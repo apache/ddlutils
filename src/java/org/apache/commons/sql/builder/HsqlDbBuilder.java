@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2002,2004 The Apache Software Foundation.
  * 
@@ -14,17 +16,28 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
+import java.io.IOException;
+
+import org.apache.commons.sql.model.Table;
 
 
 /**
  * An SQL Builder for the <a href="http://hsqldb.sourceforge.net/">HsqlDb</a> JDBC database.
- * This builder was primarily written to be used as another test case. If you want an open source,
- * non-GPL pure Java JDBC implementation we highly recommend you try
- * <a href="http://axion.tigris.org/">Axion</a> instead.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class HsqlDbBuilder extends SqlBuilder {
+public class HsqlDbBuilder extends SqlBuilder
+{
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#dropTable(Table)
+     */
+    public void dropTable(Table table) throws IOException
+    { 
+        print("DROP TABLE ");
+        print(table.getName());
+        print(" IF EXISTS");
+        printEndOfStatement();
+    }
 }

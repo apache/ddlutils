@@ -215,7 +215,7 @@ public class DynaSql extends JdbcSupport {
             return null;
         }
 
-        return createInsertSql(dynaClass, properties);
+        return createInsertSql(dynaClass, properties, dynaBean);
     }
 
     /**
@@ -374,7 +374,7 @@ public class DynaSql extends JdbcSupport {
             return;
         }
 
-        String            sql       = createInsertSql(dynaClass, properties);
+        String            sql       = createInsertSql(dynaClass, properties, null);
         PreparedStatement statement = null;
 
         if (log.isDebugEnabled())
@@ -395,9 +395,9 @@ public class DynaSql extends JdbcSupport {
 
             if (count != 1)
             {
-                log.warn("Attempted to insert a single row : " + dynaBean +
-                         " in table: " + dynaClass.getTableName() +
-                         " but changed: " + count + " row(s)");
+                log.warn("Attempted to insert a single row " + dynaBean +
+                         " in table " + dynaClass.getTableName() +
+                         " but changed " + count + " row(s)");
             }
         }
         finally
@@ -450,9 +450,9 @@ public class DynaSql extends JdbcSupport {
 
             if (count != 1 )
             {
-                log.warn("Attempted to insert a single row : " + dynaBean +
-                         " in table: " + dynaClass.getTableName() +
-                         " but changed: " + count + " row(s)");
+                log.warn("Attempted to insert a single row " + dynaBean +
+                         " in table " + dynaClass.getTableName() +
+                         " but changed " + count + " row(s)");
             }
         }
         finally
@@ -463,30 +463,69 @@ public class DynaSql extends JdbcSupport {
 
 
     /**
-     * @return the SQL required to update the given item
+     * Creates the insert SQL for inserting an object of the given type. If a concrete bean is given,
+     * then a concrete insert statement is created, otherwise a insert statement usable in a
+     * prepared statement is build. 
+     * 
+     * @param dynaClass  The type
+     * @param properties The properties to write
+     * @param dynaClass  Optionally the concrete bean to insert
+     * @return The SQL required to insert an instance of the class
      */
-    protected String createInsertSql(SqlDynaClass dynaClass, SqlDynaProperty[] properties) {
-        StringBuffer buffer = new StringBuffer( "insert into " );
-        buffer.append( dynaClass.getTableName() );
-        buffer.append( " (" );
+    protected String createInsertSql(SqlDynaClass dynaClass, SqlDynaProperty[] properties, DynaBean bean)
+    {
+        StringBuffer buffer = new StringBuffer("insert into ");
 
-        int size = properties.length;
-        for ( int i = 0; i < size; i++ ) {
-            SqlDynaProperty property = properties[i];
-            if (i > 0) {
-                buffer.append(", " );
-            }
-            buffer.append( property.getName() );
-        }
-        buffer.append( ") values (" );
+        buffer.append(dynaClass.getTableName());
+        buffer.append(" (");
 
-        if ( size > 0) {
-            buffer.append( "?" );
-            for ( int i = 1; i < size; i++ ) {
-                buffer.append( ", ?" );
+        for (int idx = 0; idx < properties.length; idx++)
+        {
+            if (idx > 0)
+            {
+                buffer.append(", ");
+            }
+            buffer.append(properties[idx].getName());
+        }
+        buffer.append(") values (");
+
+        if (properties.length > 0)
+        {
+            if (bean != null)
+            {
+                for (int idx = 0; idx < properties.length; idx++)
+                {
+                    if (idx > 0)
+                    {
+                        buffer.append(", ");
+                    }
+
+                    Object value = bean.get(properties[idx].getName());
+
+                    if (value == null)
+                    {
+                        buffer.append("NULL");
+                    }
+                    else
+                    {
+                        // TODO: Let the db builder handle the types so that the sql
+                        //       will work correctly even for binary types like BLOB
+                        buffer.append("\"");
+                        buffer.append(value.toString());
+                        buffer.append("\"");
+                    }
+                }
+            }
+            else
+            {
+                buffer.append("?");
+                for (int idx = 1; idx < properties.length; idx++)
+                {
+                    buffer.append(", ?");
+                }
             }
         }
-        buffer.append( ")" );
+        buffer.append(")");
         return buffer.toString();
     }
 

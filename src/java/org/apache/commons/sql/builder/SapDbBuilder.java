@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2002,2004 The Apache Software Foundation.
  * 
@@ -14,15 +16,51 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
+import java.sql.Types;
 
+import org.apache.commons.sql.model.Column;
 
 /**
- * An SQL Builder for Oracle
+ * An SQL Builder for SapDB.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class SapDbBuilder extends SqlBuilder {
-    
+public class SapDbBuilder extends SqlBuilder
+{
+    public SapDbBuilder()
+    {
+        // CHAR and VARCHAR are handled by getSqlType
+        addNativeTypeMapping(Types.BIGINT,        "FIXED(38,0)");
+        addNativeTypeMapping(Types.BLOB,          "LONG BYTE");
+        addNativeTypeMapping(Types.BIT,           "FIXED(1,0)");
+        addNativeTypeMapping(Types.CLOB,          "LONG UNICODE");
+        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.LONGVARBINARY, "LONG BYTE");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "LONG UNICODE");
+        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+        addNativeTypeMapping(Types.VARBINARY,     "LONG BYTE");
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getSqlType(org.apache.commons.sql.model.Column)
+     */
+    protected String getSqlType(Column column)
+    {
+        if ((column.getSize() != null) &&
+            ((column.getTypeCode() == Types.CHAR) || (column.getTypeCode() == Types.VARCHAR)))
+        {
+            StringBuffer sqlType = new StringBuffer(getNativeType(column));
+
+            sqlType.append(" (");
+            sqlType.append(column.getSize());
+            sqlType.append(") UNICODE");
+            return sqlType.toString();
+        }
+        else
+        {
+            return super.getSqlType(column);
+        }
+    }
 }

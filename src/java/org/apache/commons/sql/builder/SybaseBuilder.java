@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -14,10 +16,8 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
-
 import java.io.IOException;
-import java.util.Iterator;
+import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.ForeignKey;
@@ -27,49 +27,65 @@ import org.apache.commons.sql.model.Table;
  * An SQL Builder for Sybase
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class SybaseBuilder extends SqlBuilder {
-    
-    public SybaseBuilder() {
-        setForeignKeyConstraintsNamed(true);
+public class SybaseBuilder extends SqlBuilder
+{
+    public SybaseBuilder()
+    {
+        setEmbeddedForeignKeysNamed(true);
+        setForeignKeysEmbedded(false);
+        setCommentPrefix("/*");
+        setCommentSuffix("*/");
+        addNativeTypeMapping(Types.BLOB,          "IMAGE");
+        addNativeTypeMapping(Types.BOOLEAN,       "BIT");
+        addNativeTypeMapping(Types.CHAR,          "UNICHAR");
+        addNativeTypeMapping(Types.CLOB,          "TEXT");
+        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
+        addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
+        addNativeTypeMapping(Types.VARCHAR,       "UNIVARCHAR");
     }
-    
-    public void dropTable(Table table) throws IOException { 
-        String tableName = table.getName();
 
-        // drop the foreign key contraints
-        int counter = 1;
-        for (Iterator iter = table.getForeignKeys().iterator(); iter.hasNext(); ) {
-            ForeignKey key = (ForeignKey) iter.next();
-            
-            String constraintName = tableName + "_FK_" + counter;
-            println("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name=''" 
-                + constraintName + "')"
-            );
-            printIndent();
-            print("ALTER TABLE " + tableName + " DROP CONSTRAINT " + constraintName );
-            printEndOfStatement();
-        }
-        
-        // now drop the table
-        println( "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '" 
-            + tableName + "')" 
-        );
-        println( "BEGIN" );
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#dropExternalForeignKey(org.apache.commons.sql.model.Table, org.apache.commons.sql.model.ForeignKey, int)
+     */
+    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException
+    {
+        String constraintName = table.getName() + "_FK_" + numKey;
+
+        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name=''");
+        print(constraintName);
+        println("')");
         printIndent();
-        println( "DROP TABLE " + tableName );
-        print( "END" );
+        print("ALTER TABLE ");
+        print(table.getName());
+        print(" DROP CONSTRAINT ");
+        print(constraintName);
         printEndOfStatement();
     }
 
-    protected void printComment(String text) throws IOException { 
-        print( "/* " );
-        print( text );
-        println( " */" );
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#dropTable(org.apache.commons.sql.model.Table)
+     */
+    public void dropTable(Table table) throws IOException
+    { 
+        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '");
+        print(table.getName());
+        println("')");
+        println("BEGIN");
+        printIndent();
+        print("DROP TABLE ");
+        println(table.getName());
+        print("END");
+        printEndOfStatement();
     }
-    
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
+
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    {
         //print( "AUTO_INCREMENT" );
     }
 }

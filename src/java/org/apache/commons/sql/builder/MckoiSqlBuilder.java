@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -14,9 +16,8 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
-
 import java.io.IOException;
+import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
@@ -25,21 +26,27 @@ import org.apache.commons.sql.model.Table;
  * An SQL Builder for the Mckoi database
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class MckoiSqlBuilder extends SqlBuilder {
-    
-    public MckoiSqlBuilder() {
-        setForeignKeysEmbedded(true);
+public class MckoiSqlBuilder extends SqlBuilder
+{
+    public MckoiSqlBuilder()
+    {
+        setForeignKeysEmbedded(false);
+        setEmbeddedForeignKeysNamed(true);
+        addNativeTypeMapping(Types.BIT,  "TINYINT");
     }
-    
-    public void dropTable(Table table) throws IOException { 
-        print( "drop table if exists " );
-        print( table.getName() );
+
+    public void dropTable(Table table) throws IOException
+    { 
+        print("DROP TABLE IF EXISTS ");
+        print(table.getName());
         printEndOfStatement();
     }
-    
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
-        print( "DEFAULT UNIQUEKEY('" + table.getName() + "')");
+
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    {
+        print("DEFAULT UNIQUEKEY('" + table.getName() + "')");
     }
 }

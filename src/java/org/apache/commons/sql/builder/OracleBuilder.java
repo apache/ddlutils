@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -14,9 +16,8 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
-
 import java.io.IOException;
+import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
@@ -25,93 +26,98 @@ import org.apache.commons.sql.model.Table;
  * An SQL Builder for Oracle
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class OracleBuilder extends SqlBuilder {
-
-    public OracleBuilder() {
+public class OracleBuilder extends SqlBuilder
+{
+    public OracleBuilder()
+    {
         setPrimaryKeyEmbedded(false);
-        setForeignKeyConstraintsNamed(true);
+        setEmbeddedForeignKeysNamed(true);
+        setForeignKeysEmbedded(false);
+        addNativeTypeMapping(Types.BIGINT,        "NUMBER(38,0)");
+        addNativeTypeMapping(Types.BINARY,        "BLOB");
+        addNativeTypeMapping(Types.BIT,           "NUMBER(1,0)");
+        addNativeTypeMapping(Types.BOOLEAN,       "NUMBER(1,0)");
+        addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
+        addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
+        addNativeTypeMapping(Types.INTEGER,       "NUMBER(20)");
+        addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "CLOB");
+        addNativeTypeMapping(Types.NUMERIC,       "NUMBER");
+        addNativeTypeMapping(Types.REAL,          "FLOAT");
+        addNativeTypeMapping(Types.SMALLINT,      "NUMBER(5,0)");
+        addNativeTypeMapping(Types.TIME,          "DATE");
+        addNativeTypeMapping(Types.TIMESTAMP,     "DATE");
+        addNativeTypeMapping(Types.TINYINT,       "NUMBER(3,0)");
+        addNativeTypeMapping(Types.VARBINARY,     "BLOB");
+        addNativeTypeMapping(Types.VARCHAR,       "VARCHAR2");
     }
 
-    public void dropTable(Table table) throws IOException {
-        print( "drop table " );
-        print( table.getName() );
-        print( " CASCADE CONSTRAINTS" );
+    public void dropTable(Table table) throws IOException
+    {
+        print("DROP TABLE ");
+        print(table.getName());
+        print(" CASCADE CONSTRAINTS");
         printEndOfStatement();
     }
 
-    // there's no real need to print comments like this, just preserving
-    // backwards compatibility with the old Torque Velocity scripts
-    protected void printComment(String text) throws IOException {
-        print( "--" );
-        if (! text.startsWith( "-" ) ) {
-            print(" ");
-        }
-        println( text );
-    }
-
-    public void createTable(Table table) throws IOException {
+    public void createTable(Table table) throws IOException
+    {
         // lets create any sequences
         Column column = table.getAutoIncrementColumn();
-        if (column != null) {
+
+        if (column != null)
+        {
             createSequence(table, column);
         }
         super.createTable(table);
-        if (column != null) {
+        if (column != null)
+        {
             createSequenceTrigger(table, column);
         }
     }
 
-
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    {
         //print( "AUTO_INCREMENT" );
     }
 
     /**
-     * Creates a sequence so that values can be auto incremented
+     * Creates a sequence so that values can be auto incremented.
+     * 
+     * @param table  The table
+     * @param column The column
      */
-    protected void createSequence(Table table, Column column) throws IOException {
-        print( "create sequence " );
-        print( table.getName() );
-        print( "_seq" );
+    protected void createSequence(Table table, Column column) throws IOException
+    {
+        print("CREATE SEQUENCE ");
+        print(table.getName());
+        print("_seq");
         printEndOfStatement();
     }
 
     /**
-     * Creates a trigger to auto-increment values
+     * Creates a trigger for the auto-increment sequence.
+     * 
+     * @param table  The table
+     * @param column The column
      */
-    protected void createSequenceTrigger(Table table, Column column) throws IOException {
-        print( "create or replace trigger " );
-        print( table.getName() );
-        print( "_trg before insert on " );
-        println( table.getName() );
-        println( "for each row" );
-        println( "begin" );
-        print( "select " );
-        print( table.getName() );
-        print( "_seq.nextval into :new." );
-        print( column.getName() );
-        println( " from dual;" );
-        print( "end" );
+    protected void createSequenceTrigger(Table table, Column column) throws IOException
+    {
+        print("CREATE OR REPLACE TRIGGER ");
+        print(table.getName());
+        print("_trg BEFORE INSERT ON ");
+        println(table.getName());
+        println("FOR EACH ROW");
+        println("BEGIN");
+        print("SELECT ");
+        print(table.getName());
+        print("_seq.nextval INTO :new.");
+        print(column.getName());
+        println(" FROM dual;");
+        print("END");
         printEndOfStatement();
-    }
-
-
-    /**
-     * @return the full SQL type string, including size where appropriate.
-     * Where necessary, translate for Oracle specific DDL requirements.
-     */
-    protected String getSqlType(Column column) {
-      switch (column.getTypeCode())
-      {
-        case java.sql.Types.INTEGER:
-          return "INTEGER";
-        case java.sql.Types.DATE:
-        case java.sql.Types.TIME:
-        case java.sql.Types.TIMESTAMP:
-          return "DATE";
-        default: return column.getType();
-      }
     }
 }

@@ -18,6 +18,8 @@ package org.apache.commons.sql.model;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Add a name property to the foreignkey that is respected by
+//       create/alter/drop
 public class ForeignKey implements Cloneable
 {
     private String foreignTable;

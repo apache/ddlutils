@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -14,10 +16,8 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
-
 import java.io.IOException;
-import java.util.HashMap;
+import java.sql.Types;
 import java.util.List;
 
 import org.apache.commons.sql.model.Column;
@@ -33,27 +33,19 @@ import org.apache.commons.sql.model.Table;
  */
 public class MySqlBuilder extends SqlBuilder
 {
-    private HashMap _specialTypes = new HashMap();
-
-    public MySqlBuilder() {
-        setForeignKeysEmbedded(true);
-        _specialTypes.put("binary",        "BLOB");
-        _specialTypes.put("blob",          "LONGBLOB");
-        _specialTypes.put("boolean",       "BIT");
-        _specialTypes.put("clob",          "LONGTEXT");
-        _specialTypes.put("float",         "FLOAT");
-        _specialTypes.put("longvarbinary", "LONGBLOB");
-        _specialTypes.put("longvarchar",   "MEDIUMTEXT");
-        _specialTypes.put("real",          "FLOAT");
-        _specialTypes.put("varbinary",     "MEDIUMBLOB");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.commons.sql.builder.SqlBuilder#getCommentPrefix()
-     */
-    protected String getCommentPrefix()
+    public MySqlBuilder()
     {
-        return "#";
+        setForeignKeysEmbedded(true);
+        setCommentPrefix("#");
+        addNativeTypeMapping(Types.BINARY,        "BLOB");
+        addNativeTypeMapping(Types.BLOB,          "LONGBLOB");
+        addNativeTypeMapping(Types.BOOLEAN,       "BIT");
+        addNativeTypeMapping(Types.CLOB,          "LONGTEXT");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE");
+        addNativeTypeMapping(Types.LONGVARBINARY, "MEDIUMBLOB");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "MEDIUMTEXT");
+        addNativeTypeMapping(Types.REAL,          "FLOAT");
+        addNativeTypeMapping(Types.VARBINARY,     "BLOB");
     }
 
     /* (non-Javadoc)
@@ -61,7 +53,7 @@ public class MySqlBuilder extends SqlBuilder
      */
     public void dropTable(Table table) throws IOException
     { 
-        print("drop table if exists ");
+        print("DROP TABLE IF EXISTS ");
         print(table.getName());
         printEndOfStatement();
     }
@@ -69,7 +61,7 @@ public class MySqlBuilder extends SqlBuilder
     /* (non-Javadoc)
      * @see org.apache.commons.sql.builder.SqlBuilder#printAutoIncrementColumn(Table,Column)
      */
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
         print("AUTO_INCREMENT");
     }
@@ -84,15 +76,5 @@ public class MySqlBuilder extends SqlBuilder
          * I'm not sure why the default skips the pk statement if all are identity
          */
         return true;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.commons.sql.builder.SqlBuilder#getNativeType(Column)
-     */
-    protected String getNativeType(Column column){
-        String type        = column.getType();
-        String specialType = (String)_specialTypes.get(type.toLowerCase());
-
-        return (specialType == null ? type : specialType);
     }
 }

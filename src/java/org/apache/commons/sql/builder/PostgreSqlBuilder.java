@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -14,9 +16,8 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
-
 import java.io.IOException;
+import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
@@ -25,64 +26,60 @@ import org.apache.commons.sql.model.Table;
  * An SQL Builder for PostgresSqlL
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.8 $
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @version $Revision: 1.9 $
  */
-public class PostgreSqlBuilder extends SqlBuilder{
-
+public class PostgreSqlBuilder extends SqlBuilder
+{
     public PostgreSqlBuilder() 
     {
+        addNativeTypeMapping(Types.BINARY,        "BYTEA");
+        addNativeTypeMapping(Types.BLOB,          "BYTEA");
+        addNativeTypeMapping(Types.CLOB,          "TEXT");
+        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.LONGVARBINARY, "BYTEA");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
+        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+        addNativeTypeMapping(Types.VARBINARY,     "BYTEA");
+    }
 
-    } 
-
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
-        print(" ");
-        print("serial");
-        print(" ");
-
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    {
+        print(" SERIAL ");
     }
 
     /** 
      * Outputs the DDL to add a column to a table.
      */
-    public void createColumn(Table table, Column column) throws IOException {
+    public void writeColumn(Table table, Column column) throws IOException
+    {
         print(column.getName());
         print(" ");
-        if (column.isAutoIncrement()) {
-            printAutoIncrementColumn(table, column);
+        if (column.isAutoIncrement())
+        {
+            writeColumnAutoIncrementStmt(table, column);
         }
         else
         {
-
             print(getSqlType(column));
             print(" ");
 
             if (column.getDefaultValue() != null)
             {
-              print("DEFAULT '" + column.getDefaultValue() + "' ");
+                print("DEFAULT '");
+                print(column.getDefaultValue());
+                print("' ");
             }
-            if (column.isRequired()) {
-                printNotNullable();
+            if (column.isRequired())
+            {
+                writeColumnNotNullableStmt();
             }
-            else {
-                printNullable();
+            else
+            {
+                writeColumnNullableStmt();
             }
             print(" ");
         }
     }
-
-    /**
-     * @return the full SQL type string including the size
-     */
-    protected String getSqlType(Column column) {
-
-        if (column.getTypeCode() == java.sql.Types.VARBINARY)
-        {
-            return "OID";
-        }
-        else
-        {
-            return super.getSqlType(column);
-        }
-    }
-
 }

@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -14,35 +16,47 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
-
 import java.io.IOException;
+import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
 
 /**
- * An SQL Builder for Oracle
+ * An SQL Builder for DB2.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class Db2Builder extends SqlBuilder {
-    
-    public Db2Builder() {
+public class Db2Builder extends SqlBuilder
+{
+    public Db2Builder()
+    {
         setPrimaryKeyEmbedded(false);
-        setForeignKeyConstraintsNamed(true);
+        setEmbeddedForeignKeysNamed(true);
+        addNativeTypeMapping(Types.BINARY,        "CHAR FOR BIT DATA");
+        addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
+        addNativeTypeMapping(Types.BLOB,          "BLOB");
+        addNativeTypeMapping(Types.BOOLEAN,       "DECIMAL(1,0)");
+        addNativeTypeMapping(Types.FLOAT,         "FLOAT");
+        addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
+        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR FOR BIT DATA");
     }
-    
-    public void dropTable(Table table) throws IOException { 
+
+    public void dropTable(Table table) throws IOException
+    { 
         super.dropTable(table);
-        print( "drop sequence if exists  " );
-        print( table.getName() );
-        print( ".SequenceName" );
+        print("DROP SEQUENCE IF EXISTS ");
+        print(table.getName());
+        print(".SequenceName");
         printEndOfStatement();
     }
     
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
-        print( "GENERATED ALWAYS AS IDENTITY" );
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    {
+        print("GENERATED ALWAYS AS IDENTITY");
     }
 }

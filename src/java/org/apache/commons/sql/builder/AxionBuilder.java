@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -14,9 +16,8 @@
  * limitations under the License.
  */
 
-package org.apache.commons.sql.builder;
-
 import java.io.IOException;
+import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
@@ -31,40 +32,32 @@ public class AxionBuilder extends SqlBuilder {
     
     public AxionBuilder() {
         setForeignKeysEmbedded(true);
+        addNativeTypeMapping(Types.DECIMAL, "FLOAT");
     }    
-
 
     protected String getSqlType(Column column) {
         // Axion doesn't support text width specification 
         return getNativeType(column);
     }
     
-    protected void writePrimaryKeys(Table table) throws IOException {
+    protected void writeEmbeddedPrimaryKeysStmt(Table table) throws IOException {
         // disable primary key constraints
     }
     
-    protected void writeForeignKeys(Table table) throws IOException {
+    protected void writeEmbeddedForeignKeysStmt(Table table) throws IOException {
         // disable foreign key constraints
     }
     
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException {
         //print( "IDENTITY" );
     }
 
-    protected void printNotNullable() throws IOException {
+    protected void writeColumnNotNullableStmt() throws IOException {
         //print("NOT NULL");
     }
 
-    protected void printNullable() throws IOException {
+    protected void writeColumnNullableStmt() throws IOException {
         //print("NULL");
-    }
-
-    protected String getNativeType(Column column){
-        if(column.getTypeCode() == java.sql.Types.DECIMAL){
-            return "FLOAT";
-	}else{
-            return super.getNativeType(column);
-	}
     }
 
     /** 
@@ -72,21 +65,21 @@ public class AxionBuilder extends SqlBuilder {
      * does not support default values so we are removing
      * default from the Axion column builder.
      */
-    public void createColumn(Table table, Column column) throws IOException {
+    public void writeColumn(Table table, Column column) throws IOException {
         print(column.getName());
         print(" ");
         print(getSqlType(column));
         print(" ");
 
         if (column.isRequired()) {
-            printNotNullable();
+            writeColumnNotNullableStmt();
         }
         else {
-            printNullable();
+            writeColumnNullableStmt();
         }
         print(" ");
         if (column.isAutoIncrement()) {
-            printAutoIncrementColumn(table, column);
+            writeColumnAutoIncrementStmt(table, column);
         }
     }
 }
