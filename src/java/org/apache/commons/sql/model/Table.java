@@ -67,7 +67,15 @@ import java.util.List;
 
 public class Table 
 {
-    private String name;
+    private String catalog = null;
+    
+    private String name = null;
+
+    private String schema = null;
+
+    private String remarks = null;
+    
+    private String type = null;
     
     private List columns = new ArrayList();
     
@@ -77,6 +85,46 @@ public class Table
     
     public Table() 
     {
+    }
+
+    public String getCatalog()
+    {
+        return this.catalog;
+    }
+    
+    public void setCatalog(String catalog)
+    {
+        this.catalog = catalog;
+    }
+
+    public String getRemarks()
+    {
+        return this.remarks;
+    }
+    
+    public void setRemarks(String remarks)
+    {
+        this.remarks = remarks;
+    }
+
+    public String getSchema()
+    {
+        return this.schema;
+    }
+    
+    public void setSchema(String schema)
+    {
+        this.schema = schema;
+    }
+    
+    public String getType()
+    {
+        return (type == null) ? "(null)" : type;
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
     }
     
     public String getName() 
@@ -92,6 +140,23 @@ public class Table
     public void addColumn(Column column)
     {
         columns.add(column);
+    }
+
+    public void addColumns(List columns)
+    {
+        if(columns != null &&
+           columns.size() > 0)
+        {
+            int columnsSize = columns.size();
+            for(int i = 0; i < columnsSize; i++)
+            {
+                Column column = (Column) columns.get(i);
+                if(column != null)
+                {
+                    this.addColumn(column);
+                }
+            }
+        }
     }
     
     public List getColumns()
