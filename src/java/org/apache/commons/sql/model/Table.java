@@ -72,6 +72,8 @@ public class Table
     private List columns = new ArrayList();
     
     private List foreignKeys = new ArrayList();
+
+    private List indexes = new ArrayList();
     
     public Table() 
     {
@@ -117,6 +119,21 @@ public class Table
         return (ForeignKey) foreignKeys.get(index);
     }        
     
+    public void addIndex(Index index)
+    {
+        indexes.add(index);
+    }
+    
+    public List getIndexes()
+    {
+        return indexes;
+    }
+
+    public Index getIndex(int index)
+    {
+        return (Index) indexes.get(index);
+    }
+
     
     // Helper methods
     //-------------------------------------------------------------------------                

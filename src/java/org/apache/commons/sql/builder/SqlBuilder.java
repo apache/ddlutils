@@ -69,6 +69,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.apache.commons.sql.model.Index;
+import org.apache.commons.sql.model.IndexColumn;
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.ForeignKey;
@@ -108,6 +110,9 @@ public class SqlBuilder {
     
     /** Whether or not foreign key constraints are embedded inside the create table statement */
     private boolean foreignKeysEmbedded;
+
+    /** Whether or not indexes are embedded inside the create table statement */
+    private boolean indexesEmbedded;
 
     /** Should foreign key constraints be explicitly named */
     private boolean foreignKeyConstraintsNamed;
@@ -201,6 +206,9 @@ public class SqlBuilder {
         if (isForeignKeysEmbedded()) {
             writeForeignKeys(table);
         }
+        if (isIndexesEmbedded()) {
+            writeEmbeddedIndexes(table);
+        }
         println();
         print(")");
         printEndOfStatement();
@@ -210,6 +218,9 @@ public class SqlBuilder {
         }
         if (!isForeignKeysEmbedded()) {
             writeForeignKeysAlterTable(table);
+        }
+        if (!isIndexesEmbedded()) {
+            writeIndexes(table);
         }
     }
 
@@ -302,7 +313,23 @@ public class SqlBuilder {
         this.foreignKeysEmbedded = foreignKeysEmbedded;
     }
 
+    /**
+     * @return whether the indexes are embedded in the create 
+     * table clause or as seperate statements.
+     * The default is false.
+     */
+    public boolean isIndexesEmbedded() {
+        return indexesEmbedded;
+    }
 
+    /**
+     * Sets whether the indexes are embedded in the create 
+     * table clause or as seperate statements.
+     * The default is false.
+     */
+    public void setIndexesEmbedded(boolean indexesEmbedded) {
+        this.indexesEmbedded = indexesEmbedded;
+    }
 
     /**
      * Returns whether foreign key constraints should be named when they are embedded inside
@@ -504,6 +531,55 @@ public class SqlBuilder {
                 printEndOfStatement();
             }
         }
+    }
+
+    /**
+     * Writes the indexes.
+     */
+    protected void writeIndexes(Table table) throws IOException{
+        for (Iterator indexIter = table.getIndexes().iterator();
+            indexIter.hasNext();
+            ) {
+            Index index = (Index) indexIter.next();
+            if (index.getName() == null) {
+                log.warn( "Index Name is null for index: " + index);
+            }
+            else {
+                print("CREATE INDEX ");
+                print(index.getName());
+                print(" ON ");
+                print(table.getName());
+
+                print(" (");
+                
+                for (Iterator idxColumnIter = index.getIndexColumns().iterator();
+                    idxColumnIter.hasNext();
+                    ) 
+                {
+                    IndexColumn idxColumn = (IndexColumn)idxColumnIter.next();
+                    if (idxColumnIter.hasNext())
+                    {
+                        print(idxColumn.getName() + ", ");             
+                    }
+                    else
+                    {
+                        print(idxColumn.getName());
+                    }
+                }
+
+                print(")");
+                printEndOfStatement();
+            }
+        }
+    }
+
+
+    /**
+     * Writes the indexes embedded within the create table statement. not
+     * yet implemented
+     */
+    protected void writeEmbeddedIndexes(Table table) throws IOException 
+    {
     }
 
     /**

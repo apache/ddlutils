@@ -21,9 +21,14 @@
     <column name="author_id" type="INTEGER" required="true"/>
     <column name="title" type="VARCHAR" size="255" required="true"/>
 	    
-	  <foreign-key foreignTable="author">
-	    <reference local="author_id" foreign="author_id"/>
-	  </foreign-key>  
+    <foreign-key foreignTable="author">
+    <reference local="author_id" foreign="author_id"/>
+    </foreign-key>  
+
+    <index name="book_isbn">
+     <index-column name="isbn"/>
+    </index>
+              
   </table>
 
 </database>

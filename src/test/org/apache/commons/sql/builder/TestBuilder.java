@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -68,8 +70,8 @@ public class TestBuilder extends TestCase
         
         DatabaseReader reader = new DatabaseReader ();
         database = (Database) reader.parse(new FileInputStream(uri));
-        
         assertTrue("Loaded a valid database", database != null);
+
     }
 
     /**
@@ -78,22 +80,57 @@ public class TestBuilder extends TestCase
     public void testBuilders()
         throws Exception
     {
+
         testBuilder( new AxionBuilder(), "axion.sql" );
         testBuilder( new HsqlDbBuilder(), "hsqldb.sql" );
         testBuilder( new MSSqlBuilder(), "mssql.sql" );        
         testBuilder( new MySqlBuilder(), "mysql.sql" );
         testBuilder( new OracleBuilder(), "oracle.sql" );
+        testBuilder( new PostgreSqlBuilder(), "postgres.sql" );
         testBuilder( new SybaseBuilder(), "sybase.sql" );
+
     }
     
+    /**
+     * A unit test for JUnit
+     */
+    public void testBaseBuilder()
+        throws Exception
+    {
+    
+        SqlBuilder builder = new SqlBuilder();
+        StringWriter sw = new StringWriter();
+        builder.setWriter(sw);
+        builder.dropDatabase(database);       
+
+        String drop = sw.toString();
+        int bookIdx = drop.indexOf("drop table book");
+        int authIdx = drop.indexOf("drop table author");
+
+        assertTrue("dropDatabase Failed to create proper drop statement for " +
+                    "book table. Here is the statment created:\n" + drop, 
+                    bookIdx > 0);
+        
+        assertTrue("dropDatabase Failed to create proper drop statement for " +
+                    "author table. Here is the statment created:\n" + drop,
+                     authIdx > 0);
+
+        Writer wr = builder.getWriter();
+        assertTrue("Couldnt find writer", wr != null);  
+
+
+    }
+
     protected void testBuilder(SqlBuilder builder, String fileName) throws Exception 
     {
+
         String name = baseDir + "/target/" + fileName;
         
         FileWriter writer = new FileWriter( name );
         builder.setWriter( writer );
         builder.createDatabase( database );
         writer.close();
+
     }
 }
 

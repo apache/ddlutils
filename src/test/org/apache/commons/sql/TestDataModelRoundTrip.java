@@ -86,37 +86,64 @@ public class TestDataModelRoundTrip
             assertTrue("Parsed a Database object", database != null);
             assertEquals("bookstore", database.getName());
             
-            assertTrue("more than one table found", database.getTables().size() > 0 );
+            assertTrue("More that one table should be found", 
+                        database.getTables().size() > 1 );
             
             // Test our first table which is the 'book' table
             Table t1 = database.getTable(1);
             assertEquals("book", t1.getName());
             
+            assertTrue("book table does not have primary", t1.hasPrimaryKey());
+
+            Index idx1 = (Index)t1.getIndex(0);
+            assertTrue("Did not find an index", idx1 != null);
+
+            ForeignKey key = (ForeignKey) t1.getForeignKey(0);
+            assertTrue("Did not find a foreign key", key != null);
+
             Column c0 = t1.getColumn(0);
             assertEquals("book_id", c0.getName());
-            assertTrue("book_id is required", c0.isRequired());
-            assertTrue("book_id is primary key", c0.isPrimaryKey());
+            assertTrue("book_id should be required", c0.isRequired());
+            assertTrue("book_id should be primary key", c0.isPrimaryKey());
             
             Column c1 = t1.getColumn(1);
             assertEquals("isbn", c1.getName());
-            assertTrue("isbn is required", c1.isRequired());
-            assertTrue("isbn is not primary key", ! c1.isPrimaryKey());
+            assertTrue("isbn should be required", c1.isRequired());
+            assertTrue("isbn should not be primary key but is", 
+                        ! c1.isPrimaryKey());
 
             List keyList1 = t1.getForeignKeys();
             assertEquals( "Foreign key count", 1, keyList1.size() );
             
             ForeignKey key0 = (ForeignKey) keyList1.get(0);
-            assertEquals("foreignTable is correct", "author", key0.getForeignTable());
+            assertEquals("foreignTable value correct", "author", 
+                        key0.getForeignTable());
             
             List refList1 = key0.getReferences();
-            assertEquals( "Reference count", 1, refList1.size() );
+            assertEquals( "Reference count not correct", 1, refList1.size() );
             
             Reference r1 = (Reference) refList1.get(0);
-            assertTrue("Found a reference", r1 != null);
+            assertTrue("Could not find a reference", r1 != null);
                         
-            assertEquals("local is correct", "author_id", r1.getLocal());
-            assertEquals("foreign is correct", "author_id", r1.getForeign());
+            assertEquals("local reference is incorrect", "author_id", 
+                         r1.getLocal());
+            assertEquals("foreign reference is incorrect", "author_id", 
+                         r1.getForeign());
             
+            List idxList = t1.getIndexes();
+            assertEquals( "Index count", 1, idxList.size() );
+
+
+            Index idx2 = (Index)idxList.get(0);
+            assertTrue("Did not find an index", idx2 != null);
+            assertEquals("Index name is incorrect", "book_isbn", idx2.getName());
+
+            List idxColumns = idx2.getIndexColumns();
+            IndexColumn idxColumn = (IndexColumn) idxColumns.get(0);
+            assertTrue("Did not find an index column", idxColumn != null);
+            assertEquals("Index column name is incorrect", "isbn", 
+                          idxColumn.getName());
+
             // Write out the bean
             //writeBean(database);
         }
