@@ -56,7 +56,7 @@
  * individuals on behalf of the Apache Software Foundation.  For more
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
- * 
+ *
  * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
 
@@ -69,18 +69,18 @@ import org.apache.commons.sql.model.Table;
 
 /**
  * An SQL Builder for Oracle
- * 
+ *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
 public class OracleBuilder extends SqlBuilder {
-    
+
     public OracleBuilder() {
         setPrimaryKeyEmbedded(false);
         setForeignKeyConstraintsNamed(true);
     }
-    
-    public void dropTable(Table table) throws IOException { 
+
+    public void dropTable(Table table) throws IOException {
         print( "drop table " );
         print( table.getName() );
         print( " CASCADE CONSTRAINTS" );
@@ -89,14 +89,14 @@ public class OracleBuilder extends SqlBuilder {
 
     // there's no real need to print comments like this, just preserving
     // backwards compatibility with the old Torque Velocity scripts
-    protected void printComment(String text) throws IOException { 
+    protected void printComment(String text) throws IOException {
         print( "--" );
         if (! text.startsWith( "-" ) ) {
             print(" ");
-        }                
+        }
         println( text );
     }
-    
+
     public void createTable(Table table) throws IOException {
         // lets create any sequences
         Column column = table.getAutoIncrementColumn();
@@ -108,12 +108,12 @@ public class OracleBuilder extends SqlBuilder {
             createSequenceTrigger(table, column);
         }
     }
-    
-    
+
+
     protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
         //print( "AUTO_INCREMENT" );
     }
-    
+
     /**
      * Creates a sequence so that values can be auto incremented
      */
@@ -123,7 +123,7 @@ public class OracleBuilder extends SqlBuilder {
         print( "_seq" );
         printEndOfStatement();
     }
-    
+
     /**
      * Creates a trigger to auto-increment values
      */
@@ -149,15 +149,15 @@ public class OracleBuilder extends SqlBuilder {
      * Where necessary, translate for Oracle specific DDL requirements.
      */
     protected String getSqlType(Column column) {
-      switch (column.getSQLTypeCode())
+      switch (column.getTypeCode())
       {
         case java.sql.Types.INTEGER:
           return "INTEGER";
-        case java.sql.Types.DATE:  
-        case java.sql.Types.TIME:  
-        case java.sql.Types.TIMESTAMP:  
+        case java.sql.Types.DATE:
+        case java.sql.Types.TIME:
+        case java.sql.Types.TIMESTAMP:
           return "DATE";
-        default: return column.getTypeString();
+        default: return column.getType();
       }
-    }  
+    }
 }
