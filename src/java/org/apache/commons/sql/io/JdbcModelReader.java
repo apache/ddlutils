@@ -63,18 +63,21 @@
 package org.apache.commons.sql.io;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.apache.commons.sql.model.*;
+import org.apache.commons.sql.model.Column;
+import org.apache.commons.sql.model.Database;
+import org.apache.commons.sql.model.ForeignKey;
+import org.apache.commons.sql.model.Reference;
+import org.apache.commons.sql.model.Table;
 
 /**
  * A tool to read a JDBC database and create a Commons-Sql Database model

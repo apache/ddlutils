@@ -61,29 +61,9 @@
 
 package org.apache.commons.sql.task;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Types;
-import java.sql.SQLException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
-import java.util.Collection;
-import java.util.Iterator;
-
-import junit.framework.*;
-
-import org.apache.commons.sql.io.DatabaseWriter;
-import org.apache.commons.sql.io.JdbcModelReader;
-
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
 /**

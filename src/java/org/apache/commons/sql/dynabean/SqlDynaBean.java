@@ -63,7 +63,6 @@ package org.apache.commons.sql.dynabean;
 
 import org.apache.commons.beanutils.BasicDynaBean;
 import org.apache.commons.beanutils.DynaClass;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

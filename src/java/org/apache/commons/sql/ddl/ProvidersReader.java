@@ -1,7 +1,6 @@
 package org.apache.commons.sql.ddl;
 
 import java.beans.IntrospectionException;
-import java.io.IOException;
 
 import org.apache.commons.betwixt.XMLIntrospector;
 import org.apache.commons.betwixt.io.BeanReader;

@@ -61,13 +61,9 @@
  */
 package org.apache.commons.sql.dynabean;
 
-import java.sql.Types;
-
 import org.apache.commons.beanutils.DynaProperty;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.sql.model.Column;
 
 /**

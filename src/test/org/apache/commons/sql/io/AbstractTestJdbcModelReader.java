@@ -61,14 +61,9 @@
  */
 package org.apache.commons.sql.io;
 
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -77,18 +72,15 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaClass;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.apache.commons.sql.builder.*;
-
-import org.apache.commons.sql.io.DatabaseReader;
-import org.apache.commons.sql.model.*;
-import org.apache.commons.sql.util.DataSourceWrapper;
+import org.apache.commons.sql.builder.SqlBuilder;
+import org.apache.commons.sql.builder.SqlBuilderFactory;
+import org.apache.commons.sql.model.Column;
+import org.apache.commons.sql.model.Database;
+import org.apache.commons.sql.model.Table;
 import org.apache.commons.sql.util.DDLExecutor;
+import org.apache.commons.sql.util.DataSourceWrapper;
 
 /**
  * Abstract base class for testing the JdbcModelReader against a number of

@@ -65,10 +65,7 @@ package org.apache.commons.sql.io;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import org.apache.commons.betwixt.XMLIntrospector;
 import org.apache.commons.betwixt.io.BeanWriter;
-
-import org.apache.commons.sql.model.Database;
 
 /**
  * This class outputs a fully populated Database bean as XML.

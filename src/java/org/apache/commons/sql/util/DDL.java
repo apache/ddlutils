@@ -1,35 +1,28 @@
 package org.apache.commons.sql.util;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Parser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.apache.commons.cli.Parser;
 import org.apache.commons.sql.ddl.DDLBuilder;
 import org.apache.commons.sql.ddl.DDLBuilderFactory;
 import org.apache.commons.sql.ddl.Provider;
 import org.apache.commons.sql.ddl.ProviderVersion;
-import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.io.DatabaseReader;
+import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.type.Types;
 import org.apache.commons.sql.type.TypesFactory;
 import org.apache.commons.sql.type.TypesWriter;
-
-import org.xml.sax.SAXException;
 
 
 /**

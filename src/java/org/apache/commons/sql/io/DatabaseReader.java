@@ -63,13 +63,10 @@
 package org.apache.commons.sql.io;
 
 import java.beans.IntrospectionException;
-import java.io.IOException;
-import java.io.Writer;
 
 import org.apache.commons.betwixt.XMLIntrospector;
 import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.strategy.HyphenatedNameMapper;
-
 import org.apache.commons.sql.model.Database;
 
 /**

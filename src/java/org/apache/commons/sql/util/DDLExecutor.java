@@ -64,23 +64,17 @@ package org.apache.commons.sql.util;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.StringTokenizer;
 
 import javax.sql.DataSource;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.sql.builder.SqlBuilder;
 import org.apache.commons.sql.model.Database;
-import org.apache.commons.sql.model.Table;
-import org.apache.commons.sql.util.JdbcSupport;
 
 /**
  * DDLExecutor is a utility class which is capable of performing DDL

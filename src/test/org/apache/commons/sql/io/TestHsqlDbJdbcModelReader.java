@@ -64,13 +64,11 @@ package org.apache.commons.sql.io;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.sql.model.Table;
 
 /**

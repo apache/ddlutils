@@ -1,20 +1,14 @@
 package org.apache.commons.sql.type;
 
 import java.beans.IntrospectionException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.xml.sax.SAXException;
-
 import org.apache.commons.betwixt.XMLIntrospector;
 import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.strategy.HyphenatedNameMapper;
-
-import org.apache.commons.sql.type.Mapping;
-import org.apache.commons.sql.type.Type;
-import org.apache.commons.sql.type.Types;
+import org.xml.sax.SAXException;
 
 
 /**

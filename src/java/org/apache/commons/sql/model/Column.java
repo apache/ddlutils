@@ -61,9 +61,6 @@
  */
 package org.apache.commons.sql.model;
 
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Column 
 {

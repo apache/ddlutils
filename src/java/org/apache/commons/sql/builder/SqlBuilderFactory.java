@@ -61,22 +61,13 @@
  */
 package org.apache.commons.sql.builder;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.apache.commons.sql.model.Column;
-import org.apache.commons.sql.model.Database;
-import org.apache.commons.sql.model.ForeignKey;
-import org.apache.commons.sql.model.Reference;
-import org.apache.commons.sql.model.Table;
 
 /**
  * A factory of SqlBuilder instances based on a case insensitive database name.

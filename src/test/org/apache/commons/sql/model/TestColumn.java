@@ -1,7 +1,7 @@
 /*
- * $Header: /home/jerenkrantz/tmp/commons/commons-convert/cvs/home/cvs/jakarta-commons-sandbox//sql/src/test/org/apache/commons/sql/model/TestColumn.java,v 1.3 2002/10/28 16:17:36 jstrachan Exp $
- * $Revision: 1.3 $
- * $Date: 2002/10/28 16:17:36 $
+ * $Header: /home/jerenkrantz/tmp/commons/commons-convert/cvs/home/cvs/jakarta-commons-sandbox//sql/src/test/org/apache/commons/sql/model/TestColumn.java,v 1.4 2003/04/30 11:27:30 jstrachan Exp $
+ * $Revision: 1.4 $
+ * $Date: 2003/04/30 11:27:30 $
  *
  * ====================================================================
  *
@@ -57,7 +57,7 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: TestColumn.java,v 1.3 2002/10/28 16:17:36 jstrachan Exp $
+ * $Id: TestColumn.java,v 1.4 2003/04/30 11:27:30 jstrachan Exp $
  */
 
 package org.apache.commons.sql.model;
@@ -67,19 +67,12 @@ import java.sql.Types;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import junit.textui.TestRunner;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.impl.SimpleLog;
-
-import org.apache.commons.sql.model.Column;
 
 /**
  * Test harness for Column Class
  *
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class TestColumn
      extends TestCase

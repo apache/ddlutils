@@ -62,14 +62,11 @@
 package org.apache.commons.sql.dynabean;
 
 import java.lang.reflect.InvocationTargetException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
-import java.util.ArrayList;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -81,11 +78,8 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
 import org.apache.commons.beanutils.ResultSetDynaClass;
-import org.apache.commons.beanutils.ResultSetIterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.Table;
 import org.apache.commons.sql.util.JdbcSupport;

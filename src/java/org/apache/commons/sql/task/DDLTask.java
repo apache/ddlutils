@@ -57,13 +57,11 @@ package org.apache.commons.sql.task;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
-import java.util.Iterator;
 
 import org.apache.commons.sql.builder.SqlBuilder;
 import org.apache.commons.sql.builder.SqlBuilderFactory;
-import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.io.DatabaseReader;
-
+import org.apache.commons.sql.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 

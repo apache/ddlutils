@@ -8,9 +8,7 @@ import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.Reference;
 import org.apache.commons.sql.model.Table;
-
 import org.apache.commons.sql.type.Mapping;
-import org.apache.commons.sql.type.Type;
 import org.apache.commons.sql.type.TypeMapping;
 import org.apache.commons.sql.type.Types;
 

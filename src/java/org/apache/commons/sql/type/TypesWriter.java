@@ -3,7 +3,6 @@ package org.apache.commons.sql.type;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import org.apache.commons.betwixt.XMLIntrospector;
 import org.apache.commons.betwixt.io.BeanWriter;
 
 

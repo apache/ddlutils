@@ -9,8 +9,6 @@ package org.apache.commons.sql.builder;
  *
  * $Id: TestProjectRoundTrip.java,v 1.3 2002/03/10 20:16:03 jvanzyl Exp $
  */
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.StringWriter;
@@ -19,15 +17,9 @@ import java.io.Writer;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import junit.textui.TestRunner;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.impl.SimpleLog;
-
-import org.apache.commons.sql.builder.*;
-import org.apache.commons.sql.model.*;
 import org.apache.commons.sql.io.DatabaseReader;
+import org.apache.commons.sql.model.Database;
 
 /**
  * Test harness for the SqlBuilder for various databases.

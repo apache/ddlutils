@@ -53,19 +53,20 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: PostgreSqlBuilder.java,v 1.3 2002/10/28 16:17:11 jstrachan Exp $
+ * $Id: PostgreSqlBuilder.java,v 1.4 2003/04/30 11:27:27 jstrachan Exp $
  */
 
 package org.apache.commons.sql.builder;
 
-import org.apache.commons.sql.model.Column;
 import java.io.IOException;
+
+import org.apache.commons.sql.model.Column;
 
 /**
  * An SQL Builder for PostgresSqlL
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PostgreSqlBuilder extends SqlBuilder{
 

@@ -10,8 +10,6 @@ import org.apache.commons.sql.model.ForeignKey;
 import org.apache.commons.sql.model.Reference;
 import org.apache.commons.sql.model.Table;
 
-import org.apache.commons.sql.type.Types;
-
 
 /**
  * Helper routines for operating on a database model

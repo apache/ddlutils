@@ -53,11 +53,10 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: Index.java,v 1.1 2002/09/20 20:50:52 jvanzyl Exp $
+ * $Id: Index.java,v 1.2 2003/04/30 11:27:28 jstrachan Exp $
  */
 package org.apache.commons.sql.model;
 
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -64,12 +64,8 @@ package org.apache.commons.sql.dynabean;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * DynaSql test harness for the HsqlDb database

@@ -6,12 +6,9 @@ import java.net.URL;
 import java.sql.SQLException;
 
 import org.apache.commons.jelly.JellyContext;
-import org.apache.commons.jelly.Script;
 import org.apache.commons.jelly.XMLOutput;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.type.Types;
 import org.apache.commons.sql.type.TypesReader;
@@ -38,7 +35,7 @@ public class DDLBuilder {
     /**
      * The URL of the core taglib
      */
-    private static URL taglibPath;
+    private URL taglibPath;
 
     /**
      * The path to locate provider resources (types, jelly scripts)

@@ -61,10 +61,7 @@
  */
 package org.apache.commons.sql.dynabean;
 
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,17 +74,14 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaClass;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.apache.commons.sql.builder.*;
-import org.apache.commons.sql.dynabean.DynaSql;
+import org.apache.commons.sql.builder.SqlBuilder;
+import org.apache.commons.sql.builder.SqlBuilderFactory;
 import org.apache.commons.sql.io.DatabaseReader;
-import org.apache.commons.sql.model.*;
-import org.apache.commons.sql.util.DataSourceWrapper;
+import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.util.DDLExecutor;
+import org.apache.commons.sql.util.DataSourceWrapper;
 
 /**
  * Abstract base class for testing the DynaSql against a number of 

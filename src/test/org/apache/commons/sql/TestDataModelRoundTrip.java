@@ -9,23 +9,25 @@ package org.apache.commons.sql;
  *
  * $Id: TestProjectRoundTrip.java,v 1.3 2002/03/10 20:16:03 jvanzyl Exp $
  */
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import junit.textui.TestRunner;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.impl.SimpleLog;
-
-import org.apache.commons.sql.model.*;
-import org.apache.commons.sql.io.*;
+import org.apache.commons.sql.io.DatabaseReader;
+import org.apache.commons.sql.io.DatabaseWriter;
+import org.apache.commons.sql.model.Column;
+import org.apache.commons.sql.model.Database;
+import org.apache.commons.sql.model.ForeignKey;
+import org.apache.commons.sql.model.Index;
+import org.apache.commons.sql.model.IndexColumn;
+import org.apache.commons.sql.model.Reference;
+import org.apache.commons.sql.model.Table;
 
 /**
  * Test harness for the IO package

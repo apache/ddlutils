@@ -62,8 +62,8 @@
 package org.apache.commons.sql.model;
 
 
-import java.util.Hashtable;
 import java.sql.Types;
+import java.util.Hashtable;
 
 // I don't know if the peer system deals
 // with the recommended mappings.

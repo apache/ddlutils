@@ -61,25 +61,16 @@
 
 package org.apache.commons.sql.task;
 
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.IOException;
 import java.io.FileWriter;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
-import java.util.Iterator;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
+
 import org.apache.commons.sql.io.DatabaseWriter;
 import org.apache.commons.sql.io.JdbcModelReader;
-
-import org.apache.commons.sql.model.*;
+import org.apache.commons.sql.model.Database;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
 
 /**
  * This class generates an XML schema of an existing database from
