@@ -160,8 +160,8 @@ public class DynaSql extends JdbcSupport {
     /**
      * Performs the given SQL query returning an iterator over the results.
      */
-    public ResultSetIterator query(String sql) throws SQLException, IllegalAccessException, InstantiationException {
-        ResultSetIterator answer = null;
+    public Iterator query(String sql) throws SQLException, IllegalAccessException, InstantiationException {
+        Iterator answer = null;
         Connection connection = borrowConnection();
         Statement statement = null;
         ResultSet resultSet = null;
@@ -184,8 +184,8 @@ public class DynaSql extends JdbcSupport {
      * 
      * @return an Iterator which appears like a DynaBean for easy access to the properties.
      */
-    public ResultSetIterator query(String sql, List parameters) throws SQLException, IllegalAccessException, InstantiationException {
-        ResultSetIterator answer = null;
+    public Iterator query(String sql, List parameters) throws SQLException, IllegalAccessException, InstantiationException {
+        Iterator answer = null;
         Connection connection = borrowConnection();
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -552,13 +552,15 @@ public class DynaSql extends JdbcSupport {
     /**
      * Factory method to create a new ResultSetIterator for the given result set, closing the 
      * connection, statement and result set when the iterator is used or closed.
+     * 
+     * @todo figure out a way to close Connection, Statement and ResultSet!
      */
-    protected ResultSetIterator createResultSetIterator(
+    protected Iterator createResultSetIterator(
         Connection connection, Statement statement, ResultSet resultSet
     ) throws SQLException, IllegalAccessException, InstantiationException {
         
         // #### WARNING - the Connection, statement and resultSet are not closed.
         ResultSetDynaClass resultSetClass = new ResultSetDynaClass(resultSet);
-        return (ResultSetIterator) resultSetClass.iterator();
+        return resultSetClass.iterator();
     }
 }

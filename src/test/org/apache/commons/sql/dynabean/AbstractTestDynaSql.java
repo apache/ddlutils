@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -77,7 +78,6 @@ import junit.textui.TestRunner;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
-import org.apache.commons.beanutils.ResultSetIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -203,7 +203,7 @@ public abstract class AbstractTestDynaSql extends TestCase
      * Test out some basic query operations
      */
     protected void doQuery() throws Exception {
-        ResultSetIterator iter = dynaSql.query( "select * from book" );
+        Iterator iter = dynaSql.query( "select * from book" );
         assertTrue("Found at least one row", iter.hasNext());
 
         DynaBean bean = (DynaBean) iter.next();
@@ -211,9 +211,6 @@ public abstract class AbstractTestDynaSql extends TestCase
         assertTrue("Found a dynaBean row", bean != null);
         
         log.info( "Found book: " + bean.get("title") );
-        
-        assertEquals( "iter has corrrect isbn", "ISBN-ABCDEF", iter.get("isbn") );
-        assertEquals( "iter has corrrect title", "The Importance of being Earnest", iter.get("title") );
         
         assertEquals( "bean has corrrect isbn", "ISBN-ABCDEF", bean.get("isbn") );
         assertEquals( "bean has corrrect title", "The Importance of being Earnest", bean.get("title") );
@@ -226,7 +223,7 @@ public abstract class AbstractTestDynaSql extends TestCase
         List params = new ArrayList();
         params.add("The Hanging Garden");
         
-        ResultSetIterator iter = dynaSql.query( "select * from book where title = ?", params );
+        Iterator iter = dynaSql.query( "select * from book where title = ?", params );
         assertTrue("Found at least one row", iter.hasNext());
 
         DynaBean bean = (DynaBean) iter.next();
@@ -235,9 +232,6 @@ public abstract class AbstractTestDynaSql extends TestCase
         
         log.info( "Found book: " + bean.get("title") );
                
-        assertEquals( "iter has corrrect isbn", "ISBN-XYZ", iter.get("isbn") );
-        assertEquals( "iter has corrrect title", "The Hanging Garden", iter.get("title") );
-        
         assertEquals( "bean has corrrect isbn", "ISBN-XYZ", bean.get("isbn") );
         assertEquals( "bean has corrrect title", "The Hanging Garden", bean.get("title") );
     }
