@@ -42,6 +42,29 @@ public class Database
         return tables;
     }
 
+    // Helper methods
+    
+    /**
+     * Finds the table with the specified name, using case insensitive matching.
+     * Note that this method is not called getTable(String) to avoid introspection 
+     * problems.
+     */
+    public Table findTable(String name)
+    {
+        for (Iterator iter = tables.iterator(); iter.hasNext(); ) 
+        {
+            Table table = (Table) iter.next();
+            
+            // table names are typically case insensitive
+            if (table.getName().equalsIgnoreCase( name )) 
+            {
+                return table;
+            }
+        }
+        return null;
+    }
+                 
+   
     // Additions for PropertyUtils
     
     public void setTable(int index, Table table)
