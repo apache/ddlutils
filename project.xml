@@ -84,15 +84,10 @@
     </dependency>
 
     <dependency>
-      <id>velocity</id>
-      <version>SNAPSHOT</version>
+      <id>jdbc</id>
+      <version>2.0</version>
     </dependency>
 
-    <dependency>
-      <id>village</id>
-      <version>1.5.3</version>
-    </dependency>
-    
     <!-- indirect -->
 
     <dependency>
@@ -147,6 +142,31 @@
       <version>2.0.0</version>
     </dependency>
 
+		<!-- for test cases -->
+    <dependency>
+      <id>axion</id>
+      <version>1.0-dev.20020830.060007</version>
+    </dependency>
+    <dependency>
+      <id>commons-pool</id>
+      <version>1.1-dev</version>
+    </dependency>
+    <dependency>
+      <id>commons-dbcp</id>
+      <version>1.0-dev-20020806</version>
+    </dependency>
+
+	  <!-- no longer requird -->    
+    <dependency>
+      <id>velocity</id>
+      <version>SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <id>village</id>
+      <version>1.5.3</version>
+    </dependency>
+    
 	<!-- for running Jelly scripts -->
     <dependency>
       <id>commons-jelly</id>
@@ -161,16 +181,6 @@
     <dependency>
       <id>dom4j</id>
       <version>1.4-dev-6</version>
-    </dependency>
-    
-    <!-- for running examples -->
-    <dependency>
-      <id>jdbc</id>
-      <version>2.0</version>
-    </dependency>
-    <dependency>
-      <id>hsqldb</id>
-      <version>1.7.0</version>
     </dependency>
     
   </dependencies>
