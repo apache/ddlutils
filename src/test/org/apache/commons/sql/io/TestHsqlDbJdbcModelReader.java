@@ -81,12 +81,44 @@ import org.apache.commons.sql.model.Table;
  */
 public class TestHsqlDbJdbcModelReader extends AbstractTestJdbcModelReader {
 
+    private float driverMajor = -1;
+    private int driverMinor = -1;
+    
     /** The Log to which logging calls will be made. */
     private static final Log log =
         LogFactory.getLog(TestHsqlDbJdbcModelReader.class);
 
     public static void main(String[] args) {
         TestRunner.run(suite());
+    }
+    public void setUp() throws Exception{
+        super.setUp();
+        
+        // Get driver version
+        // cant use DatabaseMetaData.getDatabaseMajorVersion() - it dosnt work
+        // for hsqldb
+        String driverVersion = null;
+        try{
+            java.sql.Connection conn = getConnection();
+            java.sql.DatabaseMetaData dbmd = conn.getMetaData();
+            driverVersion = dbmd.getDriverVersion();
+        }catch(Exception e){
+        }
+        int dotpos = driverVersion.lastIndexOf(".");
+        String strMajor = null;
+        String strMinor = null;
+        if(dotpos>=0){
+            strMajor = driverVersion.substring(0,dotpos);
+            strMinor = driverVersion.substring(dotpos+1,driverVersion.length());
+        }
+        try{
+            driverMajor = Float.parseFloat(strMajor);
+        }catch(NumberFormatException nfe){
+        }
+        try{
+            driverMinor = Integer.parseInt(strMinor);
+        }catch(NumberFormatException nfe){
+        }
     }
 
     /**
@@ -97,17 +129,23 @@ public class TestHsqlDbJdbcModelReader extends AbstractTestJdbcModelReader {
     }
 
     public void doImportForeignKeys(Table srcTable, Table testTable) {
-        // HsqlDb doesn't support importing forign keys
-        assertTrue(
-            "No FK imported from HSQLDB",
-            testTable.getForeignKeys().size() == 0);
+        if(driverMajor>=1.7 && driverMinor>0){
+            assertTrue(
+                "Foreign Keys Imported", 
+                testTable.getForeignKeys().size() ==
+                    testTable.getForeignKeys().size());
+        }else{
+            // HsqlDb < 1.7.1 doesn't support importing forign keys
+            assertTrue(
+                "No FK imported from HSQLDB",
+                testTable.getForeignKeys().size() == 0);
+        }
 
     }
 
     public void doImportPrimaryKeyColumns(Table srcTable, Table testTable) {
-        // HsqlDb does support importing primary keys
         assertTrue(
-            "Table OK's match",
+            "Table PK's match",
             testTable.getPrimaryKeyColumns().size()
                 == srcTable.getPrimaryKeyColumns().size());
     }

@@ -10,7 +10,7 @@
     <column name="author_id" type="INTEGER" primaryKey="true" required="true"/>
     <column name="name" type="VARCHAR" size="50" required="true"/>
     <column name="organisation" type="VARCHAR" size="50" required="false"/>
-	</table>
+  </table>
 
   <!-- =================================================== -->
   <!-- B O O K  T A B L E                                  -->
@@ -30,6 +30,43 @@
      <index-column name="isbn"/>
     </index>
               
+  </table>
+
+  <!-- =================================================== -->
+  <!-- COLUMN TYPE TEST TABLE                              -->
+  <!-- =================================================== -->
+  <table name="coltype">
+    <!--column name="COL_BIT" primaryKey="false" required="false" type="BIT"/-->
+    <!--column name="COL_TINYINT" primaryKey="false" required="false" type="TINYINT"/-->
+    <!--column name="COL_SMALLINT" primaryKey="false" required="false" type="SMALLINT"/-->
+    <column name="COL_INTEGER" primaryKey="false" required="false" type="INTEGER"/>
+    <!--column name="COL_BIGINT" primaryKey="false" required="false" type="BIGINT"/-->
+    <column name="COL_FLOAT" primaryKey="false" required="false" type="FLOAT"/>
+    <!--column name="COL_REAL" primaryKey="false" required="false" type="REAL"/-->
+    <!--column name="COL_NUMERIC" primaryKey="false" required="false" size="15" type="NUMERIC"/-->
+    <column name="COL_DECIMAL" primaryKey="false" required="false" scale="3" size="15" type="DECIMAL"/>
+    <column name="COL_DEC_NOSCALE" primaryKey="false" required="false" size="15" type="DECIMAL"/>
+    <column name="COL_CHAR" primaryKey="false" required="false" size="15" type="CHAR"/>
+    <column name="COL_VARCHAR" primaryKey="false" required="false" size="15" type="VARCHAR"/>
+    <!--column name="COL_LONGVARCHAR" primaryKey="false" required="false" type="LONGVARCHAR"/-->
+    <column name="COL_DATE" primaryKey="false" required="false" type="DATE"/>
+    <column name="COL_TIME" primaryKey="false" required="false" type="TIME"/>
+    <column name="COL_TIMESTAMP" primaryKey="false" required="false" type="TIMESTAMP"/>
+    <!--column name="COL_BINARY" primaryKey="false" required="false" type="BINARY"/-->
+    <!--column name="COL_VARBINARY" primaryKey="false" required="false" size="15" type="VARBINARY"/-->
+    <!--column name="COL_LONGVARBINARY" primaryKey="false" required="false" type="LONGVARBINARY"/-->
+    <!--column name="COL_NULL" primaryKey="false" required="false" type="NULL"/-->
+    <!--column name="COL_OTHER" primaryKey="false" required="false" size="15" type="OTHER"/-->
+    <!--column name="COL_JAVA_OBJECT" primaryKey="false" required="false" size="15" type="JAVA_OBJECT"/-->
+    <!--column name="COL_DISTINCT" primaryKey="false" required="false" size="15" type="DISTINCT"/-->
+    <!--column name="COL_STRUCT" primaryKey="false" required="false" size="15" type="STRUCT"/-->
+    <!--column name="COL_ARRAY" primaryKey="false" required="false" size="15" type="ARRAY"/-->
+    <!--column name="COL_BLOB" primaryKey="false" required="false" type="BLOB"/-->
+    <!--column name="COL_CLOB" primaryKey="false" required="false" type="CLOB"/-->
+    <!--column name="COL_REF" primaryKey="false" required="false" size="15" type="REF"/-->
+    <!--column name="COL_DOUBLE" primaryKey="false" required="false" type="DOUBLE"/-->
+    <!--column name="COL_BOOLEAN" primaryKey="false" required="false" type="BOOLEAN"/-->
+    <!--column name="COL_DATALINK" primaryKey="false" required="false" size="15" type="DECIMAL"/-->
   </table>
 
 </database>

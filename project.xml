@@ -149,7 +149,7 @@
     </dependency>
     <dependency>
       <id>hsqldb</id>
-      <version>1.7.0</version>
+      <version>1.7.1</version>
     </dependency>
 
 	  <!-- no longer requird -->    
@@ -206,7 +206,8 @@
     <!-- Resources that are packaged up inside the JAR file -->
     <resources>
       <includes>
-        <include>**/*.properties, **/*.betwixt</include>
+        <include>**/*.properties</include>
+	<include>src/java/**/*.betwixt</include>
       </includes>
     </resources>
   </build>

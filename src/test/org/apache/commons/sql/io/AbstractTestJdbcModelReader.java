@@ -192,7 +192,9 @@ public abstract class AbstractTestJdbcModelReader extends TestCase {
         }
 
         Table authorTable = testDatabase.findTable("author");
+        assertTrue("found author table",authorTable!=null);
         Column authorColumn = authorTable.findColumn("organisation");
+        assertTrue("found organisation column", authorColumn!=null);
         
         assertTrue("organisation column is not a primary key", !authorColumn.isPrimaryKey());
         assertTrue("organisation column is not auto inc", !authorColumn.isAutoIncrement());

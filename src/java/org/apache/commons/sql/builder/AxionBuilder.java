@@ -87,7 +87,7 @@ public class AxionBuilder extends SqlBuilder {
 
     protected String getSqlType(Column column) {
         // Axion doesn't support text width specification 
-        return column.getType();
+        return getNativeType(column);
     }
     
     protected void writePrimaryKeys(Table table) throws IOException {
@@ -108,6 +108,14 @@ public class AxionBuilder extends SqlBuilder {
 
     protected void printNullable() throws IOException {
         //print("NULL");
+    }
+
+    protected String getNativeType(Column column){
+        if(column.getTypeCode() == java.sql.Types.DECIMAL){
+            return "FLOAT";
+	}else{
+            return super.getNativeType(column);
+	}
     }
 
     /** 

@@ -393,15 +393,14 @@ public class SqlBuilder {
      * @return the full SQL type string including the size
      */
     protected String getSqlType(Column column) {
-        StringBuffer sqlType = new StringBuffer(column.getType());
+        StringBuffer sqlType = new StringBuffer(getNativeType(column));
         if ( column.getSize() > 0 ) {
             sqlType.append(" (");
             sqlType.append(column.getSize());
-            sqlType.append(")");
-        }
-        if ( TypeMap.isDecimalType(column.getType()) ){
-            sqlType.append(",");
-            sqlType.append(column.getScale());
+            if ( TypeMap.isDecimalType(column.getType()) ){
+                sqlType.append(",");
+                sqlType.append(column.getScale());
+            }
             sqlType.append(")");
         }
         return sqlType.toString();
@@ -704,6 +703,10 @@ public class SqlBuilder {
      */ 
     protected void printAutoIncrementColumn() throws IOException {
         print( "IDENTITY" );
+    }
+
+    protected String getNativeType(Column column){
+        return column.getType();
     }
 
 }
