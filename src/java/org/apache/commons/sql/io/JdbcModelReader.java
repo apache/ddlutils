@@ -21,6 +21,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,19 +49,38 @@ import org.apache.commons.sql.model.Table;
 public class JdbcModelReader {
 
     /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( JdbcModelReader.class );
+    private final Log log = LogFactory.getLog( JdbcModelReader.class );
 
-    Connection connection = null;
-    String catalog = null;
-    String schema = null;
-    String[] tableTypes = { "TABLE", "VIEW" };
-    Pattern defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)"); //value with parenthesis and/or quotes around it
+    /** Contains default column sizes (minimum sizes that a JDBC-compliant db must support) */
+    private HashMap defaultSizes = new HashMap();
+    
+    private Connection connection = null;
+    private String catalog = null;
+    private String schema = null;
+    private String[] tableTypes = { "TABLE", "VIEW" };
+    private Pattern defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)"); //value with parenthesis and/or quotes around it
 
-    public JdbcModelReader() {
+    public JdbcModelReader()
+    {
+        this(null);
     }
     
-    public JdbcModelReader(Connection conn) {
-        this.connection = conn;
+    public JdbcModelReader(Connection conn)
+    {
+        connection = conn;
+        defaultSizes.put(new Integer(Types.CHAR),          "254");
+        defaultSizes.put(new Integer(Types.VARCHAR),       "254");
+        defaultSizes.put(new Integer(Types.LONGVARCHAR),   "254");
+        defaultSizes.put(new Integer(Types.BINARY),        "254");
+        defaultSizes.put(new Integer(Types.VARBINARY),     "254");
+        defaultSizes.put(new Integer(Types.LONGVARBINARY), "254");
+        defaultSizes.put(new Integer(Types.INTEGER),       "32");
+        defaultSizes.put(new Integer(Types.BIGINT),        "64");
+        defaultSizes.put(new Integer(Types.REAL),          "7,0");
+        defaultSizes.put(new Integer(Types.FLOAT),         "15,0");
+        defaultSizes.put(new Integer(Types.DOUBLE),        "15,0");
+        defaultSizes.put(new Integer(Types.DECIMAL),       "15,15");
+        defaultSizes.put(new Integer(Types.NUMERIC),       "15,15");
     }
     
     public void setCatalog(String catalog) {
@@ -243,7 +263,7 @@ public class JdbcModelReader {
                 String columnSize =
                     columnInfoColumns.contains("COLUMN_SIZE")
                         ? columnData.getString("COLUMN_SIZE")
-                        : null;
+                        : (String)defaultSizes.get(new Integer(columnType));
                 /* the number of fractional digits */
                 int columnScale =
                     columnInfoColumns.contains("DECIMAL_DIGITS")
@@ -338,6 +358,10 @@ public class JdbcModelReader {
                 Column col = new Column();
                 col.setName(columnName);
                 col.setTypeCode(columnType);
+                col.setPrecisionRadix(columnPrecision);
+                col.setScale(columnScale);
+                // we're setting the size after the precision and radix in case
+                // the database prefers to return them in the size value 
                 col.setSize(columnSize);
                 col.setRequired(!columnIsNullable);
                 if (primaryKeys.contains(col.getName())) {
@@ -355,8 +379,6 @@ public class JdbcModelReader {
                     }
                     col.setDefaultValue(columnDefaultValue);
                 }
-                col.setPrecisionRadix(columnPrecision);
-                col.setScale(columnScale);
                 columns.add(col);
             }
             return columns;

@@ -201,16 +201,19 @@ public class Column implements Cloneable
 
     public void setSize(String size)
     {
-        int pos = size.indexOf(",");
-
-        if (pos < 0)
+        if (size != null)
         {
-            this.size = size;
-        }
-        else
-        {
-            this.size = size.substring(0, pos);
-            scale     = Integer.parseInt(size.substring(pos + 1));
+            int pos = size.indexOf(",");
+    
+            if (pos < 0)
+            {
+                this.size = size;
+            }
+            else
+            {
+                this.size = size.substring(0, pos);
+                scale     = Integer.parseInt(size.substring(pos + 1));
+            }
         }
     }
     
