@@ -106,6 +106,10 @@ public class AxionBuilder extends SqlBuilder {
         //print("NOT NULL");
     }
 
+    protected void printNullable() throws IOException {
+        //print("NULL");
+    }
+
     /** 
      * Outputs the DDL to add a column to a table. Axion
      * does not support default values so we are removing
