@@ -1,123 +1,192 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
-<project name="maven" default="maven:jar" basedir=".">
-
-  <!-- Give user a chance to override without editing this file
-       (and without typing -D each time they invoke a target) -->
-
-  <!-- Allow any user specific values to override the defaults -->
-  <property file="${user.home}/build.properties" />
-  <!-- Allow user defaults for this project -->
-  <property file="build.properties" />
-  <!-- Set default values for the build -->
-  <property file="project.properties" />
-
-  <!-- maven:start -->
+<project default="jar" name="commons-sql" basedir=".">
   
-  <!-- ================================================================== -->
-  <!-- D E L E G A T O R S                                                -->
-  <!-- ================================================================== -->
-        
-    <target name="maven:site">
-      <ant antfile="${maven.home}/build-docs.xml" target="site"/>
-    </target>
+  <property name="defaulttargetdir" value="target"></property> 
+  <property name="classesdir" value="target/classes"></property>
+  <property name="testclassesdir" value="target/test-classes"></property>
+  <property name="testreportdir" value="target/test-reports"></property>
+  <property name="distdir" value="dist"></property>
+  <property name="javadocdir" value="target/docs/apidocs"></property>
+  <property name="final.name" value="commons-sql-1.0-dev"></property>
+  
+  <target name="init" description="o Initializes some properties">
 
-    <target name="maven:fo">
-      <ant antfile="${maven.home}/build-docs.xml" target="docs:fo"/>
-    </target>
-
-    <target name="maven:pdf">
-      <ant antfile="${maven.home}/build-docs.xml" target="docs:pdf"/>
-    </target>
-        
-    <target name="maven:jar">
-      <ant antfile="${maven.home}/build-maven.xml" target="jar"/>
-    </target>
-        
-    <target name="maven:install-jar">
-      <ant antfile="${maven.home}/build-maven.xml" target="install-jar"/>
-    </target>
-        
-    <target name="maven:env">
-      <ant antfile="${maven.home}/build-maven.xml" target="env"/>
-    </target>
-        
-    <target name="maven:docs">
-      <ant antfile="${maven.home}/build-docs.xml" target="docs"/>
-    </target>
-        
-    <target name="maven:test">
-      <ant antfile="${maven.home}/build-test.xml" target="test"/>
-    </target>
-
-    <target name="maven:iutest">
-      <ant antfile="${maven.home}/build-iutest.xml" target="test"/>
-    </target>
-
-    <target name="maven:singletest">
-      <ant antfile="${maven.home}/build-test.xml" target="run-singletest"/>
-    </target>
-        
-    <target name="maven:clean">
-      <ant antfile="${maven.home}/build-maven.xml" target="clean"/>
-    </target>
-        
-    <target name="maven:metrics">
-      <ant antfile="${maven.home}/build-metrics.xml" target="metrics"/>
-    </target>
-        
-    <target name="maven:dist">
-      <ant antfile="${maven.home}/build-maven.xml" target="dist"/>
-    </target>
-        
-    <target name="maven:deploy-site">
-      <ant antfile="${maven.home}/build-docs.xml" target="deploy-site"/>
-    </target>
-
-    <target name="maven:deploy-dist">
-      <ant antfile="${maven.home}/build-maven.xml" target="deploy-dist"/>
-    </target>
-        
-    <target name="maven:gump-descriptor">
-      <ant antfile="${maven.home}/build-maven.xml" target="gump-descriptor"/>
-    </target>
-
-    <target name="maven:cross-ref">
-      <ant antfile="${maven.home}/build-docs.xml" target="cross-ref"/>
-    </target>
+    <condition property="noget">
+      <equals arg2="only" arg1="${build.sysclasspath}"></equals>
+    </condition>
+  </target>
     
-    <target name="maven:cvs-change-log">
-      <ant antfile="${maven.home}/build-docs.xml" target="cvs-change-log"/>
-    </target>
-        
-    <target name="maven:javadocs">
-      <ant antfile="${maven.home}/build-docs.xml" target="javadocs"/>
-    </target>
-        
-    <target name="maven:compile">
-      <ant antfile="${maven.home}/build-maven.xml" target="compile"/>
-    </target>
+  <target name="jar" description="o Create the jar" depends="get-deps">
+
+    <mkdir dir="${classesdir}"></mkdir>
+
+    <javac destdir="${classesdir}" deprecation="true" debug="true" optimize="false" excludes="**/package.html">
+      <src>
+        <pathelement location="src/java"></pathelement>
+      </src>
+      <classpath>
+        <fileset dir="lib">
+          <include name="*.jar"></include>
+        </fileset>
+      </classpath>
+    </javac>
+
     
-    <target name="maven:check-source">
-      <ant antfile="${maven.home}/build-maven.xml" target="check-source"/>
-    </target>
-        
-    <target name="maven:update-jars">
-      <ant antfile="${maven.home}/build-maven.xml" target="update-jars"/>
-    </target>
+ 
+    
+ 
+    <copy todir="${classesdir}">
+      
+      
+      
+      <fileset dir="${basedir}">
+      
+      
+        <include name="**/*.properties, **/*.betwixt"></include>
+      
+      
+      </fileset>
+    </copy>
+ 
+    
+    <jar jarfile="target/${final.name}.jar" excludes="**/package.html" basedir="${classesdir}"></jar>
 
-    <target name="maven:announce">
-      <ant antfile="${maven.home}/build-maven.xml" target="announce"/>
-    </target>
+  </target>
+  
+  <target name="clean" description="o Clean up the generated directories">
+    <delete dir="${defaulttargetdir}"></delete>
+    <delete dir="${distdir}"></delete>
+  </target>
 
-    <target name="maven:maven-update">
-      <ant antfile="${maven.home}/build-maven.xml" target="maven-update"/>
-    </target>
+  <target name="dist" description="o Create a distribution" depends="jar, javadoc">
+    <mkdir dir="dist"></mkdir>
+    <copy todir="dist">
+      <fileset dir="${defaulttargetdir}"></fileset>
+    </copy>
+  </target>
+ 
+  <target name="test" description="o Run the test cases" depends="compile-tests">
+    <mkdir dir="${testreportdir}"></mkdir>
+    <junit dir="./" printSummary="yes" fork="true" haltonerror="true">
+      <sysproperty key="basedir" value="src/test"></sysproperty>
+      <formatter type="xml"></formatter>
+      <formatter usefile="true" type="plain"></formatter>
+      <classpath>
+        <fileset dir="lib">
+          <include name="*.jar"></include>
+        </fileset>
+        <pathelement location="target/${final.name}.jar"></pathelement>
+        <pathelement path="${testclassesdir}"></pathelement>
+      </classpath>
+      <batchtest todir="${testreportdir}">
+        <fileset dir="src/test">
+              
+                <include name="**/Test*.java"></include>
+              
+              
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
 
-    <target name="maven:validate-pom">
-      <ant antfile="${maven.home}/build-maven.xml" target="validate-pom"/>
-    </target>
+  <target name="compile-tests" depends="jar">
+    <mkdir dir="${testclassesdir}"></mkdir>
+    <javac destdir="${testclassesdir}" deprecation="true" debug="true" optimize="false" excludes="**/package.html">
+      <src>
+        <pathelement location="src/test"></pathelement>
+      </src>
+      <classpath>
+        <fileset dir="lib">
+          <include name="*.jar"></include>
+        </fileset>
+        <pathelement location="target/${final.name}.jar"></pathelement>
+      </classpath>
+    </javac>
 
-  <!-- maven:end -->
+    
+   
+    
+ 
+    <copy todir="${testclassesdir}">
+      <fileset dir="src/test">
+      
+      
+      </fileset>
+    </copy>
+    
+  </target>
+
+  <target name="javadoc" description="o Generate javadoc" depends="jar">
+ 
+ 
+    <mkdir dir="${javadocdir}"></mkdir>
+ 
+    
+    <tstamp>
+      <format pattern="2002-yyyy" property="year"></format>
+    </tstamp>
+ 
+    <property name="copyright" value="Copyright &amp;copy;  Apache Software Foundation. All Rights Reserved."></property>
+ 
+    <property name="title" value="commons-sql 1.0-dev API"></property>
+ 
+    <javadoc use="true" private="true" destdir="${javadocdir}" author="true" version="true" sourcepath="src/java" packagenames="org.apache.commons.sql.*">
+      <classpath>
+        <fileset dir="lib">
+          <include name="*.jar"></include>
+        </fileset>
+        <pathelement location="target/${final.name}.jar"></pathelement>
+      </classpath>
+    </javadoc>
+ 
+  </target>
+
+  <target name="get-deps" unless="noget" depends="init">
+  
+    <mkdir dir="lib"></mkdir>
+    
+    <get dest="lib/commons-logging-1.0.1.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-logging/jars/commons-logging-1.0.1.jar"></get>
+    <get dest="lib/commons-beanutils-SNAPSHOT.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-beanutils/jars/commons-beanutils-SNAPSHOT.jar"></get>
+    <get dest="lib/commons-betwixt-SNAPSHOT.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-betwixt/jars/commons-betwixt-SNAPSHOT.jar"></get>
+    <get dest="lib/jdbc-2.0.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/jdbc/jars/jdbc-2.0.jar"></get>
+    <get dest="lib/commons-collections-2.1-dev.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-collections/jars/commons-collections-2.1-dev.jar"></get>
+    <get dest="lib/commons-digester-1.2.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-digester/jars/commons-digester-1.2.jar"></get>
+    <get dest="lib/commons-lang-SNAPSHOT.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-lang/jars/commons-lang-SNAPSHOT.jar"></get>
+    <get dest="lib/ant-1.4.1.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/ant/jars/ant-1.4.1.jar"></get>
+    <get dest="lib/ant-optional-1.4.1.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/ant+optional/jars/ant-optional-1.4.1.jar"></get>
+    <get dest="lib/junit-3.7.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/junit/jars/junit-3.7.jar"></get>
+    <get dest="lib/xml-apis-2.0.2.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/xml-apis/jars/xml-apis-2.0.2.jar"></get>
+    <get dest="lib/xerces-2.0.0.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/xerces/jars/xerces-2.0.0.jar"></get>
+    <get dest="lib/axion-1.0-dev.20020830.060007.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/axion/jars/axion-1.0-dev.20020830.060007.jar"></get>
+    <get dest="lib/hsqldb-1.7.0.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/hsqldb/jars/hsqldb-1.7.0.jar"></get>
+    <get dest="lib/mckoi-0.93.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/mckoi/jars/mckoi-0.93.jar"></get>
+    <get dest="lib/velocity-SNAPSHOT.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/velocity/jars/velocity-SNAPSHOT.jar"></get>
+    <get dest="lib/village-1.5.3.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/village/jars/village-1.5.3.jar"></get>
+    <get dest="lib/commons-jelly-SNAPSHOT.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-jelly/jars/commons-jelly-SNAPSHOT.jar"></get>
+    <get dest="lib/commons-jexl-SNAPSHOT.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-jexl/jars/commons-jexl-SNAPSHOT.jar"></get>
+    <get dest="lib/dom4j-1.4-dev-6.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/dom4j/jars/dom4j-1.4-dev-6.jar"></get>
+  
+  </target>
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <target name="install-maven">
+
+    
+
+    <get dest="${user.home}/maven-install-latest.jar" usetimestamp="true" src="${maven.repo.remote}/maven/maven-install-latest.jar"></get>
+    
+    <unjar dest="${maven.home}" src="${user.home}/maven-install-latest.jar"></unjar>
+    
+  </target>
 
 </project>
+    
