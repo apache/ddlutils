@@ -17,6 +17,7 @@
 package org.apache.commons.sql.builder;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.sql.model.Column;
@@ -27,12 +28,24 @@ import org.apache.commons.sql.model.Table;
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author John Marshall/Connectria
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
 public class MySqlBuilder extends SqlBuilder {
-    
+    private HashMap _specialTypes = new HashMap();
+
     public MySqlBuilder() {
         setForeignKeysEmbedded(true);
+        _specialTypes.put("binary",        "BLOB");
+        _specialTypes.put("blob",          "LONGBLOB");
+        _specialTypes.put("boolean",       "BIT");
+        _specialTypes.put("clob",          "LONGTEXT");
+        _specialTypes.put("float",         "DOUBLE");
+        _specialTypes.put("longvarbinary", "MEDIUMBLOB");
+        _specialTypes.put("longvarchar",   "MEDIUMTEXT");
+        _specialTypes.put("real",          "FLOAT");
+        _specialTypes.put("timestamp",     "DATETIME");
+        _specialTypes.put("varbinary",     "BLOB");
     }
     
     public void dropTable(Table table) throws IOException { 
@@ -54,12 +67,9 @@ public class MySqlBuilder extends SqlBuilder {
     }
 
     protected String getNativeType(Column column){
-        if ( "timestamp".equalsIgnoreCase( column.getType() ) ) {
-            return "DATETIME";
-        } else if ( "longvarchar".equalsIgnoreCase( column.getType() ) ) {
-            return "TEXT";
-        } else {
-            return column.getType();
-        }
+        String type        = column.getType();
+        String specialType = (String)_specialTypes.get(type.toLowerCase());
+
+        return (specialType == null ? type : specialType);
     }
 }
