@@ -7,7 +7,7 @@
   <id>commons-sql</id>
   <currentVersion>1.0-dev</currentVersion>
 
-  <logo>/images/logo.jpg</logo>
+  <logo>/images/sql-logo-white.png</logo>
 
   <inceptionYear>2002</inceptionYear>
   <package>org.apache.commons.sql</package>
