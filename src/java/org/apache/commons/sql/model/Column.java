@@ -87,6 +87,18 @@ public class Column
     }
 
     public Column(String name, String type, int size, boolean required, boolean 
+                  primaryKey, boolean autoIncrement, String defaultValue) 
+    {
+        this.name = name;
+        this.type = type;
+        this.size = size;
+        this.required = required;
+        this.primaryKey = primaryKey;
+        this.autoIncrement = autoIncrement;
+        this.defaultValue = defaultValue;
+    }
+
+    public Column(String name, String type, int size, boolean required, boolean 
                   primaryKey, boolean autoIncrement, String defaultValue, 
                   Integer scale, String isNullable) 
     {
