@@ -146,7 +146,7 @@ public class DDLExecutor extends JdbcSupport {
      *
      * @throws SQLException if an error occurs and isContinueOnError == false
      */
-    public void evaluateBatch(String sql) throws SQLException {
+    public int evaluateBatch(String sql) throws SQLException {
         Connection connection = borrowConnection();
         Statement statement = null;
         int errors = 0;
@@ -204,6 +204,8 @@ public class DDLExecutor extends JdbcSupport {
             closeStatement(statement);
             returnConnection(connection);
         }
+
+        return errors;
     }
     
 

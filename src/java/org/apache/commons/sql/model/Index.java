@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.commons.sql.model;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class Index implements Cloneable
     
     public void setName(String name)
     {
+        if ( name == null ) throw new IllegalArgumentException("Null index name");
         this.name = name;
     }
     

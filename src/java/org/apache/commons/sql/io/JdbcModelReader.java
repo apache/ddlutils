@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,6 +54,7 @@ public class JdbcModelReader {
     String catalog = null;
     String schema = null;
     String[] tableTypes = { "TABLE", "VIEW" };
+    Pattern defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)"); //value with parenthesis and/or quotes around it
 
     public JdbcModelReader() {
     }
@@ -159,9 +162,7 @@ public class JdbcModelReader {
                 t1.setName(tableName);
                 tables.add(t1);
             }
-            if (tableData != null) {
-                tableData.close();
-            }
+
             Iterator i = tables.iterator();
             while (i.hasNext()) {
                 Table t = (Table) i.next();
@@ -288,11 +289,12 @@ public class JdbcModelReader {
                  * An empty string means nobody knows.
                  * We make the assumption that "NO" means no, anything else means
                  * yes.
+                 * jmm - sometimes (not always) jTDS/mssql would return "NO ", which doesn't match "NO", hence the trim
                  */
                 boolean columnIsNullable = false;
-                if (columnInfoColumns.contains("IS_NULLABLE")
-                    && "NO".equalsIgnoreCase(
-                        columnData.getString("IS_NULLABLE"))) {
+                String isNullableValue = columnInfoColumns.contains("IS_NULLABLE") ? columnData.getString("IS_NULLABLE") : null;
+                if ( isNullableValue != null ) isNullableValue = isNullableValue.trim();
+                if ( "NO".equalsIgnoreCase(isNullableValue) ) {
                     columnIsNullable = false;
                 }
                 else {
@@ -337,12 +339,20 @@ public class JdbcModelReader {
                 col.setTypeCode(columnType);
                 col.setSize(columnSize);
                 col.setRequired(!columnIsNullable);
-                col.setDefaultValue(columnDefaultValue);
                 if (primaryKeys.contains(col.getName())) {
                     col.setPrimaryKey(true);
                 }
                 else {
                     col.setPrimaryKey(false);
+                }
+
+                //sometimes the default comes back with parenthesis around it (jTDS/mssql)
+                if ( columnDefaultValue != null ) {
+                    Matcher m = defaultPattern.matcher(columnDefaultValue);
+                    if ( m.matches() ) {
+                        columnDefaultValue = m.group(1);
+                    }
+                    col.setDefaultValue(columnDefaultValue);
                 }
                 col.setPrecisionRadix(columnPrecision);
                 col.setScale(columnScale);
@@ -463,7 +473,12 @@ public class JdbcModelReader {
                     //importedKeyInitiallyDeferred - see SQL92 for definition
                     //importedKeyInitiallyImmediate - see SQL92 for definition 
                     //importedKeyNotDeferrable - see SQL92 for definition                
-                    if (!pkTable.equals(prevPkTable)) {
+
+                    //if tables are different OR fk field is first within fk
+                    //need new FK object
+                    //without this two fks to the same table on different fields in the source table
+                    //get put in the same pk
+                    if (!pkTable.equals(prevPkTable) || keySequence == 1) {
                         if (currFk != null) {
                             fks.add(currFk);
                         }
@@ -495,34 +510,36 @@ public class JdbcModelReader {
         DatabaseMetaData dbmd = connection.getMetaData();
 
         Map indexesByName = new HashMap();
-
+        
         ResultSet columnData = null;
         try {
             columnData = dbmd.getIndexInfo(catalog, schema, tableName, false, false);
         } catch ( SQLException e ) {
             log.trace("database does not support getIndexInfo()", e);
         }
-
+        
         if ( columnData != null ) {
             try {
                 //can be multiple columns per index
                 while ( columnData.next() ) {
-
-                    String indexName = columnData.getString("INDEX_NAME");
+    
                     boolean unique = !columnData.getBoolean("NON_UNIQUE");
+                    String indexName = columnData.getString("INDEX_NAME");
                     String column = columnData.getString("COLUMN_NAME");
-
+    
                     Index index = (Index) indexesByName.get(indexName);
-                    if ( index == null ) {
+                    if ( index == null && indexName != null ) {
                         index = new Index();
                         index.setName( indexName );
                         indexesByName.put( indexName, index );
                         index.setUnique( unique );
                     }
-
-                    IndexColumn ic = new IndexColumn();
-                    ic.setName( column );
-                    index.addIndexColumn( ic );
+                    
+                    if ( index != null ) {
+                        IndexColumn ic = new IndexColumn();
+                        ic.setName( column );
+                        index.addIndexColumn( ic );
+                    }
                 }
             }
             finally {
@@ -531,7 +548,7 @@ public class JdbcModelReader {
                 }
             }
         }
-
+        
         return new Vector(indexesByName.values());
     }
 

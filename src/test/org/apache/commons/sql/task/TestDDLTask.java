@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * JUnit tests.
  * 
- * @version $Id: TestDDLTask.java,v 1.2 2004/02/28 03:35:49 bayard Exp $
+ * @version $Id: TestDDLTask.java,v 1.3 2004/10/14 19:42:48 tomdz Exp $
  * @see DDLTask
  */
 public final class TestDDLTask extends TestCase {
@@ -61,7 +61,7 @@ public final class TestDDLTask extends TestCase {
 
         // Without drop statements
         task.setOutput(createOutputFile());
-        task.setDropTables(false);
+        task.setDoDrops(false);
         task.execute();
     }
 

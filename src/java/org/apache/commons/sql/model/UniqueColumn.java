@@ -20,8 +20,8 @@ package org.apache.commons.sql.model;
  * &lt;unique&gt; tags, but adds no functionality.  All indexes are treated the
  * same by the Table.
  * 
- * @author <a href="mailto:jmarshall@connectria.com">John Marshall</a>
- * @version $Revision: 1.3 $
+ * @author John Marshall/Connectria
+ * @version $Revision: 1.4 $
  */
 public class UniqueColumn extends IndexColumn
 {

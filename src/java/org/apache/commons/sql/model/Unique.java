@@ -23,8 +23,8 @@ import java.util.List;
  * &lt;unique&gt; tags, but adds no functionality.  All indexes are treated the
  * same by the Table.
  * 
- * @author <a href="mailto:jmarshall@connectria.com">John Marshall</a>
- * @version $Revision: 1.4 $
+ * @author John Marshall/Connectria
+ * @version $Revision: 1.5 $
  */
 public class Unique extends Index
 {

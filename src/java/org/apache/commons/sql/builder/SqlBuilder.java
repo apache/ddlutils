@@ -588,11 +588,21 @@ public abstract class SqlBuilder {
                     }
                 }
 
-                // TODO: add constraints here...
+                // add fk constraints
+                for (Iterator fkIt = desiredTable.getForeignKeys().iterator(); fkIt.hasNext();) {
+                    ForeignKey desiredFk = (ForeignKey) fkIt.next();
+                    ForeignKey currentFk = currentTable.findForeignKey(desiredFk);
+                    if ( currentFk == null ) {
+                        if (_log.isInfoEnabled())
+                        {
+                            _log.info("Creating foreign key " + desiredTable.getName() + "." + desiredFk);
+                        }
+                        writeExternalForeignKeyCreateStmt(desiredDb, desiredTable, desiredFk);
+                    }
+                }
 
-                // Hmm, m-w.com says indices and indexes are both okay
                 // TODO: should we check the index fields for differences?
-
+                //create new indexes
                 for (Iterator indexIt = desiredTable.getIndexes().iterator(); indexIt.hasNext();)
                 {
                     Index desiredIndex = (Index)indexIt.next();
@@ -608,8 +618,24 @@ public abstract class SqlBuilder {
                     }
                 }
 
-                // TODO: drop constraints - probably need names on them for this
+                // drop fk constraints
+                for (Iterator fkIt = currentTable.getForeignKeys().iterator(); fkIt.hasNext();) {
+                    ForeignKey currentFk = (ForeignKey) fkIt.next();
+                    ForeignKey desiredFk = desiredTable.findForeignKey(currentFk);
 
+                    if ( desiredFk == null ) {
+                        if (_log.isInfoEnabled())
+                        {
+                            _log.info((doDrops ? "" : "Not ") + "Dropping foreign key " + currentTable.getName() + "." + currentFk);
+                        }
+                        if ( doDrops ) {
+                            writeExternalForeignKeyDropStmt(currentTable, currentFk);
+                        }
+                    }
+                }
+
+
+                //Drop columns
                 for (Iterator columnIt = currentTable.getColumns().iterator(); columnIt.hasNext();)
                 {
                     Column currentColumn = (Column)columnIt.next();
@@ -638,6 +664,7 @@ public abstract class SqlBuilder {
                     }
                 }
 
+                //Drop indexes
                 for (Iterator indexIt = currentTable.getIndexes().iterator(); indexIt.hasNext();)
                 {
                     Index currentIndex = (Index)indexIt.next();
@@ -653,7 +680,7 @@ public abstract class SqlBuilder {
                             IndexColumn indexColumn = (IndexColumn)columnIt.next();
                             Column      column      = currentTable.findColumn(indexColumn.getName());
 
-                            if (!column.isPrimaryKey())
+                            if (column != null && !column.isPrimaryKey())
                             {
                                 isPk = false;
                                 break;
@@ -663,9 +690,12 @@ public abstract class SqlBuilder {
                         {
                             if (_log.isInfoEnabled())
                             {
-                                _log.info("Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
+                                _log.info((doDrops ? "" : "Not ") + "Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
                             }
-                            writeExternalIndexDropStmt(currentTable, currentIndex);
+                            if ( doDrops )
+                            {
+                                writeExternalIndexDropStmt(currentTable, currentIndex);
+                            }
                         }
                     }
                 }
@@ -674,6 +704,7 @@ public abstract class SqlBuilder {
         }
 
         // generating deferred foreignkeys
+        //TODO should we try to generate new FKs on existing tables?
         for (Iterator fkIt = newTables.iterator(); fkIt.hasNext();)
         {
             createExternalForeignKeys(desiredDb, (Table)fkIt.next());
@@ -793,7 +824,7 @@ public abstract class SqlBuilder {
 
             for (Iterator it = table.getForeignKeys().iterator(); it.hasNext(); numKey++)
             {
-                writeExternalForeignKeyCreateStmt(database, table, (ForeignKey)it.next(), numKey);
+                writeExternalForeignKeyCreateStmt(database, table, (ForeignKey)it.next());
             }
         }
     }
@@ -848,7 +879,7 @@ public abstract class SqlBuilder {
 
             for (Iterator it = table.getForeignKeys().iterator(); it.hasNext(); numKey++)
             {
-                writeExternalForeignKeyDropStmt(table, (ForeignKey)it.next(), numKey);
+                writeExternalForeignKeyDropStmt(table, (ForeignKey)it.next());
             }
         }
     }
@@ -1146,7 +1177,7 @@ public abstract class SqlBuilder {
 
         if (column.getDefaultValue() != null)
         {
-            print(" DEFAULT '");
+            print(" DEFAULT ");
             print(_valueQuoteChar);
             print(column.getDefaultValue());
             print(_valueQuoteChar);
@@ -1366,10 +1397,10 @@ public abstract class SqlBuilder {
 
         if ((columnA.getTypeCode() != columnB.getTypeCode()) ||
             (columnA.isRequired() != columnB.isRequired()) ||
-            (sizeMatters && (columnA.getSize() != columnB.getSize())) ||
+            (sizeMatters && (!columnA.getSize().equals(columnB.getSize()))) ||
+            !defaultsEqual /*|| //determined these two to be hardly useful
             (columnA.getScale() != columnB.getScale()) ||
-            !defaultsEqual ||
-            (columnA.getPrecisionRadix() != columnB.getPrecisionRadix()))
+            (columnA.getPrecisionRadix() != columnB.getPrecisionRadix())*/ )
         {
             return true;
         }
@@ -1377,6 +1408,12 @@ public abstract class SqlBuilder {
         {
             return false;
         }
+    }
+
+    protected String getForeignKeyName(ForeignKey fk) {
+        //table and local column should be sufficient - is it possible for one
+        //column to reference multiple tables
+        return fk.firstReference().getLocal() + "_" + fk.getForeignTable();
     }
 
     /**
@@ -1551,7 +1588,12 @@ public abstract class SqlBuilder {
             {
                 IndexColumn idxColumn = (IndexColumn)it.next();
 
-                print(getColumnName(table.findColumn(idxColumn.getName())));
+                Column col = table.findColumn(idxColumn.getName());
+                if ( col == null ) {
+                    //would get null pointer on next line anyway, so throw exception
+                    throw new RuntimeException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
+                }
+                print(getColumnName(col));
                 if (it.hasNext())
                 {
                     print(", ");
@@ -1634,7 +1676,7 @@ public abstract class SqlBuilder {
      * @param key      The foreign key
      * @param numKey   The number of the key, starting with 1
      */
-    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key, int numKey) throws IOException
+    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
     {
         if (key.getForeignTable() == null)
         {
@@ -1645,7 +1687,7 @@ public abstract class SqlBuilder {
             writeTableAlterStmt(table);
 
             print("ADD CONSTRAINT ");
-            print(getConstraintName(null, table, "FK", Integer.toString(numKey)));
+            print(getConstraintName(null, table, "FK", getForeignKeyName(key)));
             print(" FOREIGN KEY (");
             writeLocalReferences(key);
             print(") REFERENCES ");
@@ -1699,11 +1741,11 @@ public abstract class SqlBuilder {
      * @param key    The foreign key
      * @param numKey The number of the key, starting with 1
      */
-    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException
+    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
     {
         writeTableAlterStmt(table);
         print("DROP CONSTRAINT ");
-        print(getConstraintName(null, table, "FK", Integer.toString(numKey)));
+        print(getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)));
         printEndOfStatement();
     }
 

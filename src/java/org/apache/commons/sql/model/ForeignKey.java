@@ -16,6 +16,7 @@
 package org.apache.commons.sql.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // TODO: Add a name property to the foreignkey that is respected by
@@ -58,5 +59,31 @@ public class ForeignKey implements Cloneable
     public List getReferences()
     {
         return references;
+    }
+
+    public Reference firstReference() {
+        return (Reference) (references.size() == 0 ? null : references.get(0));
+    }
+
+    public boolean equals(Object o) {
+        boolean result = o != null && getClass().equals(o.getClass());
+        if ( result ) {
+            ForeignKey fk = (ForeignKey) o;
+            result = this.foreignTable.equalsIgnoreCase(fk.foreignTable) && this.references.size() == fk.references.size();
+            if ( result ) {
+                //check all references - need to ensure order is same for valid comparison
+                List copyThis = (List) this.references.clone();
+                List copyThat = (List) fk.references.clone();
+                Collections.sort(copyThis);
+                Collections.sort(copyThat);
+                result = copyThis.equals(copyThat);
+            }
+        }
+        return result;
+    }
+    
+    public String toString() {
+        return "ForeignKey[" + this.foreignTable + "]";
+        //TODO show references
     }
 }

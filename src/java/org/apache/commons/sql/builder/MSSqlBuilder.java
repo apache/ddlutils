@@ -21,6 +21,7 @@ import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.ForeignKey;
+import org.apache.commons.sql.model.Index;
 import org.apache.commons.sql.model.Table;
 
 /**
@@ -36,7 +37,7 @@ public class MSSqlBuilder extends SqlBuilder
     {
         setEmbeddedForeignKeysNamed(true);
         setForeignKeysEmbedded(false);
-        setCommentPrefix("#");
+        //setCommentPrefix("#");
         addNativeTypeMapping(Types.BLOB,          "IMAGE");
         addNativeTypeMapping(Types.BOOLEAN,       "BIT");
         addNativeTypeMapping(Types.CHAR,          "NCHAR");
@@ -48,7 +49,7 @@ public class MSSqlBuilder extends SqlBuilder
         addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
         addNativeTypeMapping(Types.TIME,          "DATETIME");
         addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        addNativeTypeMapping(Types.VARCHAR,       "NVARCHAR");
+        addNativeTypeMapping(Types.VARCHAR,       "VARCHAR");
     }
 
     /* (non-Javadoc)
@@ -119,5 +120,30 @@ public class MSSqlBuilder extends SqlBuilder
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
         print("IDENTITY (1,1) ");
+    }
+
+    protected boolean shouldGeneratePrimaryKeys(java.util.List primaryKeyColumns) {
+        /*
+         * requires primary key indication for autoincrement key columns
+         * I'm not sure why the default skips the pk statement if all are identity
+         */
+        return primaryKeyColumns.size() > 0;
+    }
+
+    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    {
+        print("DROP INDEX ");
+        print( getTableName(table) );
+        print( "." );
+        print( getIndexName(index) );
+        printEndOfStatement();
+    }
+
+    public void writeColumnAlterStmt(Table table, Column column, boolean isNewColumn) throws IOException
+    {
+        writeTableAlterStmt(table);
+        print(isNewColumn ? "ADD " : "ALTER COLUMN ");
+        writeColumn(table, column);
+        printEndOfStatement();
     }
 }

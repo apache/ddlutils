@@ -59,6 +59,11 @@ public class Table implements Cloneable
     {
     }
 
+    public String toString()
+    {
+        return super.toString() + "[name=" + name + "]";
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
@@ -280,6 +285,24 @@ public class Table implements Cloneable
             }
         }
         return null;
+    }
+
+    /**
+     * Finds a ForeignKey within the table that matches the supplied ForeignKey
+     * exactly, meaning the foreign table and all column references are the same.
+     */
+    public ForeignKey findForeignKey(ForeignKey key)
+    {
+        ForeignKey result = null;
+        for (Iterator iter = getForeignKeys().iterator(); iter.hasNext(); )
+        {
+            ForeignKey fk = (ForeignKey) iter.next();
+            if ( fk.equals(key) ) {
+                result = key;
+                break;
+            }
+        }
+        return result;
     }
 
     /**

@@ -3,6 +3,8 @@
   <element name="table">
     <hide property="primaryKeyColumns"/>
     <hide property="autoIncrementColumn"/>
+    <hide property="unique"/>
+    <hide property="uniques"/>
     <addDefaults/>
   </element>
 </info>

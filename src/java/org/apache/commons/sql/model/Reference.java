@@ -16,7 +16,7 @@
 package org.apache.commons.sql.model;
 
 
-public class Reference implements Cloneable
+public class Reference implements Cloneable, Comparable
 {
     private String local;
     private String foreign;
@@ -53,5 +53,30 @@ public class Reference implements Cloneable
     public void setForeign(String foreign)
     {
         this.foreign = foreign;
+    }
+    
+    public boolean equals(Object o) {
+        boolean result = o != null && getClass().equals(o.getClass());
+        if ( result ) {
+            Reference ref = (Reference) o;
+            result = this.local.equalsIgnoreCase(ref.local) && this.foreign.equalsIgnoreCase(ref.foreign);
+        }
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    public int compareTo(Object o) {
+        Reference ref = (Reference) o;
+        int result = this.local.compareTo(ref.local);
+        if ( result == 0 ) {
+            result = this.foreign.compareTo(ref.foreign);
+        }
+        return result;
+    }
+    
+    public String toString() {
+        return "Reference[" + this.local + " to " + this.foreign + "]";
     }
 }

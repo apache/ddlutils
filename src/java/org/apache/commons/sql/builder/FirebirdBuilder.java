@@ -79,11 +79,11 @@ public class FirebirdBuilder extends SqlBuilder
     }
 
     /* (non-Javadoc)
-     * @see org.apache.commons.sql.builder.SqlBuilder#writeExternalForeignKeyCreateStmt(org.apache.commons.sql.model.Table, org.apache.commons.sql.model.ForeignKey, int)
+     * @see org.apache.commons.sql.builder.SqlBuilder#writeExternalForeignKeyCreateStmt(org.apache.commons.sql.model.Table, org.apache.commons.sql.model.ForeignKey)
      */
-    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key, int numKey) throws IOException
+    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
     {
-        super.writeExternalForeignKeyCreateStmt(database, table, key, numKey);
+        super.writeExternalForeignKeyCreateStmt(database, table, key);
         if (key.getForeignTable() != null)
         {
             print("COMMIT");
