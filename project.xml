@@ -3,7 +3,7 @@
 
   <extend>../sandbox-build/project.xml</extend>
   <version>3</version>
-  <name>commons-sql</name>
+  <name>Commons Sql</name>
   <id>commons-sql</id>
   <currentVersion>1.0-dev</currentVersion>
 
