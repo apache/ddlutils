@@ -142,7 +142,7 @@ public class Table
         columns.add(column);
     }
 
-    public void addColumns(List columns)
+    public void addAll(List columns)
     {
         if(columns != null &&
            columns.size() > 0)

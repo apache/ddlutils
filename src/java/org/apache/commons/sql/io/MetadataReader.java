@@ -25,7 +25,7 @@ import java.util.Collection;
  * Reads a database's metadata and creates a fully populated Database bean.
  *
  * @author  Steven Caswell
- * @version $Id: MetadataReader.java,v 1.1 2002/10/21 11:41:55 stevencaswell Exp $
+ * @version $Id: MetadataReader.java,v 1.2 2002/10/23 10:16:48 jstrachan Exp $
  */
 public class MetadataReader
 {
@@ -104,7 +104,7 @@ public class MetadataReader
             // TableMap tblMap = dbMap.getTable(curTable);
 
             List columns = getColumns(dbMetaData, table.getName());
-            table.addColumns(columns);
+            table.addAll(columns);
 //            List primKeys = getPrimaryKeys(dbMetaData, curTable);
 //            Collection forgnKeys = getForeignKeys(dbMetaData, curTable);
             database.addTable(table);
