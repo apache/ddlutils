@@ -98,6 +98,11 @@
       <version>2.0</version>
     </dependency>
 
+    <dependency>
+      <id>ant</id>
+      <version>1.5</version>
+    </dependency>
+
     <!-- indirect -->
 
     <dependency>
@@ -111,28 +116,6 @@
     </dependency>
 
     <dependency>
-      <id>commons-lang</id>
-      <version>SNAPSHOT</version>
-    </dependency>
-
-
-    <dependency>
-      <id>ant</id>
-      <version>1.4.1</version>
-    </dependency>
-    
-    <dependency>
-      <id>ant+optional</id>
-      <version>1.4.1</version>
-      <jar>ant-optional-1.4.1.jar</jar>
-    </dependency>
-
-    <dependency>
-      <id>junit</id>
-      <version>3.7</version>
-    </dependency>
-    
-    <dependency>
       <id>xml-apis</id>
       <version>2.0.2</version>
     </dependency>
@@ -141,7 +124,7 @@
       <id>xerces</id>
       <version>2.0.0</version>
     </dependency>
-
+    
     <!-- database used for testing -->
     <dependency>
       <id>axion</id>
@@ -152,33 +135,6 @@
       <version>1.7.1</version>
     </dependency>
 
-	  <!-- no longer requird -->    
-    <dependency>
-      <id>velocity</id>
-      <version>SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <id>village</id>
-      <version>1.5.3</version>
-    </dependency>
-    
-	<!-- for running Jelly scripts -->
-    <dependency>
-      <id>commons-jelly</id>
-      <version>SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <id>commons-jexl</id>
-      <version>SNAPSHOT</version>
-    </dependency>
-    
-    <dependency>
-      <id>dom4j</id>
-      <version>1.4-dev-6</version>
-    </dependency>
-    
   </dependencies>
 
 	
@@ -207,7 +163,7 @@
     <resources>
       <includes>
         <include>**/*.properties</include>
-	<include>src/java/**/*.betwixt</include>
+				<include>**/*.betwixt</include>
       </includes>
     </resources>
   </build>
