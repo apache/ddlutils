@@ -15,31 +15,17 @@
    limitations under the License.
   -->
 
-<!DOCTYPE project [
-<!ENTITY commons-nav SYSTEM "../../sandbox-build/incl_nav.xml">
-]>
-
+<!DOCTYPE org.apache.commons.menus SYSTEM '../../../jakarta-commons/commons-build/menus/menus.dtd'>
 <project name="Sql">
-
-  <title>Sql</title>
-  <organizationLogo href="/images/jakarta-logo-blue.gif">
-   Jakarta
-  </organizationLogo>
-
-  <body>
-    <links>
-      <item name="Jakarta Commons" href="http://jakarta.apache.org/commons/"/>
-    </links>
-
-    <menu name="Commons Sql">
+  <title>Commons&#xA0;Sql</title>
+ <body>
+    <menu name="Commons&#xA0;Sql">
       <item name="Overview" href="/index.html"/>
       <item name="Javadoc" href="apidocs/index.html"/>
       <item name="Mailing lists" href="/mail-lists.html"/>
       <item name="Team" href="/team-list.html"/>
       <item name="CVS" href="http://cvs.apache.org/viewcvs/jakarta-commons-sandbox/sql"/>
     </menu>
-    
-    &commons-nav;
-
+    &common-menus;
   </body>
 </project>
