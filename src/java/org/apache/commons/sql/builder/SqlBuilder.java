@@ -66,7 +66,10 @@ public class SqlBuilder {
     
     /** The indentation used to indent commands */
     private String _indent = "    ";
-    
+
+    /** Whether the database requires the explicit stating of NULL as the default value */
+    private boolean _requiringNullAsDefaultValue = false;
+
     /** Whether primary key constraints are embedded inside the create table statement */
     private boolean _primaryKeyEmbedded = true;
     
@@ -144,6 +147,28 @@ public class SqlBuilder {
     public void setIndent(String indent)
     {
         _indent = indent;
+    }
+
+    /**
+     * Determines whether a NULL needs to be explicitly stated when the column
+     * has no specified default value. Default is false.
+     * 
+     * @return <code>true</code> if NULL must be written for empty default values
+     */
+    public boolean isRequiringNullAsDefaultValue()
+    {
+        return _requiringNullAsDefaultValue;
+    }
+    /**
+     * Specifies whether a NULL needs to be explicitly stated when the column
+     * has no specified default value. Default is false.
+     *
+     * @param requiresNullAsDefaultValue Whether NULL must be written for empty
+     *                                   default values
+     */
+    public void setRequiringNullAsDefaultValue(boolean requiresNullAsDefaultValue)
+    {
+        _requiringNullAsDefaultValue = requiresNullAsDefaultValue;
     }
 
     /**
@@ -524,7 +549,7 @@ public class SqlBuilder {
      */
     public void createTable(Table table) throws IOException 
     {
-        print("CRETE TABLE ");
+        print("CREATE TABLE ");
         println(table.getName());
         println("(");
 
@@ -699,7 +724,8 @@ public class SqlBuilder {
             print(" ");
             writeColumnNotNullableStmt();
         }
-        else
+        else if (isRequiringNullAsDefaultValue() &&
+                 (TypeMap.isTextType(column.getTypeCode()) || TypeMap.isBinaryType(column.getTypeCode())))
         {
             print(" ");
             writeColumnNullableStmt();
@@ -755,7 +781,7 @@ public class SqlBuilder {
         {
             sqlType.append(" (");
             sqlType.append(column.getSize());
-            if (TypeMap.isDecimalType(column.getType()))
+            if (TypeMap.typeHasScaleAndPrecision(column.getType()))
             {
                 sqlType.append(",");
                 sqlType.append(column.getScale());
@@ -1050,7 +1076,7 @@ public class SqlBuilder {
                 print(key.getForeignTable());
                 print(" (");
                 writeForeignReferences(key);
-                println(")");
+                print(")");
             }
         }
     }

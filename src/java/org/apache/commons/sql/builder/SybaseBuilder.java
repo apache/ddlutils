@@ -34,20 +34,19 @@ public class SybaseBuilder extends SqlBuilder
 {
     public SybaseBuilder()
     {
+        // For Sybase a present NULL allows it to save initial storage, so we better create it 
+        setRequiringNullAsDefaultValue(true);
         setEmbeddedForeignKeysNamed(true);
         setForeignKeysEmbedded(false);
         setCommentPrefix("/*");
         setCommentSuffix("*/");
         addNativeTypeMapping(Types.BLOB,          "IMAGE");
         addNativeTypeMapping(Types.BOOLEAN,       "BIT");
-        addNativeTypeMapping(Types.CHAR,          "UNICHAR");
         addNativeTypeMapping(Types.CLOB,          "TEXT");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
         addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
         addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
         addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        addNativeTypeMapping(Types.VARCHAR,       "UNIVARCHAR");
     }
 
     /* (non-Javadoc)

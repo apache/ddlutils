@@ -36,16 +36,17 @@ public class MySqlBuilder extends SqlBuilder
     public MySqlBuilder()
     {
         setForeignKeysEmbedded(true);
+        // TODO: Not yet supported:
+        //setIndicesEmbedded(true);
         setCommentPrefix("#");
         addNativeTypeMapping(Types.BINARY,        "BLOB");
         addNativeTypeMapping(Types.BLOB,          "LONGBLOB");
         addNativeTypeMapping(Types.BOOLEAN,       "BIT");
         addNativeTypeMapping(Types.CLOB,          "LONGTEXT");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE");
-        addNativeTypeMapping(Types.LONGVARBINARY, "MEDIUMBLOB");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "MEDIUMTEXT");
+        addNativeTypeMapping(Types.LONGVARBINARY, "LONGBLOB");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "LONGTEXT");
         addNativeTypeMapping(Types.REAL,          "FLOAT");
-        addNativeTypeMapping(Types.VARBINARY,     "BLOB");
+        addNativeTypeMapping(Types.VARBINARY,     "MEDIUMBLOB");
     }
 
     /* (non-Javadoc)

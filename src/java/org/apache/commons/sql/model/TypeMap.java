@@ -73,6 +73,7 @@ public class TypeMap
     public static final String CLOB = "CLOB";
     public static final String NUMERIC = "NUMERIC";
     public static final String DECIMAL = "DECIMAL";
+    public static final String BOOLEAN = "BOOLEAN";
     public static final String BIT = "BIT";
     public static final String TINYINT = "TINYINT";
     public static final String SMALLINT = "SMALLINT";
@@ -88,12 +89,14 @@ public class TypeMap
     public static final String DATE = "DATE";
     public static final String TIME = "TIME";
     public static final String TIMESTAMP = "TIMESTAMP";
-    public static final String BOOLEANCHAR = "BOOLEANCHAR";
-    public static final String BOOLEANINT = "BOOLEANINT";
     
     private static final String[] TEXT_TYPES =
     {
-        CHAR, VARCHAR, LONGVARCHAR, CLOB, DATE, TIME, TIMESTAMP, BOOLEANCHAR
+        CHAR, VARCHAR, LONGVARCHAR, CLOB
+    };
+    private static final String[] BINARY_TYPES =
+    {
+        BINARY, VARBINARY, LONGVARBINARY, BLOB
     };
     private static final String[] DECIMAL_TYPES =
     {
@@ -116,6 +119,7 @@ public class TypeMap
         registerSqlTypeID(new Integer(Types.CLOB), CLOB);
         registerSqlTypeID(new Integer(Types.NUMERIC), NUMERIC);
         registerSqlTypeID(new Integer(Types.DECIMAL), DECIMAL);
+        registerSqlTypeID(new Integer(Types.BOOLEAN), BOOLEAN);
         registerSqlTypeID(new Integer(Types.BIT), BIT);
         registerSqlTypeID(new Integer(Types.TINYINT), TINYINT);
         registerSqlTypeID(new Integer(Types.SMALLINT), SMALLINT);
@@ -163,9 +167,9 @@ public class TypeMap
     }
 
     /**
-     * Returns true if values for the type need to be quoted.
+     * Determines whether the indicated type is a textual type.
      *
-     * @param type The type to check.
+     * @param type The code of type to check (as defined by {@link java.sql.Types}
      */
     public static final boolean isTextType(int type)
     {
@@ -173,9 +177,9 @@ public class TypeMap
     }
 
     /**
-     * Returns true if values for the type need to be quoted.
+     * Determines whether the indicated type is a textual type.
      *
-     * @param type The type to check.
+     * @param type The type to check
      */
     public static final boolean isTextType(String type)
     {
@@ -192,13 +196,32 @@ public class TypeMap
     }
 
     /**
-     * Returns true if values for the type need have size and scale measurements
+     * Determines whether the indicated type is a binary type.
      *
-     * @param type The type to check.
+     * @param type The code of type to check (as defined by {@link java.sql.Types}
      */
-    public static final boolean isDecimalType(int type)
+    public static final boolean isBinaryType(int type)
     {
-        return isDecimalType(getJdbcTypeName(type));
+        return isBinaryType(getJdbcTypeName(type));
+    }
+
+    /**
+     * Determines whether the indicated type is a binary type.
+     *
+     * @param type The type to check
+     */
+    public static final boolean isBinaryType(String type)
+    {
+        for (int i = 0; i < BINARY_TYPES.length; i++)
+        {
+            if (type.equalsIgnoreCase(BINARY_TYPES[i]))
+            {
+                return true;
+            }
+        }
+
+        // If we get this far, there were no matches.
+        return false;
     }
 
     /**
@@ -206,7 +229,17 @@ public class TypeMap
      *
      * @param type The type to check.
      */
-    public static final boolean isDecimalType(String type)
+    public static final boolean typeHasScaleAndPrecision(int type)
+    {
+        return typeHasScaleAndPrecision(getJdbcTypeName(type));
+    }
+
+    /**
+     * Returns true if values for the type need have size and scale measurements
+     *
+     * @param type The type to check.
+     */
+    public static final boolean typeHasScaleAndPrecision(String type)
     {
         for (int i = 0; i < DECIMAL_TYPES.length; i++)
         {

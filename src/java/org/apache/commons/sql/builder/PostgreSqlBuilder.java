@@ -27,7 +27,7 @@ import org.apache.commons.sql.model.Table;
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PostgreSqlBuilder extends SqlBuilder
 {
@@ -37,7 +37,7 @@ public class PostgreSqlBuilder extends SqlBuilder
         addNativeTypeMapping(Types.BLOB,          "BYTEA");
         addNativeTypeMapping(Types.CLOB,          "TEXT");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.FLOAT,         "REAL");
         addNativeTypeMapping(Types.LONGVARBINARY, "BYTEA");
         addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
