@@ -18,16 +18,27 @@ package org.apache.commons.sql.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Index
+public class Index implements Cloneable
 {
-    private String name;
-        
-    private List indexColumns = new ArrayList();
-    
-    private boolean unique = false;
+    protected String    name;
+    protected ArrayList indexColumns = new ArrayList();
+    protected boolean   unique       = false;
 
     public Index() {}
-    
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        Index result = new Index();
+
+        result.name         = name;
+        result.indexColumns = (ArrayList)indexColumns.clone();
+        result.unique       = unique;
+        return result;
+    }
+
     public String getName()
     {
         return name;

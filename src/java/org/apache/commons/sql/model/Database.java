@@ -41,6 +41,34 @@ public class Database
     {
     }
 
+    /**
+     * Adds all tables from the other database to this database.
+     * Note that the other database is not changed.
+     * 
+     * @param otherDb The other database model
+     * @exception IllegalArgumentException If duplicated tables were found
+     */
+    public void mergeWith(Database otherDb) throws IllegalArgumentException
+    {
+        for (Iterator it = otherDb.tables.iterator(); it.hasNext();)
+        {
+            Table table = (Table)it.next();
+
+            if (findTable(table.getName()) != null)
+            {
+                throw new IllegalArgumentException("Table "+table.getName()+" already defined in this database");
+            }
+            try
+            {
+                addTable((Table)table.clone());
+            }
+            catch (CloneNotSupportedException ex)
+            {
+                // won't happen
+            }
+        }
+    }
+
     public String getName()
     {
         return name;

@@ -18,14 +18,26 @@ package org.apache.commons.sql.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ForeignKey 
+public class ForeignKey implements Cloneable
 {
     private String foreignTable;
         
-    private List references = new ArrayList();
+    private ArrayList references = new ArrayList();
     
     public ForeignKey() {}
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        ForeignKey result = new ForeignKey();
+
+        result.foreignTable = foreignTable;
+        result.references   = (ArrayList)references.clone();
+        return result;
+    }
+
     public String getForeignTable()
     {
         return foreignTable;

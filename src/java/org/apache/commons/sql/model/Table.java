@@ -29,7 +29,7 @@ import java.util.List;
 import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.commons.collections.Predicate;
 
-public class Table
+public class Table implements Cloneable
 {
     private static final Predicate UNIQUE_PREDICATE = new Predicate() {
         public boolean evaluate(Object input) {
@@ -49,14 +49,33 @@ public class Table
 
     private String type = null;
 
-    private List columns = new ArrayList();
+    private ArrayList columns = new ArrayList();
 
-    private List foreignKeys = new ArrayList();
+    private ArrayList foreignKeys = new ArrayList();
 
-    private List indexes = new ArrayList();
+    private ArrayList indexes = new ArrayList();
 
     public Table()
     {
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        Table result = new Table();
+
+        result.catalog     = catalog;
+        result.name        = name;
+        result.javaName    = javaName;
+        result.schema      = schema;
+        result.remarks     = remarks;
+        result.type        = type;
+        result.columns     = (ArrayList)columns.clone();
+        result.foreignKeys = (ArrayList)foreignKeys.clone();
+        result.indexes     = (ArrayList)indexes.clone();
+        return result;
     }
 
     public String getCatalog()

@@ -15,8 +15,7 @@
  */
 package org.apache.commons.sql.model;
 
-
-public class Column
+public class Column implements Cloneable
 {
     private String name;
     private String javaName;
@@ -35,6 +34,27 @@ public class Column
     {
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        Column result = new Column();
+
+        result.name            = name;
+        result.javaName        = javaName;
+        result.primaryKey      = primaryKey;
+        result.required        = required;
+        result.autoIncrement   = autoIncrement;
+        result.typeCode        = typeCode;
+        result.type            = type;
+        result.size            = size;
+        result.defaultValue    = defaultValue;
+        result.scale           = scale;
+        result.precisionRadix  = precisionRadix;
+        result.ordinalPosition = ordinalPosition;
+        return result;
+    }
 
     public Column(String name, String javaName, int typeCode, String size, boolean required, boolean
                   primaryKey, boolean autoIncrement, String defaultValue)

@@ -15,6 +15,7 @@
  */
 package org.apache.commons.sql.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,14 +24,27 @@ import java.util.List;
  * same by the Table.
  * 
  * @author <a href="mailto:jmarshall@connectria.com">John Marshall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Unique extends Index
 {
     public Unique() {
         setUnique( true );
     }
-    
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        Unique result = new Unique();
+
+        result.name         = name;
+        result.indexColumns = (ArrayList)indexColumns.clone();
+        result.unique       = unique;
+        return result;
+    }
+
     public void setUnique(boolean unique) {
         if ( unique == false ) {
             throw new IllegalArgumentException( "Unique index cannot be made non-unique" );

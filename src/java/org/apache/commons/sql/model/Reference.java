@@ -15,13 +15,26 @@
  */
 package org.apache.commons.sql.model;
 
-public class Reference 
+
+public class Reference implements Cloneable
 {
     private String local;
     private String foreign;
     
     public Reference() {}
-    
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        Reference result = new Reference();
+
+        result.local   = local;
+        result.foreign = foreign;
+        return result;
+    }
+
     public String getLocal()
     {
         return local;

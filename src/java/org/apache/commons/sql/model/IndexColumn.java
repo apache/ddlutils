@@ -15,13 +15,25 @@
  */
 package org.apache.commons.sql.model;
 
-public class IndexColumn
+public class IndexColumn implements Cloneable
 {
-    private String name;
-    private String size;
+    protected String name;
+    protected String size;
     
     public IndexColumn() {}
-    
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        IndexColumn result = new IndexColumn();
+
+        result.name = name;
+        result.size = size;
+        return result;
+    }
+
     public String getName()
     {
         return name;
@@ -30,5 +42,15 @@ public class IndexColumn
     public void setName(String name)
     {
         this.name = name;
+    }
+
+    public String getSize()
+    {
+        return size;
+    }
+
+    public void setSize(String size)
+    {
+        this.size = size;
     }
 }

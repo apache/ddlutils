@@ -21,10 +21,21 @@ package org.apache.commons.sql.model;
  * same by the Table.
  * 
  * @author <a href="mailto:jmarshall@connectria.com">John Marshall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class UniqueColumn extends IndexColumn
 {
     public UniqueColumn() {}
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        UniqueColumn result = new UniqueColumn();
+
+        result.name = name;
+        result.size = size;
+        return result;
+    }
 }
