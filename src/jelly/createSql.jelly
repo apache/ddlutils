@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<j:jelly xmlns:j="jelly:core" 
+	xmlns:sqlm="jakarta.apache.org/commons/sql/tags" 
+	xmlns:b="jelly:betwixt">
+  
+<j:include uri="defineTags.jelly"/>
+  
+<b:introspector var="introspector" 
+  attributesForPrimitives="false" elementNameMapper="lowercase"/>
+	
+<b:parse var="database" 
+  uri="../test-input/datamodel.xml" 
+  introspector="${introspector}"
+  rootClass="org.apache.commons.sql.datamodel.Database"/>
+
+Creating file: target/sql.xml
+
+<j:file name="target/sql.xml">  
+<database name="${database.name}" idMethod="${database.idMethod}">
+  	
+  <j:forEach items="${database.getTables()}" var="table">
+    <table name="${table.name}">
+
+    <drop>  	  
+  	  <sqlm:dropTable table="${table}"/>
+	</drop>  	  
+
+	<create>		
+  	  <sqlm:createTable table="${table}"/>
+	</create>  	  
+
+	</table>  	  	
+  </j:forEach>
+  	  
+</database>
+</j:file>
+
+</j:jelly>

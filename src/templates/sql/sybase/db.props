@@ -1,0 +1,67 @@
+# Taken from java.sql.Types in the IBM 1.3 JDK
+# JDBC to Sybase mappings.
+
+BIT = BIT
+TINYINT =
+SMALLINT =
+INTEGER = INT
+BIGINT =
+FLOAT =
+REAL =
+DOUBLE =
+NUMERIC = NUMERIC
+DECIMAL =
+CHAR = CHAR
+VARCHAR = VARCHAR
+LONGVARCHAR = TEXT
+DATE = DATETIME
+TIME = TIMESTAMP
+TIMESTAMP = DATETIME
+BINARY = BINARY
+VARBINARY = IMAGE
+LONGVARBINARY = IMAGE
+NULL = NULL
+OTHER =
+JAVA_OBJECT =
+DISTINCT =
+STRUCT =
+ARRAY =
+BLOB =
+CLOB =
+REF =
+
+#
+# This is the autoincrement value if using native methods for
+# incrementing keys.  Most likely IDENTITIY wrt Sybase ASE.
+# Leaving the value blank should be used when Turbine's IDBroker
+# is used to autoincrement keys.
+#
+# Default: [blank]
+#
+AUTOINCREMENT =
+
+#
+# If true, the NOT NULL values will not be printed in generated 
+# SQL files if the column is set to autoincrement.  Should be true
+# when the internal IDENTITY attribute ( above ) is used in a column
+# for autoincrementing keys.
+#
+# Default: false
+#
+removeNotNullWithAutoIncrement = false
+
+#
+# If true, defaults are not included in generated SQL.
+#
+# Default: false
+#
+suppressDefaults = false
+
+#
+# The string to place in the generated SQL for columns which cannot
+# be NULL.
+#
+# Default: NOT NULL
+#
+NOTNULL = NOT NULL
+

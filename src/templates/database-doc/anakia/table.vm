@@ -1,0 +1,33 @@
+<subsection name="$table.Name">
+  <p>
+    $!table.Description
+  </p>
+
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Size</th>
+      <th>Default</th>
+      <th>JavaName</th>
+      <th>PK</th>
+      <th>FK</th>
+      <th>not null</th>
+      <th>Description</th>
+    </tr>
+  #foreach ($col in $table.Columns)
+    <tr>
+      <td>$col.Name</td>
+      <td>$col.Type</td>
+      <td>$col.printSize()</td>
+      <td>$!col.DefaultValue</td>
+      <td>$col.JavaName</td>
+      <td>#if ($col.isPrimaryKey()==true)X#end</td>
+      <td>#if ($col.isForeignKey()==true)X#end</td>
+      <td>#if ($col.isNotNull()==true)X#end</td>
+      <td>$!col.Description</td>
+    </tr>
+  #end
+  </table>
+
+</subsection>

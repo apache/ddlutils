@@ -1,0 +1,9 @@
+<!ELEMENT dataset (
+#foreach($tbl in $tables)#if($velocityCount>1),
+#end
+    ${tbl.JavaName}*#end
+)>
+<!ATTLIST dataset
+    name CDATA #REQUIRED
+>
+

@@ -1,0 +1,13 @@
+drop table $table.Name;
+#*
+
+DB2 looks like oracle but I'm not sure
+about the sequences.
+
+#foreach ($col in $table.Columns)
+#if ($col.isAutoIncrement())
+drop sequence if exists ${table.Name}_SEQ;
+#end
+#end
+*#
+

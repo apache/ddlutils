@@ -1,0 +1,3 @@
+INSERT INTO $row.Table.Name (##
+#set ($comma="")#foreach($col in $row.ColumnValues)$comma${col.Column.Name}#set($comma=",")#end)
+    VALUES (#set ($comma="")#foreach($col in $row.ColumnValues)$comma${generator.parse("sql/load/mysql/val.vm", "", "column", $col)}#set ($comma=",")#end);

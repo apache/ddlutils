@@ -1,0 +1,3 @@
+#foreach ($unique in $table.Unices)
+    UNIQUE ($unique.ColumnList),
+#end

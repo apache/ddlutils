@@ -1,0 +1,30 @@
+<a name="$table.Name"/>
+<h2>$table.Name</h2>
+$!table.Description
+<p/>
+<table border="1">
+  <tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Size</th>
+    <th>Default</th>
+    <th>JavaName</th>
+    <th>PK</th>
+    <th>FK</th>
+    <th>not null</th>
+    <th>Description</th>
+  </tr>
+#foreach ($col in $table.Columns)
+  <tr>
+    <td>$col.Name</td>
+    <td>$col.Type</td>
+    <td>#if ($col.printSize()) $col.printSize()#else &nbsp;#end</td>
+    <td>#if ($col.DefaultValue) $col.DefaultValue#else &nbsp;#end</td>
+    <td>$col.JavaName</td>
+    <td>#if ($col.isPrimaryKey()==true)X#else &nbsp;#end</td>
+    <td>#if ($col.isForeignKey()==true)X#else &nbsp;#end</td>
+    <td>#if ($col.isNotNull()==true)X#else &nbsp;#end</td>
+    <td>#if ($col.Description) $col.Description#else &nbsp;#end</td>
+  </tr>
+#end
+</table>

@@ -1,0 +1,4 @@
+DROP TABLE $table.Name CASCADE CONSTRAINTS;
+#if ($table.IdMethod == "native")
+DROP SEQUENCE $table.SequenceName;
+#end

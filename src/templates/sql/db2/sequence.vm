@@ -1,0 +1,3 @@
+#if ($table.IdMethod == "native")
+CREATE SEQUENCE $table.SequenceName;
+#end

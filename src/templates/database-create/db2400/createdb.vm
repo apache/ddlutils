@@ -1,0 +1,8 @@
+## Not implemented for DB2/400... yet ;-)
+
+#*
+#foreach ($databaseName in $databaseNames)
+drop database if exists $databaseName;
+create database $databaseName;
+#end
+*#

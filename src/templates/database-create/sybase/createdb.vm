@@ -1,0 +1,10 @@
+#foreach ($databaseName in $databaseNames)
+USE MASTER
+;
+
+DROP DATABASE $databaseName
+;
+
+CREATE DATABASE $databaseName
+;
+#end

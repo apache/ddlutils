@@ -1,0 +1,2 @@
+    CONSTRAINT ${table.Name}_PK PRIMARY KEY($table.printPrimaryKey()),
+

@@ -1,0 +1,22 @@
+#set ( $hfname= "data/dataset.vm" )
+#set ( $fname= "data/table.vm" )
+
+#foreach ($dataModel in $dataModels)
+#foreach ($database in $dataModel.Databases)
+    #if ($project)
+        #if ($dataModel.MultipleDatabases)
+            #set ( $outFile = "${project}-${database.Name}-data.dtd" )
+        #else
+            #set ( $outFile = "${project}-data.dtd" )
+        #end
+        $generator.parse($hfname,$outFile,"tables",$database.Tables)
+        #foreach ($tbl in $database.Tables)
+            $generator.parse($fname,$outFile,"table",$tbl)
+        #end
+    #else
+        #foreach ($tbl in $database.Tables)
+            $generator.parse($fname,"","table",$tbl)
+        #end
+    #end
+#end
+#end

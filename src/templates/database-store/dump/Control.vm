@@ -1,0 +1,37 @@
+#set ( $tfname= "data/dump/top.vm" )
+#set ( $fname= "data/dump/row.vm" )
+#set ( $bfname= "data/dump/bottom.vm" )
+#set ($q = '"')
+
+#foreach ($dataModel in $dataModels)
+#foreach ($database in $dataModel.Databases)
+
+#if ($project)
+    #if ($database.Name)
+        #set ($outFile="${project}-${database.Name}-${dataset}-data.xml")
+    #else
+        #set ( $outFile = "${project}-${dataset}-data.xml" )
+    #end
+#else
+    #set ( $outFile = "" )
+#end
+
+$generator.parse($tfname,$outFile,"dataset",$dataset)
+#foreach ($tbl in $database.Tables)
+fetching table $tbl.Name
+    #foreach ($r in $tableTool.fetch($tbl.Name)).##
+        #set ($rout = "<$tbl.JavaName")
+        #foreach ($col in $tbl.Columns)
+            #set ($cval = $r.get($col.Name))
+            #if ($cval)
+                #set ($rout = "$rout ${col.JavaName}=$q$cval$q")
+            #end
+        #end
+        #set ($rout = "$rout/>")
+        $generator.parse($fname,$outFile,"row", $rout)
+    #end
+#end
+$generator.parse($bfname,$outFile,"tables",$database.Tables)
+
+#end
+#end

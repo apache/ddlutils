@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  
+  <xsd:element name="database">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="table" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="name" use="required" type="xsd:string"/>
+      <xsd:attribute name="heavyIndexing" default="false">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="true"/>
+            <xsd:enumeration value="false"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="table">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="column" maxOccurs="unbounded"/>
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+          <xsd:element ref="foreign-key"/>
+          <xsd:element ref="index"/>
+          <xsd:element ref="unique"/>
+        </xsd:choice>
+      </xsd:sequence>
+      <xsd:attribute name="name" use="required" type="xsd:string"/>
+      <xsd:attribute name="heavyIndexing" use="optional">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="true"/>
+            <xsd:enumeration value="false"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="description" use="optional" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="column">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="inheritance" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="name" use="required" type="xsd:string"/>
+      <xsd:attribute name="primaryKey" default="false">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="true"/>
+            <xsd:enumeration value="false"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="required" default="false">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="true"/>
+            <xsd:enumeration value="false"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="type" default="VARCHAR">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="BIT"/>
+            <xsd:enumeration value="TINYINT"/>
+            <xsd:enumeration value="SMALLINT"/>
+            <xsd:enumeration value="INTEGER"/>
+            <xsd:enumeration value="BIGINT"/>
+            <xsd:enumeration value="FLOAT"/>
+            <xsd:enumeration value="REAL"/>
+            <xsd:enumeration value="NUMERIC"/>
+            <xsd:enumeration value="DECIMAL"/>
+            <xsd:enumeration value="CHAR"/>
+            <xsd:enumeration value="VARCHAR"/>
+            <xsd:enumeration value="LONGVARCHAR"/>
+            <xsd:enumeration value="DATE"/>
+            <xsd:enumeration value="TIME"/>
+            <xsd:enumeration value="TIMESTAMP"/>
+            <xsd:enumeration value="BINARY"/>
+            <xsd:enumeration value="VARBINARY"/>
+            <xsd:enumeration value="LONGVARBINARY"/>
+            <xsd:enumeration value="NULL"/>
+            <xsd:enumeration value="OTHER"/>
+            <xsd:enumeration value="JAVA_OBJECT"/>
+            <xsd:enumeration value="DISTINCT"/>
+            <xsd:enumeration value="STRUCT"/>
+            <xsd:enumeration value="ARRAY"/>
+            <xsd:enumeration value="BLOB"/>
+            <xsd:enumeration value="CLOB"/>
+            <xsd:enumeration value="REF"/>
+            <xsd:enumeration value="BOOLEANINT"/>
+            <xsd:enumeration value="BOOLEANCHAR"/>
+            <xsd:enumeration value="DOUBLE"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="size" use="optional" type="xsd:string"/>
+      <xsd:attribute name="description" use="optional" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="foreign-key">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="reference" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="foreignTable" use="required" type="xsd:string"/>
+      <xsd:attribute name="name" use="optional" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="reference">
+    <xsd:complexType>
+      <xsd:attribute name="local" use="required" type="xsd:string"/>
+      <xsd:attribute name="foreign" use="required" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="index">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="index-column" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="name" use="optional" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="index-column">
+    <xsd:complexType>
+      <xsd:attribute name="name" use="required" type="xsd:string"/>
+      <xsd:attribute name="size" use="optional" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="unique">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="unique-column" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="name" use="optional" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="unique-column">
+    <xsd:complexType>
+      <xsd:attribute name="name" use="required" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>

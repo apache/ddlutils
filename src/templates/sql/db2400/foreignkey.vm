@@ -1,0 +1,5 @@
+#foreach ($fk in $table.ForeignKeys)
+ALTER TABLE $table.Name
+    ADD CONSTRAINT ${table.Name}_FK_${velocityCount} FOREIGN KEY ($fk.LocalColumnNames)
+    REFERENCES $fk.ForeignTableName ($fk.ForeignColumnNames);
+#end

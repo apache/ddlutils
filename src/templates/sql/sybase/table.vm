@@ -1,0 +1,19 @@
+
+/* ---------------------------------------------------------------------- */
+/* $table.Name                                                      */
+/* ---------------------------------------------------------------------- */
+
+$generator.parse("$basepath/drop.vm", "", "table", $tbl)
+CREATE TABLE $table.Name
+(
+#set ( $cols = $generator.parse("$basepath/columns.vm", "", "table", $tbl) )
+#set ( $pk = $generator.parse("$basepath/primarykey.vm", "", "table", $tbl) )
+#set ( $unique = $generator.parse("$basepath/unique.vm", "", "table", $tbl) )
+#if($strings.allEmpty([$pk,$unique]))$strings.chop($cols,1)#else$cols#end
+#if($strings.allEmpty([$unique]) && $pk.length()>0)$strings.chop($pk,2)#else$pk#end
+#if($unique.length()>0)$strings.chop($unique,2)#end
+
+);
+
+#set ( $index = $generator.parse("$basepath/index.vm", "", "table", $tbl) )
+#if($index.length() > 0)$index#end

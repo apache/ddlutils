@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+
+<document>
+ <properties>
+  <title>Sybase ASE Howto</title>
+  <author email="a@a.com">Turbine Documentation Team</author>
+ </properties>
+
+<body>
+
+<section name="Sybase Howto">
+
+<p>
+This text is a description of integration of Sybase ASE as the target
+database in a TDK generated application.  
+</p>
+
+</section>
+
+<section name="JDBC Driver Information">
+
+<p>
+Sybase has a pure java jdbc driver, jConnect, that is free to use, but not
+open source.  You may download this driver from 
+<a href="http://www.sybase.com/products/eaimiddleware/jconnectforjdbc/">Sybase</a>.
+</p>
+</section>
+
+<section name="Integration Steps">
+
+<OL>
+<LI>Generate your application with the TDK as normal.</LI>
+<LI>Edit the project properties as instructed by the TDK.</LI>
+<LI>
+Before you run 'build.sh init' you will need to create the
+database.  Automatic database creation for Sybase does not currently
+work, so the database must be created first.
+</LI>
+<LI>Place the jConnect jar file in your WEB-INF/lib directory.</LI>
+<LI>Run 'build.sh init' to generate and initialize the project.</LI>
+</OL>
+
+</section>
+
+<section name="Notes">
+
+<p>
+<UL>
+<LI>
+The .sql files that the TDK build process generates files with the
+sql command terminated by a ; for use in the sql directive provided by
+the Ant build system.  These scripts will not work properly if run by
+hand via the 'isql' command. 
+</LI>
+<LI>
+The .sql files to create the tables, do not correctly remove any
+constraints on the tables currently and may fail.  Drop the tables by
+hand, then re-run 'build-project.sh insert-sql' to re-create and
+populate the tables.
+</LI>
+</UL>
+</p>
+</section>
+
+</body>
+</document>

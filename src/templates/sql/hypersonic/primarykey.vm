@@ -1,0 +1,3 @@
+#if ($table.hasPrimaryKey())    
+    PRIMARY KEY($table.printPrimaryKey()),
+#end

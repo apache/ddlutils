@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+
+<document>
+ <properties>
+  <title>Oracle 8i Howto</title>
+  <author email="a@a.com">Turbine Documentation Team</author>
+ </properties>
+
+<body>
+
+<section name="Oracle Howto">
+
+<p>
+This HOWTO aims to be a simple guide to make Turbine run with an existing
+Oracle 8i database. The process of making Turbine run are not covered in
+this guide, proceed to <a href="install.html">Turbine Installation</a> for
+help on how to install Turbine.
+</p>
+
+</section>
+
+<section name="Creating the Database">
+
+<p>
+If you do not have a database already set up, you will need to create one so
+we can create the necessary tables for Turbine. The steps below are simple
+steps to take to create a new database. If you already have a database ready for
+use, you can skip this part.
+</p>
+
+<p>
+1. Open the Oracle Database Configuration assistant
+</p>
+
+<p>
+2. Create a database with the Global Database Name 'turbine.project' and
+SID 'turbine'
+</p>
+  <ul>
+  <li>Global Database Name : turbine.project</li>
+  <li>SID : turbine</li>
+  <li>SYSTEM account password : manager</li>
+  <li>SYS account password : change_on_install</li>
+  </ul>
+
+<p>
+3. Wait for the database to be created.
+</p>
+
+<p>
+4. Good idea to stop the services from running if the Oracle database
+isn't being used as they are memory hungry for a development desktop machine.
+Check if the Oracle TNS Listener and the correct service are running when
+trying to connect.
+</p>
+
+</section>
+
+<section name="Populating the Database from the .sql Scripts">
+
+<p>
+5. Start SQL *PLUS and login to the database using the username and
+password for the database. You may want to use the same username and password you will
+use for Turbine, or you will need to create synonyms for the tables and grant the
+necessary privilieges (SELECT, UPDATE, INSERT, etc), so Turbine can access the
+tables directly without using "user"."table_name".
+</p>
+
+<p>
+6. Run the Oracle specific scripts.  For the cvs version of Turbine,
+these can be found in turbine/src/sql .  In SQL*PLUS type :
+</p>
+<p>
+<font face="courier">@path/to/oracle-turbine.sql</font>
+</p>
+
+<p>
+7.The oracle-turbine.sql script creates an oracle sequence
+for each turbine table.  To use these sequences for primary
+key generation, the oracle-turbine-security.sql script should
+be modified.  For example, the following command from the script :
+</p>
+<p>
+<font face="courier">INSERT INTO TURBINE_USER (USER_ID, LOGIN_NAME, PASSWORD_VALUE, FIRST_NAME, LAST_NAME)
+VALUES (0, 'turbine', 'turbine', 'turbine', 'turbine');</font>
+</p>
+<p>
+would be changed to something like :
+</p>
+<p>
+<font face="courier">INSERT INTO TURBINE_USER (USER_ID, LOGIN_NAME, PASSWORD_VALUE, FIRST_NAME, LAST_NAME)
+VALUES (TURBINE_USER_SEQ.nextval, 'turbine', 'turbine', 'turbine', 'turbine');</font>
+</p>
+<p>
+When your changes, if any, are made to the script, run it from SQL*PLUS :
+</p>
+<p>
+<font face="courier">@path/to/oracle-turbine-security.sql</font>
+</p>
+
+<p>
+8.If you would rather use Turbine's id-broker to generate
+primary keys, run the following scripts to create and populate the
+id-broker table :
+</p>
+<p>
+<font face="courier">@path/to/oracle-id-table-schema.sql</font>
+</p>
+<p>
+<font face="courier">@path/to/oracle-turbine-id-table-init.sql</font>
+</p>
+
+</section>
+
+<section name="Setting up Turbine to Connect to Oracle">
+
+<p>
+9. Download and install the Oracle 8i JDBC type 4 Thin driver for JDK
+1.2.x from the Oracle website. Add the classes12_01.zip file to the
+classpath of the servlet engine. In JServ add to the jserv.properties file
+the line:
+</p>
+   <ul>
+   <p><font face="courier">
+   wrapper.classpath=/path/to/classes12_01.zip
+   </font></p>
+   </ul>
+
+
+<p>
+10. Ensure that the OracleoracleTNSListener service and the
+OracleServiceTURBINE service is running before using the driver.
+</p>
+
+
+<p>
+11.  Follow the <a href="install.html">installation document</a>
+for Turbine with the following differences. To link up the Oracle
+database and driver to Turbine, edit the TurbineResources.properties file;
+</p>
+
+<ul>
+  <li>Uncomment the lines:</li>
+
+   <ul>
+    database.default.driver=oracle.jdbc.driver.OracleDriver<br/>
+    database.default.url=jdbc:oracle:thin:@localhost:1521:ORCL
+   </ul>
+
+    <p>
+        and ensure no other database.default.driver or database.default.url
+        is left uncommented.</p>
+
+    <li>Edit the database.default.url to the oracle thin driver
+        format drivername:@servername:portnumber:SID</li>
+
+    <ul>
+        database.default.driver=oracle.jdbc.driver.OracleDriver<br/>
+        database.default.url=jdbc:oracle:thin:@localhost:1521:turbine
+    </ul>
+
+
+    <p>
+    The  servername is the Oracle server name and the port is the port
+    that oracle uses. It is important not to confuse the Oracle servername
+    and port with the Apache server name and port. Refer to the Oracle 8i
+    documentation if there are any conflicts in this regard.
+    Take care to use the correct SID for the database you have set up.
+    </p>
+
+
+    <li>Edit the database.default.username and
+        database.default.password to match the username and password of your
+        database.</li>
+
+    <p>
+    You may need to check if a Turbine database adaptor has been setup for Oracle.
+    Look for the following lines in TurbineResources.properties, and add them in
+    case you do not find:
+    </p>
+
+    <ul>
+        database.adaptor=DBOracle<br/>
+        database.adaptor.DBOracle=oracle.jdbc.driver.OracleDriver
+    </ul>
+
+ </ul>
+
+</section>
+
+<section name="Connecting to the Oracle Database">
+
+<p>
+12. Point your web browser at http://servername:port/servlets/Turbine
+(the URL may vary depending on your servlet engine) and login as username
+turbine, password turbine. After logging in you should see the congratulatory
+"Welcome To The Default Screen".
+</p>
+
+</section>
+
+</body>
+</document>

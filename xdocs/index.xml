@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+
+<document>
+
+  <properties>
+    <title>Torque</title>
+    <author email="jvanzyl@apache.com">Jason van Zyl</author>
+    <author email="mpoeschl@marmot.at">Martin Poeschl</author>
+  </properties>
+
+  <body>
+
+    <section name="What is Torque?">
+      <p>
+        Torque is a persistence layer. Torque generates all the database
+        resources required by your application and includes a runtime
+        environment to run the generated classes.
+      </p>
+      <p>
+        Torque was developed as part of the Turbine Framework. It is now
+        decoupled and can be used by itself. Starting with version 2.2 Turbine
+        will use the decoupled Torque.
+      </p>
+
+      <subsection name="Torque's generation tasks">
+        <p>
+          Torque uses a single XML database schema to generate the SQL for
+          your target database and Torque's Peer-based object relation model
+          representing your XML database schema. Additionally, an HTML document
+          describing the database can be generated if you wish to make a
+          browseable version of the database schema.
+        </p>
+
+        <p>
+          Torque offers the following <a href="http://jakarta.apache.org/ant">
+          Ant</a> tasks:
+          <ul>
+            <li>
+              <strong>TorqueCreateDatabase</strong><br/>
+              generates simple scripts for creating databases on various
+              platforms.
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueDataDTDTask</strong><br/>
+              generates data DTD from an XML schema describing a database
+              structure
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueDataDumpTask</strong><br/>
+              dumping data from db into XML
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueDataSQLTask</strong><br/>
+              generates SQL source from an XML data file
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueJDBCTransformTask</strong><br/>
+              generates an XML schema of an existing database from JDBC metadata
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueObjectModelTask</strong><br/>
+              generates output by using Velocity
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueSQLExecTask</strong><br/>
+              inserts a SQL file into its designated database
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueSQLTask</strong><br/>
+              generates SQL source from an XML schema describing a database
+              structure
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueSQLTransformTask</strong><br/>
+              generates an xml schema from an sql schema
+            </li>
+            <p/>
+            <li>
+              <strong>TorqueDocumentationTask</strong><br/>
+              generates html or xml documentation for xml schemas
+            </li>
+          </ul>
+        </p>
+      </subsection>
+
+      <subsection name="Torque's runtime environment">
+        <p>
+          Torque's runtime environment includes everything you need to use the
+          generated OM/Peer classes. It includes a jdbc connection pool.
+        </p>
+      </subsection>
+
+    </section>
+
+    <section name="Supported RDBMS">
+      <table>
+        <tr>
+          <th>RDBMS</th>
+          <th>driver</th>
+          <th>status</th>
+          <th>tester</th>
+        </tr>
+        <tr>
+          <td>Cloudscape</td>
+          <td>COM.cloudscape.core.JDBCDriver</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DB2</td>
+          <td>COM.ibm.db2.jdbc.{app|net}.DB2Driver</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DB2/AS400</td>
+          <td>com.ibm.as400.access.AS400JDBCDriver</td>
+          <td>possible case-insensitivity issues</td>
+          <td><a href="mailto:Sweaver@rippe.com">Scott Weaver</a></td>
+        </tr>
+        <tr>
+          <td>Hypersonic</td>
+          <td>org.hsql.jdbcDriver</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Informix</td>
+          <td>???</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>InstantDB</td>
+          <td>org.enhydra.instantdb.jdbc.idbDriver</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Interbase</td>
+          <td>interbase.interclient.Driver</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><a href="mssql-howto.html">MS SQL</a></td>
+          <td>com.microsoft.jdbc.sqlserver.SQLServerDriver</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Mysql</td>
+          <td>org.gjt.mm.mysql.Driver</td>
+          <td>no known problems</td>
+          <td><a href="mailto:mpoeschl@marmot.at">Martin Poeschl</a></td>
+        </tr>
+        <tr>
+          <td><a href="oracle-howto.html">Oracle</a></td>
+          <td>oracle.jdbc.driver.OracleDriver</td>
+          <td>no known problems</td>
+          <td><a href="mailto:mpoeschl@marmot.at">Martin Poeschl</a></td>
+        </tr>
+        <tr>
+          <td><a href="postgres-howto.html">Postgres</a></td>
+          <td>org.postgresql.Driver</td>
+          <td>no known problems</td>
+          <td><a href="mailto:mpoeschl@marmot.at">Martin Poeschl</a></td>
+        </tr>
+        <tr>
+          <td>SapDB</td>
+          <td>com.sap.dbtech.jdbc.DriverSapDB</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><a href="sybase-howto.html">Sybase</a></td>
+          <td>com.sybase.jdbc2.jdbc.SybDriver</td>
+          <td>
+          JDBCToXMLSchema task will not generate the schema properly.
+          All other tests pass.
+          </td>
+          <td><a href="mailto:brekke@apache.org">Jeffrey D. Brekke</a></td>
+        </tr>
+        <tr>
+          <td>Weblogic</td>
+          <td>weblogic.jdbc.pool.Driver</td>
+          <td>untested</td>
+          <td></td>
+        </tr>
+      </table>
+
+      <p>
+        If your RDBMS is not listed here, please read the document about
+        <a href="db-adapters.html">writing DB Adapters</a>
+      </p>
+      <p>
+        If there is no tester for your RDBMS and you want to help, please read
+        the <a href="developer-guide.html">developer-guide</a>, run the tests
+        and send your results (and bugfixes ;) to the turbine-dev list.
+      </p>
+    </section>
+
+  </body>
+</document>

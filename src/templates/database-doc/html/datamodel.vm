@@ -1,0 +1,28 @@
+#set ( $database = $dataModel.database )
+<html>
+<header>
+  <title>$dataModel.name</title>
+</header>
+
+<body>
+  <table border="1">
+    <tr>
+      <th>Table Name</th>
+      <th>OM Class</th>
+      <th>Description</th>
+    <tr>
+  #foreach ($tbl in $database.tables)
+    <tr>
+      <td><a href="#$tbl.Name">$tbl.Name</a></td>
+      <td>$tbl.JavaName</td>
+      <td>#if ($tbl.Description) $tbl.Description#else &nbsp;#end</td>
+    </tr>
+  #end
+  </table>
+
+  #foreach ($tbl in $database.tables)
+    $generator.parse("doc/html/table.vm",$outFile,"table",$tbl)
+  #end
+
+</body>
+</html>

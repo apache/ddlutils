@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no" ?>
+<!DOCTYPE database SYSTEM "http://jakarta.apache.org/turbine/dtd/database.dtd">
+
+<database>
+  <name>bookstore</name>
+  
+  <tables>
+  
+    <!-- =================================================== -->
+    <!-- B O O K  T A B L E                                  -->
+    <!-- =================================================== -->
+  
+    <table>
+      <name>book</name>
+    
+      <columns>
+        <column>
+          <name>book_id</name>
+          <required>true</required>
+          <primaryKey>true</primaryKey>
+          <type>INTEGER</type>
+        </column>
+        
+        <column>
+          <name>isbn</name>
+          <required>true</required>
+          <type>VARCHAR</type>
+          <size>15</size>
+        </column>
+        
+        <column>
+          <name>author_id</name>
+          <required>true</required>
+          <type>INTEGER</type>
+        </column>
+        
+        <column>
+          <name>title</name>
+          <required>true</required>
+          <type>VARCHAR</type>
+          <size>255</size>
+        </column>
+      </columns>
+    
+      <!-- Same deal, maybe these should be defined outside the table? -->
+      <foreignKeys>
+        <foreignKey>
+          <foreigntable>author</foreigntable>
+          <reference>
+            <local>author_id</local>
+            <foreign>author_id</foreign>
+          </reference>
+        </foreignKey>
+      </foreignKeys>
+    </table>
+
+    <!-- =================================================== -->
+    <!-- A U T H O R  T A B L E                              -->
+    <!-- =================================================== -->
+
+    <table>
+      <name>author</name>
+    
+      <columns>
+        <column>
+          <name>author_id</name>
+          <required>true</required>
+          <primaryKey>true</primaryKey>
+          <type>INTEGER</type>
+        </column>
+        
+        <column>
+          <name>name</name>
+          <required>true</required>
+          <type>VARCHAR</type>
+          <size>50</size>
+        </column>
+      </columns>
+    </table>
+  
+  </tables>
+</database>

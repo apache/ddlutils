@@ -1,0 +1,8 @@
+<!ELEMENT $table.JavaName EMPTY>
+<!ATTLIST $table.JavaName
+#foreach ($col in $table.columns)
+    $col.JavaName CDATA #if($col.isNotNull())#REQUIRED#else#IMPLIED#end
+
+#end
+>
+

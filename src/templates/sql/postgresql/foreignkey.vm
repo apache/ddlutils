@@ -1,0 +1,17 @@
+##
+## The following will only work for non-circular references
+## if you have a dependancy chain, you will need to use
+## ADD CONSTRAINT syntax (with INITIALLY DEFERRED)
+## which is sticky and version dependant
+##
+#foreach ($fk in $table.ForeignKeys)
+ALTER TABLE $table.Name
+ADD FOREIGN KEY ($fk.LocalColumnNames) REFERENCES $fk.ForeignTableName ($fk.ForeignColumnNames)
+#if ($fk.hasOnUpdate())
+ON UPDATE $fk.OnUpdate
+#end
+#if ($fk.hasOnDelete())
+ON DELETE $fk.OnDelete 
+#end
+;
+#end

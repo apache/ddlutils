@@ -1,0 +1,9 @@
+#foreach ($fk in $table.ForeignKeys)
+IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name='$fk.Name')
+    ALTER TABLE $table.Name DROP CONSTRAINT $fk.Name;
+#end
+IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '$table.Name')
+BEGIN
+	DROP TABLE $table.Name
+END
+;

@@ -1,0 +1,289 @@
+<project name="Torque" default="main" basedir=".">
+
+  <property name="build.properties" value="build.properties"/>
+  <property file="${build.properties}"/>
+
+  <!-- ================================================================ -->
+  <!-- C R E A T E  T A R G E T  D A T A B A S E                        -->
+  <!-- ================================================================ -->
+  <!-- Most RDBMs have a facility for creating database via an SQL      -->
+  <!-- interface which we will use by generating the database creation  -->
+  <!-- SQL and executing it.                                            -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-create-db"
+    unless="database.manual.creation"
+    description="==> generates the target database">
+
+    <taskdef
+      name="torque-create-db"
+      classname="org.apache.commons.sql.CreateDatabase">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-create-db
+      controlTemplate="sql/db-init/Control.vm"
+      outputDirectory="${basedir}/${outputDirectory}/sql"
+      targetDatabase="${database}"
+      useClasspath="true"
+      outputFile="create-db.sql">
+      <fileset dir="${basedir}/${schemaDirectory}">
+        <include name="*-schema.xml"/>
+      </fileset>
+    </torque-create-db>
+
+    <sql
+      driver="${databaseDriver}"
+      url="${createDatabaseUrl}"
+      userid="${databaseUser}"
+      password="${databasePassword}"
+      src="${basedir}/${outputDirectory}/sql/create-db.sql"
+      autocommit="true"
+      onerror="continue">
+      <classpath refid="torque-classpath"/>
+    </sql>
+  </target>
+
+  <!-- ================================================================ -->
+  <!-- G E N E R A T E  P R O J E C T  S Q L                            -->
+  <!-- ================================================================ -->
+  <!-- Generate the SQL for your project, these are in addition         -->
+  <!-- to the base Turbine tables! The tables you require for your      -->
+  <!-- project should be specified in project-schema.xml.               -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-sql-classpath"
+    description="==> generates the SQL for your project">
+
+    <echo message="+------------------------------------------+"/>
+    <echo message="|                                          |"/>
+    <echo message="| Generating SQL for YOUR Turbine project! |"/>
+    <echo message="| Woo hoo!                                 |"/>
+    <echo message="|                                          |"/>
+    <echo message="+------------------------------------------+"/>
+
+    <taskdef
+      name="torque-sql"
+      classname="org.apache.commons.sql.SQLTask">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-sql
+      contextProperties="${build.properties}"
+      controlTemplate="${SQLControlTemplate}"
+      outputDirectory="${torque.home}/${outputDirectory}/sql"
+      useClasspath="true"
+      sqldbmap="${torque.home}/${outputDirectory}/sql/sqldb.map"
+      outputFile="report.${project}.sql.generation"
+      targetDatabase="${database}">
+      <fileset dir="${torque.home}/${schemaDirectory}">
+        <include name="*-schema.xml"/>
+      </fileset>
+    </torque-sql>
+  </target>
+
+  <!-- ================================================================ -->
+  <!-- I N S E R T  P R O J E C T  S Q L  F I L E S                     -->
+  <!-- ================================================================ -->
+  <!--                                                                  -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-insert-sql">
+
+    <taskdef
+      name="torque-insert-sql"
+      classname="org.apache.commons.sql.SQLExec">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-insert-sql
+      driver="${databaseDriver}"
+      url="${buildDatabaseUrl}"
+      userid="${databaseUser}"
+      password="${databasePassword}"
+      autocommit="true"
+      onerror="continue"
+      sqldbmap="${basedir}/${outputDirectory}/sql/sqldb.map"
+      srcDir="${basedir}/${outputDirectory}/sql">
+      <classpath refid="torque-classpath"/>
+    </torque-insert-sql>
+  </target>
+
+  <!-- ================================================================ -->
+  <!-- G E N E R A T E   D O C S                                        -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-doc"
+    description="==> generates documentation for your datamodel">
+
+    <echo message="+------------------------------------------+"/>
+    <echo message="|                                          |"/>
+    <echo message="| Generating docs for YOUR datamodel!      |"/>
+    <echo message="| Woo hoo!                                 |"/>
+    <echo message="|                                          |"/>
+    <echo message="+------------------------------------------+"/>
+
+    <taskdef
+      name="torque-doc"
+      classname="org.apache.commons.sql.DocumentationTask">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-doc
+      contextProperties="${build.properties}"
+      controlTemplate="${DocControlTemplate}"
+      outputDirectory="${basedir}/${outputDirectory}/doc"
+      outputFormat="${documentationFormat}"
+      useClasspath="true"
+      sqldbmap="${basedir}/${outputDirectory}/sql/sqldb.map"
+      outputFile="report.${project}.doc.generation">
+      <fileset dir="${basedir}/${schemaDirectory}">
+        <include name="*-schema.xml"/>
+      </fileset>
+    </torque-doc>
+  </target>
+
+  <!-- ================================================================ -->
+  <!-- J D B C  TO  X M L                                               -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-jdbc"
+    description="==> jdbc to xml">
+
+    <echo message="+-----------------------------------------------+"/>
+    <echo message="|                                               |"/>
+    <echo message="| Generating XML from JDBC connection !         |"/>
+    <echo message="| Woo hoo!                                      |"/>
+    <echo message="|                                               |"/>
+    <echo message="+-----------------------------------------------+"/>
+    <echo message=" taking build.properties from: ${build.properties}"/>
+
+    <taskdef
+      name="torque-jdbc"
+      classname="org.apache.commons.sql.JDBCTransformTask">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-jdbc
+      dbUrl="${databaseUrl}"
+      dbDriver="${databaseDriver}"
+      dbUser="${databaseUser}"
+      dbPassword="${databasePassword}"
+      dbSchema="${databaseSchema}"
+      outputFile="${basedir}/${outputDirectory}/schema.xml"
+      sameJavaName="${sameJavaName}"
+    />
+  </target>
+
+  <!-- ================================================================ -->
+  <!-- Generate SQL from XML data file                                  -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-datasql"
+    description="==> generates sql from data xml">
+
+    <echo message="+-----------------------------------------------+"/>
+    <echo message="|                                               |"/>
+    <echo message="| Generating SQL from data XML !                |"/>
+    <echo message="| Woo hoo!                                      |"/>
+    <echo message="|                                               |"/>
+    <echo message="+-----------------------------------------------+"/>
+    <echo message=" taking build.properties from: ${build.properties}"/>
+
+    <taskdef
+      name="torque-datasql"
+      classname="org.apache.commons.sql.DataSQLTask">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-datasql
+      contextProperties="${build.properties}"
+      controlTemplate="${DataSQLControlTemplate}"
+      outputDirectory="${basedir}/${outputDirectory}"
+      useClasspath="true"
+      outputFile="${project}-data.sql"
+      xmlFile="${basedir}/${schemaDirectory}/${project}-schema.xml"
+      dataXmlFile="${basedir}/${schemaDirectory}/${project}-data.xml"
+      dataDTD="${basedir}/${schemaDirectory}/${project}-data.dtd"
+      targetDatabase="${database}"
+      sqldbmap="${basedir}/${outputDirectory}/sql/sqldb.map"
+    />
+  </target>
+
+  <!-- ================================================================ -->
+  <!-- Dump data from database into xml file                            -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-datadump"
+    description="==> dump data from database into xml file">
+
+    <echo message="+-----------------------------------------------+"/>
+    <echo message="|                                               |"/>
+    <echo message="| Dumping the data from database into XML       |"/>
+    <echo message="| Woo hoo!                                      |"/>
+    <echo message="|                                               |"/>
+    <echo message="+-----------------------------------------------+"/>
+    <echo message=" taking build.properties from: ${build.properties}"/>
+
+    <taskdef
+      name="torque-datadump"
+      classname="org.apache.commons.sql.DataDumpTask">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-datadump
+      contextProperties="${build.properties}"
+      controlTemplate="${DataDumpControlTemplate}"
+      outputDirectory="${basedir}/${outputDirectory}"
+      useClasspath="true"
+      outputFile="report.${project}.datadump.generation"
+      xmlFile="${basedir}/${schemaDirectory}/${project}-schema.xml"
+      databaseDriver="${databaseDriver}"
+      databaseUrl="${databaseUrl}"
+      databaseUser="${databaseUser}"
+      databasePassword="${databasePassword}"
+      databaseName="${databaseName}"
+    />
+  </target>
+
+  <!-- ================================================================ -->
+  <!-- G E N E R A T E  P R O J E C T  D A T A  D T D                   -->
+  <!-- ================================================================ -->
+  <!-- Generate the DATA DTD for your project                           -->
+  <!-- ================================================================ -->
+
+  <target
+    name="project-datadtd"
+    description="==> generates the DATA DTD for your project">
+
+    <echo message="+-----------------------------------------------+"/>
+    <echo message="|                                               |"/>
+    <echo message="| Generating Data DTD for YOUR Turbine project! |"/>
+    <echo message="| Woo hoo!                                      |"/>
+    <echo message="|                                               |"/>
+    <echo message="+-----------------------------------------------+"/>
+
+    <taskdef
+      name="torque-datadtd"
+      classname="org.apache.commons.sql.DataDTDTask">
+      <classpath refid="torque-classpath"/>
+    </taskdef>
+
+    <torque-datadtd
+      contextProperties="${build.properties}"
+      controlTemplate="${DataDTDControlTemplate}"
+      outputDirectory="${basedir}/${outputDirectory}"
+      useClasspath="true"
+      outputFile="report.${project}.datadtd.generation"
+      xmlFile="${basedir}/${schemaDirectory}/${project}-schema.xml"
+    />
+  </target>
+
+</project>

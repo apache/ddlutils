@@ -1,0 +1,3 @@
+#foreach ($fk in $table.ForeignKeys)
+    FOREIGN KEY ($fk.LocalColumnNames) REFERENCES $fk.ForeignTableName ($fk.ForeignColumnNames),
+#end

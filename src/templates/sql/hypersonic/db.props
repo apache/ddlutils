@@ -1,0 +1,41 @@
+# Taken from java.sql.Types in the IBM 1.3 JDK
+# JDBC to Hypersonic mappings.
+
+BIT =
+TINYINT =
+SMALLINT =
+INTEGER = integer
+BIGINT =
+FLOAT =
+REAL =
+DOUBLE =
+NUMERIC =
+DECIMAL =
+CHAR = VARCHAR
+VARCHAR = VARCHAR
+LONGVARCHAR = VARCHAR
+DATE = date
+TIME = time
+TIMESTAMP = timestamp
+BINARY =
+VARBINARY = BINARY
+LONGVARBINARY =
+NULL =
+OTHER =
+JAVA_OBJECT =
+DISTINCT =
+STRUCT =
+ARRAY =
+BLOB =
+CLOB =
+REF =
+
+AUTOINCREMENT = IDENTITY
+NOTNULL = NOT NULL
+
+primaryKeyInsideTableDirective = true
+indexInsideTableDirective = false
+
+removeNotNullWithAutoIncrement = false
+
+suppressDefaults = true
