@@ -1,2 +1,0 @@
-#set ( $fname = "sql/db-init/$targetDatabase/createdb.vm" )
-$generator.parse($fname,"")

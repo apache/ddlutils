@@ -1,4 +1,0 @@
-#set ( $fk = $generator.parse("$basepath/foreignkey.vm", "", "table", $tbl) )
-#if ($fk.length()>0)$fk#end
-
-

@@ -1,7 +1,0 @@
-#set ($length = $table.Name.length())
-#if ($length > 27)#set ($length=27)#end
-#if ($table.hasPrimaryKey())
-ALTER TABLE $table.Name
-    ADD CONSTRAINT ${table.Name.substring(0,$length)}_PK
-PRIMARY KEY ($table.printPrimaryKey());
-#end

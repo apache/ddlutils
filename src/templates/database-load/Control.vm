@@ -1,5 +1,0 @@
-#set ( $fname= "sql/load/${targetDatabase}/row.vm" )
-
-#foreach ($r in $data)
-$generator.parse($fname,"","row",$r)
-#end

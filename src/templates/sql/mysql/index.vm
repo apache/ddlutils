@@ -1,3 +1,0 @@
-#foreach ($index in $table.Indices)
-    INDEX $index.Name ($index.ColumnList),
-#end

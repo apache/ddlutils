@@ -1,3 +1,0 @@
-#if ($table.IdMethod == "sequence")
-CREATE SEQUENCE $table.SequenceName;
-#end

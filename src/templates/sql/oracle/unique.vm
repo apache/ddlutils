@@ -1,3 +1,0 @@
-#foreach ($unique in $table.Unices)
-    CONSTRAINT $unique.Name UNIQUE ($unique.ColumnList),
-#end
