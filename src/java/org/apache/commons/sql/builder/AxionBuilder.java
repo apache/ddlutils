@@ -103,4 +103,28 @@ public class AxionBuilder extends SqlBuilder {
     protected void printNotNullable() throws IOException {
         //print("NOT NULL");
     }
+
+    /** 
+     * Outputs the DDL to add a column to a table. Axion
+     * does not support default values so we are removing
+     * default from the Axion column builder.
+     */
+    public void createColumn(Column column) throws IOException {
+        this.column = column;
+        print(column.getName());
+        print(" ");
+        print(getSqlType(column));
+        print(" ");
+
+        if (column.isRequired()) {
+            printNotNullable();
+        }
+        else {
+            printNullable();
+        }
+        print(" ");
+        if (column.isAutoIncrement()) {
+            printAutoIncrementColumn();
+        }
+    }
 }
