@@ -135,4 +135,25 @@
                     todir="${build.test.dir}"/>
         </junitreport>
     </target>
+
+    <!-- Doesn't work yet, the site.xsl needs work -->
+    <target name="doc" description="Creates documentation via XSLT">
+        <mkdir dir="${build.doc.dir}"/>
+        <style basedir="${src.doc.dir}"
+               destdir="${build.doc.dir}"
+               extension=".html"
+               style="${src.doc.dir}/stylesheets/site.xsl"
+               excludes="empty.xml"
+               includes="**/*.xml">
+          <param name="relative-path" expression="."/>
+        </style>
+        <copy todir="${build.doc.dir}/images" filtering="no">
+          <fileset dir="${src.doc.dir}/images">
+            <include name="**/*.gif"/>
+            <include name="**/*.jpeg"/>
+            <include name="**/*.jpg"/>
+            <include name="**/*.png"/>
+          </fileset>
+        </copy>
+    </target>
 </project>
