@@ -160,6 +160,7 @@ public class JdbcModelReader {
                         : null;
                 Table t1 = new Table();
                 t1.setName(tableName);
+                t1.setType(tableType);
                 tables.add(t1);
             }
 
