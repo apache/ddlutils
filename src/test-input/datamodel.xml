@@ -2,6 +2,15 @@
 
 <database name="bookstore">
 
+	<!-- =================================================== -->
+  <!-- A U T H O R  T A B L E                              -->
+  <!-- =================================================== -->
+
+  <table name="author">
+    <column name="author_id" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="name" type="VARCHAR" size="50" required="true"/>
+	</table>
+
   <!-- =================================================== -->
   <!-- B O O K  T A B L E                                  -->
   <!-- =================================================== -->
@@ -16,14 +25,5 @@
 	    <reference local="author_id" foreign="author_id"/>
 	  </foreign-key>  
   </table>
-
-	<!-- =================================================== -->
-  <!-- A U T H O R  T A B L E                              -->
-  <!-- =================================================== -->
-
-  <table name="author">
-    <column name="author_id" type="INTEGER" primaryKey="true" required="true"/>
-    <column name="name" type="VARCHAR" size="50" required="true"/>
-	</table>
 
 </database>

@@ -1,16 +1,16 @@
 <project default="java:jar" xmlns:j="jelly:core">
 
-  <goal name="jelly-task" prereqs="java:compile, test:compile">
-	<path id="test.classpath">
-	    <pathelement path="${maven.build.dest}"/>
+  <goal name="setclasspath" prereqs="java:compile, test:compile">
+		<path id="test.classpath">
+		  <pathelement path="${maven.build.dest}"/>
 	    <pathelement path="target/classes"/>
 	    <pathelement path="target/test-classes"/>
 	    <path refid="maven.dependency.classpath"/>
-	</path>
+		</path>
   </goal>
 
-  <goal name="sql:generate-sql" prereqs="jelly-task" 
-	description="Generates the SQL DDL for creating and dropping the database">
+  <goal name="sql:generate-sql" prereqs="setclasspath" 
+		description="Generates the SQL DDL for creating and dropping the database">
 
 <!--
 	if we could set the threads context class loader to ${test.classpath} 
@@ -26,13 +26,19 @@
   </goal>
   
   <goal name="sql:create-db" prereqs="sql:generate-sql" 
-	description="Runs the SQL to create a new database, dropping the previous tables">
+		description="Runs the SQL to create a new database, dropping the previous tables">
 
     <java classname="org.apache.commons.jelly.Jelly" fork="yes">
       <classpath refid="test.classpath"/>
 	  <arg value="src/jelly/createDb.jelly"/> 
     </java>
   </goal>
-  
+
+  <goal name="test:dynasql" prereqs="setclasspath" 
+		description="Runs the DynaSql test case">
+    <java classname="org.apache.commons.sql.dynabean.TestDynaSql" fork="yes">
+      <classpath refid="test.classpath"/>
+    </java>
+  </goal>
   
 </project>

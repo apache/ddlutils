@@ -89,33 +89,33 @@ public class TestDataModelRoundTrip
             assertTrue("more than one table found", database.getTables().size() > 0 );
             
             // Test our first table which is the 'book' table
-            Table t0 = database.getTable(0);
-            assertEquals("book", t0.getName());
+            Table t1 = database.getTable(1);
+            assertEquals("book", t1.getName());
             
-            Column c0 = t0.getColumn(0);
+            Column c0 = t1.getColumn(0);
             assertEquals("book_id", c0.getName());
             assertTrue("book_id is required", c0.isRequired());
             assertTrue("book_id is primary key", c0.isPrimaryKey());
             
-            Column c1 = t0.getColumn(1);
+            Column c1 = t1.getColumn(1);
             assertEquals("isbn", c1.getName());
             assertTrue("isbn is required", c1.isRequired());
             assertTrue("isbn is not primary key", ! c1.isPrimaryKey());
 
-            List keyList0 = t0.getForeignKeys();
-            assertEquals( "Foreign key count", 1, keyList0.size() );
+            List keyList1 = t1.getForeignKeys();
+            assertEquals( "Foreign key count", 1, keyList1.size() );
             
-            ForeignKey key0 = (ForeignKey) keyList0.get(0);
+            ForeignKey key0 = (ForeignKey) keyList1.get(0);
             assertEquals("foreignTable is correct", "author", key0.getForeignTable());
             
-            List refList0 = key0.getReferences();
-            assertEquals( "Reference count", 1, refList0.size() );
+            List refList1 = key0.getReferences();
+            assertEquals( "Reference count", 1, refList1.size() );
             
-            Reference r0 = (Reference) refList0.get(0);
-            assertTrue("Found a reference", r0 != null);
+            Reference r1 = (Reference) refList1.get(0);
+            assertTrue("Found a reference", r1 != null);
                         
-            assertEquals("local is correct", "author_id", r0.getLocal());
-            assertEquals("foreign is correct", "author_id", r0.getForeign());
+            assertEquals("local is correct", "author_id", r1.getLocal());
+            assertEquals("foreign is correct", "author_id", r1.getForeign());
             
             // Write out the bean
             //writeBean(database);

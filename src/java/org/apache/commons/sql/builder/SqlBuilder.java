@@ -126,12 +126,21 @@ public class SqlBuilder {
      * Outputs the DDL required to drop and recreate the database 
      */
     public void createDatabase(Database database, boolean dropTable) throws IOException {
+        
+        // lets drop the tables in reverse order as its less likely to cause
+        // problems with referential constraints
+        
+        if (dropTable) {
+            List tables = database.getTables();
+            for (int i = tables.size() - 1; i >= 0; i-- ) {
+                Table table = (Table) tables.get(i);
+                dropTable(table);
+            }
+        }
+            
         for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
             Table table = (Table) iter.next();
             tableComment(table);
-            if (dropTable) {
-                dropTable(table);
-            }
             createTable(table);
         }
     }
@@ -140,8 +149,11 @@ public class SqlBuilder {
      * Outputs the DDL required to drop the database 
      */
     public void dropDatabase(Database database) throws IOException {
-        for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
-            Table table = (Table) iter.next();
+        
+        // lets drop the tables in reverse order
+        List tables = database.getTables();
+        for (int i = tables.size() - 1; i >= 0; i-- ) {
+            Table table = (Table) tables.get(i);
             tableComment(table);
             dropTable(table);
         }
@@ -203,16 +215,17 @@ public class SqlBuilder {
         print(getSqlType(column));
         print(" ");
         if (column.isRequired()) {
-            print("NOT NULL");
+            printNotNullable();
         }
         else {
-            print("NULL");
+            printNullable();
         }
         print(" ");
         if (column.isAutoIncrement()) {
             printAutoIncrementColumn();
         }
     }
+    
 
     // Properties
     //-------------------------------------------------------------------------                
@@ -306,6 +319,22 @@ public class SqlBuilder {
     //-------------------------------------------------------------------------                
 
     /**
+     * @return true if we should generate a primary key constraint for the given
+     *  primary key columns. By default if there are no primary keys or the column(s) are 
+     *  all auto increment (identity) columns then there is no need to generate a primary key 
+     *  constraint.
+     */
+    protected boolean shouldGeneratePrimaryKeys(List primaryKeyColumns) {
+        for (Iterator iter = primaryKeyColumns.iterator(); iter.hasNext(); ) {
+            Column column = (Column) iter.next();
+            if (! column.isAutoIncrement()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @return the full SQL type string including the size
      */
     protected String getSqlType(Column column) {
@@ -335,7 +364,7 @@ public class SqlBuilder {
      */
     protected void writePrimaryKeys(Table table) throws IOException {
         List primaryKeyColumns = table.getPrimaryKeyColumns();
-        if (primaryKeyColumns.size() > 0) {
+        if (primaryKeyColumns.size() > 0 && shouldGeneratePrimaryKeys(primaryKeyColumns)) {
             println(",");
             printIndent();
             writePrimaryKeyStatement(primaryKeyColumns);
@@ -347,7 +376,7 @@ public class SqlBuilder {
      */
     protected void writePrimaryKeysAlterTable(Table table) throws IOException {
         List primaryKeyColumns = table.getPrimaryKeyColumns();
-        if (primaryKeyColumns.size() > 0) {
+        if (primaryKeyColumns.size() > 0 && shouldGeneratePrimaryKeys(primaryKeyColumns)) {
             print("ALTER TABLE ");
             println(table.getName());
 
@@ -391,8 +420,7 @@ public class SqlBuilder {
             ) {
             ForeignKey key = (ForeignKey) keyIter.next();
             if (key.getForeignTable() == null) {
-                System.err.println(
-                    "WARN: foreign key table is null for key: " + key);
+                log.warn( "Foreign key table is null for key: " + key);
             }
             else {
                 println(",");
@@ -430,8 +458,7 @@ public class SqlBuilder {
             ) {
             ForeignKey key = (ForeignKey) keyIter.next();
             if (key.getForeignTable() == null) {
-                System.err.println(
-                    "WARN: foreign key table is null for key: " + key);
+                log.warn( "Foreign key table is null for key: " + key);
             }
             else {
                 print("ALTER TABLE ");
@@ -505,6 +532,20 @@ public class SqlBuilder {
         println( text );
     }
 
+    /**
+     * Prints that a column is nullable 
+     */
+    protected void printNullable() throws IOException {
+        print("NULL");
+    }
+    
+    /**
+     * Prints that a column is not nullable
+     */
+    protected void printNotNullable() throws IOException {
+        print("NOT NULL");
+    }
+    
     /** 
      * Prints the end of statement text, which is typically a semi colon followed by 
      * a carriage return

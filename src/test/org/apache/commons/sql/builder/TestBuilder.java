@@ -78,10 +78,12 @@ public class TestBuilder extends TestCase
     public void testBuilders()
         throws Exception
     {
-        testBuilder( new SybaseBuilder(), "sybase.sql" );
-        testBuilder( new OracleBuilder(), "oracle.sql" );
-        testBuilder( new MySqlBuilder(), "mysql.sql" );
+        testBuilder( new AxionBuilder(), "axion.sql" );
+        testBuilder( new HsqlDbBuilder(), "hsqldb.sql" );
         testBuilder( new MSSqlBuilder(), "mssql.sql" );        
+        testBuilder( new MySqlBuilder(), "mysql.sql" );
+        testBuilder( new OracleBuilder(), "oracle.sql" );
+        testBuilder( new SybaseBuilder(), "sybase.sql" );
     }
     
     protected void testBuilder(SqlBuilder builder, String fileName) throws Exception 

@@ -73,6 +73,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
 
@@ -81,6 +83,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.Table;
+import org.apache.commons.sql.util.JdbcSupport;
 
 /**
  * DynaSql provides simple access to relational data
@@ -90,7 +93,7 @@ import org.apache.commons.sql.model.Table;
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
-public abstract class DynaSql {
+public class DynaSql extends JdbcSupport {
 
     /** The Log to which logging calls will be made. */
     private static final Log log = LogFactory.getLog( DynaSql.class );
@@ -104,7 +107,8 @@ public abstract class DynaSql {
     public DynaSql() {
     }
 
-    public DynaSql(Database database) {
+    public DynaSql(DataSource dataSource, Database database) {
+        super(dataSource);
         this.database = database;
     }
 
@@ -113,10 +117,34 @@ public abstract class DynaSql {
      * @return the new empty DynaBean for the given tableName or null if the
      *  table does not exist in the current Database model.
      */
-    public DynaBean newInstance(String tableName) {
-        SqlDynaClass dynaClass = getSqlDynaClass(tableName);
+    public DynaBean newInstance(String tableName) throws IllegalAccessException, InstantiationException {
+        SqlDynaClass dynaClass = getDynaClass(tableName);
+        if (dynaClass != null) {
+            return dynaClass.newInstance();
+        }
         return null;
     }
+    
+    /**
+     * @return the SqlDynaClass for the given table name. If the SqlDynaClass does not exist
+     * then create a new one based on the Table definition
+     */
+    public SqlDynaClass getDynaClass(String tableName) {
+        SqlDynaClass answer = (SqlDynaClass) dynaClassCache.get(tableName);
+        if (answer == null) {
+            Table table = getDatabase().findTable(tableName);
+            if (table != null) {
+                answer = createSqlDynaClass(table);
+                dynaClassCache.put(tableName, dynaClassCache);
+            }
+            else {
+                log.warn( "No such table: " + tableName );
+                System.out.println( "Couldn't find table: " + tableName );
+            }
+        }
+        return answer;
+    }
+    
     
     /**
      * Stores the given DyanBean in the database, inserting it if there is no primary key
@@ -179,7 +207,9 @@ public abstract class DynaSql {
             }
             String sql = createDeleteSql(dynaClass, primaryKeys);
 
-            log.info( "About to execute SQL: " + sql );
+            if (log.isDebugEnabled()) {
+                log.debug( "About to execute SQL: " + sql );
+            }
             
             statement = connection.prepareStatement( sql );   
             
@@ -227,50 +257,12 @@ public abstract class DynaSql {
     //-------------------------------------------------------------------------                
 
     /**
-     * @return a new JDBC connection from the pool
-     */
-    protected abstract Connection borrowConnection() throws SQLException;
-    
-    /**
-     * Returns a JDBC connection back into the pool
-     */
-    protected abstract void returnConnection(Connection connection) throws SQLException;
-    
-    /**
      * @return true if this dynaBean has a primary key
      */
     protected boolean exists(DynaBean dynaBean, Connection connection) {
         return false;
     }
 
-    /**
-     * Closes the given result set down.
-     */
-    protected void closeResultSet(ResultSet resultSet) {
-        if ( resultSet != null ) {
-            try {
-                resultSet.close();
-            }
-            catch (Exception e) {
-                log.warn("Ignoring exception closing result set: " + e, e);
-            }
-        }
-    }
-
-    /**
-     * Closes the given statement down.
-     */
-    protected void closeStatement(Statement statement) {
-        if ( statement != null ) {
-            try {
-                statement.close();
-            }
-            catch (Exception e) {
-                log.warn("Ignoring exception closing statement: " + e, e);
-            }
-        }
-    }
-    
      /**
      * Creates a new primary key value, inserts the bean and returns the new item.
      */
@@ -285,7 +277,9 @@ public abstract class DynaSql {
         
         String sql = createInsertSql(dynaClass, properties);
         
-        log.info( "About to execute SQL: " + sql );
+        if (log.isDebugEnabled()) {
+            log.debug( "About to execute SQL: " + sql );
+        }
         
         PreparedStatement statement = null;
         try {
@@ -323,8 +317,10 @@ public abstract class DynaSql {
         
         String sql = createUpdateSql(dynaClass, primaryKeys, properties);
         
-        log.info( "About to execute SQL: " + sql );
-
+        if (log.isDebugEnabled()) {
+            log.debug( "About to execute SQL: " + sql );
+        }
+        
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement( sql );   
@@ -444,22 +440,6 @@ public abstract class DynaSql {
     }
 
     /**
-     * @return the SqlDynaClass for the given table name. If the SqlDynaClass does not exist
-     * then create a new one based on the Table definition
-     */
-    protected SqlDynaClass getSqlDynaClass(String tableName) {
-        SqlDynaClass answer = (SqlDynaClass) dynaClassCache.get(tableName);
-        if (answer == null) {
-            Table table = getDatabase().findTable(tableName);
-            if (table != null) {
-                answer = createSqlDynaClass(table);
-                dynaClassCache.put(tableName, dynaClassCache);
-            }
-        }
-        return answer;
-    }
-    
-    /**
      * A Factory method to create a new SqlDynaClass instance for the given table name If the SqlDynaClass does not exist
      * then create a new one based on the Table definition
      */
@@ -470,7 +450,13 @@ public abstract class DynaSql {
     /**
      * Sets property value with the given prepared statement, doing any type specific conversions or swizzling.
      */
-    protected void setObject(PreparedStatement statement, int sqlIndex, DynaBean dynaBean, SqlDynaProperty property) throws SQLException {
+    protected void setObject(
+        PreparedStatement statement, 
+        int sqlIndex, 
+        DynaBean dynaBean, 
+        SqlDynaProperty property
+    ) throws SQLException {
+        
         Object value = dynaBean.get(property.getName());    
         statement.setObject(sqlIndex, value);
     }

@@ -82,4 +82,25 @@ public class AxionBuilder extends SqlBuilder {
     public AxionBuilder() {
         setForeignKeysEmbedded(true);
     }    
+
+
+    protected String getSqlType(Column column) {
+        // Axion doesn't support text width specification 
+        return column.getType();
+    }
+    protected void writePrimaryKeys(Table table) throws IOException {
+        // disable primary key constraints
+    }
+    
+    protected void writeForeignKeys(Table table) throws IOException {
+        // disable foreign key constraints
+    }
+    
+    protected void printAutoIncrementColumn() throws IOException {
+        //print( "IDENTITY" );
+    }
+
+    protected void printNotNullable() throws IOException {
+        //print("NOT NULL");
+    }
 }

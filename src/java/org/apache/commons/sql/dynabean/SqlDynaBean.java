@@ -62,6 +62,7 @@
 package org.apache.commons.sql.dynabean;
 
 import org.apache.commons.beanutils.BasicDynaBean;
+import org.apache.commons.beanutils.DynaClass;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +79,7 @@ public class SqlDynaBean extends BasicDynaBean {
     /** The Log to which logging calls will be made. */
     private static final Log log = LogFactory.getLog( SqlDynaBean.class );
     
-    public SqlDynaBean(SqlDynaClass dynaClass) {
+    public SqlDynaBean(DynaClass dynaClass) {
         super(dynaClass);
     }
 

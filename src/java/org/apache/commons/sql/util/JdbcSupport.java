@@ -59,9 +59,12 @@
  * 
  * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
-package org.apache.commons.sql.dynabean;
+package org.apache.commons.sql.util;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -70,23 +73,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * An implementation of DynaSql which uses a {@link DataSource} as its {@link Connection}
- * pool.
+ * JdbcSupport is an abstract base class for objects which need to 
+ * perform JDBC operations. It contains a number of useful methods 
+ * for implementation inheritence..
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
-public class DataSourceDynaSql extends DynaSql {
+public abstract class JdbcSupport {
 
     /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( DataSourceDynaSql.class );
-
+    private static final Log log = LogFactory.getLog( JdbcSupport.class );
+    
     private DataSource dataSource;
-        
-    public DataSourceDynaSql() {
+    
+    public JdbcSupport() {
     }
 
-    // Implementation methods    
+    public JdbcSupport(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    // Properties
     //-------------------------------------------------------------------------                
     
     /**
@@ -126,6 +134,32 @@ public class DataSourceDynaSql extends DynaSql {
             log.error( "Caught exception while returning connection to pool: " + e, e);
         }
     }
-    
 
+    /**
+     * Closes the given result set down.
+     */
+    protected void closeResultSet(ResultSet resultSet) {
+        if ( resultSet != null ) {
+            try {
+                resultSet.close();
+            }
+            catch (Exception e) {
+                log.warn("Ignoring exception closing result set: " + e, e);
+            }
+        }
+    }
+
+    /**
+     * Closes the given statement down.
+     */
+    protected void closeStatement(Statement statement) {
+        if ( statement != null ) {
+            try {
+                statement.close();
+            }
+            catch (Exception e) {
+                log.warn("Ignoring exception closing statement: " + e, e);
+            }
+        }
+    }
 }

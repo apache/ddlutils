@@ -102,7 +102,7 @@
 
     <dependency>
       <id>commons-collections</id>
-      <version>2.0</version>
+      <version>2.1-dev</version>
     </dependency>
 
     <dependency>
@@ -142,18 +142,14 @@
       <version>2.0.0</version>
     </dependency>
 
-		<!-- for test cases -->
+    <!-- database used for testing -->
     <dependency>
       <id>axion</id>
       <version>1.0-dev.20020830.060007</version>
     </dependency>
     <dependency>
-      <id>commons-pool</id>
-      <version>1.1-dev</version>
-    </dependency>
-    <dependency>
-      <id>commons-dbcp</id>
-      <version>1.0-dev-20020806</version>
+      <id>hsqldb</id>
+      <version>1.7.0</version>
     </dependency>
 
 	  <!-- no longer requird -->    
