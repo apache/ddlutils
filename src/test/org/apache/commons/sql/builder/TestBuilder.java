@@ -30,6 +30,7 @@ import org.apache.commons.sql.io.DatabaseReader;
 /**
  * Test harness for the SqlBuilder for various databases.
  *
+ * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.3 $
  */
 public class TestBuilder extends TestCase
