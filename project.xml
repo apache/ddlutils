@@ -89,7 +89,6 @@
   </repository>
 
 
-  <!-- Need to mark these as compile-time/run-time -->
 
   <dependencies>
      <dependency>
