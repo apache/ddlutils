@@ -13,15 +13,29 @@
 
     <section name="What is Commons SQL?">
       <p>
-        Commons SQL is a simple set of beans that represent a relational database schema
-        such as a Database, Table, Column etc.
+        Commons SQL is a component for working with databases and generating DDL. Its
+        based on experiences and ideas from the Turbine and Torque projects.
+      </p>
+      <p>
+        Commons SQL contains a simple set of 
+        <a href="apidocs/org/apache/commons/sql/model/package-summary.html">beans</a> 
+        that represent a relational database schema such as a Database, Table, Column etc.
         These beans can be read from XML or written to XML using 
-        <a href="http://jakarta.apache.org/commons/betwixt/">Betwixt</a>.        
+        <a href="http://jakarta.apache.org/commons/betwixt/">Betwixt</a> via the 
+        <a href="apidocs/org/apache/commons/sql/io/DatabaseReader.html">DatabaseReader</a> and 
+        <a href="apidocs/org/apache/commons/sql/io/DatabaseWriter.html">DatabaseWriter</a> classes.        
       </p>
       <p>
         There is an example XML document 
         <a href="http://cvs.apache.org/viewcvs.cgi/jakarta-commons-sandbox/sql/src/test-input/datamodel.xml?rev=HEAD">here</a>
       </p>
+      <p>
+        Once you have the relational model, either via beans or XML, you can then create the DDL to create or drop
+        the database for various different phyiscal database.
+        The <a href="apidocs/org/apache/commons/sql/builder/package-summary.html">builder</a>
+        package contains a bunch of classes to generate the DDL for your database.
+      </p>
+
       <p>
         Then the SQL beans can be used by code generation tools like 
         <a href="http://jakarta.apache.org/velocity/">Velocity</a>
@@ -31,13 +45,30 @@
         <a href="http://jakarta.apache.org/ojb/">OJB</a>
         repository files and so forth.
       </p>
+    </section>
+    
+    <section name="Using Commons SQL in Ant or Maven">
+      <p>
+        There's also an Ant task to generate the DDL for a physical database. Here's an example of it in use.        
+      </p>
+
+<pre>
+  &lt;taskdef
+    name="ddl"
+    classname="org.apache.commons.sql.task.DDLTask"&gt;
+      lt;classpath refid="some.classpath"/&gt;
+  &lt;/taskdef&gt;    
+		
+  &lt;ddl
+    xmlFile="src/conf/myschema.xml" 
+    targetDatabase="oracle"
+    output="target/myschema-oracle.sql"/&gt;
+</pre>
+      
       <p>
         It is hoped that Commons SQL can be used to create a 
         <a href="http://jakarta.apache.org/turbine/maven/">Maven</a> 
         plugin for projects wishing to create beans or OJB files from some logical relational schema.
-      </p>
-      <p>
-        Commons SQL is based on experiences and ideas from the Turbine and Torque projects.
       </p>
 
 <!--
