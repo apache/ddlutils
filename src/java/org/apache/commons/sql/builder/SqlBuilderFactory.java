@@ -1,3 +1,5 @@
+package org.apache.commons.sql.builder;
+
 /*
  * Copyright 1999-2002,2004 The Apache Software Foundation.
  * 
@@ -13,15 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.sql.builder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A factory of SqlBuilder instances based on a case insensitive database name.
@@ -30,64 +28,77 @@ import org.apache.commons.logging.LogFactory;
  * new databases on the classpath.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class SqlBuilderFactory {
-
-    /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog(SqlBuilderFactory.class);
-
+public class SqlBuilderFactory
+{
     private static Map databases = new HashMap();
-        
-    static {
+
+    static
+    {
         registerDatabases();
     }
 
     /**
      * Creates a new SqlBuilder for the given (case insensitive) database name
      * or returns null if the database is not recognized.
+     * 
+     * @param databaseName The name of the database (case is not important)
+     * @return The builder or <code>null</code> if the database is not supported
      */
-    public static synchronized SqlBuilder newSqlBuilder(String databaseName) 
-        throws IllegalAccessException, InstantiationException {
-            
-        Class theClass = (Class) databases.get(databaseName.toLowerCase());
-        if (theClass != null) {
-            return (SqlBuilder) theClass.newInstance();
+    public static synchronized SqlBuilder newSqlBuilder(String databaseName) throws IllegalAccessException, InstantiationException
+    {
+        Class builderClass = (Class) databases.get(databaseName.toLowerCase());
+
+        if (builderClass != null)
+        {
+            return (SqlBuilder)builderClass.newInstance();
         }
         return null;
     }
 
     /**
-     * @return a List of currently registered database types for which there is a
-     * specific SqlBuilder.
+     * Returns a list of all supported databases.
+     * 
+     * @return The currently registered database types
      */
-    public static synchronized List getDatabaseTypes() {
+    public static synchronized List getDatabaseTypes()
+    {
         // return a copy to prevent modification
         List answer = new ArrayList();
-        answer.addAll( databases.keySet());
+
+        answer.addAll(databases.keySet());
         return answer;
     }
 
 
     /**
-     * Register the common builders
+     * Registers a builder.
+     * 
+     * @param databaseName    The database name
+     * @param sqlBuilderClass The builder class
      */
-    public static synchronized void registerDatabase(String databaseName, Class sqlBuilderClass) {
+    public static synchronized void registerDatabase(String databaseName, Class sqlBuilderClass)
+    {
         databases.put(databaseName.toLowerCase(), sqlBuilderClass);        
     }
 
     /**
-     * Register the common builders
+     * Registers the predefined builders.
      */
-    protected static void registerDatabases() {
-        registerDatabase("axion", AxionBuilder.class);
-        registerDatabase("db2", Db2Builder.class);
-        registerDatabase("hsqldb", HsqlDbBuilder.class);
-        registerDatabase("mckoi", MckoiSqlBuilder.class);
-        registerDatabase("mssql", MSSqlBuilder.class);
-        registerDatabase("mysql", MySqlBuilder.class);
-        registerDatabase("oracle", OracleBuilder.class);
+    protected static void registerDatabases()
+    {
+        registerDatabase("axion",      AxionBuilder.class);
+        registerDatabase("db2",        Db2Builder.class);
+        registerDatabase("hsqldb",     HsqlDbBuilder.class);
+        registerDatabase("maxdb",      MaxDbBuilder.class);
+        registerDatabase("mckoi",      MckoiSqlBuilder.class);
+        registerDatabase("mssql",      MSSqlBuilder.class);
+        registerDatabase("mysql",      MySqlBuilder.class);
+        registerDatabase("oracle",     OracleBuilder.class);
         registerDatabase("postgresql", PostgreSqlBuilder.class);
-        registerDatabase("sybase", SybaseBuilder.class);
+        registerDatabase("sapdb",      SapDbBuilder.class);
+        registerDatabase("sybase",     SybaseBuilder.class);
     }
 }
