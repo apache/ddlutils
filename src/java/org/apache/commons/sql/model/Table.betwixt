@@ -2,6 +2,7 @@
 <info>
   <element>
     <hide property="primaryKeyColumns"/>
+    <hide property="autoIncrementColumn"/>
     <addDefaults/>
   </element>
 </info>

@@ -9,6 +9,7 @@
   <table name="author">
     <column name="author_id" type="INTEGER" primaryKey="true" required="true"/>
     <column name="name" type="VARCHAR" size="50" required="true"/>
+    <column name="organisation" type="VARCHAR" size="50" required="false"/>
 	</table>
 
   <!-- =================================================== -->

@@ -221,6 +221,26 @@ public class Table
     }
     
     /**
+     * Finds the table with the specified name, using case insensitive matching.
+     * Note that this method is not called getColumn(String) to avoid introspection 
+     * problems.
+     */
+    public Column findColumn(String name)
+    {
+        for (Iterator iter = getColumns().iterator(); iter.hasNext(); ) 
+        {
+            Column column = (Column) iter.next();
+            
+            // column names are typically case insensitive
+            if (column.getName().equalsIgnoreCase( name )) 
+            {
+                return column;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return a List of primary key columns or an empty list if there are no
      * primary key columns for this Table
      */    

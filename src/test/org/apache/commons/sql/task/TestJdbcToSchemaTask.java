@@ -76,12 +76,15 @@ import java.util.List;
 import java.util.Vector;
 import java.util.Collection;
 import java.util.Iterator;
+
 import junit.framework.*;
+
 import org.apache.commons.sql.io.DatabaseWriter;
 import org.apache.commons.sql.io.JdbcModelReader;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
-import org.apache.commons.sql.model.*;
+
 
 /**
  * A JUnit test for JdbcToSchemaTask.java
@@ -89,9 +92,9 @@ import org.apache.commons.sql.model.*;
  * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
  * @version $Revision: $
  */
-public class JdbcToSchemaTaskTest extends TestCase {
+public class TestJdbcToSchemaTask extends TestCase {
     
-    public JdbcToSchemaTaskTest(java.lang.String testName) {
+    public TestJdbcToSchemaTask(java.lang.String testName) {
         super(testName);
     }
     
@@ -100,8 +103,7 @@ public class JdbcToSchemaTaskTest extends TestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite(JdbcToSchemaTaskTest.class);
-        
+        TestSuite suite = new TestSuite(TestJdbcToSchemaTask.class);
         return suite;
     }
     
@@ -114,23 +116,12 @@ public class JdbcToSchemaTaskTest extends TestCase {
     }
     
     
-    // Add test methods here, they have to start with 'test' name.
-    // for example:
-    // public void testHello() {}
-    
-    private JdbcToSchemaTask createTask(){
+    protected JdbcToSchemaTask createTask() {
         JdbcToSchemaTask task = new JdbcToSchemaTask();
-        task.setDbDriver("com.sap.dbtech.jdbc.DriverSapDB");
-        task.setDbUrl("jdbc:sapdb://localhost/TST");
-        task.setDbUser("TEST");
-        task.setDbPassword("TEST");
+        task.setDbDriver("org.axiondb.jdbc.AxionDriver");
+        task.setDbUrl("jdbc:axiondb:diskdb:target/axiondb");
         task.setDbSchema("TEST");
-//        task.setDbDriver("org.hsqldb.jdbcDriver");
-//        task.setDbUrl("jdbc:hsqldb:/data/ext-cvs/jakarta-ojb/target/test/OJB");
-//        task.setDbUser("sa");
-//        task.setDbPassword("");
-//        //task.setDbSchema("TEST");
-        task.setOutputFile("/home/drfish/working/commons-sql/test.xml");
+        task.setOutputFile("target/test.xml");
         return task;
     }
     

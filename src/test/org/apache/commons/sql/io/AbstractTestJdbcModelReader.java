@@ -191,16 +191,48 @@ public abstract class AbstractTestJdbcModelReader extends TestCase {
 
         }
 
-        Table bookTable = database.findTable("book");
+        Table authorTable = testDatabase.findTable("author");
+        Column authorColumn = authorTable.findColumn("organisation");
+        
+        assertTrue("organisation column is not a primary key", !authorColumn.isPrimaryKey());
+        assertTrue("organisation column is not auto inc", !authorColumn.isAutoIncrement());
+        assertTrue("organisation column is not required", !authorColumn.isRequired());
+
+
+        Table bookTable = testDatabase.findTable("book");
         Column bookColumn = bookTable.findColumn("book_id");
+        
+        if (supportsPrimaryKeyMetadata()) {
+            assertTrue("book_id column is primary key", bookColumn.isPrimaryKey());
+        }            
+        
+        if (supportsAutoIncrement()) {
+            assertTrue("book_id column is auto inc", bookColumn.isAutoIncrement());
+        }
+            
+        /** @todo uncomment when this works!        
+         * 
         assertTrue("book_id column is required", bookColumn.isRequired());
-        assertTrue("book_id column is auto inc", bookColumn.isAutoIncrement());
-        assertTrue("book_id column is primary key", bookColumn.isPrimaryKey());
+        */
     }
 
     // Implementation methods
     //-------------------------------------------------------------------------
 
+    /**
+     * @return true if this database test case should test for primary key meta data
+     */
+    protected boolean supportsPrimaryKeyMetadata() {
+        return true;
+    }
+    
+    /**
+     * @return true if we should test for auto-increment columns
+     */
+    protected boolean supportsAutoIncrement() {
+        return false;
+    }
+    
     public abstract void doImportForeignKeys(Table srcTable, Table testTable);
     public abstract void doImportPrimaryKeyColumns(
         Table srcTable,

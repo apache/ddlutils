@@ -70,6 +70,10 @@ import java.sql.ResultSetMetaData;
 import java.util.List;
 import java.util.Vector;
 import java.util.Iterator;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.apache.commons.sql.model.*;
 
 /**
@@ -79,6 +83,9 @@ import org.apache.commons.sql.model.*;
  * @version $Revision: $
  */
 public class JdbcModelReader {
+
+    /** The Log to which logging calls will be made. */
+    private static final Log log = LogFactory.getLog( JdbcModelReader.class );
 
     Connection connection = null;
     String catalog = null;
@@ -396,13 +403,20 @@ public class JdbcModelReader {
         ResultSet parts = null;
         try {
             parts = dbmd.getPrimaryKeys(catalog, schema, tableName);
-            while (parts.next()) {
-                pk.add(parts.getString(4));
-            }
         }
-        finally {
-            if (parts != null) {
-                parts.close();
+        catch (SQLException e) {
+            log.trace("database does not support getPrimaryKeys()", e);
+        }
+        if (parts != null) {
+            try{
+                while (parts.next()) {
+                    pk.add(parts.getString(4));
+                }
+            }
+            finally {
+                if (parts != null) {
+                    parts.close();
+                }
             }
         }
         return pk;
@@ -425,79 +439,86 @@ public class JdbcModelReader {
         ForeignKey currFk = null;
         try {
             foreignKeys = dbmd.getImportedKeys(catalog, schema, tableName);
-            while (foreignKeys.next()) {
-                //primary key table catalog being imported (may be null)
-                String pkCat = foreignKeys.getString("PKTABLE_CAT");
-                //primary key table schema being imported (may be null)
-                String pkSchema = foreignKeys.getString("PKTABLE_SCHEM");
-                //primary key table name being imported
-                String pkTable = foreignKeys.getString("PKTABLE_NAME");
-                //primary key column name being imported
-                String pkColumn = foreignKeys.getString("PKCOLUMN_NAME");
-                // foreign key table catalog (may be null)
-                String fkCat = foreignKeys.getString("FKTABLE_CAT");
-                // foreign key table schema (may be null)
-                String fkSchema = foreignKeys.getString("FKTABLE_SCHEM");
-                // foreign key table name
-                String fkTable = foreignKeys.getString("FKTABLE_NAME");
-                // foreign key column name
-                String fkColumn = foreignKeys.getString("FKCOLUMN_NAME");
-                /* sequence number within a foreign key */
-                short keySequence = foreignKeys.getShort("KEY_SEQ");
-                /*What happens to a foreign key when the primary key is updated */
-                short updateRule = foreignKeys.getShort("UPDATE_RULE");
-                //importedNoAction - do not allow update of primary 
-                //               key if it has been imported
-                //importedKeyCascade - change imported key to agree 
-                //               with primary key update
-                //importedKeySetNull - change imported key to NULL if its primary key has been updated
-                //importedKeySetDefault - change imported key to default values 
-                //               if its primary key has been updated
-                //importedKeyRestrict - same as importedKeyNoAction 
-                //                                 (for ODBC 2.x compatibility)
-                // What happens to the foreign key when primary is deleted.
-                short deleteRule = foreignKeys.getShort("DELETE_RULE");
-                //importedKeyNoAction - do not allow delete of primary 
-                //               key if it has been imported
-                //importedKeyCascade - delete rows that import a deleted key
-                //importedKeySetNull - change imported key to NULL if 
-                //               its primary key has been deleted
-                //importedKeyRestrict - same as importedKeyNoAction 
-                //                                 (for ODBC 2.x compatibility)
-                //importedKeySetDefault - change imported key to default if 
-                //               its primary key has been deleted
-                /*foreign key name (may be null)*/
-                String fkName = foreignKeys.getString("FK_NAME");
-                /*primary key name (may be null)*/
-                String pkName = foreignKeys.getString("PK_NAME");
-                /*can the evaluation of foreign key constraints be deferred until commit*/
-                short deferrablity = foreignKeys.getShort("DEFERRABILITY");
-                //importedKeyInitiallyDeferred - see SQL92 for definition
-                //importedKeyInitiallyImmediate - see SQL92 for definition 
-                //importedKeyNotDeferrable - see SQL92 for definition                
-                if (!pkTable.equals(prevPkTable)) {
-                    if (currFk != null) {
-                        fks.add(currFk);
+        }
+        catch (SQLException e) {
+            log.trace("database does not support getImportedKeys()", e);
+        }
+        if (foreignKeys != null) {
+            try {
+                while (foreignKeys.next()) {
+                    //primary key table catalog being imported (may be null)
+                    String pkCat = foreignKeys.getString("PKTABLE_CAT");
+                    //primary key table schema being imported (may be null)
+                    String pkSchema = foreignKeys.getString("PKTABLE_SCHEM");
+                    //primary key table name being imported
+                    String pkTable = foreignKeys.getString("PKTABLE_NAME");
+                    //primary key column name being imported
+                    String pkColumn = foreignKeys.getString("PKCOLUMN_NAME");
+                    // foreign key table catalog (may be null)
+                    String fkCat = foreignKeys.getString("FKTABLE_CAT");
+                    // foreign key table schema (may be null)
+                    String fkSchema = foreignKeys.getString("FKTABLE_SCHEM");
+                    // foreign key table name
+                    String fkTable = foreignKeys.getString("FKTABLE_NAME");
+                    // foreign key column name
+                    String fkColumn = foreignKeys.getString("FKCOLUMN_NAME");
+                    /* sequence number within a foreign key */
+                    short keySequence = foreignKeys.getShort("KEY_SEQ");
+                    /*What happens to a foreign key when the primary key is updated */
+                    short updateRule = foreignKeys.getShort("UPDATE_RULE");
+                    //importedNoAction - do not allow update of primary 
+                    //               key if it has been imported
+                    //importedKeyCascade - change imported key to agree 
+                    //               with primary key update
+                    //importedKeySetNull - change imported key to NULL if its primary key has been updated
+                    //importedKeySetDefault - change imported key to default values 
+                    //               if its primary key has been updated
+                    //importedKeyRestrict - same as importedKeyNoAction 
+                    //                                 (for ODBC 2.x compatibility)
+                    // What happens to the foreign key when primary is deleted.
+                    short deleteRule = foreignKeys.getShort("DELETE_RULE");
+                    //importedKeyNoAction - do not allow delete of primary 
+                    //               key if it has been imported
+                    //importedKeyCascade - delete rows that import a deleted key
+                    //importedKeySetNull - change imported key to NULL if 
+                    //               its primary key has been deleted
+                    //importedKeyRestrict - same as importedKeyNoAction 
+                    //                                 (for ODBC 2.x compatibility)
+                    //importedKeySetDefault - change imported key to default if 
+                    //               its primary key has been deleted
+                    /*foreign key name (may be null)*/
+                    String fkName = foreignKeys.getString("FK_NAME");
+                    /*primary key name (may be null)*/
+                    String pkName = foreignKeys.getString("PK_NAME");
+                    /*can the evaluation of foreign key constraints be deferred until commit*/
+                    short deferrablity = foreignKeys.getShort("DEFERRABILITY");
+                    //importedKeyInitiallyDeferred - see SQL92 for definition
+                    //importedKeyInitiallyImmediate - see SQL92 for definition 
+                    //importedKeyNotDeferrable - see SQL92 for definition                
+                    if (!pkTable.equals(prevPkTable)) {
+                        if (currFk != null) {
+                            fks.add(currFk);
+                        }
+                        currFk = new ForeignKey();
+                        currFk.setForeignTable(pkTable);
+                        prevPkTable = pkTable;
                     }
-                    currFk = new ForeignKey();
-                    currFk.setForeignTable(pkTable);
-                    prevPkTable = pkTable;
+                    Reference ref = new Reference();
+                    ref.setForeign(pkColumn);
+                    ref.setLocal(fkColumn);
+                    currFk.addReference(ref);
                 }
-                Reference ref = new Reference();
-                ref.setForeign(pkColumn);
-                ref.setLocal(fkColumn);
-                currFk.addReference(ref);
+                if (currFk != null) {
+                    fks.add(currFk);
+                    currFk = null;
+                }
             }
-            if (currFk != null) {
-                fks.add(currFk);
-                currFk = null;
-            }
-            return fks;
-        }
-        finally {
-            if (foreignKeys != null) {
-                foreignKeys.close();
+            finally {
+                if (foreignKeys != null) {
+                    foreignKeys.close();
+                }
             }
         }
+        return fks;
     }
 }
