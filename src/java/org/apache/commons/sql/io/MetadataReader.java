@@ -25,7 +25,7 @@ import java.util.Collection;
  * Reads a database's metadata and creates a fully populated Database bean.
  *
  * @author  Steven Caswell
- * @version $Id: MetadataReader.java,v 1.2 2002/10/23 10:16:48 jstrachan Exp $
+ * @version $Id: MetadataReader.java,v 1.3 2002/10/28 16:14:55 jstrachan Exp $
  */
 public class MetadataReader
 {
@@ -194,46 +194,53 @@ public class MetadataReader
             while (columnSet.next())
             {
                 String name = columnSet.getString(4);
-                Integer sqlType = new Integer(columnSet.getInt(5));
+//                Integer sqlType = new Integer(columnSet.getInt(5));
+                int sqlType = columnSet.getInt(5);
                 String typeName = columnSet.getString(6);
                 int size = columnSet.getInt(7);
-                String scale = columnSet.getString(9);
-                String precisionRadix = columnSet.getString(10);
+//                String scale = columnSet.getString(9);
+//                String precisionRadix = columnSet.getString(10);
+                int scale = columnSet.getInt(9);
+                int precisionRadix = columnSet.getInt(10);
                 int nullable = columnSet.getInt(11);
                 String remarks = columnSet.getString(12);
                 String defValue = columnSet.getString(13);
                 String charOctetLength = columnSet.getString(16);
-                String ordinalPosition = columnSet.getString(17);
+//                String ordinalPosition = columnSet.getString(17);
+                int ordinalPosition = columnSet.getInt(17);
                 String isNullable = columnSet.getString(18);
 
                 Column column = new Column();
                 column.setName(name);
-                column.setType(TypeMap.getSQLTypeString(sqlType));
-                if(TypeMap.isTextType(TypeMap.getSQLTypeString(sqlType)))
-                {
-                    column.setIsTextType(new Boolean(true));
-                }
+//                column.setType(TypeMap.getSQLTypeString(sqlType));
+                column.setTypeCode(sqlType);
+//                if(TypeMap.isTextType(TypeMap.getSQLTypeString(sqlType)))
+//                {
+//                    column.setIsTextType(new Boolean(true));
+//                }
                 
                 column.setSize(size);
-                if(scale != null)
-                {
-                    column.setScale(new Integer(scale));
-                }
-                if(precisionRadix != null)
-                {
-                    column.setPrecisionRadix(Integer.getInteger(precisionRadix));
-                }
-                column.setNullable((nullable == 1) ? true : false);
+//                if(scale != null)
+//                {
+//                    column.setScale(new Integer(scale));
+                    column.setScale(scale);
+//                }
+//                if(precisionRadix != null)
+//                {
+//                    column.setPrecisionRadix(Integer.getInteger(precisionRadix));
+                    column.setPrecisionRadix(precisionRadix);
+//                }
+//                column.setNullable((nullable == 1) ? true : false);
                 column.setDefaultValue(defValue);
-                if(charOctetLength != null)
-                {
-                    column.setCharOctetLength(Integer.getInteger(charOctetLength));
-                }
-                if(ordinalPosition != null)
-                {
-                    column.setOrdinalPosition(Integer.getInteger(ordinalPosition));
-                }
-                column.setIsNullable(isNullable);
+//                if(charOctetLength != null)
+//                {
+//                    column.setCharOctetLength(Integer.getInteger(charOctetLength));
+//                }
+//                if(ordinalPosition != null)
+//                {
+                    column.setOrdinalPosition(ordinalPosition);
+//                }
+//                column.setIsNullable(isNullable);
                 /*
                 List col = new Vector(5);
                 col.add(name);
