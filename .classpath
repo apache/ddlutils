@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<classpath>
+  <classpathentry kind="src" path="src/java">
+  </classpathentry>
+  <classpathentry kind="src" path="src/test">
+  </classpathentry>
+  <classpathentry kind="var" rootpath="JRE_SRCROOT" path="JRE_LIB" sourcepath="JRE_SRC">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/commons-logging/jars/commons-logging-1.0.1.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/commons-beanutils/jars/commons-beanutils-SNAPSHOT.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/commons-betwixt/jars/commons-betwixt-SNAPSHOT.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/commons-jelly/jars/commons-jelly-SNAPSHOT.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/commons-cli/jars/commons-cli-SNAPSHOT.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/jdbc/jars/jdbc-2.0.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/ant/jars/ant-1.5.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/commons-collections/jars/commons-collections-2.1-dev.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/commons-digester/jars/commons-digester-1.2.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/dom4j/jars/dom4j-1.4-dev-8.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/xml-apis/jars/xml-apis-2.0.2.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/xerces/jars/xerces-2.0.0.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/axion/jars/axion-1.0-dev.20020830.060007.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/hsqldb/jars/hsqldb-1.7.1.jar">
+  </classpathentry>
+  <classpathentry kind="output" path="target\classes">
+  </classpathentry>
+</classpath>

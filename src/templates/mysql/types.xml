@@ -1,0 +1,68 @@
+
+<types>
+  <type SQLName="TINYINT" size="3" minimumScale="0" maximumScale="0"/>
+  <type SQLName="BIGINT" size="19" minimumScale="0" maximumScale="0"/>
+  <type SQLName="MEDIUMBLOB" size="16777215" minimumScale="0" maximumScale="0"/>
+  <type SQLName="MEDIUMTEXT" size="16777215" minimumScale="0" maximumScale="0"/>
+  <type SQLName="LONGBLOB" size="2147483647" minimumScale="0" maximumScale="0"/>
+  <type SQLName="LONGTEXT" size="2147483647" minimumScale="0" maximumScale="0"/>
+  <type SQLName="BLOB" size="65535" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TEXT" size="65535" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TINYBLOB" size="255" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TINYTEXT" size="255" minimumScale="0" maximumScale="0"/>
+  <type SQLName="CHAR" size="255" minimumScale="0" maximumScale="0"/>
+  <type SQLName="NUMERIC" size="17" minimumScale="308" maximumScale="308"/>
+  <type SQLName="DECIMAL" size="17" minimumScale="-308" maximumScale="308"/>
+  <type SQLName="INT" size="10" minimumScale="0" maximumScale="0"/>
+  <type SQLName="MEDIUMINT" size="7" minimumScale="0" maximumScale="0"/>
+  <type SQLName="SMALLINT" size="5" minimumScale="0" maximumScale="0"/>
+  <type SQLName="FLOAT" size="10" minimumScale="-38" maximumScale="38"/>
+  <type SQLName="DOUBLE" size="17" minimumScale="-308" maximumScale="308"/>
+  <type SQLName="DOUBLE PRECISION" size="17" minimumScale="-308" maximumScale="308"/>
+  <type SQLName="REAL" size="17" minimumScale="-308" maximumScale="308"/>
+  <type SQLName="VARCHAR" size="255" minimumScale="0" maximumScale="0"/>
+  <type SQLName="ENUM" size="65535" minimumScale="0" maximumScale="0"/>
+  <type SQLName="SET" size="65535" minimumScale="0" maximumScale="0"/>
+  <type SQLName="DATE" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TIME" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="DATETIME" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TIMESTAMP" size="0" minimumScale="0" maximumScale="0"/>
+  <mapping name="TINYINT" SQLName="TINYINT" format="(3)"/>
+  <mapping name="BIGINT" SQLName="BIGINT" format="(19)"/>
+  <mapping name="LONGVARBINARY" SQLName="MEDIUMBLOB"/>
+  <mapping name="LONGVARBINARY" SQLName="MEDIUMTEXT"/>
+  <mapping name="LONGVARBINARY" SQLName="LONGBLOB"/>
+  <mapping name="LONGVARBINARY" SQLName="LONGTEXT"/>
+  <mapping name="LONGVARBINARY" SQLName="BLOB"/>
+  <mapping name="LONGVARBINARY" SQLName="TEXT"/>
+  <mapping name="VARBINARY" SQLName="TINYBLOB"/>
+  <mapping name="VARBINARY" SQLName="TINYTEXT"/>
+  <mapping name="CHAR" SQLName="CHAR" format="size"/>
+  <mapping name="NUMERIC" SQLName="NUMERIC" format="size-scale"/>
+  <mapping name="DECIMAL" SQLName="DECIMAL" format="size-scale"/>
+  <mapping name="INTEGER" SQLName="INT" format="(10)"/>
+  <mapping name="INTEGER" SQLName="MEDIUMINT" format="(7)"/>
+  <mapping name="SMALLINT" SQLName="SMALLINT" format="(5)"/>
+  <mapping name="FLOAT" SQLName="FLOAT" format="size-scale"/>
+  <mapping name="DOUBLE" SQLName="DOUBLE" format="size-scale"/>
+  <mapping name="DOUBLE" SQLName="DOUBLE PRECISION" format="size-scale"/>
+  <mapping name="DOUBLE" SQLName="REAL" format="size-scale"/>
+  <mapping name="VARCHAR" SQLName="VARCHAR" format="size"/>
+  <!--mapping name="VARCHAR" SQLName="ENUM"/-->
+  <!--mapping name="VARCHAR" SQLName="SET"/-->
+  <mapping name="DATE" SQLName="DATE"/>
+  <mapping name="TIME" SQLName="TIME"/>
+  <!--mapping name="TIMESTAMP" SQLName="DATETIME" format="size"/-->
+  <mapping name="TIMESTAMP" SQLName="TIMESTAMP" format="size"/>
+  <auto-increment-mapping name="TINYINT" SQLName="TINYINT" format="(3)"/>
+  <auto-increment-mapping name="BIGINT" SQLName="BIGINT" format="(19)"/>
+  <auto-increment-mapping name="NUMERIC" SQLName="NUMERIC" format="size-scale"/>
+  <auto-increment-mapping name="DECIMAL" SQLName="DECIMAL" format="size-scale"/>
+  <auto-increment-mapping name="INTEGER" SQLName="INT" format="(10)"/>
+  <auto-increment-mapping name="INTEGER" SQLName="MEDIUMINT" format="(7)"/>
+  <auto-increment-mapping name="SMALLINT" SQLName="SMALLINT" format="(5)"/>
+  <auto-increment-mapping name="FLOAT" SQLName="FLOAT" format="size-scale"/>
+  <auto-increment-mapping name="DOUBLE" SQLName="DOUBLE" format="size-scale"/>
+  <auto-increment-mapping name="DOUBLE" SQLName="DOUBLE PRECISION" format="size-scale"/>
+  <auto-increment-mapping name="DOUBLE" SQLName="REAL" format="size-scale"/>
+</types>

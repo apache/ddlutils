@@ -1,0 +1,44 @@
+
+<types>
+  <type SQLName="BIT" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TINYINT" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="BIGINT" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="LONGVARBINARY" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="VARBINARY" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="BINARY" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="LONGVARCHAR" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="CHAR" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="NUMERIC" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="DECIMAL" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="INTEGER" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="SMALLINT" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="FLOAT" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="REAL" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="DOUBLE" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="VARCHAR" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="DATE" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TIME" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="TIMESTAMP" size="0" minimumScale="0" maximumScale="0"/>
+  <type SQLName="OBJECT" size="0" minimumScale="0" maximumScale="0"/>
+  <mapping name="BIT" SQLName="BIT"/>
+  <mapping name="TINYINT" SQLName="TINYINT"/>
+  <mapping name="BIGINT" SQLName="BIGINT"/>
+  <mapping name="LONGVARBINARY" SQLName="LONGVARBINARY"/>
+  <mapping name="VARBINARY" SQLName="VARBINARY"/>
+  <mapping name="BINARY" SQLName="BINARY"/>
+  <mapping name="LONGVARCHAR" SQLName="LONGVARCHAR"/>
+  <mapping name="CHAR" SQLName="CHAR"/>
+  <mapping name="NUMERIC" SQLName="NUMERIC"/>
+  <mapping name="DECIMAL" SQLName="DECIMAL"/>
+  <mapping name="INTEGER" SQLName="INTEGER"/>
+  <mapping name="SMALLINT" SQLName="SMALLINT"/>
+  <mapping name="FLOAT" SQLName="FLOAT"/>
+  <mapping name="REAL" SQLName="REAL"/>
+  <mapping name="DOUBLE" SQLName="DOUBLE"/>
+  <mapping name="VARCHAR" SQLName="VARCHAR"/>
+  <mapping name="DATE" SQLName="DATE"/>
+  <mapping name="TIME" SQLName="TIME"/>
+  <mapping name="TIMESTAMP" SQLName="TIMESTAMP"/>
+  <mapping name="OTHER" SQLName="OBJECT"/>
+  <auto-increment-mapping name="INTEGER" SQLName="INTEGER"/>
+</types>

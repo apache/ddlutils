@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<j:jelly xmlns:j="jelly:core" 
+	 xmlns:define="jelly:define"
+         xmlns="jakarta.apache.org/commons/sql/tags">
+  
+  <j:include uri="${commons_sql.taglib}"/>
+
+  <define:taglib uri="jakarta.apache.org/commons/sql/tags" inherit="true">
+
+    <define:extend name="drop-table">
+      <drop-table-spec/> IF EXISTS ${table.name}<nl/>
+      <eos-spec/><nl/>
+    </define:extend>
+
+    <define:extend name="column-constraint">
+      <j:choose>
+        <j:when test="${column.isAutoIncrement() and column.isPrimaryKey()}">
+          <auto-increment-spec/><space/><primary-key-spec/>
+        </j:when>
+        <j:otherwise>
+          <define:super/>
+        </j:otherwise>
+      </j:choose>
+    </define:extend>
+
+    <define:extend name="auto-increment-spec">AUTO_INCREMENT</define:extend>
+
+  </define:taglib>
+
+</j:jelly>

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+
+<providers>
+  
+  <provider>
+    <name>axion</name>
+    <provider-version>
+      <create-script>axion/createdb.jelly</create-script>
+      <drop-script>dropdb.jelly</drop-script>
+      <types>axion/types.xml</types>
+    </provider-version>
+  </provider>
+
+  <provider>
+    <name>hsqldb</name>
+    <provider-version>
+      <create-script>createdb.jelly</create-script>
+      <drop-script>dropdb.jelly</drop-script>
+      <types>hsqldb/types.xml</types>
+    </provider-version>
+  </provider>
+
+  <provider>
+    <name>mysql</name>
+    <provider-version>
+      <create-script>mysql/createdb.jelly</create-script>
+      <drop-script>mysql/dropdb.jelly</drop-script>
+      <types>mysql/types.xml</types>
+    </provider-version>
+  </provider>
+
+  <provider>
+    <name>oracle</name>
+    <provider-version>
+      <name>8i</name>
+      <create-script>oracle/createdb.jelly</create-script>
+      <drop-script>oracle/dropdb.jelly</drop-script>
+      <types>oracle/8i/types.xml</types>
+    </provider-version>
+
+    <provider-version>
+      <name>9i</name>
+      <create-script>oracle/createdb.jelly</create-script>
+      <drop-script>oracle/dropdb.jelly</drop-script>
+      <types>oracle/9i/types.xml</types>
+    </provider-version>
+  </provider>
+
+  <provider>
+    <name>sybase</name>
+    <provider-version>
+      <create-script>sybase/createdb.jelly</create-script>
+      <drop-script>dropdb.jelly</drop-script>
+      <types>sybase/types.xml</types>
+    </provider-version>
+  </provider>
+
+</providers>
+

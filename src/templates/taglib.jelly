@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+
+<j:jelly xmlns:j="jelly:core" 
+         xmlns:define="jelly:define"
+         xmlns:log="jelly:log"
+         xmlns="jakarta.apache.org/commons/sql/tags">
+
+  <define:taglib uri="jakarta.apache.org/commons/sql/tags">  
+
+    <!-- ================================================================= -->
+    <!-- Database creation tags                                            -->
+    <!-- . create-database      - create a database                        -->
+    <!-- . create-tables        - create a set of tables                   -->
+    <!-- . create-table         - create a table                           -->
+    <!-- ================================================================= -->
+    <define:tag name="create-database">
+      <create-tables tables="${database.tables}"/>
+    </define:tag>
+
+    <define:tag name="create-tables">
+      <j:forEach var="table" items="${tables}">
+        <create-table table="${table}" />
+        <add-indexes table="${table}" />
+      </j:forEach>
+    </define:tag>
+
+    <define:tag name="create-table" trim="true">
+      <j:set var="columns" value="${table.columns}" />
+      <create-table-spec/> ${table.name} (<column-list/>
+      <embedded-primary-key />
+      <embedded-foreign-keys /> 
+      )
+      <eos-spec/><nl/>
+    </define:tag>
+
+    <!-- ================================================================= -->
+    <!-- Primary keys                                                      -->
+    <!-- ================================================================= -->
+    <define:tag name="embedded-primary-key">
+      <j:if test="${table.hasPrimaryKey() &amp;&amp;
+                  size(table.primaryKeyColumns) > 1}"> 
+        ,<nl/>
+        <primary-key/> <nl/>
+      </j:if>
+    </define:tag>
+
+    <define:tag name="add-primary-key">
+      <j:if test="${table.hasPrimaryKey()}">
+        <add-constraint/> <primary-key/>
+      </j:if>
+    </define:tag>
+
+    <define:tag name="primary-key">
+        <primary-key-spec/> (<primary-key-columns/>)
+    </define:tag>
+
+    <define:tag name="primary-key-columns">
+       <column-names columns="${table.primaryKeyColumns}"/>
+    </define:tag>
+
+
+    <!-- ================================================================= -->
+    <!-- Foreign keys                                                      -->
+    <!-- ================================================================= -->
+    <define:tag name="embedded-foreign-keys">      
+      <j:forEach var="key" items="${table.foreignKeys}">
+        ,<nl/>
+        <foreign-key/><nl/>
+      </j:forEach>
+    </define:tag>
+
+    <define:tag name="add-foreign-keys">      
+      <j:forEach var="key" items="${table.foreignKeys}">
+        <add-foreign-key/>
+      </j:forEach>
+    </define:tag>
+
+    <define:tag name="add-foreign-key">
+      <add-constraint/> <foreign-key/> 
+      <eos-spec/><nl/>
+    </define:tag>
+
+    <define:tag name="foreign-key">
+      <foreign-key-spec/><space/>(<foreign-key-local-columns/>)<nl/>
+      <references-spec/> ${key.foreignTable} (<foreign-key-ref-columns/>)
+    </define:tag>
+
+    <define:tag name="foreign-key-local-columns">
+      <j:forEach var="column" items="${key.references}" indexVar="i">
+        <j:whitespace><j:if test="${i != 0}">, </j:if>${column.local}</j:whitespace>
+      </j:forEach>
+    </define:tag>
+
+    <define:tag name="foreign-key-ref-columns">
+      <j:forEach var="column" items="${key.references}" indexVar="i">
+        <j:whitespace><j:if test="${i != 0}">, </j:if>${column.foreign}</j:whitespace>
+      </j:forEach>
+    </define:tag>
+
+    <!-- ================================================================= -->
+    <!-- Indexes                                                           -->
+    <!-- ================================================================= -->
+    <define:tag name="add-indexes">      
+      <j:forEach var="index" items="${table.indexes}">
+        <add-index/>
+      </j:forEach>
+    </define:tag>
+
+    <define:tag name="add-index">
+      <create-index-spec/> ${index.name} 
+<on-spec/> ${table.name} (<column-names columns="${index.indexColumns}"/>)<eos-spec/><nl/>
+    </define:tag>
+
+    <define:tag name="index-columns">
+      <column-names columns="${index.indexColumns}"/>
+    </define:tag>
+ 
+    <!-- ================================================================= -->
+    <!-- Columns                                                           -->
+    <!-- ================================================================= -->
+    <define:tag name="column-names" trim="true">
+      <j:forEach var="column" items="${columns}" indexVar="i"><j:if test="${i != 0}" trim="false">, </j:if>${column.name}</j:forEach>
+    </define:tag>
+
+    <define:tag name="column-list">
+      <j:forEach var="column" items="${columns}" indexVar="i">
+        <j:if test="${i != 0}">,</j:if>
+        <column/>
+      </j:forEach>
+    </define:tag>
+    
+    <define:tag name="column">
+      ${column.name} ${types.getSQLType(column)}<space/><column-constraint/>
+    </define:tag>
+
+    <define:tag name="column-constraint">
+      <j:choose>
+        <j:when test="${column.isAutoIncrement()}">
+          <auto-increment-spec/>
+        </j:when>
+        <j:when test="${column.isPrimaryKey()}">
+          <j:if test="${size(table.primaryKeyColumns) == 1}">
+            <primary-key-spec/>
+          </j:if>
+        </j:when>
+        <j:when test="${column.isRequired()}">
+          <not-null-spec/>
+        </j:when>
+        <j:otherwise>
+          <null-spec/>
+        </j:otherwise>
+      </j:choose>
+    </define:tag>
+
+    <!-- ================================================================= -->
+    <!-- Database drop tags                                                -->
+    <!-- . drop-database        - drop a database                          -->
+    <!-- . drop-tables          - drop a set of tables                     -->
+    <!-- . drop-table           - drop a table                             -->
+    <!-- ================================================================= -->
+    <define:tag name="drop-database">
+      <drop-tables tables="${database.tables}"/>
+    </define:tag>
+
+    <define:tag name="drop-tables">
+      <j:set var="index" value="${size(tables) - 1}" />   
+      <j:set var="limit" value="${0-1}"/>  <!-- workarounds for jexl -->
+      <j:while test="${index > limit}">
+         <drop-table table="${tables[index]}"/>
+         <j:set var="index" value="${index - 1}"/>
+      </j:while>
+    </define:tag>
+    
+    <define:tag name="drop-table">
+      <drop-table-spec/> ${table.name}<nl/>
+      <eos-spec/><nl/>
+    </define:tag>
+
+    <!-- ================================================================= -->
+    <!-- Misc                                                              -->
+    <!-- ================================================================= -->
+    <define:tag name="alter-table">
+      <alter-table-spec/> ${table.name}
+    </define:tag>
+
+    <define:tag name="add-constraint">
+      <alter-table/> <add-spec/>
+    </define:tag>
+
+    <!-- ================================================================= -->
+    <!-- Keywords                                                          -->
+    <!-- ================================================================= -->
+
+    <define:tag name="auto-increment-spec"></define:tag>
+
+    <define:tag name="create-table-spec">CREATE TABLE</define:tag>
+
+    <define:tag name="drop-table-spec">DROP TABLE</define:tag>
+
+    <define:tag name="primary-key-spec">PRIMARY KEY</define:tag>
+
+    <define:tag name="foreign-key-spec">FOREIGN KEY</define:tag>
+
+    <define:tag name="alter-table-spec">ALTER TABLE</define:tag>
+
+    <define:tag name="create-index-spec">CREATE INDEX</define:tag>
+
+    <define:tag name="drop-index-spec">DROP INDEX</define:tag>
+
+    <define:tag name="on-spec">ON</define:tag>
+
+    <define:tag name="add-spec">ADD</define:tag>
+
+    <define:tag name="references-spec">REFERENCES</define:tag>
+
+    <define:tag name="null-spec">NULL</define:tag>
+
+    <define:tag name="not-null-spec">NOT NULL</define:tag>
+
+    <define:tag name="eos-spec">;</define:tag>
+
+    <!-- ================================================================= -->
+    <!-- Helpers                                                           -->
+    <!-- ================================================================= -->
+    <define:tag name="nl">
+      <j:whitespace>
+</j:whitespace>
+    </define:tag>
+
+    <define:tag name="space">
+      <j:whitespace> </j:whitespace>
+    </define:tag> 
+
+  </define:taglib>
+    
+</j:jelly>

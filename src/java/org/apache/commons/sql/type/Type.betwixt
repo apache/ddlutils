@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<info>
+  <element name="type">
+    <attribute name="SQLName" property="SQLName" />
+    <attribute name="size" property="size" />
+    <attribute name="minimumScale" property="minimumScale" />
+    <attribute name="maximumScale" property="maximumScale" />
+  </element>
+</info>

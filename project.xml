@@ -94,6 +94,16 @@
     </dependency>
 
     <dependency>
+      <id>commons-jelly</id>
+      <version>SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <id>commons-cli</id>
+      <version>SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <id>jdbc</id>
       <version>2.0</version>
     </dependency>
@@ -113,6 +123,11 @@
     <dependency>
       <id>commons-digester</id>
       <version>1.2</version>
+    </dependency>
+
+    <dependency>
+      <id>dom4j</id>
+      <version>1.4-dev-8</version>
     </dependency>
 
     <dependency>
