@@ -111,7 +111,13 @@ public class SqlBuilder {
 
     /** Should foreign key constraints be explicitly named */
     private boolean foreignKeyConstraintsNamed;
+
+    /** The current Table we're working on */
+    private Table table;
     
+    /** The current Column we're working on */
+    private Column column;
+        
     public SqlBuilder() {
     }
 
@@ -133,13 +139,13 @@ public class SqlBuilder {
         if (dropTable) {
             List tables = database.getTables();
             for (int i = tables.size() - 1; i >= 0; i-- ) {
-                Table table = (Table) tables.get(i);
+                table = (Table) tables.get(i);
                 dropTable(table);
             }
         }
             
         for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
-            Table table = (Table) iter.next();
+            table = (Table) iter.next();
             tableComment(table);
             createTable(table);
         }
@@ -153,7 +159,7 @@ public class SqlBuilder {
         // lets drop the tables in reverse order
         List tables = database.getTables();
         for (int i = tables.size() - 1; i >= 0; i-- ) {
-            Table table = (Table) tables.get(i);
+            table = (Table) tables.get(i);
             tableComment(table);
             dropTable(table);
         }
@@ -182,6 +188,7 @@ public class SqlBuilder {
      * Outputs the DDL to create the table along with any constraints
      */
     public void createTable(Table table) throws IOException {
+        this.table = table;
         print("create table ");
         println(table.getName());
         println("(");
@@ -210,6 +217,7 @@ public class SqlBuilder {
      * Outputs the DDL to add a column to a table.
      */
     public void createColumn(Column column) throws IOException {
+        this.column = column;
         print(column.getName());
         print(" ");
         print(getSqlType(column));
@@ -318,6 +326,20 @@ public class SqlBuilder {
     // Implementation methods
     //-------------------------------------------------------------------------                
 
+    /**
+     * @return the current Table we're working on
+     */
+    protected Table getTable() {
+        return table;
+    }
+    
+    /**
+     * @return the current Column we're working on
+     */
+    protected Column getColumn() {
+        return column;
+    }
+    
     /**
      * @return true if we should generate a primary key constraint for the given
      *  primary key columns. By default if there are no primary keys or the column(s) are 

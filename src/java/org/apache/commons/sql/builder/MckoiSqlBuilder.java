@@ -90,6 +90,6 @@ public class MckoiSqlBuilder extends SqlBuilder {
     }
     
     protected void printAutoIncrementColumn() throws IOException { 
-        //print( "AUTO_INCREMENT" );
+        print( "DEFAULT UNIQUEKEY('" + getTable().getName() + "')");
     }
 }

@@ -541,7 +541,12 @@ public class DynaSql extends JdbcSupport {
     ) throws SQLException {
         
         Object value = dynaBean.get(property.getName());    
-        statement.setObject(sqlIndex, value);
+        if (value == null) {
+            statement.setNull(sqlIndex, property.getColumn().getSQLTypeCode());
+        }
+        else {
+            statement.setObject(sqlIndex, value);
+        }
     }
     
     /**
