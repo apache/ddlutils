@@ -15,8 +15,6 @@
  */
 package org.apache.commons.sql.model;
 
-import java.util.Iterator;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +23,7 @@ import java.util.List;
  * same by the Table.
  * 
  * @author <a href="mailto:jmarshall@connectria.com">John Marshall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Unique extends Index
 {

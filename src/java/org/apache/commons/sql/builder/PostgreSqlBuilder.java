@@ -21,13 +21,11 @@ import java.io.IOException;
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
 
-import java.io.IOException;
-
 /**
  * An SQL Builder for PostgresSqlL
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PostgreSqlBuilder extends SqlBuilder{
 

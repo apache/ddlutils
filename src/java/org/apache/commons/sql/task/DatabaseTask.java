@@ -17,7 +17,6 @@
 package org.apache.commons.sql.task;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -34,7 +33,7 @@ import org.apache.tools.ant.Task;
  *
  * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
  * @author John Marshall/Connectria
- * @version $Id: DatabaseTask.java,v 1.2 2004/02/28 03:35:48 bayard Exp $
+ * @version $Id: DatabaseTask.java,v 1.3 2004/03/02 13:18:31 mvdb Exp $
  */
 public abstract class DatabaseTask extends Task
 {

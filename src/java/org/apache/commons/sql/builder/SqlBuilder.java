@@ -25,8 +25,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.sql.io.JdbcModelReader;
-import org.apache.commons.sql.model.Index;
-import org.apache.commons.sql.model.IndexColumn;
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.ForeignKey;
