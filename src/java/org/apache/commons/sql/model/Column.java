@@ -9,6 +9,7 @@ public class Column
     private String name;
     private boolean primaryKey = false;
     private boolean required = false;
+    private boolean autoIncrement = false;
     private String type;
     private int size = 0;
     
@@ -44,6 +45,16 @@ public class Column
         this.required = required;
     }
     
+    public boolean isAutoIncrement()
+    {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement)
+    {
+        this.autoIncrement = autoIncrement;
+    }
+    
     public String getType()
     {
         return type;
@@ -63,4 +74,19 @@ public class Column
     {
         this.size=size;
     }
+    
+    
+    // Helper methods
+    //-------------------------------------------------------------------------                
+    
+    /**
+     * @return the full SQL type string including the size, such as "VARCHAR (2000)"
+     */
+    public String getTypeString() {
+        if ( getSize() > 0 ) {
+            return getType() + " (" + getSize() + ")";
+        }
+        return getType();
+    }
+
 }

@@ -58,6 +58,7 @@ public class Table
     
     
     // Helper methods
+    //-------------------------------------------------------------------------                
     
     /**
      * @return true if there is at least one primary key column
@@ -75,4 +76,23 @@ public class Table
         }
         return false;
     }
+    
+    /**
+     * @return a List of primary key columns or an empty list if there are no
+     * primary key columns for this Table
+     */    
+    public List getPrimaryKeyColumns() 
+    {
+        List answer = new ArrayList();
+        for (Iterator iter = getColumns().iterator(); iter.hasNext(); ) 
+        {
+            Column column = (Column) iter.next();
+            if ( column.isPrimaryKey() )
+            {
+                answer.add(column);
+            }
+        }
+        return answer;
+    }
+
 }
