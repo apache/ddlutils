@@ -56,10 +56,7 @@
  * individuals on behalf of the Apache Software Foundation.  For more
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
- * 
- * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
-
 package org.apache.commons.sql.io;
 
 import java.io.OutputStream;
@@ -71,6 +68,7 @@ import org.apache.commons.betwixt.io.BeanWriter;
  * This class outputs a fully populated Database bean as XML.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author Matthew Hawthorne
  * @version $Revision: 1.14 $
  */
 public class DatabaseWriter extends BeanWriter {
@@ -91,6 +89,6 @@ public class DatabaseWriter extends BeanWriter {
     private void init() {
         setXMLIntrospector( DatabaseReader.newXMLIntrospector() );
         enablePrettyPrint();
-        setWriteIDs(false);
+        getBindingConfiguration().setMapIDs(false);
     }
 }
