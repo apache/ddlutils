@@ -62,6 +62,9 @@
 package org.apache.commons.sql.dynabean;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
@@ -165,18 +168,35 @@ public abstract class DynaSql {
      */
     public void delete(DynaBean dynaBean) throws SQLException {
         Connection connection = borrowConnection();
+        PreparedStatement statement = null;
         try {
             SqlDynaClass dynaClass = getSqlDynaClass(dynaBean);
             SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
-            if (primaryKeys.length == 0) {
+            int size = primaryKeys.length;
+            if (size == 0) {
                 log.info( "Cannot update type: " + dynaClass + " as there are no primary keys to update" );        
                 return;
             }
             String sql = createDeleteSql(dynaClass, primaryKeys);
 
             log.info( "About to execute SQL: " + sql );
+            
+            statement = connection.prepareStatement( sql );   
+            
+            for ( int i = 0; i < size; i++ ) {
+                SqlDynaProperty primaryKey = primaryKeys[i];
+                setObject(statement, 1+i, dynaBean, primaryKey);
+            }
+            int count = statement.executeUpdate();
+            if ( count != 1 ) {
+                log.warn( "Attempted to delete a single row : " + dynaBean 
+                    + " in table: " + dynaClass.getTableName() 
+                    + " but changed: " + count + " row(s)" 
+                );
+            }
         }
         finally {
+            closeStatement(statement);
             returnConnection(connection);
         }
     }
@@ -224,12 +244,41 @@ public abstract class DynaSql {
     }
 
     /**
+     * Closes the given result set down.
+     */
+    protected void closeResultSet(ResultSet resultSet) {
+        if ( resultSet != null ) {
+            try {
+                resultSet.close();
+            }
+            catch (Exception e) {
+                log.warn("Ignoring exception closing result set: " + e, e);
+            }
+        }
+    }
+
+    /**
+     * Closes the given statement down.
+     */
+    protected void closeStatement(Statement statement) {
+        if ( statement != null ) {
+            try {
+                statement.close();
+            }
+            catch (Exception e) {
+                log.warn("Ignoring exception closing statement: " + e, e);
+            }
+        }
+    }
+    
+     /**
      * Creates a new primary key value, inserts the bean and returns the new item.
      */
     protected void insert(DynaBean dynaBean, Connection connection) throws SQLException {
         SqlDynaClass dynaClass = getSqlDynaClass(dynaBean);
         SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
-        if (properties.length == 0) {
+        int size = properties.length;
+        if (size == 0) {
             log.info( "Cannot insert type: " + dynaClass + " as there are no properties" );        
             return;
         }
@@ -237,6 +286,26 @@ public abstract class DynaSql {
         String sql = createInsertSql(dynaClass, properties);
         
         log.info( "About to execute SQL: " + sql );
+        
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement( sql );   
+            
+            for ( int i = 0; i < size; i++ ) {
+                SqlDynaProperty property = properties[i];
+                setObject(statement, 1+i, dynaBean, property);
+            }
+            int count = statement.executeUpdate();
+            if ( count != 1 ) {
+                log.warn( "Attempted to insert a single row : " + dynaBean 
+                    + " in table: " + dynaClass.getTableName() 
+                    + " but changed: " + count + " row(s)" 
+                );
+            }
+        }
+        finally {
+            closeStatement(statement);
+        }
     }
     
     /**
@@ -255,6 +324,31 @@ public abstract class DynaSql {
         String sql = createUpdateSql(dynaClass, primaryKeys, properties);
         
         log.info( "About to execute SQL: " + sql );
+
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement( sql );   
+            
+            int sqlIndex = 1;
+            for ( int i = 0, size = properties.length; i < size; i++ ) {
+                SqlDynaProperty property = properties[i];
+                setObject(statement, sqlIndex++, dynaBean, property);
+            }
+            for ( int i = 0, size = primaryKeys.length; i < size; i++ ) {
+                SqlDynaProperty primaryKey = primaryKeys[i];
+                setObject(statement, sqlIndex++, dynaBean, primaryKey);
+            }
+            int count = statement.executeUpdate();
+            if ( count != 1 ) {
+                log.warn( "Attempted to insert a single row : " + dynaBean 
+                    + " in table: " + dynaClass.getTableName() 
+                    + " but changed: " + count + " row(s)" 
+                );
+            }
+        }
+        finally {
+            closeStatement(statement);
+        }
     }
 
         
@@ -371,5 +465,13 @@ public abstract class DynaSql {
      */
     protected SqlDynaClass createSqlDynaClass(Table table) {
         return SqlDynaClass.newInstance(table);
+    }
+
+    /**
+     * Sets property value with the given prepared statement, doing any type specific conversions or swizzling.
+     */
+    protected void setObject(PreparedStatement statement, int sqlIndex, DynaBean dynaBean, SqlDynaProperty property) throws SQLException {
+        Object value = dynaBean.get(property.getName());    
+        statement.setObject(sqlIndex, value);
     }
 }
