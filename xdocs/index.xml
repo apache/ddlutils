@@ -3,25 +3,40 @@
 <document>
 
   <properties>
-    <title>Torque</title>
+    <title>Commons SQL</title>
+    <author email="jstrachan@apache.org">James Strachan</author>
     <author email="jvanzyl@apache.com">Jason van Zyl</author>
     <author email="mpoeschl@marmot.at">Martin Poeschl</author>
   </properties>
 
   <body>
 
-    <section name="What is Torque?">
+    <section name="What is Commons SQL?">
       <p>
-        Torque is a persistence layer. Torque generates all the database
-        resources required by your application and includes a runtime
-        environment to run the generated classes.
+        Commons SQL is a simple set of beans that represent a relational database schema
+        such as a Database, Table, Column etc.
+        These beans can be read from XML or written to XML using 
+        <a href="http://jakarta.apache.org/commons/betwixt/">Betwix</a>.
       </p>
       <p>
-        Torque was developed as part of the Turbine Framework. It is now
-        decoupled and can be used by itself. Starting with version 2.2 Turbine
-        will use the decoupled Torque.
+        Then the SQL beans can be used by code generation tools like 
+        <a href="http://jakarta.apache.org/velocity/">Velocity</a>
+        or
+        <a href="http://jakarta.apache.org/commons/sandbox/jelly/">Jelly</a>
+        to create SQL DDL for different databases, HTML documentation, Java beans for each table,
+        <a href="http://jakarta.apache.org/ojb/">OJB</a>
+        repository files and so forth.
+      </p>
+      <p>
+        It is hoped that Commons SQL can be used to create a 
+        <a href="http://jakarta.apache.org/turbine/maven/">Maven</a> 
+        plugin for projects wishing to create beans or OJB files from some logical relational schema.
+      </p>
+      <p>
+        Commons SQL is based on experiences and ideas from the Turbine and Torque projects.
       </p>
 
+<!--
       <subsection name="Torque's generation tasks">
         <p>
           Torque uses a single XML database schema to generate the SQL for
@@ -206,6 +221,8 @@
         the <a href="developer-guide.html">developer-guide</a>, run the tests
         and send your results (and bugfixes ;) to the turbine-dev list.
       </p>
+      
+-->      
     </section>
 
   </body>
