@@ -71,16 +71,24 @@ public class Column
     private boolean primaryKey = false;
     private boolean required = false;
     private boolean autoIncrement = false;
+    private boolean nullable = false;
     private String type;
     private int size = 0;
     private String defaultValue;
+    private Integer scale = null;
+    private String isNullable;
+    private Boolean isTextType = new Boolean(false);
+    private Integer precisionRadix = null;
+    private Integer charOctetLength = null;
+    private Integer ordinalPosition = null;
     
     public Column() 
     {
     }
 
     public Column(String name, String type, int size, boolean required, boolean 
-                  primaryKey, boolean autoIncrement, String defaultValue) 
+                  primaryKey, boolean autoIncrement, String defaultValue, 
+                  Integer scale, String isNullable) 
     {
         this.name = name;
         this.type = type;
@@ -89,9 +97,11 @@ public class Column
         this.primaryKey = primaryKey;
         this.autoIncrement = autoIncrement;
         this.defaultValue = defaultValue;
+        this.scale = scale;
+        this.isNullable = isNullable;
     }
 
-    public String toString() 
+    public String toString()
     {
         return super.toString() + "[name=" + name + ";type=" + type + "]";
     }
@@ -145,6 +155,26 @@ public class Column
     {
         this.type = type;
     }
+
+    public boolean getNullable()
+    {
+        return this.nullable;
+    }
+    
+    public void setNullable(boolean nullable)
+    {
+        this.nullable = nullable;
+    }
+    
+    public String getIsNullable()
+    {
+        return this.isNullable;
+    }
+    
+    public void setIsNullable(String isNullable)
+    {
+        this.isNullable = isNullable;
+    }
     
     public int getSize()
     {
@@ -154,6 +184,26 @@ public class Column
     public void setSize(int size)
     {
         this.size = size;
+    }
+
+    public Integer getScale()
+    {
+        return this.scale;
+    }
+    
+    public void setScale(Integer scale)
+    {
+        this.scale = scale;
+    }
+
+    public Boolean getIsTextType()
+    {
+        return this.isTextType;
+    }
+
+    public void setIsTextType(Boolean isTextType)
+    {
+        this.isTextType = isTextType;
     }
     
     public String getDefaultValue()
@@ -166,6 +216,36 @@ public class Column
         this.defaultValue = defaultValue;
     }
 
+    public Integer getPrecisionRadix()
+    {
+        return this.precisionRadix;
+    }
+    
+    public void setPrecisionRadix(Integer precisionRadix)
+    {
+        this.precisionRadix = precisionRadix;
+    }
+
+    public Integer getCharOctetLength()
+    {
+        return this.charOctetLength;
+    }
+    
+    public void setCharOctetLength(Integer charOctetLength)
+    {
+        this.charOctetLength = charOctetLength;
+    }
+
+    public Integer getOrdinalPosition()
+    {
+        return this.ordinalPosition;
+    }
+    
+    public void setOrdinalPosition(Integer ordinalPosition)
+    {
+        this.ordinalPosition = ordinalPosition;
+    }
+    
     // Helper methods
     //-------------------------------------------------------------------------                
     
@@ -173,8 +253,14 @@ public class Column
      * @return the full SQL type string including the size, such as "VARCHAR (2000)"
      */
     public String getTypeString() {
-        if ( getSize() > 0 ) {
-            return getType() + " (" + getSize() + ")";
+        if ( this.scale != null ) {
+            return getType() + " (" + getSize() + "," + getScale() + ")";
+        }
+        else
+        {
+            if ( getSize() > 0 ) {
+                return getType() + " (" + getSize() + ")";
+            }
         }
         return getType();
     }
