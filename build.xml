@@ -56,6 +56,9 @@
         <copy todir="${build.java.dir}/resources">
             <fileset dir="${src.resources.dir}"/>
         </copy>
+        <copy todir="${build.java.dir}">
+            <fileset dir="${src.java.dir}" includes="**/*.betwixt"/>
+        </copy>
         <jar jarfile="${dist.dir}/${dist-filename-prefix}.jar"
              basedir="${build.java.dir}"/>
     </target>
@@ -132,5 +135,4 @@
                     todir="${build.test.dir}"/>
         </junitreport>
     </target>
-
 </project>
