@@ -33,7 +33,7 @@ import org.apache.tools.ant.Task;
  *
  * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
  * @author John Marshall/Connectria
- * @version $Id: DatabaseTask.java,v 1.3 2004/03/02 13:18:31 mvdb Exp $
+ * @version $Id$
  */
 public abstract class DatabaseTask extends Task
 {

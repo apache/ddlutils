@@ -56,7 +56,7 @@ import org.apache.commons.sql.model.TypeMap;
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author John Marshall/Connectria
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public abstract class SqlBuilder {
 

@@ -7,7 +7,7 @@ package org.apache.commons.sql.model;
  * version 1.1, a copy of which has been included with this distribution in
  * the LICENSE file.
  *
- * $Id: TestTypeMap.java,v 1.2 2003/04/30 11:27:30 jstrachan Exp $
+ * $Id$
  */
 
 import junit.framework.Test;
@@ -18,7 +18,7 @@ import junit.framework.TestSuite;
  * Test harness for TypeMap Class
  *
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class TestTypeMap
      extends TestCase

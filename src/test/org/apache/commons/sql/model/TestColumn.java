@@ -26,7 +26,7 @@ import junit.framework.TestSuite;
  * Test harness for Column Class
  *
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class TestColumn
      extends TestCase

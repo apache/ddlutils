@@ -63,7 +63,7 @@ import java.util.Hashtable;
  *
  * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class TypeMap
 {

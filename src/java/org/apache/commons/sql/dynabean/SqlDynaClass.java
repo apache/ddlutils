@@ -31,7 +31,7 @@ import org.apache.commons.sql.model.Table;
  * Table in a Database.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class SqlDynaClass extends BasicDynaClass {
 

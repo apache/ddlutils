@@ -29,7 +29,7 @@ import java.util.Map;
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class SqlBuilderFactory
 {

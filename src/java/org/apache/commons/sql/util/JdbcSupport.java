@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * for implementation inheritence..
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public abstract class JdbcSupport {
 

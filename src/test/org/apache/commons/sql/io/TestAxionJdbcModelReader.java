@@ -29,7 +29,7 @@ import org.apache.commons.sql.model.Table;
  * JdbcModelReader test harness for the Axion database
  *
  * @author <a href="mailto:dep4b@yahoo.com">Eric Pugh</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class TestAxionJdbcModelReader extends AbstractTestJdbcModelReader {
 

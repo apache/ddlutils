@@ -13,7 +13,7 @@
 -->
 
 
-<!-- $Id: site.xsl,v 1.1 2004/10/16 10:09:15 tomdz Exp $ -->
+<!-- $Id$ -->
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   version="1.0">

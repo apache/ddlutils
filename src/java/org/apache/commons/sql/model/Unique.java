@@ -24,7 +24,7 @@ import java.util.List;
  * same by the Table.
  * 
  * @author John Marshall/Connectria
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class Unique extends Index
 {

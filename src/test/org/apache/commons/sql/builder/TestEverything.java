@@ -7,7 +7,7 @@ package org.apache.commons.sql.builder;
  * version 1.1, a copy of which has been included with this distribution in
  * the LICENSE file.
  *
- * $Id: TestEverything.java,v 1.3 2004/08/14 19:51:38 tomdz Exp $
+ * $Id$
  */
 import java.beans.IntrospectionException;
 import java.io.FileInputStream;
@@ -40,7 +40,7 @@ import org.xml.sax.SAXException;
  * drop column, modify column, drop table, default values, unique indexes
  *
  * @author John Marshall/Connectria
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class TestEverything extends TestCase
 {

@@ -7,7 +7,7 @@ package org.apache.commons.sql.builder;
  * version 1.1, a copy of which has been included with this distribution in
  * the LICENSE file.
  *
- * $Id: TestProjectRoundTrip.java,v 1.3 2002/03/10 20:16:03 jvanzyl Exp $
+ * $Id$
  */
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -25,7 +25,7 @@ import org.apache.commons.sql.model.Database;
  * Test harness for the SqlBuilder for various databases.
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class TestBuilder extends TestCase
 {

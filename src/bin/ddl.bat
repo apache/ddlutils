@@ -12,7 +12,7 @@ rem   COMMONS_SQL_HOME   Points to the commons-sql installation directory.
 rem
 rem   JAVA_OPTS       Java runtime options
 rem
-rem $Id: ddl.bat,v 1.7 2002/12/17 13:03:10 tanderson Exp $
+rem $Id$
 rem ---------------------------------------------------------------------------
 
 if "%OS%" == "Windows_NT" setlocal

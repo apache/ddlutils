@@ -26,7 +26,7 @@ import org.apache.commons.sql.model.Table;
  * An SQL Builder for the <a href="http://axion.tigris.org/">Axion</a> JDBC database.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class AxionBuilder extends SqlBuilder {
     

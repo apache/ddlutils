@@ -42,7 +42,7 @@ import org.apache.commons.sql.util.DataSourceWrapper;
  * SqlBuilder code be functioning to dynamically create the database so we can test it!
  *
  * @author <a href="mailto:dep4b@yahoo.com">Eric Pugh</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public abstract class AbstractTestJdbcModelReader extends TestCase {
     /** The Log to which logging calls will be made. */

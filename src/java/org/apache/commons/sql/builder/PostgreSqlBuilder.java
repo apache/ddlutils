@@ -27,7 +27,7 @@ import org.apache.commons.sql.model.Table;
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class PostgreSqlBuilder extends SqlBuilder
 {

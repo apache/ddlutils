@@ -44,7 +44,7 @@ import org.apache.commons.sql.model.Table;
  * A tool to read a JDBC database and create a Commons-Sql Database model
  *
  * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
- * @version $Revision: $
+ * @version $Revision$
  */
 public class JdbcModelReader {
 

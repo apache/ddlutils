@@ -28,7 +28,7 @@ import org.apache.commons.sql.model.Database;
  * This class is-a Digester and so can support configuration via custom rules.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class DatabaseReader extends BeanReader
 {

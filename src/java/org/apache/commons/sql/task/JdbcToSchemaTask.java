@@ -28,7 +28,7 @@ import org.apache.tools.ant.BuildException;
  * JDBC metadata.
  *
  * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
- * @version $Id: $
+ * @version $Id$
  */
 public class JdbcToSchemaTask extends DatabaseTask
 {

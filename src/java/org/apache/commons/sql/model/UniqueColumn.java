@@ -21,7 +21,7 @@ package org.apache.commons.sql.model;
  * same by the Table.
  * 
  * @author John Marshall/Connectria
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class UniqueColumn extends IndexColumn
 {

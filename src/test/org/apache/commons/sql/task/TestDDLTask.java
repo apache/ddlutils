@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * JUnit tests.
  * 
- * @version $Id: TestDDLTask.java,v 1.3 2004/10/14 19:42:48 tomdz Exp $
+ * @version $Id$
  * @see DDLTask
  */
 public final class TestDDLTask extends TestCase {

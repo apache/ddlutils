@@ -7,7 +7,7 @@ package org.apache.commons.sql;
  * version 1.1, a copy of which has been included with this distribution in
  * the LICENSE file.
  *
- * $Id: TestProjectRoundTrip.java,v 1.3 2002/03/10 20:16:03 jvanzyl Exp $
+ * $Id$
  */
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import org.apache.commons.sql.model.Table;
  * Test harness for the IO package
  *
  * @author <a href="mailto:jason@zenplex.com">Jason van Zyl</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class TestDataModelRoundTrip
      extends TestCase

@@ -25,7 +25,7 @@ import junit.framework.TestSuite;
  * A JUnit test for JdbcToSchemaTask.java
  *
  * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
- * @version $Revision: $
+ * @version $Revision$
  */
 public class TestJdbcToSchemaTask extends TestCase {
     

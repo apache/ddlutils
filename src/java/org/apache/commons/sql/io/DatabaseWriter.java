@@ -25,7 +25,7 @@ import org.apache.commons.betwixt.io.BeanWriter;
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author Matthew Hawthorne
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class DatabaseWriter extends BeanWriter {
     
