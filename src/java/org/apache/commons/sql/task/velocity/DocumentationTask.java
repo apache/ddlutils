@@ -1,4 +1,4 @@
-package org.apache.commons.sql.task;
+package org.apache.commons.sql.task.velocity;
 
 /* ====================================================================
  * The Apache Software License, Version 1.1
@@ -54,15 +54,78 @@ package org.apache.commons.sql.task;
  * <http://www.apache.org/>.
  */
 
+import org.apache.velocity.context.Context;
+
 /**
- * An extended Texen task used for generating data DTD from
- * an XML schema describing a database structure.
+ * An ant task for generating output by using Velocity
  *
- * @author <a href="mailto:fedor.karpelevitch@home.com"> Fedor Karpelevitch </a>
- * @author <a href="mailto:jvanzyl@zenplex.com">Jason van Zyl</a>
- * @version  $Id: TorqueDataDTDTask.java,v 1.3 2001/10/27 19:04:38 jvanzyl Exp $
+ * @author <a href="mailto:mpoeschl@marmot.at">Martin Poeschl</a>
+ * @version $Id: TorqueDocumentationTask.java,v 1.2 2002/04/11 22:02:06 mpoeschl Exp $
  */
-public class DataDTDTask 
+public class DocumentationTask 
     extends DataModelTask
 {
+
+    /**
+     * The target database(s) we are generating SQL
+     * for. Right now we can only deal with a single
+     * target, but we will support multiple targets
+     * soon.
+     */
+    private String targetDatabase;
+
+    private String outputFormat;
+
+
+    /**
+     * Get the current target package.
+     *
+     * @return String target database(s)
+     */
+    public String getTargetDatabase()
+    {
+        return targetDatabase;
+    }
+
+    /**
+     * Set the current target package.  This is where
+     * generated java classes will live.
+     *
+     * @param v target database(s)
+     */
+    public void setTargetDatabase(String v)
+    {
+        targetDatabase = v;
+    }
+
+    /**
+     * Get the current output format.
+     *
+     * @return the current output format
+     */
+    public String getOutputFormat()
+    {
+        return outputFormat;
+    }
+
+    /**
+     * Set the current output format.
+     *
+     * @param v output format
+     */
+    public void setOutputFormat(String v)
+    {
+        outputFormat = v;
+    }
+
+    /**
+     * Place our target package value into the context for use in the templates.
+     */
+    public Context initControlContext() throws Exception
+    {
+        super.initControlContext();
+        context.put("targetDatabase", targetDatabase);
+        context.put("outputFormat", outputFormat);
+        return context;
+    }
 }

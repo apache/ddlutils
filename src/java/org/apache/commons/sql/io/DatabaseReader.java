@@ -60,41 +60,47 @@
  * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
 
-package org.apache.commons.sql.builder;
+package org.apache.commons.sql.io;
 
+import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Iterator;
-import java.util.List;
 
-import org.apache.commons.sql.model.Column;
+import org.apache.commons.betwixt.XMLIntrospector;
+import org.apache.commons.betwixt.io.BeanReader;
+import org.apache.commons.betwixt.strategy.HyphenatedNameMapper;
+
 import org.apache.commons.sql.model.Database;
-import org.apache.commons.sql.model.Table;
 
 /**
- * An SQL Builder for Oracle
+ * This class parsers XML and creates a fully populated Database bean.
+ * This class is-a Digester and so can support configuration via custom rules.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
-public class OracleBuilder extends SqlBuilder {
+public class DatabaseReader extends BeanReader {
     
-    public OracleBuilder() {
-        setPrimaryKeyEmbedded(false);
+    public DatabaseReader() throws IntrospectionException {
+        setXMLIntrospector( newXMLIntrospector() );
+        registerBeanClass(Database.class);
     }
-    
-    public void dropTable(Table table) throws IOException { 
-        print( "drop table " );
-        print( table.getName() );
-        print( " CASCADE CONSTRAINTS" );
-        printEndOfStatement();
-    }
-    
-    protected void printComment(String text) throws IOException { 
-        print( "--" );
-        if (! text.startsWith( "-" ) ) {
-            print(" ");
-        }                
-        println( text );
+
+    /**
+     * A factory method to create the default introspector used to turn
+     * the Database object model into XML
+     */    
+    protected static XMLIntrospector newXMLIntrospector() {
+        XMLIntrospector introspector = new XMLIntrospector();
+
+        // configure the style of the XML, to brief and attribute based
+        introspector.setAttributesForPrimitives(true);
+        introspector.setWrapCollectionsInElement(false);
+
+        // set the mixed case name mapper
+        introspector.setElementNameMapper(new HyphenatedNameMapper());
+        //introspector.setElementNameMapper(new DecapitalizeNameMapper());
+
+        return introspector;
     }
 }

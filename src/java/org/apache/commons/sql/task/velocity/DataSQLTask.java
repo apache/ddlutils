@@ -1,4 +1,4 @@
-package org.apache.commons.sql.task;
+package org.apache.commons.sql.task.velocity;
 
 /* ====================================================================
  * The Apache Software License, Version 1.1

@@ -1,9 +1,12 @@
 package org.apache.commons.sql.builder;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
@@ -26,21 +29,33 @@ import org.apache.commons.sql.model.Table;
  * @version $Revision: 1.14 $
  */
 public class SqlBuilder {
+
+    /** The Log to which logging calls will be made. */
+    private static final Log log = LogFactory.getLog(SqlBuilder.class);
     
-    protected PrintWriter writer;
+    /** The current Writer used to output the SQL to */
+    private Writer writer;
     
-    /** used for generating sequential constraints */
-    protected int counter;
+    /** A counter used to count the constraints */
+    private int counter;
     
+    /** The indentation used to indent commands */
+    private String indent = "    ";
+    
+    /** Whether or not primary key constraints are embedded inside the create table statement */
+    private boolean primaryKeyEmbedded = true;
+    
+    /** Whether or not foreign key constraints are embedded inside the create table statement */
+    private boolean foreignKeysEmbedded;
+
     public SqlBuilder() {
     }
-    
-    
+
     /**
      * Outputs the DDL required to drop and recreate the database 
      */
     public void createDatabase(Database database) throws IOException {
-        for ( Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
+        for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
             Table table = (Table) iter.next();
             tableComment(table);
             dropTable(table);
@@ -52,7 +67,7 @@ public class SqlBuilder {
      * Outputs the DDL required to drop the database 
      */
     public void dropDatabase(Database database) throws IOException {
-        for ( Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
+        for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
             Table table = (Table) iter.next();
             tableComment(table);
             dropTable(table);
@@ -61,96 +76,140 @@ public class SqlBuilder {
 
     /** 
      * Outputs a comment for the table
-     */    
-    public void tableComment(Table table) throws IOException { 
-        writeComment(  "-----------------------------------------------------------------------" );
-        writeComment(  table.getName() );
-        writeComment(  "-----------------------------------------------------------------------" );
-        writer.println();
+     */
+    public void tableComment(Table table) throws IOException {
+        printComment("-----------------------------------------------------------------------");
+        printComment(table.getName());
+        printComment("-----------------------------------------------------------------------");
+        println();
     }
-    
 
     /**
      * Outputs the DDL to drop the table
      */
-    public void dropTable(Table table) throws IOException { 
-        writer.write( "drop table " );
-        writer.write( table.getName() );
-        writeEndOfStatement();
+    public void dropTable(Table table) throws IOException {
+        print("drop table ");
+        print(table.getName());
+        printEndOfStatement();
     }
-    
+
     /** 
      * Outputs the DDL to create the table along with any constraints
      */
-    public void createTable(Table table) throws IOException { 
-        writer.write( "create table " );
-        writer.write( table.getName() );
-        writer.println( " (" );
+    public void createTable(Table table) throws IOException {
+        print("create table ");
+        println(table.getName());
+        println("(");
 
         writeColumnTypes(table);
-        
+
         if (isPrimaryKeyEmbedded()) {
             writePrimaryKeys(table);
         }
         if (isForeignKeysEmbedded()) {
             writeForeignKeys(table);
         }
-        writer.println();
-        writer.write( ")" );
-        writeEndOfStatement();
-        
-        if (! isPrimaryKeyEmbedded()) {
+        println();
+        print(")");
+        printEndOfStatement();
+
+        if (!isPrimaryKeyEmbedded()) {
             writePrimaryKeysAlterTable(table);
         }
-        if (! isForeignKeysEmbedded()) {
+        if (!isForeignKeysEmbedded()) {
             writeForeignKeysAlterTable(table);
         }
     }
-    
+
     /** 
      * Outputs the DDL to add a column to a table.
      */
     public void createColumn(Column column) throws IOException {
-        writer.write( column.getName() );
-        writer.write( " " );
-        writer.write( getSqlType( column ) );
-        writer.write( " " );
-        if ( column.isAutoIncrement() ) {
-            writeAutoIncrementColumn();
-        }
-        if ( column.isRequired() ) {
-            writer.write( "NOT NULL" );
+        print(column.getName());
+        print(" ");
+        print(getSqlType(column));
+        print(" ");
+        if (column.isRequired()) {
+            print("NOT NULL");
         }
         else {
-            writer.write( "NULL" );
+            print("NULL");
+        }
+        if (column.isAutoIncrement()) {
+            printAutoIncrementColumn();
         }
     }
 
-
     // Properties
     //-------------------------------------------------------------------------                
-        
+
     /**
-     * Returns the writer.
-     * @return PrintWriter
+     * @return the Writer used to print the DDL to
      */
-    public PrintWriter getWriter() {
+    public Writer getWriter() {
         return writer;
     }
 
     /**
-     * Sets the writer.
-     * @param writer The writer to set
+     * Sets the writer used to print the DDL to
      */
-    public void setWriter(PrintWriter writer) {
+    public void setWriter(Writer writer) {
         this.writer = writer;
     }
 
+    /** 
+     * @return the indentation used to indent the SQL
+     */
+    public String getIndent() {
+        return indent;
+    }
+
+    /**
+     * Sets the indentation used to indent the SQL
+     */
+    public void setIndent(String indent) {
+        this.indent = indent;
+    }
+
+    /**
+     * @return whether the primary key constraint is embedded in the create 
+     * table clause or as a seperate alter table.
+     * The default is true.
+     */
+    public boolean isPrimaryKeyEmbedded() {
+        return primaryKeyEmbedded;
+    }
+
+    /**
+     * Sets whether the primary key constraint is embedded in the create 
+     * table clause or as a seperate alter table.
+     * The default is true.
+     */
+    public void setPrimaryKeyEmbedded(boolean primaryKeyEmbedded) {
+        this.primaryKeyEmbedded = primaryKeyEmbedded;
+    }
+
+    /**
+     * @return whether the foreign key constraints are embedded in the create 
+     * table clause or as a seperate alter table statements.
+     * The default is false.
+     */
+    public boolean isForeignKeysEmbedded() {
+        return foreignKeysEmbedded;
+    }
+
+    /**
+     * Sets whether the foreign key constraints are embedded in the create 
+     * table clause or as a seperate alter table statements.
+     * The default is false.
+     */
+    public void setForeignKeysEmbedded(boolean foreignKeysEmbedded) {
+        this.foreignKeysEmbedded = foreignKeysEmbedded;
+    }
 
     // Implementation methods
     //-------------------------------------------------------------------------                
-        
-    
+
     /**
      * @return the full SQL type string including the size
      */
@@ -160,128 +219,142 @@ public class SqlBuilder {
 
     /**
      * Writes the column types for a table 
-     */    
+     */
     protected void writeColumnTypes(Table table) throws IOException {
-        boolean first = true;        
-        for (Iterator iter = table.getColumns().iterator(); iter.hasNext(); ) {
+        boolean first = true;
+        for (Iterator iter = table.getColumns().iterator(); iter.hasNext();) {
             Column column = (Column) iter.next();
             if (first) {
                 first = false;
             }
             else {
-                writer.println(",");
+                println(",");
             }
-            writer.write( "  " );
+            printIndent();
             createColumn(column);
         }
     }
-    
+
     /**
      * Writes the primary key constraints inside a create table () clause.
-     */    
+     */
     protected void writePrimaryKeys(Table table) throws IOException {
         List primaryKeyColumns = table.getPrimaryKeyColumns();
-        if ( primaryKeyColumns.size() > 0 ) {
-            writer.println( "," );
+        if (primaryKeyColumns.size() > 0) {
+            println(",");
+            printIndent();
             writePrimaryKeyStatement(primaryKeyColumns);
         }
     }
-    
+
     /**
      * Writes the primary key constraints as an AlterTable clause.
-     */    
+     */
     protected void writePrimaryKeysAlterTable(Table table) throws IOException {
         List primaryKeyColumns = table.getPrimaryKeyColumns();
-        if ( primaryKeyColumns.size() > 0 ) {
-            writer.write( "ALTER TABLE " );
-            writer.println( table.getName() );
-            writer.write( "    ADD CONSTRAINT " );
-            writer.write( table.getName() );
-            writer.println( "_PK" );
+        if (primaryKeyColumns.size() > 0) {
+            print("ALTER TABLE ");
+            println(table.getName());
+
+            printIndent();
+            print("ADD CONSTRAINT ");
+            print(table.getName());
+            println("_PK");
             writePrimaryKeyStatement(primaryKeyColumns);
-            writeEndOfStatement();
-            writer.println();
+            printEndOfStatement();
+            println();
         }
     }
 
     /**
      * Writes the 'PRIMARY KEY(A,B,...,N)' statement
      */
-    protected void writePrimaryKeyStatement(List primaryKeyColumns) throws IOException {
-        writer.write( "PRIMARY KEY (" );
-        
+    protected void writePrimaryKeyStatement(List primaryKeyColumns)
+        throws IOException {
+        print("PRIMARY KEY (");
+
         boolean first = true;
-        for (Iterator iter = primaryKeyColumns.iterator(); iter.hasNext(); ) {
+        for (Iterator iter = primaryKeyColumns.iterator(); iter.hasNext();) {
             Column column = (Column) iter.next();
             if (first) {
                 first = false;
             }
             else {
-                writer.write(", " );
+                print(", ");
             }
-            writer.write(column.getName());
+            print(column.getName());
         }
-        writer.write( ")" );
+        print(")");
     }
-    
+
     /**
      * Writes the foreign key constraints inside a create table () clause.
-     */    
+     */
     protected void writeForeignKeys(Table table) throws IOException {
-        for (Iterator keyIter = table.getForeignKeys().iterator(); keyIter.hasNext(); ) {
+        for (Iterator keyIter = table.getForeignKeys().iterator();
+            keyIter.hasNext();
+            ) {
             ForeignKey key = (ForeignKey) keyIter.next();
             if (key.getForeignTable() == null) {
-                System.err.println( "WARN: foreign key table is null for key: " + key );
+                System.err.println(
+                    "WARN: foreign key table is null for key: " + key);
             }
             else {
-                writer.println( "," );
-    
-                writer.write( "  CONSTRAINT " );
-                writer.write( table.getName() );
-                writer.write( "_FK_" );
-                writer.write( Integer.toString(++counter) );
-                writer.write( " FOREIGN KEY (" );            
-                writeLocalReferences(key);            
-                writer.write( key.getForeignTable() );
-                writer.println( ")" );
-                
-                writer.write( "  REFERENCES " );
-                writer.write( key.getForeignTable() );
-                writer.write( " (" );
+                println(",");
+
+                printIndent();
+                print("CONSTRAINT ");
+                print(table.getName());
+                print("_FK_");
+                print(Integer.toString(++counter));
+                print(" FOREIGN KEY (");
+                writeLocalReferences(key);
+                print(key.getForeignTable());
+                println(")");
+
+                printIndent();
+                print("REFERENCES ");
+                print(key.getForeignTable());
+                print(" (");
                 writeForeignReferences(key);
-                writer.println( ")" );
+                println(")");
             }
         }
     }
 
     /**
      * Writes the foreign key constraints as an AlterTable clause.
-     */    
+     */
     protected void writeForeignKeysAlterTable(Table table) throws IOException {
         counter = 0;
-        for (Iterator keyIter = table.getForeignKeys().iterator(); keyIter.hasNext(); ) {
+        for (Iterator keyIter = table.getForeignKeys().iterator();
+            keyIter.hasNext();
+            ) {
             ForeignKey key = (ForeignKey) keyIter.next();
             if (key.getForeignTable() == null) {
-                System.err.println( "WARN: foreign key table is null for key: " + key );
+                System.err.println(
+                    "WARN: foreign key table is null for key: " + key);
             }
             else {
-                writer.write( "ALTER TABLE " );
-                writer.println( table.getName() );
-                
-                writer.write( "  ADD CONSTRAINT " );
-                writer.write( table.getName() );
-                writer.write( "_FK_" );
-                writer.write( Integer.toString(++counter) );
-                writer.write( " FOREIGN KEY (" );            
-                writeLocalReferences(key);            
-                writer.println( ")" );
-                
-                writer.write( "  REFERENCES " );
-                writer.write( key.getForeignTable() );
-                writer.write( " (" );
+                print("ALTER TABLE ");
+                println(table.getName());
+
+                printIndent();
+                print("ADD CONSTRAINT ");
+                print(table.getName());
+                print("_FK_");
+                print(Integer.toString(++counter));
+                print(" FOREIGN KEY (");
+                writeLocalReferences(key);
+                println(")");
+
+                printIndent();
+                print("REFERENCES ");
+                print(key.getForeignTable());
+                print(" (");
                 writeForeignReferences(key);
-                writer.println( ")" );
-                writeEndOfStatement();
+                println(")");
+                printEndOfStatement();
             }
         }
     }
@@ -291,73 +364,88 @@ public class SqlBuilder {
      */
     protected void writeLocalReferences(ForeignKey key) throws IOException {
         boolean first = true;
-        for (Iterator iter = key.getReferences().iterator(); iter.hasNext(); ) {
+        for (Iterator iter = key.getReferences().iterator(); iter.hasNext();) {
             Reference reference = (Reference) iter.next();
             if (first) {
                 first = false;
             }
             else {
-                writer.write( ", " );
+                print(", ");
             }
-            writer.write( reference.getLocal() );
+            print(reference.getLocal());
         }
     }
-            
+
     /**
      * Writes a list of foreign references for the given key
      */
     protected void writeForeignReferences(ForeignKey key) throws IOException {
         boolean first = true;
-        for (Iterator iter = key.getReferences().iterator(); iter.hasNext(); ) {
+        for (Iterator iter = key.getReferences().iterator(); iter.hasNext();) {
             Reference reference = (Reference) iter.next();
             if (first) {
                 first = false;
             }
             else {
-                writer.write( ", " );
+                print(", ");
             }
-            writer.write( reference.getForeign() );
+            print(reference.getForeign());
         }
     }
-            
-    
+   
+   
+    /**
+     * Prints an SQL comment to the current stream
+     */
+    protected void printComment(String text) throws IOException {
+        print("# ");
+        println(text);
+    }
+
     /** 
-     * Writes the end of statement text, which is typically a semi colon followed by 
+     * Prints the end of statement text, which is typically a semi colon followed by 
      * a carriage return
      */
-    protected void writeEndOfStatement() throws IOException {
-        writer.println( ";" );
-        writer.println();
+    protected void printEndOfStatement() throws IOException {
+        println(";");
+        println();
     }
 
+    /** 
+     * Prints a new line
+     */
+    protected void println() throws IOException {
+        print("\n");
+    }
 
     /**
-     * Write a comment to the DDL stream
-     */    
-    protected void writeComment(String text) throws IOException { 
-        writer.write( "# " );
-        writer.println( text );
-    }
-    
-    /**
-     * Outputs that the current column is an auto increment
+     * Prints some text
      */
-    protected void writeAutoIncrementColumn() throws IOException { 
+    protected void print(String text) throws IOException {
+        writer.write(text);
     }
-    
+
     /**
-     * Should the primary key constraints be embedded inside the create table statement
+     * Prints some text then a newline
      */
-    protected boolean isPrimaryKeyEmbedded() {
-        return false;
+    protected void println(String text) throws IOException {
+        print(text);
+        println();
     }
-    
+
     /**
-     * Should the foreign key constraints be embedded inside the create table statement
+     * Prints the indentation used to indent SQL
      */
-    protected boolean isForeignKeysEmbedded() {
-        return false;
+    protected void printIndent() throws IOException {
+        print(getIndent());
     }
+
+    /**
+     * Outputs the fact that this column is an auto increment column.
+     */ 
+    protected void printAutoIncrementColumn() throws IOException {
+    }
+
 
 
 }

@@ -12,25 +12,23 @@ package org.apache.commons.sql;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.StringWriter;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
-import org.apache.commons.betwixt.XMLIntrospector;
-import org.apache.commons.betwixt.io.BeanReader;
-import org.apache.commons.betwixt.io.BeanWriter;
-import org.apache.commons.betwixt.strategy.DecapitalizeNameMapper;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.SimpleLog;
 
 import org.apache.commons.sql.model.*;
+import org.apache.commons.sql.io.*;
 
 /**
- * Test harness for the BeanReader that deals with project definitions.
+ * Test harness for the IO package
  *
  * @author <a href="mailto:jason@zenplex.com">Jason van Zyl</a>
  * @version $Revision: 1.3 $
@@ -75,13 +73,11 @@ public class TestDataModelRoundTrip
     /**
      * A unit test for JUnit
      */
-    public void testBeanWriter()
+    public void testDatabaseReader()
         throws Exception
     {
 
-        BeanReader reader = new BeanReader();
-        reader.setXMLIntrospector(createXMLIntrospector());
-        reader.registerBeanClass(getBeanClass());
+        DatabaseReader reader = new DatabaseReader();
         InputStream in = getXMLInput();
 
         try
@@ -105,6 +101,21 @@ public class TestDataModelRoundTrip
             assertEquals("isbn", c1.getName());
             assertTrue("isbn is required", c1.isRequired());
             assertTrue("isbn is not primary key", ! c1.isPrimaryKey());
+
+            List keyList0 = t0.getForeignKeys();
+            assertEquals( "Foreign key count", 1, keyList0.size() );
+            
+            ForeignKey key0 = (ForeignKey) keyList0.get(0);
+            assertEquals("foreignTable is correct", "author", key0.getForeignTable());
+            
+            List refList0 = key0.getReferences();
+            assertEquals( "Reference count", 1, refList0.size() );
+            
+            Reference r0 = (Reference) refList0.get(0);
+            assertTrue("Found a reference", r0 != null);
+                        
+            assertEquals("local is correct", "author_id", r0.getLocal());
+            assertEquals("foreign is correct", "author_id", r0.getForeign());
             
             // Write out the bean
             //writeBean(database);
@@ -129,9 +140,10 @@ public class TestDataModelRoundTrip
     public void writeBean(Object bean)
         throws Exception
     {
-        BeanWriter writer = new BeanWriter();
-        writer.enablePrettyPrint();
+        StringWriter buffer = new StringWriter();
+        DatabaseWriter writer = new DatabaseWriter(buffer);
         writer.write(bean);
+        String text = buffer.toString();
     }
 
     /**
@@ -151,25 +163,5 @@ public class TestDataModelRoundTrip
         //return getClass().getResourceAsStream("datamodel.xml");
         return new FileInputStream(TEST_DOCUMENT);
     }
-
-
-    /**
-     * ### it would be really nice to move this somewhere shareable across Maven
-     * / Turbine projects. Maybe a static helper method - question is what to
-     * call it???
-     */
-    protected XMLIntrospector createXMLIntrospector()
-    {
-        XMLIntrospector introspector = new XMLIntrospector();
-
-        // set elements for attributes to true
-        introspector.setAttributesForPrimitives(false);
-
-        // turn bean elements into lower case
-        introspector.setElementNameMapper(new DecapitalizeNameMapper());
-
-        return introspector;
-    }
-
 }
 

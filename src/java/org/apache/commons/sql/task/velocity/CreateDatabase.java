@@ -1,4 +1,4 @@
-package org.apache.commons.sql.task;
+package org.apache.commons.sql.task.velocity;
 
 /* ====================================================================
  * The Apache Software License, Version 1.1
@@ -25,13 +25,13 @@ package org.apache.commons.sql.task;
  *    Alternately, this acknowledgment may appear in the software itself,
  *    if and wherever such third-party acknowledgments normally appear.
  *
- * 4. The names "Apache" and "Apache Software Foundation" and
- *    "Apache Turbine" must not be used to endorse or promote products
- *    derived from this software without prior written permission. For
+ * 4. The names "Apache" and "Apache Software Foundation" and 
+ *    "Apache Turbine" must not be used to endorse or promote products 
+ *    derived from this software without prior written permission. For 
  *    written permission, please contact apache@apache.org.
  *
  * 5. Products derived from this software may not be called "Apache",
- *    "Apache Turbine", nor may "Apache" appear in their name, without
+ *    "Apache Turbine", nor may "Apache" appear in their name, without 
  *    prior written permission of the Apache Software Foundation.
  *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
@@ -57,30 +57,24 @@ package org.apache.commons.sql.task;
 import org.apache.velocity.context.Context;
 
 /**
- * An ant task for generating output by using Velocity
+ * An extended Texen task used for generating simple scripts
+ * for creating databases on various platforms.
  *
- * @author <a href="mailto:mpoeschl@marmot.at">Martin Poeschl</a>
- * @version $Id: TorqueDocumentationTask.java,v 1.2 2002/04/11 22:02:06 mpoeschl Exp $
+ * @author <a href="mailto:jvanzyl@zenplex.com">Jason van Zyl</a>
+ * @version $Id: TorqueCreateDatabase.java,v 1.6 2002/04/11 22:02:06 mpoeschl Exp $
  */
-public class DocumentationTask 
+public class CreateDatabase 
     extends DataModelTask
 {
-
     /**
-     * The target database(s) we are generating SQL
-     * for. Right now we can only deal with a single
-     * target, but we will support multiple targets
-     * soon.
+     * The target database vendor: MySQL, Oracle.
      */
     private String targetDatabase;
 
-    private String outputFormat;
-
-
     /**
-     * Get the current target package.
+     * Get the target database.
      *
-     * @return String target database(s)
+     * @return String target database.
      */
     public String getTargetDatabase()
     {
@@ -88,10 +82,9 @@ public class DocumentationTask
     }
 
     /**
-     * Set the current target package.  This is where
-     * generated java classes will live.
+     * Set the target database.
      *
-     * @param v target database(s)
+     * @param String target database(s)
      */
     public void setTargetDatabase(String v)
     {
@@ -99,33 +92,14 @@ public class DocumentationTask
     }
 
     /**
-     * Get the current output format.
-     *
-     * @return the current output format
-     */
-    public String getOutputFormat()
-    {
-        return outputFormat;
-    }
-
-    /**
-     * Set the current output format.
-     *
-     * @param v output format
-     */
-    public void setOutputFormat(String v)
-    {
-        outputFormat = v;
-    }
-
-    /**
-     * Place our target package value into the context for use in the templates.
+     * Place our target database and target platform
+     * values into the context for use in the
+     * templates.
      */
     public Context initControlContext() throws Exception
-    {
+    {   
         super.initControlContext();
         context.put("targetDatabase", targetDatabase);
-        context.put("outputFormat", outputFormat);
         return context;
     }
 }

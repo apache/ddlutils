@@ -1,4 +1,4 @@
-package org.apache.commons.sql.task;
+package org.apache.commons.sql.task.velocity;
 
 /* ====================================================================
  * The Apache Software License, Version 1.1
@@ -25,13 +25,13 @@ package org.apache.commons.sql.task;
  *    Alternately, this acknowledgment may appear in the software itself,
  *    if and wherever such third-party acknowledgments normally appear.
  *
- * 4. The names "Apache" and "Apache Software Foundation" and 
- *    "Apache Turbine" must not be used to endorse or promote products 
- *    derived from this software without prior written permission. For 
+ * 4. The names "Apache" and "Apache Software Foundation" and
+ *    "Apache Turbine" must not be used to endorse or promote products
+ *    derived from this software without prior written permission. For
  *    written permission, please contact apache@apache.org.
  *
  * 5. Products derived from this software may not be called "Apache",
- *    "Apache Turbine", nor may "Apache" appear in their name, without 
+ *    "Apache Turbine", nor may "Apache" appear in their name, without
  *    prior written permission of the Apache Software Foundation.
  *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
@@ -54,52 +54,15 @@ package org.apache.commons.sql.task;
  * <http://www.apache.org/>.
  */
 
-import org.apache.velocity.context.Context;
-
 /**
- * An extended Texen task used for generating simple scripts
- * for creating databases on various platforms.
+ * An extended Texen task used for generating data DTD from
+ * an XML schema describing a database structure.
  *
+ * @author <a href="mailto:fedor.karpelevitch@home.com"> Fedor Karpelevitch </a>
  * @author <a href="mailto:jvanzyl@zenplex.com">Jason van Zyl</a>
- * @version $Id: TorqueCreateDatabase.java,v 1.6 2002/04/11 22:02:06 mpoeschl Exp $
+ * @version  $Id: TorqueDataDTDTask.java,v 1.3 2001/10/27 19:04:38 jvanzyl Exp $
  */
-public class CreateDatabase 
+public class DataDTDTask 
     extends DataModelTask
 {
-    /**
-     * The target database vendor: MySQL, Oracle.
-     */
-    private String targetDatabase;
-
-    /**
-     * Get the target database.
-     *
-     * @return String target database.
-     */
-    public String getTargetDatabase()
-    {
-        return targetDatabase;
-    }
-
-    /**
-     * Set the target database.
-     *
-     * @param String target database(s)
-     */
-    public void setTargetDatabase(String v)
-    {
-        targetDatabase = v;
-    }
-
-    /**
-     * Place our target database and target platform
-     * values into the context for use in the
-     * templates.
-     */
-    public Context initControlContext() throws Exception
-    {   
-        super.initControlContext();
-        context.put("targetDatabase", targetDatabase);
-        return context;
-    }
 }
