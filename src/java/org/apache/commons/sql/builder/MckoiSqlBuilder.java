@@ -59,89 +59,37 @@
  * 
  * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
+
 package org.apache.commons.sql.builder;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
-import org.apache.commons.sql.model.ForeignKey;
-import org.apache.commons.sql.model.Reference;
 import org.apache.commons.sql.model.Table;
 
 /**
- * A factory of SqlBuilder instances based on a case insensitive database name.
- * 
- * Ultimately this class could use a discovery mechanism (such as commons-discovery) to find
- * new databases on the classpath.
+ * An SQL Builder for the Mckoi database
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
-public class SqlBuilderFactory {
-
-    /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog(SqlBuilderFactory.class);
-
-    private static Map databases = new HashMap();
-        
-    static {
-        registerDatabases();
+public class MckoiSqlBuilder extends SqlBuilder {
+    
+    public MckoiSqlBuilder() {
+        setForeignKeysEmbedded(true);
     }
-
-    /**
-     * Creates a new SqlBuilder for the given (case insensitive) database name
-     * or returns null if the database is not recognized.
-     */
-    public static synchronized SqlBuilder newSqlBuilder(String databaseName) 
-        throws IllegalAccessException, InstantiationException {
-            
-        Class theClass = (Class) databases.get(databaseName.toLowerCase());
-        if (theClass != null) {
-            return (SqlBuilder) theClass.newInstance();
-        }
-        return null;
+    
+    public void dropTable(Table table) throws IOException { 
+        print( "drop table if exists " );
+        print( table.getName() );
+        printEndOfStatement();
     }
-
-    /**
-     * @return a List of currently registered database types for which there is a
-     * specific SqlBuilder.
-     */
-    public static synchronized List getDatabaseTypes() {
-        // return a copy to prevent modification
-        List answer = new ArrayList();
-        answer.addAll( databases.keySet());
-        return answer;
-    }
-
-
-    /**
-     * Register the common builders
-     */
-    public static synchronized void registerDatabase(String databaseName, Class sqlBuilderClass) {
-        databases.put(databaseName.toLowerCase(), sqlBuilderClass);        
-    }
-
-    /**
-     * Register the common builders
-     */
-    protected static void registerDatabases() {
-        registerDatabase("axion", AxionBuilder.class);
-        registerDatabase("db2", Db2Builder.class);
-        registerDatabase("hsqldb", HsqlDbBuilder.class);
-        registerDatabase("mckoi", MckoiSqlBuilder.class);
-        registerDatabase("mssql", MSSqlBuilder.class);
-        registerDatabase("mysql", MySqlBuilder.class);
-        registerDatabase("oracle", OracleBuilder.class);
-        registerDatabase("sybase", SybaseBuilder.class);
+    
+    protected void printAutoIncrementColumn() throws IOException { 
+        //print( "AUTO_INCREMENT" );
     }
 }
