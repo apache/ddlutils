@@ -143,6 +143,7 @@ public class TypeMap
     };
 
     private static Hashtable sqlTypeNameToTypeID = new Hashtable();
+    private static Hashtable sqlTypeIDToTypeName = new Hashtable();
 
 
 
@@ -188,6 +189,16 @@ public class TypeMap
         return Types.OTHER;
     }
 
+    public static String getSQLTypeString(Integer typeCode)
+    {
+        String answer = (String) sqlTypeIDToTypeName.get(typeCode);
+        if ( answer != null )
+        {
+            return answer;
+        }
+        return "UNKNOWN";
+    }
+    
     /**
      * Returns true if values for the type need to be quoted.
      *
@@ -214,6 +225,7 @@ public class TypeMap
     protected static void registerSqlTypeID(Integer sqlTypeID, String name) 
     {
         sqlTypeNameToTypeID.put(name, sqlTypeID);
+        sqlTypeIDToTypeName.put(sqlTypeID, name);
     }
 }
 
