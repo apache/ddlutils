@@ -1,0 +1,142 @@
+<!--
+    Torque XML database schema DTD
+    $Id: database.dtd,v 1.13 2002/06/20 23:55:14 jmcnally Exp $
+-->
+
+<!--
+For: database.defaultIdMethod and table.idMethod
+
+Do not use autoincrement or sequence. They are deprecated in favor of
+using native which will use the Turbine Connection pool to determine
+which database it is talking to (yes, it knows that) and then use
+whatever native database methodology for insert increments that it can.
+Otherwise, you should use idbroker or none. none is good if you have a
+table that is just a join table. idbroker is good if you want a
+centralized repository for brokering out clumps of id's in a database
+agnostic way.
+-->
+
+<!--
+
+defaultJavaNamingMethod determines how a table or column name,
+from the name attribute in the xml database file, is converted to a
+Java class or method name.
+
+     nochange   - indicates not change is performed.
+     underscore - Underscores are removed, First letter is
+              capitalized, first letter after an underscore
+              is capitalized, the rest of the letters are
+              converted to lowercase.
+     javaname   - same as underscore, but no letters are converted
+              to lowercase.
+-->
+
+<!ELEMENT database (external-schema*, table+)>
+<!ATTLIST database
+  name CDATA #IMPLIED
+  defaultIdMethod (idbroker|native|autoincrement|sequence|none) "none"
+  defaultJavaType (object|primitive) "primitive"
+  package CDATA #IMPLIED
+  baseClass CDATA #IMPLIED
+  basePeer CDATA #IMPLIED
+  defaultJavaNamingMethod (nochange|underscore|javaname) "underscore"
+  heavyIndexing (true|false) "false"
+>
+
+<!ELEMENT external-schema EMPTY>
+<!ATTLIST external-schema
+  filename CDATA #REQUIRED
+>
+
+<!-- 
+     note: the interface="true", requires that useManagers=true in the
+     properties file. 
+-->
+<!ELEMENT table (column+,(foreign-key|index|unique|id-method-parameter)*)>
+<!ATTLIST table
+  name CDATA #REQUIRED
+  javaName CDATA #IMPLIED
+  idMethod (idbroker|native|autoincrement|sequence|none|null) "null"
+  skipSql (true|false) "false"
+  abstract (true|false) "false"
+  baseClass CDATA #IMPLIED
+  basePeer CDATA #IMPLIED
+  alias CDATA #IMPLIED
+  interface CDATA #IMPLIED
+  javaNamingMethod (nochange|underscore|javaname) #IMPLIED
+  heavyIndexing (true|false) #IMPLIED
+  description CDATA #IMPLIED
+>
+
+<!ELEMENT id-method-parameter EMPTY>
+<!ATTLIST id-method-parameter
+  name CDATA "default"
+  value CDATA #REQUIRED
+>
+
+<!ELEMENT column (inheritance*)>
+<!ATTLIST column
+  name CDATA #REQUIRED
+  javaName CDATA #IMPLIED
+  primaryKey (true|false) "false"
+  required (true|false) "false"
+  type
+    (
+          BIT  | TINYINT | SMALLINT    | INTEGER    | BIGINT    | FLOAT
+        | REAL | NUMERIC | DECIMAL     | CHAR       | VARCHAR   | LONGVARCHAR
+        | DATE | TIME    | TIMESTAMP   | BINARY     | VARBINARY | LONGVARBINARY
+        | NULL | OTHER   | JAVA_OBJECT | DISTINCT   | STRUCT    | ARRAY
+        | BLOB | CLOB    | REF         | BOOLEANINT | BOOLEANCHAR
+        | DOUBLE
+    ) "VARCHAR"
+  javaType (object|primitive) #IMPLIED
+  size CDATA #IMPLIED
+  default CDATA #IMPLIED
+  autoIncrement (true|false) "false"
+  inheritance (single|false) "false"
+  inputValidator CDATA #IMPLIED
+  javaNamingMethod (nochange|underscore|javaname) #IMPLIED
+  description CDATA #IMPLIED
+>
+
+<!ELEMENT inheritance EMPTY>
+<!ATTLIST inheritance
+  key CDATA #REQUIRED
+  class CDATA #REQUIRED
+  extends CDATA #IMPLIED
+>
+
+<!ELEMENT foreign-key (reference+)>
+<!ATTLIST foreign-key
+  foreignTable CDATA #REQUIRED
+  name CDATA #IMPLIED
+  onUpdate (cascade|setnull|restrict|none) "none"
+  onDelete (cascade|setnull|restrict|none) "none"
+>
+
+<!ELEMENT reference EMPTY>
+<!ATTLIST reference
+  local CDATA #REQUIRED
+  foreign CDATA #REQUIRED
+>
+
+<!ELEMENT index (index-column+)>
+<!ATTLIST index
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT index-column EMPTY>
+<!ATTLIST index-column
+  name CDATA #REQUIRED
+  size CDATA #IMPLIED
+>
+
+<!ELEMENT unique (unique-column+)>
+<!ATTLIST unique
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT unique-column EMPTY>
+<!ATTLIST unique-column
+  name CDATA #REQUIRED
+>

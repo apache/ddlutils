@@ -53,7 +53,7 @@ public class DefaultDatabaseMapper extends AbstractDatabaseMapper {
     protected void mapColumn(Table table, Column column) throws SQLException {
         Types types = getTypes();
         String name = column.getType();
-        int size = column.getSize();
+        int size = column.getSizeAsInt();
         
         TypeMapping mapping = types.getTypeMapping(name, size);
         if (mapping == null) {
@@ -62,7 +62,7 @@ public class DefaultDatabaseMapper extends AbstractDatabaseMapper {
         if (mapping == null) {
             throw new SQLException("Column not supported: " + column);
         }
-        if (mapping.getSize() != 0 && column.getSize() > mapping.getSize()) {
+        if (mapping.getSize() != 0 && column.getSizeAsInt() > mapping.getSize()) {
             // if the target type specifies a size of zero, and the
             // requested column specifies > 0, just ignore - assume that
             // the type has unlimited size
@@ -77,7 +77,7 @@ public class DefaultDatabaseMapper extends AbstractDatabaseMapper {
 
         Column column = table.getAutoIncrementColumn();
         String name = column.getType();
-        int size = column.getSize();
+        int size = column.getSizeAsInt();
 
         if (!types.getAutoIncrementMappings().isEmpty()) {
             // database provider supports auto-increment columns - 
@@ -117,8 +117,8 @@ public class DefaultDatabaseMapper extends AbstractDatabaseMapper {
     protected void promoteColumn(Table table, Column column, 
                                  TypeMapping mapping) {
         column.setType(mapping.getName());
-        if (mapping.getSize() < column.getSize()) {
-            column.setSize((int) mapping.getSize()); 
+        if (mapping.getSize() < column.getSizeAsInt()) {
+            column.setSize(String.valueOf(mapping.getSize())); 
             // @todo - oracle returns column sizes of type long
         }
         

@@ -238,17 +238,17 @@ public class JdbcModelReader {
                  * number of characters, for numeric or decimal types this is 
                  * precision.
                  */
-                int columnSize =
+                String columnSize =
                     columnInfoColumns.contains("COLUMN_SIZE")
-                        ? columnData.getInt("COLUMN_SIZE")
-                        : 0;
+                        ? columnData.getString("COLUMN_SIZE")
+                        : null;
                 /* the number of fractional digits */
-                int columnDecimalDigits =
+                int columnScale =
                     columnInfoColumns.contains("DECIMAL_DIGITS")
                         ? columnData.getInt("DECIMAL_DIGITS")
                         : 0;
                 /* Radix (typically either 10 or 2) */
-                int columnRadix =
+                int columnPrecision =
                     columnInfoColumns.contains("NUM_PREC_RADIX")
                         ? columnData.getInt("NUM_PREC_RADIX")
                         : 10;
@@ -344,8 +344,8 @@ public class JdbcModelReader {
                 else {
                     col.setPrimaryKey(false);
                 }
-                col.setPrecisionRadix(columnRadix);
-                col.setScale(columnDecimalDigits);
+                col.setPrecisionRadix(columnPrecision);
+                col.setScale(columnScale);
                 columns.add(col);
             }
             return columns;

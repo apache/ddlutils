@@ -191,6 +191,16 @@ public class SqlBuilder {
         }
     }
 
+    /**
+     * Determines whether this database reequires the specification of NULL as the default value.
+     *  
+     * @return Whether the database requires NULL for the default value
+     */
+    protected boolean requiresNullAsDefault()
+    {
+        return false;
+    }
+
     /** 
      * Outputs the DDL to add a column to a table.
      */
@@ -209,7 +219,7 @@ public class SqlBuilder {
         if (column.isRequired()) {
             printNotNullable();
         }
-        else {
+        else if (requiresNullAsDefault()) {
             printNullable();
         }
         print(" ");
@@ -347,7 +357,7 @@ public class SqlBuilder {
      */
     protected String getSqlType(Column column) {
         StringBuffer sqlType = new StringBuffer(getNativeType(column));
-        if ( column.getSize() > 0 ) {
+        if ( column.getSize() != null ) {
             sqlType.append(" (");
             sqlType.append(column.getSize());
             if ( TypeMap.isDecimalType(column.getType()) ){
@@ -599,13 +609,22 @@ public class SqlBuilder {
             print(reference.getForeign());
         }
     }
-   
-   
+
+    /**
+     * Returns the string that denotes a comment if put at the beginning of a line.
+     *  
+     * @return The comment prefix
+     */
+    protected String getCommentPrefix()
+    {
+        return "--";
+    }
+
     /**
      * Prints an SQL comment to the current stream
      */
     protected void printComment(String text) throws IOException { 
-        print( "--" );
+        print(getCommentPrefix());
         
        // MySql insists on a space after the first 2 dashes.
        // http://www.mysql.com/documentation/mysql/bychapter/manual_Reference.html#Comments
@@ -950,7 +969,7 @@ public class SqlBuilder {
         boolean defaultsEqual = desiredDefault == null ||
             desiredDefault.equals(currentDefault);
 
-        boolean sizeMatters = desired.getSize() > 0;
+        boolean sizeMatters = desired.getSize() != null;
 
         if ( desired.getTypeCode() != current.getTypeCode() ||
                 desired.isRequired() != current.isRequired() ||

@@ -26,7 +26,7 @@ import junit.framework.TestSuite;
  * Test harness for Column Class
  *
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class TestColumn
      extends TestCase
@@ -65,7 +65,7 @@ public class TestColumn
     public void testColumn()
         throws Exception
     {
-        Column column = new Column("Test1",Types.INTEGER,255,true,true,true,"");
+        Column column = new Column("Test1", "Test1",Types.INTEGER,"255",true,true,true,"");
         assertTrue("Column is null", column != null);
         assertTrue("Column toString does not end with [name=Test1;type=INTEGER]", 
                ((String)column.toString()).endsWith("[name=Test1;type=INTEGER]"));
@@ -76,7 +76,7 @@ public class TestColumn
     public void testTypeName()
         throws Exception
     {
-        Column column = new Column("Test1","INTEGER",0, true,true,true,"");
+        Column column = new Column("Test1","Test1", "INTEGER","0", true,true,true,"");
         
         assertEquals("INTEGER", column.getType());                           
         assertEquals(Types.INTEGER, column.getTypeCode());

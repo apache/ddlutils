@@ -19,12 +19,13 @@ package org.apache.commons.sql.model;
 public class Column
 {
     private String name;
+    private String javaName;
     private boolean primaryKey = false;
     private boolean required = false;
     private boolean autoIncrement = false;
     private int typeCode;
     private String type;
-    private int size = 0;
+    private String size = null;
     private String defaultValue = null;
     private int scale = 0;
     private int precisionRadix = 10;
@@ -35,10 +36,11 @@ public class Column
     }
 
 
-    public Column(String name, int typeCode, int size, boolean required, boolean
+    public Column(String name, String javaName, int typeCode, String size, boolean required, boolean
                   primaryKey, boolean autoIncrement, String defaultValue)
     {
         this.name = name;
+        this.javaName = javaName;
         this.typeCode = typeCode;
         this.type = TypeMap.getJdbcTypeName(typeCode);
         this.size = size;
@@ -48,17 +50,18 @@ public class Column
         this.defaultValue = defaultValue;
     }
 
-    public Column(String name, String type, int size, boolean required, boolean
+    public Column(String name, String javaName, String type, String size, boolean required, boolean
                   primaryKey, boolean autoIncrement, String defaultValue  )
     {
-        this(name, TypeMap.getJdbcTypeCode(type), size, required, primaryKey, autoIncrement, defaultValue);
+        this(name, javaName, TypeMap.getJdbcTypeCode(type), size, required, primaryKey, autoIncrement, defaultValue);
     }
 
-    public Column(String name, int typeCode, int size, boolean required, boolean
+    public Column(String name, String javaName, int typeCode, String size, boolean required, boolean
                   primaryKey, boolean autoIncrement, String defaultValue,
                   int scale)
     {
         this.name = name;
+        this.javaName = javaName;
         this.typeCode = typeCode;
         this.type = TypeMap.getJdbcTypeName(typeCode);
         this.size = size;
@@ -77,6 +80,7 @@ public class Column
     public String toStringAll()
     {
         return "Column[name=" + name +
+            ";javaName=" + javaName +
             ";type=" + type +
             ";typeCode=" + typeCode +
             ";size=" + size +
@@ -98,6 +102,16 @@ public class Column
     public void setName(String name)
     {
         this.name = name;
+    }
+
+    public String getJavaName()
+    {
+        return javaName;
+    }
+
+    public void setJavaName(String javaName)
+    {
+        this.javaName = javaName;
     }
 
     public boolean isPrimaryKey()
@@ -155,16 +169,31 @@ public class Column
         this.typeCode = TypeMap.getJdbcTypeCode(type);
     }
 
-    public int getSize()
+    public String getSize()
     {
         return size;
     }
 
-    public void setSize(int size)
+    public int getSizeAsInt()
     {
-        this.size = size;
+        return size == null ? 0 : Integer.parseInt(size);
     }
 
+    public void setSize(String size)
+    {
+        int pos = size.indexOf(",");
+
+        if (pos < 0)
+        {
+            this.size = size;
+        }
+        else
+        {
+            this.size = size.substring(0, pos);
+            scale     = Integer.parseInt(size.substring(pos + 1));
+        }
+    }
+    
     public int getScale()
     {
         return this.scale;

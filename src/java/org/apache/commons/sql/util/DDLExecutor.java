@@ -178,7 +178,8 @@ public class DDLExecutor extends JdbcSupport {
                         }
                     }
                     catch (SQLException e) {
-                        log.error( "Command failed: " + command + ". Reason: " + e );
+                        log.error("Command " + command + " failed", e);
+                        System.err.println("Command " + command + " failed with " + e);
                         errors++;
                     }
                 }

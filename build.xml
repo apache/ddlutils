@@ -53,9 +53,11 @@
     <target name="jar"
             description="Creates the jar"
             depends="compile">
+        <copy todir="${build.java.dir}/resources">
+            <fileset dir="${src.resources.dir}"/>
+        </copy>
         <jar jarfile="${dist.dir}/${dist-filename-prefix}.jar"
-            basedir="${build.java.dir}"
-             includes="org/**"/>
+             basedir="${build.java.dir}"/>
     </target>
 
     <target name="clean"

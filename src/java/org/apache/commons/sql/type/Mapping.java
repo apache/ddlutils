@@ -77,7 +77,7 @@ public class Mapping {
 
     public String getSQLType(Column column) {
         StringBuffer result = new StringBuffer(sqlName);
-        int size = column.getSize();
+        int size = column.getSizeAsInt();
         int scale = column.getScale();
         if (SIZE_FORMAT.equals(format)) {
             if (size > 1) {

@@ -30,11 +30,43 @@ import org.apache.commons.sql.model.Database;
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
-public class DatabaseReader extends BeanReader {
-    
+public class DatabaseReader extends BeanReader
+{
+    /** Whether to use the internal dtd that comes with commons-sql */
+    private boolean _useInternalDtd = false;
+
     public DatabaseReader() throws IntrospectionException {
         setXMLIntrospector( newXMLIntrospector() );
         registerBeanClass(Database.class);
+        setValidating(false);
+    }
+
+    /**
+     * Returns whether the internal dtd that comes with commons-sql is used.
+     * 
+     * @return <code>true</code> if parsing uses the internal dtd
+     */
+    public boolean isUseInternalDtd()
+    {
+        return _useInternalDtd;
+    }
+
+    /**
+     * Specifies whether the internal dtd is to be used.
+     *
+     * @param useInternalDtd Whether to use the internal dtd 
+     */
+    public void setUseInternalDtd(boolean useInternalDtd)
+    {
+        _useInternalDtd = useInternalDtd;
+        if (_useInternalDtd)
+        {
+            setEntityResolver(new LocalEntityResolver());
+        }
+        else
+        {
+            setEntityResolver(this);
+        }
     }
 
     /**

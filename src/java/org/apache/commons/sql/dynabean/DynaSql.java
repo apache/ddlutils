@@ -57,10 +57,11 @@ public class DynaSql extends JdbcSupport {
     /** A cache of the SqlDynaClasses per table name */
     private Map dynaClassCache = new HashMap();
 
-    public DynaSql() {
-    }
+    public DynaSql()
+    {}
 
-    public DynaSql(DataSource dataSource, Database database) {
+    public DynaSql(DataSource dataSource, Database database)
+    {
         super(dataSource);
         this.database = database;
     }
@@ -196,6 +197,27 @@ public class DynaSql extends JdbcSupport {
         }
     }
 
+
+    /**
+     * Returns the sql for inserting the bean.
+     * 
+     * @param dynaBean The bean
+     * @return The sql
+     */
+    public String getInsertSql(DynaBean dynaBean)
+    {
+        SqlDynaClass      dynaClass  = getSqlDynaClass(dynaBean);
+        SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
+
+        if (properties.length == 0)
+        {
+            log.info("Cannot insert type " + dynaClass + " as there are no properties");
+            return null;
+        }
+
+        return createInsertSql(dynaClass, properties);
+    }
+
     /**
      * Inserts the given DynaBean in the database, assuming the primary key values are specified.
      */
@@ -207,6 +229,26 @@ public class DynaSql extends JdbcSupport {
         finally {
             returnConnection(connection);
         }
+    }
+
+    /**
+     * Returns the sql for updating the given bean in the database.
+     * 
+     * @param dynaBean The bean
+     * @return The sql
+     */
+    public String getUpdateSql(DynaBean dynaBean)
+    {
+        SqlDynaClass      dynaClass   = getSqlDynaClass(dynaBean);
+        SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
+
+        if (primaryKeys.length == 0)
+        {
+            log.info("Cannot update type " + dynaClass + " as there are no primary keys to update");
+            return null;
+        }
+
+        return createUpdateSql(dynaClass, primaryKeys, dynaClass.getNonPrimaryKeyProperties());
     }
 
     /**
@@ -233,7 +275,7 @@ public class DynaSql extends JdbcSupport {
             SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
             int size = primaryKeys.length;
             if (size == 0) {
-                log.info( "Cannot update type: " + dynaClass + " as there are no primary keys to update" );
+                log.info( "Cannot delete type " + dynaClass + " as there are no primary keys" );
                 return;
             }
             String sql = createDeleteSql(dynaClass, primaryKeys);
@@ -262,6 +304,25 @@ public class DynaSql extends JdbcSupport {
         }
     }
 
+    /**
+     * Returns the sql for deleting the given DynaBean from the database.
+     * 
+     * @param dynaBean The bean
+     * @return The sql
+     */
+    public String getDeleteSql(DynaBean dynaBean)
+    {
+        SqlDynaClass      dynaClass   = getSqlDynaClass(dynaBean);
+        SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
+
+        if (primaryKeys.length == 0)
+        {
+            log.warn("Cannot delete type " + dynaClass + " as there are no primary keys");
+            return null;
+        }
+
+        return createDeleteSql(dynaClass, primaryKeys);
+    }
 
     // Properties
     //-------------------------------------------------------------------------
@@ -297,85 +358,105 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * Creates a new primary key value, inserts the bean and returns the new item.
+     * Inserts the bean.
+     * 
+     * @param dynaBean   The bean
+     * @param connection The database connection
      */
-    protected void insert(DynaBean dynaBean, Connection connection) throws SQLException {
-        SqlDynaClass dynaClass = getSqlDynaClass(dynaBean);
+    protected void insert(DynaBean dynaBean, Connection connection) throws SQLException
+    {
+        SqlDynaClass      dynaClass  = getSqlDynaClass(dynaBean);
         SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
-        int size = properties.length;
-        if (size == 0) {
-            log.info( "Cannot insert type: " + dynaClass + " as there are no properties" );
+
+        if (properties.length == 0)
+        {
+            log.info("Cannot insert type " + dynaClass + " as there are no properties");
             return;
         }
 
-        String sql = createInsertSql(dynaClass, properties);
-
-        if (log.isDebugEnabled()) {
-            log.debug( "About to execute SQL: " + sql );
-        }
-
+        String            sql       = createInsertSql(dynaClass, properties);
         PreparedStatement statement = null;
-        try {
-            statement = connection.prepareStatement( sql );
 
-            for ( int i = 0; i < size; i++ ) {
-                SqlDynaProperty property = properties[i];
-                setObject(statement, 1+i, dynaBean, property);
+        if (log.isDebugEnabled())
+        {
+            log.debug("About to execute SQL: " + sql);
+        }
+
+        try
+        {
+            statement = connection.prepareStatement(sql);
+
+            for (int idx = 0; idx < properties.length; idx++ )
+            {
+                setObject(statement, idx + 1, dynaBean, properties[idx]);
             }
+
             int count = statement.executeUpdate();
-            if ( count != 1 ) {
-                log.warn( "Attempted to insert a single row : " + dynaBean
-                    + " in table: " + dynaClass.getTableName()
-                    + " but changed: " + count + " row(s)"
-                );
+
+            if (count != 1)
+            {
+                log.warn("Attempted to insert a single row : " + dynaBean +
+                         " in table: " + dynaClass.getTableName() +
+                         " but changed: " + count + " row(s)");
             }
         }
-        finally {
+        finally
+        {
             closeStatement(statement);
         }
     }
 
     /**
-     * Updates the row which maps to the given dynabean
+     * Updates the row which maps to the given dynabean.
+     * 
+     * @param dynaBean   The bean
+     * @param connection The database connection
      */
-    protected void update(DynaBean dynaBean, Connection connection) throws SQLException {
-        SqlDynaClass dynaClass = getSqlDynaClass(dynaBean);
+    protected void update(DynaBean dynaBean, Connection connection) throws SQLException
+    {
+        SqlDynaClass      dynaClass   = getSqlDynaClass(dynaBean);
         SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
-        if (primaryKeys.length == 0) {
-            log.info( "Cannot update type: " + dynaClass + " as there are no primary keys to update" );
+
+        if (primaryKeys.length == 0)
+        {
+            log.info("Cannot update type " + dynaClass + " as there are no primary keys to update");
             return;
         }
 
         SqlDynaProperty[] properties = dynaClass.getNonPrimaryKeyProperties();
+        String            sql        = createUpdateSql(dynaClass, primaryKeys, properties);
+        PreparedStatement statement  = null;
 
-        String sql = createUpdateSql(dynaClass, primaryKeys, properties);
-
-        if (log.isDebugEnabled()) {
-            log.debug( "About to execute SQL: " + sql );
+        if (log.isDebugEnabled())
+        {
+            log.debug("About to execute SQL: " + sql);
         }
-
-        PreparedStatement statement = null;
-        try {
-            statement = connection.prepareStatement( sql );
+        try
+        {
+            statement = connection.prepareStatement(sql);
 
             int sqlIndex = 1;
-            for ( int i = 0, size = properties.length; i < size; i++ ) {
-                SqlDynaProperty property = properties[i];
-                setObject(statement, sqlIndex++, dynaBean, property);
+
+            for (int idx = 0; idx < properties.length; idx++)
+            {
+                setObject(statement, sqlIndex++, dynaBean, properties[idx]);
             }
-            for ( int i = 0, size = primaryKeys.length; i < size; i++ ) {
-                SqlDynaProperty primaryKey = primaryKeys[i];
-                setObject(statement, sqlIndex++, dynaBean, primaryKey);
+            for (int idx = 0; idx < properties.length; idx++)
+            {
+                setObject(statement, sqlIndex++, dynaBean, primaryKeys[idx]);
             }
+
             int count = statement.executeUpdate();
-            if ( count != 1 ) {
-                log.warn( "Attempted to insert a single row : " + dynaBean
-                    + " in table: " + dynaClass.getTableName()
-                    + " but changed: " + count + " row(s)"
-                );
+
+            if (count != 1 )
+            {
+                log.warn("Attempted to insert a single row : " + dynaBean +
+                         " in table: " + dynaClass.getTableName() +
+                         " but changed: " + count + " row(s)");
             }
         }
-        finally {
+        finally
+        {
             closeStatement(statement);
         }
     }

@@ -265,7 +265,7 @@ public class Types {
     public String getSQLType(Column column) {
         String result = null;
         TypeMapping mapping = getTypeMapping(column.getType(), 
-                                             column.getSize());
+                                             column.getSizeAsInt());
         if (mapping != null) {
             result = mapping.getSQLType(column);
         }

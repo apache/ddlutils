@@ -7,7 +7,7 @@ package org.apache.commons.sql.builder;
  * version 1.1, a copy of which has been included with this distribution in
  * the LICENSE file.
  *
- * $Id: TestEverything.java,v 1.1 2003/12/16 16:03:07 matth Exp $
+ * $Id: TestEverything.java,v 1.2 2004/07/18 21:55:58 tomdz Exp $
  */
 import java.beans.IntrospectionException;
 import java.io.FileInputStream;
@@ -40,7 +40,7 @@ import org.xml.sax.SAXException;
  * drop column, modify column, drop table, default values, unique indexes
  *
  * @author John Marshall/Connectria
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TestEverything extends TestCase
 {
@@ -190,7 +190,7 @@ public class TestEverything extends TestCase
 
 
         //check adding column with default
-        Column newCol = new Column( "defaulted", Types.INTEGER, 11, true, false, false, "50" );
+        Column newCol = new Column("defaulted", "defaulted", Types.INTEGER, "11", true, false, false, "50");
         table.addColumn( newCol );
         updateDatabase( db, false );
 

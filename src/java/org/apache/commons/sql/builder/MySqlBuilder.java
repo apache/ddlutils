@@ -31,7 +31,8 @@ import org.apache.commons.sql.model.Table;
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class MySqlBuilder extends SqlBuilder {
+public class MySqlBuilder extends SqlBuilder
+{
     private HashMap _specialTypes = new HashMap();
 
     public MySqlBuilder() {
@@ -40,25 +41,44 @@ public class MySqlBuilder extends SqlBuilder {
         _specialTypes.put("blob",          "LONGBLOB");
         _specialTypes.put("boolean",       "BIT");
         _specialTypes.put("clob",          "LONGTEXT");
-        _specialTypes.put("float",         "DOUBLE");
-        _specialTypes.put("longvarbinary", "MEDIUMBLOB");
+        _specialTypes.put("float",         "FLOAT");
+        _specialTypes.put("longvarbinary", "LONGBLOB");
         _specialTypes.put("longvarchar",   "MEDIUMTEXT");
         _specialTypes.put("real",          "FLOAT");
-        _specialTypes.put("timestamp",     "DATETIME");
-        _specialTypes.put("varbinary",     "BLOB");
-    }
-    
-    public void dropTable(Table table) throws IOException { 
-        print( "drop table if exists " );
-        print( table.getName() );
-        printEndOfStatement();
-    }
-    
-    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
-        print( "AUTO_INCREMENT" );
+        _specialTypes.put("varbinary",     "MEDIUMBLOB");
     }
 
-    protected boolean shouldGeneratePrimaryKeys(List primaryKeyColumns) {
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getCommentPrefix()
+     */
+    protected String getCommentPrefix()
+    {
+        return "#";
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#dropTable(Table)
+     */
+    public void dropTable(Table table) throws IOException
+    { 
+        print("drop table if exists ");
+        print(table.getName());
+        printEndOfStatement();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#printAutoIncrementColumn(Table,Column)
+     */
+    protected void printAutoIncrementColumn(Table table, Column column) throws IOException
+    {
+        print("AUTO_INCREMENT");
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#shouldGeneratePrimaryKeys(List)
+     */
+    protected boolean shouldGeneratePrimaryKeys(List primaryKeyColumns)
+    {
         /*
          * mySQL requires primary key indication for autoincrement key columns
          * I'm not sure why the default skips the pk statement if all are identity
@@ -66,6 +86,9 @@ public class MySqlBuilder extends SqlBuilder {
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getNativeType(Column)
+     */
     protected String getNativeType(Column column){
         String type        = column.getType();
         String specialType = (String)_specialTypes.get(type.toLowerCase());

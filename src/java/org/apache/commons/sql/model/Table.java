@@ -41,6 +41,8 @@ public class Table
 
     private String name = null;
 
+    private String javaName = null;
+
     private String schema = null;
 
     private String remarks = null;
@@ -105,6 +107,16 @@ public class Table
     public void setName(String name)
     {
         this.name=name;
+    }
+
+    public String getJavaName()
+    {
+        return javaName;
+    }
+
+    public void setJavaName(String javaName)
+    {
+        this.javaName = javaName;
     }
 
     public void addColumn(Column column)
