@@ -114,7 +114,6 @@ public class SqlBuilder {
         writer.write( column.getName() );
         writer.write( " " );
         writer.write( getSqlType( column ) );
-        writer.write( column.getType() );
         writer.write( " " );
         if ( column.isAutoIncrement() ) {
             writeAutoIncrementColumn();
