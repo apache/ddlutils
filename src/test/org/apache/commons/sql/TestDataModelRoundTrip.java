@@ -1,4 +1,4 @@
-package org.apache.commons.sql.datamodel;
+package org.apache.commons.sql;
 
 /*
  * Copyright (C) The Apache Software Foundation. All rights reserved.
@@ -26,6 +26,8 @@ import org.apache.commons.betwixt.strategy.DecapitalizeNameMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.SimpleLog;
+
+import org.apache.commons.sql.model.*;
 
 /**
  * Test harness for the BeanReader that deals with project definitions.

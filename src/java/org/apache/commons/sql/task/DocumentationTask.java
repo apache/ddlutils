@@ -1,4 +1,4 @@
-package org.apache.commons.sql;
+package org.apache.commons.sql.task;
 
 /* ====================================================================
  * The Apache Software License, Version 1.1
@@ -54,58 +54,33 @@ package org.apache.commons.sql;
  * <http://www.apache.org/>.
  */
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.List;
-import java.util.Properties;
 import org.apache.velocity.context.Context;
 
-import org.apache.commons.sql.datamodel.Database;
-
 /**
- * An extended Texen task used for generating SQL source from an XML data file
+ * An ant task for generating output by using Velocity
  *
- * @author <a href="mailto:jason@zenplex.com"> Jason van Zyl </a>
- * @author <a href="mailto:jmcnally@collab.net"> John McNally </a>
- * @author <a href="mailto:fedor.karpelevitch@home.com"> Fedor Karpelevitch </a>
- * @version $Id: TorqueDataSQLTask.java,v 1.8 2002/04/11 22:02:06 mpoeschl Exp $
+ * @author <a href="mailto:mpoeschl@marmot.at">Martin Poeschl</a>
+ * @version $Id: TorqueDocumentationTask.java,v 1.2 2002/04/11 22:02:06 mpoeschl Exp $
  */
-public class DataSQLTask 
+public class DocumentationTask 
     extends DataModelTask
 {
-    private String dataXmlFile;
-    private String dataDTD;
 
     /**
-     * The target database(s) we are generating SQL for. Right now we can only
-     * deal with a single target, but we will support multiple targets soon.
+     * The target database(s) we are generating SQL
+     * for. Right now we can only deal with a single
+     * target, but we will support multiple targets
+     * soon.
      */
     private String targetDatabase;
 
-    /**
-     * Sets the DataXmlFile attribute of the TorqueDataSQLTask object
-     *
-     * @param  dataXmlFile The new DataXmlFile value
-     */
-    public void setDataXmlFile(String dataXmlFile)
-    {
-        this.dataXmlFile = project.resolveFile(dataXmlFile).toString();
-    }
+    private String outputFormat;
+
 
     /**
-     * Gets the DataXmlFile attribute of the TorqueDataSQLTask object
+     * Get the current target package.
      *
-     * @return  The DataXmlFile value
-     */
-    public String getDataXmlFile()
-    {
-        return dataXmlFile;
-    }
-
-    /**
-     * Get the current target database.
-     *
-     * @return  String target database(s)
+     * @return String target database(s)
      */
     public String getTargetDatabase()
     {
@@ -113,10 +88,10 @@ public class DataSQLTask
     }
 
     /**
-     * Set the current target database.  This is where generated java classes
-     * will live.
+     * Set the current target package.  This is where
+     * generated java classes will live.
      *
-     * @param  v The new TargetDatabase value
+     * @param v target database(s)
      */
     public void setTargetDatabase(String v)
     {
@@ -124,69 +99,33 @@ public class DataSQLTask
     }
 
     /**
-     * Gets the DataDTD attribute of the TorqueDataSQLTask object
+     * Get the current output format.
      *
-     * @return  The DataDTD value
+     * @return the current output format
      */
-    public String getDataDTD()
+    public String getOutputFormat()
     {
-        return dataDTD;
+        return outputFormat;
     }
 
     /**
-     * Sets the DataDTD attribute of the TorqueDataSQLTask object
+     * Set the current output format.
      *
-     * @param  dataDTD The new DataDTD value
+     * @param v output format
      */
-    public void setDataDTD(String dataDTD)
+    public void setOutputFormat(String v)
     {
-        this.dataDTD = project.resolveFile(dataDTD).toString();
+        outputFormat = v;
     }
 
     /**
-     * Set up the initialial context for generating the SQL from the XML schema.
-     *
-     * @return  Description of the Returned Value
+     * Place our target package value into the context for use in the templates.
      */
-    public Context initControlContext()
-        throws Exception
+    public Context initControlContext() throws Exception
     {
         super.initControlContext();
-        
-        /*
-        
-        AppData app = (AppData) getDataModels().elementAt(0);
-        Database db = app.getDatabase();
-
-        try
-        {
-            XmlToData dataXmlParser = new XmlToData(db, dataDTD);
-            List data = dataXmlParser.parseFile(dataXmlFile);
-            context.put("data", data);
-        }
-        catch (Exception e)
-        {
-            throw new Exception("Exception parsing data XML:");
-        }
-
-        // Place our model in the context.
-        context.put("appData", app);
-
-        */
-
-        Database db = null;
-
-        // Place the target database in the context.
         context.put("targetDatabase", targetDatabase);
-
-        Properties p = new Properties();
-        FileInputStream fis = new FileInputStream(getSqlDbMap());
-        p.load(fis);
-        fis.close();
-
-        p.setProperty(getOutputFile(), db.getName());
-        p.store(new FileOutputStream(getSqlDbMap()), "Sqlfile -> Database map");
-
+        context.put("outputFormat", outputFormat);
         return context;
     }
 }

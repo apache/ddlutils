@@ -1,4 +1,4 @@
-package org.apache.commons.sql.datamodel;
+package org.apache.commons.sql.model;
 
 import java.util.Iterator;
 import java.util.ArrayList;

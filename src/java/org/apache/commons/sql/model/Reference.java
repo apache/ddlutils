@@ -1,4 +1,4 @@
-package org.apache.commons.sql.datamodel;
+package org.apache.commons.sql.model;
 
 public class Reference 
 {

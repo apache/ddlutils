@@ -1,4 +1,4 @@
-package org.apache.commons.sql;
+package org.apache.commons.sql.task;
 
 /* ====================================================================
  * The Apache Software License, Version 1.1
@@ -54,95 +54,41 @@ package org.apache.commons.sql;
  * <http://www.apache.org/>.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.Properties;
-import java.util.Iterator;
 import org.apache.velocity.context.Context;
-import org.apache.velocity.VelocityContext;
 
 /**
- * An extended Texen task used for generating SQL source from
- * an XML schema describing a database structure.
+ * An extended Texen task used for generating simple scripts
+ * for creating databases on various platforms.
  *
- * @author <a href="mailto:jvanzyl@periapt.com">Jason van Zyl</a>
- * @author <a href="mailto:jmcnally@collab.net>John McNally</a>
- * @version $Id: TorqueSQLTask.java,v 1.11 2002/04/10 21:08:43 dlr Exp $
+ * @author <a href="mailto:jvanzyl@zenplex.com">Jason van Zyl</a>
+ * @version $Id: TorqueCreateDatabase.java,v 1.6 2002/04/11 22:02:06 mpoeschl Exp $
  */
-public class SQLTask 
+public class CreateDatabase 
     extends DataModelTask
 {
-    // if the database is set than all generated sql files
-    // will be placed in the specified database, the database
-    // will not be taken from the data model schema file.
+    /**
+     * The target database vendor: MySQL, Oracle.
+     */
+    private String targetDatabase;
 
-    private String database;
-    private String suffix = "";
-    
-    public void setDatabase(String database)
+    /**
+     * Get the target database.
+     *
+     * @return String target database.
+     */
+    public String getTargetDatabase()
     {
-        this.database = database;
+        return targetDatabase;
     }
-    
-    public String getDatabase()
-    {
-        return database;
-    }        
 
-    public void setSuffix(String suffix)
+    /**
+     * Set the target database.
+     *
+     * @param String target database(s)
+     */
+    public void setTargetDatabase(String v)
     {
-        this.suffix = suffix;
-    }
-    
-    public String getSuffix()
-    {
-        return suffix;
-    }        
-
-    private void createSqlDbMap()
-        throws Exception
-    {
-        if (getSqlDbMap() == null)
-        {
-            return;
-        }        
-        
-        // Produce the sql -> database map
-        Properties sqldbmap = new Properties();
-        
-        // Check to see if the sqldbmap has already been created.
-        File file = new File(getSqlDbMap());
-        
-        if (file.exists())
-        {
-            FileInputStream fis = new FileInputStream(file);
-            sqldbmap.load(fis);
-            fis.close();
-        }
-        
-        Iterator i = getDataModelDbMap().keySet().iterator();
-        
-        while (i.hasNext())
-        {
-            String dataModelName = (String) i.next();
-            String sqlFile = dataModelName + suffix + ".sql";
-            
-            String databaseName;
-            
-            if (getDatabase() == null)
-            {
-                databaseName = (String) getDataModelDbMap().get(dataModelName);
-            }
-            else
-            {   
-                databaseName = getDatabase();
-            }
-            
-            sqldbmap.setProperty(sqlFile,databaseName);
-        }
-        
-        sqldbmap.store(new FileOutputStream(getSqlDbMap()),"Sqlfile -> Database map");
+        targetDatabase = v;
     }
 
     /**
@@ -150,12 +96,10 @@ public class SQLTask
      * values into the context for use in the
      * templates.
      */
-    public Context initControlContext()
-        throws Exception
+    public Context initControlContext() throws Exception
     {   
         super.initControlContext();
-        context.put("targetDatabase", getTargetDatabase());
-        createSqlDbMap();
+        context.put("targetDatabase", targetDatabase);
         return context;
     }
 }

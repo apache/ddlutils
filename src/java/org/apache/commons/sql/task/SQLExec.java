@@ -1,4 +1,4 @@
-package org.apache.commons.sql;
+package org.apache.commons.sql.task;
 
 /*
  * The Apache Software License, Version 1.1
