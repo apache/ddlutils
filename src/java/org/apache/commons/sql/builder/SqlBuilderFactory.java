@@ -91,6 +91,7 @@ public class SqlBuilderFactory
     {
         registerDatabase("axion",      AxionBuilder.class);
         registerDatabase("db2",        Db2Builder.class);
+        registerDatabase("firebird",   FirebirdBuilder.class);
         registerDatabase("hsqldb",     HsqlDbBuilder.class);
         registerDatabase("maxdb",      MaxDbBuilder.class);
         registerDatabase("mckoi",      MckoiSqlBuilder.class);

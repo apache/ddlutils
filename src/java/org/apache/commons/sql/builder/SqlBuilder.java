@@ -354,20 +354,11 @@ public abstract class SqlBuilder {
         {
             dropDatabase(database);
         }
-            
-        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
-        {
-            Table table = (Table)it.next();
 
-            writeTableComment(table);
-            createTable(table);
-        }
+        createTables(database);
 
         // we're writing the external foreignkeys last to ensure that all referenced tables are already defined
-        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
-        {
-            createExternalForeignKeys((Table)it.next());
-        }
+        createExternalForeignKeys(database);
     }
 
     /**
@@ -549,6 +540,22 @@ public abstract class SqlBuilder {
     }
 
     /** 
+     * Outputs the DDL to create all tables of the given database model.
+     * 
+     * @param database The database
+     */
+    public void createTables(Database database) throws IOException
+    {
+        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
+        {
+            Table table = (Table)it.next();
+
+            writeTableComment(table);
+            createTable(table);
+        }
+    }
+
+    /** 
      * Outputs the DDL to create the table along with any non-external constraints as well
      * as with external primary keys and indices (but not foreign keys).
      * 
@@ -585,6 +592,19 @@ public abstract class SqlBuilder {
         if (!isIndicesEmbedded())
         {
             writeExternalIndicesCreateStmt(table);
+        }
+    }
+
+    /**
+     * Creates the external foreignkey creation statements for all tables in the database.
+     * 
+     * @param database The database
+     */
+    public void createExternalForeignKeys(Database database) throws IOException
+    {
+        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
+        {
+            createExternalForeignKeys((Table)it.next());
         }
     }
 
@@ -709,6 +729,18 @@ public abstract class SqlBuilder {
         }
     }
 
+    /**
+     * Writes the column name. This method allows builder implementations to e.g. escape
+     * the name or similar.
+     * 
+     * @param table  The table of the column
+     * @param column The column
+     */
+    protected void writeColumnName(Table table, Column column) throws IOException
+    {
+        print(column.getName());
+    }
+
     /** 
      * Outputs the DDL for the specified column.
      * 
@@ -718,7 +750,7 @@ public abstract class SqlBuilder {
     protected void writeColumn(Table table, Column column) throws IOException
     {
         //see comments in columnsDiffer about null/"" defaults
-        print(column.getName());
+        writeColumnName(table, column);
         print(" ");
         print(getSqlType(column));
 
@@ -769,7 +801,7 @@ public abstract class SqlBuilder {
     {
         writeTableAlterStmt(table);
         print("DROP COLUMN ");
-        print(column.getName());
+        writeColumnName(table, column);
         printEndOfStatement();
     }
 
@@ -896,7 +928,7 @@ public abstract class SqlBuilder {
         {
             println(",");
             printIndent();
-            writePrimaryKeyStmt(primaryKeyColumns);
+            writePrimaryKeyStmt(table, primaryKeyColumns);
         }
     }
 
@@ -917,7 +949,7 @@ public abstract class SqlBuilder {
             print("ADD CONSTRAINT ");
             print(table.getName());
             print("_PK ");
-            writePrimaryKeyStmt(primaryKeyColumns);
+            writePrimaryKeyStmt(table, primaryKeyColumns);
             printEndOfStatement();
         }
     }
@@ -946,14 +978,15 @@ public abstract class SqlBuilder {
     /**
      * Writes a primary key statement for the given columns.
      * 
+     * @param table             The table
      * @param primaryKeyColumns The primary columns
      */
-    protected void writePrimaryKeyStmt(List primaryKeyColumns) throws IOException
+    protected void writePrimaryKeyStmt(Table table, List primaryKeyColumns) throws IOException
     {
         print("PRIMARY KEY (");
         for (Iterator it = primaryKeyColumns.iterator(); it.hasNext();)
         {
-            print(((Column)it.next()).getName());
+            writeColumnName(table, (Column)it.next());
             if (it.hasNext())
             {
                 print(", ");

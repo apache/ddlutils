@@ -74,7 +74,7 @@ public class AxionBuilder extends SqlBuilder {
      * default from the Axion column builder.
      */
     public void writeColumn(Table table, Column column) throws IOException {
-        print(column.getName());
+        writeColumnName(table, column);
         print(" ");
         print(getSqlType(column));
         print(" ");
