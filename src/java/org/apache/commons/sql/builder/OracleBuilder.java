@@ -142,4 +142,22 @@ public class OracleBuilder extends SqlBuilder {
         print( "end" );
         printEndOfStatement();
     }
+
+
+    /**
+     * @return the full SQL type string, including size where appropriate.
+     * Where necessary, translate for Oracle specific DDL requirements.
+     */
+    protected String getSqlType(Column column) {
+      switch (column.getSQLTypeCode())
+      {
+        case java.sql.Types.INTEGER:
+          return "INTEGER";
+        case java.sql.Types.DATE:  
+        case java.sql.Types.TIME:  
+        case java.sql.Types.TIMESTAMP:  
+          return "DATE";
+        default: return column.getTypeString();
+      }
+    }  
 }
