@@ -53,18 +53,19 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: PostgreSqlBuilder.java,v 1.1 2002/09/20 20:50:51 jvanzyl Exp $
+ * $Id: PostgreSqlBuilder.java,v 1.2 2002/09/23 16:53:24 thorhauer Exp $
  */
 
 package org.apache.commons.sql.builder;
 
+import org.apache.commons.sql.model.Column;
 import java.io.IOException;
 
 /**
  * An SQL Builder for PostgresSqlL
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PostgreSqlBuilder extends SqlBuilder{
 
@@ -74,6 +75,55 @@ public class PostgreSqlBuilder extends SqlBuilder{
     } 
 
     protected void printAutoIncrementColumn() throws IOException { 
-        print( "DEFAULT NEXTVAL('serial')" );
+        print(" ");
+        print("serial");
+        print(" ");
+
     }
+
+    /** 
+     * Outputs the DDL to add a column to a table.
+     */
+    public void createColumn(Column column) throws IOException {
+        this.column = column;
+        print(column.getName());
+        print(" ");
+        if (column.isAutoIncrement()) {
+            printAutoIncrementColumn();
+        }
+        else
+        {
+
+            print(getSqlType(column));
+            print(" ");
+
+            if (column.getDefaultValue() != null)
+            {
+              print("DEFAULT '" + column.getDefaultValue() + "' ");
+            }
+            if (column.isRequired()) {
+                printNotNullable();
+            }
+            else {
+                printNullable();
+            }
+            print(" ");
+        }
+    }
+
+    /**
+     * @return the full SQL type string including the size
+     */
+    protected String getSqlType(Column column) {
+
+        if (column.getTypeString().equalsIgnoreCase("VARBINARY"))
+        {
+            return "OID";
+        }
+        else
+        {
+            return column.getTypeString();
+        }
+    }
+
 }
