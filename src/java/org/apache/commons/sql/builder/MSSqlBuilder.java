@@ -81,6 +81,7 @@ import org.apache.commons.sql.model.Table;
 public class MSSqlBuilder extends SqlBuilder {
     
     public MSSqlBuilder() {
+        setForeignKeyConstraintsNamed(true);
     }
     
     public void dropTable(Table table) throws IOException { 
@@ -128,6 +129,11 @@ public class MSSqlBuilder extends SqlBuilder {
         println( "     DROP TABLE " + tableName );
         print( "END" );
         printEndOfStatement();
+    }
+    
+    protected void printComment(String text) throws IOException {
+        print("# ");
+        println(text);
     }
     
     protected void printAutoIncrementColumn() throws IOException { 

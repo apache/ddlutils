@@ -81,6 +81,7 @@ public class OracleBuilder extends SqlBuilder {
     
     public OracleBuilder() {
         setPrimaryKeyEmbedded(false);
+        setForeignKeyConstraintsNamed(true);
     }
     
     public void dropTable(Table table) throws IOException { 
@@ -89,12 +90,18 @@ public class OracleBuilder extends SqlBuilder {
         print( " CASCADE CONSTRAINTS" );
         printEndOfStatement();
     }
-    
+
+    // there's no real need to print comments like this, just preserving
+    // backwards compatibility with the old Torque Velocity scripts
     protected void printComment(String text) throws IOException { 
         print( "--" );
         if (! text.startsWith( "-" ) ) {
             print(" ");
         }                
         println( text );
+    }
+    
+    protected void printAutoIncrementColumn() throws IOException { 
+        //print( "AUTO_INCREMENT" );
     }
 }

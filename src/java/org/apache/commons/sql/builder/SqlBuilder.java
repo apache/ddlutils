@@ -109,6 +109,9 @@ public class SqlBuilder {
     /** Whether or not foreign key constraints are embedded inside the create table statement */
     private boolean foreignKeysEmbedded;
 
+    /** Should foreign key constraints be explicitly named */
+    private boolean foreignKeyConstraintsNamed;
+    
     public SqlBuilder() {
     }
 
@@ -116,10 +119,19 @@ public class SqlBuilder {
      * Outputs the DDL required to drop and recreate the database 
      */
     public void createDatabase(Database database) throws IOException {
+        createDatabase(database, true);
+    }
+
+    /**
+     * Outputs the DDL required to drop and recreate the database 
+     */
+    public void createDatabase(Database database, boolean dropTable) throws IOException {
         for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
             Table table = (Table) iter.next();
             tableComment(table);
-            dropTable(table);
+            if (dropTable) {
+                dropTable(table);
+            }
             createTable(table);
         }
     }
@@ -196,6 +208,7 @@ public class SqlBuilder {
         else {
             print("NULL");
         }
+        print(" ");
         if (column.isAutoIncrement()) {
             printAutoIncrementColumn();
         }
@@ -267,6 +280,27 @@ public class SqlBuilder {
     public void setForeignKeysEmbedded(boolean foreignKeysEmbedded) {
         this.foreignKeysEmbedded = foreignKeysEmbedded;
     }
+
+
+
+    /**
+     * Returns whether foreign key constraints should be named when they are embedded inside
+     * a create table clause.
+     * @return boolean
+     */
+    public boolean isForeignKeyConstraintsNamed() {
+        return foreignKeyConstraintsNamed;
+    }
+
+    /**
+     * Sets whether foreign key constraints should be named when they are embedded inside
+     * a create table clause.
+     * @param foreignKeyConstraintsNamed The foreignKeyConstraintsNamed to set
+     */
+    public void setForeignKeyConstraintsNamed(boolean foreignKeyConstraintsNamed) {
+        this.foreignKeyConstraintsNamed = foreignKeyConstraintsNamed;
+    }
+
 
     // Implementation methods
     //-------------------------------------------------------------------------                
@@ -364,13 +398,16 @@ public class SqlBuilder {
                 println(",");
 
                 printIndent();
-                print("CONSTRAINT ");
-                print(table.getName());
-                print("_FK_");
-                print(Integer.toString(++counter));
-                print(" FOREIGN KEY (");
+                
+                if (isForeignKeyConstraintsNamed()) {
+                    print("CONSTRAINT ");
+                    print(table.getName());
+                    print("_FK_");
+                    print(Integer.toString(++counter));
+                    print(" " );
+                }
+                print("FOREIGN KEY (");
                 writeLocalReferences(key);
-                print(key.getForeignTable());
                 println(")");
 
                 printIndent();
@@ -458,9 +495,14 @@ public class SqlBuilder {
     /**
      * Prints an SQL comment to the current stream
      */
-    protected void printComment(String text) throws IOException {
-        print("# ");
-        println(text);
+    protected void printComment(String text) throws IOException { 
+        print( "--" );
+        
+       // MySql insists on a space after the first 2 dashes.
+       // http://www.mysql.com/documentation/mysql/bychapter/manual_Reference.html#Comments
+       // dunno if this is a common thing
+        print(" ");
+        println( text );
     }
 
     /** 
@@ -505,8 +547,7 @@ public class SqlBuilder {
      * Outputs the fact that this column is an auto increment column.
      */ 
     protected void printAutoIncrementColumn() throws IOException {
+        print( "IDENTITY" );
     }
-
-
 
 }

@@ -63,6 +63,7 @@ package org.apache.commons.sql.builder;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -111,6 +112,17 @@ public class SqlBuilderFactory {
         return null;
     }
 
+    /**
+     * @return a List of currently registered database types for which there is a
+     * specific SqlBuilder.
+     */
+    public static synchronized List getDatabaseTypes() {
+        // return a copy to prevent modification
+        List answer = new ArrayList();
+        answer.addAll( databases.keySet());
+        return answer;
+    }
+
 
     /**
      * Register the common builders
@@ -123,6 +135,9 @@ public class SqlBuilderFactory {
      * Register the common builders
      */
     protected static void registerDatabases() {
+        registerDatabase("axion", AxionBuilder.class);
+        registerDatabase("db2", Db2Builder.class);
+        registerDatabase("hsqldb", HsqlDbBuilder.class);
         registerDatabase("mssql", MSSqlBuilder.class);
         registerDatabase("mysql", MySqlBuilder.class);
         registerDatabase("oracle", OracleBuilder.class);

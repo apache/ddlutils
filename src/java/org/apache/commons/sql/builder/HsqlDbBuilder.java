@@ -69,56 +69,20 @@ import java.util.List;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
-import org.apache.commons.sql.model.ForeignKey;
 import org.apache.commons.sql.model.Table;
 
 /**
- * An SQL Builder for Sybase
+ * An SQL Builder for the <a href="http://hsqldb.sourceforge.net/">HsqlDb</a> JDBC database.
+ * This builder was primarily written to be used as another test case. If you want an open source,
+ * non-GPL pure Java JDBC implementation we highly recommend you try
+ * <a href="http://axion.tigris.org/">Axion</a> instead.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
-public class SybaseBuilder extends SqlBuilder {
+public class HsqlDbBuilder extends SqlBuilder {
     
-    public SybaseBuilder() {
-        setForeignKeyConstraintsNamed(true);
-    }
-    
-    public void dropTable(Table table) throws IOException { 
-        String tableName = table.getName();
-
-        // drop the foreign key contraints
-        int counter = 1;
-        for (Iterator iter = table.getForeignKeys().iterator(); iter.hasNext(); ) {
-            ForeignKey key = (ForeignKey) iter.next();
-            
-            String constraintName = tableName + "_FK_" + counter;
-            println("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name=''" 
-                + constraintName + "')"
-            );
-            printIndent();
-            print("ALTER TABLE " + tableName + " DROP CONSTRAINT " + constraintName );
-            printEndOfStatement();
-        }
-        
-        // now drop the table
-        println( "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '" 
-            + tableName + "')" 
-        );
-        println( "BEGIN" );
-        printIndent();
-        println( "DROP TABLE " + tableName );
-        print( "END" );
-        printEndOfStatement();
-    }
-
-    protected void printComment(String text) throws IOException { 
-        print( "/* " );
-        print( text );
-        println( " */" );
-    }
-    
-    protected void printAutoIncrementColumn() throws IOException { 
-        //print( "AUTO_INCREMENT" );
+    public HsqlDbBuilder() {
+        setForeignKeysEmbedded(true);
     }
 }

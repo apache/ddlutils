@@ -69,56 +69,30 @@ import java.util.List;
 
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
-import org.apache.commons.sql.model.ForeignKey;
 import org.apache.commons.sql.model.Table;
 
 /**
- * An SQL Builder for Sybase
+ * An SQL Builder for Oracle
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.14 $
  */
-public class SybaseBuilder extends SqlBuilder {
+public class Db2Builder extends SqlBuilder {
     
-    public SybaseBuilder() {
+    public Db2Builder() {
+        setPrimaryKeyEmbedded(false);
         setForeignKeyConstraintsNamed(true);
     }
     
     public void dropTable(Table table) throws IOException { 
-        String tableName = table.getName();
-
-        // drop the foreign key contraints
-        int counter = 1;
-        for (Iterator iter = table.getForeignKeys().iterator(); iter.hasNext(); ) {
-            ForeignKey key = (ForeignKey) iter.next();
-            
-            String constraintName = tableName + "_FK_" + counter;
-            println("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name=''" 
-                + constraintName + "')"
-            );
-            printIndent();
-            print("ALTER TABLE " + tableName + " DROP CONSTRAINT " + constraintName );
-            printEndOfStatement();
-        }
-        
-        // now drop the table
-        println( "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '" 
-            + tableName + "')" 
-        );
-        println( "BEGIN" );
-        printIndent();
-        println( "DROP TABLE " + tableName );
-        print( "END" );
+        super.dropTable(table);
+        print( "drop sequence if exists  " );
+        print( table.getName() );
+        print( ".SequenceName" );
         printEndOfStatement();
-    }
-
-    protected void printComment(String text) throws IOException { 
-        print( "/* " );
-        print( text );
-        println( " */" );
     }
     
     protected void printAutoIncrementColumn() throws IOException { 
-        //print( "AUTO_INCREMENT" );
+        print( "GENERATED ALWAYS AS IDENTITY" );
     }
 }

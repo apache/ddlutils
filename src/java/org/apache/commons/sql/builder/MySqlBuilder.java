@@ -90,6 +90,6 @@ public class MySqlBuilder extends SqlBuilder {
     }
     
     protected void printAutoIncrementColumn() throws IOException { 
-        print( "AUTO_INCREMENT " );
+        print( "AUTO_INCREMENT" );
     }
 }
