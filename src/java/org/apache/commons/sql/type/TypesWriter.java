@@ -1,5 +1,5 @@
 /*
- * /home/jerenkrantz/tmp/commons/commons-convert/cvs/home/cvs/jakarta-commons-sandbox//sql/src/java/org/apache/commons/sql/type/TypesWriter.java,v 1.3 2003/12/03 21:03:00 matth Exp
+ * /home/cvs/jakarta-commons-sandbox/sql/src/java/org/apache/commons/sql/type/TypesWriter.java,v 1.3 2003/12/03 21:03:00 matth Exp
  * 1.3
  * 2003/12/03 21:03:00
  *
@@ -91,6 +91,8 @@ public class TypesWriter extends BeanWriter {
     private void init() {
         setXMLIntrospector(TypesReader.newXMLIntrospector());
         enablePrettyPrint();
-        getBindingConfiguration().setMapIDs(false);
+        // TODO: Remove deprecated call once Betwixt is updated on ibiblio
+        setWriteIDs(false);
+        //getBindingConfiguration().setMapIDs(false);
     }
 }

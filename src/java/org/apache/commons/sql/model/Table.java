@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@
  * individuals on behalf of the Apache Software Foundation.  For more
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
- * 
+ *
  * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
 package org.apache.commons.sql.model;
@@ -65,25 +65,41 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Table 
+/**
+ * Models a table.
+ *
+ * @version $Id$
+ * @author John Marshall/Connectria
+ * @author Matthew Hawthorne
+ */
+import org.apache.commons.collections.iterators.FilterIterator;
+import org.apache.commons.collections.Predicate;
+
+public class Table
 {
+    private static final Predicate UNIQUE_PREDICATE = new Predicate() {
+        public boolean evaluate(Object input) {
+            return ((Index)input).isUnique();
+        }
+    };
+
     private String catalog = null;
-    
+
     private String name = null;
 
     private String schema = null;
 
     private String remarks = null;
-    
+
     private String type = null;
-    
+
     private List columns = new ArrayList();
-    
+
     private List foreignKeys = new ArrayList();
 
     private List indexes = new ArrayList();
-    
-    public Table() 
+
+    public Table()
     {
     }
 
@@ -91,7 +107,7 @@ public class Table
     {
         return this.catalog;
     }
-    
+
     public void setCatalog(String catalog)
     {
         this.catalog = catalog;
@@ -101,7 +117,7 @@ public class Table
     {
         return this.remarks;
     }
-    
+
     public void setRemarks(String remarks)
     {
         this.remarks = remarks;
@@ -111,12 +127,12 @@ public class Table
     {
         return this.schema;
     }
-    
+
     public void setSchema(String schema)
     {
         this.schema = schema;
     }
-    
+
     public String getType()
     {
         return (type == null) ? "(null)" : type;
@@ -126,17 +142,17 @@ public class Table
     {
         this.type = type;
     }
-    
-    public String getName() 
+
+    public String getName()
     {
         return name;
     }
-    
+
     public void setName(String name)
     {
         this.name=name;
     }
-    
+
     public void addColumn(Column column)
     {
         columns.add(column);
@@ -158,17 +174,17 @@ public class Table
             }
         }
     }
-    
+
     public List getColumns()
     {
         return columns;
     }
-    
+
     public void addForeignKey(ForeignKey foreignKey)
     {
         foreignKeys.add(foreignKey);
     }
-    
+
     public List getForeignKeys()
     {
         return foreignKeys;
@@ -177,18 +193,18 @@ public class Table
     public Column getColumn(int index)
     {
         return (Column) columns.get(index);
-    }        
+    }
 
     public ForeignKey getForeignKey(int index)
     {
         return (ForeignKey) foreignKeys.get(index);
-    }        
-    
+    }
+
     public void addIndex(Index index)
     {
         indexes.add(index);
     }
-    
+
     public List getIndexes()
     {
         return indexes;
@@ -199,17 +215,38 @@ public class Table
         return (Index) indexes.get(index);
     }
 
-    
+//take this out of Unique is annoying
+//this is in here to support <unique> in the xml
+    /**
+     * Add a unique index to this table
+     * @param index The unique index
+     */
+    public void addUnique(Unique index)
+    {
+        addIndex(index);
+    }
+
+    /**
+     * Gets a list of unique indexes on this table.
+     * @return an Iterator of Index objects where isUnique == true
+     */
+    public Iterator getUniques()
+    {
+        return new FilterIterator( indexes.iterator(), UNIQUE_PREDICATE );
+    }
+//end unique
+
+
     // Helper methods
-    //-------------------------------------------------------------------------                
-    
+    //-------------------------------------------------------------------------
+
     /**
      * @return true if there is at least one primary key column
      *  on this table
      */
-    public boolean hasPrimaryKey() 
+    public boolean hasPrimaryKey()
     {
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); ) 
+        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
         {
             Column column = (Column) iter.next();
             if ( column.isPrimaryKey() )
@@ -219,20 +256,20 @@ public class Table
         }
         return false;
     }
-    
+
     /**
      * Finds the table with the specified name, using case insensitive matching.
-     * Note that this method is not called getColumn(String) to avoid introspection 
+     * Note that this method is not called getColumn(String) to avoid introspection
      * problems.
      */
     public Column findColumn(String name)
     {
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); ) 
+        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
         {
             Column column = (Column) iter.next();
-            
+
             // column names are typically case insensitive
-            if (column.getName().equalsIgnoreCase( name )) 
+            if (column.getName().equalsIgnoreCase( name ))
             {
                 return column;
             }
@@ -241,13 +278,33 @@ public class Table
     }
 
     /**
+     * Finds the index with the specified name, using case insensitive matching.
+     * Note that this method is not called getIndex(String) to avoid introspection
+     * problems.
+     */
+    public Index findIndex(String name)
+    {
+        for (Iterator iter = getIndexes().iterator(); iter.hasNext(); )
+        {
+            Index index = (Index) iter.next();
+
+            // column names are typically case insensitive
+            if (index.getName().equalsIgnoreCase( name ))
+            {
+                return index;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return a List of primary key columns or an empty list if there are no
      * primary key columns for this Table
-     */    
-    public List getPrimaryKeyColumns() 
+     */
+    public List getPrimaryKeyColumns()
     {
         List answer = new ArrayList();
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); ) 
+        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
         {
             Column column = (Column) iter.next();
             if ( column.isPrimaryKey() )
@@ -261,9 +318,9 @@ public class Table
     /**
      * @return the auto increment column, if there is one, otherwise null is returned
      */
-    public Column getAutoIncrementColumn() 
+    public Column getAutoIncrementColumn()
     {
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); ) 
+        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
         {
             Column column = (Column) iter.next();
             if ( column.isAutoIncrement() )

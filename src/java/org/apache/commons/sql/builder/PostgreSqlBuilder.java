@@ -3,7 +3,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: PostgreSqlBuilder.java,v 1.5 2003/10/13 08:30:55 rdonkin Exp $
+ * $Id: PostgreSqlBuilder.java,v 1.6 2003/12/16 15:09:50 matth Exp $
  */
 
 package org.apache.commons.sql.builder;
@@ -61,12 +61,15 @@ package org.apache.commons.sql.builder;
 import java.io.IOException;
 
 import org.apache.commons.sql.model.Column;
+import org.apache.commons.sql.model.Table;
+
+import java.io.IOException;
 
 /**
  * An SQL Builder for PostgresSqlL
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PostgreSqlBuilder extends SqlBuilder{
 
@@ -75,7 +78,7 @@ public class PostgreSqlBuilder extends SqlBuilder{
 
     } 
 
-    protected void printAutoIncrementColumn() throws IOException { 
+    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
         print(" ");
         print("serial");
         print(" ");
@@ -85,12 +88,11 @@ public class PostgreSqlBuilder extends SqlBuilder{
     /** 
      * Outputs the DDL to add a column to a table.
      */
-    public void createColumn(Column column) throws IOException {
-        this.column = column;
+    public void createColumn(Table table, Column column) throws IOException {
         print(column.getName());
         print(" ");
         if (column.isAutoIncrement()) {
-            printAutoIncrementColumn();
+            printAutoIncrementColumn(table, column);
         }
         else
         {

@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,6 +97,10 @@ public class DDLExecutor extends JdbcSupport {
     public DDLExecutor() {
     }
 
+    public DDLExecutor(DataSource dataSource) {
+        super(dataSource);
+    }
+
     public DDLExecutor(DataSource dataSource, SqlBuilder sqlBuilder) {
         super(dataSource);
         this.sqlBuilder = sqlBuilder;
@@ -177,7 +181,18 @@ public class DDLExecutor extends JdbcSupport {
     // Implementation methods
     //-------------------------------------------------------------------------                
 
-    protected void evaluateBatch(String sql) throws SQLException {
+    /**
+     * Executes a series of sql statements.  It is assumed that the parameter
+     * string contains sql statements separated by a semicolon.
+     *
+     * @todo consider outputting a collection of String or some kind of statement
+     * object from the SqlBuilder instead of having to parse strings here
+     *
+     * @param sql A list of sql statements
+     *
+     * @throws SQLException if an error occurs and isContinueOnError == false
+     */
+    public void evaluateBatch(String sql) throws SQLException {
         Connection connection = borrowConnection();
         Statement statement = null;
         int errors = 0;

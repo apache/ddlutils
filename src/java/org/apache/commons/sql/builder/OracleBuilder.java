@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ public class OracleBuilder extends SqlBuilder {
     }
     
     
-    protected void printAutoIncrementColumn() throws IOException { 
+    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
         //print( "AUTO_INCREMENT" );
     }
     

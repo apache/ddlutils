@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,7 @@ package org.apache.commons.sql.builder;
 
 import java.io.IOException;
 
+import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
 
 /**
@@ -87,7 +88,7 @@ public class Db2Builder extends SqlBuilder {
         printEndOfStatement();
     }
     
-    protected void printAutoIncrementColumn() throws IOException { 
+    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
         print( "GENERATED ALWAYS AS IDENTITY" );
     }
 }

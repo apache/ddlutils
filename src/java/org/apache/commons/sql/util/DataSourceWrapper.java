@@ -1,7 +1,7 @@
 /*
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999 The Apache Software Foundation.  All rights 
+ * Copyright (c) 1999,2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,15 +81,38 @@ public class DataSourceWrapper implements DataSource {
     private String userName;
     private String password;
 
+    /**
+     * Default constructor
+     */
+    public DataSourceWrapper() {
+    }
+
+    public DataSourceWrapper(String driverClassName, String jdbcURL)
+        throws ClassNotFoundException {
+
+        this(driverClassName, jdbcURL, null, null);
+    }
+
+    public DataSourceWrapper(String driverClassName, String jdbcURL, String userName, String password)
+        throws ClassNotFoundException {
+
+        setDriverClassName(driverClassName);
+        setJdbcURL(jdbcURL);
+        setUserName(userName);
+        setPassword(password);
+    }
+
     public void setDriverClassName(String driverClassName)
-        throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        throws ClassNotFoundException {
 
         if (log.isDebugEnabled()) {
             log.debug("Loading JDBC driver: [" + driverClassName + "]");
         }
 
         this.driverClassName = driverClassName;
-        getClass().getClassLoader().loadClass(driverClassName).newInstance();
+//changed to get rid of instantiation and access exceptions
+//        getClass().getClassLoader().loadClass(driverClassName).newInstance();
+        Class c = Class.forName(driverClassName, true, getClass().getClassLoader());
     }
 
     public void setJdbcURL(String jdbcURL) {

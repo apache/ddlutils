@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,13 +56,13 @@
  * individuals on behalf of the Apache Software Foundation.  For more
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
- * 
+ *
  * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
 package org.apache.commons.sql.model;
 
 
-public class Column 
+public class Column
 {
     private String name;
     private boolean primaryKey = false;
@@ -75,14 +75,14 @@ public class Column
     private int scale = 0;
     private int precisionRadix = 10;
     private int ordinalPosition = 0;
-    
-    public Column() 
+
+    public Column()
     {
     }
 
-    
-    public Column(String name, int typeCode, int size, boolean required, boolean 
-                  primaryKey, boolean autoIncrement, String defaultValue) 
+
+    public Column(String name, int typeCode, int size, boolean required, boolean
+                  primaryKey, boolean autoIncrement, String defaultValue)
     {
         this.name = name;
         this.typeCode = typeCode;
@@ -94,15 +94,15 @@ public class Column
         this.defaultValue = defaultValue;
     }
 
-    public Column(String name, String type, int size, boolean required, boolean 
-                  primaryKey, boolean autoIncrement, String defaultValue  ) 
+    public Column(String name, String type, int size, boolean required, boolean
+                  primaryKey, boolean autoIncrement, String defaultValue  )
     {
         this(name, TypeMap.getJdbcTypeCode(type), size, required, primaryKey, autoIncrement, defaultValue);
     }
 
-    public Column(String name, int typeCode, int size, boolean required, boolean 
-                  primaryKey, boolean autoIncrement, String defaultValue, 
-                  int scale) 
+    public Column(String name, int typeCode, int size, boolean required, boolean
+                  primaryKey, boolean autoIncrement, String defaultValue,
+                  int scale)
     {
         this.name = name;
         this.typeCode = typeCode;
@@ -119,27 +119,43 @@ public class Column
     {
         return super.toString() + "[name=" + name + ";type=" + type + "]";
     }
-            
+
+    public String toStringAll()
+    {
+        return "Column[name=" + name +
+            ";type=" + type +
+            ";typeCode=" + typeCode +
+            ";size=" + size +
+            ";required=" + required +
+            ";pk=" + primaryKey +
+            ";auto=" + autoIncrement +
+            ";default=" + defaultValue +
+            ";scale=" + scale +
+            ";prec=" + precisionRadix +
+            ";ord=" + ordinalPosition +
+            "]";
+    }
+
     public String getName()
     {
         return name;
     }
-    
+
     public void setName(String name)
     {
         this.name = name;
     }
-    
+
     public boolean isPrimaryKey()
     {
         return primaryKey;
     }
-    
+
     public void setPrimaryKey(boolean primaryKey)
     {
         this.primaryKey = primaryKey;
-    }	
-    
+    }
+
     public boolean isRequired()
     {
         return required;
@@ -149,7 +165,7 @@ public class Column
     {
         this.required = required;
     }
-    
+
     public boolean isAutoIncrement()
     {
         return autoIncrement;
@@ -159,23 +175,23 @@ public class Column
     {
         this.autoIncrement = autoIncrement;
     }
-    
+
     public int getTypeCode()
     {
         return typeCode;
     }
-    
+
     public void setTypeCode(int typeCode)
     {
         this.typeCode = typeCode;
         this.type = TypeMap.getJdbcTypeName(typeCode);
     }
 
-    public String getType() 
+    public String getType()
     {
         return type;
     }
-    
+
     /**
      * Set this columns type by name
      */
@@ -184,7 +200,7 @@ public class Column
         this.type = type;
         this.typeCode = TypeMap.getJdbcTypeCode(type);
     }
-    
+
     public int getSize()
     {
         return size;
@@ -199,7 +215,7 @@ public class Column
     {
         return this.scale;
     }
-    
+
     public void setScale(int scale)
     {
         this.scale = scale;
@@ -209,7 +225,7 @@ public class Column
     {
         return defaultValue;
     }
-    
+
     public void setDefaultValue(String defaultValue)
     {
         this.defaultValue = defaultValue;
@@ -219,7 +235,7 @@ public class Column
     {
         return this.precisionRadix;
     }
-    
+
     public void setPrecisionRadix(int precisionRadix)
     {
         this.precisionRadix = precisionRadix;
@@ -229,12 +245,12 @@ public class Column
     {
         return this.ordinalPosition;
     }
-    
+
     public void setOrdinalPosition(int ordinalPosition)
     {
         this.ordinalPosition = ordinalPosition;
     }
-    
+
 
 
 }

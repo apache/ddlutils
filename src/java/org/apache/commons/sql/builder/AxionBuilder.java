@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ public class AxionBuilder extends SqlBuilder {
         // disable foreign key constraints
     }
     
-    protected void printAutoIncrementColumn() throws IOException {
+    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
         //print( "IDENTITY" );
     }
 
@@ -118,8 +118,7 @@ public class AxionBuilder extends SqlBuilder {
      * does not support default values so we are removing
      * default from the Axion column builder.
      */
-    public void createColumn(Column column) throws IOException {
-        this.column = column;
+    public void createColumn(Table table, Column column) throws IOException {
         print(column.getName());
         print(" ");
         print(getSqlType(column));
@@ -133,7 +132,7 @@ public class AxionBuilder extends SqlBuilder {
         }
         print(" ");
         if (column.isAutoIncrement()) {
-            printAutoIncrementColumn();
+            printAutoIncrementColumn(table, column);
         }
     }
 }

@@ -3,7 +3,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: Index.java,v 1.3 2003/10/13 08:30:03 rdonkin Exp $
+ * $Id: Index.java,v 1.4 2003/12/16 15:09:50 matth Exp $
  */
 package org.apache.commons.sql.model;
 
@@ -66,6 +66,8 @@ public class Index
         
     private List indexColumns = new ArrayList();
     
+    private boolean unique = false;
+
     public Index() {}
     
     public String getName()
@@ -87,4 +89,13 @@ public class Index
     {
         return indexColumns;
     }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
+    }
+
 }

@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,11 +63,16 @@ package org.apache.commons.sql.builder;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.sql.io.JdbcModelReader;
+import org.apache.commons.sql.model.Index;
+import org.apache.commons.sql.model.IndexColumn;
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.ForeignKey;
@@ -89,9 +94,12 @@ import org.apache.commons.sql.model.TypeMap;
  * Hopefully only a small amount code needs to be changed on a per database basis.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author John Marshall/Connectria
  * @version $Revision: 1.14 $
  */
 public class SqlBuilder {
+
+    private static final String LINE_SEP = System.getProperty( "line.separator", "\n" );
 
     /** The Log to which logging calls will be made. */
     private static final Log log = LogFactory.getLog(SqlBuilder.class);
@@ -117,12 +125,9 @@ public class SqlBuilder {
     /** Should foreign key constraints be explicitly named */
     private boolean foreignKeyConstraintsNamed;
 
-    /** The current Table we're working on */
-    protected Table table;
-    
-    /** The current Column we're working on */
-    protected Column column;
-        
+    /** Is an ALTER TABLE needed to drop indexes? */
+    private boolean alterTableForDrop;
+
     public SqlBuilder() {
     }
 
@@ -144,13 +149,13 @@ public class SqlBuilder {
         if (dropTable) {
             List tables = database.getTables();
             for (int i = tables.size() - 1; i >= 0; i-- ) {
-                table = (Table) tables.get(i);
+                Table table = (Table) tables.get(i);
                 dropTable(table);
             }
         }
             
         for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
-            table = (Table) iter.next();
+            Table table = (Table) iter.next();
             tableComment(table);
             createTable(table);
         }
@@ -164,7 +169,7 @@ public class SqlBuilder {
         // lets drop the tables in reverse order
         List tables = database.getTables();
         for (int i = tables.size() - 1; i >= 0; i-- ) {
-            table = (Table) tables.get(i);
+            Table table = (Table) tables.get(i);
             tableComment(table);
             dropTable(table);
         }
@@ -193,7 +198,6 @@ public class SqlBuilder {
      * Outputs the DDL to create the table along with any constraints
      */
     public void createTable(Table table) throws IOException {
-        this.table = table;
         print("create table ");
         println(table.getName());
         println("(");
@@ -227,8 +231,9 @@ public class SqlBuilder {
     /** 
      * Outputs the DDL to add a column to a table.
      */
-    public void createColumn(Column column) throws IOException {
-        this.column = column;
+    public void createColumn(Table table, Column column) throws IOException {
+        //see comments in columnsDiffer about null/"" defaults
+
         print(column.getName());
         print(" ");
         print(getSqlType(column));
@@ -246,7 +251,7 @@ public class SqlBuilder {
         }
         print(" ");
         if (column.isAutoIncrement()) {
-            printAutoIncrementColumn();
+            printAutoIncrementColumn(table, column);
         }
     }
     
@@ -359,20 +364,6 @@ public class SqlBuilder {
     //-------------------------------------------------------------------------                
 
     /**
-     * @return the current Table we're working on
-     */
-    protected Table getTable() {
-        return table;
-    }
-    
-    /**
-     * @return the current Column we're working on
-     */
-    protected Column getColumn() {
-        return column;
-    }
-    
-    /**
      * @return true if we should generate a primary key constraint for the given
      *  primary key columns. By default if there are no primary keys or the column(s) are 
      *  all auto increment (identity) columns then there is no need to generate a primary key 
@@ -419,7 +410,7 @@ public class SqlBuilder {
                 println(",");
             }
             printIndent();
-            createColumn(column);
+            createColumn(table, column);
         }
     }
 
@@ -521,31 +512,36 @@ public class SqlBuilder {
             keyIter.hasNext();
             ) {
             ForeignKey key = (ForeignKey) keyIter.next();
-            if (key.getForeignTable() == null) {
-                log.warn( "Foreign key table is null for key: " + key);
-            }
-            else {
-                print("ALTER TABLE ");
-                println(table.getName());
-
-                printIndent();
-                print("ADD CONSTRAINT ");
-                print(table.getName());
-                print("_FK_");
-                print(Integer.toString(++counter));
-                print(" FOREIGN KEY (");
-                writeLocalReferences(key);
-                println(")");
-
-                printIndent();
-                print("REFERENCES ");
-                print(key.getForeignTable());
-                print(" (");
-                writeForeignReferences(key);
-                println(")");
-                printEndOfStatement();
-            }
+            writeForeignKeyAlterTable( table, key );
         }
+    }
+
+    protected void writeForeignKeyAlterTable( Table table, ForeignKey key ) throws IOException {
+        if (key.getForeignTable() == null) {
+            log.warn( "Foreign key table is null for key: " + key);
+        }
+        else {
+            print("ALTER TABLE ");
+            println(table.getName());
+
+            printIndent();
+            print("ADD CONSTRAINT ");
+            print(table.getName());
+            print("_FK_");
+            print(Integer.toString(++counter));
+            print(" FOREIGN KEY (");
+            writeLocalReferences(key);
+            println(")");
+
+            printIndent();
+            print("REFERENCES ");
+            print(key.getForeignTable());
+            print(" (");
+            writeForeignReferences(key);
+            println(")");
+            printEndOfStatement();
+        }
+
     }
 
     /**
@@ -556,39 +552,49 @@ public class SqlBuilder {
             indexIter.hasNext();
             ) {
             Index index = (Index) indexIter.next();
-            if (index.getName() == null) {
-                log.warn( "Index Name is null for index: " + index);
-            }
-            else {
-                print("CREATE INDEX ");
-                print(index.getName());
-                print(" ON ");
-                print(table.getName());
-
-                print(" (");
-                
-                for (Iterator idxColumnIter = index.getIndexColumns().iterator();
-                    idxColumnIter.hasNext();
-                    ) 
-                {
-                    IndexColumn idxColumn = (IndexColumn)idxColumnIter.next();
-                    if (idxColumnIter.hasNext())
-                    {
-                        print(idxColumn.getName() + ", ");             
-                    }
-                    else
-                    {
-                        print(idxColumn.getName());
-                    }
-                }
-
-                print(")");
-                printEndOfStatement();
-            }
+            writeIndex( table, index );
         }
     }
 
+    /**
+     * Writes one index for a table
+     */
+    protected void writeIndex( Table table, Index index ) throws IOException {
+        if (index.getName() == null) {
+            log.warn( "Index Name is null for index: " + index);
+        }
+        else {
+            print("CREATE");
+            if ( index.isUnique() ) {
+                print( " UNIQUE" );
+            }
+            print(" INDEX ");
+            print(index.getName());
+            print(" ON ");
+            print(table.getName());
 
+            print(" (");
+
+            for (Iterator idxColumnIter = index.getIndexColumns().iterator();
+                idxColumnIter.hasNext();
+                )
+            {
+                IndexColumn idxColumn = (IndexColumn)idxColumnIter.next();
+                if (idxColumnIter.hasNext())
+                {
+                    print(idxColumn.getName() + ", ");
+                }
+                else
+                {
+                    print(idxColumn.getName());
+                }
+            }
+
+            print(")");
+            printEndOfStatement();
+        }
+
+    }
     /**
      * Writes the indexes embedded within the create table statement. not
      * yet implemented
@@ -672,7 +678,7 @@ public class SqlBuilder {
      * Prints a new line
      */
     protected void println() throws IOException {
-        print("\n");
+        print( LINE_SEP );
     }
 
     /**
@@ -700,12 +706,313 @@ public class SqlBuilder {
     /**
      * Outputs the fact that this column is an auto increment column.
      */ 
-    protected void printAutoIncrementColumn() throws IOException {
+    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
         print( "IDENTITY" );
     }
 
     protected String getNativeType(Column column){
         return column.getType();
     }
+
+
+    /**
+     * Generates the DDL to modify an existing database so the schema matches
+     * the current specified database schema.  Drops and modifications will
+     * not be made.
+     *
+     * @param desiredDb The desired database schema
+     * @param cn A connection to the existing database that should be modified
+     *
+     * @throws IOException if the ddl cannot be output
+     * @throws SQLException if there is an error reading the current schema
+     */
+    public void alterDatabase(Database desiredDb, Connection cn) throws IOException, SQLException {
+        alterDatabase( desiredDb, cn, false, false );
+    }
+
+    /**
+     * Generates the DDL to modify an existing database so the schema matches
+     * the current specified database schema.
+     *
+     * @param desiredDb The desired database schema
+     * @param cn A connection to the existing database that should be modified
+     * @param doDrops true if columns and indexes should be dropped, false if
+     *      just a message should be output
+     * @param modifyColumns true if columns should be altered for datatype, size, etc.,
+     *      false if just a message should be output
+     *
+     * @throws IOException if the ddl cannot be output
+     * @throws SQLException if there is an error reading the current schema
+     */
+    public void alterDatabase(Database desiredDb, Connection cn, boolean doDrops, boolean modifyColumns) throws IOException, SQLException {
+
+        Database currentDb = new JdbcModelReader(cn).getDatabase();
+
+        for (Iterator iter = desiredDb.getTables().iterator(); iter.hasNext(); ) {
+            Table desiredTable = (Table) iter.next();
+            Table currentTable = currentDb.findTable( desiredTable.getName() );
+
+//took out because if there were no changes to be made the execution had
+//errors because it tries to execute the comments as a statement
+//            tableComment(desiredTable);
+
+            if ( currentTable == null ) {
+                log.info( "creating table " + desiredTable.getName() );
+                createTable( desiredTable );
+            } else {
+                //add any columns, indices, or constraints
+
+                Iterator desiredColumns = desiredTable.getColumns().iterator();
+                while ( desiredColumns.hasNext() ) {
+                	Column desiredColumn = (Column) desiredColumns.next();
+                	Column currentColumn = currentTable.findColumn(desiredColumn.getName());
+                    if ( null == currentColumn ) {
+                        log.info( "creating column " + desiredTable.getName() + "." + desiredColumn.getName() );
+                        alterColumn( desiredTable, desiredColumn, true );
+                    } else if ( columnsDiffer( desiredColumn, currentColumn ) ) {
+                        if ( modifyColumns ) {
+                            log.info( "altering column " + desiredTable.getName() + "." + desiredColumn.getName() );
+                            log.info( "  desiredColumn=" + desiredColumn.toStringAll() );
+                            log.info( "  currentColumn=" + currentColumn.toStringAll() );
+                            alterColumn( desiredTable, desiredColumn, false );
+                        } else {
+                            String text = "Column " + currentColumn.getName() + " in table " + currentTable.getName() + " differs from current specification";
+                            log.info( text );
+                            printComment( text );
+                        }
+                    }
+                } //for columns
+
+                //@todo add constraints here...
+
+                //hmm, m-w.com says indices and indexes are both okay
+                //@todo should we check the index fields for differences?
+                Iterator desiredIndexes = desiredTable.getIndexes().iterator();
+                while ( desiredIndexes.hasNext() ) {
+                    Index desiredIndex = (Index) desiredIndexes.next();
+                    Index currentIndex = currentTable.findIndex(desiredIndex.getName());
+                    if ( null == currentIndex ) {
+                        log.info( "creating index " + desiredTable.getName() + "." + desiredIndex.getName() );
+                        writeIndex( desiredTable, desiredIndex );
+                    }
+                }
+
+                // Drops ///////////////////////
+                //@todo drop constraints - probably need names on them for this
+
+                //do any drops of columns
+                Iterator currentColumns = currentTable.getColumns().iterator();
+                while ( currentColumns.hasNext() ) {
+                    Column currentColumn = (Column) currentColumns.next();
+                    Column desiredColumn = desiredTable.findColumn(currentColumn.getName());
+                    if ( null == desiredColumn ) {
+                        if ( doDrops ) {
+                            log.info( "dropping column " + currentTable.getName() + "." + currentColumn.getName() );
+                            dropColumn( currentTable, currentColumn );
+                        } else {
+                            String text = "Column " + currentColumn.getName() + " can be dropped from table " + currentTable.getName();
+                            log.info( text );
+                            printComment( text );
+                        }
+                    }
+                } //for columns
+
+                //drop indexes
+                Iterator currentIndexes = currentTable.getIndexes().iterator();
+                while ( currentIndexes.hasNext() ) {
+                    Index currentIndex = (Index) currentIndexes.next();
+                    Index desiredIndex = desiredTable.findIndex(currentIndex.getName());
+                    if ( null == desiredIndex ) {
+                        //make sure this isn't the primary key index (mySQL reports this at least)
+
+                        Iterator indexColumns = currentIndex.getIndexColumns().iterator();
+                        boolean isPk = true;
+                        while ( indexColumns.hasNext() ) {
+                            IndexColumn ic = (IndexColumn) indexColumns.next();
+                            Column c = currentTable.findColumn( ic.getName() );
+                            if ( !c.isPrimaryKey() ) {
+                                isPk = false;
+                                break;
+                            }
+                        }
+
+                        if ( !isPk ) {
+                            log.info( "dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName() );
+                            dropIndex( currentTable, currentIndex );
+                        }
+                    }
+                }
+
+            } //table exists?
+        } //for tables create
+
+        //check for table drops
+        for (Iterator iter = currentDb.getTables().iterator(); iter.hasNext(); ) {
+            Table currentTable = (Table) iter.next();
+            Table desiredTable = desiredDb.findTable( currentTable.getName() );
+
+            if ( desiredTable == null ) {
+                if ( doDrops ) {
+                    log.info( "dropping table " + currentTable.getName() );
+                    dropTable( currentTable );
+                } else {
+                    String text = "Table " + currentTable.getName() + " can be dropped";
+                    log.info( text );
+                    printComment( text );
+                }
+            }
+
+        } //for tables drops
+
+    }
+
+    /**
+     * Generates the alter statement to add or modify a single column on a table.
+     *
+     * @param table The table the index is on
+     * @param column The column to drop
+     * @param add true if the column is new, false if it is to be changed
+     *
+     * @throws IOException if the statement cannot be written
+     */
+    public void alterColumn( Table table, Column column, boolean add ) throws IOException {
+
+        writeAlterHeader( table );
+
+        print( add ? "ADD " : "MODIFY " );
+        createColumn( table, column );
+        printEndOfStatement();
+    }
+
+    /**
+     * Generates the statement to drop an column from a table.
+     *
+     * @param table The table the index is on
+     * @param column The column to drop
+     *
+     * @throws IOException if the statement cannot be written
+     */
+    public void dropColumn( Table table, Column column ) throws IOException {
+
+        writeAlterHeader( table );
+
+        print( "DROP COLUMN " );
+        print( column.getName() );
+        printEndOfStatement();
+    }
+
+    /**
+     * Generates the first part of the ALTER TABLE statement including the
+     * table name.
+     *
+     * @param table The table being altered
+     *
+     * @throws IOException if the statement cannot be written
+     */
+    protected void writeAlterHeader( Table table ) throws IOException {
+        print("ALTER TABLE ");
+        println(table.getName());
+
+        printIndent();
+
+    }
+
+    /**
+     * Generates the statement to drop an index from the database.  The
+     * <code>alterTableForDrop</code> property is checked to determine what
+     * style of drop is generated.
+     *
+     * @param table The table the index is on
+     * @param index The index to drop
+     *
+     * @throws IOException if the statement cannot be written
+     *
+     * @see SqlBuilder#useAlterTableForDrop
+     */
+    public void dropIndex( Table table, Index index ) throws IOException {
+
+        if ( useAlterTableForDrop() ) {
+            writeAlterHeader( table );
+        }
+
+        print( "DROP INDEX " );
+        print( index.getName() );
+
+        if ( ! useAlterTableForDrop() ) {
+            print( " ON " );
+            print( table.getName() );
+        }
+
+        printEndOfStatement();
+    }
+
+    /**
+     * Helper method to determine if two column specifications represent
+     * different types.  Type, nullability, size, scale, default value,
+     * and precision radix are the attributes checked.  Currently default
+     * values are compared where null and empty string are considered equal.
+     * See comments in the method body for explanation.
+     *
+     *
+     * @param first First column to compare
+     * @param second Second column to compare
+     * @return true if the columns differ
+     */
+    protected boolean columnsDiffer( Column desired, Column current ) {
+        boolean result = false;
+
+        //The createColumn method leaves off the default clause if column.getDefaultValue()
+        //is null.  mySQL interprets this as a default of "" or 0, and thus the columns
+        //are always different according to this method.  alterDatabase will generate
+        //an alter statement for the column, but it will be the exact same definition
+        //as before.  In order to avoid this situation I am ignoring the comparison
+        //if the desired default is null.  In order to "un-default" a column you'll
+        //have to have a default="" or default="0" in the schema xml.
+        //If this is bad for other databases, it is recommended that the createColumn
+        //method use a "DEFAULT NULL" statement if that is what is needed.
+        //A good way to get this would be to require a defaultValue="<NULL>" in the
+        //schema xml if you really want null and not just unspecified.
+        String desiredDefault = desired.getDefaultValue();
+        String currentDefault = current.getDefaultValue();
+        boolean defaultsEqual = desiredDefault == null ||
+            desiredDefault.equals(currentDefault);
+
+        boolean sizeMatters = desired.getSize() > 0;
+
+        if ( desired.getTypeCode() != current.getTypeCode() ||
+                desired.isRequired() != current.isRequired() ||
+                (sizeMatters && desired.getSize() != current.getSize()) ||
+                desired.getScale() != current.getScale() ||
+                !defaultsEqual ||
+                desired.getPrecisionRadix() != current.getPrecisionRadix() )
+        {
+            result = true;
+        }
+
+        return result;
+    }
+
+    /**
+     * Whether an ALTER TABLE statement is necessary when dropping indexes
+     * or constraints.  The default is false.
+     * @return true if ALTER TABLE is required
+     */
+    public boolean useAlterTableForDrop() {
+        return alterTableForDrop;
+    }
+
+    /**
+     * Whether an ALTER TABLE statement is necessary when dropping indexes
+     * or constraints.  The default is false.
+     * @param alterTableForDrop The new value
+     */
+    public void setAlterTableForDrop(boolean alterTableForDrop) {
+        this.alterTableForDrop = alterTableForDrop;
+    }
+
+//used to check for code to be changed when changing signatures
+//protected final void printAutoIncrementColumn() throws IOException {};
+//protected final void createColumn(Column column) throws IOException {};
+
 
 }

@@ -113,12 +113,14 @@
     </dependency>
 
     <dependency>
-      <id>commons-betwixt</id>
-      <version>1.0-beta-1-dev</version>
+      <groupId>commons-betwixt</groupId>
+      <artifactId>commons-betwixt</artifactId>
+      <version>20030211.133854</version>
     </dependency>
 
     <dependency>
-      <id>commons-jelly</id>
+      <groupId>commons-jelly</groupId>
+      <artifactId>commons-jelly</artifactId>
       <version>20030902.160215</version>
     </dependency>
 
@@ -127,10 +129,12 @@
       <version>1.0-beta-2</version>
     </dependency>
 
+    <!--
     <dependency>
       <id>jdbc</id>
       <version>2.0</version>
     </dependency>
+    -->f
 
     <dependency>
       <id>ant</id>

@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,10 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -76,6 +78,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.ForeignKey;
+import org.apache.commons.sql.model.Index;
+import org.apache.commons.sql.model.IndexColumn;
 import org.apache.commons.sql.model.Reference;
 import org.apache.commons.sql.model.Table;
 
@@ -217,6 +221,13 @@ public class JdbcModelReader {
                 while (fkIterator.hasNext()) {
                     t.addForeignKey((ForeignKey) fkIterator.next());
                 }
+
+                Iterator idxIterator =
+                    getIndexesForTable(t.getName()).iterator();
+                while (idxIterator.hasNext()) {
+                    t.addIndex((Index) idxIterator.next());
+                }
+
             }
             return tables;
         }
@@ -524,4 +535,51 @@ public class JdbcModelReader {
         }
         return fks;
     }
+
+
+    private List getIndexesForTable(String tableName) throws SQLException {
+        DatabaseMetaData dbmd = connection.getMetaData();
+
+        Map indexesByName = new HashMap();
+
+        ResultSet columnData = null;
+        try {
+            columnData = dbmd.getIndexInfo(catalog, schema, tableName, false, false);
+        } catch ( SQLException e ) {
+            log.trace("database does not support getIndexInfo()", e);
+        }
+
+        if ( columnData != null ) {
+            try {
+                //can be multiple columns per index
+                while ( columnData.next() ) {
+
+                    String indexName = columnData.getString("INDEX_NAME");
+                    boolean unique = !columnData.getBoolean("NON_UNIQUE");
+                    String column = columnData.getString("COLUMN_NAME");
+
+                    Index index = (Index) indexesByName.get(indexName);
+                    if ( index == null ) {
+                        index = new Index();
+                        index.setName( indexName );
+                        indexesByName.put( indexName, index );
+                        index.setUnique( unique );
+                    }
+
+                    IndexColumn ic = new IndexColumn();
+                    ic.setName( column );
+                    index.addIndexColumn( ic );
+                }
+            }
+            finally {
+                if (columnData != null) {
+                    columnData.close();
+                }
+            }
+        }
+
+        return new Vector(indexesByName.values());
+    }
+
+
 }

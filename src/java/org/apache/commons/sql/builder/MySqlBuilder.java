@@ -7,7 +7,7 @@
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,13 +63,16 @@
 package org.apache.commons.sql.builder;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
 
 /**
  * An SQL Builder for MySQL
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author John Marshall/Connectria
  * @version $Revision: 1.14 $
  */
 public class MySqlBuilder extends SqlBuilder {
@@ -84,7 +87,25 @@ public class MySqlBuilder extends SqlBuilder {
         printEndOfStatement();
     }
     
-    protected void printAutoIncrementColumn() throws IOException { 
+    protected void printAutoIncrementColumn(Table table, Column column) throws IOException {
         print( "AUTO_INCREMENT" );
+    }
+
+    protected boolean shouldGeneratePrimaryKeys(List primaryKeyColumns) {
+        /*
+         * mySQL requires primary key indication for autoincrement key columns
+         * I'm not sure why the default skips the pk statement if all are identity
+         */
+        return true;
+    }
+
+    protected String getNativeType(Column column){
+        if ( "timestamp".equalsIgnoreCase( column.getType() ) ) {
+            return "DATETIME";
+        } else if ( "longvarchar".equalsIgnoreCase( column.getType() ) ) {
+            return "TEXT";
+        } else {
+            return column.getType();
+        }
     }
 }
