@@ -76,6 +76,7 @@ import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.ForeignKey;
 import org.apache.commons.sql.model.Reference;
 import org.apache.commons.sql.model.Table;
+import org.apache.commons.sql.model.TypeMap;
 
 /**
  * This class is a collection of Strategy methods for creating the DDL required to create and drop 
@@ -392,9 +393,20 @@ public class SqlBuilder {
      * @return the full SQL type string including the size
      */
     protected String getSqlType(Column column) {
-        return column.getTypeString();
+        StringBuffer sqlType = new StringBuffer(column.getType());
+        if ( column.getSize() > 0 ) {
+            sqlType.append(" (");
+            sqlType.append(column.getSize());
+            sqlType.append(")");
+        }
+        if ( TypeMap.isDecimalType(column.getType()) ){
+            sqlType.append(",");
+            sqlType.append(column.getScale());
+            sqlType.append(")");
+        }
+        return sqlType.toString();
     }
-
+    
     /**
      * Writes the column types for a table 
      */
