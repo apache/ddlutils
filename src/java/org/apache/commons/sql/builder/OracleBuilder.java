@@ -101,7 +101,49 @@ public class OracleBuilder extends SqlBuilder {
         println( text );
     }
     
+    public void createTable(Table table) throws IOException {
+        // lets create any sequences
+        Column column = table.getAutoIncrementColumn();
+        if (column != null) {
+            createSequence(table, column);
+        }
+        super.createTable(table);
+        if (column != null) {
+            createSequenceTrigger(table, column);
+        }
+    }
+    
+    
     protected void printAutoIncrementColumn() throws IOException { 
         //print( "AUTO_INCREMENT" );
+    }
+    
+    /**
+     * Creates a sequence so that values can be auto incremented
+     */
+    protected void createSequence(Table table, Column column) throws IOException {
+        print( "create sequence " );
+        print( table.getName() );
+        print( "_seq" );
+        printEndOfStatement();
+    }
+    
+    /**
+     * Creates a trigger to auto-increment values
+     */
+    protected void createSequenceTrigger(Table table, Column column) throws IOException {
+        print( "create or replace trigger " );
+        print( table.getName() );
+        print( "_trg before insert on " );
+        println( table.getName() );
+        println( "for each row" );
+        println( "begin" );
+        print( "select " );
+        print( table.getName() );
+        print( "_seq.nextval into :new." );
+        print( column.getName() );
+        println( " from dual;" );
+        print( "end" );
+        printEndOfStatement();
     }
 }

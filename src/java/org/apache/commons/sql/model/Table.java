@@ -156,4 +156,19 @@ public class Table
         return answer;
     }
 
+    /**
+     * @return the auto increment column, if there is one, otherwise null is returned
+     */
+    public Column getAutoIncrementColumn() 
+    {
+        for (Iterator iter = getColumns().iterator(); iter.hasNext(); ) 
+        {
+            Column column = (Column) iter.next();
+            if ( column.isAutoIncrement() )
+            {
+                return column;
+            }
+        }
+        return null;
+    }
 }
