@@ -27,8 +27,4 @@ package org.apache.commons.sql.builder;
  * @version $Revision: 1.14 $
  */
 public class HsqlDbBuilder extends SqlBuilder {
-    
-    public HsqlDbBuilder() {
-        setForeignKeysEmbedded(true);
-    }
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -111,6 +112,10 @@ public class SqlBuilder {
             tableComment(table);
             createTable(table);
         }
+        // we're writing the foreignkeys last to ensure that all referenced tables are already defined
+        for (Iterator iter = database.getTables().iterator(); iter.hasNext(); ) {
+            createExternalForeignKey((Table) iter.next());
+        }
     }
 
     /**
@@ -147,7 +152,7 @@ public class SqlBuilder {
     }
 
     /** 
-     * Outputs the DDL to create the table along with any constraints
+     * Outputs the DDL to create the table along with any non-external constraints
      */
     public void createTable(Table table) throws IOException {
         print("create table ");
@@ -172,11 +177,17 @@ public class SqlBuilder {
         if (!isPrimaryKeyEmbedded()) {
             writePrimaryKeysAlterTable(table);
         }
-        if (!isForeignKeysEmbedded()) {
-            writeForeignKeysAlterTable(table);
-        }
         if (!isIndexesEmbedded()) {
             writeIndexes(table);
+        }
+    }
+
+    /** 
+     * Creates an external foreignkey definition.
+     */
+    public void createExternalForeignKey(Table table) throws IOException {
+        if (!isForeignKeysEmbedded()) {
+            writeForeignKeysAlterTable(table);
         }
     }
 
@@ -698,7 +709,8 @@ public class SqlBuilder {
      */
     public void alterDatabase(Database desiredDb, Connection cn, boolean doDrops, boolean modifyColumns) throws IOException, SQLException {
 
-        Database currentDb = new JdbcModelReader(cn).getDatabase();
+        Database  currentDb      = new JdbcModelReader(cn).getDatabase();
+        ArrayList deferredTables = new ArrayList();
 
         for (Iterator iter = desiredDb.getTables().iterator(); iter.hasNext(); ) {
             Table desiredTable = (Table) iter.next();
@@ -711,6 +723,8 @@ public class SqlBuilder {
             if ( currentTable == null ) {
                 log.info( "creating table " + desiredTable.getName() );
                 createTable( desiredTable );
+                // we're deferring foreignkey generation
+                deferredTables.add(desiredTable);
             } else {
                 //add any columns, indices, or constraints
 
@@ -797,6 +811,13 @@ public class SqlBuilder {
 
             } //table exists?
         } //for tables create
+
+        // generating deferred foreignkeys
+        for (Iterator iter = deferredTables.iterator(); iter.hasNext();)
+        {
+            createExternalForeignKey((Table)iter.next());
+        }
+        
 
         //check for table drops
         for (Iterator iter = currentDb.getTables().iterator(); iter.hasNext(); ) {
