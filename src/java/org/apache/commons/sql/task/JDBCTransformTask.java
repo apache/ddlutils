@@ -304,7 +304,8 @@ public class JDBCTransformTask
                 {
                     column.setAttribute("javaName", name);
                 }
-                column.setAttribute("type", TypeMap.getTorqueType(type));
+                
+                //column.setAttribute("type", TypeMap.getTorqueType(type));
 
                 if (size > 0 &&
                     (type.intValue() == Types.CHAR ||
