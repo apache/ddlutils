@@ -27,24 +27,24 @@
   </description>
 
   <url>http://jakarta.apache.org/commons/sql/</url>
-  <cvsWebUrl>http://cvs.apache.org/viewcvs/jakarta-turbine-maven/</cvsWebUrl>
+  <cvsWebUrl>http://cvs.apache.org/viewcvs/jakarta-commons-sandbox/sql/</cvsWebUrl>
   <issueTrackingUrl>http://nagoya.apache.org:8080/scarab/servlet/scarab/</issueTrackingUrl>
   <siteAddress>jakarta.apache.org</siteAddress>
-  <siteDirectory>/www/jakarta.apache.org/turbine/maven/</siteDirectory>
-  <distributionDirectory>/www/jakarta.apache.org/builds/jakarta-turbine-maven/</distributionDirectory>
+  <siteDirectory>/www/jakarta.apache.org/commons/sandbox/sql/</siteDirectory>
+  <distributionDirectory>/www/jakarta.apache.org/builds/jakarta-commons-sandbox/sql/</distributionDirectory>
 
   <mailingLists>
     <mailingList>
       <name>Maven User List</name>
-      <subscribe>turbine-maven-user-subscribe@jakarta.apache.org</subscribe>
-      <unsubscribe>turbine-maven-user-unsubscribe@jakarta.apache.org</unsubscribe>
-      <archive>http://nagoya.apache.org:8080/eyebrowse/SummarizeList?listName=turbine-maven-user@jakarta.apache.org</archive>
+      <subscribe>commons-user-subscribe@jakarta.apache.org</subscribe>
+      <unsubscribe>commons-user-unsubscribe@jakarta.apache.org</unsubscribe>
+      <archive>http://nagoya.apache.org:8080/eyebrowse/SummarizeList?listName=commons-user@jakarta.apache.org</archive>
     </mailingList>
     <mailingList>
       <name>Maven Developer List</name>
-      <subscribe>turbine-maven-dev-subscribe@jakarta.apache.org</subscribe>
-      <unsubscribe>turbine-maven-dev-unsubscribe@jakarta.apache.org</unsubscribe>
-      <archive>http://nagoya.apache.org:8080/eyebrowse/SummarizeList?listName=turbine-maven-dev@jakarta.apache.org</archive>
+      <subscribe>commons-dev-subscribe@jakarta.apache.org</subscribe>
+      <unsubscribe>commons-dev-unsubscribe@jakarta.apache.org</unsubscribe>
+      <archive>http://nagoya.apache.org:8080/eyebrowse/SummarizeList?listName=commons-dev@jakarta.apache.org</archive>
     </mailingList>
   </mailingLists>
 
