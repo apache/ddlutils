@@ -27,7 +27,7 @@
       </p>
       <p>
         There is an example XML document
-        <a href="http://cvs.apache.org/viewcvs.cgi/jakarta-commons-sandbox/sql/src/test-input/datamodel.xml?rev=HEAD">here</a>
+        <a href="http://svn.apache.org/viewcvs/jakarta/commons/sandbox/sql/src/test-input/datamodel.xml">here</a>
       </p>
       <p>
         Once you have the relational model, either via beans or XML, you can then create the DDL to create or drop
