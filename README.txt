@@ -1,5 +1,5 @@
-Jelly
-=====
+Jakarta Commons SQL
+===================
 
 The primary build tool for this project is Maven. 
 So all you should need to do is install Maven and just type
