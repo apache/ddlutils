@@ -16,7 +16,7 @@
         Commons SQL is a simple set of beans that represent a relational database schema
         such as a Database, Table, Column etc.
         These beans can be read from XML or written to XML using 
-        <a href="http://jakarta.apache.org/commons/betwixt/">Betwix</a>.        
+        <a href="http://jakarta.apache.org/commons/betwixt/">Betwixt</a>.        
       </p>
       <p>
         There is an example XML document 
