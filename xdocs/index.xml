@@ -56,7 +56,7 @@
   &lt;taskdef
     name="ddl"
     classname="org.apache.commons.sql.task.DDLTask"&gt;
-      lt;classpath refid="some.classpath"/&gt;
+      &lt;classpath refid="some.classpath"/&gt;
   &lt;/taskdef&gt;    
 		
   &lt;ddl
