@@ -141,9 +141,13 @@ public class TypeMap
     {
         CHAR, VARCHAR, LONGVARCHAR, CLOB, DATE, TIME, TIMESTAMP, BOOLEANCHAR
     };
+    private static final String[] DECIMAL_TYPES =
+    {
+        NUMERIC, DECIMAL, REAL, FLOAT, DOUBLE
+    };
 
     private static Hashtable sqlTypeNameToTypeID = new Hashtable();
-    private static Hashtable sqlTypeIDToTypeName = new Hashtable();
+    private static Hashtable typeIdToSqlTypeName = new Hashtable();
 
 
 
@@ -179,7 +183,7 @@ public class TypeMap
      * Returns the JDBC type name which maps to {@link java.sql.Types}
      * for the given SQL name of type
      */
-    public static int getSQLTypeCode(String typeName)
+    public static int getJdbcTypeCode(String typeName)
     {
         Integer answer = (Integer) sqlTypeNameToTypeID.get(typeName.toUpperCase());
         if ( answer != null ) 
@@ -189,16 +193,31 @@ public class TypeMap
         return Types.OTHER;
     }
 
-    public static String getSQLTypeString(Integer typeCode)
+    /**
+     * Returns the name which maps to the given {@link java.sql.Types} 
+     * type code 
+     */
+    public static String getJdbcTypeName(int typeCode)
     {
-        String answer = (String) sqlTypeIDToTypeName.get(typeCode);
-        if ( answer != null )
+        String answer = (String)typeIdToSqlTypeName.get(new Integer(typeCode));
+        if ( answer == null ) 
         {
-            return answer;
+            System.out.println("Couldn't find JDBC Name for typeCode: " + typeCode);
+            answer = "UNKNOWN";
         }
-        return "UNKNOWN";
+        return answer;
     }
-    
+
+    /**
+     * Returns true if values for the type need to be quoted.
+     *
+     * @param type The type to check.
+     */
+    public static final boolean isTextType(int type)
+    {
+        return isTextType(getJdbcTypeName(type));
+    }
+
     /**
      * Returns true if values for the type need to be quoted.
      *
@@ -218,6 +237,35 @@ public class TypeMap
         return false;
     }
 
+    /**
+     * Returns true if values for the type need have size and scale measurements
+     *
+     * @param type The type to check.
+     */
+    public static final boolean isDecimalType(int type)
+    {
+        return isDecimalType(getJdbcTypeName(type));
+    }
+
+    /**
+     * Returns true if values for the type need have size and scale measurements
+     *
+     * @param type The type to check.
+     */
+    public static final boolean isDecimalType(String type)
+    {
+        for (int i = 0; i < DECIMAL_TYPES.length; i++)
+        {
+            if (type.equalsIgnoreCase(DECIMAL_TYPES[i]))
+            {
+                return true;
+            }
+        }
+
+        // If we get this far, there were no matches.
+        return false;
+    }
+
 
     /**
      * Registers the fact that the given Integer SQL ID maps to the given SQL name
@@ -225,7 +273,7 @@ public class TypeMap
     protected static void registerSqlTypeID(Integer sqlTypeID, String name) 
     {
         sqlTypeNameToTypeID.put(name, sqlTypeID);
-        sqlTypeIDToTypeName.put(sqlTypeID, name);
+        typeIdToSqlTypeName.put(sqlTypeID, name);
     }
 }
 
