@@ -29,18 +29,58 @@ import org.apache.commons.sql.model.Column;
  */
 public class SapDbBuilder extends SqlBuilder
 {
+    public static final String CHARACTER_TYPE_ASCII   = "ASCII";
+    public static final String CHARACTER_TYPE_UNICODE = "UNICODE";
+
+    /** The characater type */
+    private String _characterType = "";
+
     public SapDbBuilder()
     {
+        setCommentPrefix("/*");
+        setCommentSuffix("*/");
         // CHAR and VARCHAR are handled by getSqlType
         addNativeTypeMapping(Types.BIGINT,        "FIXED(38,0)");
         addNativeTypeMapping(Types.BLOB,          "LONG BYTE");
         addNativeTypeMapping(Types.BIT,           "FIXED(1,0)");
-        addNativeTypeMapping(Types.CLOB,          "LONG UNICODE");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG BYTE");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "LONG UNICODE");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         addNativeTypeMapping(Types.VARBINARY,     "LONG BYTE");
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "SapDB";
+    }
+
+    /**
+     * Sets the character type of the database, either 'ASCII', 'UNICODE'.
+     * 
+     * @param characterType The character type
+     */
+    public void setCharacterType(String characterType)
+    {
+        if (characterType == null)
+        {
+            _characterType = "";
+        }
+        else if (CHARACTER_TYPE_ASCII.equalsIgnoreCase(characterType))
+        {
+            _characterType = CHARACTER_TYPE_ASCII;
+        }
+        else if (CHARACTER_TYPE_UNICODE.equalsIgnoreCase(characterType))
+        {
+            _characterType = CHARACTER_TYPE_UNICODE;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unknown character type "+characterType+", only "+
+                                               CHARACTER_TYPE_ASCII+" and "+CHARACTER_TYPE_UNICODE+" or an empty string are allowed");
+        }
     }
 
     /* (non-Javadoc)
@@ -48,19 +88,25 @@ public class SapDbBuilder extends SqlBuilder
      */
     protected String getSqlType(Column column)
     {
-        if ((column.getSize() != null) &&
-            ((column.getTypeCode() == Types.CHAR) || (column.getTypeCode() == Types.VARCHAR)))
+        switch (column.getTypeCode())
         {
-            StringBuffer sqlType = new StringBuffer(getNativeType(column));
+            case Types.CHAR:
+            case Types.VARCHAR:
+                if (column.getSize() != null)
+                {
+                    StringBuffer sqlType = new StringBuffer(getNativeType(column));
 
-            sqlType.append(" (");
-            sqlType.append(column.getSize());
-            sqlType.append(") UNICODE");
-            return sqlType.toString();
+                    sqlType.append(" (");
+                    sqlType.append(column.getSize());
+                    sqlType.append(") ");
+                    sqlType.append(_characterType);
+                    return sqlType.toString();
+                }
+                break;
+            case Types.CLOB:
+            case Types.LONGVARCHAR:
+                return "LONG "+_characterType;
         }
-        else
-        {
-            return super.getSqlType(column);
-        }
+        return super.getSqlType(column);
     }
 }

@@ -35,6 +35,14 @@ public class AxionBuilder extends SqlBuilder {
         addNativeTypeMapping(Types.DECIMAL, "FLOAT");
     }    
 
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "Axion";
+    }
+
     protected String getSqlType(Column column) {
         // Axion doesn't support text width specification 
         return getNativeType(column);

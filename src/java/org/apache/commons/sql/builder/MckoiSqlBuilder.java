@@ -38,6 +38,14 @@ public class MckoiSqlBuilder extends SqlBuilder
         addNativeTypeMapping(Types.BIT,  "TINYINT");
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "Mckoi";
+    }
+
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE IF EXISTS ");

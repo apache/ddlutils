@@ -50,6 +50,14 @@ public class MySqlBuilder extends SqlBuilder
     }
 
     /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "MySQL";
+    }
+
+    /* (non-Javadoc)
      * @see org.apache.commons.sql.builder.SqlBuilder#dropTable(Table)
      */
     public void dropTable(Table table) throws IOException

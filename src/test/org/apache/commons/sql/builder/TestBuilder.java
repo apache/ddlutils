@@ -90,7 +90,7 @@ public class TestBuilder extends TestCase
         throws Exception
     {
     
-        SqlBuilder builder = new SqlBuilder();
+        SqlBuilder builder = new HsqlDbBuilder();
         StringWriter sw = new StringWriter();
         builder.setWriter(sw);
         builder.dropDatabase(database);       

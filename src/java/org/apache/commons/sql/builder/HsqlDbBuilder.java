@@ -31,6 +31,14 @@ import org.apache.commons.sql.model.Table;
 public class HsqlDbBuilder extends SqlBuilder
 {
     /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "HsqlDb";
+    }
+
+    /* (non-Javadoc)
      * @see org.apache.commons.sql.builder.SqlBuilder#dropTable(Table)
      */
     public void dropTable(Table table) throws IOException

@@ -55,6 +55,14 @@ public class OracleBuilder extends SqlBuilder
         addNativeTypeMapping(Types.VARCHAR,       "VARCHAR2");
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "Oracle";
+    }
+
     public void dropTable(Table table) throws IOException
     {
         print("DROP TABLE ");

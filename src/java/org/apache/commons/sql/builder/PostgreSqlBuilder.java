@@ -23,11 +23,11 @@ import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
 
 /**
- * An SQL Builder for PostgresSqlL
+ * An SQL Builder for PostgresSql
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PostgreSqlBuilder extends SqlBuilder
 {
@@ -42,6 +42,14 @@ public class PostgreSqlBuilder extends SqlBuilder
         addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         addNativeTypeMapping(Types.VARBINARY,     "BYTEA");
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "PostgreSql";
     }
 
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException

@@ -52,6 +52,14 @@ public class MSSqlBuilder extends SqlBuilder
     }
 
     /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "MS SQL Server";
+    }
+
+    /* (non-Javadoc)
      * @see org.apache.commons.sql.builder.SqlBuilder#dropExternalForeignKey(org.apache.commons.sql.model.Table, org.apache.commons.sql.model.ForeignKey, int)
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException

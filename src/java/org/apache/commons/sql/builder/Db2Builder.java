@@ -46,6 +46,14 @@ public class Db2Builder extends SqlBuilder
         addNativeTypeMapping(Types.VARBINARY,     "VARCHAR FOR BIT DATA");
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "DB2";
+    }
+
     public void dropTable(Table table) throws IOException
     { 
         super.dropTable(table);

@@ -54,7 +54,7 @@ import org.apache.commons.sql.model.TypeMap;
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
-public class SqlBuilder {
+public abstract class SqlBuilder {
 
     private static final String LINE_SEPERATOR = System.getProperty("line.separator", "\n");
 
@@ -325,6 +325,13 @@ public class SqlBuilder {
     // public interface
     //
 
+    /**
+     * Returns the name of the database that this builder is for.
+     * 
+     * @return The database name
+     */
+    public abstract String getDatabaseName();
+    
     /**
      * Outputs the DDL required to drop and recreate the database.
      * 

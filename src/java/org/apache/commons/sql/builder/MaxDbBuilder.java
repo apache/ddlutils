@@ -24,4 +24,11 @@ package org.apache.commons.sql.builder;
  */
 public class MaxDbBuilder extends SapDbBuilder
 {
+    /* (non-Javadoc)
+     * @see org.apache.commons.sql.builder.SqlBuilder#getDatabaseName()
+     */
+    public String getDatabaseName()
+    {
+        return "MaxDB";
+    }
 }
