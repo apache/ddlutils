@@ -142,6 +142,7 @@ public class SqlBuilderFactory {
         registerDatabase("mssql", MSSqlBuilder.class);
         registerDatabase("mysql", MySqlBuilder.class);
         registerDatabase("oracle", OracleBuilder.class);
+        registerDatabase("postgresql", PostgreSqlBuilder.class);
         registerDatabase("sybase", SybaseBuilder.class);
     }
 }
