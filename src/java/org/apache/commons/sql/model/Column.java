@@ -71,26 +71,25 @@ public class Column
     private boolean primaryKey = false;
     private boolean required = false;
     private boolean autoIncrement = false;
-    private boolean nullable = false;
+    private int typeCode;
     private String type;
     private int size = 0;
-    private String defaultValue;
-    private Integer scale = null;
-    private String isNullable;
-    private Boolean isTextType = new Boolean(false);
-    private Integer precisionRadix = null;
-    private Integer charOctetLength = null;
-    private Integer ordinalPosition = null;
+    private String defaultValue = null;
+    private int scale = 0;
+    private int precisionRadix = 10;
+    private int ordinalPosition = 0;
     
     public Column() 
     {
     }
 
-    public Column(String name, String type, int size, boolean required, boolean 
+    
+    public Column(String name, int typeCode, int size, boolean required, boolean 
                   primaryKey, boolean autoIncrement, String defaultValue) 
     {
         this.name = name;
-        this.type = type;
+        this.typeCode = typeCode;
+        this.type = TypeMap.getJdbcTypeName(typeCode);
         this.size = size;
         this.required = required;
         this.primaryKey = primaryKey;
@@ -99,18 +98,24 @@ public class Column
     }
 
     public Column(String name, String type, int size, boolean required, boolean 
+                  primaryKey, boolean autoIncrement, String defaultValue  ) 
+    {
+        this(name, TypeMap.getJdbcTypeCode(type), size, required, primaryKey, autoIncrement, defaultValue);
+    }
+
+    public Column(String name, int typeCode, int size, boolean required, boolean 
                   primaryKey, boolean autoIncrement, String defaultValue, 
-                  Integer scale, String isNullable) 
+                  int scale) 
     {
         this.name = name;
-        this.type = type;
+        this.typeCode = typeCode;
+        this.type = TypeMap.getJdbcTypeName(typeCode);
         this.size = size;
         this.required = required;
         this.primaryKey = primaryKey;
         this.autoIncrement = autoIncrement;
         this.defaultValue = defaultValue;
         this.scale = scale;
-        this.isNullable = isNullable;
     }
 
     public String toString()
@@ -158,34 +163,29 @@ public class Column
         this.autoIncrement = autoIncrement;
     }
     
-    public String getType()
+    public int getTypeCode()
+    {
+        return typeCode;
+    }
+    
+    public void setTypeCode(int typeCode)
+    {
+        this.typeCode = typeCode;
+        this.type = TypeMap.getJdbcTypeName(typeCode);
+    }
+
+    public String getType() 
     {
         return type;
     }
     
+    /**
+     * Set this columns type by name
+     */
     public void setType(String type)
     {
         this.type = type;
-    }
-
-    public boolean getNullable()
-    {
-        return this.nullable;
-    }
-    
-    public void setNullable(boolean nullable)
-    {
-        this.nullable = nullable;
-    }
-    
-    public String getIsNullable()
-    {
-        return this.isNullable;
-    }
-    
-    public void setIsNullable(String isNullable)
-    {
-        this.isNullable = isNullable;
+        this.typeCode = TypeMap.getJdbcTypeCode(type);
     }
     
     public int getSize()
@@ -198,26 +198,16 @@ public class Column
         this.size = size;
     }
 
-    public Integer getScale()
+    public int getScale()
     {
         return this.scale;
     }
     
-    public void setScale(Integer scale)
+    public void setScale(int scale)
     {
         this.scale = scale;
     }
 
-    public Boolean getIsTextType()
-    {
-        return this.isTextType;
-    }
-
-    public void setIsTextType(Boolean isTextType)
-    {
-        this.isTextType = isTextType;
-    }
-    
     public String getDefaultValue()
     {
         return defaultValue;
@@ -228,61 +218,26 @@ public class Column
         this.defaultValue = defaultValue;
     }
 
-    public Integer getPrecisionRadix()
+    public int getPrecisionRadix()
     {
         return this.precisionRadix;
     }
     
-    public void setPrecisionRadix(Integer precisionRadix)
+    public void setPrecisionRadix(int precisionRadix)
     {
         this.precisionRadix = precisionRadix;
     }
 
-    public Integer getCharOctetLength()
-    {
-        return this.charOctetLength;
-    }
-    
-    public void setCharOctetLength(Integer charOctetLength)
-    {
-        this.charOctetLength = charOctetLength;
-    }
-
-    public Integer getOrdinalPosition()
+    public int getOrdinalPosition()
     {
         return this.ordinalPosition;
     }
     
-    public void setOrdinalPosition(Integer ordinalPosition)
+    public void setOrdinalPosition(int ordinalPosition)
     {
         this.ordinalPosition = ordinalPosition;
     }
     
-    // Helper methods
-    //-------------------------------------------------------------------------                
-    
-    /**
-     * @return the full SQL type string including the size, such as "VARCHAR (2000)"
-     */
-    public String getTypeString() {
-        if ( this.scale != null ) {
-            return getType() + " (" + getSize() + "," + getScale() + ")";
-        }
-        else
-        {
-            if ( getSize() > 0 ) {
-                return getType() + " (" + getSize() + ")";
-            }
-        }
-        return getType();
-    }
 
 
-    /**
-     * @return the SQL type code for this column which matches the enumeration of 
-     * {@link java.sql.Types}.
-     */
-    public int getSQLTypeCode() {
-        return TypeMap.getSQLTypeCode(getType());
-    }
 }
