@@ -1,7 +1,7 @@
 /*
- * $Header: /home/jerenkrantz/tmp/commons/commons-convert/cvs/home/cvs/jakarta-commons-sandbox//sql/src/test/org/apache/commons/sql/model/TestColumn.java,v 1.3 2002/10/28 16:17:36 jstrachan Exp $
- * $Revision: 1.3 $
- * $Date: 2002/10/28 16:17:36 $
+ * $Header: $
+ * $Revision: $
+ * $Date: $
  *
  * ====================================================================
  *
@@ -57,98 +57,82 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: TestColumn.java,v 1.3 2002/10/28 16:17:36 jstrachan Exp $
  */
 
-package org.apache.commons.sql.model;
+package org.apache.commons.sql.task;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Types;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.impl.SimpleLog;
-
-import org.apache.commons.sql.model.Column;
+import java.sql.SQLException;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Vector;
+import java.util.Collection;
+import java.util.Iterator;
+import junit.framework.*;
+import org.apache.commons.sql.io.DatabaseWriter;
+import org.apache.commons.sql.io.JdbcModelReader;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+import org.apache.commons.sql.model.*;
 
 /**
- * Test harness for Column Class
+ * A JUnit test for JdbcToSchemaTask.java
  *
- * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.3 $
+ * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
+ * @version $Revision: $
  */
-public class TestColumn
-     extends TestCase
-{
-
-    /**
-     * A unit test suite for JUnit
-     */
-    public static Test suite()
-    {
-        return new TestSuite(TestColumn.class);
-    }
-
-    /**
-     * Constructor for the TestColumn
-     *
-     * @param testName
-     */
-    public TestColumn(String testName)
-    {
+public class JdbcToSchemaTaskTest extends TestCase {
+    
+    public JdbcToSchemaTaskTest(java.lang.String testName) {
         super(testName);
     }
-
-    /**
-     * The JUnit setup method
-     */
-    protected void setUp()
-        throws Exception
-    {
-        super.setUp();
+    
+    public static void main(java.lang.String[] args) {
+        junit.textui.TestRunner.run(suite());
     }
-
-    /**
-     * A unit test for JUnit
-     */
-    public void testColumn()
-        throws Exception
-    {
-        Column column = new Column("Test1",Types.INTEGER,255,true,true,true,"");
-        assertTrue("Column is null", column != null);
-        assertTrue("Column toString does not end with [name=Test1;type=INTEGER]", 
-               ((String)column.toString()).endsWith("[name=Test1;type=INTEGER]"));
-               
-        assertEquals("INTEGER", column.getType());                           
+    
+    public static Test suite() {
+        TestSuite suite = new TestSuite(JdbcToSchemaTaskTest.class);
+        
+        return suite;
     }
-
-    public void testTypeName()
-        throws Exception
-    {
-        Column column = new Column("Test1","INTEGER",0, true,true,true,"");
-        
-        assertEquals("INTEGER", column.getType());                           
-        assertEquals(Types.INTEGER, column.getTypeCode());
-
-        column = new Column();
-        column.setName("foo");
-        column.setType("INTEGER");
-                
-        assertEquals("INTEGER", column.getType());                           
-        assertEquals(Types.INTEGER, column.getTypeCode());
-        
-        column = new Column();
-        column.setName("foo");
-        column.setTypeCode(Types.INTEGER);
-                
-        assertEquals("INTEGER", column.getType());                           
-        assertEquals(Types.INTEGER, column.getTypeCode());
-        
+    
+    
+    /** Test of execute method, of class test.JdbcToSchemaTask. */
+    public void testExecute() {
+        System.out.println("testExecute");
+        JdbcToSchemaTask t = createTask();
+        t.execute();
     }
-
+    
+    
+    // Add test methods here, they have to start with 'test' name.
+    // for example:
+    // public void testHello() {}
+    
+    private JdbcToSchemaTask createTask(){
+        JdbcToSchemaTask task = new JdbcToSchemaTask();
+        task.setDbDriver("com.sap.dbtech.jdbc.DriverSapDB");
+        task.setDbUrl("jdbc:sapdb://localhost/TST");
+        task.setDbUser("TEST");
+        task.setDbPassword("TEST");
+        task.setDbSchema("TEST");
+//        task.setDbDriver("org.hsqldb.jdbcDriver");
+//        task.setDbUrl("jdbc:hsqldb:/data/ext-cvs/jakarta-ojb/target/test/OJB");
+//        task.setDbUser("sa");
+//        task.setDbPassword("");
+//        //task.setDbSchema("TEST");
+        task.setOutputFile("/home/drfish/working/commons-sql/test.xml");
+        return task;
+    }
+    
+    
 }
-
