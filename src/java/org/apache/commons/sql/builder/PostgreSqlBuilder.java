@@ -53,7 +53,7 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  * 
- * $Id: PostgreSqlBuilder.java,v 1.2 2002/09/23 16:53:24 thorhauer Exp $
+ * $Id: PostgreSqlBuilder.java,v 1.3 2002/10/28 16:17:11 jstrachan Exp $
  */
 
 package org.apache.commons.sql.builder;
@@ -65,7 +65,7 @@ import java.io.IOException;
  * An SQL Builder for PostgresSqlL
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PostgreSqlBuilder extends SqlBuilder{
 
@@ -116,13 +116,13 @@ public class PostgreSqlBuilder extends SqlBuilder{
      */
     protected String getSqlType(Column column) {
 
-        if (column.getTypeString().equalsIgnoreCase("VARBINARY"))
+        if (column.getTypeCode() == java.sql.Types.VARBINARY)
         {
             return "OID";
         }
         else
         {
-            return column.getTypeString();
+            return super.getSqlType(column);
         }
     }
 

@@ -70,6 +70,7 @@ import java.util.List;
 import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.Table;
+import org.apache.commons.sql.model.TypeMap;
 
 /**
  * An SQL Builder for the <a href="http://axion.tigris.org/">Axion</a> JDBC database.
@@ -88,6 +89,7 @@ public class AxionBuilder extends SqlBuilder {
         // Axion doesn't support text width specification 
         return column.getType();
     }
+    
     protected void writePrimaryKeys(Table table) throws IOException {
         // disable primary key constraints
     }

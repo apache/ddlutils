@@ -544,7 +544,7 @@ public class DynaSql extends JdbcSupport {
 
         Object value = dynaBean.get(property.getName());
         if (value == null) {
-            statement.setNull(sqlIndex, property.getColumn().getSQLTypeCode());
+            statement.setNull(sqlIndex, property.getColumn().getTypeCode());
         }
         else {
             statement.setObject(sqlIndex, value);
