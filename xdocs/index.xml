@@ -61,8 +61,24 @@
         </source>
 
       <p>
+        The currently supported values for targetDatabase are:
+      </p>
+
+      <ul>
+        <li>axion</li>
+        <li>db2</li>
+        <li>hsqldb</li>
+        <li>mckoi</li>
+        <li>mssql</li>
+        <li>mysql</li>
+        <li>oracle</li>
+        <li>postgresql</li>
+        <li>sybase</li>
+      </ul>
+
+      <p>
         It is hoped that Commons SQL can be used to create a
-        <a href="http://jakarta.apache.org/turbine/maven/">Maven</a>
+        <a href="http://maven.apache.org">Maven</a>
         plugin for projects wishing to create beans or OJB files from some logical relational schema.
       </p>
     </section>

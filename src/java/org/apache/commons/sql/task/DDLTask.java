@@ -1,9 +1,7 @@
-package org.apache.commons.sql.task;
-
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2001 The Apache Software Foundation.  All rights
+ * Copyright (c) 2001-2004 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +51,7 @@ package org.apache.commons.sql.task;
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  */
+package org.apache.commons.sql.task;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -71,9 +70,7 @@ import org.apache.tools.ant.Task;
  * a data model contains tables for a <strong>single</strong>
  * database.
  *
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:jvanzyl@zenplex.com">Jason van Zyl</a>
- * @author <a href="mailto:dlr@finemaltcoding.com">Daniel Rall</a>
+ * @version $Id$
  */
 public class DDLTask extends Task
 {
@@ -94,6 +91,10 @@ public class DDLTask extends Task
      */
     private String targetDatabase;
 
+    /**
+     * Flag indicates whether SQL drop statements should be generated.
+     */
+    private boolean dropTables = true;
 
     /**
      * Get the xml schema describing the application model.
@@ -154,6 +155,20 @@ public class DDLTask extends Task
     }
     
     /**
+     * @return Returns the dropTables.
+     */
+    public boolean isDropTables() {
+        return dropTables;
+    }
+
+    /**
+     * @param dropTables The dropTables to set.
+     */
+    public void setDropTables(boolean dropTables) {
+        this.dropTables = dropTables;
+    }
+    
+    /**
      * Create the SQL DDL for the given database.
      */
     public void execute() throws BuildException
@@ -208,7 +223,7 @@ public class DDLTask extends Task
         // OK we're ready now, lets try create the DDL
         try 
         {
-            builder.createDatabase(database);
+            builder.createDatabase(database, dropTables);
             writer.close();
         }
         catch (Exception e) 
@@ -235,4 +250,6 @@ public class DDLTask extends Task
         builder.setWriter(writer);
         return builder;
     }
+    
+
 }
