@@ -17,16 +17,16 @@
         based on experiences and ideas from the Turbine and Torque projects.
       </p>
       <p>
-        Commons SQL contains a simple set of 
-        <a href="apidocs/org/apache/commons/sql/model/package-summary.html">beans</a> 
+        Commons SQL contains a simple set of
+        <a href="apidocs/org/apache/commons/sql/model/package-summary.html">beans</a>
         that represent a relational database schema such as a Database, Table, Column etc.
-        These beans can be read from XML or written to XML using 
-        <a href="http://jakarta.apache.org/commons/betwixt/">Betwixt</a> via the 
-        <a href="apidocs/org/apache/commons/sql/io/DatabaseReader.html">DatabaseReader</a> and 
-        <a href="apidocs/org/apache/commons/sql/io/DatabaseWriter.html">DatabaseWriter</a> classes.        
+        These beans can be read from XML or written to XML using
+        <a href="http://jakarta.apache.org/commons/betwixt/">Betwixt</a> via the
+        <a href="apidocs/org/apache/commons/sql/io/DatabaseReader.html">DatabaseReader</a> and
+        <a href="apidocs/org/apache/commons/sql/io/DatabaseWriter.html">DatabaseWriter</a> classes.
       </p>
       <p>
-        There is an example XML document 
+        There is an example XML document
         <a href="http://cvs.apache.org/viewcvs.cgi/jakarta-commons-sandbox/sql/src/test-input/datamodel.xml?rev=HEAD">here</a>
       </p>
       <p>
@@ -37,7 +37,7 @@
       </p>
 
       <p>
-        Then the SQL beans can be used by code generation tools like 
+        Then the SQL beans can be used by code generation tools like
         <a href="http://jakarta.apache.org/velocity/">Velocity</a>
         or
         <a href="http://jakarta.apache.org/commons/sandbox/jelly/">Jelly</a>
@@ -46,28 +46,23 @@
         repository files and so forth.
       </p>
     </section>
-    
+
     <section name="Using Commons SQL in Ant or Maven">
       <p>
-        There's also an Ant task to generate the DDL for a physical database. Here's an example of it in use.        
+        There's also an Ant task to generate the DDL for a physical database. Here's an example of it in use.
       </p>
 
-<pre>
-  &lt;taskdef
-    name="ddl"
-    classname="org.apache.commons.sql.task.DDLTask"&gt;
-      &lt;classpath refid="some.classpath"/&gt;
-  &lt;/taskdef&gt;    
-		
-  &lt;ddl
-    xmlFile="src/conf/myschema.xml" 
-    targetDatabase="oracle"
-    output="target/myschema-oracle.sql"/&gt;
-</pre>      
+        <source><![CDATA[<taskdef name="ddl" classname="org.apache.commons.sql.task.DDLTask">
+    <classpath refid="some.classpath"/>
+</taskdef>
+
+<ddl xmlFile="src/conf/myschema.xml" targetDatabase="oracle"
+    output="target/myschema-oracle.sql"/>]]>
+        </source>
 
       <p>
-        It is hoped that Commons SQL can be used to create a 
-        <a href="http://jakarta.apache.org/turbine/maven/">Maven</a> 
+        It is hoped that Commons SQL can be used to create a
+        <a href="http://jakarta.apache.org/turbine/maven/">Maven</a>
         plugin for projects wishing to create beans or OJB files from some logical relational schema.
       </p>
     </section>
@@ -75,69 +70,66 @@
 
     <section name="Using DynaBeans to access and change data in a database">
       <p>
-		There's a simple API for querying and inserting, updating and deleting data via
-		<a href="">DynaBeans</a>
-		It essentially binds the commons-sql model beans
-		(Database, Table, Column) to DyanClass, DynaBean and DynaProperty instances.
+        There's a simple API for querying and inserting, updating and deleting data via
+        <a href="">DynaBeans</a>
+        It essentially binds the commons-sql model beans
+        (Database, Table, Column) to DyanClass, DynaBean and DynaProperty instances.
       </p>
-	  <p>
-	    So you can do things like
-	  </p>					
+      <p>
+        So you can do things like
+      </p>
 
-<pre>
-  // lets parser the model from XML
-  DatabaseReader reader = new DatabaseReader();
-  Database model = (Database) reader.parse( "mymodel.xml" );
-		
-  // JDBC connection pool, maybe using DBCP and Pool from commons
-  DataSource source = ...;
-		
-  // now lets add some data
-  DynaSql dynaSql = new DynaSql(source, model);
-		
-  DynaBean author = dynaSql.newInstance( "author" );
-  author.set( "name", "James" );
-  author.set( "whatever", new Integer(1234));
-  dynaSql.insert(author);
-</pre>
-		
-	<p>
-		Or perform arbitrary queries against the database like this
-	</p>					
+<source><![CDATA[// lets parser the model from XML
+DatabaseReader reader = new DatabaseReader();
+Database model = (Database) reader.parse( "mymodel.xml" );
 
-<pre>
-  // perform a query with no arguments		
-  Iterator iter = dynaSql.query( "select * from book" );
-  while (iter.hasNext()) {
+// JDBC connection pool, maybe using DBCP and Pool from commons
+DataSource source = ...;
+
+// now lets add some data
+DynaSql dynaSql = new DynaSql(source, model);
+
+DynaBean author = dynaSql.newInstance( "author" );
+author.set( "name", "James" );
+author.set( "whatever", new Integer(1234));
+dynaSql.insert(author);]]>
+</source>
+
+    <p>
+        Or perform arbitrary queries against the database like this
+    </p>
+
+<source><![CDATA[// perform a query with no arguments
+Iterator iter = dynaSql.query( "select * from book" );
+while (iter.hasNext()) {
     DynaBean book = (DynaBean) iter.next();
-    String title = book.get("title");			
+    String title = book.get("title");
     ...
-  }
-		
-  // perform a query with arguments
-  List params = new ArrayList();
-  params.add("Some title");
-	
-  Iterator iter = dynaSql.query( "select * from book where title = ?", params );
-  while (iter.hasNext()) {
+}
+
+// perform a query with arguments
+List params = new ArrayList();
+params.add("Some title");
+
+Iterator iter = dynaSql.query( "select * from book where title = ?", params );
+while (iter.hasNext()) {
     DynaBean book = (DynaBean) iter.next();
-    String title = book.get("title");			
+    String title = book.get("title");
     ...
-  }
-</pre>
-		
-		
-		<p>
-			This can be handy if you want something really simple and easy or need to
-			create dynamic tables or handle arbitrary database schemas at runtime. 
-			It can also be useful for writing simple bulk loading programs or working generically
-			with SQL data.
-		</p>
-		<p>
-			Though if your persistent schema is more well defined, tools like OJB or Torque might be more applicable.
-		</p>
-	
-			
+}]]>
+</source>
+
+        <p>
+            This can be handy if you want something really simple and easy or need to
+            create dynamic tables or handle arbitrary database schemas at runtime.
+            It can also be useful for writing simple bulk loading programs or working generically
+            with SQL data.
+        </p>
+        <p>
+            Though if your persistent schema is more well defined, tools like OJB or Torque might be more applicable.
+        </p>
+
+
 <!--
       <subsection name="Torque's generation tasks">
         <p>
@@ -323,8 +315,8 @@
         the <a href="developer-guide.html">developer-guide</a>, run the tests
         and send your results (and bugfixes ;) to the turbine-dev list.
       </p>
-      
--->      
+
+-->
     </section>
 
   </body>

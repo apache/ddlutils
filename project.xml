@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project>
-  
+
   <version>3</version>
   <name>commons-sql</name>
   <id>commons-sql</id>
@@ -9,7 +9,7 @@
   <organization>
     <name>Apache Software Foundation</name>
     <url>http://www.apache.org</url>
-    <logo>/images/jakarta-logo-blue.gif</logo>
+    <logo>http://jakarta.apache.org/images/jakarta-logo-blue.gif</logo>
   </organization>
   <logo>/images/logo.jpg</logo>
 
@@ -74,12 +74,21 @@
   </developers>
 
 
+  <repository>
+        <connection>
+            scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:jakarta-commons-sandbox/sql
+        </connection>
+
+        <url>http://cvs.apache.org/viewcvs/jakarta-commons-sandbox/sql</url>
+  </repository>
+
+
   <!-- Need to mark these as compile-time/run-time -->
 
   <dependencies>
      <dependency>
       <id>commons-logging</id>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
 
     <dependency>
@@ -98,18 +107,17 @@
 
     <dependency>
       <id>commons-digester</id>
-      <version>1.3</version>
+      <version>1.5</version>
     </dependency>
 
-
-     <dependency>
+    <dependency>
       <id>commons-betwixt</id>
-      <version>1.0-alpha-1</version>
+      <version>1.0-beta-1-dev</version>
     </dependency>
 
     <dependency>
       <id>commons-jelly</id>
-      <version>1.0-beta-4</version>
+      <version>SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -138,12 +146,12 @@
       <id>xml-apis</id>
       <version>1.0.b2</version>
     </dependency>
-    
+
     <dependency>
       <id>xerces</id>
-      <version>2.0.2</version>
+      <version>2.5.0</version>
     </dependency>
-    
+
     <!-- database used for testing -->
     <dependency>
       <id>axion</id>
@@ -156,8 +164,8 @@
 
   </dependencies>
 
-	
-	
+
+
   <build>
 
     <nagEmailAddress>commons-dev@jakarta.apache.org</nagEmailAddress>
@@ -173,18 +181,18 @@
       </includes>
     </unitTest>
 
-    
+
     <!-- Integration unit test classes -->
     <integrationUnitTestPatterns></integrationUnitTestPatterns>
 
     <!-- J A R  R E S O U R C E S -->
     <!-- Resources that are packaged up inside the JAR file -->
     <resources>
-			<directory>src/java</directory>
-			<includes>
-				<include>**/*.properties</include>
-				<include>**/*.betwixt</include>
-			</includes>
+            <directory>src/java</directory>
+            <includes>
+                <include>**/*.properties</include>
+                <include>**/*.betwixt</include>
+            </includes>
     </resources>
   </build>
 </project>
