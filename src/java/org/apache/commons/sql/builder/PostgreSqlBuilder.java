@@ -27,7 +27,7 @@ import org.apache.commons.sql.model.Table;
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PostgreSqlBuilder extends SqlBuilder
 {
@@ -62,7 +62,7 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     public void writeColumn(Table table, Column column) throws IOException
     {
-        writeColumnName(table, column);
+        print(getColumnName(column));
         print(" ");
         if (column.isAutoIncrement())
         {

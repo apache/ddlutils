@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.sql.Types;
 
 import org.apache.commons.sql.model.Column;
+import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.Table;
 
 /**
- * An SQL Builder for Oracle
+ * An SQL Builder for Oracle.
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
@@ -33,6 +34,7 @@ public class OracleBuilder extends SqlBuilder
 {
     public OracleBuilder()
     {
+        setMaxIdentifierLength(30);
         setPrimaryKeyEmbedded(false);
         setEmbeddedForeignKeysNamed(true);
         setForeignKeysEmbedded(false);
@@ -66,12 +68,12 @@ public class OracleBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     {
         print("DROP TABLE ");
-        print(table.getName());
+        print(getTableName(table));
         print(" CASCADE CONSTRAINTS");
         printEndOfStatement();
     }
 
-    public void createTable(Table table) throws IOException
+    public void createTable(Database database, Table table) throws IOException
     {
         // lets create any sequences
         Column column = table.getAutoIncrementColumn();
@@ -80,7 +82,7 @@ public class OracleBuilder extends SqlBuilder
         {
             createSequence(table, column);
         }
-        super.createTable(table);
+        super.createTable(database, table);
         if (column != null)
         {
             createSequenceTrigger(table, column);
@@ -101,8 +103,7 @@ public class OracleBuilder extends SqlBuilder
     protected void createSequence(Table table, Column column) throws IOException
     {
         print("CREATE SEQUENCE ");
-        print(table.getName());
-        print("_seq");
+        print(getConstraintName(null, table, "seq", null));
         printEndOfStatement();
     }
 
@@ -115,15 +116,15 @@ public class OracleBuilder extends SqlBuilder
     protected void createSequenceTrigger(Table table, Column column) throws IOException
     {
         print("CREATE OR REPLACE TRIGGER ");
-        print(table.getName());
-        print("_trg BEFORE INSERT ON ");
-        println(table.getName());
+        print(getConstraintName(null, table, "trg", null));
+        print(" BEFORE INSERT ON ");
+        println(getTableName(table));
         println("FOR EACH ROW");
         println("BEGIN");
         print("SELECT ");
-        print(table.getName());
-        print("_seq.nextval INTO :new.");
-        print(column.getName());
+        print(getConstraintName(null, table, "seq", null));
+        print(".nextval INTO :new.");
+        print(getColumnName(column));
         println(" FROM dual;");
         print("END");
         printEndOfStatement();

@@ -19,10 +19,14 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,6 +89,25 @@ public abstract class SqlBuilder {
     /** Is an ALTER TABLE needed to drop indexes? */
     private boolean _useAlterTableForDrop = false;
 
+    /** Specifies the maximum length that an identifier (name of a table, column, constraint etc.)
+     *  can have for this database; use -1 if there is no limit */
+    private int _maxIdentifierLength = -1;
+
+    /** The string used for escaping values when generating textual SQL statements */
+    private String _valueQuoteChar = "'";
+
+    /** An optional locale specification for number and date formatting */
+    private String _valueLocale;
+
+    /** The date formatter */
+    private DateFormat _valueDateFormat;
+
+    /** The date time formatter */
+    private DateFormat _valueTimeFormat;
+
+    /** The number formatter */
+    private NumberFormat _valueNumberFormat;
+    
     /** The string that starts a comment */
     private String _commentPrefix = "--";
 
@@ -240,7 +263,7 @@ public abstract class SqlBuilder {
     }
 
     /**
-     * Returns whether embedded foreign key constraints should have a name named.
+     * Returns whether embedded foreign key constraints should have a name.
      * 
      * @return <code>true</code> if embedded fks have name
      */
@@ -254,7 +277,8 @@ public abstract class SqlBuilder {
      * 
      * @param embeddedForeignKeysNamed Whether embedded fks shall have a name
      */
-    public void setEmbeddedForeignKeysNamed(boolean embeddedForeignKeysNamed) {
+    public void setEmbeddedForeignKeysNamed(boolean embeddedForeignKeysNamed)
+    {
         _embeddedForeignKeysNamed = embeddedForeignKeysNamed;
     }
 
@@ -278,6 +302,122 @@ public abstract class SqlBuilder {
     public void setUseAlterTableForDrop(boolean useAlterTableForDrop)
     {
         _useAlterTableForDrop = useAlterTableForDrop;
+    }
+
+    /**
+     * Returns the maximum length of identifiers that this database allows.
+     * 
+     * @return The maximum identifier length, -1 if unlimited
+     */
+    public int getMaxIdentifierLength()
+    {
+        return _maxIdentifierLength;
+    }
+
+    /**
+     * Sets the maximum length of identifiers that this database allows.
+     * 
+     * @param maxIdentifierLength The maximum identifier length, -1 if unlimited
+     */
+    public void setMaxIdentifierLength(int maxIdentifierLength)
+    {
+        _maxIdentifierLength = maxIdentifierLength;
+    }
+
+    /**
+     * Returns the locale that is used for number and date formatting
+     * (when printing default values and in generates insert/update/delete
+     * statements).
+     * 
+     * @return The locale or <code>null</code> if default formatting is used
+     */
+    public String getValueLocale()
+    {
+        return _valueLocale;
+    }
+
+    /**
+     * Sets the locale that is used for number and date formatting
+     * (when printing default values and in generates insert/update/delete
+     * statements).
+     *
+     * @param locale The new locale or <code>null</code> if default formatting
+     *               should be used; Format is "language[_country[_variant]]"
+     */
+    public void setValueLocale(String localeStr)
+    {
+        if (localeStr != null)
+        {
+            int    sepPos   = localeStr.indexOf('_');
+            String language = null;
+            String country  = null;
+            String variant  = null;
+
+            if (sepPos > 0)
+            {
+                language = localeStr.substring(0, sepPos);
+                country  = localeStr.substring(sepPos + 1);
+                sepPos   = country.indexOf('_');
+                if (sepPos > 0)
+                {
+                    variant = country.substring(sepPos + 1);
+                    country = country.substring(0, sepPos);
+                }
+            }
+            else
+            {
+                language = localeStr;
+            }
+            if (language != null)
+            {
+                Locale locale = null;
+    
+                if (variant != null)
+                {
+                    locale = new Locale(language, country, variant);
+                }
+                else if (country != null)
+                {
+                    locale = new Locale(language, country);
+                }
+                else
+                {
+                    locale = new Locale(language);
+                }
+
+                _valueLocale       = localeStr;
+                _valueDateFormat   = DateFormat.getDateInstance(DateFormat.SHORT, locale);
+                _valueTimeFormat   = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+                _valueNumberFormat = NumberFormat.getNumberInstance(locale);
+                return;
+            }
+        }
+        _valueLocale       = null;
+        _valueDateFormat   = null;
+        _valueTimeFormat   = null;
+        _valueNumberFormat = null;
+    }
+
+    /**
+     * Returns the text that is used for for quoting values (e.g. text) when
+     * printing default values and in generates insert/update/delete statements.
+     * 
+     * @return The quote text
+     */
+    public String getValueQuoteChar()
+    {
+        return _valueQuoteChar;
+    }
+
+    /**
+     * Sets the text that is used for for quoting values (e.g. text) when
+     * printing default values and in generates insert/update/delete statements.
+     *
+     * @param valueQuoteChar The new quote text
+     */
+    public void setValueQuoteChar(String valueQuoteChar)
+    {
+        _valueQuoteChar = valueQuoteChar;
     }
 
     /**
@@ -400,8 +540,11 @@ public abstract class SqlBuilder {
 
             if (currentTable == null)
             {
-                _log.info("Creating table " + desiredTable.getName());
-                createTable(desiredTable);
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Creating table " + desiredTable.getName());
+                }
+                createTable(desiredDb, desiredTable);
                 // we're deferring foreignkey generation
                 newTables.add(desiredTable);
             }
@@ -414,23 +557,32 @@ public abstract class SqlBuilder {
 
                     if (null == currentColumn)
                     {
-                        _log.info("Creating column " + desiredTable.getName() + "." + desiredColumn.getName());
+                        if (_log.isInfoEnabled())
+                        {
+                            _log.info("Creating column " + desiredTable.getName() + "." + desiredColumn.getName());
+                        }
                         writeColumnAlterStmt(desiredTable, desiredColumn, true);
                     }
                     else if (columnsDiffer(desiredColumn, currentColumn))
                     {
                         if (modifyColumns)
                         {
-                            _log.info("Altering column " + desiredTable.getName() + "." + desiredColumn.getName());
-                            _log.info("  desired = " + desiredColumn.toStringAll());
-                            _log.info("  current = " + currentColumn.toStringAll());
+                            if (_log.isInfoEnabled())
+                            {
+                                _log.info("Altering column " + desiredTable.getName() + "." + desiredColumn.getName());
+                                _log.info("  desired = " + desiredColumn.toStringAll());
+                                _log.info("  current = " + currentColumn.toStringAll());
+                            }
                             writeColumnAlterStmt(desiredTable, desiredColumn, false);
                         }
                         else
                         {
                             String text = "Column " + currentColumn.getName() + " in table " + currentTable.getName() + " differs from current specification";
 
-                            _log.info(text);
+                            if (_log.isInfoEnabled())
+                            {
+                                _log.info(text);
+                            }
                             printComment(text);
                         }
                     }
@@ -448,7 +600,10 @@ public abstract class SqlBuilder {
 
                     if (null == currentIndex)
                     {
-                        _log.info("Creating index " + desiredTable.getName() + "." + desiredIndex.getName());
+                        if (_log.isInfoEnabled())
+                        {
+                            _log.info("Creating index " + desiredTable.getName() + "." + desiredIndex.getName());
+                        }
                         writeExternalIndexCreateStmt(desiredTable, desiredIndex);
                     }
                 }
@@ -464,14 +619,20 @@ public abstract class SqlBuilder {
                     {
                         if (doDrops)
                         {
-                            _log.info("Dropping column " + currentTable.getName() + "." + currentColumn.getName());
+                            if (_log.isInfoEnabled())
+                            {
+                                _log.info("Dropping column " + currentTable.getName() + "." + currentColumn.getName());
+                            }
                             writeColumnDropStmt(currentTable, currentColumn);
                         }
                         else
                         {
                             String text = "Column " + currentColumn.getName() + " can be dropped from table " + currentTable.getName();
 
-                            _log.info(text);
+                            if (_log.isInfoEnabled())
+                            {
+                                _log.info(text);
+                            }
                             printComment(text);
                         }
                     }
@@ -500,7 +661,10 @@ public abstract class SqlBuilder {
                         }
                         if (!isPk)
                         {
-                            _log.info("Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
+                            if (_log.isInfoEnabled())
+                            {
+                                _log.info("Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
+                            }
                             writeExternalIndexDropStmt(currentTable, currentIndex);
                         }
                     }
@@ -512,7 +676,7 @@ public abstract class SqlBuilder {
         // generating deferred foreignkeys
         for (Iterator fkIt = newTables.iterator(); fkIt.hasNext();)
         {
-            createExternalForeignKeys((Table)fkIt.next());
+            createExternalForeignKeys(desiredDb, (Table)fkIt.next());
         }
 
         // check for table drops
@@ -525,14 +689,20 @@ public abstract class SqlBuilder {
             {
                 if (doDrops)
                 {
-                    _log.info("Dropping table " + currentTable.getName());
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info("Dropping table " + currentTable.getName());
+                    }
                     dropTable(currentTable);
                 }
                 else
                 {
                     String text = "Table " + currentTable.getName() + " can be dropped";
 
-                    _log.info(text);
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info(text);
+                    }
                     printComment(text);
                 }
             }
@@ -551,7 +721,7 @@ public abstract class SqlBuilder {
             Table table = (Table)it.next();
 
             writeTableComment(table);
-            createTable(table);
+            createTable(database, table);
         }
     }
 
@@ -559,12 +729,13 @@ public abstract class SqlBuilder {
      * Outputs the DDL to create the table along with any non-external constraints as well
      * as with external primary keys and indices (but not foreign keys).
      * 
-     * @param table The table
+     * @param database The database model
+     * @param table    The table
      */
-    public void createTable(Table table) throws IOException 
+    public void createTable(Database database, Table table) throws IOException 
     {
         print("CREATE TABLE ");
-        println(table.getName());
+        println(getTableName(table));
         println("(");
 
         writeColumns(table);
@@ -575,7 +746,7 @@ public abstract class SqlBuilder {
         }
         if (isForeignKeysEmbedded())
         {
-            writeEmbeddedForeignKeysStmt(table);
+            writeEmbeddedForeignKeysStmt(database, table);
         }
         if (isIndicesEmbedded())
         {
@@ -604,16 +775,17 @@ public abstract class SqlBuilder {
     {
         for (Iterator it = database.getTables().iterator(); it.hasNext(); )
         {
-            createExternalForeignKeys((Table)it.next());
+            createExternalForeignKeys(database, (Table)it.next());
         }
     }
 
     /**
      * Creates external foreignkey creation statements if necessary.
      * 
-     * @param table The table
+     * @param database The database model
+     * @param table    The table
      */
-    public void createExternalForeignKeys(Table table) throws IOException
+    public void createExternalForeignKeys(Database database, Table table) throws IOException
     {
         if (!isForeignKeysEmbedded())
         {
@@ -621,7 +793,7 @@ public abstract class SqlBuilder {
 
             for (Iterator it = table.getForeignKeys().iterator(); it.hasNext(); numKey++)
             {
-                writeExternalForeignKeyCreateStmt(table, (ForeignKey)it.next(), numKey);
+                writeExternalForeignKeyCreateStmt(database, table, (ForeignKey)it.next(), numKey);
             }
         }
     }
@@ -659,7 +831,7 @@ public abstract class SqlBuilder {
     public void dropTable(Table table) throws IOException
     {
         print("DROP TABLE ");
-        print(table.getName());
+        print(getTableName(table));
         printEndOfStatement();
     }
 
@@ -681,10 +853,229 @@ public abstract class SqlBuilder {
         }
     }
 
+    /**
+     * Creates the SQL for inserting an object into the specified table.
+     * If values are given then a concrete insert statement is created, otherwise an
+     * insert statement usable in a prepared statement is build.
+     *  
+     * @param table           The table
+     * @param columnValues    The columns values indexed by the column names
+     * @param genPlaceholders Whether to generate value placeholders for a
+     *                        prepared statement
+     * @return The insertion sql
+     */
+    public String getInsertSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    {
+        StringBuffer buffer   = new StringBuffer("INSERT INTO ");
+        boolean      addComma = false;
+
+        buffer.append(getTableName(table));
+        buffer.append(" (");
+
+        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        {
+            Column column = (Column)it.next();
+
+            if (columnValues.containsKey(column.getName()))
+            {
+                if (addComma)
+                {
+                    buffer.append(", ");
+                }
+                buffer.append(column.getName());
+                addComma = true;
+            }
+        }
+        buffer.append(") VALUES (");
+        if (genPlaceholders)
+        {
+            buffer.append("?");
+            for (int idx = 1; idx < columnValues.size(); idx++)
+            {
+                buffer.append(", ?");
+            }
+        }
+        else
+        {
+            addComma = false;
+            for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+            {
+                Column column = (Column)it.next();
+
+                if (columnValues.containsKey(column.getName()))
+                {
+                    if (addComma)
+                    {
+                        buffer.append(", ");
+                    }
+                    buffer.append(getValueAsString(column, columnValues.get(column.getName())));
+                    addComma = true;
+                }
+            }
+        }
+        buffer.append(")");
+        return buffer.toString();
+    }
+
+    /**
+     * Creates the SQL for updating an object in the specified table.
+     * If values are given then a concrete update statement is created, otherwise an
+     * update statement usable in a prepared statement is build.
+     * 
+     * @param table           The table
+     * @param columnValues    Contains the primary key values to identify the object to update
+     *                        and the values for the columns to update
+     * @param genPlaceholders Whether to generate value placeholders for a
+     *                        prepared statement (both for the pk values and the object values)
+     * @return The update sql
+     */
+    public String getUpdateSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    {
+        StringBuffer buffer = new StringBuffer("UPDATE ");
+        boolean      addSep = false;
+
+        buffer.append(getTableName(table));
+        buffer.append(" SET ");
+
+        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        {
+            Column column = (Column)it.next();
+
+            if (!column.isPrimaryKey() && columnValues.containsKey(column.getName()))
+            {
+                if (addSep)
+                {
+                    buffer.append(", ");
+                }
+                buffer.append(column.getName());
+                buffer.append(" = ");
+                if (genPlaceholders)
+                {
+                    buffer.append("?");
+                }
+                else
+                {
+                    buffer.append(getValueAsString(column, columnValues.get(column.getName())));
+                }
+                addSep = true;
+            }
+        }
+        buffer.append(" WHERE ");
+        addSep = false;
+        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        {
+            Column column = (Column)it.next();
+
+            if (column.isPrimaryKey() && columnValues.containsKey(column.getName()))
+            {
+                if (addSep)
+                {
+                    buffer.append(" AND ");
+                }
+                buffer.append(column.getName());
+                buffer.append(" = ");
+                if (genPlaceholders)
+                {
+                    buffer.append("?");
+                }
+                else
+                {
+                    buffer.append(getValueAsString(column, columnValues.get(column.getName())));
+                }
+                addSep = true;
+            }
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * Creates the SQL for deleting an object from the specified table.
+     * If values are given then a concrete delete statement is created, otherwise an
+     * delete statement usable in a prepared statement is build.
+     * 
+     * @param table           The table
+     * @param pkValues        The primary key values indexed by the column names
+     * @param genPlaceholders Whether to generate value placeholders for a
+     *                        prepared statement
+     * @return The delete sql
+     */
+    public String getDeleteSql(Table table, HashMap pkValues, boolean genPlaceholders)
+    {
+        StringBuffer buffer = new StringBuffer("DELETE FROM ");
+        boolean      addSep = false;
+
+        buffer.append(getTableName(table));
+        buffer.append(" WHERE ");
+        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        {
+            Column column = (Column)it.next();
+
+            if (column.isPrimaryKey() && pkValues.containsKey(column.getName()))
+            {
+                if (addSep)
+                {
+                    buffer.append(" AND ");
+                }
+                buffer.append(column.getName());
+                buffer.append(" = ");
+                if (genPlaceholders)
+                {
+                    buffer.append("?");
+                }
+                else
+                {
+                    buffer.append(getValueAsString(column, pkValues.get(column.getName())));
+                }
+                addSep = true;
+            }
+        }
+        return buffer.toString();
+    }
+
     //
     // implementation methods that may be overridden by specific database builders
     //
 
+    /**
+     * Generates a version of the name that has at most the specified
+     * length.
+     * 
+     * @param name          The original name
+     * @param desiredLength The desired maximum length
+     * @return The shortened version
+     */
+    protected String shortenName(String name, int desiredLength)
+    {
+        // TODO: Find an algorithm that generates unique names
+        int originalLength = name.length();
+
+        if ((desiredLength < 0) || (originalLength <= desiredLength))
+        {
+            return name;
+        }
+
+        int delta    = originalLength - desiredLength;
+        int startCut = originalLength / 2;
+
+        StringBuffer result = new StringBuffer();
+
+        result.append(name.substring(0, startCut));
+        result.append("_");
+        result.append(name.substring(startCut + delta + 1, originalLength));
+        return result.toString();
+    }
+    
+    /**
+     * Returns the table name. This method takes care of length limitations imposed by some databases.
+     * 
+     * @param table The table
+     * @return The table name
+     */
+    protected String getTableName(Table table)
+    {
+        return shortenName(table.getName(), _maxIdentifierLength);
+    }
+    
     /** 
      * Outputs a comment for the table.
      * 
@@ -693,7 +1084,7 @@ public abstract class SqlBuilder {
     protected void writeTableComment(Table table) throws IOException
     {
         printComment("-----------------------------------------------------------------------");
-        printComment(table.getName());
+        printComment(getTableName(table));
         printComment("-----------------------------------------------------------------------");
         println();
     }
@@ -707,7 +1098,7 @@ public abstract class SqlBuilder {
     protected void writeTableAlterStmt(Table table) throws IOException
     {
         print("ALTER TABLE ");
-        println(table.getName());
+        println(getTableName(table));
         printIndent();
     }
 
@@ -730,15 +1121,14 @@ public abstract class SqlBuilder {
     }
 
     /**
-     * Writes the column name. This method allows builder implementations to e.g. escape
-     * the name or similar.
+     * Returns the column name. This method takes care of length limitations imposed by some databases.
      * 
-     * @param table  The table of the column
      * @param column The column
+     * @return The column name
      */
-    protected void writeColumnName(Table table, Column column) throws IOException
+    protected String getColumnName(Column column) throws IOException
     {
-        print(column.getName());
+        return shortenName(column.getName(), _maxIdentifierLength);
     }
 
     /** 
@@ -750,13 +1140,16 @@ public abstract class SqlBuilder {
     protected void writeColumn(Table table, Column column) throws IOException
     {
         //see comments in columnsDiffer about null/"" defaults
-        writeColumnName(table, column);
+        print(getColumnName(column));
         print(" ");
         print(getSqlType(column));
 
         if (column.getDefaultValue() != null)
         {
-            print(" DEFAULT '" + column.getDefaultValue() + "'");
+            print(" DEFAULT '");
+            print(_valueQuoteChar);
+            print(column.getDefaultValue());
+            print(_valueQuoteChar);
         }
         if (column.isRequired())
         {
@@ -801,7 +1194,7 @@ public abstract class SqlBuilder {
     {
         writeTableAlterStmt(table);
         print("DROP COLUMN ");
-        writeColumnName(table, column);
+        print(getColumnName(column));
         printEndOfStatement();
     }
 
@@ -843,6 +1236,77 @@ public abstract class SqlBuilder {
         return nativeType == null ? column.getType() : nativeType;
     }
 
+    /**
+     * Generates the string representation of the given value.
+     * 
+     * @param column The column
+     * @param value  The value
+     * @return The string representation
+     */
+    protected String getValueAsString(Column column, Object value)
+    {
+        if (value == null)
+        {
+            return "NULL";
+        }
+
+        StringBuffer result = new StringBuffer();
+
+        // TODO: Handle binary types (BINARY, VARBINARY, LONGVARBINARY, BLOB)
+        switch (column.getTypeCode())
+        {
+            // Note: TIMESTAMP (java.sql.Timestamp) is properly handled by its toString method
+            case Types.DATE:
+                result.append(_valueQuoteChar);
+                if (!(value instanceof String) && (_valueDateFormat != null))
+                {
+                    // TODO: Can the format method handle java.sql.Date properly ?
+                    result.append(_valueDateFormat.format(value));
+                }
+                else
+                {
+                    result.append(value.toString());
+                }
+                result.append(_valueQuoteChar);
+                break;
+            case Types.TIME:
+                result.append(_valueQuoteChar);
+                if (!(value instanceof String) && (_valueTimeFormat != null))
+                {
+                    // TODO: Can the format method handle java.sql.Date properly ?
+                    result.append(_valueTimeFormat.format(value));
+                }
+                else
+                {
+                    result.append(value.toString());
+                }
+                result.append(_valueQuoteChar);
+                break;
+            case Types.REAL:
+            case Types.NUMERIC:
+            case Types.FLOAT:
+            case Types.DOUBLE:
+            case Types.DECIMAL:
+                result.append(_valueQuoteChar);
+                if (!(value instanceof String) && (_valueNumberFormat != null))
+                {
+                    result.append(_valueNumberFormat.format(value));
+                }
+                else
+                {
+                    result.append(value.toString());
+                }
+                result.append(_valueQuoteChar);
+                break;
+            default:
+                result.append(_valueQuoteChar);
+                result.append(value.toString());
+                result.append(_valueQuoteChar);
+                break;
+        }
+        return result.toString();
+    }
+    
     /**
      * Prints that the column is an auto increment column.
      * 
@@ -916,6 +1380,35 @@ public abstract class SqlBuilder {
     }
 
     /**
+     * Returns the constraint name. This method takes care of length limitations imposed by some databases.
+     * 
+     * @param prefix     The constraint prefix, can be <code>null</code>
+     * @param table      The table that the constraint belongs to
+     * @param secondPart The second name part, e.g. the name of the constraint column
+     * @param suffix     The constraint suffix, e.g. a counter (can be <code>null</code>)
+     * @return The constraint name
+     */
+    protected String getConstraintName(String prefix, Table table, String secondPart, String suffix) throws IOException
+    {
+        StringBuffer result = new StringBuffer();
+        
+        if (prefix != null)
+        {
+            result.append(prefix);
+            result.append("_");
+        }
+        result.append(table.getName());
+        result.append("_");
+        result.append(secondPart);
+        if (suffix != null)
+        {
+            result.append("_");
+            result.append(suffix);
+        }
+        return shortenName(result.toString(), _maxIdentifierLength);
+    }
+
+    /**
      * Writes the primary key constraints of the table inside its definition.
      * 
      * @param table The table
@@ -944,11 +1437,10 @@ public abstract class SqlBuilder {
         if (!primaryKeyColumns.isEmpty() && shouldGeneratePrimaryKeys(primaryKeyColumns))
         {
             print("ALTER TABLE ");
-            println(table.getName());
+            println(getTableName(table));
             printIndent();
             print("ADD CONSTRAINT ");
-            print(table.getName());
-            print("_PK ");
+            print(getConstraintName(null, table, "PK", null));
             writePrimaryKeyStmt(table, primaryKeyColumns);
             printEndOfStatement();
         }
@@ -986,7 +1478,7 @@ public abstract class SqlBuilder {
         print("PRIMARY KEY (");
         for (Iterator it = primaryKeyColumns.iterator(); it.hasNext();)
         {
-            writeColumnName(table, (Column)it.next());
+            print(getColumnName((Column)it.next()));
             if (it.hasNext())
             {
                 print(", ");
@@ -995,6 +1487,18 @@ public abstract class SqlBuilder {
         print(")");
     }
 
+    /**
+     * Returns the index name. This method takes care of length limitations imposed by some databases.
+     * 
+     * @param index The index
+     * @return The index name
+     */
+    protected String getIndexName(Index index) throws IOException
+    {
+        return index.getName();
+    }
+
+    
     /**
      * Writes the indexes of the given table.
      * 
@@ -1038,14 +1542,16 @@ public abstract class SqlBuilder {
                 print(" UNIQUE");
             }
             print(" INDEX ");
-            print(index.getName());
+            print(getIndexName(index));
             print(" ON ");
-            print(table.getName());
+            print(getTableName(table));
             print(" (");
 
             for (Iterator it = index.getIndexColumns().iterator(); it.hasNext();)
             {
-                print(((IndexColumn)it.next()).getName());
+                IndexColumn idxColumn = (IndexColumn)it.next();
+
+                print(getColumnName(table.findColumn(idxColumn.getName())));
                 if (it.hasNext())
                 {
                     print(", ");
@@ -1070,11 +1576,11 @@ public abstract class SqlBuilder {
             writeTableAlterStmt(table);
         }
         print("DROP INDEX ");
-        print(index.getName());
+        print(getIndexName(index));
         if (!isUseAlterTableForDrop())
         {
             print(" ON ");
-            print(table.getName());
+            print(getTableName(table));
         }
         printEndOfStatement();
     }
@@ -1083,9 +1589,10 @@ public abstract class SqlBuilder {
     /**
      * Writes the foreign key constraints inside a create table () clause.
      * 
-     * @param table The table
+     * @param database The database model
+     * @param table    The table
      */
-    protected void writeEmbeddedForeignKeysStmt(Table table) throws IOException
+    protected void writeEmbeddedForeignKeysStmt(Database database, Table table) throws IOException
     {
         int numKey = 1;
 
@@ -1105,15 +1612,13 @@ public abstract class SqlBuilder {
                 if (isEmbeddedForeignKeysNamed())
                 {
                     print("CONSTRAINT ");
-                    print(table.getName());
-                    print("_FK_");
-                    print(Integer.toString(numKey));
+                    print(getConstraintName(null, table, "FK", Integer.toString(numKey)));
                     print(" ");
                 }
                 print("FOREIGN KEY (");
                 writeLocalReferences(key);
                 print(") REFERENCES ");
-                print(key.getForeignTable());
+                print(getTableName(database.findTable(key.getForeignTable())));
                 print(" (");
                 writeForeignReferences(key);
                 print(")");
@@ -1124,11 +1629,12 @@ public abstract class SqlBuilder {
     /**
      * Writes a single foreign key constraint using a alter table statement.
      * 
-     * @param table  The table 
-     * @param key    The foreign key
-     * @param numKey The number of the key, starting with 1
+     * @param database The database model
+     * @param table    The table 
+     * @param key      The foreign key
+     * @param numKey   The number of the key, starting with 1
      */
-    protected void writeExternalForeignKeyCreateStmt(Table table, ForeignKey key, int numKey) throws IOException
+    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key, int numKey) throws IOException
     {
         if (key.getForeignTable() == null)
         {
@@ -1139,13 +1645,11 @@ public abstract class SqlBuilder {
             writeTableAlterStmt(table);
 
             print("ADD CONSTRAINT ");
-            print(table.getName());
-            print("_FK_");
-            print(Integer.toString(numKey));
+            print(getConstraintName(null, table, "FK", Integer.toString(numKey)));
             print(" FOREIGN KEY (");
             writeLocalReferences(key);
             print(") REFERENCES ");
-            print(key.getForeignTable());
+            print(getTableName(database.findTable(key.getForeignTable())));
             print(" (");
             writeForeignReferences(key);
             print(")");
@@ -1199,9 +1703,7 @@ public abstract class SqlBuilder {
     {
         writeTableAlterStmt(table);
         print("DROP CONSTRAINT ");
-        print(table.getName());
-        print("_FK_");
-        print(Integer.toString(numKey));
+        print(getConstraintName(null, table, "FK", Integer.toString(numKey)));
         printEndOfStatement();
     }
 

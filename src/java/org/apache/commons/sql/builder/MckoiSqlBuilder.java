@@ -49,12 +49,14 @@ public class MckoiSqlBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE IF EXISTS ");
-        print(table.getName());
+        print(getTableName(table));
         printEndOfStatement();
     }
 
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        print("DEFAULT UNIQUEKEY('" + table.getName() + "')");
+        print("DEFAULT UNIQUEKEY('");
+        print(getTableName(table));
+        print("')");
     }
 }

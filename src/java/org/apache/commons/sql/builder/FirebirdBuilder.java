@@ -81,9 +81,9 @@ public class FirebirdBuilder extends SqlBuilder
     /* (non-Javadoc)
      * @see org.apache.commons.sql.builder.SqlBuilder#writeExternalForeignKeyCreateStmt(org.apache.commons.sql.model.Table, org.apache.commons.sql.model.ForeignKey, int)
      */
-    protected void writeExternalForeignKeyCreateStmt(Table table, ForeignKey key, int numKey) throws IOException
+    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key, int numKey) throws IOException
     {
-        super.writeExternalForeignKeyCreateStmt(table, key, numKey);
+        super.writeExternalForeignKeyCreateStmt(database, table, key, numKey);
         if (key.getForeignTable() != null)
         {
             print("COMMIT");
@@ -94,38 +94,32 @@ public class FirebirdBuilder extends SqlBuilder
     /* (non-Javadoc)
      * @see org.apache.commons.sql.builder.SqlBuilder#createTable(org.apache.commons.sql.model.Table)
      */
-    public void createTable(Table table) throws IOException
+    public void createTable(Database database, Table table) throws IOException
     {
-        super.createTable(table);
+        super.createTable(database, table);
 
         // creating generator and trigger for auto-increment
         Column column = table.getAutoIncrementColumn();
 
         if (column != null)
         {
-            print("CREATE GENERATOR gen_");
-            print(table.getName());
-            print("_");
-            print(column.getName());
+            print("CREATE GENERATOR ");
+            print(getConstraintName("gen", table, column.getName(), null));
             printEndOfStatement();
             print("CREATE TRIGGER trg_");
-            print(table.getName());
-            print("_");
-            print(column.getName());
+            print(getConstraintName("trg", table, column.getName(), null));
             print(" FOR ");
-            println(table.getName());
+            println(getTableName(table));
             println("ACTIVE BEFORE INSERT POSITION 0");
             println("AS");
             println("BEGIN");
             print("IF (NEW.");
-            print(column.getName());
+            print(getColumnName(column));
             println(" IS NULL) THEN");
             print("NEW.");
-            print(column.getName());
-            print(" = GEN_ID(gen_");
-            print(table.getName());
-            print("_");
-            print(column.getName());
+            print(getColumnName(column));
+            print(" = GEN_ID(");
+            print(getConstraintName("gen", table, column.getName(), null));
             println(", 1);");
             print("END");
             printEndOfStatement();
@@ -143,14 +137,10 @@ public class FirebirdBuilder extends SqlBuilder
         if (column != null)
         {
             print("DROP TRIGGER trg_");
-            print(table.getName());
-            print("_");
-            print(column.getName());
+            print(getConstraintName("trg", table, column.getName(), null));
             printEndOfStatement();
             print("DROP GENERATOR gen_");
-            print(table.getName());
-            print("_");
-            print(column.getName());
+            print(getConstraintName("gen", table, column.getName(), null));
             printEndOfStatement();
         }
         super.dropTable(table);

@@ -7,7 +7,7 @@ package org.apache.commons.sql.builder;
  * version 1.1, a copy of which has been included with this distribution in
  * the LICENSE file.
  *
- * $Id: TestEverything.java,v 1.2 2004/07/18 21:55:58 tomdz Exp $
+ * $Id: TestEverything.java,v 1.3 2004/08/14 19:51:38 tomdz Exp $
  */
 import java.beans.IntrospectionException;
 import java.io.FileInputStream;
@@ -40,7 +40,7 @@ import org.xml.sax.SAXException;
  * drop column, modify column, drop table, default values, unique indexes
  *
  * @author John Marshall/Connectria
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class TestEverything extends TestCase
 {
@@ -139,7 +139,7 @@ public class TestEverything extends TestCase
         updateDatabase( db, true );
         Table table = db.findTable( tableName );
 
-        DynaSql dynaSql = new DynaSql( dataSource, db );
+        DynaSql dynaSql = new DynaSql(SqlBuilderFactory.newSqlBuilder("hsqldb"), dataSource, db );
         DynaBean test = dynaSql.newInstance(tableName);
 
         assertTrue("Test not null", test != null);

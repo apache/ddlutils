@@ -44,7 +44,7 @@ public class HsqlDbBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE ");
-        print(table.getName());
+        print(getTableName(table));
         print(" IF EXISTS");
         printEndOfStatement();
     }

@@ -23,15 +23,13 @@ import org.apache.commons.sql.model.Column;
 import org.apache.commons.sql.model.Table;
 
 /**
- * An SQL Builder for DB2.
+ * An SQL Builder for Cloudscape.
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision: 1.14 $
  */
-public class Db2Builder extends SqlBuilder
+public class CloudscapeBuilder extends SqlBuilder
 {
-    public Db2Builder()
+    public CloudscapeBuilder()
     {
         setPrimaryKeyEmbedded(false);
         setEmbeddedForeignKeysNamed(true);
@@ -48,7 +46,7 @@ public class Db2Builder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "DB2";
+        return "Cloudscape";
     }
 
     /* (non-Javadoc)
@@ -87,15 +85,6 @@ public class Db2Builder extends SqlBuilder
             default:
         }
         return super.getSqlType(column);
-    }
-
-    public void dropTable(Table table) throws IOException
-    { 
-        super.dropTable(table);
-        print("DROP SEQUENCE IF EXISTS ");
-        print(getTableName(table));
-        print(".SequenceName");
-        printEndOfStatement();
     }
     
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException

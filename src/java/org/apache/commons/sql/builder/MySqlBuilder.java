@@ -63,7 +63,7 @@ public class MySqlBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE IF EXISTS ");
-        print(table.getName());
+        print(getTableName(table));
         printEndOfStatement();
     }
 

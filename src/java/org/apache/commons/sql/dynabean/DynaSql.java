@@ -34,6 +34,7 @@ import org.apache.commons.beanutils.DynaClass;
 import org.apache.commons.beanutils.ResultSetDynaClass;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.sql.builder.SqlBuilder;
 import org.apache.commons.sql.model.Database;
 import org.apache.commons.sql.model.Table;
 import org.apache.commons.sql.util.JdbcSupport;
@@ -44,26 +45,34 @@ import org.apache.commons.sql.util.JdbcSupport;
  * DynaBean instances for each row of a table.
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision: 1.14 $
  */
 public class DynaSql extends JdbcSupport {
 
     /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( DynaSql.class );
+    private final Log _log = LogFactory.getLog(DynaSql.class);
+
+    /** The sql builder */
+    private SqlBuilder _builder;
 
     /** The current database model */
-    private Database database;
+    private Database _database;
 
     /** A cache of the SqlDynaClasses per table name */
-    private Map dynaClassCache = new HashMap();
+    private Map _dynaClassCache = new HashMap();
 
-    public DynaSql()
-    {}
+    public DynaSql(SqlBuilder builder)
+    {
+        _builder = builder;
+    }
+    
 
-    public DynaSql(DataSource dataSource, Database database)
+    public DynaSql(SqlBuilder builder, DataSource dataSource, Database database)
     {
         super(dataSource);
-        this.database = database;
+        _builder = builder;
+        _database = database;
     }
 
     /**
@@ -71,12 +80,11 @@ public class DynaSql extends JdbcSupport {
      * @return the new empty DynaBean for the given tableName or null if the
      *  table does not exist in the current Database model.
      */
-    public DynaBean newInstance(String tableName) throws IllegalAccessException, InstantiationException {
+    public DynaBean newInstance(String tableName) throws IllegalAccessException, InstantiationException
+    {
         SqlDynaClass dynaClass = getDynaClass(tableName);
-        if (dynaClass != null) {
-            return dynaClass.newInstance();
-        }
-        return null;
+
+        return dynaClass != null ? dynaClass.newInstance() : null;
     }
 
     /**
@@ -97,7 +105,8 @@ public class DynaSql extends JdbcSupport {
      * @return a DynaBean bound to the given table name and containing all the properties from
      *  the given source object
      */
-    public DynaBean copy(String tableName, Object source) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+    public DynaBean copy(String tableName, Object source) throws IllegalAccessException, InstantiationException, InvocationTargetException
+    {
         DynaBean answer = newInstance(tableName);
 
         // copy all the properties from the source
@@ -109,20 +118,25 @@ public class DynaSql extends JdbcSupport {
     /**
      * Performs the given SQL query returning an iterator over the results.
      */
-    public Iterator query(String sql) throws SQLException, IllegalAccessException, InstantiationException {
-        Iterator answer = null;
+    public Iterator query(String sql) throws SQLException, IllegalAccessException, InstantiationException
+    {
         Connection connection = borrowConnection();
-        Statement statement = null;
-        ResultSet resultSet = null;
-        try {
+        Statement  statement  = null;
+        ResultSet  resultSet  = null;
+        Iterator   answer     = null;
+
+        try
+        {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sql);
-            answer = createResultSetIterator(connection, statement, resultSet);
+            answer    = createResultSetIterator(connection, statement, resultSet);
             return answer;
         }
-        finally {
+        finally
+        {
             // if any exceptions are thrown, close things down
-            if (answer == null) {
+            if (answer == null)
+            {
                 closeResources(connection, statement, resultSet);
             }
         }
@@ -133,25 +147,32 @@ public class DynaSql extends JdbcSupport {
      *
      * @return an Iterator which appears like a DynaBean for easy access to the properties.
      */
-    public Iterator query(String sql, List parameters) throws SQLException, IllegalAccessException, InstantiationException {
-        Iterator answer = null;
-        Connection connection = borrowConnection();
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        try {
+    public Iterator query(String sql, List parameters) throws SQLException, IllegalAccessException, InstantiationException
+    {
+        Connection        connection = borrowConnection();
+        PreparedStatement statement  = null;
+        ResultSet         resultSet  = null;
+        Iterator          answer     = null;
+
+        try
+        {
             statement = connection.prepareStatement(sql);
+
             int paramIdx = 1;
-            for (Iterator iter = parameters.iterator(); iter.hasNext(); ) {
-                Object param = iter.next();
-                statement.setObject(paramIdx++, param);
+
+            for (Iterator iter = parameters.iterator(); iter.hasNext(); paramIdx++)
+            {
+                statement.setObject(paramIdx, iter.next());
             }
             resultSet = statement.executeQuery();
-            answer = createResultSetIterator(connection, statement, resultSet);
+            answer    = createResultSetIterator(connection, statement, resultSet);
             return answer;
         }
-        finally {
+        finally
+        {
             // if any exceptions are thrown, close things down
-            if (answer == null) {
+            if (answer == null)
+            {
                 closeResources(connection, statement, resultSet);
             }
         }
@@ -161,17 +182,22 @@ public class DynaSql extends JdbcSupport {
      * @return the SqlDynaClass for the given table name. If the SqlDynaClass does not exist
      * then create a new one based on the Table definition
      */
-    public SqlDynaClass getDynaClass(String tableName) {
-        SqlDynaClass answer = (SqlDynaClass) dynaClassCache.get(tableName);
-        if (answer == null) {
+    public SqlDynaClass getDynaClass(String tableName)
+    {
+        SqlDynaClass answer = (SqlDynaClass)_dynaClassCache.get(tableName);
+
+        if (answer == null)
+        {
             Table table = getDatabase().findTable(tableName);
-            if (table != null) {
+
+            if (table != null)
+            {
                 answer = createSqlDynaClass(table);
-                dynaClassCache.put(tableName, answer);
+                _dynaClassCache.put(tableName, answer);
             }
-            else {
-                log.warn( "No such table: " + tableName );
-                System.out.println( "Couldn't find table: " + tableName );
+            else
+            {
+                _log.warn("Could not find table " + tableName);
             }
         }
         return answer;
@@ -182,17 +208,23 @@ public class DynaSql extends JdbcSupport {
      * Stores the given DynaBean in the database, inserting it if there is no primary key
      * otherwise the bean is updated in the database.
      */
-    public void store(DynaBean dynaBean) throws SQLException {
+    public void store(DynaBean dynaBean) throws SQLException
+    {
         Connection connection = borrowConnection();
-        try {
-            if (exists(dynaBean, connection)) {
+
+        try
+        {
+            if (exists(dynaBean, connection))
+            {
                 update(dynaBean, connection);
             }
-            else {
+            else
+            {
                 insert(dynaBean, connection);
             }
         }
-        finally {
+        finally
+        {
             returnConnection(connection);
         }
     }
@@ -211,7 +243,7 @@ public class DynaSql extends JdbcSupport {
 
         if (properties.length == 0)
         {
-            log.info("Cannot insert type " + dynaClass + " as there are no properties");
+            _log.info("Cannot insert type " + dynaClass + " as there are no properties");
             return null;
         }
 
@@ -221,12 +253,16 @@ public class DynaSql extends JdbcSupport {
     /**
      * Inserts the given DynaBean in the database, assuming the primary key values are specified.
      */
-    public void insert(DynaBean dynaBean) throws SQLException {
+    public void insert(DynaBean dynaBean) throws SQLException
+    {
         Connection connection = borrowConnection();
-        try {
+
+        try
+        {
             insert(dynaBean, connection);
         }
-        finally {
+        finally
+        {
             returnConnection(connection);
         }
     }
@@ -244,22 +280,26 @@ public class DynaSql extends JdbcSupport {
 
         if (primaryKeys.length == 0)
         {
-            log.info("Cannot update type " + dynaClass + " as there are no primary keys to update");
+            _log.info("Cannot update type " + dynaClass + " as there are no primary keys to update");
             return null;
         }
 
-        return createUpdateSql(dynaClass, primaryKeys, dynaClass.getNonPrimaryKeyProperties());
+        return createUpdateSql(dynaClass, primaryKeys, dynaClass.getNonPrimaryKeyProperties(), dynaBean);
     }
 
     /**
      * Updates the given DynaBean in the database, assuming the primary key values are specified.
      */
-    public void update(DynaBean dynaBean) throws SQLException {
+    public void update(DynaBean dynaBean) throws SQLException
+    {
         Connection connection = borrowConnection();
-        try {
+
+        try
+        {
             update(dynaBean, connection);
         }
-        finally {
+        finally
+        {
             returnConnection(connection);
         }
     }
@@ -267,38 +307,47 @@ public class DynaSql extends JdbcSupport {
     /**
      * Deletes the given DynaBean from the database, assuming the primary key values are specified.
      */
-    public void delete(DynaBean dynaBean) throws SQLException {
-        Connection connection = borrowConnection();
-        PreparedStatement statement = null;
-        try {
-            SqlDynaClass dynaClass = getSqlDynaClass(dynaBean);
+    public void delete(DynaBean dynaBean) throws SQLException
+    {
+        Connection        connection = borrowConnection();
+        PreparedStatement statement  = null;
+
+        try
+        {
+            SqlDynaClass      dynaClass   = getSqlDynaClass(dynaBean);
             SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
-            int size = primaryKeys.length;
-            if (size == 0) {
-                log.info( "Cannot delete type " + dynaClass + " as there are no primary keys" );
+
+            if (primaryKeys.length == 0)
+            {
+                _log.warn("Cannot delete type " + dynaClass + " as there are no primary keys");
                 return;
             }
-            String sql = createDeleteSql(dynaClass, primaryKeys);
 
-            if (log.isDebugEnabled()) {
-                log.debug( "About to execute SQL: " + sql );
+            String sql = createDeleteSql(dynaClass, primaryKeys, null);
+
+            if (_log.isDebugEnabled())
+            {
+                _log.debug("About to execute SQL " + sql);
             }
 
-            statement = connection.prepareStatement( sql );
+            statement = connection.prepareStatement(sql);
 
-            for ( int i = 0; i < size; i++ ) {
-                SqlDynaProperty primaryKey = primaryKeys[i];
-                setObject(statement, 1+i, dynaBean, primaryKey);
+            for (int idx = 0; idx < primaryKeys.length; idx++)
+            {
+                setObject(statement, idx + 1, dynaBean, primaryKeys[idx]);
             }
+
             int count = statement.executeUpdate();
-            if ( count != 1 ) {
-                log.warn( "Attempted to delete a single row : " + dynaBean
-                    + " in table: " + dynaClass.getTableName()
-                    + " but changed: " + count + " row(s)"
-                );
+
+            if (count != 1)
+            {
+                _log.warn("Attempted to delete a single row " + dynaBean +
+                          " in table " + dynaClass.getTableName() +
+                          " but changed " + count + " row(s).");
             }
         }
-        finally {
+        finally
+        {
             closeStatement(statement);
             returnConnection(connection);
         }
@@ -317,11 +366,11 @@ public class DynaSql extends JdbcSupport {
 
         if (primaryKeys.length == 0)
         {
-            log.warn("Cannot delete type " + dynaClass + " as there are no primary keys");
+            _log.warn("Cannot delete type " + dynaClass + " as there are no primary keys");
             return null;
         }
 
-        return createDeleteSql(dynaClass, primaryKeys);
+        return createDeleteSql(dynaClass, primaryKeys, dynaBean);
     }
 
     // Properties
@@ -331,17 +380,19 @@ public class DynaSql extends JdbcSupport {
      * Returns the database.
      * @return Database
      */
-    public Database getDatabase() {
-        return database;
+    public Database getDatabase()
+    {
+        return _database;
     }
 
     /**
      * Sets the database.
      * @param database The database to set
      */
-    public void setDatabase(Database database) {
-        this.database = database;
-        this.dynaClassCache.clear();
+    public void setDatabase(Database database)
+    {
+        _database = database;
+        _dynaClassCache.clear();
     }
 
 
@@ -353,7 +404,8 @@ public class DynaSql extends JdbcSupport {
      * @todo Provide functionality or document behavior [returns false].
      * @return true if this dynaBean has a primary key
      */
-    protected boolean exists(DynaBean dynaBean, Connection connection) {
+    protected boolean exists(DynaBean dynaBean, Connection connection)
+    {
         return false;
     }
 
@@ -370,16 +422,16 @@ public class DynaSql extends JdbcSupport {
 
         if (properties.length == 0)
         {
-            log.info("Cannot insert type " + dynaClass + " as there are no properties");
+            _log.info("Cannot insert type " + dynaClass + " as there are no properties");
             return;
         }
 
         String            sql       = createInsertSql(dynaClass, properties, null);
         PreparedStatement statement = null;
 
-        if (log.isDebugEnabled())
+        if (_log.isDebugEnabled())
         {
-            log.debug("About to execute SQL: " + sql);
+            _log.debug("About to execute SQL: " + sql);
         }
 
         try
@@ -395,7 +447,7 @@ public class DynaSql extends JdbcSupport {
 
             if (count != 1)
             {
-                log.warn("Attempted to insert a single row " + dynaBean +
+                _log.warn("Attempted to insert a single row " + dynaBean +
                          " in table " + dynaClass.getTableName() +
                          " but changed " + count + " row(s)");
             }
@@ -419,17 +471,17 @@ public class DynaSql extends JdbcSupport {
 
         if (primaryKeys.length == 0)
         {
-            log.info("Cannot update type " + dynaClass + " as there are no primary keys to update");
+            _log.info("Cannot update type " + dynaClass + " as there are no primary keys to update");
             return;
         }
 
         SqlDynaProperty[] properties = dynaClass.getNonPrimaryKeyProperties();
-        String            sql        = createUpdateSql(dynaClass, primaryKeys, properties);
+        String            sql        = createUpdateSql(dynaClass, primaryKeys, properties, null);
         PreparedStatement statement  = null;
 
-        if (log.isDebugEnabled())
+        if (_log.isDebugEnabled())
         {
-            log.debug("About to execute SQL: " + sql);
+            _log.debug("About to execute SQL: " + sql);
         }
         try
         {
@@ -448,9 +500,9 @@ public class DynaSql extends JdbcSupport {
 
             int count = statement.executeUpdate();
 
-            if (count != 1 )
+            if (count != 1)
             {
-                log.warn("Attempted to insert a single row " + dynaBean +
+                _log.warn("Attempted to insert a single row " + dynaBean +
                          " in table " + dynaClass.getTableName() +
                          " but changed " + count + " row(s)");
             }
@@ -461,134 +513,95 @@ public class DynaSql extends JdbcSupport {
         }
     }
 
+    /**
+     * Derives the column values for the given dyna properties from the dyna bean.
+     * 
+     * @param properties The properties
+     * @param bean       The bean
+     * @return The values indexed by the column names
+     */
+    private HashMap toColumnValues(SqlDynaProperty[] properties, DynaBean bean)
+    {
+        HashMap result = new HashMap();
+
+        for (int idx = 0; idx < properties.length; idx++)
+        {
+            result.put(properties[idx].getName(),
+                       bean == null ? null : bean.get(properties[idx].getName()));
+        }
+        return result;
+    }
 
     /**
-     * Creates the insert SQL for inserting an object of the given type. If a concrete bean is given,
-     * then a concrete insert statement is created, otherwise a insert statement usable in a
+     * Creates the SQL for inserting an object of the given type. If a concrete bean is given,
+     * then a concrete insert statement is created, otherwise an insert statement usable in a
      * prepared statement is build. 
      * 
      * @param dynaClass  The type
      * @param properties The properties to write
-     * @param dynaClass  Optionally the concrete bean to insert
+     * @param bean       Optionally the concrete bean to insert
      * @return The SQL required to insert an instance of the class
      */
     protected String createInsertSql(SqlDynaClass dynaClass, SqlDynaProperty[] properties, DynaBean bean)
     {
-        StringBuffer buffer = new StringBuffer("insert into ");
+        Table   table        = _database.findTable(dynaClass.getTableName());
+        HashMap columnValues = toColumnValues(properties, bean);
 
-        buffer.append(dynaClass.getTableName());
-        buffer.append(" (");
-
-        for (int idx = 0; idx < properties.length; idx++)
-        {
-            if (idx > 0)
-            {
-                buffer.append(", ");
-            }
-            buffer.append(properties[idx].getName());
-        }
-        buffer.append(") values (");
-
-        if (properties.length > 0)
-        {
-            if (bean != null)
-            {
-                for (int idx = 0; idx < properties.length; idx++)
-                {
-                    if (idx > 0)
-                    {
-                        buffer.append(", ");
-                    }
-
-                    Object value = bean.get(properties[idx].getName());
-
-                    if (value == null)
-                    {
-                        buffer.append("NULL");
-                    }
-                    else
-                    {
-                        // TODO: Let the db builder handle the types so that the sql
-                        //       will work correctly even for binary types like BLOB
-                        buffer.append("\"");
-                        buffer.append(value.toString());
-                        buffer.append("\"");
-                    }
-                }
-            }
-            else
-            {
-                buffer.append("?");
-                for (int idx = 1; idx < properties.length; idx++)
-                {
-                    buffer.append(", ?");
-                }
-            }
-        }
-        buffer.append(")");
-        return buffer.toString();
+        return _builder.getInsertSql(table, columnValues, bean == null);
     }
 
     /**
-     * @return the SQL required to update the given item
+     * Creates the SQL for updating an object of the given type. If a concrete bean is given,
+     * then a concrete update statement is created, otherwise an update statement usable in a
+     * prepared statement is build.
+     * 
+     * @param dynaClass   The type
+     * @param primaryKeys The primary keys
+     * @param properties  The properties to write
+     * @param bean        Optionally the concrete bean to update
+     * @return The SQL required to update an instance of the class
      */
-    protected String createUpdateSql(SqlDynaClass dynaClass, SqlDynaProperty[] primaryKeys, SqlDynaProperty[] properties) {
-        StringBuffer buffer = new StringBuffer( "update " );
-        buffer.append( dynaClass.getTableName() );
-        buffer.append( " set " );
+    protected String createUpdateSql(SqlDynaClass dynaClass, SqlDynaProperty[] primaryKeys, SqlDynaProperty[] properties, DynaBean bean)
+    {
+        Table   table        = _database.findTable(dynaClass.getTableName());
+        HashMap columnValues = toColumnValues(properties, bean);
 
-        for ( int i = 0; i < properties.length; i++ ) {
-            SqlDynaProperty property = properties[i];
-            if (i > 0) {
-                buffer.append(", " );
-            }
-            buffer.append( property.getName() );
-            buffer.append( " = ?" );
-        }
-        buffer.append( " where " );
-
-        for (int i = 0, size = primaryKeys.length; i < size; i++ ) {
-            SqlDynaProperty primaryKey = primaryKeys[i];
-            if (i > 0) {
-                buffer.append(", " );
-            }
-            buffer.append( primaryKey.getName() );
-            buffer.append( " = ?" );
-        }
-        return buffer.toString();
+        return _builder.getUpdateSql(table, columnValues, bean == null);
     }
 
     /**
-     * @return the SQL required to update the given item
+     * Creates the SQL for deleting an object of the given type. If a concrete bean is given,
+     * then a concrete delete statement is created, otherwise a delete statement usable in a
+     * prepared statement is build.
+     * 
+     * @param dynaClass   The type
+     * @param primaryKeys The primary keys
+     * @param bean        Optionally the concrete bean to update
+     * @return The SQL required to update an instance of the class
      */
-    protected String createDeleteSql(SqlDynaClass dynaClass, SqlDynaProperty[] primaryKeys) {
-        StringBuffer buffer = new StringBuffer( "delete " );
-        buffer.append( dynaClass.getTableName() );
-        buffer.append( " where " );
+    protected String createDeleteSql(SqlDynaClass dynaClass, SqlDynaProperty[] primaryKeys, DynaBean bean)
+    {
+        Table   table    = _database.findTable(dynaClass.getTableName());
+        HashMap pkValues = toColumnValues(primaryKeys, bean);
 
-        int size = primaryKeys.length;
-        for ( int i = 0; i < size; i++ ) {
-            SqlDynaProperty primaryKey = primaryKeys[i];
-            if (i > 0) {
-                buffer.append(" and " );
-            }
-            buffer.append( primaryKey.getName() );
-            buffer.append( " = ?" );
-        }
-        return buffer.toString();
+        return _builder.getDeleteSql(table, pkValues, bean == null);
     }
 
     /**
      * @return the SqlDynaClass for the given DynaBean or throws an exception if it could not be found
      */
-    protected SqlDynaClass getSqlDynaClass(DynaBean dynaBean) {
+    protected SqlDynaClass getSqlDynaClass(DynaBean dynaBean)
+    {
         DynaClass dynaClass = dynaBean.getDynaClass();
-        if (dynaClass instanceof SqlDynaClass) {
+
+        if (dynaClass instanceof SqlDynaClass)
+        {
             return (SqlDynaClass) dynaClass;
         }
-        else {
-            // #### we could autogenerate an SqlDynaClass here
-            throw new IllegalArgumentException( "The dynaBean is not an instance of an SqlDynaClass" );
+        else
+        {
+            // TODO: we could autogenerate an SqlDynaClass here ?
+            throw new IllegalArgumentException("The dynaBean is not an instance of an SqlDynaClass");
         }
     }
 
@@ -596,25 +609,24 @@ public class DynaSql extends JdbcSupport {
      * A Factory method to create a new SqlDynaClass instance for the given table name If the SqlDynaClass does not exist
      * then create a new one based on the Table definition
      */
-    protected SqlDynaClass createSqlDynaClass(Table table) {
+    protected SqlDynaClass createSqlDynaClass(Table table)
+    {
         return SqlDynaClass.newInstance(table);
     }
 
     /**
      * Sets property value with the given prepared statement, doing any type specific conversions or swizzling.
      */
-    protected void setObject(
-        PreparedStatement statement,
-        int sqlIndex,
-        DynaBean dynaBean,
-        SqlDynaProperty property
-    ) throws SQLException {
-
+    protected void setObject(PreparedStatement statement, int sqlIndex, DynaBean dynaBean, SqlDynaProperty property) throws SQLException
+    {
         Object value = dynaBean.get(property.getName());
-        if (value == null) {
+
+        if (value == null)
+        {
             statement.setNull(sqlIndex, property.getColumn().getTypeCode());
         }
-        else {
+        else
+        {
             statement.setObject(sqlIndex, value);
         }
     }
@@ -625,12 +637,11 @@ public class DynaSql extends JdbcSupport {
      *
      * @todo figure out a way to close Connection, Statement and ResultSet!
      */
-    protected Iterator createResultSetIterator(
-        Connection connection, Statement statement, ResultSet resultSet
-    ) throws SQLException, IllegalAccessException, InstantiationException {
-
+    protected Iterator createResultSetIterator(Connection connection, Statement statement, ResultSet resultSet) throws SQLException, IllegalAccessException, InstantiationException
+    {
         // #### WARNING - the Connection, statement and resultSet are not closed.
         ResultSetDynaClass resultSetClass = new ResultSetDynaClass(resultSet);
+
         return resultSetClass.iterator();
     }
 }

@@ -62,14 +62,14 @@ public class SybaseBuilder extends SqlBuilder
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException
     {
-        String constraintName = table.getName() + "_FK_" + numKey;
+        String constraintName = getConstraintName(null, table, "FK", Integer.toString(numKey));
 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name=''");
         print(constraintName);
         println("')");
         printIndent();
         print("ALTER TABLE ");
-        print(table.getName());
+        print(getTableName(table));
         print(" DROP CONSTRAINT ");
         print(constraintName);
         printEndOfStatement();
@@ -81,12 +81,12 @@ public class SybaseBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '");
-        print(table.getName());
+        print(getTableName(table));
         println("')");
         println("BEGIN");
         printIndent();
         print("DROP TABLE ");
-        println(table.getName());
+        println(getTableName(table));
         print("END");
         printEndOfStatement();
     }

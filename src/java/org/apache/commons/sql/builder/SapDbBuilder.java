@@ -41,6 +41,7 @@ public class SapDbBuilder extends SqlBuilder
         setCommentSuffix("*/");
         // CHAR and VARCHAR are handled by getSqlType
         addNativeTypeMapping(Types.BIGINT,        "FIXED(38,0)");
+        addNativeTypeMapping(Types.BINARY,        "LONG BYTE");
         addNativeTypeMapping(Types.BLOB,          "LONG BYTE");
         addNativeTypeMapping(Types.BIT,           "FIXED(1,0)");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");

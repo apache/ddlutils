@@ -64,14 +64,14 @@ public class MSSqlBuilder extends SqlBuilder
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException
     {
-        String constraintName = table.getName() + "_FK_" + numKey;
+        String constraintName = getConstraintName(null, table, "FK", Integer.toString(numKey));
 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name='");
         print(constraintName);
         println("'");
         printIndent();
         print("ALTER TABLE ");
-        print(table.getName());
+        print(getTableName(table));
         print(" DROP CONSTRAINT ");
         print(constraintName);
         printEndOfStatement();
@@ -82,7 +82,7 @@ public class MSSqlBuilder extends SqlBuilder
      */
     public void dropTable(Table table) throws IOException
     {
-        String tableName = table.getName();
+        String tableName = getTableName(table);
 
         print( "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '");
         print(tableName);
@@ -110,7 +110,7 @@ public class MSSqlBuilder extends SqlBuilder
         println("     END");
         println("     CLOSE refcursor");
         println("     DEALLOCATE refcursor");
-        print("     DROP TABLE " + tableName);
+        print("     DROP TABLE ");
         println(tableName);
         print("END");
         printEndOfStatement();

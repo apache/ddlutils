@@ -90,6 +90,7 @@ public class SqlBuilderFactory
     protected static void registerDatabases()
     {
         registerDatabase("axion",      AxionBuilder.class);
+        registerDatabase("cloudscape", CloudscapeBuilder.class);
         registerDatabase("db2",        Db2Builder.class);
         registerDatabase("firebird",   FirebirdBuilder.class);
         registerDatabase("hsqldb",     HsqlDbBuilder.class);

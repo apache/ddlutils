@@ -204,7 +204,7 @@ public abstract class AbstractTestDynaSql extends TestCase
         
         executeDDL();
         
-        dynaSql = new DynaSql(dataSource, database);
+        dynaSql = new DynaSql(sqlBuilder, dataSource, database);
     }
 
     /**
