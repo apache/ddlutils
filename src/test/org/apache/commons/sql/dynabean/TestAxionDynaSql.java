@@ -59,117 +59,60 @@
  * 
  * $Id: CompilableTag.java,v 1.5 2002/05/17 15:18:12 jstrachan Exp $
  */
-package org.apache.commons.sql.util;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+package org.apache.commons.sql.dynabean;
 
 import javax.sql.DataSource;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * JdbcSupport is an abstract base class for objects which need to 
- * perform JDBC operations. It contains a number of useful methods 
- * for implementation inheritence..
+ * DynaSql test harness for the Axion database
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.3 $
  */
-public abstract class JdbcSupport {
-
-    /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( JdbcSupport.class );
-    
-    private DataSource dataSource;
-    
-    public JdbcSupport() {
-    }
-
-    public JdbcSupport(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    // Properties
-    //-------------------------------------------------------------------------                
-    
-    /**
-     * Returns the DataSource used to pool JDBC Connections.
-     * @return DataSource
-     */
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    /**
-     * Sets the DataSource used to pool JDBC Connections.
-     * @param dataSource The dataSource to set
-     */
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    // Implementation methods    
-    //-------------------------------------------------------------------------                
-
-    /**
-     * @return a new JDBC connection from the pool
-     */
-    protected Connection borrowConnection() throws SQLException {
-        return getDataSource().getConnection();
+public class TestAxionDynaSql extends AbstractTestDynaSql
+{
+    public static void main( String[] args ) 
+    {
+        TestRunner.run( suite() );
     }
     
     /**
-     * Returns a JDBC connection back into the pool
+     * A unit test suite for JUnit
      */
-    protected void returnConnection(Connection connection) {
-        try {
-            connection.close();
-        }
-        catch (Exception e) {
-            log.error( "Caught exception while returning connection to pool: " + e, e);
-        }
+    public static Test suite()
+    {
+        return new TestSuite(TestAxionDynaSql.class);
     }
 
     /**
-     * Closes the given result set down.
+     * Constructor for the TestAxionDynaSql object
+     *
+     * @param testName
      */
-    protected void closeResultSet(ResultSet resultSet) {
-        if ( resultSet != null ) {
-            try {
-                resultSet.close();
-            }
-            catch (Exception e) {
-                log.warn("Ignoring exception closing result set: " + e, e);
-            }
-        }
+    public TestAxionDynaSql(String testName)
+    {
+        super(testName);
     }
 
-    /**
-     * Closes the given statement down.
-     */
-    protected void closeStatement(Statement statement) {
-        if ( statement != null ) {
-            try {
-                statement.close();
-            }
-            catch (Exception e) {
-                log.warn("Ignoring exception closing statement: " + e, e);
-            }
-        }
+    protected String getDatabaseType() 
+    {
+        return "axion";
     }
     
-    /**
-     * A helper method to close down any resources used and return the JDBC connection
-     * back to the pool
-     */
-    protected void closeResources(Connection connection, Statement statement, ResultSet resultSet) {
-        closeResultSet(resultSet);
-        closeStatement(statement);
-        returnConnection(connection);
+    protected DataSource createDataSource() throws Exception
+    {
+        return createDataSource(
+            "org.axiondb.jdbc.AxionDriver", 
+            "jdbc:axiondb:diskdb:target/axiondb"
+        );
     }
 }
+

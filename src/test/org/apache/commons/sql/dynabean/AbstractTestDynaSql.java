@@ -65,6 +65,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -75,10 +77,10 @@ import junit.textui.TestRunner;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
+import org.apache.commons.beanutils.ResultSetIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.impl.SimpleLog;
 
 import org.apache.commons.sql.builder.*;
 import org.apache.commons.sql.dynabean.DynaSql;
@@ -87,18 +89,32 @@ import org.apache.commons.sql.model.*;
 import org.apache.commons.sql.util.DataSourceWrapper;
 import org.apache.commons.sql.util.DDLExecutor;
 
-import org.axiondb.jdbc.AxionDriver;
-
 /**
- * Test harness for the SqlBuilder for various databases.
+ * Abstract base class for testing the DynaSql against a number of 
+ * different databases
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision: 1.3 $
  */
-public class TestDynaSql extends TestCase
+public abstract class AbstractTestDynaSql extends TestCase
 {
-    private Database database;
+    /** The Log to which logging calls will be made. */
+    private static final Log log = LogFactory.getLog( AbstractTestDynaSql.class );
+    
     private String baseDir;
+    
+    /** the database model */
+    private Database database;
+    
+    /** the database to connect to */
+    private DataSource dataSource;
+    
+    /** for building the DDL to create the database */
+    private SqlBuilder sqlBuilder;
+
+    /** the simple API to the database */
+    protected DynaSql dynaSql;
+    
  
     public static void main( String[] args ) 
     {
@@ -110,17 +126,120 @@ public class TestDynaSql extends TestCase
      */
     public static Test suite()
     {
-        return new TestSuite(TestDynaSql.class);
+        return new TestSuite(AbstractTestDynaSql.class);
     }
 
     /**
-     * Constructor for the TestDynaSql object
+     * Constructor for the AbstractTestDynaSql object
      *
      * @param testName
      */
-    public TestDynaSql(String testName)
+    public AbstractTestDynaSql(String testName)
     {
         super(testName);
+    }
+
+    // Test cases
+    //-------------------------------------------------------------------------                
+
+    /**
+     * Insert some data
+     */    
+    public void testInsert() throws Exception 
+    {
+        // first lets check that the tables are available in our database
+        
+        assertTrue( "Database contains a table 'author'", database.findTable("author") != null );
+        assertTrue( "Database contains a table 'book'", database.findTable("book") != null );
+        
+        DynaBean author = dynaSql.newInstance("author");
+
+        assertTrue("Found an author", author != null);
+        
+        author.set("author_id", new Integer(1));
+        author.set("name", "Oscar Wilde");
+        dynaSql.insert(author);        
+
+        log.info( "Inserted author: " + author );
+
+        author = dynaSql.newInstance("author");
+        author.set("author_id", new Integer(2));
+        author.set("name", "Ian Rankin");
+        dynaSql.insert(author);
+        
+        log.info( "Inserted author: " + author );
+        
+        DynaBean book = dynaSql.newInstance("book");
+        
+        assertTrue("Found an book", book != null);
+        
+        book.set("author_id", new Integer(1));
+        book.set("isbn", "ISBN-ABCDEF");
+        book.set("title", "The Importance of being Earnest");
+        dynaSql.insert(book);
+        log.info( "Inserted book: " + book );
+        
+        book = dynaSql.newInstance("book");
+        book.set("author_id", new Integer(2));
+        book.set("isbn", "ISBN-XYZ");
+        book.set("title", "The Hanging Garden");
+        dynaSql.insert(book);
+        
+        log.info( "Inserted book: " + book );
+        
+        
+        // now lets do some queries        
+        doQuery();
+        doQueryWithParameters();
+    }
+
+
+
+    // Implementation methods
+    //-------------------------------------------------------------------------                
+
+
+    /**
+     * Test out some basic query operations
+     */
+    protected void doQuery() throws Exception {
+        ResultSetIterator iter = dynaSql.query( "select * from book" );
+        assertTrue("Found at least one row", iter.hasNext());
+
+        DynaBean bean = (DynaBean) iter.next();
+       
+        assertTrue("Found a dynaBean row", bean != null);
+        
+        log.info( "Found book: " + bean.get("title") );
+        
+        assertEquals( "iter has corrrect isbn", "ISBN-ABCDEF", iter.get("isbn") );
+        assertEquals( "iter has corrrect title", "The Importance of being Earnest", iter.get("title") );
+        
+        assertEquals( "bean has corrrect isbn", "ISBN-ABCDEF", bean.get("isbn") );
+        assertEquals( "bean has corrrect title", "The Importance of being Earnest", bean.get("title") );
+    }
+
+    /**
+     * Test out some queries with parameters
+     */
+    protected void doQueryWithParameters() throws Exception {
+        List params = new ArrayList();
+        params.add("The Hanging Garden");
+        
+        ResultSetIterator iter = dynaSql.query( "select * from book where title = ?", params );
+        assertTrue("Found at least one row", iter.hasNext());
+
+        DynaBean bean = (DynaBean) iter.next();
+
+        assertTrue("Found a dynaBean row", bean != null);
+        
+        log.info( "Found book: " + bean.get("title") );
+               
+        assertEquals( "iter has corrrect isbn", "ISBN-XYZ", iter.get("isbn") );
+        assertEquals( "iter has corrrect title", "The Hanging Garden", iter.get("title") );
+        
+        assertEquals( "bean has corrrect isbn", "ISBN-XYZ", bean.get("isbn") );
+        assertEquals( "bean has corrrect title", "The Hanging Garden", bean.get("title") );
     }
 
     /**
@@ -137,81 +256,42 @@ public class TestDynaSql extends TestCase
         database = (Database) reader.parse(new FileInputStream(uri));
         
         assertTrue("Loaded a valid database", database != null);
-    }
-
-    /**
-     * Tests the Axion database
-     */
-    public void testAxion() throws Exception
-    {
-        DataSource dataSource = createDataSource(
-            "org.axiondb.jdbc.AxionDriver", 
-            "jdbc:axiondb:diskdb:target/axiondb"
-        );
-
-        testDDLExecutor(dataSource, new AxionBuilder() );        
-    }
-
-    /**
-     * Tests the HsqlDb database
-     */
-    public void testHsqlDb() throws Exception
-    {
-        DataSource dataSource = createDataSource(
-            "org.hsqldb.jdbcDriver", 
-            "jdbc:hsqldb:target/hsqldb", 
-            "sa", 
-            ""
-        );
         
-        testDDLExecutor(dataSource, new HsqlDbBuilder() );        
+        dataSource = createDataSource();
+        sqlBuilder = createSqlBuilder();
+        
+        executeDDL();
+        
+        dynaSql = new DynaSql(dataSource, database);
+    }
+
+    /**
+     * @return the name of the database type to use to create the DDL
+     */
+    protected abstract String getDatabaseType();    
+    
+    /**
+     * Factory method to create a DataSource
+     */
+    protected abstract DataSource createDataSource() throws Exception;
+
+    /**
+     * Creates an SqlBuilder based on the name of the database
+     */
+    protected SqlBuilder createSqlBuilder() throws Exception
+    {
+        return SqlBuilderFactory.newSqlBuilder(getDatabaseType());
     }
 
     /**
      * Creates the database on the given data source with the given SQL builder
      */    
-    protected void testDDLExecutor(DataSource dataSource, SqlBuilder builder) throws Exception 
+    protected void executeDDL() throws Exception 
     {
-        DDLExecutor executor = new DDLExecutor(dataSource, builder);
+        DDLExecutor executor = new DDLExecutor(dataSource, sqlBuilder);
         executor.createDatabase(database, true);
-        
-        testDynaSql(dataSource);
     }
     
-    /**
-     * Perform some database operations on the data source using DynaBeans
-     */    
-    protected void testDynaSql(DataSource dataSource) throws Exception 
-    {
-        // first lets check that the tables are available in our database
-        
-        assertTrue( "Database contains a table 'author'", database.findTable("author") != null );
-        assertTrue( "Database contains a table 'book'", database.findTable("book") != null );
-        
-        DynaSql dynaSql = new DynaSql(dataSource, database);
-
-        DynaBean author = dynaSql.newInstance("author");
-
-        assertTrue("Found an author", author != null);
-        
-        author.set("author_id", new Integer(1));
-        author.set("name", "Oscar Wilde");
-        dynaSql.insert(author);
-        
-        System.out.println( "Inserted author: " + author );
-        
-        DynaBean book = dynaSql.newInstance("book");
-        
-        assertTrue("Found an book", book != null);
-        
-        book.set("author_id", new Integer(1));
-        book.set("isbn", "ISBN-ABCDEF");
-        book.set("title", "The Importance of being Earnest");
-        dynaSql.insert(book);
-        
-        System.out.println( "Inserted book: " + book );
-    }
-
     /**
      * Creates a new DataSource for the given JDBC URI
      */    

@@ -61,6 +61,8 @@
  */
 package org.apache.commons.sql.dynabean;
 
+import java.lang.reflect.InvocationTargetException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -75,8 +77,11 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
+import org.apache.commons.beanutils.ResultSetDynaClass;
+import org.apache.commons.beanutils.ResultSetIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -126,6 +131,84 @@ public class DynaSql extends JdbcSupport {
     }
     
     /**
+     * <p>
+     * Creates a new DynaBean instance of the given table name and copies the values from the 
+     * given source object. The source object can be a bean, a Map or a DynaBean.
+     * </p>
+     * <p>
+     * This method is useful when iterating through an arbitrary DynaBean
+     * result set after performing a query, then creating a copy as a DynaBean 
+     * which is bound to a specific table. 
+     * This new DynaBean cna be kept around, changed and stored back into the database.
+     * </p>
+     * 
+     * @param tableName is the name of the database that the new DynaBean will be bound
+     * @param source is either a bean, a Map or a DynaBean that will be used to populate
+     *      returned DynaBean.
+     * @return a DynaBean bound to the given table name and containing all the properties from 
+     *  the given source object
+     */
+    public DynaBean copy(String tableName, Object source) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+        DynaBean answer = newInstance(tableName);
+
+        // copy all the properties from the source        
+        BeanUtils.copyProperties(answer, source);
+        
+        return answer;
+    }
+
+    /**
+     * Performs the given SQL query returning an iterator over the results.
+     */
+    public ResultSetIterator query(String sql) throws SQLException, IllegalAccessException, InstantiationException {
+        ResultSetIterator answer = null;
+        Connection connection = borrowConnection();
+        Statement statement = null;
+        ResultSet resultSet = null;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(sql);
+            answer = createResultSetIterator(connection, statement, resultSet);
+            return answer;
+        }
+        finally {
+            // if any exceptions are thrown, close things down
+            if (answer == null) {
+                closeResources(connection, statement, resultSet);
+            }
+        }
+    }    
+    
+    /**
+     * Performs the given parameterized SQL query returning an iterator over the results.
+     * 
+     * @return an Iterator which appears like a DynaBean for easy access to the properties.
+     */
+    public ResultSetIterator query(String sql, List parameters) throws SQLException, IllegalAccessException, InstantiationException {
+        ResultSetIterator answer = null;
+        Connection connection = borrowConnection();
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            statement = connection.prepareStatement(sql);
+            int paramIdx = 1;
+            for (Iterator iter = parameters.iterator(); iter.hasNext(); ) {
+                Object param = iter.next();
+                statement.setObject(paramIdx++, param);
+            }
+            resultSet = statement.executeQuery();
+            answer = createResultSetIterator(connection, statement, resultSet);
+            return answer;
+        }
+        finally {
+            // if any exceptions are thrown, close things down
+            if (answer == null) {
+                closeResources(connection, statement, resultSet);
+            }
+        }
+    }    
+    
+    /**
      * @return the SqlDynaClass for the given table name. If the SqlDynaClass does not exist
      * then create a new one based on the Table definition
      */
@@ -135,7 +218,7 @@ public class DynaSql extends JdbcSupport {
             Table table = getDatabase().findTable(tableName);
             if (table != null) {
                 answer = createSqlDynaClass(table);
-                dynaClassCache.put(tableName, dynaClassCache);
+                dynaClassCache.put(tableName, answer);
             }
             else {
                 log.warn( "No such table: " + tableName );
@@ -459,5 +542,18 @@ public class DynaSql extends JdbcSupport {
         
         Object value = dynaBean.get(property.getName());    
         statement.setObject(sqlIndex, value);
+    }
+    
+    /**
+     * Factory method to create a new ResultSetIterator for the given result set, closing the 
+     * connection, statement and result set when the iterator is used or closed.
+     */
+    protected ResultSetIterator createResultSetIterator(
+        Connection connection, Statement statement, ResultSet resultSet
+    ) throws SQLException, IllegalAccessException, InstantiationException {
+        
+        // #### WARNING - the Connection, statement and resultSet are not closed.
+        ResultSetDynaClass resultSetClass = new ResultSetDynaClass(resultSet);
+        return (ResultSetIterator) resultSetClass.iterator();
     }
 }
