@@ -19,7 +19,7 @@
     <column name="book_id" type="INTEGER" required="true" primaryKey="true" autoIncrement="true"/>
     <column name="isbn" type="VARCHAR" size="15" required="true"/>
     <column name="author_id" type="INTEGER" required="true"/>
-    <column name="title" type="VARCHAR" size="255" required="true"/>
+    <column name="title" type="VARCHAR" size="255" defaultValue="N/A" required="true"/>
 	    
     <foreign-key foreignTable="author">
     <reference local="author_id" foreign="author_id"/>

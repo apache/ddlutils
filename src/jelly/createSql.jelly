@@ -12,7 +12,7 @@
 <b:parse var="database" 
   uri="../test-input/datamodel.xml" 
   introspector="${introspector}"
-  rootClass="org.apache.commons.sql.datamodel.Database"/>
+  rootClass="org.apache.commons.sql.model.Database"/>
 
 Creating file: target/sql.xml
 

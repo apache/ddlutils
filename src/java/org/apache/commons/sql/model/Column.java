@@ -73,12 +73,14 @@ public class Column
     private boolean autoIncrement = false;
     private String type;
     private int size = 0;
+    private String defaultValue;
     
     public Column() 
     {
     }
 
-    public Column(String name, String type, int size, boolean required, boolean primaryKey, boolean autoIncrement) 
+    public Column(String name, String type, int size, boolean required, boolean 
+                  primaryKey, boolean autoIncrement, String defaultValue) 
     {
         this.name = name;
         this.type = type;
@@ -86,6 +88,7 @@ public class Column
         this.required = required;
         this.primaryKey = primaryKey;
         this.autoIncrement = autoIncrement;
+        this.defaultValue = defaultValue;
     }
 
     public String toString() 
@@ -153,6 +156,16 @@ public class Column
         this.size = size;
     }
     
+    public String getDefaultValue()
+    {
+        return defaultValue;
+    }
+    
+    public void setDefaultValue(String defaultValue)
+    {
+        this.defaultValue = defaultValue;
+    }
+
     // Helper methods
     //-------------------------------------------------------------------------                
     

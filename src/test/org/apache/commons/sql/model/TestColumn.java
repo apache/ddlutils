@@ -7,7 +7,7 @@ package org.apache.commons.sql.model;
  * version 1.1, a copy of which has been included with this distribution in
  * the LICENSE file.
  *
- * $Id: TestColumn.java,v 1.1 2002/09/20 21:28:00 thorhauer Exp $
+ * $Id: TestColumn.java,v 1.2 2002/09/23 16:57:26 thorhauer Exp $
  */
 
 import junit.framework.Test;
@@ -25,7 +25,7 @@ import org.apache.commons.sql.model.Column;
  * Test harness for Column Class
  *
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TestColumn
      extends TestCase
@@ -64,7 +64,7 @@ public class TestColumn
     public void testColumn()
         throws Exception
     {
-        Column column = new Column("Test1","INTEGER",255,true,true,true);
+        Column column = new Column("Test1","INTEGER",255,true,true,true,"");
         assertTrue("Column is null", column != null);
         assertTrue("Column toString does not end with [name=Test1;type=INTEGER]", 
                ((String)column.toString()).endsWith("[name=Test1;type=INTEGER]"));

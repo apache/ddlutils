@@ -101,6 +101,7 @@
         </xsd:simpleType>
       </xsd:attribute>
       <xsd:attribute name="size" use="optional" type="xsd:string"/>
+      <xsd:attribute name="defaultValue" use="optional" type="xsd:string"/>
       <xsd:attribute name="description" use="optional" type="xsd:string"/>
     </xsd:complexType>
   </xsd:element>
