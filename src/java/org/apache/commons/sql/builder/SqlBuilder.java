@@ -1080,13 +1080,13 @@ public abstract class SqlBuilder {
         // TODO: Find an algorithm that generates unique names
         int originalLength = name.length();
 
-        if ((desiredLength < 0) || (originalLength <= desiredLength))
+        if ((desiredLength <= 0) || (originalLength <= desiredLength))
         {
             return name;
         }
 
         int delta    = originalLength - desiredLength;
-        int startCut = originalLength / 2;
+        int startCut = desiredLength / 2;
 
         StringBuffer result = new StringBuffer();
 
