@@ -1478,6 +1478,7 @@ public abstract class SqlBuilder {
             printIndent();
             print("ADD CONSTRAINT ");
             print(getConstraintName(null, table, "PK", null));
+            print(" ");
             writePrimaryKeyStmt(table, primaryKeyColumns);
             printEndOfStatement();
         }
