@@ -118,10 +118,10 @@ public class SqlBuilder {
     private boolean foreignKeyConstraintsNamed;
 
     /** The current Table we're working on */
-    private Table table;
+    protected Table table;
     
     /** The current Column we're working on */
-    private Column column;
+    protected Column column;
         
     public SqlBuilder() {
     }
@@ -233,6 +233,11 @@ public class SqlBuilder {
         print(" ");
         print(getSqlType(column));
         print(" ");
+
+        if (column.getDefaultValue() != null)
+        {
+          print("DEFAULT '" + column.getDefaultValue() + "' ");
+        }
         if (column.isRequired()) {
             printNotNullable();
         }
