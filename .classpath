@@ -3,17 +3,15 @@
 	<classpathentry kind="src" path="src/java"/>
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry sourcepath="JRE_SRC" kind="var" path="JRE_LIB"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/junit-3.8.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-betwixt-20030211.133854.jar"/>
+	<classpathentry kind="lib" path="lib/commons-betwixt-0.5.jar"/>
 	<classpathentry kind="lib" path="lib/commons-digester-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/commons-jelly-20030902.160215.jar"/>
+	<classpathentry kind="lib" path="lib/commons-jelly-1.0-dev.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/commons-beanutils-1.6.jar"/>
-	<classpathentry kind="lib" path="lib/commons-collections-3.0-dev.jar"/>
-	<classpathentry kind="lib" path="lib/ant-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/xml-apis-1.0.b2.jar"/>
-	<classpathentry kind="lib" path="lib/xerces-2.4.0.jar"/>
-	<classpathentry kind="lib" path="lib/commons-cli-1.0-beta-2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-beanutils-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/ant-1.6.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

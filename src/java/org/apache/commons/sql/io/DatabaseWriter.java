@@ -46,8 +46,6 @@ public class DatabaseWriter extends BeanWriter {
         setXMLIntrospector( DatabaseReader.newXMLIntrospector() );
         enablePrettyPrint();
         
-        // TODO: Remove deprecated call once Betwixt is updated on ibiblio
-        setWriteIDs(false);
-        //getBindingConfiguration().setMapIDs(false);
+        getBindingConfiguration().setMapIDs(false);
     }
 }
