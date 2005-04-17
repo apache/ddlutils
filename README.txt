@@ -1,4 +1,4 @@
-Jakarta Commons SQL
+DB DDLUTILS
 ===================
 
 The primary build tool for this project is Maven. 
