@@ -1,4 +1,4 @@
-DB DDLUTILS
+DB DdlUtils
 ===================
 
 The primary build tool for this project is Maven. 
