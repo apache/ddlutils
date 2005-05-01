@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Copyright 2002-2004 The Apache Software Foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>Using DdlUtils' API</title> 
+  </header> 
+  <body> 
+    <section>
+      <title>The model</title>
+      <p>
+        At the core of DdlUtils lies the database model in package
+        <code>org.apache.ddlutils.model</code>. It consists of classes that
+        represent the database schema:
+      </p>
+      <p>
+        <img src="images/model.png" alt="UML diagram of the database model"/>
+      </p>
+      <p>
+        Using the appropriate methods on these classes, you can build the
+        database model manually, or you read it from XML or from the database
+        (see the next paragraphs for details). More into about the classes
+        can be found in the <a href="ext:ddlutils/javadoc/model">javadoc</a>.
+      </p>
+    </section>
+    <section>
+      <title>Reading from XML</title>
+      <p>
+        Most of the time you have a schema in an XML file, and you want to
+        read it into memory in order to do something with it. This is quite easily
+        accomplished with a few lines of code:
+      </p>
+      <source><![CDATA[
+import java.io.IOException;
+import org.apache.ddlutils.io.DatabaseReader;
+import org.apache.ddlutils.model.Database;
+import org.xml.SAXException;
+
+...
+
+public Database readDatabaseFromXML(String fileName) throws IOException,
+                                                            SAXException
+{
+    DatabaseReader reader = new DatabaseReader();
+
+    return (Database)reader.parse(fileName);
+}]]></source>
+    </section>
+    <section>
+      <title>Writing to XML</title>
+      <p>
+        Writing a model to XML is just as easy as reading from XML:
+      </p>
+      <source><![CDATA[
+import java.beans.IntrospectionException;
+import java.io.IOException;
+import org.apache.ddlutils.io.DatabaseWriter;
+import org.apache.ddlutils.model.Database;
+import org.xml.SAXException;
+
+...
+
+public void writeDatabaseToXML(Database db, String fileName) throws IOException,
+                                                                    SAXException,
+                                                                    IntrospectionException
+{
+    DatabaseWriter writer = new DatabaseWriter(new FileWriter(fileName));
+
+    writer.write(db);
+}]]></source>
+    </section>
+    <section>
+      <title>Reading from a database</title>
+      <p>
+        Reading the database model from a live database is only slightly more involved
+        because we first need to establish a connection to it:
+      </p>
+      <source><![CDATA[
+import java.sql.SQLException;
+import org.apache.ddlutils.io.JdbcModelReader;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.util.DataSourceWrapper;
+
+public Database readDatabase(String driverClassName
+                             String databseUrl,
+                             String username,
+                             String password) throws ClassNotFoundException,
+                                                     SQLException
+                             
+{
+    DataSourceWrapper dataSource = new DataSourceWrapper(driverClassName, databseUrl, username, password);
+    JdbcModelReader   reader     = new JdbcModelReader(dataSource.getConnection());
+
+    // set catalog and schema at the reader if the database requires it
+
+    return reader.getDatabase();
+}
+
+]]></source>
+    </section>
+    <section>
+      <title>Changing a database</title>
+      <source><![CDATA[]]></source>
+    </section>
+    <section>
+      <title>Inserting data into a database</title>
+      <source><![CDATA[]]></source>
+    </section>
+  </body>
+</document>

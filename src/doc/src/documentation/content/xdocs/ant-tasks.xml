@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Copyright 2002-2004 The Apache Software Foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>Using DdlUtils' Ant tasks</title> 
+  </header> 
+  <body> 
+    <section>
+      <title>DdlUtils' Ant tasks</title>
+      <p>
+        DdlUtils comes with two <a href="ext:ant">Ant</a> tasks that allow you to create the
+        database structure, and to dump the database structure to XML, both from within your
+        build file.
+      </p>
+      <p>
+        Lets see examples for how to use them:
+      </p>
+      <source><![CDATA[
+<path id="runtime.classpath">
+    <fileset dir="lib">
+        <include name="**/*.jar"/>
+        <include name="**/*.zip"/>
+    </fileset>
+</path>
+
+<taskdef name="ddl"
+         classname="org.apache.ddlutils.task.DDLTask">
+  <classpath refid="runtime.classpath"/>
+</taskdef>
+
+<target name="database-setup" description="Creates database structure">
+  <ddl xmlFile="schema/schema.xml" 
+       targetDatabase="mysql"
+       output="target/schema.sql"
+       dbUrl="jdbc:mysql://localhost:3306/test"
+       dbUser="user"
+       dbPassword="pass"
+       dbDriver="com.mysql.jdbc.Driver"
+       alterDb="true"
+       executeSql="true"
+       modifyColumns="true"
+       doDrops="true"
+  />
+</target>]]></source>
+      <p>
+        This snippet essentially uses the <code>DDLTask</code> to create the SQL necessary
+        to alter (attribute <code>alterDb</code>) the database schema of the existing MySQL
+        database at <code>localhost:3306/test</code> so that it matches the structure defined
+        in the file <code>schema/schema.xml</code>. This SQL is written to
+        <code>target/schema.sql</code> and then executed against the database (because of
+        attribute <code>executeSql</code>).
+      </p>
+      <p>
+        Required for this to work is that both DdlUtils and the JDBC driver are available
+        in the path specified by <code>runtime.classpath</code>. In the above snippet, this path
+        contains all JARs and ZIPs in sub-directory <code>lib</code>.
+      </p>
+      <p>
+        The opposite direction is achieved via the <code>JdbcToSchemaTask</code> task:
+      </p>
+      <source><![CDATA[
+<path id="runtime.classpath">
+    <fileset dir="lib">
+        <include name="**/*.jar"/>
+        <include name="**/*.zip"/>
+    </fileset>
+</path>
+
+<taskdef name="jdbc2Schema"
+         classname="org.apache.ddlutils.task.JdbcToSchemaTask">
+  <classpath refid="runtime.classpath"/>
+</taskdef>
+
+<target name="database-dump" description="Dumps the database structure">
+  <jdbc2Schema outputFile="schema/schema-dump.xml" 
+               dbUrl="jdbc:mysql://localhost:3306/test"
+               dbUser="user"
+               dbPassword="pass"
+               dbDriver="com.mysql.jdbc.Driver"
+  />
+</target>]]></source>
+      <p>
+        Here, the database schema is retrieved via the specified JDBC driver and written
+        to the file <code>schema/schema-dump.xml</code>.
+      </p>
+    </section>
+    <section>
+      <title>DDLTask reference</title>
+      <p>
+        Class name: <code>org.apache.ddlutils.task.DDLTask</code>
+      </p>
+      <table>
+        <tr>
+          <th>Attribute</th>
+          <th>Required ?</th>
+          <th>Possible values</th>
+          <th>Default value</th>
+          <th>Meaning</th>
+        </tr>
+        <tr>
+          <td>alterDb</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>false</td>
+          <td>Whether the generated sql shall alter the database rather than replacing it
+              completely (which would result in the removal of all data already in the
+              tables). Note that this requires a database connection.</td>
+        </tr>
+        <tr>
+          <td>dbCatalog</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The database catalog to use. This value depends on the database.</td>
+        </tr>
+        <tr>
+          <td>dbDriver</td>
+          <td>yes if <code>executeSql = true</code> or <code>alterDb = true</code></td>
+          <td></td>
+          <td></td>
+          <td>The fully qualified class name of the JDBC driver.</td>
+        </tr>
+        <tr>
+          <td>dbPassword</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The password to use for the JDBC connection.</td>
+        </tr>
+        <tr>
+          <td>dbSchema</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The schema in the database to use. This value depends on the database.</td>
+        </tr>
+        <tr>
+          <td>dbUrl</td>
+          <td>yes if <code>executeSql = true</code> or <code>alterDb = true</code></td>
+          <td></td>
+          <td></td>
+          <td>The JDBC connection url. This value depends on the used JDBC driver.</td>
+        </tr>
+        <tr>
+          <td>dbUser</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The user name to use for the JDBC connection.</td>
+        </tr>
+        <tr>
+          <td>doDrops</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>false</td>
+          <td>Whether drops shall be performed when modifying an existing database
+              (<code>alterDb = true</code>).</td>
+        </tr>
+        <tr>
+          <td>executeSql</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>false</td>
+          <td>Whether to execute the generated sql (which requires a database connection).</td>
+        </tr>
+        <tr>
+          <td>modifyColumns</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>false</td>
+          <td>Whether columns can be modified when chaning an existing database
+              (<code>alterDb = true</code>).</td>
+        </tr>
+        <tr>
+          <td>output</td>
+          <td>yes</td>
+          <td></td>
+          <td></td>
+          <td>The file to write the generated SQL to.</td>
+        </tr>
+        <tr>
+          <td>targetDatabase</td>
+          <td>yes</td>
+          <td>axion, cloudscape, db2, firebird, hsqldb, maxdb, mckoi, mssql, mysql, oracle, postgresql, sapdb, sybase</td>
+          <td></td>
+          <td>For which database to generate.</td>
+        </tr>
+        <tr>
+          <td>xmlFile</td>
+          <td>yes</td>
+          <td></td>
+          <td></td>
+          <td>The schema file containing the database definition.</td>
+        </tr>
+      </table>
+    </section>
+    <section>
+      <title>JdbcToSchemaTask reference</title>
+      <p>
+        Class name: <code>org.apache.ddlutils.task.JdbcToSchemaTask</code>
+      </p>
+      <table>
+        <tr>
+          <th>Attribute</th>
+          <th>Required ?</th>
+          <th>Possible values</th>
+          <th>Default value</th>
+          <th>Meaning</th>
+        </tr>
+        <tr>
+          <td>dbCatalog</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The database catalog to use. This value depends on the database.</td>
+        </tr>
+        <tr>
+          <td>dbDriver</td>
+          <td>yes</td>
+          <td></td>
+          <td></td>
+          <td>The fully qualified class name of the JDBC driver.</td>
+        </tr>
+        <tr>
+          <td>dbPassword</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The password to use for the JDBC connection.</td>
+        </tr>
+        <tr>
+          <td>dbSchema</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The schema in the database to use. This value depends on the database.</td>
+        </tr>
+        <tr>
+          <td>dbUrl</td>
+          <td>yes</td>
+          <td></td>
+          <td></td>
+          <td>The JDBC connection url. This value depends on the used JDBC driver.</td>
+        </tr>
+        <tr>
+          <td>dbUser</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>The user name to use for the JDBC connection.</td>
+        </tr>
+        <tr>
+          <td>outputFile</td>
+          <td>yes</td>
+          <td></td>
+          <td></td>
+          <td>The file to write the schema to.</td>
+        </tr>
+      </table>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Copyright 2002-2004 The Apache Software Foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>Where to download DdlUtils</title> 
+  </header> 
+  <body> 
+    <section>
+      <title>Where to download DdlUtils</title>
+    </section>
+    <p>
+      DdlUtils has not yet released any binary or source releases. Therefore please get it
+      from the repository for the time being. Instructions on how to do that can be found
+      <a href="site:download/svn-info">here</a>.
+    </p>
+  </body>
+</document>

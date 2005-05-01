@@ -1,0 +1,18 @@
+List of things to be done for the next version of DdlUtils:
+
+* Fix Javadoc errors
+* Migrate doc to Forrest
+* Enhance doc:
+    - The Ant task
+    - How to use DdlUtils in code
+* Update commons-betwixt to 0.61-dev and replace .betwixt files with a multi-mapping
+* Add unit tests for:
+    - Model reading
+    - SQL generation
+    - Roundtrip (database specific)
+* Replace System.out/System.err writes with logging statements
+* Extract interfaces from the model classes and inroduce a factory for creating the concrete model objects
+* Make associations in the model (foreignkey, indices) stonger-typed by referencing the columns instead
+  of using only their names
+* Add functionality and ant tasks to insert/dump data into/from the database
+* Add integration with DbUnit to allow DbUnit to use the schema and data files

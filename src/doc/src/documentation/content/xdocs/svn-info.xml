@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Copyright 2002-2004 The Apache Software Foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>DdlUtils' source repository</title> 
+  </header> 
+  <body> 
+    <section>
+      <title>Necessary software</title>
+      <p>
+        DdlUtils uses <a href="ext:tigris/svn">SVN</a> for its source repository. To access it
+        you need a SVN client. Unix and Linux systems usually have the <code>svn</code>
+        tool built in. For Windows you'll need an additional tool like
+        <a href="ext:tigris/tortoisesvn">TortoiseSVN</a>. Also, most modern IDEs have SVN support
+        built in or there are plugins that provide this ability.
+      </p>
+    </section>
+    <section>
+      <title>Unix-based and Linux systems</title>
+      <p>
+        The <code>svn</code> command is usually readily available in these systems. Here all
+        you need to do is to change to a directory where you want to put DdlUtils into, and
+        then issue this command:
+      </p>
+      <source><![CDATA[
+svn co http://svn.apache.org/repos/asf/db/ddlutils/trunk ddlutils
+      ]]></source>
+      <p>
+        This will checkout the current development version of DdlUtils in read-only mode.
+        This means you can play around with the source without fear for breaking anything
+        as the changes cannot be checked back in. 
+      </p>
+      <note>
+        If you're a committer, you'll have to replace the <code>http</code> with
+        <code>https</code>.
+      </note>
+    </section>
+    <section>
+      <title>Windows systems</title>
+      <p>
+        For Windows systems, one of the available SVN clients is
+        <a href="ext:tigris/tortoisesvn">TortoiseSVN</a> which is an Explorer extension.
+        After you've installed it and rebooted you computer (which is necessary
+        because of it nature as an Explorer extension), you'll have additional
+        options in the context menu in Explorer. Change to a directory where you
+        want to checkout DdlUtils, and choose the "SVN Checkout ..." option
+        from the context menu. You'll get this dialog:
+      </p>
+      <p>
+        <img src="images/tortoisesvn-checkout-dlg.png" alt="TortoiseSVN checkout dialog"/>
+      </p>
+      <p>
+        After you clicked OK, TortoiseSVN will checkout to the designated place. Once it
+        has finished you can start using DdlUtils:
+      </p>
+      <p>
+        <img src="images/tortoisesvn-checkout-finished.png" alt="TortoiseSVN checkout finished"/>
+      </p>
+    </section>
+    <section>
+      <title>IDEs</title>
+      <p>
+        For Java IDEs, you usually have to install a plugin in order to get SVN support.
+      </p>
+      <table>
+        <tr>
+          <th>IDE</th>
+          <th>Plugin/Extension</th>
+        </tr>
+        <tr>
+          <td><a href="ext:eclipse">Eclipse</a></td>
+          <td><a href="ext:tigris/subclipse">Subclipse</a></td>
+        </tr>
+        <tr>
+          <td><a href="ext:idea">JetBrains IDEA</a></td>
+          <td><a href="ext:tigris/svn-up">svn-up</a></td>
+        </tr>
+        <tr>
+          <td><a href="ext:netbeans">NetBeans</a></td>
+          <td><a href="ext:netbeans/subversion-profile">Subversion profile</a></td>
+        </tr>
+      </table>
+      <p>
+        Please refer to the documentation of the IDE and the plugin/extension for how to install
+        and use the plugin/extension. The location of the DdlUtils repository is
+      </p>
+      <source><![CDATA[
+http://svn.apache.org/repos/asf/db/ddlutils/trunk
+      ]]></source>
+      <p>
+        which you can access anonymously (without user name and password).
+      </p>
+    </section>
+  </body>
+</document>

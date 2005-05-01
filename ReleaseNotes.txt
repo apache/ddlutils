@@ -1,0 +1,5 @@
+Changes since the migration from commons-sql to DdlUtils:
+
+* Replaced 'commons-sql' with 'DdlUtils' in the doc and the build file
+* Package names have been changed from org.apache.commons.sql to org.apache.ddlutils
+* New mailing lists ddlutils-user@db.apache.org and ddlutils-dev@db.apache.org
