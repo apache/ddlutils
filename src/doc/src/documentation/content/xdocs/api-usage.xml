@@ -45,15 +45,17 @@
         accomplished with a few lines of code:
       </p>
       <source><![CDATA[
+import java.beans.IntrospectionException;
 import java.io.IOException;
 import org.apache.ddlutils.io.DatabaseReader;
 import org.apache.ddlutils.model.Database;
-import org.xml.SAXException;
+import org.xml.sax.SAXException;
 
 ...
 
 public Database readDatabaseFromXML(String fileName) throws IOException,
-                                                            SAXException
+                                                            SAXException,
+                                                            IntrospectionException
 {
     DatabaseReader reader = new DatabaseReader();
 
@@ -67,10 +69,11 @@ public Database readDatabaseFromXML(String fileName) throws IOException,
       </p>
       <source><![CDATA[
 import java.beans.IntrospectionException;
+import java.io.FileWriter;
 import java.io.IOException;
 import org.apache.ddlutils.io.DatabaseWriter;
 import org.apache.ddlutils.model.Database;
-import org.xml.SAXException;
+import org.xml.sax.SAXException;
 
 ...
 
@@ -95,30 +98,183 @@ import org.apache.ddlutils.io.JdbcModelReader;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.util.DataSourceWrapper;
 
-public Database readDatabase(String driverClassName
-                             String databseUrl,
+public Database readDatabase(String driverClassName,
+                             String databaseUrl,
                              String username,
                              String password) throws ClassNotFoundException,
                                                      SQLException
-                             
 {
-    DataSourceWrapper dataSource = new DataSourceWrapper(driverClassName, databseUrl, username, password);
+    // you could also use a datasource provided by your jdbc driver or from commons-dbcp
+
+    DataSourceWrapper dataSource = new DataSourceWrapper(driverClassName, databaseUrl, username, password);
     JdbcModelReader   reader     = new JdbcModelReader(dataSource.getConnection());
 
     // set catalog and schema at the reader if the database requires it
 
     return reader.getDatabase();
-}
-
-]]></source>
+}]]></source>
     </section>
     <section>
       <title>Changing a database</title>
-      <source><![CDATA[]]></source>
+      <p>
+        Changing a database essentially means one of two things: resetting a database to the
+        schema defined by the model, or altering the database to have the same model. The key
+        difference is that with the latter, data in the database is retained as much as
+        possible. Only major changes to the table structure or type-incompatible alterations of
+        columns will result in loss of data, most changes will simply retain the data.
+      </p>
+      <note>
+        Whether a change of e.g. a column type affects the data contained in the table, depends
+        on the database that you use. Most databases are able to convert between different
+        datatypes and will apply these conversions when the column type is changed.
+      </note>
+      <p>
+        Both types of modification differ only in how the SQL is created, the general procedure
+        is the same: create the sql and execute it:
+      </p>
+      <source><![CDATA[
+import java.io.IOException;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.apache.ddlutils.builder.SqlBuilder;
+import org.apache.ddlutils.builder.SqlBuilderFactory;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.util.DDLExecutor;
+
+...
+
+public void changeDatabase(DataSource dataSource,
+                           String     databaseName,
+                           Database   targetModel,
+                           boolean    alterDb) throws IllegalAccessException,
+                                                      InstantiationException,
+                                                      IOException,
+                                                      SQLException
+{
+    SqlBuilder   builder    = SqlBuilderFactory.newSqlBuilder(databaseName);
+    StringWriter writer     = new StringWriter();
+    Connection   connection = null;
+
+    builder.setWriter(writer);
+    try
+    {
+        connection = dataSource.getConnection();
+        if (alterDb)
+        {
+            builder.alterDatabase(targetModel, connection, true, true);
+        }
+        else
+        {
+            builder.createDatabase(targetModel);
+        }
+        
+        String sql = writer.toString();
+
+        // you could dump the SQL to a file here
+
+        DDLExecutor executor = new DDLExecutor(dataSource);
+
+        executor.evaluateBatch(sql);
+    }
+    finally
+    {
+        if (connection != null)
+        {
+            connection.close();
+        }
+    }
+}]]></source>
     </section>
     <section>
       <title>Inserting data into a database</title>
-      <source><![CDATA[]]></source>
+      <p>
+        DdlUtils provides a simple way to insert data into the database. For this it uses
+        <a href="ext:beanutils/dynabean">DynaBeans</a> which are essentially dynamically
+        created beans with variable properties. For each table defined by the database
+        model, a so-called dyna class is created that represents the table with its
+        columns. Of this dyna class, instances - the dyna beans - are then created
+        which can be inserted by DdlUtils into the database:
+      </p>
+      <source><![CDATA[
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.builder.SqlBuilder;
+import org.apache.ddlutils.builder.SqlBuilderFactory;
+import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.model.Database;
+
+...
+
+public void insertData(DataSource dataSource,
+                       String     databaseName,
+                       Database   database) throws IllegalAccessException,
+                                                   InstantiationException,
+                                                   SQLException
+{
+    SqlBuilder builder = SqlBuilderFactory.newSqlBuilder(databaseName);
+    DynaSql    dynaSql = new DynaSql(builder, dataSource, database);
+
+    // "author" is a table of the model
+    DynaBean author = dynaSql.newInstance("author");
+
+    // "name" and "whatever" are columns of table "author"
+    author.set("name",     "James");
+    author.set("whatever", new Integer(1234));
+
+    dynaSql.insert(author);
+}]]></source>
+    </section>
+    <section>
+      <title>Getting data from a database</title>
+      <p>
+        In the same way as inserting data into a database, DdlUtils uses dyna beans
+        for retrieving data from the database. You issue a SQL select against the
+        database and get dyna beans back. This means that the table that the select
+        goes against, has to be part of the database model used by DdlUtils.
+      </p>
+      <p>
+        In the following sample, the titles of all books in the database are printed
+        to stdout:
+      </p>
+      <source><![CDATA[
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.sql.DataSource;
+
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.builder.SqlBuilder;
+import org.apache.ddlutils.builder.SqlBuilderFactory;
+import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.model.Database;
+
+...
+
+public void dumpBooks(DataSource dataSource,
+                      String   databaseName,
+                      Database database) throws IllegalAccessException,
+                                                InstantiationException,
+                                                SQLException
+{
+    SqlBuilder builder = SqlBuilderFactory.newSqlBuilder(databaseName);
+    DynaSql    dynaSql = new DynaSql(builder, dataSource, database);
+    ArrayList  params  = new ArrayList();
+
+    params.add("Some title");
+
+    Iterator iter = dynaSql.query("select * from book where title = ?", params);
+
+    while (iter.hasNext())
+    {
+        DynaBean book = (DynaBean)iter.next();
+
+        System.out.println(book.get("title"));
+    }
+}]]></source>
     </section>
   </body>
 </document>

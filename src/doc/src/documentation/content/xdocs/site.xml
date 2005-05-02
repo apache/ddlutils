@@ -79,6 +79,9 @@ See http://forrest.apache.org/docs/linking.html for more info
     </ddlutils>
 
     <ant href="http://ant.apache.org"/>
+    <beanutils href="http://jakarta.apache.org/commons/beanutils">
+      <dynabean href="apidocs/index.html?org/apache/commons/beanutils/DynaBean.html"/>
+    </beanutils>
     <eclipse href="http://www.eclipse.org"/>
     <idea href="http://www.jetbrains.com/idea"/>
     <netbeans href="http://www.netbeans.org">
