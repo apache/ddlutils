@@ -39,7 +39,6 @@ public class MSSqlBuilder extends SqlBuilder
         setForeignKeysEmbedded(false);
         //setCommentPrefix("#");
         addNativeTypeMapping(Types.BLOB,          "IMAGE");
-        addNativeTypeMapping(Types.BOOLEAN,       "BIT");
         addNativeTypeMapping(Types.CHAR,          "NCHAR");
         addNativeTypeMapping(Types.CLOB,          "NTEXT");
         addNativeTypeMapping(Types.DATE,          "DATETIME");
@@ -50,6 +49,9 @@ public class MSSqlBuilder extends SqlBuilder
         addNativeTypeMapping(Types.TIME,          "DATETIME");
         addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
         addNativeTypeMapping(Types.VARCHAR,       "VARCHAR");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "BIT");
     }
 
     /* (non-Javadoc)

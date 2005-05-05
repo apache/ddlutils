@@ -41,12 +41,14 @@ public class SybaseBuilder extends SqlBuilder
         setCommentPrefix("/*");
         setCommentSuffix("*/");
         addNativeTypeMapping(Types.BLOB,          "IMAGE");
-        addNativeTypeMapping(Types.BOOLEAN,       "BIT");
         addNativeTypeMapping(Types.CLOB,          "TEXT");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
         addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
         addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "BIT");
     }
 
     /* (non-Javadoc)

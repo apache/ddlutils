@@ -40,7 +40,6 @@ public class FirebirdBuilder extends SqlBuilder
         addNativeTypeMapping(Types.BIGINT,        "DECIMAL(18,0)");
         addNativeTypeMapping(Types.BINARY,        "BLOB");
         addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
-        addNativeTypeMapping(Types.BOOLEAN,       "DECIMAL(1,0)");
         addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
@@ -48,6 +47,9 @@ public class FirebirdBuilder extends SqlBuilder
         addNativeTypeMapping(Types.REAL,          "FLOAT");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         addNativeTypeMapping(Types.VARBINARY,     "BLOB");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
     }
 
     /* (non-Javadoc)

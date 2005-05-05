@@ -41,6 +41,9 @@ public class Db2Builder extends SqlBuilder
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
     }
 
     /* (non-Javadoc)

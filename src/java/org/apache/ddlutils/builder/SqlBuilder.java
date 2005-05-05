@@ -18,6 +18,7 @@ package org.apache.ddlutils.builder;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -109,6 +110,9 @@ public abstract class SqlBuilder {
     /** The number formatter */
     private NumberFormat _valueNumberFormat;
     
+    /** Whether comments are supported */
+    private boolean _commentsSupported = true;
+
     /** The string that starts a comment */
     private String _commentPrefix = "--";
 
@@ -131,6 +135,35 @@ public abstract class SqlBuilder {
     protected void addNativeTypeMapping(int jdbcTypeCode, String nativeType)
     {
         _specialTypes.put(new Integer(jdbcTypeCode), nativeType);
+    }
+
+    /**
+     * Adds a mapping from jdbc type to database-native type. Note that this
+     * method accesses the named constant in {@link java.sql.Types} via reflection
+     * and is thus safe to use under JDK 1.2/1.3 even with constants defined
+     * only in later Java versions - for these, the method simply will not add
+     * a mapping.
+     * 
+     * @param jdbcTypeName The jdbc type name, one of the constants defined in
+     *                     {@link java.sql.Types}
+     * @param nativeType   The native type
+     */
+    protected void addNativeTypeMapping(String jdbcTypeName, String nativeType)
+    {
+        try
+        {
+            Field constant = Types.class.getField(jdbcTypeName);
+
+            if (constant != null)
+            {
+                addNativeTypeMapping(constant.getInt(null), nativeType);
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore -> won't be defined
+            // TODO: add a logging statement
+        }
     }
 
     /**
@@ -284,7 +317,7 @@ public abstract class SqlBuilder {
     }
 
     /**
-     * Determinws whether an ALTER TABLE statement shall be used for dropping indices
+     * Determines whether an ALTER TABLE statement shall be used for dropping indices
      * or constraints.  The default is false.
      * 
      * @return <code>true</code> if ALTER TABLE is required
@@ -419,6 +452,26 @@ public abstract class SqlBuilder {
     public void setValueQuoteChar(String valueQuoteChar)
     {
         _valueQuoteChar = valueQuoteChar;
+    }
+
+    /**
+     * Determines whether the database supports comments.
+     *
+     * @return <code>true</code> if comments are supported
+     */
+    public boolean getCommentsSupported()
+    {
+        return _commentsSupported;
+    }
+
+    /**
+     * Specifies whether comments are supported by the database.
+     * 
+     * @param commentsSupported <code>true</code> if comments are supported
+     */
+    public void setCommentsSupported(boolean commentsSupported)
+    {
+        _commentsSupported = commentsSupported;
     }
 
     /**
@@ -1243,7 +1296,7 @@ public abstract class SqlBuilder {
 
         if (column.getSize() != null)
         {
-            sqlType.append(" (");
+            sqlType.append("(");
             sqlType.append(column.getSize());
             if (TypeMap.typeHasScaleAndPrecision(column.getType()))
             {
@@ -1761,14 +1814,17 @@ public abstract class SqlBuilder {
      * @param text The comment text
      */
     protected void printComment(String text) throws IOException
-    { 
-        print(getCommentPrefix());
-        // Some databases insist on a space after the prefix
-        print(" ");
-        print(text);
-        print(" ");
-        print(getCommentSuffix());
-        println();
+    {
+        if (getCommentsSupported())
+        {
+            print(getCommentPrefix());
+            // Some databases insist on a space after the prefix
+            print(" ");
+            print(text);
+            print(" ");
+            print(getCommentSuffix());
+            println();
+        }
     }
     
     /** 

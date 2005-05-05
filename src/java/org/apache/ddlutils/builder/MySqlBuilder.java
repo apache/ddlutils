@@ -41,12 +41,14 @@ public class MySqlBuilder extends SqlBuilder
         setCommentPrefix("#");
         addNativeTypeMapping(Types.BINARY,        "BLOB");
         addNativeTypeMapping(Types.BLOB,          "LONGBLOB");
-        addNativeTypeMapping(Types.BOOLEAN,       "BIT");
         addNativeTypeMapping(Types.CLOB,          "LONGTEXT");
         addNativeTypeMapping(Types.LONGVARBINARY, "LONGBLOB");
         addNativeTypeMapping(Types.LONGVARCHAR,   "LONGTEXT");
         addNativeTypeMapping(Types.REAL,          "FLOAT");
         addNativeTypeMapping(Types.VARBINARY,     "MEDIUMBLOB");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "BIT");
     }
 
     /* (non-Javadoc)

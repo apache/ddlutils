@@ -36,6 +36,9 @@ public class MckoiSqlBuilder extends SqlBuilder
         setForeignKeysEmbedded(false);
         setEmbeddedForeignKeysNamed(true);
         addNativeTypeMapping(Types.BIT,  "TINYINT");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "TINYINT");
     }
 
     /* (non-Javadoc)

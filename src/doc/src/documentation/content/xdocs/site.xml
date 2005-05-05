@@ -78,12 +78,22 @@ See http://forrest.apache.org/docs/linking.html for more info
       </dev-list>
     </ddlutils>
 
-    <ant href="http://ant.apache.org"/>
-    <beanutils href="http://jakarta.apache.org/commons/beanutils">
+    <ant href="http://ant.apache.org/"/>
+    <axion href="http://axion.tigris.org/">
+      <datatypes href="datatypes.html"/>
+    </axion>
+    <beanutils href="http://jakarta.apache.org/commons/beanutils/">
       <dynabean href="apidocs/index.html?org/apache/commons/beanutils/DynaBean.html"/>
     </beanutils>
     <eclipse href="http://www.eclipse.org"/>
     <idea href="http://www.jetbrains.com/idea"/>
+    <java href="http://java.sun.com/">
+      <jdbc>
+        <guide href="http://java.sun.com/j2se/1.4.2/docs/guide/jdbc/getstart/GettingStartedTOC.fm.html">
+          <types href="http://java.sun.com/j2se/1.4.2/docs/guide/jdbc/getstart/mapping.html#996857">
+        </guide>
+      </jdbc>
+    </java>
     <netbeans href="http://www.netbeans.org">
       <subversion-profile href="http://vcsgeneric.netbeans.org/profiles/index.html"/>
     </netbeans>

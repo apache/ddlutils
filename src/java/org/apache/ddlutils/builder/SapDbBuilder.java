@@ -48,6 +48,9 @@ public class SapDbBuilder extends SqlBuilder
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG BYTE");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         addNativeTypeMapping(Types.VARBINARY,     "LONG BYTE");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "FIXED(1,0)");
     }
 
     /* (non-Javadoc)

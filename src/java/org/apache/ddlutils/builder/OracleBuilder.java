@@ -41,7 +41,6 @@ public class OracleBuilder extends SqlBuilder
         addNativeTypeMapping(Types.BIGINT,        "NUMBER(38,0)");
         addNativeTypeMapping(Types.BINARY,        "BLOB");
         addNativeTypeMapping(Types.BIT,           "NUMBER(1,0)");
-        addNativeTypeMapping(Types.BOOLEAN,       "NUMBER(1,0)");
         addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
         addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
         addNativeTypeMapping(Types.INTEGER,       "NUMBER(20)");
@@ -55,6 +54,9 @@ public class OracleBuilder extends SqlBuilder
         addNativeTypeMapping(Types.TINYINT,       "NUMBER(3,0)");
         addNativeTypeMapping(Types.VARBINARY,     "BLOB");
         addNativeTypeMapping(Types.VARCHAR,       "VARCHAR2");
+
+        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN", "NUMBER(1,0)");
     }
 
     /* (non-Javadoc)

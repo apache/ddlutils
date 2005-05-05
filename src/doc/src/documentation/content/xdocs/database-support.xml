@@ -17,11 +17,258 @@
 <!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
 <document> 
   <header> 
-    <title>DdlUtils' source repository</title> 
+    <title>Database support in DdlUtils</title> 
   </header> 
   <body> 
+    <p>
+      This document gives a list of supported databases including some details on the level
+      of support, e.g. mapping between JDBC types and SQL types, supported options for
+      the individual databases, etc.
+    </p>
+    <p>
+      General information about the JDBC datatypes can be found in
+      <a href="ext:java/jdbc/guide/types">Chapter 9: Mapping SQL and Java Types</a> of the
+      <a href="ext:java/jdbc/guide">JDBC Technology Guide: Getting Started</a>. Please also note
+      that some JDBC types are only available in recent versions of the Java platform, e.g.
+      the <code>BOOLEAN</code> type is only available since J2SE version 1.4. These will be
+      usable with DdlUtils only if you're running the respective Java version or a newer one.
+    </p>
+    <note>
+      This is currently somewhat incomplete, especially in regard to which versions of the
+      individual databases are supported resp. tested.
+    </note>
     <section>
-      <title>Retrieving DdlUtils from the source repository</title>
+      <title>Axion</title>
+      <p>
+        Info about the datatypes supported by Axion can be found <a href="ext:axion/datatypes">here</a>.
+      </p>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>unlimited</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>Single line starting with <code>--</code></td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td></td>
+          <td>Not supported by Axion</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td></td>
+          <td>Not supported by Axion</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td></td>
+          <td>Not supported by Axion</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td></td>
+          <td>Not supported by Axion</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td></td>
+          <td>Not supported by Axion</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td></td>
+          <td>Not supported by Axion</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td></td>
+          <td>Not supported by Axion</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </section>
+    <section>
+      <title>Cloudscape/Derby</title>
+    </section>
+    <section>
+      <title>DB 2</title>
+    </section>
+    <section>
+      <title>Firebird</title>
+    </section>
+    <section>
+      <title>HsqlDB</title>
+    </section>
+    <section>
+      <title>MaxDB</title>
+    </section>
+    <section>
+      <title>Mckoi</title>
+    </section>
+    <section>
+      <title>SQL Server</title>
+    </section>
+    <section>
+      <title>MySQL</title>
+    </section>
+    <section>
+      <title>Oracle</title>
+    </section>
+    <section>
+      <title>PostgreSQL</title>
+    </section>
+    <section>
+      <title>SapDB</title>
+    </section>
+    <section>
+      <title>Sybase</title>
     </section>
   </body>
 </document>

@@ -28,12 +28,26 @@ import org.apache.ddlutils.model.Table;
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision$
  */
-public class AxionBuilder extends SqlBuilder {
-    
-    public AxionBuilder() {
-        setForeignKeysEmbedded(true);
-        addNativeTypeMapping(Types.DECIMAL, "FLOAT");
-    }    
+public class AxionBuilder extends SqlBuilder
+{
+   
+    public AxionBuilder()
+    {
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
+        setForeignKeysEmbedded(false);
+        setIndicesEmbedded(true);
+        addNativeTypeMapping(Types.BINARY,        "VARBINARY");
+        addNativeTypeMapping(Types.BIT,           "BOOLEAN");
+        addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
+        addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
+        addNativeTypeMapping(Types.LONGVARBINARY, "VARBINARY");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "VARCHAR");
+        addNativeTypeMapping(Types.NUMERIC,       "NUMBER");
+        addNativeTypeMapping(Types.REAL,          "FLOAT");
+        addNativeTypeMapping(Types.SMALLINT,      "SHORT");
+        addNativeTypeMapping(Types.TINYINT,       "SHORT");
+    }
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
@@ -43,51 +57,18 @@ public class AxionBuilder extends SqlBuilder {
         return "Axion";
     }
 
-    protected String getSqlType(Column column) {
-        // Axion doesn't support text width specification 
-        return getNativeType(column);
-    }
-    
-    protected void writeEmbeddedPrimaryKeysStmt(Table table) throws IOException {
-        // disable primary key constraints
-    }
-    
-    protected void writeEmbeddedForeignKeysStmt(Table table) throws IOException {
-        // disable foreign key constraints
-    }
-    
-    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException {
-        //print( "IDENTITY" );
-    }
-
-    protected void writeColumnNotNullableStmt() throws IOException {
-        //print("NOT NULL");
-    }
-
-    protected void writeColumnNullableStmt() throws IOException {
-        //print("NULL");
-    }
-
-    /** 
-     * Outputs the DDL to add a column to a table. Axion
-     * does not support default values so we are removing
-     * default from the Axion column builder.
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(Table)
      */
-    public void writeColumn(Table table, Column column) throws IOException {
-        print(getColumnName(column));
-        print(" ");
-        print(getSqlType(column));
-        print(" ");
-
-        if (column.isRequired()) {
-            writeColumnNotNullableStmt();
-        }
-        else {
-            writeColumnNullableStmt();
-        }
-        print(" ");
-        if (column.isAutoIncrement()) {
-            writeColumnAutoIncrementStmt(table, column);
-        }
+    public void dropTable(Table table) throws IOException
+    { 
+        print("DROP TABLE IF EXISTS ");
+        print(getTableName(table));
+        printEndOfStatement();
+    }
+    
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    {
+        print("IDENTITY");
     }
 }

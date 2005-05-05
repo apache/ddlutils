@@ -6,9 +6,14 @@ List of things to be done for the next version of DdlUtils:
     - The Ant task
     - How to use DdlUtils in code
 * Update commons-betwixt to 0.61-dev and replace .betwixt files with a multi-mapping
+* Remove DDL subpackage and jelly-dependency which is not used anymore anyway
+* Separate generation of generation of alter statements for an existing databases from the reading
+  of the model from the existing database to allow for alter statement generation with two
+  database models without having to connect to the database and thus allow for testing the
+  alter statement generation without an actual live database
 * Add unit tests for:
     - Model reading
-    - SQL generation
+    - SQL generation (including alteration)
     - Roundtrip (database specific)
 * Replace System.out/System.err writes with logging statements
 * Extract interfaces from the model classes and inroduce a factory for creating the concrete model objects
