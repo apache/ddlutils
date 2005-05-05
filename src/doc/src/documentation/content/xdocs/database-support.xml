@@ -40,7 +40,7 @@
     <section>
       <title>Axion</title>
       <p>
-        Info about the datatypes supported by Axion can be found <a href="ext:axion/datatypes">here</a>.
+        Info about the datatypes supported by <a href="ext:axion">Axion</a> can be found <a href="ext:axion/datatypes">here</a>.
       </p>
       <table>
         <tr>
@@ -57,7 +57,7 @@
         </tr>
         <tr>
           <td>Indices embedded in table definition</td>
-          <td>no</td>
+          <td>yes</td>
         </tr>
         <tr>
           <td>Uses ALTER TABLE statements for dropping tables </td>
@@ -89,37 +89,37 @@
         </tr>
         <tr>
           <td>BIGINT</td>
-          <td></td>
+          <td>BIGINT</td>
           <td></td>
         </tr>
         <tr>
           <td>BINARY</td>
-          <td></td>
-          <td></td>
+          <td>VARBINARY</td>
+          <td>Axion does not support fixed-size binary types</td>
         </tr>
         <tr>
           <td>BIT</td>
-          <td></td>
+          <td>BOOLEAN</td>
           <td></td>
         </tr>
         <tr>
           <td>BLOB</td>
-          <td></td>
+          <td>BLOB</td>
           <td></td>
         </tr>
         <tr>
           <td>BOOLEAN</td>
-          <td></td>
+          <td>BOOLEAN</td>
           <td></td>
         </tr>
         <tr>
           <td>CHAR</td>
-          <td></td>
+          <td>CHAR</td>
           <td></td>
         </tr>
         <tr>
           <td>CLOB</td>
-          <td></td>
+          <td>CLOB</td>
           <td></td>
         </tr>
         <tr>
@@ -129,13 +129,13 @@
         </tr>
         <tr>
           <td>DATE</td>
-          <td></td>
-          <td></td>
+          <td>DATE</td>
+          <td>Axion handles DATE, TIME the same as TIMESTAMP</td>
         </tr>
         <tr>
           <td>DECIMAL</td>
-          <td></td>
-          <td></td>
+          <td>NUMBER</td>
+          <td><code>scale</code> is currently fixed to 2</td>
         </tr>
         <tr>
           <td>DISTINCT</td>
@@ -144,32 +144,32 @@
         </tr>
         <tr>
           <td>DOUBLE</td>
-          <td></td>
+          <td>FLOAT</td>
           <td></td>
         </tr>
         <tr>
           <td>FLOAT</td>
-          <td></td>
+          <td>FLOAT</td>
           <td></td>
         </tr>
         <tr>
           <td>INTEGER</td>
-          <td></td>
+          <td>INTEGER</td>
           <td></td>
         </tr>
         <tr>
           <td>JAVA_OBJECT</td>
-          <td></td>
+          <td>JAVA_OBJECT</td>
           <td></td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
-          <td></td>
+          <td>VARBINARY</td>
           <td></td>
         </tr>
         <tr>
           <td>LONGVARCHAR</td>
-          <td></td>
+          <td>VARCHAR</td>
           <td></td>
         </tr>
         <tr>
@@ -179,8 +179,8 @@
         </tr>
         <tr>
           <td>NUMERIC</td>
-          <td></td>
-          <td></td>
+          <td>NUMBER</td>
+          <td><code>scale</code> is currently fixed to 2</td>
         </tr>
         <tr>
           <td>OTHER</td>
@@ -189,7 +189,7 @@
         </tr>
         <tr>
           <td>REAL</td>
-          <td></td>
+          <td>FLOAT</td>
           <td></td>
         </tr>
         <tr>
@@ -199,7 +199,7 @@
         </tr>
         <tr>
           <td>SMALLINT</td>
-          <td></td>
+          <td>SHORT</td>
           <td></td>
         </tr>
         <tr>
@@ -209,27 +209,27 @@
         </tr>
         <tr>
           <td>TIME</td>
-          <td></td>
-          <td></td>
+          <td>TIME</td>
+          <td>Axion handles DATE, TIME the same as TIMESTAMP</td>
         </tr>
         <tr>
           <td>TIMESTAMP</td>
-          <td></td>
+          <td>TIMESTAMP</td>
           <td></td>
         </tr>
         <tr>
           <td>TINYINT</td>
-          <td></td>
+          <td>SHORT</td>
           <td></td>
         </tr>
         <tr>
           <td>VARBINARY</td>
-          <td></td>
+          <td>VARBINARY</td>
           <td></td>
         </tr>
         <tr>
           <td>VARCHAR</td>
-          <td></td>
+          <td>VARCHAR</td>
           <td></td>
         </tr>
       </table>
