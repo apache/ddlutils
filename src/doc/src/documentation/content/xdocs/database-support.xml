@@ -40,7 +40,8 @@
     <section>
       <title>Axion</title>
       <p>
-        Info about the datatypes supported by <a href="ext:axion">Axion</a> can be found <a href="ext:axion/datatypes">here</a>.
+        Info about the datatypes supported by <a href="ext:axion">Axion</a> can be found
+        <a href="ext:axion/datatypes">here</a>.
       </p>
       <table>
         <tr>
@@ -236,39 +237,108 @@
     </section>
     <section>
       <title>Cloudscape/Derby</title>
+      <p>
+        DdlUtils supports <a href="ext:cloudscape">Cloudscape</a> version 10.0. Information about the
+        SQL elements and datatypes of Cloudscape is found in the
+        <a href="ext:cloudscape/manual">IBM Cloudscape Reference Manual</a>.
+      </p>
+      <p>
+        The <a href="ext:derby">Apache Derby</a> project is based upon Cloudscape. The SQL syntax and
+        datatypes supported by Derby are described in the Datatypes section in the
+        <a href="ext:derby/manual">Reference Manual</a>.
+      </p>
     </section>
     <section>
       <title>DB 2</title>
+      <p>
+        The DdlUtils support for <a href="ext:db2">IBM DB2</a> is based upon version <strong>7</strong>.
+        The datatypes and SQL elements in DB2 are described in the
+        <a href="ext:db2/manual">DB2 SQL Reference V7</a>.
+      </p>
     </section>
     <section>
-      <title>Firebird</title>
+      <title>Firebird/Interbase</title>
+      <p>
+        DdlUtils supports <a href="ext:interbase">Interbase</a> version <strong>6.0</strong> and its
+        open-sourced version, <a href="ext:firebird">Firebird</a>. Sadly, for neither version there is
+        free documentation available, but rather you have to use the documentation that comes with the
+        Interbase database or, in the case of Firebird, you have to buy a book.
+      </p>
+      <note>
+        For this reason, DdlUtils does not officially support the Interbase versions 7 and newer because
+        these versions are not open source, and thus require a commercial version to develop against.
+        If you happen to run a Interbase database server of version 7 or newer, you could help us adding
+        support for these versions.
+      </note>
     </section>
     <section>
       <title>HsqlDB</title>
+      <p>
+        Support for the <a href="ext:hsqldb">HSQLDB</a> database is based upon the version <strong>1.7.0</strong>.
+        SQL Documentation for HSQLDB can be found <a href="ext:hsqldb/sql-syntax">here</a>.
+      </p>
     </section>
     <section>
-      <title>MaxDB</title>
+      <title>MaxDB/SapDB</title>
+      <p>
+        The <a href="ext:sapdb">SapDB</a> database was open-sourced and rebranded <a href="ext:maxdb">MaxDB</a> 
+        beginning with version 7.4. DdlUtils supports SapDB version <strong>7.2</strong> and MaxDB version
+        <strong>7.5</strong>. Documentation of the SQL supported by SapDB is found in the
+        <a href="ext:sapdb/manual">Reference manual</a>. Likewise, documentation for MaxDB is contained in
+        the <a href="ext:maxdb/manual">MaxDB documentation</a>.
+      </p>
     </section>
     <section>
       <title>Mckoi</title>
-    </section>
-    <section>
-      <title>SQL Server</title>
+      <p>
+        The open source database <a href="ext:mckoi">McKoi</a> is supported in version <strong>1.0.3</strong>.
+        Details on the supported SQL and datatypes can be found in Chapter 2 of the
+        <a href="ext:mckoi/manual">Database Manual</a>.
+      </p>
     </section>
     <section>
       <title>MySQL</title>
+      <p>
+        <a href="ext:mysql">MySQL</a> is supported from version <strong>3.23</strong> onwards. Note that
+        the major versions (3, 4, 5) differ in their datatype support. The supported SQL syntax and datatypes
+        can be found in the <a href="ext:mysql/manual">MySQL Reference Manual</a>.
+      </p>
     </section>
     <section>
       <title>Oracle</title>
+      <p>
+        Support for the <a href="ext:oracle">Oracle database</a> is based upon the version <strong>8.1.7</strong>.
+        Info about the datatypes and SQL elements supported in this version can be found in the
+        <strong>Oracle8i SQL Reference</strong>. You can access this documentation from the
+        <a href="ext:oracle/otn">Oracle Technology Network</a>. Registration to this area is free.
+      </p>
     </section>
     <section>
       <title>PostgreSQL</title>
+      <p>
+        DdlUtils supports <a href="ext:postgresql">PostgreSQL</a> version <strong>7.2</strong> and newer. SQL syntax
+        details and supported datatypes are described in the <a href="ext:postgresql/manual">Manual</a>.
+      </p>
     </section>
     <section>
-      <title>SapDB</title>
+      <title>SQL Server</title>
+      <p>
+        The <a href="ext:sqlserver">SQL Server</a> is supported form version <strong>6.5</strong> onwards.
+        Information about the versions prior to SQL Server 2000 however is difficult to find online, you'll
+        have to resort to the documentation accompanying the database. Information for version 2000 can be found
+        <a href="ext:sqlserver/manual-2000">here</a>.
+      </p>
     </section>
     <section>
       <title>Sybase</title>
+      <p>
+        DdlUtils supports the Sybase products <a href="ext:sybase/sqlserver">SQL Server</a> from version 
+        <strong>10.0</strong> on, and <a href="ext:sybase/ase">Adaptive Server Enterprise</a> from version
+        <strong>11.5</strong> on. The Sybase documentation can be found in the
+        <a href="ext:sybase/manual-archive">Archive</a> in the <em>Transact-SQL User's Guide</em> document
+        for the respective version. The newest version (<strong>12.5</strong>)
+        is found <a href="ext:sybase/manual">here</a>.
+      </p>
     </section>
   </body>
 </document>

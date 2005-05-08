@@ -145,12 +145,22 @@
                  packagenames="org.*"/>
     </target>
 
+    <!-- ================================================================== -->
+    <!-- Build the doc archive                                              -->
+    <!-- ================================================================== -->
+    <target name="doc-archive" depends="doc"
+            description="Builds the complete documentation archive.">
+        <zip zipfile="${dist.dir}/${dist-filename-prefix}-doc.zip"
+             basedir="."
+             includes="doc/**"/>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Creates the DdlUtils distribution                                  -->
+    <!-- ================================================================== -->
     <target name="dist"
             description="Creates the distribution"
-            depends="jar, doc">
-        <jar jarfile="${dist.dir}/${dist-filename-prefix}-javadoc.jar"
-             basedir="${build.javadoc.dir}"/>
-    </target>
+            depends="jar, doc-archive"/>
 
     <target name="compile-tests"
             description="Compiles the unit tests"

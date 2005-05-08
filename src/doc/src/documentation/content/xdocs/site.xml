@@ -61,7 +61,7 @@ See http://forrest.apache.org/docs/linking.html for more info
 
   <external-refs>
     <ddlutils>
-      <jira href="http://issues.apache.org/jira/secure/BrowseProject.jspa?id="/>
+      <jira href="http://issues.apache.org/jira/secure/BrowseProject.jspa?id=10731"/>
       <javadoc href="api/index.html">
         <model href="?org/apache/ddlutils/model/package-summary.html"/>
       </javadoc>
@@ -85,8 +85,22 @@ See http://forrest.apache.org/docs/linking.html for more info
     <beanutils href="http://jakarta.apache.org/commons/beanutils/">
       <dynabean href="apidocs/index.html?org/apache/commons/beanutils/DynaBean.html"/>
     </beanutils>
+    <cloudscape href="http://www-306.ibm.com/software/data/cloudscape/">
+      <manual href="http://publib.boulder.ibm.com/epubs/pdf/c1892480.pdf"/>
+    </cloudscape>
+    <db2 href="http://www-130.ibm.com/developerworks/db2/">
+      <manual href="ftp://ftp.software.ibm.com/ps/products/db2/info/vr7/pdf/letter/db2s0e70.pdf"/>
+    </db2>
+    <derby href="http://incubator.apache.org/derby/">
+      <manual href="manuals/reference/sqlj02.html#Reference+Manual"/>
+    </derby>
     <eclipse href="http://www.eclipse.org"/>
+    <firebird href="http://firebird.sourceforge.net/"/>
+    <hsqldb href="http://hsqldb.sourceforge.net/">
+      <sql-syntax href="doc/guide/ch08.html"/>
+    </hsqldb>
     <idea href="http://www.jetbrains.com/idea"/>
+    <interbase href="http://www.borland.com/interbase/"/>
     <java href="http://java.sun.com/">
       <jdbc>
         <guide href="http://java.sun.com/j2se/1.4.2/docs/guide/jdbc/getstart/GettingStartedTOC.fm.html">
@@ -94,10 +108,37 @@ See http://forrest.apache.org/docs/linking.html for more info
         </guide>
       </jdbc>
     </java>
+    <maxdb href="http://www.mysql.com/products/maxdb/">
+      <manual href="http://dev.mysql.com/get/Downloads/MaxDB/7.5.00/maxdb-chmdoc-75.chm/from/pick"/>
+    </maxdb>
+    <mckoi href="http://www.mckoi.com/database/">
+      <manual href="docindex.html"/>
+    </mckoi>
+    <mysql href="http://www.mysql.com/products/mysql/">
+      <manual href="http://dev.mysql.com/doc/mysql/en/index.html"/>
+    </mysql>
     <netbeans href="http://www.netbeans.org">
       <subversion-profile href="http://vcsgeneric.netbeans.org/profiles/index.html"/>
     </netbeans>
     <ojb href="http://db.apache.org/ojb"/>
+    <oracle href="http://www.oracle.com/">
+      <otn href="technology/index.html"/>
+    </oracle>
+    <postgresql href="http://www.postgresql.org/">
+      <manual href="docs/7.2/interactive/index.html"/>
+    </postgresql>
+    <sapdb href="http://www.sapdb.org/">
+      <manual href="pdf/reference_72_73eng.pdf"/>
+    </sapdb>
+    <sqlserver href="http://msdn.microsoft.com/SQL/">
+      <manual-2000 href="http://msdn.microsoft.com/library/en-us/tsqlref/ts_tsqlcon_6lyk.asp?frame=true"/>
+    </sqlserver>
+    <sybase>
+      <sqlserver href="http://www.sybase.com/products/archivedproducts/sqlserver"/>
+      <ase href="http://www.sybase.com/products/informationmanagement/adaptiveserverenterprise"/>
+      <manual-archive href="http://sybooks.sybase.com/onlinebooks/group-asarc/@Generic__CollectionView;pt=group-asarc"/>
+      <manual href="http://sybooks.sybase.com/as.html"/>
+    </sybase>
     <tigris>
       <subclipse href="http://subclipse.tigris.org"/>
       <svn href="http://subversion.tigris.org"/>
