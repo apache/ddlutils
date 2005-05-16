@@ -16,7 +16,6 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-
 import java.beans.IntrospectionException;
 
 import org.apache.commons.betwixt.XMLIntrospector;
@@ -36,8 +35,9 @@ public class DatabaseReader extends BeanReader
     /** Whether to use the internal dtd that comes with commons-sql */
     private boolean _useInternalDtd = false;
 
-    public DatabaseReader() throws IntrospectionException {
-        setXMLIntrospector( newXMLIntrospector() );
+    public DatabaseReader() throws IntrospectionException
+    {
+        setXMLIntrospector(newXMLIntrospector());
         registerBeanClass(Database.class);
         setValidating(false);
     }
@@ -74,7 +74,8 @@ public class DatabaseReader extends BeanReader
      * A factory method to create the default introspector used to turn
      * the Database object model into XML
      */    
-    protected static XMLIntrospector newXMLIntrospector() {
+    protected static XMLIntrospector newXMLIntrospector()
+    {
         XMLIntrospector introspector = new XMLIntrospector();
 
         // configure the style of the XML, to brief and attribute based

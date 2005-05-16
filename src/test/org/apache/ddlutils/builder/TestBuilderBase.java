@@ -18,7 +18,7 @@ package org.apache.ddlutils.builder;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
-import java.io.StringBufferInputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
@@ -132,7 +132,7 @@ public abstract class TestBuilderBase extends TestCase
     {
         DatabaseReader reader = new DatabaseReader();
 
-        return (Database)reader.parse(new StringBufferInputStream(dbDef));
+        return (Database)reader.parse(new StringReader(dbDef));
     }
     
     /**
