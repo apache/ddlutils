@@ -106,6 +106,7 @@ See http://forrest.apache.org/docs/linking.html for more info
         <guide href="http://java.sun.com/j2se/1.4.2/docs/guide/jdbc/getstart/GettingStartedTOC.fm.html">
           <types href="http://java.sun.com/j2se/1.4.2/docs/guide/jdbc/getstart/mapping.html#996857"/>
         </guide>
+        <spec href="http://java.sun.com/products/jdbc/download.html"/>
       </jdbc>
     </java>
     <maxdb href="http://www.mysql.com/products/maxdb/">

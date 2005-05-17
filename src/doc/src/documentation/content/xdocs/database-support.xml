@@ -26,13 +26,179 @@
       the individual databases, etc.
     </p>
     <p>
-      General information about the JDBC datatypes can be found in
+      The main source of information about JDBC is the <a href="ext:java/jdbc/spec">JDBC Specification</a>,
+      currently for JDBC version 3. General information about the JDBC datatypes can also be found in
       <a href="ext:java/jdbc/guide/types">Chapter 9: Mapping SQL and Java Types</a> of the
       <a href="ext:java/jdbc/guide">JDBC Technology Guide: Getting Started</a>. Please also note
       that some JDBC types are only available in recent versions of the Java platform, e.g.
       the <code>BOOLEAN</code> type is only available since J2SE version 1.4. These will be
       usable with DdlUtils only if you're running the respective Java version or a newer one.
     </p>
+    <p>
+      Here is a short summary of the information about the JDBC data types:
+    </p>
+    <table>
+      <tr>
+        <th>JDBC data type</th>
+        <th>Required minimum limits (range or size)</th>
+        <th>Comments</th>
+      </tr>
+      <tr>
+        <td>ARRAY</td>
+        <td></td>
+        <td>Represents an array</td>
+      </tr>
+      <tr>
+        <td>BIGINT</td>
+        <td>-9223372036854775808 to 9223372036854775807</td>
+        <td>64 bit signed integer</td>
+      </tr>
+      <tr>
+        <td>BINARY</td>
+        <td>254 bytes</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BIT</td>
+        <td>0, 1</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BLOB</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BOOLEAN</td>
+        <td>true, false</td>
+        <td>Java 1.4 and above</td>
+      </tr>
+      <tr>
+        <td>CHAR</td>
+        <td>254 (8-bit characters)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>CLOB</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DATALINK</td>
+        <td></td>
+        <td>Java 1.4 and above. References a file outside of the database but that
+            is managed by it. Maps to <code>java.net.URL</code></td>
+      </tr>
+      <tr>
+        <td>DATE</td>
+        <td>year, month, day</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DECIMAL</td>
+        <td>15 for precision (total number of digits) and for scale (number of
+            digits after the decimal point)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DISTINCT</td>
+        <td></td>
+        <td>Represents a distinct value, totally implementation dependent</td>
+      </tr>
+      <tr>
+        <td>DOUBLE</td>
+        <td>15 bits of mantissa (fractional part)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>FLOAT</td>
+        <td>15 bits of mantissa (fractional part)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>INTEGER</td>
+        <td>-2147483648 to 2147483647</td>
+        <td>32 bit signed integer</td>
+      </tr>
+      <tr>
+        <td>JAVA_OBJECT</td>
+        <td></td>
+        <td>Represents an java object, usually a serialized one</td>
+      </tr>
+      <tr>
+        <td>LONGVARBINARY</td>
+        <td>1 GB</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>LONGVARCHAR</td>
+        <td>1 GB (8-bit characters)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>NULL</td>
+        <td></td>
+        <td>Is not specified in detail</td>
+      </tr>
+      <tr>
+        <td>NUMERIC</td>
+        <td>15 for precision (total number of digits) and for scale (number of digits
+            after the decimal point)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>OTHER</td>
+        <td></td>
+        <td>Entirely database-specific type</td>
+      </tr>
+      <tr>
+        <td>REAL</td>
+        <td>7 bits of mantissa (fractional part)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>REF</td>
+        <td></td>
+        <td>Represents a reference to an instance of a SQL structured type. Maps to
+            <code>java.sql.Ref</code>.</td>
+      </tr>
+      <tr>
+        <td>SMALLINT</td>
+        <td>-32768 to 32767</td>
+        <td>16 bit signed integer</td>
+      </tr>
+      <tr>
+        <td>STRUCT</td>
+        <td></td>
+        <td>Represents a structured type, usually created via CREATE TYPE. Maps to
+            <code>java.sql.Struct</code>.</td>
+      </tr>
+      <tr>
+        <td>TIME</td>
+        <td>hours, minutes, seconds</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>TIMESTAMP</td>
+        <td>year, month, day, hours, minutes, seconds, nanoseconds</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>TINYINT</td>
+        <td>-128 to 127 (8 bit signed) or 0 to 254 (8 bit unsigned)</td>
+        <td>8 bit signed or unsigned integer</td>
+      </tr>
+      <tr>
+        <td>VARBINARY</td>
+        <td>254 bytes</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>VARCHAR</td>
+        <td>254 bytes (8-bit characters)</td>
+        <td></td>
+      </tr>
+    </table>
     <note>
       This is currently somewhat incomplete, especially in regard to which versions of the
       individual databases are supported resp. tested.
