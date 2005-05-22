@@ -26,7 +26,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
- * Reads data XML into dyna beans according to a specified database model.
+ * Reads data XML into dyna beans matching a specified database model.
  * 
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision:$

@@ -1,4 +1,4 @@
-package org.apache.ddlutils.io;
+package org.apache.ddlutils.task;
 
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
@@ -16,22 +16,20 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-import java.sql.SQLException;
-
-import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.model.Database;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
 
 /**
- * Marks classes that can receive dyna beans read by the {@link org.apache.ddlutils.io.DataReader}.
- * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * Base interface for commands that work with a model.
  */
-public interface DataSink
+public interface Command
 {
     /**
-     * Adds a dyna bean.
+     * Executes this command.
      * 
-     * @param bean The dyna bean to add
+     * @param task  The executing task
+     * @param model The database model
      */
-    public void addBean(DynaBean bean) throws SQLException;
+    public void execute(Task task, Database model) throws BuildException;
 }

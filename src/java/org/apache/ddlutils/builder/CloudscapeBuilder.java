@@ -33,6 +33,7 @@ public class CloudscapeBuilder extends SqlBuilder
     {
         setPrimaryKeyEmbedded(false);
         setEmbeddedForeignKeysNamed(true);
+        setMaxIdentifierLength(18);
         // binary and varbinary are handled by getSqlType
         addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");

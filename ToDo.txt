@@ -1,7 +1,6 @@
 List of things to be done for the next version of DdlUtils:
 
 * Fix Javadoc errors
-* Migrate doc to Forrest
 * Enhance doc:
     - The Ant task
     - How to use DdlUtils in code
@@ -21,3 +20,6 @@ List of things to be done for the next version of DdlUtils:
   of using only their names
 * Add functionality and ant tasks to insert/dump data into/from the database
 * Add integration with DbUnit to allow DbUnit to use the schema and data files
+* Add proper handling of names (table, column, ...) that contain whitespaces and similar (-> escaping)
+* Add notion of jdbc types not directly supported by the database which are mapped to some large binary type,
+  and add warnings when they are used (-> logging)

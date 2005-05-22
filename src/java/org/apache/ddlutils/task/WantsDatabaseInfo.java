@@ -1,4 +1,4 @@
-package org.apache.ddlutils.io;
+package org.apache.ddlutils.task;
 
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
@@ -16,22 +16,20 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-import java.sql.SQLException;
+import javax.sql.DataSource;
 
-import org.apache.commons.beanutils.DynaBean;
+import org.apache.tools.ant.BuildException;
 
 /**
- * Marks classes that can receive dyna beans read by the {@link org.apache.ddlutils.io.DataReader}.
- * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * Denotes a type that want database info from its context.
  */
-public interface DataSink
+public interface WantsDatabaseInfo
 {
     /**
-     * Adds a dyna bean.
+     * Sets the database info.
      * 
-     * @param bean The dyna bean to add
+     * @param dataSource The data source pointing to the database
+     * @param type       The database type
      */
-    public void addBean(DynaBean bean) throws SQLException;
+    public void setDatabaseInfo(DataSource dataSource, String type) throws BuildException;
 }

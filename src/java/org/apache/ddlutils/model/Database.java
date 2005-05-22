@@ -57,6 +57,7 @@ public class Database
 
             if (findTable(table.getName()) != null)
             {
+                // TODO: It might make more sense to log a warning and overwrite the table ?
                 throw new IllegalArgumentException("Table "+table.getName()+" already defined in this database");
             }
             try
