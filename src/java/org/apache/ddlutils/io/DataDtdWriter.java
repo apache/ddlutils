@@ -61,7 +61,7 @@ public class DataDtdWriter
                 writer.println();
             }
         }
-        writer.println(")>");
+        writer.println(")*>");
         for (Iterator tableIt = model.getTables().iterator(); tableIt.hasNext();)
         {
             writeTableElement((Table)tableIt.next(), writer);
