@@ -42,6 +42,8 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
     private DataSource _dataSource;
     /** The database type */
     private String     _databaseType;
+    /** A single data file to insert */
+    private File _singleDataFile = null;
     /** The input files */
     private ArrayList  _fileSets = new ArrayList();
 
@@ -62,10 +64,7 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
      */
     public void setDataFile(File dataFile)
     {
-        FileSet fileSet = new FileSet();
-
-        fileSet.setIncludesfile(dataFile);
-        _fileSets.add(fileSet);
+        _singleDataFile = dataFile;
     }
 
     /* (non-Javadoc)
@@ -88,44 +87,29 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
             DataToDatabaseSink sink    = new DataToDatabaseSink(_dataSource, model, builder);
             DataReader         reader  = new DataReader(model, sink);
 
-            for (Iterator it = _fileSets.iterator(); it.hasNext();)
+            if ((_singleDataFile != null) && !_fileSets.isEmpty())
             {
-                FileSet          fileSet    = (FileSet)it.next();
-                File             fileSetDir = fileSet.getDir(task.getProject());
-                DirectoryScanner scanner    = fileSet.getDirectoryScanner(task.getProject());
-                String[]         files      = scanner.getIncludedFiles();
-
-                for (int idx = 0; (files != null) && (idx < files.length); idx++)
+                throw new BuildException("Please use either the datafile attribute or the sub fileset element, but not both");
+            }
+            if (_singleDataFile != null)
+            {
+                readSingleDataFile(task, reader, _singleDataFile);
+            }
+            else
+            {
+                for (Iterator it = _fileSets.iterator(); it.hasNext();)
                 {
-                    File curSchemaFile = new File(fileSetDir, files[idx]);
-
-                    if (!curSchemaFile.exists())
+                    FileSet          fileSet    = (FileSet)it.next();
+                    File             fileSetDir = fileSet.getDir(task.getProject());
+                    DirectoryScanner scanner    = fileSet.getDirectoryScanner(task.getProject());
+                    String[]         files      = scanner.getIncludedFiles();
+    
+                    for (int idx = 0; (files != null) && (idx < files.length); idx++)
                     {
-                        task.log("Could not find data file "+files[idx], Project.MSG_ERR);
-                    }
-                    else if (!curSchemaFile.isFile())
-                    {
-                        task.log("Path "+curSchemaFile.getAbsolutePath()+" does not denote a data file", Project.MSG_ERR);
-                    }
-                    else if (!curSchemaFile.canRead())
-                    {
-                        task.log("Could not read data file "+curSchemaFile.getAbsolutePath(), Project.MSG_ERR);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            reader.parse(curSchemaFile);
-                            task.log("Read data file "+curSchemaFile.getAbsolutePath(), Project.MSG_INFO);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new BuildException("Could not read data file "+curSchemaFile.getAbsolutePath(), ex);
-                        }
+                        readSingleDataFile(task, reader, new File(fileSetDir, files[idx]));
                     }
                 }
             }
-
         }
         catch (Exception ex)
         {
@@ -133,4 +117,38 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
         }
     }
 
+    /**
+     * Reads a single data file.
+     * 
+     * @param task       The parent task
+     * @param reader     The data reader
+     * @param schemaFile The schema file
+     */
+    private void readSingleDataFile(Task task, DataReader reader, File schemaFile)
+    {
+        if (!schemaFile.exists())
+        {
+            task.log("Could not find data file "+schemaFile.getAbsolutePath(), Project.MSG_ERR);
+        }
+        else if (!schemaFile.isFile())
+        {
+            task.log("Path "+schemaFile.getAbsolutePath()+" does not denote a data file", Project.MSG_ERR);
+        }
+        else if (!schemaFile.canRead())
+        {
+            task.log("Could not read data file "+schemaFile.getAbsolutePath(), Project.MSG_ERR);
+        }
+        else
+        {
+            try
+            {
+                reader.parse(schemaFile);
+                task.log("Read data file "+schemaFile.getAbsolutePath(), Project.MSG_INFO);
+            }
+            catch (Exception ex)
+            {
+                throw new BuildException("Could not read data file "+schemaFile.getAbsolutePath(), ex);
+            }
+        }
+    }
 }

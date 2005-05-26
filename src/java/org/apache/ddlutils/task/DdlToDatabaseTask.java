@@ -34,6 +34,8 @@ import org.apache.tools.ant.types.FileSet;
  */
 public class DdlToDatabaseTask extends Task
 {
+    /** A single schema file to read */
+    private File _singleSchemaFile = null;
     /** The input files */
     private ArrayList _fileSets = new ArrayList();
     /** The sub tasks to execute */
@@ -56,10 +58,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void setSchemaFile(File schemaFile)
     {
-        FileSet fileSet = new FileSet();
-
-        fileSet.setIncludesfile(schemaFile);
-        _fileSets.add(fileSet);
+        _singleSchemaFile = schemaFile;
     }
 
     /**
@@ -110,47 +109,32 @@ public class DdlToDatabaseTask extends Task
         {
             throw new BuildException(ex);
         }
-        for (Iterator it = _fileSets.iterator(); it.hasNext();)
+        if ((_singleSchemaFile != null) && !_fileSets.isEmpty())
         {
-            FileSet          fileSet    = (FileSet)it.next();
-            File             fileSetDir = fileSet.getDir(getProject());
-            DirectoryScanner scanner    = fileSet.getDirectoryScanner(getProject());
-            String[]         files      = scanner.getIncludedFiles();
-
-            for (int idx = 0; (files != null) && (idx < files.length); idx++)
+            throw new BuildException("Please use either the schemafile attribute or the sub fileset element, but not both");
+        }
+        if (_singleSchemaFile != null)
+        {
+            model = readSingleSchemaFile(reader, _singleSchemaFile);
+        }
+        else
+        {
+            for (Iterator it = _fileSets.iterator(); it.hasNext();)
             {
-                File curSchemaFile = new File(fileSetDir, files[idx]);
-
-                if (!curSchemaFile.exists())
+                FileSet          fileSet    = (FileSet)it.next();
+                File             fileSetDir = fileSet.getDir(getProject());
+                DirectoryScanner scanner    = fileSet.getDirectoryScanner(getProject());
+                String[]         files      = scanner.getIncludedFiles();
+    
+                for (int idx = 0; (files != null) && (idx < files.length); idx++)
                 {
-                    log("Could not find schema file "+files[idx], Project.MSG_ERR);
-                }
-                else if (!curSchemaFile.isFile())
-                {
-                    log("Path "+curSchemaFile.getAbsolutePath()+" does not denote a schema file", Project.MSG_ERR);
-                }
-                else if (!curSchemaFile.canRead())
-                {
-                    log("Could not read schema file "+curSchemaFile.getAbsolutePath(), Project.MSG_ERR);
-                }
-                else
-                {
-                    Database curModel = null;
-
-                    try
-                    {
-                        curModel = (Database)reader.parse(curSchemaFile);
-                        log("Read schema file "+curSchemaFile.getAbsolutePath(), Project.MSG_INFO);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new BuildException("Could not read schema file "+curSchemaFile.getAbsolutePath(), ex);
-                    }
+                    Database curModel = readSingleSchemaFile(reader, new File(fileSetDir, files[idx]));
+    
                     if (model == null)
                     {
                         model = curModel;
                     }
-                    else
+                    else if (curModel != null)
                     {
                         try
                         {
@@ -162,6 +146,40 @@ public class DdlToDatabaseTask extends Task
                         }
                     }
                 }
+            }
+        }
+        return model;
+    }
+
+    /**
+     * Reads a single schema file.
+     * 
+     * @param reader     The schema reader 
+     * @param schemaFile The schema file
+     * @return The model
+     */
+    private Database readSingleSchemaFile(DatabaseReader reader, File schemaFile)
+    {
+        Database model = null;
+
+        if (!schemaFile.isFile())
+        {
+            log("Path "+schemaFile.getAbsolutePath()+" does not denote a schema file", Project.MSG_ERR);
+        }
+        else if (!schemaFile.canRead())
+        {
+            log("Could not read schema file "+schemaFile.getAbsolutePath(), Project.MSG_ERR);
+        }
+        else
+        {
+            try
+            {
+                model = (Database)reader.parse(schemaFile);
+                log("Read schema file "+schemaFile.getAbsolutePath(), Project.MSG_INFO);
+            }
+            catch (Exception ex)
+            {
+                throw new BuildException("Could not read schema file "+schemaFile.getAbsolutePath(), ex);
             }
         }
         return model;
