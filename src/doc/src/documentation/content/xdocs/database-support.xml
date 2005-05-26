@@ -251,8 +251,8 @@
         </tr>
         <tr>
           <td>ARRAY</td>
-          <td></td>
-          <td>Not supported by Axion</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Axion</td>
         </tr>
         <tr>
           <td>BIGINT</td>
@@ -262,7 +262,7 @@
         <tr>
           <td>BINARY</td>
           <td>VARBINARY</td>
-          <td>Axion does not support fixed-size binary types</td>
+          <td></td>
         </tr>
         <tr>
           <td>BIT</td>
@@ -291,8 +291,8 @@
         </tr>
         <tr>
           <td>DATALINK</td>
-          <td></td>
-          <td>Not supported by Axion</td>
+          <td><em>VARBINARY</em></td>
+          <td>Not natively supported by Axion</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -302,12 +302,12 @@
         <tr>
           <td>DECIMAL</td>
           <td>NUMBER</td>
-          <td><code>scale</code> is currently fixed to 2</td>
+          <td><code>scale</code> is currently fixed to 2 (though a different one can be specified)</td>
         </tr>
         <tr>
           <td>DISTINCT</td>
-          <td></td>
-          <td>Not supported by Axion</td>
+          <td><em>VARBINARY</em></td>
+          <td>Not natively supported by Axion</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -341,18 +341,18 @@
         </tr>
         <tr>
           <td>NULL</td>
-          <td></td>
-          <td>Not supported by Axion</td>
+          <td><em>VARBINARY</em></td>
+          <td>Not natively supported by Axion</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
           <td>NUMBER</td>
-          <td><code>scale</code> is currently fixed to 2</td>
+          <td><code>scale</code> is currently fixed to 2 (though a different one can be specified)</td>
         </tr>
         <tr>
           <td>OTHER</td>
-          <td></td>
-          <td>Not supported by Axion</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Axion</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -361,8 +361,8 @@
         </tr>
         <tr>
           <td>REF</td>
-          <td></td>
-          <td>Not supported by Axion</td>
+          <td><em>VARBINARY</em></td>
+          <td>Not natively supported by Axion</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -371,8 +371,8 @@
         </tr>
         <tr>
           <td>STRUCT</td>
-          <td></td>
-          <td>Not supported by Axion</td>
+          <td><em>VARBINARY</em></td>
+          <td>Not natively supported by Axion</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -485,6 +485,163 @@
         DdlUtils supports <a href="ext:postgresql">PostgreSQL</a> version <strong>7.2</strong> and newer. SQL syntax
         details and supported datatypes are described in the <a href="ext:postgresql/manual">Manual</a>.
       </p>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>BYTEA</em></td>
+          <td>PostgreSQL can work with arrays directly, but this is currently not directly supported in DdlUtils</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td>BIGINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>BYTEA</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>BIT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>BYTEA</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>BOOLEAN</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td>TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by PostgreSQL</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>NUMERIC</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by PostgreSQL</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INTEGER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by PostgreSQL</td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>BYTEA</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by PostgreSQL</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMERIC</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by PostgreSQL</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>REAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by PostgreSQL</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by PostgreSQL</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>TIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td>TIMESTAMP</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>BYTEA</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td></td>
+        </tr>
+      </table>
     </section>
     <section>
       <title>SQL Server</title>
