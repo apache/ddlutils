@@ -37,16 +37,24 @@ public class AxionBuilder extends SqlBuilder
         setPrimaryKeyEmbedded(true);
         setForeignKeysEmbedded(false);
         setIndicesEmbedded(true);
+        addNativeTypeMapping(Types.ARRAY,         "BLOB");
         addNativeTypeMapping(Types.BINARY,        "VARBINARY");
         addNativeTypeMapping(Types.BIT,           "BOOLEAN");
         addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
+        addNativeTypeMapping(Types.DISTINCT,      "VARBINARY");
         addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
         addNativeTypeMapping(Types.LONGVARBINARY, "VARBINARY");
         addNativeTypeMapping(Types.LONGVARCHAR,   "VARCHAR");
+        addNativeTypeMapping(Types.NULL,          "VARBINARY");
         addNativeTypeMapping(Types.NUMERIC,       "NUMBER");
+        addNativeTypeMapping(Types.OTHER,         "BLOB");
         addNativeTypeMapping(Types.REAL,          "FLOAT");
+        addNativeTypeMapping(Types.REF,           "VARBINARY");
         addNativeTypeMapping(Types.SMALLINT,      "SHORT");
+        addNativeTypeMapping(Types.STRUCT,        "VARBINARY");
         addNativeTypeMapping(Types.TINYINT,       "SHORT");
+
+        addNativeTypeMapping("DATALINK", "VARBINARY");
     }
 
     /* (non-Javadoc)

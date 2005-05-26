@@ -40,7 +40,6 @@ public class CloudscapeBuilder extends SqlBuilder
         addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
         addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
     }
 
@@ -86,8 +85,8 @@ public class CloudscapeBuilder extends SqlBuilder
                 sqlType.append(") FOR BIT DATA");
                 return sqlType.toString();
             default:
+                return super.getSqlType(column);
         }
-        return super.getSqlType(column);
     }
     
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException

@@ -23,3 +23,6 @@ List of things to be done for the next version of DdlUtils:
 * Add proper handling of names (table, column, ...) that contain whitespaces and similar (-> escaping)
 * Add notion of jdbc types not directly supported by the database which are mapped to some large binary type,
   and add warnings when they are used (-> logging)
+* It might be useful to add support for the ARRAY jdbc data type in the way that PostgreSQL does, by
+  simply adding brackets to the base type instead of using the ARRAY literal as this does not define the base
+  type at all

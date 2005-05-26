@@ -19,16 +19,16 @@ package org.apache.ddlutils.builder;
 import org.apache.ddlutils.model.Database;
 
 /**
- * Tests the Axion builder.
+ * Tests the PostgreSQL builder.
  */
-public class TestAxionBuilder extends TestBuilderBase
+public class TestPostgresqlBuilder extends TestBuilderBase
 {
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.TestBuilderBase#getDatabaseName()
      */
     protected String getDatabaseName()
     {
-        return "Axion";
+        return "Postgresql";
     }
 
     /**
@@ -43,39 +43,39 @@ public class TestAxionBuilder extends TestBuilderBase
         getBuilder().createDatabase(testDb);
 
         assertEqualsIgnoringWhitespaces(
-            "DROP TABLE IF EXISTS coltype;\n"+
+            "DROP TABLE coltype CASCADE;\n"+
             "CREATE TABLE coltype\n"+
             "(\n"+
-            "    COL_ARRAY           BLOB,\n"+
+            "    COL_ARRAY           BYTEA,\n"+
             "    COL_BIGINT          BIGINT,\n"+
-            "    COL_BINARY          VARBINARY,\n"+
-            "    COL_BIT             BOOLEAN,\n"+
-            "    COL_BLOB            BLOB,\n"+
+            "    COL_BINARY          BYTEA,\n"+
+            "    COL_BIT             BIT,\n"+
+            "    COL_BLOB            BYTEA,\n"+
             "    COL_BOOLEAN         BOOLEAN,\n"+
             "    COL_CHAR            CHAR(15),\n"+
-            "    COL_CLOB            CLOB,\n"+
-            "    COL_DATALINK        VARBINARY,\n"+
+            "    COL_CLOB            TEXT,\n"+
+            "    COL_DATALINK        BYTEA,\n"+
             "    COL_DATE            DATE,\n"+
-            "    COL_DECIMAL         NUMBER(15,3),\n"+
-            "    COL_DECIMAL_NOSCALE NUMBER(15,0),\n"+
-            "    COL_DISTINCT        VARBINARY,\n"+
-            "    COL_DOUBLE          FLOAT,\n"+
-            "    COL_FLOAT           FLOAT,\n"+
+            "    COL_DECIMAL         NUMERIC(15,3),\n"+
+            "    COL_DECIMAL_NOSCALE NUMERIC(15,0),\n"+
+            "    COL_DISTINCT        BYTEA,\n"+
+            "    COL_DOUBLE          DOUBLE PRECISION,\n"+
+            "    COL_FLOAT           DOUBLE PRECISION,\n"+
             "    COL_INTEGER         INTEGER,\n"+
-            "    COL_JAVA_OBJECT     JAVA_OBJECT,\n"+
-            "    COL_LONGVARBINARY   VARBINARY,\n"+
-            "    COL_LONGVARCHAR     VARCHAR,\n"+
-            "    COL_NULL            VARBINARY,\n"+
-            "    COL_NUMERIC         NUMBER(15,0),\n"+
-            "    COL_OTHER           BLOB,\n"+
-            "    COL_REAL            FLOAT,\n"+
-            "    COL_REF             VARBINARY,\n"+
-            "    COL_SMALLINT        SHORT,\n"+
-            "    COL_STRUCT          VARBINARY,\n"+
+            "    COL_JAVA_OBJECT     BYTEA,\n"+
+            "    COL_LONGVARBINARY   BYTEA,\n"+
+            "    COL_LONGVARCHAR     TEXT,\n"+
+            "    COL_NULL            BYTEA,\n"+
+            "    COL_NUMERIC         NUMERIC(15,0),\n"+
+            "    COL_OTHER           BYTEA,\n"+
+            "    COL_REAL            REAL,\n"+
+            "    COL_REF             BYTEA,\n"+
+            "    COL_SMALLINT        SMALLINT,\n"+
+            "    COL_STRUCT          BYTEA,\n"+
             "    COL_TIME            TIME,\n"+
             "    COL_TIMESTAMP       TIMESTAMP,\n"+
-            "    COL_TINYINT         SHORT,\n"+
-            "    COL_VARBINARY       VARBINARY(15),\n"+
+            "    COL_TINYINT         SMALLINT,\n"+
+            "    COL_VARBINARY       BYTEA,\n"+
             "    COL_VARCHAR         VARCHAR(15)\n"+
             ");\n",
             getBuilderOutput());

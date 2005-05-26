@@ -16,80 +16,52 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
+import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.Hashtable;
 
-// I don't know if the peer system deals
-// with the recommended mappings.
-//
-//import java.sql.Date;
-//import java.sql.Time;
-//import java.sql.Timestamp;
-
 /**
  * A class that maps SQL type names to their JDBC type ID found in
- * {@link java.sql.Types}.
- *
- * <pre>
- * -------------------------------------------------------
- * SQL Type      | Java Type            | Peer Type
- * -------------------------------------------------------
- * CHAR          | String               | String
- * VARCHAR       | String               | String
- * LONGVARCHAR   | String               | String
- * NUMERIC       | java.math.BigDecimal | java.math.BigDecimal
- * DECIMAL       | java.math.BigDecimal | java.math.BigDecimal
- * BIT           | boolean OR Boolean   | Boolean
- * TINYINT       | byte OR Byte         | Byte
- * SMALLINT      | short OR Short       | Short
- * INTEGER       | int OR Integer       | Integer
- * BIGINT        | long OR Long         | Long
- * REAL          | float OR Float       | Float
- * FLOAT         | double OR Double     | Double
- * DOUBLE        | double OR Double     | Double
- * BINARY        | byte[]               | ?
- * VARBINARY     | byte[]               | ?
- * LONGVARBINARY | byte[]               | ?
- * DATE          | java.sql.Date        | java.util.Date
- * TIME          | java.sql.Time        | java.util.Date
- * TIMESTAMP     | java.sql.Timestamp   | java.util.Date
- *
- * -------------------------------------------------------
- * A couple variations have been introduced to cover cases
- * that may arise, but are not covered above
- * BOOLEANCHAR   | boolean OR Boolean   | String
- * BOOLEANINT    | boolean OR Boolean   | Integer
- * </pre>
+ * {@link java.sql.Types} and vice versa.
  *
  * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
 public class TypeMap
 {
-    public static final String CHAR = "CHAR";
-    public static final String VARCHAR = "VARCHAR";
-    public static final String LONGVARCHAR = "LONGVARCHAR";
-    public static final String CLOB = "CLOB";
-    public static final String NUMERIC = "NUMERIC";
-    public static final String DECIMAL = "DECIMAL";
-    public static final String BOOLEAN = "BOOLEAN";
-    public static final String BIT = "BIT";
-    public static final String TINYINT = "TINYINT";
-    public static final String SMALLINT = "SMALLINT";
-    public static final String INTEGER = "INTEGER";
-    public static final String BIGINT = "BIGINT";
-    public static final String REAL = "REAL";
-    public static final String FLOAT = "FLOAT";
-    public static final String DOUBLE = "DOUBLE";
-    public static final String BINARY = "BINARY";
-    public static final String VARBINARY = "VARBINARY";
+    public static final String ARRAY         = "ARRAY";
+    public static final String BIGINT        = "BIGINT";
+    public static final String BINARY        = "BINARY";
+    public static final String BIT           = "BIT";
+    public static final String BLOB          = "BLOB";
+    public static final String BOOLEAN       = "BOOLEAN";
+    public static final String CHAR          = "CHAR";
+    public static final String CLOB          = "CLOB";
+    public static final String DATALINK      = "DATALINK";
+    public static final String DATE          = "DATE";
+    public static final String DECIMAL       = "DECIMAL";
+    public static final String DISTINCT      = "DISTINCT";
+    public static final String DOUBLE        = "DOUBLE";
+    public static final String FLOAT         = "FLOAT";
+    public static final String INTEGER       = "INTEGER";
+    public static final String JAVA_OBJECT   = "JAVA_OBJECT";
     public static final String LONGVARBINARY = "LONGVARBINARY";
-    public static final String BLOB = "BLOB";
-    public static final String DATE = "DATE";
-    public static final String TIME = "TIME";
-    public static final String TIMESTAMP = "TIMESTAMP";
-    
+    public static final String LONGVARCHAR   = "LONGVARCHAR";
+    public static final String NULL          = "NULL";
+    public static final String NUMERIC       = "NUMERIC";
+    public static final String OTHER         = "OTHER";
+    public static final String REAL          = "REAL";
+    public static final String REF           = "REF";
+    public static final String SMALLINT      = "SMALLINT";
+    public static final String STRUCT        = "STRUCT";
+    public static final String TIME          = "TIME";
+    public static final String TIMESTAMP     = "TIMESTAMP";
+    public static final String TINYINT       = "TINYINT";
+    public static final String VARBINARY     = "VARBINARY";
+    public static final String VARCHAR       = "VARCHAR";
+
     private static final String[] TEXT_TYPES =
     {
         CHAR, VARCHAR, LONGVARCHAR, CLOB
@@ -100,7 +72,7 @@ public class TypeMap
     };
     private static final String[] DECIMAL_TYPES =
     {
-        NUMERIC, DECIMAL, REAL, FLOAT, DOUBLE
+        NUMERIC, DECIMAL
     };
 
     private static Hashtable sqlTypeNameToTypeID = new Hashtable();
@@ -108,47 +80,72 @@ public class TypeMap
 
 
 
-    static {
+    static
+    {
+        registerSqlTypeID(Types.ARRAY,         ARRAY);
+        registerSqlTypeID(Types.BIGINT,        BIGINT);
+        registerSqlTypeID(Types.BINARY,        BINARY);
+        registerSqlTypeID(Types.BIT,           BIT);
+        registerSqlTypeID(Types.BLOB,          BLOB);
+        registerSqlTypeID(Types.CHAR,          CHAR);
+        registerSqlTypeID(Types.CLOB,          CLOB);
+        registerSqlTypeID(Types.DATE,          DATE);
+        registerSqlTypeID(Types.DECIMAL,       DECIMAL);
+        registerSqlTypeID(Types.DISTINCT,      DISTINCT);
+        registerSqlTypeID(Types.DOUBLE,        DOUBLE);
+        registerSqlTypeID(Types.FLOAT,         FLOAT);
+        registerSqlTypeID(Types.INTEGER,       INTEGER);
+        registerSqlTypeID(Types.JAVA_OBJECT,   JAVA_OBJECT);
+        registerSqlTypeID(Types.LONGVARBINARY, LONGVARBINARY);
+        registerSqlTypeID(Types.LONGVARCHAR,   LONGVARCHAR);
+        registerSqlTypeID(Types.NULL,          NULL);
+        registerSqlTypeID(Types.NUMERIC,       NUMERIC);
+        registerSqlTypeID(Types.OTHER,         OTHER);
+        registerSqlTypeID(Types.REAL,          REAL);
+        registerSqlTypeID(Types.REF,           REF);
+        registerSqlTypeID(Types.SMALLINT,      SMALLINT);
+        registerSqlTypeID(Types.STRUCT,        STRUCT);
+        registerSqlTypeID(Types.TIME,          TIME);
+        registerSqlTypeID(Types.TIMESTAMP,     TIMESTAMP);
+        registerSqlTypeID(Types.TINYINT,       TINYINT);
+        registerSqlTypeID(Types.VARBINARY,     VARBINARY);
+        registerSqlTypeID(Types.VARCHAR,       VARCHAR);
 
-        /*
-         * Map the Strings to JDBC type IDs
-         */
-        registerSqlTypeID(new Integer(Types.CHAR), CHAR);
-        registerSqlTypeID(new Integer(Types.VARCHAR), VARCHAR);
-        registerSqlTypeID(new Integer(Types.LONGVARCHAR), LONGVARCHAR);
-        registerSqlTypeID(new Integer(Types.CLOB), CLOB);
-        registerSqlTypeID(new Integer(Types.NUMERIC), NUMERIC);
-        registerSqlTypeID(new Integer(Types.DECIMAL), DECIMAL);
-        registerSqlTypeID(new Integer(Types.BOOLEAN), BOOLEAN);
-        registerSqlTypeID(new Integer(Types.BIT), BIT);
-        registerSqlTypeID(new Integer(Types.TINYINT), TINYINT);
-        registerSqlTypeID(new Integer(Types.SMALLINT), SMALLINT);
-        registerSqlTypeID(new Integer(Types.INTEGER), INTEGER);
-        registerSqlTypeID(new Integer(Types.BIGINT), BIGINT);
-        registerSqlTypeID(new Integer(Types.REAL), REAL);
-        registerSqlTypeID(new Integer(Types.FLOAT), FLOAT);
-        registerSqlTypeID(new Integer(Types.DOUBLE), DOUBLE);
-        registerSqlTypeID(new Integer(Types.BINARY), BINARY);
-        registerSqlTypeID(new Integer(Types.VARBINARY), VARBINARY);
-        registerSqlTypeID(new Integer(Types.LONGVARBINARY), LONGVARBINARY);
-        registerSqlTypeID(new Integer(Types.BLOB), BLOB);
-        registerSqlTypeID(new Integer(Types.DATE), DATE);
-        registerSqlTypeID(new Integer(Types.TIME), TIME);
-        registerSqlTypeID(new Integer(Types.TIMESTAMP), TIMESTAMP);
+        // only available in JDK 1.4 and above:
+        try
+        {
+            Field datalinkField = Types.class.getField(DATALINK);
+
+            if (datalinkField != null)
+            {
+                registerSqlTypeID(datalinkField.getInt(null), DATALINK);
+            }
+        }
+        catch (Exception ex)
+        {}
+        try
+        {
+            Field booleanField = Types.class.getField(BOOLEAN);
+
+            if (booleanField != null)
+            {
+                registerSqlTypeID(booleanField.getInt(null), BOOLEAN);
+            }
+        }
+        catch (Exception ex)
+        {}
     }
 
+    
     /**
      * Returns the JDBC type name which maps to {@link java.sql.Types}
      * for the given SQL name of type
      */
     public static int getJdbcTypeCode(String typeName)
     {
-        Integer answer = (Integer) sqlTypeNameToTypeID.get(typeName.toUpperCase());
-        if ( answer != null ) 
-        {
-            return answer.intValue();
-        }
-        return Types.OTHER;
+        Integer answer = (Integer)sqlTypeNameToTypeID.get(typeName.toUpperCase());
+
+        return answer != null ? answer.intValue() : Types.OTHER;
     }
 
     /**
@@ -158,12 +155,8 @@ public class TypeMap
     public static String getJdbcTypeName(int typeCode)
     {
         String answer = (String)typeIdToSqlTypeName.get(new Integer(typeCode));
-        if ( answer == null ) 
-        {
-            System.out.println("Couldn't find JDBC Name for typeCode: " + typeCode);
-            answer = "UNKNOWN";
-        }
-        return answer;
+
+        return answer == null ? OTHER : answer;
     }
 
     /**
@@ -257,10 +250,12 @@ public class TypeMap
     /**
      * Registers the fact that the given Integer SQL ID maps to the given SQL name
      */
-    protected static void registerSqlTypeID(Integer sqlTypeID, String name) 
+    protected static void registerSqlTypeID(int sqlTypeID, String name) 
     {
-        sqlTypeNameToTypeID.put(name, sqlTypeID);
-        typeIdToSqlTypeName.put(sqlTypeID, name);
+        Integer typeId = new Integer(sqlTypeID);
+
+        sqlTypeNameToTypeID.put(name, typeId);
+        typeIdToSqlTypeName.put(typeId, name);
     }
 }
 
