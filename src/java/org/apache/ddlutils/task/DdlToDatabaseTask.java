@@ -92,6 +92,16 @@ public class DdlToDatabaseTask extends Task
     }
 
     /**
+     * Adds the "write data to database"-command
+     * 
+     * @param command The command
+     */
+    public void addWriteDataToDatabase(WriteDataToSpecifiedDatabaseCommand command)
+    {
+        _commands.add(command);
+    }
+
+    /**
      * Reads the schemas from the specified files and merges them into one database model.
      * 
      * @return The database model

@@ -88,6 +88,16 @@ public class DatabaseToDdlTask extends Task
     }
 
     /**
+     * Adds the "write data into database"-command
+     * 
+     * @param command The command
+     */
+    public void addWriteDataToDatabase(WriteDataToDatabaseCommand command)
+    {
+        _commands.add(command);
+    }
+
+    /**
      * Reads the schemas from the specified database.
      * 
      * @return The database model

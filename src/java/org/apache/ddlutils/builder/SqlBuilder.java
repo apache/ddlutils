@@ -770,7 +770,7 @@ public abstract class SqlBuilder {
             Table currentTable = (Table)tableIt.next();
             Table desiredTable = desiredDb.findTable(currentTable.getName());
 
-            if (desiredTable == null)
+            if ((desiredTable == null) && (currentTable.getName() != null) && (currentTable.getName().length() > 0))
             {
                 if (doDrops)
                 {
@@ -895,7 +895,13 @@ public abstract class SqlBuilder {
         // we're dropping the external foreignkeys first
         for (int idx = tables.size() - 1; idx >= 0; idx--)
         {
-            dropExternalForeignKeys((Table)tables.get(idx));
+            Table table = (Table)tables.get(idx);
+
+            if ((table.getName() != null) &&
+                (table.getName().length() > 0))
+            {
+                dropExternalForeignKeys(table);
+            }
         }
 
         // Next we drop the tables in reverse order to avoid referencial problems
@@ -903,8 +909,12 @@ public abstract class SqlBuilder {
         {
             Table table = (Table)tables.get(idx);
 
-            writeTableComment(table);
-            dropTable(table);
+            if ((table.getName() != null) &&
+                (table.getName().length() > 0))
+            {
+                writeTableComment(table);
+                dropTable(table);
+            }
         }
     }
 

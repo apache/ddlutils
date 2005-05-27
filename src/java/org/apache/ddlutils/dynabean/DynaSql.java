@@ -626,6 +626,10 @@ public class DynaSql extends JdbcSupport {
         {
             statement.setNull(sqlIndex, property.getColumn().getTypeCode());
         }
+        else if (value instanceof String)
+        {
+            statement.setString(sqlIndex, (String)value);
+        }
         else
         {
             statement.setObject(sqlIndex, value);
