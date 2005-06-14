@@ -16,8 +16,6 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-import java.sql.SQLException;
-
 import org.apache.commons.beanutils.DynaBean;
 
 /**
@@ -29,9 +27,19 @@ import org.apache.commons.beanutils.DynaBean;
 public interface DataSink
 {
     /**
+     * Notifies the sink that beans will be added.
+     */
+    public void start() throws DataSinkException;
+
+    /**
      * Adds a dyna bean.
      * 
      * @param bean The dyna bean to add
      */
-    public void addBean(DynaBean bean) throws SQLException;
+    public void addBean(DynaBean bean) throws DataSinkException;
+
+    /**
+     * Notifies the sink that all beans have been added.
+     */
+    public void end()  throws DataSinkException;
 }

@@ -71,21 +71,29 @@ public abstract class JdbcSupport {
     //-------------------------------------------------------------------------                
 
     /**
-     * @return a new JDBC connection from the pool
+     * Returns a (new) JDBC connection from the data source.
+     * 
+     * @return A JDBC connection
      */
-    protected Connection borrowConnection() throws SQLException {
+    public Connection borrowConnection() throws SQLException
+    {
         return getDataSource().getConnection();
     }
     
     /**
-     * Returns a JDBC connection back into the pool
+     * Closes a JDBC connection (returns it back to pool if a poolable datasource).
+     * 
+     * @param connection The connection
      */
-    protected void returnConnection(Connection connection) {
-        try {
+    public void returnConnection(Connection connection)
+    {
+        try
+        {
             connection.close();
         }
-        catch (Exception e) {
-            log.error( "Caught exception while returning connection to pool: " + e, e);
+        catch (Exception e)
+        {
+            log.error("Caught exception while returning connection to pool", e);
         }
     }
 

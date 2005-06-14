@@ -17,11 +17,18 @@ package org.apache.ddlutils.dynabean;
  */
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -38,6 +45,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.builder.SqlBuilder;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.util.Jdbc3Utils;
 import org.apache.ddlutils.util.JdbcSupport;
 
 /**
@@ -416,7 +424,7 @@ public class DynaSql extends JdbcSupport {
      * @param dynaBean   The bean
      * @param connection The database connection
      */
-    protected void insert(DynaBean dynaBean, Connection connection) throws SQLException
+    public void insert(DynaBean dynaBean, Connection connection) throws SQLException
     {
         SqlDynaClass      dynaClass  = getSqlDynaClass(dynaBean);
         SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
@@ -465,7 +473,7 @@ public class DynaSql extends JdbcSupport {
      * @param dynaBean   The bean
      * @param connection The database connection
      */
-    protected void update(DynaBean dynaBean, Connection connection) throws SQLException
+    public void update(DynaBean dynaBean, Connection connection) throws SQLException
     {
         SqlDynaClass      dynaClass   = getSqlDynaClass(dynaBean);
         SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
@@ -589,9 +597,11 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * @return the SqlDynaClass for the given DynaBean or throws an exception if it could not be found
+     * Returns the {@link SqlDynaClass} for the given bean.
+     * 
+     * @return The dyna bean class
      */
-    protected SqlDynaClass getSqlDynaClass(DynaBean dynaBean)
+    public SqlDynaClass getSqlDynaClass(DynaBean dynaBean)
     {
         DynaClass dynaClass = dynaBean.getDynaClass();
 
@@ -620,11 +630,12 @@ public class DynaSql extends JdbcSupport {
      */
     protected void setObject(PreparedStatement statement, int sqlIndex, DynaBean dynaBean, SqlDynaProperty property) throws SQLException
     {
-        Object value = dynaBean.get(property.getName());
+        int    typeCode = property.getColumn().getTypeCode();
+        Object value    = dynaBean.get(property.getName());
 
         if (value == null)
         {
-            statement.setNull(sqlIndex, property.getColumn().getTypeCode());
+            statement.setNull(sqlIndex, typeCode);
         }
         else if (value instanceof String)
         {
@@ -632,8 +643,191 @@ public class DynaSql extends JdbcSupport {
         }
         else
         {
-            statement.setObject(sqlIndex, value);
+            if (Jdbc3Utils.supportsJava14JdbcTypes())
+            {
+                if (typeCode == Jdbc3Utils.determineBooleanTypeCode())
+                {
+                    statement.setBoolean(sqlIndex, ((Boolean)value).booleanValue());
+                    return;
+                }
+            }
+            switch (typeCode)
+            {
+                case Types.BIT :
+                    statement.setBoolean(sqlIndex, ((Boolean)value).booleanValue());
+                    break;
+                case Types.BIGINT :
+                    statement.setLong(sqlIndex, ((Long)convert(value, Long.class)).longValue());
+                    break;
+                case Types.DECIMAL :
+                case Types.NUMERIC :
+                    statement.setBigDecimal(sqlIndex, (BigDecimal)convert(value, BigDecimal.class));
+                    break;
+                case Types.DOUBLE :
+                case Types.FLOAT :
+                    statement.setDouble(sqlIndex, ((Double)convert(value, Double.class)).doubleValue());
+                    break;
+                case Types.INTEGER :
+                    statement.setInt(sqlIndex, ((Integer)convert(value, Integer.class)).intValue());
+                    break;
+                case Types.REAL :
+                    statement.setFloat(sqlIndex, ((Float)convert(value, Float.class)).floatValue());
+                    break;
+                case Types.SMALLINT :
+                case Types.TINYINT :
+                    statement.setShort(sqlIndex, ((Short)convert(value, Short.class)).shortValue());
+                    break;
+                case Types.CHAR :
+                case Types.VARCHAR :
+                case Types.LONGVARCHAR :
+                    statement.setString(sqlIndex, value.toString());
+                    break;
+                case Types.DATE :
+                    statement.setDate(sqlIndex, (Date)value);
+                    break;
+                case Types.TIME :
+                    statement.setTime(sqlIndex, (Time)value);
+                    break;
+                case Types.TIMESTAMP :
+                    statement.setTimestamp(sqlIndex, (Timestamp)value);
+                    break;
+                case Types.BLOB :
+                    statement.setBlob(sqlIndex, (Blob)value);
+                    break;
+                case Types.CLOB :
+                    statement.setClob(sqlIndex, (Clob)value);
+                    break;
+                case Types.NULL :
+                    statement.setNull(sqlIndex, typeCode);
+                    break;
+                default:
+                    statement.setObject(sqlIndex, value);
+                    break;
+            }
         }
+    }
+
+    /**
+     * Tries to convert the given object into an instance of the specified target class. This is mostly
+     * useful to convert between numeric types.
+     * 
+     * @param source      The source object
+     * @param targetClass The target class
+     * @return The converted object
+     */
+    private Object convert(Object source, Class targetClass)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+        
+        Class sourceClass  = source.getClass();
+
+        if (sourceClass.equals(targetClass))
+        {
+            return source;
+        }
+        if (targetClass.equals(String.class))
+        {
+            return source.toString();
+        }
+
+        long    longValue    = 0;
+        double  doubleValue  = 0;
+        boolean toShort      = false;
+        boolean toInteger    = false;
+        boolean toLong       = false;
+        boolean toFloat      = false;
+
+        if (sourceClass.equals(Byte.class))
+        {
+            longValue   = ((Byte)source).longValue();
+            doubleValue = longValue;
+            toShort     = true;
+            toInteger   = true;
+            toLong      = true;
+            toFloat     = true;
+        }
+        else if (sourceClass.equals(Short.class))
+        {
+            longValue   = ((Short)source).longValue();
+            doubleValue = longValue;
+            toShort     = true;
+            toInteger   = true;
+            toLong      = true;
+            toFloat     = true;
+        }
+        else if (sourceClass.equals(Integer.class))
+        {
+            longValue   = ((Integer)source).longValue();
+            doubleValue = longValue;
+            toShort     = (longValue >= (long)Short.MIN_VALUE) && (longValue <= (long)Short.MAX_VALUE);
+            toInteger   = true;
+            toLong      = true;
+            toFloat     = true;
+        }
+        else if (sourceClass.equals(Long.class))
+        {
+            longValue   = ((Long)source).longValue();
+            doubleValue = longValue;
+            toShort     = (longValue >= (long)Short.MIN_VALUE) && (longValue <= (long)Short.MAX_VALUE);
+            toInteger   = (longValue >= (long)Integer.MIN_VALUE) && (longValue <= (long)Integer.MAX_VALUE);
+            toLong      = true;
+            toFloat     = true;
+        }
+        else if (sourceClass.equals(Float.class))
+        {
+            doubleValue = ((Float)source).doubleValue();
+            toFloat     = true;
+        }
+        else if (sourceClass.equals(Double.class))
+        {
+            doubleValue = ((Double)source).doubleValue();
+            toFloat     = (doubleValue >= (double)Float.MIN_VALUE) && (doubleValue <= (double)Float.MAX_VALUE);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Cannot convert from "+sourceClass.getName()+" to "+targetClass.getName());
+        }
+
+        if (targetClass.equals(Short.class))
+        {
+            if (toShort)
+            {
+                return Short.valueOf((short)longValue);
+            }
+        }
+        else if (targetClass.equals(Integer.class))
+        {
+            if (toInteger)
+            {
+                return Integer.valueOf((int)longValue);
+            }
+        }
+        else if (targetClass.equals(Long.class))
+        {
+            if (toLong)
+            {
+                return Long.valueOf(longValue);
+            }
+        }
+        else if (targetClass.equals(Float.class))
+        {
+            if (toFloat)
+            {
+                return Float.valueOf((float)doubleValue);
+            }
+        }
+        else if (targetClass.equals(Double.class))
+        {
+            return Double.valueOf(doubleValue);
+        }
+        else if (targetClass.equals(BigDecimal.class))
+        {
+            return (toLong ? new BigDecimal(longValue) : new BigDecimal(doubleValue));
+        }
+        throw new IllegalArgumentException("Cannot convert from "+sourceClass.getName()+" to "+targetClass.getName());
     }
 
     /**

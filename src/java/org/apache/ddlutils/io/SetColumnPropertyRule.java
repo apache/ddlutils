@@ -1,0 +1,80 @@
+package org.apache.ddlutils.io;
+
+/*
+ * Copyright 1999-2004 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.digester.Rule;
+import org.apache.ddlutils.io.converters.SqlTypeConverter;
+import org.apache.ddlutils.model.Column;
+import org.xml.sax.Attributes;
+
+/**
+ * A digester rule for setting a bean property that corresponds to a column. 
+ * 
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @version $Revision:$
+ */
+public class SetColumnPropertyRule extends Rule
+{
+    /** The column that this rule shall set */
+    private Column _column;
+    /** The converter for generating the property value from a string */
+    private SqlTypeConverter _converter;
+
+    /**
+     * Creates a new creation rule that sets the property corresponding to the given column.
+     * 
+     * @param column    The column that this rule shall set
+     * @param converter The converter to be used for this column
+     */
+    public SetColumnPropertyRule(Column column, SqlTypeConverter converter)
+    {
+        _column    = column;
+        _converter = converter;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.commons.digester.Rule#begin(org.xml.sax.Attributes)
+     */
+    public void begin(Attributes attributes) throws Exception
+    {
+        Object bean = digester.peek();
+
+        for (int idx = 0; idx < attributes.getLength(); idx++)
+        {
+            String attrName = attributes.getLocalName(idx);
+
+            if ("".equals(attrName))
+            {
+                attrName = attributes.getQName(idx);
+            }
+            if (attrName.equals(_column.getName()))
+            {
+                String attrValue = attributes.getValue(idx);
+                Object propValue = (_converter != null ? _converter.convertFromString(attrValue, _column.getTypeCode()) : attrValue);
+
+                if (digester.getLogger().isDebugEnabled())
+                {
+                    digester.getLogger().debug("[SetColumnPropertyRule]{" + digester.getMatch() +
+                                               "} Setting property '" + attrName + "' to '" + propValue + "'");
+                }
+
+                PropertyUtils.setProperty(bean, attrName, propValue);
+            }
+        }
+    }
+}

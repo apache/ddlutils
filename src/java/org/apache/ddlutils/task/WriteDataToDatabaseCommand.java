@@ -85,8 +85,10 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
         {
             SqlBuilder         builder = SqlBuilderFactory.newSqlBuilder(_databaseType);
             DataToDatabaseSink sink    = new DataToDatabaseSink(_dataSource, model, builder);
-            DataReader         reader  = new DataReader(model, sink);
+            DataReader         reader  = new DataReader();
 
+            reader.setModel(model);
+            reader.setSink(sink);
             if ((_singleDataFile != null) && !_fileSets.isEmpty())
             {
                 throw new BuildException("Please use either the datafile attribute or the sub fileset element, but not both");

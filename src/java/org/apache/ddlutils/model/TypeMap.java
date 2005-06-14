@@ -16,9 +16,10 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
-import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.Hashtable;
+
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * A class that maps SQL type names to their JDBC type ID found in
@@ -112,28 +113,11 @@ public class TypeMap
         registerSqlTypeID(Types.VARCHAR,       VARCHAR);
 
         // only available in JDK 1.4 and above:
-        try
+        if (Jdbc3Utils.supportsJava14JdbcTypes())
         {
-            Field datalinkField = Types.class.getField(DATALINK);
-
-            if (datalinkField != null)
-            {
-                registerSqlTypeID(datalinkField.getInt(null), DATALINK);
-            }
+            registerSqlTypeID(Jdbc3Utils.determineBooleanTypeCode(),  BOOLEAN);
+            registerSqlTypeID(Jdbc3Utils.determineDatalinkTypeCode(), DATALINK);
         }
-        catch (Exception ex)
-        {}
-        try
-        {
-            Field booleanField = Types.class.getField(BOOLEAN);
-
-            if (booleanField != null)
-            {
-                registerSqlTypeID(booleanField.getInt(null), BOOLEAN);
-            }
-        }
-        catch (Exception ex)
-        {}
     }
 
     

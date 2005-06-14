@@ -19,6 +19,7 @@ package org.apache.ddlutils.io;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.digester.Rule;
 import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.model.Table;
 import org.xml.sax.Attributes;
 
 /**
@@ -31,6 +32,8 @@ public class DynaSqlCreateRule extends Rule
 {
     /** The dyna sql instance to use for creating the dyna beans */
     private DynaSql _dynaSql;
+    /** The table that we're creating instances for */
+    private Table   _table;
     /** The object that will receive the read beans */
     private DataSink _receiver;
 
@@ -38,11 +41,13 @@ public class DynaSqlCreateRule extends Rule
      * Creates a new creation rule that creates dyna bean instances.
      * 
      * @param dynaSql  The dyna sql instance to use for creating the dyna beans
+     * @param table    The table that we're creating instances for
      * @param receiver The object that will receive the read beans
      */
-    public DynaSqlCreateRule(DynaSql dynaSql, DataSink receiver)
+    public DynaSqlCreateRule(DynaSql dynaSql, Table table, DataSink receiver)
     {
         _dynaSql  = dynaSql;
+        _table    = table;
         _receiver = receiver;
     }
 
@@ -51,11 +56,11 @@ public class DynaSqlCreateRule extends Rule
      */
     public void begin(String namespace, String name, Attributes attributes) throws Exception
     {
-        Object instance = _dynaSql.newInstance(name);
+        Object instance = _dynaSql.newInstance(_table.getName());
 
         if (digester.getLogger().isDebugEnabled())
         {
-            digester.getLogger().debug("[DynaSqlCreateRule]{" + digester.getMatch() + "} New dyna bean '" + name + "'");
+            digester.getLogger().debug("[DynaSqlCreateRule]{" + digester.getMatch() + "} New dyna bean '" + _table.getName() + "' created");
         }
         digester.push(instance);
     }

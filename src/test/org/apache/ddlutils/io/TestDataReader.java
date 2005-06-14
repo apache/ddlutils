@@ -81,13 +81,21 @@ public class TestDataReader extends TestCase
         DatabaseReader  modelReader = new DatabaseReader();
         Database        model       = (Database)modelReader.parse(new StringReader(TEST_SCHEMA));
         final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader(model, new DataSink() {
-            public void addBean(DynaBean bean)
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new DataSink() {
+            public void start() throws DataSinkException
+            {}
+
+            public void addBean(DynaBean bean) throws DataSinkException
             {
                 readObjects.add(bean);
             }
-        });
 
+            public void end() throws DataSinkException
+            {}
+        });
         dataReader.parse(new StringReader(TEST_DATA));
 
         assertEquals(5, readObjects.size());
@@ -120,8 +128,8 @@ public class TestDataReader extends TestCase
                      obj3.get("isbn").toString());
         assertEquals("Old Man And The Sea",
                      obj3.get("title").toString());
-        assertEquals("1952",
-                     obj3.get("issue_date").toString());
+        assertEquals("1952-01-01",
+                     obj3.get("issue_date").toString());    // parsed as a java.sql.Date
         assertEquals("book",
                      obj4.getDynaClass().getName());
         assertEquals("2",
@@ -132,8 +140,8 @@ public class TestDataReader extends TestCase
                      obj4.get("isbn").toString());
         assertEquals("Macbeth",
                      obj4.get("title").toString());
-        assertEquals("1606",
-                     obj4.get("issue_date").toString());
+        assertEquals("1606-01-01",
+                     obj4.get("issue_date").toString());    // parsed as a java.sql.Date
         assertEquals("book",
                      obj5.getDynaClass().getName());
         assertEquals("3",
@@ -144,7 +152,7 @@ public class TestDataReader extends TestCase
                      obj5.get("isbn").toString());
         assertEquals("A Midsummer Night's Dream",
                      obj5.get("title").toString());
-        assertEquals("1595",
-                     obj5.get("issue_date").toString());
+        assertEquals("1595-01-01",
+                     obj5.get("issue_date").toString());    // parsed as a java.sql.Date
     }
 }
