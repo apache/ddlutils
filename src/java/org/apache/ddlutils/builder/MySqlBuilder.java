@@ -88,4 +88,14 @@ public class MySqlBuilder extends SqlBuilder
          */
         return true;
     }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getSelectLastInsertId(org.apache.ddlutils.model.Table)
+     */
+    public String getSelectLastInsertId(Table table)
+    {
+        return "SELECT LAST_INSERT_ID()";
+    }
+
+    
 }

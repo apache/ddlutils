@@ -30,8 +30,10 @@ public class Identity
 {
     /** The name of the table */
     private String _tableName;
+    /** The optional foreign key name whose referenced object this identity represents */
+    private String _fkName;
     /** The identity columns and their values */
-    private HashMap _columnValues;
+    private HashMap _columnValues = new HashMap();
 
     /**
      * Creates a new identity object for the indicated table.
@@ -43,6 +45,29 @@ public class Identity
         _tableName = tableName;
     }
 
+    /**
+     * Creates a new identity object for the indicated table.
+     * 
+     * @param tableName The name of the table
+     * @param fkName    The name of the foreign key whose referenced object this identity represents
+     */
+    public Identity(String tableName, String fkName)
+    {
+        _tableName = tableName;
+    }
+
+    /**
+     * Returns the name of the foreign key whose referenced object this identity represents. This
+     * name is <code>null</code> if the identity is not for a foreign key, or if the foreign key
+     * was unnamed.
+     * 
+     * @return The foreign key name
+     */
+    public String getForeignKeyName()
+    {
+        return _fkName;
+    }
+    
     /**
      * Specifies the value for one of the identity columns.
      * 
@@ -115,7 +140,7 @@ public class Identity
 
         buffer.append(_tableName);
         buffer.append(":");
-        for (Iterator it = _columnValues.keySet().iterator(); it.hasNext();)
+        for (Iterator it = _columnValues.entrySet().iterator(); it.hasNext();)
         {
             Map.Entry entry = (Map.Entry)it.next();
 

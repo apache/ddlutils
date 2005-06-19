@@ -133,8 +133,25 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        print("DEFAULT nextval('");
+        print("UNIQUE DEFAULT nextval('");
         print(getConstraintName(null, table, column.getName(), "seq"));
-        print(" UNIQUE");
+        print("')");
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getSelectLastInsertId(org.apache.ddlutils.model.Table)
+     */
+    public String getSelectLastInsertId(Table table)
+    {
+        Column autoIncrColumn = table.getAutoIncrementColumn();
+
+        if (autoIncrColumn == null)
+        {
+            return null;
+        }
+        else
+        {
+            return "SELECT CURRVAL('" + getConstraintName(null, table, autoIncrColumn.getName(), "seq") + "') AS " + autoIncrColumn.getName();
+        }
     }
 }

@@ -16,7 +16,6 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,12 +24,29 @@ import java.util.List;
 //       create/alter/drop
 public class ForeignKey implements Cloneable
 {
+    private String name;
     private String foreignTable;
         
     private ArrayList references = new ArrayList();
+
+    /**
+     * Creates a new foreign key object.
+     */
+    public ForeignKey()
+    {
+        this(null);
+    }
     
-    public ForeignKey() {}
-    
+    /**
+     * Creates a new foreign key object.
+     * 
+     * @param name The name of the foreignkey
+     */
+    public ForeignKey(String name)
+    {
+        this.name = name;
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
@@ -43,6 +59,16 @@ public class ForeignKey implements Cloneable
         return result;
     }
 
+    /**
+     * Returns the name of this foreign key.
+     * 
+     * @return The name
+     */
+    public String getName()
+    {
+        return name;
+    }
+    
     public String getForeignTable()
     {
         return foreignTable;

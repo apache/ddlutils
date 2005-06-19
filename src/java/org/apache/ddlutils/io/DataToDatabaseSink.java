@@ -26,8 +26,11 @@ import java.util.Iterator;
 import javax.sql.DataSource;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.builder.SqlBuilder;
 import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -41,6 +44,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class DataToDatabaseSink implements DataSink
 {
+    /** Our log */
+    private final Log _log = LogFactory.getLog(DataToDatabaseSink.class);
+ 
     /** Generates the sql and writes it to the database */
     private DynaSql _dynaSql;
     /** The connection to the database */
@@ -211,7 +217,7 @@ public class DataToDatabaseSink implements DataSink
             }
             else
             {
-                // TODO: log error
+                _log.warn("Exception while inserting a bean into the database", ex);
             }
         }
         if (_processedIdentities.containsKey(table.getName()))
@@ -223,12 +229,15 @@ public class DataToDatabaseSink implements DataSink
             for (Iterator waitingObjIt = _waitingObjects.iterator(); waitingObjIt.hasNext();)
             {
                 WaitingObject waitingObj = (WaitingObject)waitingObjIt.next();
+                Identity      fkIdentity = waitingObj.removePendingFK(identity);
 
-                waitingObj.removePendingFK(identity);
                 if (!waitingObj.hasPendingFKs())
                 {
                     waitingObjIt.remove();
                     // the object was only waiting for this one, so store it now
+                    // prior to that we also update the fk fields in case one of the pk
+                    // columns of the target object is auto-incremented by the database
+                    updateFKColumns(waitingObj.getObject(), bean, fkIdentity.getForeignKeyName());
                     addBean(waitingObj.getObject());
                 }
             }
@@ -266,7 +275,7 @@ public class DataToDatabaseSink implements DataSink
      */
     private Identity buildIdentityFromFK(ForeignKey fk, DynaBean bean)
     {
-        Identity identity = new Identity(fk.getForeignTable());
+        Identity identity = new Identity(fk.getForeignTable(), fk.getName());
 
         for (Iterator refIt = fk.getReferences().iterator(); refIt.hasNext();)
         {
@@ -275,5 +284,56 @@ public class DataToDatabaseSink implements DataSink
             identity.setIdentityColumn(reference.getForeign(), bean.get(reference.getLocal()));
         }
         return identity;
+    }
+
+    /**
+     * Updates the values of the columns constituting the foreign key between the two given beans to
+     * the current values of the primary key columns of the referenced bean.
+     * 
+     * @param referencingBean The referencing bean whose foreign key columns shall be updated
+     * @param referencedBean  The referenced bean whose primary key column values will be used
+     * @param fkName          The name of the foreign key
+     */
+    private void updateFKColumns(DynaBean referencingBean, DynaBean referencedBean, String fkName)
+    {
+        Table      sourceTable = ((SqlDynaClass)referencingBean.getDynaClass()).getTable();
+        Table      targetTable = ((SqlDynaClass)referencedBean.getDynaClass()).getTable();
+        ForeignKey fk          = null;
+
+        for (Iterator it = sourceTable.getForeignKeys().iterator(); it.hasNext();)
+        {
+            ForeignKey curFk = (ForeignKey)it.next();
+
+            if (curFk.getForeignTable().equalsIgnoreCase(targetTable.getName()))
+            {
+                if (fkName == null)
+                {
+                    if (curFk.getName() == null)
+                    {
+                        fk = curFk;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (fkName.equals(curFk.getName()))
+                    {
+                        fk = curFk;
+                        break;
+                    }
+                }
+            }
+        }
+        if (fk != null)
+        {
+            for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
+            {
+                Reference curRef       = (Reference)it.next();
+                Column    sourceColumn = sourceTable.findColumn(curRef.getLocal());
+                Column    targetColumn = targetTable.findColumn(curRef.getForeign());
+
+                referencingBean.set(sourceColumn.getName(), referencedBean.get(targetColumn.getName()));
+            }
+        }
     }
 }

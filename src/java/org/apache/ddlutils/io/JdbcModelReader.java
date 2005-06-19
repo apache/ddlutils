@@ -63,7 +63,7 @@ public class JdbcModelReader
     /** The database schema to read */
     private String schema = "%";
     /** The table types to recognize */
-    private String[] tableTypes = { "TABLE", "VIEW" };
+    private String[] tableTypes = { "TABLE" };
     /** The patern to recognize when parsing a default value */
     private Pattern defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)");
 
@@ -328,7 +328,7 @@ public class JdbcModelReader
                     {
                         fks.add(currFk);
                     }
-                    currFk = new ForeignKey();
+                    currFk = new ForeignKey(getValueAsString(fkData, "FK_NAME", availableColumns, null));
                     currFk.setForeignTable(pkTable);
                     prevPkTable = pkTable;
                 }

@@ -984,10 +984,15 @@ public abstract class SqlBuilder {
         buffer.append(") VALUES (");
         if (genPlaceholders)
         {
-            buffer.append("?");
-            for (int idx = 1; idx < columnValues.size(); idx++)
+            addComma = false;
+            for (int idx = 0; idx < columnValues.size(); idx++)
             {
-                buffer.append(", ?");
+                if (addComma)
+                {
+                    buffer.append(", ");
+                }
+                buffer.append("?");
+                addComma = true;
             }
         }
         else
@@ -1125,6 +1130,20 @@ public abstract class SqlBuilder {
             }
         }
         return buffer.toString();
+    }
+
+    /**
+     * Generates the SQL for querying the id that was created in the last insertion
+     * operation. This is obviously only useful for pk fields that are auto-incrementing.
+     * A database that does not support this, will return <code>null</code>.
+     * 
+     * @param table The table
+     * @return The sql, or <code>null</code> if the database does not support this
+     */
+    public String getSelectLastInsertId(Table table)
+    {
+        // No default possible as the databases are quite different in this respect
+        return null;
     }
 
     //
@@ -1489,7 +1508,7 @@ public abstract class SqlBuilder {
      * @param suffix     The constraint suffix, e.g. a counter (can be <code>null</code>)
      * @return The constraint name
      */
-    protected String getConstraintName(String prefix, Table table, String secondPart, String suffix) throws IOException
+    protected String getConstraintName(String prefix, Table table, String secondPart, String suffix)
     {
         StringBuffer result = new StringBuffer();
         

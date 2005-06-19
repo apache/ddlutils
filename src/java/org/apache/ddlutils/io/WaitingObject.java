@@ -1,6 +1,7 @@
 package org.apache.ddlutils.io;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 
@@ -14,7 +15,7 @@ public class WaitingObject
     /** The object that is waiting for insertion */
     private DynaBean _obj;
     /** The identities of the waited-for objects */
-    private HashSet _waitedForIdentites = new HashSet();
+    private List _waitedForIdentites = new ArrayList();
 
     /**
      * Creates a new <code>WaitingObject</code> instance for the given object.
@@ -50,10 +51,19 @@ public class WaitingObject
      * Removes the specified identity from list of identities of the waited-for objects.
      * 
      * @param fkIdentity The identity to remove
+     * @return The removed identity if any
      */
-    public void removePendingFK(Identity fkIdentity)
+    public Identity removePendingFK(Identity fkIdentity)
     {
-        _waitedForIdentites.remove(fkIdentity);
+        Identity result = null;
+        int      idx    = _waitedForIdentites.indexOf(fkIdentity);
+
+        if (idx >= 0)
+        {
+            result = (Identity)_waitedForIdentites.get(idx);
+            _waitedForIdentites.remove(idx);
+        }
+        return result;
     }
 
     /**
