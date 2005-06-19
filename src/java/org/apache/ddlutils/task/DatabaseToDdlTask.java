@@ -18,6 +18,7 @@ package org.apache.ddlutils.task;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.io.JdbcModelReader;
@@ -34,6 +35,12 @@ public class DatabaseToDdlTask extends Task
     private String _databaseType;
     /** The data source to use for accessing the database */
     private BasicDataSource _dataSource;
+    /** The specific schema to use */
+    private String _schema;
+    /** The specific catalog to use */
+    private String _catalog;
+    /** The table types to recognize when reading the model from the database */
+    private String _tableTypes;
     /** The sub tasks to execute */
     private ArrayList _commands = new ArrayList();
 
@@ -45,6 +52,36 @@ public class DatabaseToDdlTask extends Task
     public void setDatabaseType(String type)
     {
         _databaseType = type;
+    }
+
+    /**
+     * Sets the database schema to access.
+     * 
+     * @param schema The schema
+     */
+    public void setSchema(String schema)
+    {
+        _schema = schema;
+    }
+
+    /**
+     * Sets the database catalog to access.
+     * 
+     * @param catalog The catalog
+     */
+    public void setCatalog(String catalog)
+    {
+        _catalog = catalog;
+    }
+
+    /**
+     * Sets the table types ro recognize.
+     * 
+     * @param tableTypes The table types as a comma-separated list
+     */
+    public void setTableTypes(String tableTypes)
+    {
+        _tableTypes = tableTypes;
     }
 
     /**
@@ -98,7 +135,34 @@ public class DatabaseToDdlTask extends Task
     }
 
     /**
-     * Reads the schemas from the specified database.
+     * Returns the table types to recognize.
+     * 
+     * @return The table types
+     */
+    private String[] getTableTypes()
+    {
+        if ((_tableTypes == null) || (_tableTypes.length() == 0))
+        {
+            return new String[0];
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(_tableTypes, ",");
+        ArrayList       result    = new ArrayList();
+
+        while (tokenizer.hasMoreTokens())
+        {
+            String token = tokenizer.nextToken().trim();
+
+            if (token.length() > 0)
+            {
+                result.add(token);
+            }
+        }
+        return (String[])result.toArray(new String[result.size()]);
+    }
+
+    /**
+     * Reads the schema(s) from the specified database.
      * 
      * @return The database model
      */
@@ -118,6 +182,21 @@ public class DatabaseToDdlTask extends Task
         {
             JdbcModelReader reader = new JdbcModelReader(_dataSource.getConnection());
 
+            if ((_catalog != null) && (_catalog.length() > 0))
+            {
+                reader.setCatalog(_catalog);
+            }
+            if ((_schema != null) && (_schema.length() > 0))
+            {
+                reader.setSchema(_schema);
+            }
+
+            String[] tableTypes = getTableTypes();
+
+            if (tableTypes.length > 0)
+            {
+                reader.setTableTypes(tableTypes);
+            }
             return reader.getDatabase();
         }
         catch (Exception ex)
