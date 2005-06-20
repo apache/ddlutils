@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import javax.sql.DataSource;
-
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -184,17 +182,34 @@ public class DataToDatabaseSink implements DataSink
 
             for (Iterator fkIt = table.getForeignKeys().iterator(); fkIt.hasNext();)
             {
-                ForeignKey fk                 = (ForeignKey)fkIt.next();
-                Identity   fkIdentity         = buildIdentityFromFK(fk, bean);
-                HashSet    identitiesForTable = (HashSet)_processedIdentities.get(fk.getForeignTable());
+                ForeignKey fk         = (ForeignKey)fkIt.next();
+                Identity   fkIdentity = buildIdentityFromFK(fk, bean);
 
-                if (!identitiesForTable.contains(fkIdentity))
+                if (fkIdentity != null)
                 {
-                    waitingObj.addPendingFK(fkIdentity);
+                    HashSet identitiesForTable = (HashSet)_processedIdentities.get(fk.getForeignTable());
+    
+                    if (!identitiesForTable.contains(fkIdentity))
+                    {
+                        waitingObj.addPendingFK(fkIdentity);
+                    }
                 }
             }
             if (waitingObj.hasPendingFKs())
             {
+                if (_log.isDebugEnabled())
+                {
+                    StringBuffer msg = new StringBuffer();
+                    msg.append("Defering insertion of bean ");
+                    msg.append(buildIdentityFromPKs(table, bean).toString());
+                    msg.append(" because it is waiting for:");
+                    for (Iterator it = waitingObj.getPendingFKs(); it.hasNext();)
+                    {
+                        msg.append("\n  ");
+                        msg.append(it.next().toString());
+                    }
+                    _log.debug(msg.toString());
+                }
                 _waitingObjects.add(waitingObj);
                 return;
             }
@@ -207,6 +222,10 @@ public class DataToDatabaseSink implements DataSink
             {
                 _connection.commit();
             }
+            if (_log.isDebugEnabled())
+            {
+                _log.debug("Inserted bean "+buildIdentityFromPKs(table, bean).toString());
+            }
         }
         catch (SQLException ex)
         {
@@ -217,7 +236,7 @@ public class DataToDatabaseSink implements DataSink
             }
             else
             {
-                _log.warn("Exception while inserting a bean into the database", ex);
+                _log.debug("Exception while inserting a bean into the database", ex);
             }
         }
         if (_processedIdentities.containsKey(table.getName()))
@@ -239,6 +258,12 @@ public class DataToDatabaseSink implements DataSink
                     // columns of the target object is auto-incremented by the database
                     updateFKColumns(waitingObj.getObject(), bean, fkIdentity.getForeignKeyName());
                     addBean(waitingObj.getObject());
+                    if (_log.isDebugEnabled())
+                    {
+                        Table waitingObjTable = ((SqlDynaClass)waitingObj.getObject().getDynaClass()).getTable();
+
+                        _log.debug("Inserted deferred bean "+buildIdentityFromPKs(waitingObjTable, waitingObj.getObject()));
+                    }
                 }
             }
         }
@@ -280,8 +305,13 @@ public class DataToDatabaseSink implements DataSink
         for (Iterator refIt = fk.getReferences().iterator(); refIt.hasNext();)
         {
             Reference reference = (Reference)refIt.next();
+            Object    value     = bean.get(reference.getLocal());
 
-            identity.setIdentityColumn(reference.getForeign(), bean.get(reference.getLocal()));
+            if (value == null)
+            {
+                return null;
+            }
+            identity.setIdentityColumn(reference.getForeign(), value);
         }
         return identity;
     }

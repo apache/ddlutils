@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1094,7 +1095,7 @@ public abstract class SqlBuilder {
      * delete statement usable in a prepared statement is build.
      * 
      * @param table           The table
-     * @param pkValues        The primary key values indexed by the column names
+     * @param pkValues        The primary key values indexed by the column names, can be empty
      * @param genPlaceholders Whether to generate value placeholders for a
      *                        prepared statement
      * @return The delete sql
@@ -1105,18 +1106,19 @@ public abstract class SqlBuilder {
         boolean      addSep = false;
 
         buffer.append(getTableName(table));
-        buffer.append(" WHERE ");
-        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        if ((pkValues != null) && !pkValues.isEmpty())
         {
-            Column column = (Column)it.next();
-
-            if (column.isPrimaryKey() && pkValues.containsKey(column.getName()))
+            buffer.append(" WHERE ");
+            for (Iterator it = pkValues.entrySet().iterator(); it.hasNext();)
             {
+                Map.Entry entry  = (Map.Entry)it.next();
+                Column    column = table.findColumn((String)entry.getKey());
+    
                 if (addSep)
                 {
                     buffer.append(" AND ");
                 }
-                buffer.append(column.getName());
+                buffer.append(entry.getKey());
                 buffer.append(" = ");
                 if (genPlaceholders)
                 {
@@ -1124,7 +1126,7 @@ public abstract class SqlBuilder {
                 }
                 else
                 {
-                    buffer.append(getValueAsString(column, pkValues.get(column.getName())));
+                    buffer.append(column == null ? entry.getValue() : getValueAsString(column, entry.getValue()));
                 }
                 addSep = true;
             }

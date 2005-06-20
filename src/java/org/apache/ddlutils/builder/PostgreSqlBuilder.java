@@ -33,7 +33,10 @@ import org.apache.ddlutils.model.Table;
  */
 public class PostgreSqlBuilder extends SqlBuilder
 {
-    public PostgreSqlBuilder() 
+    /** Database name of this builder */
+    public static final String DATABASENAME = "PostgreSql";
+
+    public PostgreSqlBuilder()
     {
         // this is the default length though it might be changed when building PostgreSQL
         // in file src/include/postgres_ext.h
@@ -44,6 +47,7 @@ public class PostgreSqlBuilder extends SqlBuilder
         setIndicesEmbedded(false);
         addNativeTypeMapping(Types.ARRAY,         "BYTEA");
         addNativeTypeMapping(Types.BINARY,        "BYTEA");
+        addNativeTypeMapping(Types.BIT,           "BOOLEAN");
         addNativeTypeMapping(Types.BLOB,          "BYTEA");
         addNativeTypeMapping(Types.CLOB,          "TEXT");
         addNativeTypeMapping(Types.DECIMAL,       "NUMERIC");
@@ -68,7 +72,7 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "PostgreSql";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

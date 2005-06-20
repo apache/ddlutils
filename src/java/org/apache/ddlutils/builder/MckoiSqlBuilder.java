@@ -31,6 +31,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class MckoiSqlBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "McKoi";
+
     public MckoiSqlBuilder()
     {
         setForeignKeysEmbedded(false);
@@ -46,7 +49,7 @@ public class MckoiSqlBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "Mckoi";
+        return DATABASENAME;
     }
 
     public void dropTable(Table table) throws IOException

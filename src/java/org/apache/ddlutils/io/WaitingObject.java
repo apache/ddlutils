@@ -1,6 +1,7 @@
 package org.apache.ddlutils.io;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
@@ -45,6 +46,16 @@ public class WaitingObject
     public void addPendingFK(Identity fkIdentity)
     {
         _waitedForIdentites.add(fkIdentity);
+    }
+
+    /**
+     * Returns the identities of the object that this object is waiting for.
+     * 
+     * @return The identities
+     */
+    public Iterator getPendingFKs()
+    {
+        return _waitedForIdentites.iterator();
     }
 
     /**

@@ -24,11 +24,14 @@ package org.apache.ddlutils.builder;
  */
 public class MaxDbBuilder extends SapDbBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "MaxDB";
+
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
      */
     public String getDatabaseName()
     {
-        return "MaxDB";
+        return DATABASENAME;
     }
 }

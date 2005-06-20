@@ -29,6 +29,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class CloudscapeBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "Cloudscape";
+
     public CloudscapeBuilder()
     {
         setPrimaryKeyEmbedded(false);
@@ -48,7 +51,7 @@ public class CloudscapeBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "Cloudscape";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

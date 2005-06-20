@@ -31,6 +31,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class Db2Builder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "DB2";
+
     public Db2Builder()
     {
         setPrimaryKeyEmbedded(false);
@@ -51,7 +54,7 @@ public class Db2Builder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "DB2";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

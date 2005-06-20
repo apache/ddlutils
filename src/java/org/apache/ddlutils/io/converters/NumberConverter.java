@@ -19,6 +19,7 @@ package org.apache.ddlutils.io.converters;
 import java.math.BigDecimal;
 import java.sql.Types;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
@@ -37,46 +38,44 @@ public class NumberConverter implements SqlTypeConverter
         }
         else
         {
-            if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-                (sqlTypeCode == Jdbc3Utils.determineBooleanTypeCode()))
-            {
-                return Boolean.valueOf(textRep);
-            }
+            Object result      = textRep;
+            Class  targetClass = null;
+
             switch (sqlTypeCode)
             {
                 case Types.BIGINT:
-                    return Long.valueOf(textRep);
+                    targetClass = Long.class;
+                    break;
                 case Types.BIT:
-                    int value = Byte.parseByte(textRep);
-
-                    if (value == 0)
-                    {
-                        return Boolean.FALSE;
-                    }
-                    else if (value == 1)
-                    {
-                        return Boolean.TRUE;
-                    }
-                    else
-                    {
-                        throw new IllegalArgumentException("Cannot convert string "+textRep);
-                    }
+                    targetClass = Boolean.class;
+                    break;
                 case Types.DECIMAL:
                 case Types.NUMERIC:
-                    return new BigDecimal(textRep);
+                    targetClass = BigDecimal.class;
+                    break;
                 case Types.DOUBLE:
                 case Types.FLOAT:
-                    return Double.valueOf(textRep);
+                    targetClass = Double.class;
+                    break;
                 case Types.INTEGER:
-                    return Integer.valueOf(textRep);
+                    targetClass = Integer.class;
+                    break;
                 case Types.REAL:
-                    return Float.valueOf(textRep);
+                    targetClass = Float.class;
+                    break;
                 case Types.SMALLINT:
                 case Types.TINYINT:
-                    return Short.valueOf(textRep);
+                    targetClass = Short.class;
+                    break;
                 default:
-                    return textRep;
+                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
+                        (sqlTypeCode == Jdbc3Utils.determineBooleanTypeCode()))
+                    {
+                        targetClass = Boolean.class;
+                    }
+                    break;
             }
+            return targetClass == null ? textRep : ConvertUtils.convert(textRep, targetClass);
         }
     }
 

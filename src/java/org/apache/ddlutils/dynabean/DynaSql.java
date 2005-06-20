@@ -18,24 +18,16 @@ package org.apache.ddlutils.dynabean;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
@@ -47,7 +39,6 @@ import org.apache.ddlutils.builder.SqlBuilder;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.util.Jdbc3Utils;
 import org.apache.ddlutils.util.JdbcSupport;
 
 /**
@@ -726,67 +717,7 @@ public class DynaSql extends JdbcSupport {
         }
         else
         {
-            if (Jdbc3Utils.supportsJava14JdbcTypes())
-            {
-                if (typeCode == Jdbc3Utils.determineBooleanTypeCode())
-                {
-                    statement.setBoolean(sqlIndex, ((Boolean)value).booleanValue());
-                    return;
-                }
-            }
-            switch (typeCode)
-            {
-                case Types.BIT :
-                    statement.setBoolean(sqlIndex, ((Boolean)value).booleanValue());
-                    break;
-                case Types.BIGINT :
-                    statement.setLong(sqlIndex, ((Long)convert(value, Long.class)).longValue());
-                    break;
-                case Types.DECIMAL :
-                case Types.NUMERIC :
-                    statement.setBigDecimal(sqlIndex, (BigDecimal)convert(value, BigDecimal.class));
-                    break;
-                case Types.DOUBLE :
-                case Types.FLOAT :
-                    statement.setDouble(sqlIndex, ((Double)convert(value, Double.class)).doubleValue());
-                    break;
-                case Types.INTEGER :
-                    statement.setInt(sqlIndex, ((Integer)convert(value, Integer.class)).intValue());
-                    break;
-                case Types.REAL :
-                    statement.setFloat(sqlIndex, ((Float)convert(value, Float.class)).floatValue());
-                    break;
-                case Types.SMALLINT :
-                case Types.TINYINT :
-                    statement.setShort(sqlIndex, ((Short)convert(value, Short.class)).shortValue());
-                    break;
-                case Types.CHAR :
-                case Types.VARCHAR :
-                case Types.LONGVARCHAR :
-                    statement.setString(sqlIndex, value.toString());
-                    break;
-                case Types.DATE :
-                    statement.setDate(sqlIndex, (Date)value);
-                    break;
-                case Types.TIME :
-                    statement.setTime(sqlIndex, (Time)value);
-                    break;
-                case Types.TIMESTAMP :
-                    statement.setTimestamp(sqlIndex, (Timestamp)value);
-                    break;
-                case Types.BLOB :
-                    statement.setBlob(sqlIndex, (Blob)value);
-                    break;
-                case Types.CLOB :
-                    statement.setClob(sqlIndex, (Clob)value);
-                    break;
-                case Types.NULL :
-                    statement.setNull(sqlIndex, typeCode);
-                    break;
-                default:
-                    statement.setObject(sqlIndex, value);
-                    break;
-            }
+            statement.setObject(sqlIndex, value, typeCode);
         }
     }
 

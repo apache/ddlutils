@@ -89,18 +89,18 @@ public class SqlBuilderFactory
      */
     protected static void registerDatabases()
     {
-        registerDatabase("axion",      AxionBuilder.class);
-        registerDatabase("cloudscape", CloudscapeBuilder.class);
-        registerDatabase("db2",        Db2Builder.class);
-        registerDatabase("firebird",   FirebirdBuilder.class);
-        registerDatabase("hsqldb",     HsqlDbBuilder.class);
-        registerDatabase("maxdb",      MaxDbBuilder.class);
-        registerDatabase("mckoi",      MckoiSqlBuilder.class);
-        registerDatabase("mssql",      MSSqlBuilder.class);
-        registerDatabase("mysql",      MySqlBuilder.class);
-        registerDatabase("oracle",     OracleBuilder.class);
-        registerDatabase("postgresql", PostgreSqlBuilder.class);
-        registerDatabase("sapdb",      SapDbBuilder.class);
-        registerDatabase("sybase",     SybaseBuilder.class);
+        registerDatabase(AxionBuilder.DATABASENAME,      AxionBuilder.class);
+        registerDatabase(CloudscapeBuilder.DATABASENAME, CloudscapeBuilder.class);
+        registerDatabase(Db2Builder.DATABASENAME,        Db2Builder.class);
+        registerDatabase(FirebirdBuilder.DATABASENAME,   FirebirdBuilder.class);
+        registerDatabase(HsqlDbBuilder.DATABASENAME,     HsqlDbBuilder.class);
+        registerDatabase(MaxDbBuilder.DATABASENAME,      MaxDbBuilder.class);
+        registerDatabase(MckoiSqlBuilder.DATABASENAME,   MckoiSqlBuilder.class);
+        registerDatabase(MSSqlBuilder.DATABASENAME,      MSSqlBuilder.class);
+        registerDatabase(MySqlBuilder.DATABASENAME,      MySqlBuilder.class);
+        registerDatabase(OracleBuilder.DATABASENAME,     OracleBuilder.class);
+        registerDatabase(PostgreSqlBuilder.DATABASENAME, PostgreSqlBuilder.class);
+        registerDatabase(SapDbBuilder.DATABASENAME,      SapDbBuilder.class);
+        registerDatabase(SybaseBuilder.DATABASENAME,     SybaseBuilder.class);
     }
 }

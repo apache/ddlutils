@@ -33,6 +33,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class MSSqlBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "MsSql";
+
     public MSSqlBuilder()
     {
         setEmbeddedForeignKeysNamed(true);
@@ -59,7 +62,7 @@ public class MSSqlBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "MS SQL Server";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

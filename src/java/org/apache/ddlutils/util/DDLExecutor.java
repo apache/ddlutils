@@ -41,7 +41,7 @@ import org.apache.ddlutils.model.Database;
 public class DDLExecutor extends JdbcSupport {
 
     /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( DDLExecutor.class );
+    private final Log log = LogFactory.getLog( DDLExecutor.class );
     
     /** The Strategy for building SQL for the current physical database */
     private SqlBuilder sqlBuilder;
@@ -180,7 +180,7 @@ public class DDLExecutor extends JdbcSupport {
                     }
                     catch (SQLException e) {
                         log.error("Command " + command + " failed", e);
-                        System.err.println("Command " + command + " failed with " + e);
+                        System.err.println("Command " + command + " failed with " + e.getMessage());
                         errors++;
                     }
                 }

@@ -32,6 +32,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class SybaseBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "Sybase";
+
     public SybaseBuilder()
     {
         // For Sybase a present NULL allows it to save initial storage, so we better create it 
@@ -56,7 +59,7 @@ public class SybaseBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "Sybase";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

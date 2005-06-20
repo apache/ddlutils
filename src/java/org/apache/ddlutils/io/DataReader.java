@@ -19,7 +19,6 @@ package org.apache.ddlutils.io;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
-
 import org.apache.commons.digester.Digester;
 import org.apache.ddlutils.dynabean.DynaSql;
 import org.apache.ddlutils.io.converters.DateConverter;

@@ -30,12 +30,15 @@ import org.apache.ddlutils.model.Table;
  */
 public class HsqlDbBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "HsqlDb";
+
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
      */
     public String getDatabaseName()
     {
-        return "HsqlDb";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

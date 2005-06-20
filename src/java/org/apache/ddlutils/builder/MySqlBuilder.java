@@ -33,6 +33,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class MySqlBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "MySQL";
+
     public MySqlBuilder()
     {
         setForeignKeysEmbedded(true);
@@ -56,7 +59,7 @@ public class MySqlBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "MySQL";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

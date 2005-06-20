@@ -32,6 +32,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class OracleBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "Oracle";
+
     public OracleBuilder()
     {
         setMaxIdentifierLength(30);
@@ -64,7 +67,7 @@ public class OracleBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "Oracle";
+        return DATABASENAME;
     }
 
     public void dropTable(Table table) throws IOException

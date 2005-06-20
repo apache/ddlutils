@@ -29,6 +29,9 @@ import org.apache.ddlutils.model.Column;
  */
 public class SapDbBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "SapDB";
+
     public static final String CHARACTER_TYPE_ASCII   = "ASCII";
     public static final String CHARACTER_TYPE_UNICODE = "UNICODE";
 
@@ -58,7 +61,7 @@ public class SapDbBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "SapDB";
+        return DATABASENAME;
     }
 
     /**

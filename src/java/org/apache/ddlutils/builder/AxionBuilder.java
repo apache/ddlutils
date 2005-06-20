@@ -30,7 +30,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class AxionBuilder extends SqlBuilder
 {
-   
+    /** Database name of this builder */
+    public static final String DATABASENAME = "Axion";
+
     public AxionBuilder()
     {
         setRequiringNullAsDefaultValue(false);
@@ -62,7 +64,7 @@ public class AxionBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "Axion";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)

@@ -31,6 +31,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class FirebirdBuilder extends SqlBuilder
 {
+    /** Database name of this builder */
+    public static final String DATABASENAME = "Firebird";
+
     public FirebirdBuilder()
     {
         setPrimaryKeyEmbedded(true);
@@ -57,7 +60,7 @@ public class FirebirdBuilder extends SqlBuilder
      */
     public String getDatabaseName()
     {
-        return "Firebird";
+        return DATABASENAME;
     }
 
     /* (non-Javadoc)
