@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.collections.SequencedHashMap;
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.model.Column;
@@ -39,7 +38,7 @@ public class Types {
     /**
      * The set of Type instances
      */
-    private SequencedHashMap types = new SequencedHashMap();
+    private ListOrderedMap types = new ListOrderedMap();
 
     /**
      * A list of all mappings, in the order they were registered

@@ -81,7 +81,7 @@ public class DataReader extends Digester
      */
     public void registerConverter(int sqlTypeCode, SqlTypeConverter converter)
     {
-        _converters.put(Integer.valueOf(sqlTypeCode), converter);
+        _converters.put(new Integer(sqlTypeCode), converter);
     }
 
     /**
@@ -92,7 +92,7 @@ public class DataReader extends Digester
      */
     public SqlTypeConverter getRegisteredConverter(int sqlTypeCode)
     {
-        return (SqlTypeConverter)_converters.get(Integer.valueOf(sqlTypeCode));
+        return (SqlTypeConverter)_converters.get(new Integer(sqlTypeCode));
     }
 
     /**

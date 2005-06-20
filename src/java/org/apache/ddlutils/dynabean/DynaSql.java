@@ -878,33 +878,33 @@ public class DynaSql extends JdbcSupport {
         {
             if (toShort)
             {
-                return Short.valueOf((short)longValue);
+                return new Short((short)longValue);
             }
         }
         else if (targetClass.equals(Integer.class))
         {
             if (toInteger)
             {
-                return Integer.valueOf((int)longValue);
+                return new Integer((int)longValue);
             }
         }
         else if (targetClass.equals(Long.class))
         {
             if (toLong)
             {
-                return Long.valueOf(longValue);
+                return new Long(longValue);
             }
         }
         else if (targetClass.equals(Float.class))
         {
             if (toFloat)
             {
-                return Float.valueOf((float)doubleValue);
+                return new Float((float)doubleValue);
             }
         }
         else if (targetClass.equals(Double.class))
         {
-            return Double.valueOf(doubleValue);
+            return new Double(doubleValue);
         }
         else if (targetClass.equals(BigDecimal.class))
         {
