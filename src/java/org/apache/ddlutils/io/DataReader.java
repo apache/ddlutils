@@ -46,7 +46,9 @@ public class DataReader extends Digester
     /** Specifies whether the (lazy) configuration of the digester still needs to be performed */
     private boolean  _needsConfiguration = true;
     /** The converters per type */
-    private HashMap  _converters = new HashMap();
+    private HashMap  _convertersPerType = new HashMap();
+    /** The converters per table-column path */
+    private HashMap  _convertersPerPath = new HashMap();
 
     /**
      * Creates a new data reader instance.
@@ -73,25 +75,44 @@ public class DataReader extends Digester
     }
 
     /**
-     * Registers the given type converter.
+     * Registers the given type converter for an sql type.
      * 
      * @param sqlTypeCode The type code, one of the {@link java.sql.Types} constants
      * @param converter   The converter
      */
     public void registerConverter(int sqlTypeCode, SqlTypeConverter converter)
     {
-        _converters.put(new Integer(sqlTypeCode), converter);
+        _convertersPerType.put(new Integer(sqlTypeCode), converter);
     }
 
     /**
-     * Returns the converter registered for the specified type.
+     * Registers the given type converter for the specified column.
      * 
-     * @param sqlTypeCode The type code, one of the {@link java.sql.Types} constants
+     * @param tableName  The name of the table
+     * @param columnName The name of the column
+     * @param converter  The converter
+     */
+    public void registerConverter(String tableName, String columnName, SqlTypeConverter converter)
+    {
+        _convertersPerPath.put(tableName +"/" + columnName, converter);
+    }
+
+    /**
+     * Returns the converter registered for the specified column.
+     * 
+     * @param table  The table
+     * @param column The column
      * @return The converter
      */
-    public SqlTypeConverter getRegisteredConverter(int sqlTypeCode)
+    public SqlTypeConverter getRegisteredConverter(Table table, Column column)
     {
-        return (SqlTypeConverter)_converters.get(new Integer(sqlTypeCode));
+        SqlTypeConverter result = (SqlTypeConverter)_convertersPerPath.get(table.getName() + "/" + column.getName());
+
+        if (result == null)
+        {
+            result = (SqlTypeConverter)_convertersPerType.get(new Integer(column.getTypeCode()));
+        }
+        return result;
     }
 
     /**
@@ -165,7 +186,7 @@ public class DataReader extends Digester
                 for (Iterator columnIt = table.getColumns().iterator(); columnIt.hasNext();)
                 {
                     Column           column    = (Column)columnIt.next();
-                    SqlTypeConverter converter = getRegisteredConverter(column.getTypeCode());
+                    SqlTypeConverter converter = getRegisteredConverter(table, column);
     
                     addRule(path, new SetColumnPropertyRule(column, converter));
                     addRule(path + "/" + column.getName(), new SetColumnPropertyFromSubElementRule(column, converter));

@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.ddlutils.builder.SqlBuilder;
 import org.apache.ddlutils.builder.SqlBuilderFactory;
+import org.apache.ddlutils.io.DataConverterRegistration;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
@@ -46,6 +47,8 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
     private File _singleDataFile = null;
     /** The input files */
     private ArrayList  _fileSets = new ArrayList();
+    /** The converterd */
+    private ArrayList  _converters = new ArrayList();
 
     /**
      * Adds a fileset.
@@ -55,6 +58,16 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
     public void addConfiguredFileset(FileSet fileset)
     {
         _fileSets.add(fileset);
+    }
+
+    /**
+     * Registers a converter.
+     * 
+     * @param converterRegistration The registration info
+     */
+    public void addConfiguredConverter(DataConverterRegistration converterRegistration)
+    {
+        _converters.add(converterRegistration);
     }
 
     /**
@@ -89,6 +102,26 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
 
             reader.setModel(model);
             reader.setSink(sink);
+            for (Iterator it = _converters.iterator(); it.hasNext();)
+            {
+                DataConverterRegistration registrationInfo = (DataConverterRegistration)it.next();
+
+                if (registrationInfo.getTypeCode() != Integer.MIN_VALUE)
+                {
+                    reader.registerConverter(registrationInfo.getTypeCode(),
+                                             registrationInfo.getConverter());
+                }
+                else
+                {
+                    if ((registrationInfo.getTable() == null) || (registrationInfo.getColumn() == null)) 
+                    {
+                        throw new BuildException("Please specify either the jdbc type or a table/column pair for which the converter shall be defined");
+                    }
+                    reader.registerConverter(registrationInfo.getTable(),
+                                             registrationInfo.getColumn(),
+                                             registrationInfo.getConverter());
+                }
+            }
             if ((_singleDataFile != null) && !_fileSets.isEmpty())
             {
                 throw new BuildException("Please use either the datafile attribute or the sub fileset element, but not both");
