@@ -183,7 +183,7 @@ public class DataToDatabaseSink implements DataSink
             for (Iterator fkIt = table.getForeignKeys().iterator(); fkIt.hasNext();)
             {
                 ForeignKey fk         = (ForeignKey)fkIt.next();
-                Identity   fkIdentity = buildIdentityFromFK(fk, bean);
+                Identity   fkIdentity = buildIdentityFromFK(table, fk, bean);
 
                 if (fkIdentity != null)
                 {
@@ -270,6 +270,54 @@ public class DataToDatabaseSink implements DataSink
     }
 
     /**
+     * Returns the name of the given foreign key. If it has no name, then a temporary one
+     * is generated from the names of the relevant tables and columns.
+     *
+     * @param owningTable    The table owning the fk
+     * @param fk             The foreign key
+     * @return The name
+     */
+    private String getFKName(Table owningTable, ForeignKey fk)
+    {
+        if ((fk.getName() != null) && (fk.getName().length() > 0))
+        {
+            return fk.getName();
+        }
+        else
+        {
+            StringBuffer result = new StringBuffer();
+
+            result.append(owningTable.getName());
+            result.append("[");
+            for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
+            {
+                Reference ref = (Reference)it.next();
+                
+                result.append(ref.getLocal());
+                if (it.hasNext())
+                {
+                    result.append(",");
+                }
+            }
+            result.append("]->");
+            result.append(fk.getForeignTable());
+            result.append("[");
+            for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
+            {
+                Reference ref = (Reference)it.next();
+                
+                result.append(ref.getForeign());
+                if (it.hasNext())
+                {
+                    result.append(",");
+                }
+            }
+            result.append("]");
+            return result.toString();
+        }
+    }
+    
+    /**
      * Builds an identity object from the primary keys of the specified table using the
      * column values of the supplied bean.
      * 
@@ -294,13 +342,14 @@ public class DataToDatabaseSink implements DataSink
      * Builds an identity object for the specified foreign key using the foreignkey column values
      * of the supplied bean.
      * 
-     * @param fk   The foreign key
-     * @param bean The bean
+     * @param owningTable The table owning the foreign key
+     * @param fk          The foreign key
+     * @param bean        The bean
      * @return The identity
      */
-    private Identity buildIdentityFromFK(ForeignKey fk, DynaBean bean)
+    private Identity buildIdentityFromFK(Table owningTable, ForeignKey fk, DynaBean bean)
     {
-        Identity identity = new Identity(fk.getForeignTable(), fk.getName());
+        Identity identity = new Identity(fk.getForeignTable(), getFKName(owningTable, fk));
 
         for (Iterator refIt = fk.getReferences().iterator(); refIt.hasNext();)
         {
@@ -336,21 +385,10 @@ public class DataToDatabaseSink implements DataSink
 
             if (curFk.getForeignTable().equalsIgnoreCase(targetTable.getName()))
             {
-                if (fkName == null)
+                if (fkName.equals(getFKName(sourceTable, curFk)))
                 {
-                    if (curFk.getName() == null)
-                    {
-                        fk = curFk;
-                        break;
-                    }
-                }
-                else
-                {
-                    if (fkName.equals(curFk.getName()))
-                    {
-                        fk = curFk;
-                        break;
-                    }
+                    fk = curFk;
+                    break;
                 }
             }
         }

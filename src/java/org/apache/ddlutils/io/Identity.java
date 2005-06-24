@@ -54,6 +54,7 @@ public class Identity
     public Identity(String tableName, String fkName)
     {
         _tableName = tableName;
+        _fkName    = fkName;
     }
 
     /**
