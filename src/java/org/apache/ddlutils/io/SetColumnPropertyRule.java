@@ -34,6 +34,8 @@ public class SetColumnPropertyRule extends Rule
     private Column _column;
     /** The converter for generating the property value from a string */
     private SqlTypeConverter _converter;
+    /** Whether to be case sensitive or not when comparing the attribute name */
+    private boolean _caseSensitive;
 
     /**
      * Creates a new creation rule that sets the property corresponding to the given column.
@@ -41,10 +43,11 @@ public class SetColumnPropertyRule extends Rule
      * @param column    The column that this rule shall set
      * @param converter The converter to be used for this column
      */
-    public SetColumnPropertyRule(Column column, SqlTypeConverter converter)
+    public SetColumnPropertyRule(Column column, SqlTypeConverter converter, boolean beCaseSensitive)
     {
-        _column    = column;
-        _converter = converter;
+        _column        = column;
+        _converter     = converter;
+        _caseSensitive = beCaseSensitive;
     }
 
     /* (non-Javadoc)
@@ -62,7 +65,8 @@ public class SetColumnPropertyRule extends Rule
             {
                 attrName = attributes.getQName(idx);
             }
-            if (attrName.equals(_column.getName()))
+            if ((_caseSensitive  && attrName.equals(_column.getName())) ||
+                (!_caseSensitive && attrName.equalsIgnoreCase(_column.getName())))
             {
                 String attrValue = attributes.getValue(idx);
                 Object propValue = (_converter != null ? _converter.convertFromString(attrValue, _column.getTypeCode()) : attrValue);
@@ -70,10 +74,10 @@ public class SetColumnPropertyRule extends Rule
                 if (digester.getLogger().isDebugEnabled())
                 {
                     digester.getLogger().debug("[SetColumnPropertyRule]{" + digester.getMatch() +
-                                               "} Setting property '" + attrName + "' to '" + propValue + "'");
+                                               "} Setting property '" + _column.getName() + "' to '" + propValue + "'");
                 }
 
-                PropertyUtils.setProperty(bean, attrName, propValue);
+                PropertyUtils.setProperty(bean, _column.getName(), propValue);
             }
         }
     }

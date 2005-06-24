@@ -44,7 +44,7 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
     /** The database type */
     private String     _databaseType;
     /** A single data file to insert */
-    private File _singleDataFile = null;
+    private File       _singleDataFile = null;
     /** The input files */
     private ArrayList  _fileSets = new ArrayList();
     /** The converterd */

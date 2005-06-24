@@ -49,6 +49,8 @@ public class DataReader extends Digester
     private HashMap  _convertersPerType = new HashMap();
     /** The converters per table-column path */
     private HashMap  _convertersPerPath = new HashMap();
+    /** Whether to be case sensitive or not */
+    private boolean _caseSensitive = false;
 
     /**
      * Creates a new data reader instance.
@@ -157,6 +159,27 @@ public class DataReader extends Digester
         _needsConfiguration = true;
     }
 
+    /**
+     * Determines whether this rules object matches case sensitively.
+     *
+     * @return <code>true</code> if the case of the pattern matters
+     */
+    public boolean isCaseSensitive()
+    {
+        return _caseSensitive;
+    }
+
+
+    /**
+     * Specifies whether this rules object shall match case sensitively.
+     *
+     * @param beCaseSensitive <code>true</code> if the case of the pattern shall matter
+     */
+    public void setCaseSensitive(boolean beCaseSensitive)
+    {
+        _caseSensitive = beCaseSensitive;
+    }
+
     /* (non-Javadoc)
      * @see org.apache.commons.digester.Digester#configure()
      */
@@ -176,6 +199,11 @@ public class DataReader extends Digester
             DynaSql dynaSql = new DynaSql(null);
     
             dynaSql.setDatabase(_model);
+
+            DigesterRules rules = new DigesterRules();
+
+            rules.setCaseSensitive(isCaseSensitive());
+            setRules(rules);
             for (Iterator tableIt = _model.getTables().iterator(); tableIt.hasNext();)
             {
                 // TODO: For now we hardcode the root as 'data' but ultimately we should wildcard it ('?')
@@ -188,7 +216,7 @@ public class DataReader extends Digester
                     Column           column    = (Column)columnIt.next();
                     SqlTypeConverter converter = getRegisteredConverter(table, column);
     
-                    addRule(path, new SetColumnPropertyRule(column, converter));
+                    addRule(path, new SetColumnPropertyRule(column, converter, isCaseSensitive()));
                     addRule(path + "/" + column.getName(), new SetColumnPropertyFromSubElementRule(column, converter));
                 }
             }
