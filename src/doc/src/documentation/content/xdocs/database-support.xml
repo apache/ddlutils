@@ -224,7 +224,7 @@
         </tr>
         <tr>
           <td>Indices embedded in table definition</td>
-          <td>yes</td>
+          <td>no</td>
         </tr>
         <tr>
           <td>Uses ALTER TABLE statements for dropping tables </td>
@@ -232,7 +232,7 @@
         </tr>
         <tr>
           <td>Maximum identifier length</td>
-          <td>unlimited</td>
+          <td>31</td>
         </tr>
         <tr>
           <td>Quote character</td>
@@ -441,8 +441,202 @@
       <title>HsqlDB</title>
       <p>
         Support for the <a href="ext:hsqldb">HSQLDB</a> database is based upon the version <strong>1.7.0</strong>.
-        SQL Documentation for HSQLDB can be found <a href="ext:hsqldb/sql-syntax">here</a>.
+        SQL Documentation for HSQLDB can be found in the distribution, and for the newest version
+        <a href="ext:hsqldb/sql-syntax">here</a>.
       </p>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>unlimited</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>Single line starting with <code>--</code></td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported by Hsqldb</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td>BIGINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>BINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>BIT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>LONGVARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td><em>BIT</em></td>
+          <td>BOOLEAN is supported natively by Hsqldb only since version 1.7.2</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td>The size is optional because per default Hsqldb does not enforce it</td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td><em>LONGVARCHAR</em></td>
+          <td>Not natively supported by Hsqldb</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported by Hsqldb</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>DECIMAL</td>
+          <td>Precision and scale are ignored by Hsqldb, as Hsqldb uses unlimited precision and scale</td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>LONGVARBINARY </em></td>
+          <td>Not natively supported by Hsqldb</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>DOUBLE</td>
+          <td>Precision and scale are ignored by Hsqldb</td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>DOUBLE</td>
+          <td>Though Hsqldb supports FLOAT, it is recommended to use DOUBLE</td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INTEGER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td>OBJECT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>LONGVARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>LONGVARCHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported by Hsqldb</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMERIC</td>
+          <td>Precision and scale are ignored by Hsqldb, as Hsqldb uses unlimited precision and scale</td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td>OTHER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>REAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported by Hsqldb</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported by Hsqldb</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>TIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td>TIMESTAMP</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td>TINYINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>VARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td>The size is optional because per default Hsqldb does not enforce it</td>
+        </tr>
+      </table>
     </section>
     <section>
       <title>MaxDB/SapDB</title>

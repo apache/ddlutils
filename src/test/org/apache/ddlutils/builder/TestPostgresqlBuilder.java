@@ -28,7 +28,7 @@ public class TestPostgresqlBuilder extends TestBuilderBase
      */
     protected String getDatabaseName()
     {
-        return "Postgresql";
+        return PostgreSqlBuilder.DATABASENAME;
     }
 
     /**
@@ -49,7 +49,7 @@ public class TestPostgresqlBuilder extends TestBuilderBase
             "    COL_ARRAY           BYTEA,\n"+
             "    COL_BIGINT          BIGINT,\n"+
             "    COL_BINARY          BYTEA,\n"+
-            "    COL_BIT             BIT,\n"+
+            "    COL_BIT             BOOLEAN,\n"+
             "    COL_BLOB            BYTEA,\n"+
             "    COL_BOOLEAN         BOOLEAN,\n"+
             "    COL_CHAR            CHAR(15),\n"+
