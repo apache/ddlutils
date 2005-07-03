@@ -224,7 +224,7 @@
         </tr>
         <tr>
           <td>Indices embedded in table definition</td>
-          <td>no</td>
+          <td>yes</td>
         </tr>
         <tr>
           <td>Uses ALTER TABLE statements for dropping tables </td>
@@ -232,7 +232,7 @@
         </tr>
         <tr>
           <td>Maximum identifier length</td>
-          <td>31</td>
+          <td>unlimited</td>
         </tr>
         <tr>
           <td>Quote character</td>
@@ -676,9 +676,43 @@
     <section>
       <title>PostgreSQL</title>
       <p>
-        DdlUtils supports <a href="ext:postgresql">PostgreSQL</a> version <strong>7.2</strong> and newer. SQL syntax
+        DdlUtils supports <a href="ext:postgresql">PostgreSQL</a> version <strong>7.2.8</strong> and newer. SQL syntax
         details and supported datatypes are described in the <a href="ext:postgresql/manual">Manual</a>.
       </p>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>31</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>Single line starting with <code>--</code></td>
+        </tr>
+      </table>
       <table>
         <tr>
           <th>JDBC Type</th>
@@ -702,7 +736,7 @@
         </tr>
         <tr>
           <td>BIT</td>
-          <td>BIT</td>
+          <td>BOOLEAN</td>
           <td></td>
         </tr>
         <tr>
