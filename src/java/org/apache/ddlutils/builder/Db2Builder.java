@@ -38,12 +38,14 @@ public class Db2Builder extends SqlBuilder
     {
         setPrimaryKeyEmbedded(false);
         setEmbeddedForeignKeysNamed(true);
-        // binary and varbinary are handled by getSqlType
+        // the BINARY types are also handled by getSqlType(Column)
+        addNativeTypeMapping(Types.BINARY,        "CHAR");
         addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
         addNativeTypeMapping(Types.BOOLEAN,       "DECIMAL(1,0)");
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
 
         // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
         addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
@@ -62,24 +64,14 @@ public class Db2Builder extends SqlBuilder
      */
     protected String getSqlType(Column column)
     {
-        StringBuffer sqlType = new StringBuffer();
-
         switch (column.getTypeCode())
         {
             case Types.BINARY:
-                sqlType.append("CHAR (");
-                if (column.getSize() != null)
-                {
-                    sqlType.append(column.getSize());
-                }
-                else
-                {
-                    sqlType.append("254");
-                }
-                sqlType.append(") FOR BIT DATA");
-                return sqlType.toString();
             case Types.VARBINARY:
-                sqlType.append("VARCHAR (");
+                StringBuffer sqlType = new StringBuffer();
+
+                sqlType.append(getNativeType(column));
+                sqlType.append(" (");
                 if (column.getSize() != null)
                 {
                     sqlType.append(column.getSize());
@@ -91,8 +83,8 @@ public class Db2Builder extends SqlBuilder
                 sqlType.append(") FOR BIT DATA");
                 return sqlType.toString();
             default:
+                return super.getSqlType(column);
         }
-        return super.getSqlType(column);
     }
 
     public void dropTable(Table table) throws IOException

@@ -38,20 +38,34 @@ public class MySqlBuilder extends SqlBuilder
 
     public MySqlBuilder()
     {
-        setForeignKeysEmbedded(true);
-        // TODO: Not yet supported:
-        //setIndicesEmbedded(true);
+        setMaxIdentifierLength(64);
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
+        setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
         setCommentPrefix("#");
-        addNativeTypeMapping(Types.BINARY,        "BLOB");
+        // the BINARY types are also handled by getSqlType(Column)
+        addNativeTypeMapping(Types.ARRAY,         "LONGBLOB");
+        addNativeTypeMapping(Types.BINARY,        "CHAR");
+        addNativeTypeMapping(Types.BIT,           "TINYINT(1)");
         addNativeTypeMapping(Types.BLOB,          "LONGBLOB");
         addNativeTypeMapping(Types.CLOB,          "LONGTEXT");
-        addNativeTypeMapping(Types.LONGVARBINARY, "LONGBLOB");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "LONGTEXT");
+        addNativeTypeMapping(Types.DISTINCT,      "LONGBLOB");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "LONGBLOB");
+        addNativeTypeMapping(Types.LONGVARBINARY, "MEDIUMBLOB");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "MEDIUMTEXT");
+        addNativeTypeMapping(Types.NULL,          "MEDIUMBLOB");
+        addNativeTypeMapping(Types.NUMERIC,       "DECIMAL");
+        addNativeTypeMapping(Types.OTHER,         "LONGBLOB");
         addNativeTypeMapping(Types.REAL,          "FLOAT");
-        addNativeTypeMapping(Types.VARBINARY,     "MEDIUMBLOB");
+        addNativeTypeMapping(Types.REF,           "MEDIUMBLOB");
+        addNativeTypeMapping(Types.STRUCT,        "LONGBLOB");
+        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "BIT");
+        // These types are only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN",  "TINYINT(1)");
+        addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
     }
 
     /* (non-Javadoc)
@@ -70,6 +84,34 @@ public class MySqlBuilder extends SqlBuilder
         print("DROP TABLE IF EXISTS ");
         print(getTableName(table));
         printEndOfStatement();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
+     */
+    protected String getSqlType(Column column)
+    {
+        switch (column.getTypeCode())
+        {
+            case Types.BINARY:
+            case Types.VARBINARY:
+                StringBuffer sqlType = new StringBuffer();
+
+                sqlType.append(getNativeType(column));
+                sqlType.append("(");
+                if (column.getSize() != null)
+                {
+                    sqlType.append(column.getSize());
+                }
+                else
+                {
+                    sqlType.append("254");
+                }
+                sqlType.append(") BINARY");
+                return sqlType.toString();
+            default:
+                return super.getSqlType(column);
+        }
     }
 
     /* (non-Javadoc)
