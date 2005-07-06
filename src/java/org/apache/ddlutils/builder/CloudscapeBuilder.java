@@ -34,16 +34,30 @@ public class CloudscapeBuilder extends SqlBuilder
 
     public CloudscapeBuilder()
     {
-        setPrimaryKeyEmbedded(false);
-        setEmbeddedForeignKeysNamed(true);
-        setMaxIdentifierLength(18);
-        // binary and varbinary are handled by getSqlType
-        addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
+        setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
+        setMaxIdentifierLength(128);
+        // binary and varbinary are also handled by getSqlType
+        addNativeTypeMapping(Types.ARRAY,         "BLOB");
+        addNativeTypeMapping(Types.BINARY,        "CHAR");
+        addNativeTypeMapping(Types.BIT,           "CHAR FOR BIT DATA");
+        addNativeTypeMapping(Types.DISTINCT,      "BLOB");
+        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
+        addNativeTypeMapping(Types.OTHER,         "BLOB");
+        addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA");
+        addNativeTypeMapping(Types.REF,           "LONG VARCHAR FOR BIT DATA");
+        addNativeTypeMapping(Types.STRUCT,        "BLOB");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
 
-        addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
+        addNativeTypeMapping("BOOLEAN",  "CHAR FOR BIT DATA");
+        addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA");
     }
 
     /* (non-Javadoc)
@@ -59,24 +73,14 @@ public class CloudscapeBuilder extends SqlBuilder
      */
     protected String getSqlType(Column column)
     {
-        StringBuffer sqlType = new StringBuffer();
-
         switch (column.getTypeCode())
         {
             case Types.BINARY:
-                sqlType.append("CHAR (");
-                if (column.getSize() != null)
-                {
-                    sqlType.append(column.getSize());
-                }
-                else
-                {
-                    sqlType.append("254");
-                }
-                sqlType.append(") FOR BIT DATA");
-                return sqlType.toString();
             case Types.VARBINARY:
-                sqlType.append("VARCHAR (");
+                StringBuffer sqlType = new StringBuffer();
+                
+                sqlType.append(getNativeType(column));
+                sqlType.append(" (");
                 if (column.getSize() != null)
                 {
                     sqlType.append(column.getSize());
