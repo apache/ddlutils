@@ -20,6 +20,8 @@ import org.apache.ddlutils.model.Database;
 
 /**
  * Tests the Axion builder.
+ * 
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  */
 public class TestAxionBuilder extends TestBuilderBase
 {

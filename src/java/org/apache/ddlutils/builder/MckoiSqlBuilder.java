@@ -36,12 +36,22 @@ public class MckoiSqlBuilder extends SqlBuilder
 
     public MckoiSqlBuilder()
     {
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
         setForeignKeysEmbedded(false);
-        setEmbeddedForeignKeysNamed(true);
-        addNativeTypeMapping(Types.BIT,  "TINYINT");
+        setIndicesEmbedded(false);
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "TINYINT");
+        addNativeTypeMapping(Types.ARRAY,    "BLOB");
+        addNativeTypeMapping(Types.BIT,      "BOOLEAN");
+        addNativeTypeMapping(Types.DISTINCT, "BLOB");
+        addNativeTypeMapping(Types.FLOAT,    "DOUBLE");
+        addNativeTypeMapping(Types.NULL,     "BLOB");
+        addNativeTypeMapping(Types.OTHER,    "BLOB");
+        addNativeTypeMapping(Types.REF,      "BLOB");
+        addNativeTypeMapping(Types.STRUCT,   "BLOB");
+
+        // Types.DATALINK is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("DATALINK", "BLOB");
     }
 
     /* (non-Javadoc)

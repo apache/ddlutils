@@ -20,6 +20,8 @@ import org.apache.ddlutils.model.Database;
 
 /**
  * Tests the PostgreSQL builder.
+ * 
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  */
 public class TestCloudscapeBuilder extends TestBuilderBase
 {
