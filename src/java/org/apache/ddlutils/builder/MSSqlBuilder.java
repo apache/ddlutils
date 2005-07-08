@@ -38,23 +38,34 @@ public class MSSqlBuilder extends SqlBuilder
 
     public MSSqlBuilder()
     {
-        setEmbeddedForeignKeysNamed(true);
+        setMaxIdentifierLength(128);
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
         setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
         //setCommentPrefix("#");
+        addNativeTypeMapping(Types.ARRAY,         "IMAGE");
+        addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
         addNativeTypeMapping(Types.BLOB,          "IMAGE");
-        addNativeTypeMapping(Types.CHAR,          "NCHAR");
-        addNativeTypeMapping(Types.CLOB,          "NTEXT");
+        addNativeTypeMapping(Types.CLOB,          "TEXT");
         addNativeTypeMapping(Types.DATE,          "DATETIME");
+        addNativeTypeMapping(Types.DISTINCT,      "IMAGE");
         addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
         addNativeTypeMapping(Types.INTEGER,       "INT");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE");
         addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
         addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
+        addNativeTypeMapping(Types.NULL,          "IMAGE");
+        addNativeTypeMapping(Types.OTHER,         "IMAGE");
+        addNativeTypeMapping(Types.REF,           "IMAGE");
+        addNativeTypeMapping(Types.STRUCT,        "IMAGE");
         addNativeTypeMapping(Types.TIME,          "DATETIME");
         addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        addNativeTypeMapping(Types.VARCHAR,       "VARCHAR");
+        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "BIT");
+        // these types are only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN",  "BIT");
+        addNativeTypeMapping("DATALINK", "IMAGE");
     }
 
     /* (non-Javadoc)
@@ -90,13 +101,13 @@ public class MSSqlBuilder extends SqlBuilder
     {
         String tableName = getTableName(table);
 
-        print( "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '");
+        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '");
         print(tableName);
         println("')");
         println("BEGIN");
         println("     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)");
         println("     DECLARE refcursor CURSOR FOR");
-        println("     select reftables.name tablename, cons.name constraitname");
+        println("     select reftables.name tablename, cons.name constraintname");
         println("      from sysobjects tables,");
         println("           sysobjects reftables,");
         println("           sysobjects cons,");
