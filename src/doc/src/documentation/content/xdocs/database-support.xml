@@ -1275,207 +1275,6 @@
         </tr>
         <tr>
           <td>Maximum identifier length</td>
-          <td>128</td>
-        </tr>
-        <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
-        </tr>
-        <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
-        </tr>
-      </table>
-      <table>
-        <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
-        </tr>
-        <tr>
-          <td>ARRAY</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>BIGINT</td>
-          <td><em>DECIMAL(19,0)</em></td>
-          <td>Natively supported only since SQL Server 2000</td>
-        </tr>
-        <tr>
-          <td>BINARY</td>
-          <td>BINARY</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>BIT</td>
-          <td>BIT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>BLOB</td>
-          <td>IMAGE</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>BOOLEAN</td>
-          <td>BIT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>CHAR</td>
-          <td>CHAR</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>CLOB</td>
-          <td>TEXT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>DATALINK</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>DATE</td>
-          <td>DATETIME</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>DECIMAL</td>
-          <td>DECIMAL</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>DISTINCT</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>DOUBLE</td>
-          <td>FLOAT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>FLOAT</td>
-          <td>FLOAT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>INTEGER</td>
-          <td>INT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>JAVA_OBJECT</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>LONGVARBINARY</td>
-          <td>BYTEA</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>LONGVARCHAR</td>
-          <td>IMAGE</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>NULL</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>NUMERIC</td>
-          <td>NUMERIC</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>OTHER</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>REAL</td>
-          <td>REAL</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>REF</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>SMALLINT</td>
-          <td>SMALLINT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>STRUCT</td>
-          <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
-        </tr>
-        <tr>
-          <td>TIME</td>
-          <td>DATETIME</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>TIMESTAMP</td>
-          <td><em>DATETIME</em></td>
-          <td>The native <code>TIMESTAMP</code> type of SQL Server serves a different purpose: it provides a counter
-              that automatically increments upon each insertion or update of the table</td>
-        </tr>
-        <tr>
-          <td>TINYINT</td>
-          <td>SMALLINT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>VARBINARY</td>
-          <td>VARBINARY</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>VARCHAR</td>
-          <td>VARCHAR</td>
-          <td></td>
-        </tr>
-      </table>
-    </section>
-    <section>
-      <title>SQL Server</title>
-      <p>
-        The <a href="ext:sqlserver">SQL Server</a> is supported form version <strong>6.5</strong> onwards.
-        Information about the versions prior to SQL Server 2000 however is difficult to find online, you'll
-        have to resort to the documentation accompanying the database. Information for version 2000 can be found
-        <a href="ext:sqlserver/manual-2000">here</a>.
-      </p>
-      <table>
-        <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>Primary key definitions embedded in table definition</td>
-          <td>yes</td>
-        </tr>
-        <tr>
-          <td>Foreign key definitions embedded in table definition</td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>Indices embedded in table definition</td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>Maximum identifier length</td>
           <td>31</td>
         </tr>
         <tr>
@@ -1646,6 +1445,207 @@
       </table>
     </section>
     <section>
+      <title>SQL Server</title>
+      <p>
+        The <a href="ext:sqlserver">SQL Server</a> is supported form version <strong>6.5</strong> onwards.
+        Information about the versions prior to SQL Server 2000 however is difficult to find online, you'll
+        have to resort to the documentation accompanying the database. Information for version 2000 can be found
+        <a href="ext:sqlserver/manual-2000">here</a>.
+      </p>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>128</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>Single line starting with <code>--</code></td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td><em>DECIMAL(19,0)</em></td>
+          <td>Natively supported only since SQL Server 2000</td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>BINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>BIT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>IMAGE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>BIT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td>TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATETIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>DECIMAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>FLOAT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>FLOAT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>BYTEA</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>IMAGE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMERIC</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>REAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by SQL Server</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>DATETIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td><em>DATETIME</em></td>
+          <td>The native <code>TIMESTAMP</code> type of SQL Server serves a different purpose: it provides a counter
+              that automatically increments upon each insertion or update of the table</td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td><em>SMALLINT</em></td>
+          <td>The native <code>TINYINT</code> type only supports values between 0 and 255</td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>VARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td></td>
+        </tr>
+      </table>
+    </section>
+    <section>
       <title>Sybase</title>
       <p>
         DdlUtils supports the Sybase products <a href="ext:sybase/sqlserver">SQL Server</a> from version 
@@ -1655,6 +1655,197 @@
         for the respective version. The newest version (<strong>12.5</strong>)
         is found <a href="ext:sybase/manual">here</a>.
       </p>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>30</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>A block between <code>/*</code> and <code>*/</code></td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td><em>DECIMAL(19,0)</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>BINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>BIT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>IMAGE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>BIT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td>TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATETIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>DECIMAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>FLOAT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>FLOAT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>BYTEA</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>IMAGE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMERIC</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>REAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>IMAGE</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>DATETIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td><em>DATETIME</em></td>
+          <td>Not natively supported by Sybase</td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td><em>SMALLINT</em></td>
+          <td>The native <code>TINYINT</code> type only supports values between 0 and 255</td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>VARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td></td>
+        </tr>
+      </table>
     </section>
   </body>
 </document>

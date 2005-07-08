@@ -37,21 +37,37 @@ public class SybaseBuilder extends SqlBuilder
 
     public SybaseBuilder()
     {
-        // For Sybase a present NULL allows it to save initial storage, so we better create it 
-        setRequiringNullAsDefaultValue(true);
-        setEmbeddedForeignKeysNamed(true);
+        setMaxIdentifierLength(30);
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
         setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
         setCommentPrefix("/*");
         setCommentSuffix("*/");
+
+        addNativeTypeMapping(Types.ARRAY,         "IMAGE");
+        addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
         addNativeTypeMapping(Types.BLOB,          "IMAGE");
         addNativeTypeMapping(Types.CLOB,          "TEXT");
+        addNativeTypeMapping(Types.DATE,          "DATETIME");
+        addNativeTypeMapping(Types.DISTINCT,      "IMAGE");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.INTEGER,       "INT");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE");
         addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
         addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
+        addNativeTypeMapping(Types.NULL,          "IMAGE");
+        addNativeTypeMapping(Types.OTHER,         "IMAGE");
+        addNativeTypeMapping(Types.REF,           "IMAGE");
+        addNativeTypeMapping(Types.STRUCT,        "IMAGE");
+        addNativeTypeMapping(Types.TIME,          "DATETIME");
         addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
+        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "BIT");
+        // These types are only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN",  "BIT");
+        addNativeTypeMapping("DATALINK", "IMAGE");
     }
 
     /* (non-Javadoc)
@@ -98,6 +114,6 @@ public class SybaseBuilder extends SqlBuilder
 
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        //print( "AUTO_INCREMENT" );
+        print("IDENTITY");
     }
 }
