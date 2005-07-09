@@ -1025,10 +1025,201 @@
       <p>
         The <a href="ext:sapdb">SapDB</a> database was open-sourced and rebranded <a href="ext:maxdb">MaxDB</a> 
         beginning with version 7.4. DdlUtils supports SapDB version <strong>7.2</strong> and MaxDB version
-        <strong>7.5</strong>. Documentation of the SQL supported by SapDB is found in the
+        <strong>7.5</strong>, and newer. Documentation of the SQL supported by SapDB is found in the
         <a href="ext:sapdb/manual">Reference manual</a>. Likewise, documentation for MaxDB is contained in
         the <a href="ext:maxdb/manual">MaxDB documentation</a>.
       </p>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>32</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>A block between <code>/*</code> and <code>*/</code></td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td><em>FIXED(38,0)</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>LONG BYTE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>BOOLEAN</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>LONG BYTE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>BOOLEAN</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td>LONG</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>DECIMAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INTEGER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>LONG BYTE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>LONG VARCHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>DECIMAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>REAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>LONG BYTE</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>TIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td><em>TIMESTAMP</em></td>
+          <td>Not natively supported by SapDB/MaxDB</td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>LONG BYTE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td></td>
+        </tr>
+      </table>
     </section>
     <section>
       <title>Mckoi</title>

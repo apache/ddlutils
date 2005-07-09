@@ -16,9 +16,11 @@ package org.apache.ddlutils.builder;
  * limitations under the License.
  */
 
+import java.io.IOException;
 import java.sql.Types;
 
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Table;
 
 /**
  * An SQL Builder for SapDB.
@@ -32,28 +34,38 @@ public class SapDbBuilder extends SqlBuilder
     /** Database name of this builder */
     public static final String DATABASENAME = "SapDB";
 
-    public static final String CHARACTER_TYPE_ASCII   = "ASCII";
-    public static final String CHARACTER_TYPE_UNICODE = "UNICODE";
-
-    /** The characater type */
-    private String _characterType = "";
-
     public SapDbBuilder()
     {
+        setMaxIdentifierLength(32);
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
+        setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
         setCommentPrefix("/*");
         setCommentSuffix("*/");
-        // CHAR and VARCHAR are handled by getSqlType
+
+        addNativeTypeMapping(Types.ARRAY,         "LONG BYTE");
         addNativeTypeMapping(Types.BIGINT,        "FIXED(38,0)");
         addNativeTypeMapping(Types.BINARY,        "LONG BYTE");
+        addNativeTypeMapping(Types.BIT,           "BOOLEAN");
         addNativeTypeMapping(Types.BLOB,          "LONG BYTE");
-        addNativeTypeMapping(Types.BIT,           "FIXED(1,0)");
+        addNativeTypeMapping(Types.CLOB,          "LONG");
+        addNativeTypeMapping(Types.DISTINCT,      "LONG BYTE");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "LONG BYTE");
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG BYTE");
+        addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
+        addNativeTypeMapping(Types.NULL,          "LONG BYTE");
+        addNativeTypeMapping(Types.NUMERIC,       "DECIMAL");
+        addNativeTypeMapping(Types.OTHER,         "LONG BYTE");
+        addNativeTypeMapping(Types.REF,           "LONG BYTE");
+        addNativeTypeMapping(Types.STRUCT,        "LONG BYTE");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         addNativeTypeMapping(Types.VARBINARY,     "LONG BYTE");
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "FIXED(1,0)");
+        // Types.DATALINK is only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("DATALINK", "LONG BYTE");
     }
 
     /* (non-Javadoc)
@@ -64,32 +76,6 @@ public class SapDbBuilder extends SqlBuilder
         return DATABASENAME;
     }
 
-    /**
-     * Sets the character type of the database, either 'ASCII', 'UNICODE'.
-     * 
-     * @param characterType The character type
-     */
-    public void setCharacterType(String characterType)
-    {
-        if (characterType == null)
-        {
-            _characterType = "";
-        }
-        else if (CHARACTER_TYPE_ASCII.equalsIgnoreCase(characterType))
-        {
-            _characterType = CHARACTER_TYPE_ASCII;
-        }
-        else if (CHARACTER_TYPE_UNICODE.equalsIgnoreCase(characterType))
-        {
-            _characterType = CHARACTER_TYPE_UNICODE;
-        }
-        else
-        {
-            throw new IllegalArgumentException("Unknown character type "+characterType+", only "+
-                                               CHARACTER_TYPE_ASCII+" and "+CHARACTER_TYPE_UNICODE+" or an empty string are allowed");
-        }
-    }
-
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
      */
@@ -97,23 +83,23 @@ public class SapDbBuilder extends SqlBuilder
     {
         switch (column.getTypeCode())
         {
-            case Types.CHAR:
-            case Types.VARCHAR:
-                if (column.getSize() != null)
-                {
-                    StringBuffer sqlType = new StringBuffer(getNativeType(column));
-
-                    sqlType.append(" (");
-                    sqlType.append(column.getSize());
-                    sqlType.append(") ");
-                    sqlType.append(_characterType);
-                    return sqlType.toString();
-                }
-                break;
-            case Types.CLOB:
-            case Types.LONGVARCHAR:
-                return "LONG "+_characterType;
+            // no support for specifying the size for these types:
+            case Types.BINARY:
+            case Types.VARBINARY:
+                return getNativeType(column);
+            default:
+                return super.getSqlType(column);
         }
-        return super.getSqlType(column);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(Table)
+     */
+    public void dropTable(Table table) throws IOException
+    { 
+        print("DROP TABLE ");
+        print(getTableName(table));
+        print(" CASCADE");
+        printEndOfStatement();
     }
 }
