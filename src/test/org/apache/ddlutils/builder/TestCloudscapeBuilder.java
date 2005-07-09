@@ -19,7 +19,7 @@ package org.apache.ddlutils.builder;
 import org.apache.ddlutils.model.Database;
 
 /**
- * Tests the PostgreSQL builder.
+ * Tests the Cloudscape/Derby builder.
  * 
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  */

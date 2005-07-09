@@ -36,19 +36,26 @@ public class Db2Builder extends SqlBuilder
 
     public Db2Builder()
     {
-        setPrimaryKeyEmbedded(false);
-        setEmbeddedForeignKeysNamed(true);
+        setMaxIdentifierLength(18);
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
+        setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
         // the BINARY types are also handled by getSqlType(Column)
+        addNativeTypeMapping(Types.ARRAY,         "BLOB");
         addNativeTypeMapping(Types.BINARY,        "CHAR");
-        addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
-        addNativeTypeMapping(Types.BOOLEAN,       "DECIMAL(1,0)");
+        addNativeTypeMapping(Types.BIT,           "CHAR FOR BIT DATA");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
         addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
+        addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA");
+        addNativeTypeMapping(Types.OTHER,         "BLOB");
+        addNativeTypeMapping(Types.STRUCT,        "BLOB");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
 
         // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
+        addNativeTypeMapping("BOOLEAN", "CHAR FOR BIT DATA");
     }
 
     /* (non-Javadoc)

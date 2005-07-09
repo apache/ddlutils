@@ -1176,7 +1176,13 @@ public abstract class SqlBuilder {
         StringBuffer result = new StringBuffer();
 
         result.append(name.substring(0, startCut));
-        result.append("_");
+        if (((startCut == 0) || (name.charAt(startCut - 1) != '_')) &&
+            ((startCut + delta + 1 == originalLength) || (name.charAt(startCut + delta + 1) != '_')))
+        {
+            // just to make sure that there isn't already a '_' right before or right
+            // after the cutting place (which would look odd with an aditional one)
+            result.append("_");
+        }
         result.append(name.substring(startCut + delta + 1, originalLength));
         return result.toString();
     }
