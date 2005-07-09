@@ -36,23 +36,37 @@ public class InterbaseBuilder extends SqlBuilder
 
     public InterbaseBuilder()
     {
+        setMaxIdentifierLength(31);
+        setRequiringNullAsDefaultValue(false);
         setPrimaryKeyEmbedded(true);
         setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
         setCommentPrefix("/*");
         setCommentSuffix("*/");
-        addNativeTypeMapping(Types.BIGINT,        "DECIMAL(18,0)");
-        addNativeTypeMapping(Types.BINARY,        "BLOB");
+
+        // BINARY and VARBINARY are also handled by the getSqlType method
+        addNativeTypeMapping(Types.ARRAY,         "BLOB");
+        addNativeTypeMapping(Types.BIGINT,        "DECIMAL(38,0)");
+        addNativeTypeMapping(Types.BINARY,        "CHAR");
         addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
         addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
+        addNativeTypeMapping(Types.DISTINCT,      "BLOB");
         addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
         addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
         addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT");
+        addNativeTypeMapping(Types.NULL,          "BLOB");
+        addNativeTypeMapping(Types.OTHER,         "BLOB");
         addNativeTypeMapping(Types.REAL,          "FLOAT");
         addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        addNativeTypeMapping(Types.VARBINARY,     "BLOB");
+        addNativeTypeMapping(Types.REF,           "BLOB");
+        addNativeTypeMapping(Types.STRUCT,        "BLOB");
+        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
+        // These types are only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN",  "DECIMAL(1,0)");
+        addNativeTypeMapping("DATALINK", "BLOB");
     }
 
     /* (non-Javadoc)
@@ -128,6 +142,32 @@ public class InterbaseBuilder extends SqlBuilder
             println(", 1);");
             print("END");
             printEndOfStatement();
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
+     */
+    protected String getSqlType(Column column)
+    {
+        switch (column.getTypeCode())
+        {
+            // we need to always specify a size for these types
+            case Types.BINARY:
+            case Types.VARBINARY:
+                StringBuffer sqlType = new StringBuffer();
+
+                sqlType.append(getNativeType(column));
+                if (column.getSize() != null)
+                {
+                    sqlType.append(" (");
+                    sqlType.append(column.getSize());
+                    sqlType.append(")");
+                }
+                sqlType.append(" CHARACTER SET OCTETS");
+                return sqlType.toString();
+            default:
+                return super.getSqlType(column);
         }
     }
 

@@ -818,6 +818,197 @@
         If you happen to run a Interbase database server of version 7 or newer, you could help us adding
         support for these versions.
       </note>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>31</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>A block between <code>/*</code> and <code>*/</code></td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>BLOB</em></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td>DECIMAL(38,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>CHAR(n) CHARACTER SET OCTETS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>DECIMAL(1,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>BLOB</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>DECIMAL(1,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td>BLOB SUB_TYPE TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Interbase/Firebird</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>DECIMAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Interbase/Firebird</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INTEGER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Interbase/Firebird</td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>BLOB</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>BLOB SUB_TYPE TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Interbase/Firebird</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMERIC</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Interbase/Firebird</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>FLOAT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Interbase/Firebird</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>BYTEA</em></td>
+          <td>Not natively supported by Interbase/Firebird</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>TIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td>TIMESTAMP</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>VARCHAR(n) CHARACTER SET OCTETS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td></td>
+        </tr>
+      </table>
     </section>
     <section>
       <title>HsqlDB</title>
