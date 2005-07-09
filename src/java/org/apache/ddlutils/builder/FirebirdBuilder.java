@@ -16,44 +16,16 @@ package org.apache.ddlutils.builder;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.sql.Types;
-
-import org.apache.ddlutils.model.Column;
-import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.ForeignKey;
-import org.apache.ddlutils.model.Table;
 
 /**
  * An SQL Builder for the Firebird database.
  * 
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  */
-public class FirebirdBuilder extends SqlBuilder
+public class FirebirdBuilder extends InterbaseBuilder
 {
     /** Database name of this builder */
     public static final String DATABASENAME = "Firebird";
-
-    public FirebirdBuilder()
-    {
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setCommentPrefix("/*");
-        setCommentSuffix("*/");
-        addNativeTypeMapping(Types.BIGINT,        "DECIMAL(18,0)");
-        addNativeTypeMapping(Types.BINARY,        "BLOB");
-        addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
-        addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
-        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT");
-        addNativeTypeMapping(Types.REAL,          "FLOAT");
-        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        addNativeTypeMapping(Types.VARBINARY,     "BLOB");
-
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "DECIMAL(1,0)");
-    }
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
@@ -61,101 +33,5 @@ public class FirebirdBuilder extends SqlBuilder
     public String getDatabaseName()
     {
         return DATABASENAME;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropDatabase(org.apache.ddlutils.model.Database)
-     */
-    public void dropDatabase(Database database) throws IOException
-    {
-        super.dropDatabase(database);
-        print("COMMIT");
-        printEndOfStatement();
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#createTables(org.apache.ddlutils.model.Database)
-     */
-    public void createTables(Database database) throws IOException
-    {
-        super.createTables(database);
-        print("COMMIT");
-        printEndOfStatement();
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeExternalForeignKeyCreateStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey)
-     */
-    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
-    {
-        super.writeExternalForeignKeyCreateStmt(database, table, key);
-        if (key.getForeignTable() != null)
-        {
-            print("COMMIT");
-            printEndOfStatement();
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Table)
-     */
-    public void createTable(Database database, Table table) throws IOException
-    {
-        super.createTable(database, table);
-
-        // creating generator and trigger for auto-increment
-        Column column = table.getAutoIncrementColumn();
-
-        if (column != null)
-        {
-            print("CREATE GENERATOR ");
-            print(getConstraintName("gen", table, column.getName(), null));
-            printEndOfStatement();
-            print("CREATE TRIGGER trg_");
-            print(getConstraintName("trg", table, column.getName(), null));
-            print(" FOR ");
-            println(getTableName(table));
-            println("ACTIVE BEFORE INSERT POSITION 0");
-            println("AS");
-            println("BEGIN");
-            print("IF (NEW.");
-            print(getColumnName(column));
-            println(" IS NULL) THEN");
-            print("NEW.");
-            print(getColumnName(column));
-            print(" = GEN_ID(");
-            print(getConstraintName("gen", table, column.getName(), null));
-            println(", 1);");
-            print("END");
-            printEndOfStatement();
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(org.apache.ddlutils.model.Table)
-     */
-    public void dropTable(Table table) throws IOException
-    {
-        // dropping generator and trigger for auto-increment
-        Column column = table.getAutoIncrementColumn();
-
-        if (column != null)
-        {
-            print("DROP TRIGGER trg_");
-            print(getConstraintName("trg", table, column.getName(), null));
-            printEndOfStatement();
-            print("DROP GENERATOR gen_");
-            print(getConstraintName("gen", table, column.getName(), null));
-            printEndOfStatement();
-        }
-        super.dropTable(table);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#printAutoIncrementColumn(Table,Column)
-     */
-    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
-    {
-        // we're using a generator
     }
 }

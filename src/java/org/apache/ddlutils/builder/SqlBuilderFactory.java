@@ -92,8 +92,10 @@ public class SqlBuilderFactory
         registerDatabase(AxionBuilder.DATABASENAME,      AxionBuilder.class);
         registerDatabase(CloudscapeBuilder.DATABASENAME, CloudscapeBuilder.class);
         registerDatabase(Db2Builder.DATABASENAME,        Db2Builder.class);
+        registerDatabase(DerbyBuilder.DATABASENAME,      DerbyBuilder.class);
         registerDatabase(FirebirdBuilder.DATABASENAME,   FirebirdBuilder.class);
         registerDatabase(HsqlDbBuilder.DATABASENAME,     HsqlDbBuilder.class);
+        registerDatabase(InterbaseBuilder.DATABASENAME,  InterbaseBuilder.class);
         registerDatabase(MaxDbBuilder.DATABASENAME,      MaxDbBuilder.class);
         registerDatabase(MckoiSqlBuilder.DATABASENAME,   MckoiSqlBuilder.class);
         registerDatabase(MSSqlBuilder.DATABASENAME,      MSSqlBuilder.class);
