@@ -1627,6 +1627,197 @@
         <strong>Oracle8i SQL Reference</strong>. You can access this documentation from the
         <a href="ext:oracle/otn">Oracle Technology Network</a>. Registration to this area is free.
       </p>
+      <table>
+        <tr>
+          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Primary key definitions embedded in table definition</td>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <td>Foreign key definitions embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Indices embedded in table definition</td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>no</td>
+        </tr>
+        <tr>
+          <td>Maximum identifier length</td>
+          <td>30</td>
+        </tr>
+        <tr>
+          <td>Quote character</td>
+          <td>Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td>Comment format</td>
+          <td>Single line starting with <code>--</code></td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <th>JDBC Type</th>
+          <th>Database Type</th>
+          <th>Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td>NUMBER(38,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>RAW</td>
+          <td>Oracle requires the specification of the size for <code>RAW</code> columns. If no size was specified, then 254 is used.</td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>NUMBER(1,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>BLOB</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>NUMBER(1,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td>CLOB</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>NUMBER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>NUMBER(38)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>NUMBER(38)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>NUMBER(20,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td><em>CLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMBER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>NUMBER(18)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>NUMBER(5,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported by Oracle</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td><em>DATE</em></td>
+          <td>Only natively supported in Oracle 9 and above</td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td>NUMBER(3,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>RAW</td>
+          <td>Oracle requires the specification of the size for <code>RAW</code> columns. If no size was specified, then 254 is used.</td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR2</td>
+          <td></td>
+        </tr>
+      </table>
     </section>
     <section>
       <title>PostgreSQL</title>

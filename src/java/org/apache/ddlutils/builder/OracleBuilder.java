@@ -38,28 +38,41 @@ public class OracleBuilder extends SqlBuilder
     public OracleBuilder()
     {
         setMaxIdentifierLength(30);
-        setPrimaryKeyEmbedded(false);
-        setEmbeddedForeignKeysNamed(true);
+        setRequiringNullAsDefaultValue(false);
+        setPrimaryKeyEmbedded(true);
         setForeignKeysEmbedded(false);
+        setIndicesEmbedded(false);
+
+        addNativeTypeMapping(Types.ARRAY,         "BLOB");
         addNativeTypeMapping(Types.BIGINT,        "NUMBER(38,0)");
-        addNativeTypeMapping(Types.BINARY,        "BLOB");
+        addNativeTypeMapping(Types.BINARY,        "RAW");
         addNativeTypeMapping(Types.BIT,           "NUMBER(1,0)");
         addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
-        addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
-        addNativeTypeMapping(Types.INTEGER,       "NUMBER(20)");
+        addNativeTypeMapping(Types.DISTINCT,      "BLOB");
+        addNativeTypeMapping(Types.DOUBLE,        "NUMBER(38)");
+        addNativeTypeMapping(Types.FLOAT,         "NUMBER(38)");
+        addNativeTypeMapping(Types.INTEGER,       "NUMBER(20,0)");
+        addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
         addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
         addNativeTypeMapping(Types.LONGVARCHAR,   "CLOB");
+        addNativeTypeMapping(Types.NULL,          "BLOB");
         addNativeTypeMapping(Types.NUMERIC,       "NUMBER");
-        addNativeTypeMapping(Types.REAL,          "FLOAT");
+        addNativeTypeMapping(Types.OTHER,         "BLOB");
+        addNativeTypeMapping(Types.REAL,          "NUMBER(18)");
+        addNativeTypeMapping(Types.REF,           "BLOB");
         addNativeTypeMapping(Types.SMALLINT,      "NUMBER(5,0)");
+        addNativeTypeMapping(Types.STRUCT,        "BLOB");
         addNativeTypeMapping(Types.TIME,          "DATE");
+        // TODO: This should really be controlled by an option since beginning with Oracle 9,
+        //       the special TIMESTAMP type should be used
         addNativeTypeMapping(Types.TIMESTAMP,     "DATE");
         addNativeTypeMapping(Types.TINYINT,       "NUMBER(3,0)");
-        addNativeTypeMapping(Types.VARBINARY,     "BLOB");
+        addNativeTypeMapping(Types.VARBINARY,     "RAW");
         addNativeTypeMapping(Types.VARCHAR,       "VARCHAR2");
 
-        // Types.BOOLEAN is only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN", "NUMBER(1,0)");
+        // These types are only available since 1.4 so we're using the safe mapping method
+        addNativeTypeMapping("BOOLEAN",  "NUMBER(1,0)");
+        addNativeTypeMapping("DATALINK", "BLOB");
     }
 
     /* (non-Javadoc)
@@ -94,9 +107,30 @@ public class OracleBuilder extends SqlBuilder
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
+     */
+    protected String getSqlType(Column column)
+    {
+        switch (column.getTypeCode())
+        {
+            // we need to always specify a size for these types
+            case Types.BINARY:
+            case Types.VARCHAR:
+                String result = super.getSqlType(column);
+
+                if (column.getSize() == null)
+                {
+                    result += "(254)";
+                }
+                return result;
+            default:
+                return super.getSqlType(column);
+        }
+    }
+
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        //print( "AUTO_INCREMENT" );
     }
 
     /**
