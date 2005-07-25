@@ -23,6 +23,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -50,8 +52,8 @@ import org.apache.ddlutils.util.JdbcSupport;
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
-public class DynaSql extends JdbcSupport {
-
+public class DynaSql extends JdbcSupport
+{
     /** The Log to which logging calls will be made. */
     private final Log _log = LogFactory.getLog(DynaSql.class);
 
@@ -119,6 +121,9 @@ public class DynaSql extends JdbcSupport {
 
     /**
      * Performs the given SQL query returning an iterator over the results.
+     * 
+     * @param sql The sql query to perform
+     * @return An iterator for the dyna beans resulting from the query
      */
     public Iterator query(String sql) throws SQLException, IllegalAccessException, InstantiationException
     {
@@ -131,12 +136,13 @@ public class DynaSql extends JdbcSupport {
         {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sql);
-            answer    = createResultSetIterator(connection, statement, resultSet);
+            answer    = createResultSetIterator(connection, resultSet);
             return answer;
         }
         finally
         {
             // if any exceptions are thrown, close things down
+            // otherwise we're leaving it open for the iterator
             if (answer == null)
             {
                 closeResources(connection, statement, resultSet);
@@ -147,9 +153,11 @@ public class DynaSql extends JdbcSupport {
     /**
      * Performs the given parameterized SQL query returning an iterator over the results.
      *
-     * @return an Iterator which appears like a DynaBean for easy access to the properties.
+     * @param sql        The sql query to perform
+     * @param parameters The parameter values
+     * @return An iterator for the dyna beans resulting from the query
      */
-    public Iterator query(String sql, List parameters) throws SQLException, IllegalAccessException, InstantiationException
+    public Iterator query(String sql, Collection parameters) throws SQLException, IllegalAccessException, InstantiationException
     {
         Connection        connection = borrowConnection();
         PreparedStatement statement  = null;
@@ -167,7 +175,7 @@ public class DynaSql extends JdbcSupport {
                 statement.setObject(paramIdx, iter.next());
             }
             resultSet = statement.executeQuery();
-            answer    = createResultSetIterator(connection, statement, resultSet);
+            answer    = createResultSetIterator(connection, resultSet);
             return answer;
         }
         finally
@@ -181,8 +189,129 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * @return the SqlDynaClass for the given table name. If the SqlDynaClass does not exist
-     * then create a new one based on the Table definition
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String)} method all beans will be
+     * materialized and the connection will be closed before returning the beans. 
+     * 
+     * @param sql The sql query
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(String sql) throws SQLException, IllegalAccessException, InstantiationException
+    {
+        return fetch(sql, 0, -1);
+    }
+
+    /**
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String, Collection)} method all beans will be
+     * materialized and the connection will be closed before returning the beans. 
+     * 
+     * @param sql        The parameterized query
+     * @param parameters The parameter values
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(String sql, Collection parameters) throws SQLException, IllegalAccessException, InstantiationException
+    {
+        return fetch(sql, parameters, 0, -1);
+    }
+
+    /**
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String)} method all beans will be
+     * materialized and the connection will be closed before returning the beans.
+     * Also, the two int parameters specify which rows of the result set to use.
+     * If there are more rows than desired, they will be ignored (and not read
+     * from the database).
+     * 
+     * @param sql   The sql query
+     * @param start Row number to start from (0 for first row)
+     * @param end   Row number to stop at (inclusively; -1 for last row)
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(String sql, int start, int end) throws SQLException, IllegalAccessException, InstantiationException
+    {
+        Connection connection = borrowConnection();
+        Statement  statement  = null;
+        ResultSet  resultSet  = null;
+        List       result     = new ArrayList();
+
+        try
+        {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(sql);
+
+            int rowIdx = 0;
+
+            for (Iterator it = createResultSetIterator(connection, resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
+            {
+                if (rowIdx >= start)
+                {
+                    result.add(it.next());
+                }
+            }
+        }
+        finally
+        {
+            closeResources(connection, statement, resultSet);
+        }
+        return result;
+    }
+
+    /**
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String, Collection)} method all beans will be
+     * materialized and the connection will be closed before returning the beans.
+     * Also, the two int parameters specify which rows of the result set to use.
+     * If there are more rows than desired, they will be ignored (and not read
+     * from the database).
+     * 
+     * @param sql        The parameterized sql query
+     * @param parameters The parameter values
+     * @param start      Row number to start from (0 for first row)
+     * @param end        Row number to stop at (inclusively; -1 for last row)
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(String sql, Collection parameters, int start, int end) throws SQLException, IllegalAccessException, InstantiationException
+    {
+        Connection        connection = borrowConnection();
+        PreparedStatement statement  = null;
+        ResultSet         resultSet  = null;
+        List              result     = new ArrayList();
+
+        try
+        {
+            statement = connection.prepareStatement(sql);
+
+            int paramIdx = 1;
+
+            for (Iterator iter = parameters.iterator(); iter.hasNext(); paramIdx++)
+            {
+                statement.setObject(paramIdx, iter.next());
+            }
+            resultSet = statement.executeQuery();
+
+            int rowIdx = 0;
+
+            for (Iterator it = createResultSetIterator(connection, resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
+            {
+                if (rowIdx >= start)
+                {
+                    result.add(it.next());
+                }
+            }
+        }
+        finally
+        {
+            closeResources(connection, statement, resultSet);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the {@link SqlDynaClass} for the given table name. If the it does not
+     * exist yet, a new one will be created based on the Table definition.
+     * 
+     * @return The <code>SqlDynaClass</code> for the indicated table
      */
     public SqlDynaClass getDynaClass(String tableName)
     {
@@ -290,7 +419,9 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * Updates the given DynaBean in the database, assuming the primary key values are specified.
+     * Updates the given dyna bean in the database, assuming the primary key values are specified.
+     * 
+     * @param dynaBean The bean
      */
     public void update(DynaBean dynaBean) throws SQLException
     {
@@ -307,7 +438,9 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * Deletes the given DynaBean from the database, assuming the primary key values are specified.
+     * Deletes the given dyna bean from the database, assuming the primary key values are specified.
+     * 
+     * @param dynaBean The dyna bean
      */
     public void delete(DynaBean dynaBean) throws SQLException
     {
@@ -380,7 +513,8 @@ public class DynaSql extends JdbcSupport {
 
     /**
      * Returns the database.
-     * @return Database
+     * 
+     * @return The model
      */
     public Database getDatabase()
     {
@@ -388,8 +522,9 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * Sets the database.
-     * @param database The database to set
+     * Sets the database model.
+     * 
+     * @param database The model
      */
     public void setDatabase(Database database)
     {
@@ -402,9 +537,10 @@ public class DynaSql extends JdbcSupport {
     //-------------------------------------------------------------------------
 
     /**
-     * Returns true if this dynaBean has a primary key.
-     * @todo Provide functionality or document behavior [returns false].
-     * @return true if this dynaBean has a primary key
+     * Determines whether this dynaBean has a primary key.
+     * 
+     * @todo Doesn't do anything yet
+     * @return <code>true</code> if this dynaBean has a primary key
      */
     protected boolean exists(DynaBean dynaBean, Connection connection)
     {
@@ -691,8 +827,9 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * A Factory method to create a new SqlDynaClass instance for the given table name If the SqlDynaClass does not exist
-     * then create a new one based on the Table definition
+     * Creates a new {@link SqlDynaClass} instance for the given table based on the table definition.
+     * 
+     * @param table The table
      */
     protected SqlDynaClass createSqlDynaClass(Table table)
     {
@@ -700,7 +837,12 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * Sets property value with the given prepared statement, doing any type specific conversions or swizzling.
+     * Sets a parameter of the prepared statement based on the type of the column of the property.
+     * 
+     * @param statement The statement
+     * @param sqlIndex  The index of the parameter to set in the statement
+     * @param dynaBean  The bean of which to take the value
+     * @param property  The property of the bean, which also defines the corresponding column
      */
     protected void setObject(PreparedStatement statement, int sqlIndex, DynaBean dynaBean, SqlDynaProperty property) throws SQLException
     {
@@ -845,13 +987,16 @@ public class DynaSql extends JdbcSupport {
     }
 
     /**
-     * Factory method to create a new ResultSetIterator for the given result set, closing the
-     * connection, statement and result set when the iterator is used or closed.
+     * Creates an iterator over the given result set.
      *
-     * @todo figure out a way to close Connection, Statement and ResultSet!
+     * @param connection The connection
+     * @param resultSet  The result set to iteratpr over
      */
-    protected Iterator createResultSetIterator(Connection connection, Statement statement, ResultSet resultSet) throws SQLException, IllegalAccessException, InstantiationException
+    protected Iterator createResultSetIterator(Connection connection, ResultSet resultSet) throws SQLException, IllegalAccessException, InstantiationException
     {
+        // TODO Define a result set iterator that closes automatically upon finish or finally
+        //      Or use a cached result set ? 
+
         // #### WARNING - the Connection, statement and resultSet are not closed.
         ResultSetDynaClass resultSetClass = new ResultSetDynaClass(resultSet);
 
