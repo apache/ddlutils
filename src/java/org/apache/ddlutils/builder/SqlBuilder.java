@@ -96,6 +96,9 @@ public abstract class SqlBuilder {
      *  can have for this database; use -1 if there is no limit */
     private int _maxIdentifierLength = -1;
 
+    /** Whether identifiers are case sensitive or not */
+    private boolean _caseSensitive = false;
+
     /** The string used for escaping values when generating textual SQL statements */
     private String _valueQuoteChar = "'";
 
@@ -357,6 +360,26 @@ public abstract class SqlBuilder {
     public void setMaxIdentifierLength(int maxIdentifierLength)
     {
         _maxIdentifierLength = maxIdentifierLength;
+    }
+
+    /**
+     * Determines whether the database has case sensitive identifiers.
+     *
+     * @return <code>true</code> if case of the the identifiers is important
+     */
+    public boolean isCaseSensitive()
+    {
+        return _caseSensitive;
+    }
+
+    /**
+     * Specifies whether the database has case sensitive identifiers.
+     *
+     * @param caseSensitive <code>true</code> if case of the the identifiers is important
+     */
+    public void setCaseSensitive(boolean caseSensitive)
+    {
+        _caseSensitive = caseSensitive;
     }
 
     /**

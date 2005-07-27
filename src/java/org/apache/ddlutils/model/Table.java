@@ -249,20 +249,46 @@ public class Table implements Cloneable
     }
 
     /**
-     * Finds the table with the specified name, using case insensitive matching.
+     * Finds the column with the specified name, using case insensitive matching.
      * Note that this method is not called getColumn(String) to avoid introspection
      * problems.
+     * 
+     * @param name The name of the column
+     * @return The column or <code>null</code> if there is no such column
      */
     public Column findColumn(String name)
+    {
+        return findColumn(name, false);
+    }
+
+    /**
+     * Finds the column with the specified name, using case insensitive matching.
+     * Note that this method is not called getColumn(String) to avoid introspection
+     * problems.
+     * 
+     * @param name          The name of the column
+     * @param caseSensitive Whether case matters for the names
+     * @return The column or <code>null</code> if there is no such column
+     */
+    public Column findColumn(String name, boolean caseSensitive)
     {
         for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
         {
             Column column = (Column) iter.next();
 
-            // column names are typically case insensitive
-            if (column.getName().equalsIgnoreCase( name ))
+            if (caseSensitive)
             {
-                return column;
+                if (column.getName().equals(name))
+                {
+                    return column;
+                }
+            }
+            else
+            {
+                if (column.getName().equalsIgnoreCase(name))
+                {
+                    return column;
+                }
             }
         }
         return null;

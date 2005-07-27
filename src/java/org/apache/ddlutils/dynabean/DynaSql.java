@@ -29,12 +29,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
+
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.beanutils.ResultSetDynaClass;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.builder.SqlBuilder;
@@ -136,7 +137,7 @@ public class DynaSql extends JdbcSupport
         {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sql);
-            answer    = createResultSetIterator(connection, resultSet);
+            answer    = createResultSetIterator(resultSet);
             return answer;
         }
         finally
@@ -175,7 +176,7 @@ public class DynaSql extends JdbcSupport
                 statement.setObject(paramIdx, iter.next());
             }
             resultSet = statement.executeQuery();
-            answer    = createResultSetIterator(connection, resultSet);
+            answer    = createResultSetIterator(resultSet);
             return answer;
         }
         finally
@@ -242,7 +243,7 @@ public class DynaSql extends JdbcSupport
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(connection, resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
+            for (Iterator it = createResultSetIterator(resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
@@ -250,8 +251,9 @@ public class DynaSql extends JdbcSupport
                 }
             }
         }
-        finally
+        catch (SQLException ex)
         {
+            // any other exception comes from the iterator which closes the resources automatically
             closeResources(connection, statement, resultSet);
         }
         return result;
@@ -292,7 +294,7 @@ public class DynaSql extends JdbcSupport
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(connection, resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
+            for (Iterator it = createResultSetIterator(resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
@@ -300,8 +302,9 @@ public class DynaSql extends JdbcSupport
                 }
             }
         }
-        finally
+        catch (SQLException ex)
         {
+            // any other exception comes from the iterator which closes the resources automatically
             closeResources(connection, statement, resultSet);
         }
         return result;
@@ -532,6 +535,15 @@ public class DynaSql extends JdbcSupport
         _dynaClassCache.clear();
     }
 
+    /**
+     * Returns the builder (if any).
+     * 
+     * @return The sql builder
+     */
+    public SqlBuilder getSqlBuilder()
+    {
+        return _builder;
+    }
 
     // Implementation methods
     //-------------------------------------------------------------------------
@@ -989,17 +1001,10 @@ public class DynaSql extends JdbcSupport
     /**
      * Creates an iterator over the given result set.
      *
-     * @param connection The connection
-     * @param resultSet  The result set to iteratpr over
+     * @param resultSet The result set to iterate over
      */
-    protected Iterator createResultSetIterator(Connection connection, ResultSet resultSet) throws SQLException, IllegalAccessException, InstantiationException
+    protected DynaSqlIterator createResultSetIterator(ResultSet resultSet)
     {
-        // TODO Define a result set iterator that closes automatically upon finish or finally
-        //      Or use a cached result set ? 
-
-        // #### WARNING - the Connection, statement and resultSet are not closed.
-        ResultSetDynaClass resultSetClass = new ResultSetDynaClass(resultSet);
-
-        return resultSetClass.iterator();
+        return new DynaSqlIterator(this, resultSet, true);
     }
 }
