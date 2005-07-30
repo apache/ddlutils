@@ -47,17 +47,18 @@ public class DynaSqlIterator implements Iterator
      */
     public DynaSqlIterator(DynaSql dynaSql, ResultSet resultSet, boolean cleanUpAfterFinish) throws DynaSqlException
     {
-        if (_resultSet != null)
+        if (resultSet != null)
         {
             _resultSet          = resultSet;
             _cleanUpAfterFinish = cleanUpAfterFinish;
 
             try
             {
-                initFromMetaData(dynaSql, resultSet.getMetaData());
+                initFromMetaData(dynaSql, resultSet);
             }
             catch (SQLException ex)
             {
+                cleanUp();
                 throw new DynaSqlException("Could not read the metadata of the result set", ex);
             }
         }
@@ -70,26 +71,30 @@ public class DynaSqlIterator implements Iterator
     /**
      * Initializes this iterator from the resultset metadata.
      * 
-     * @param dynaSql  The dyna sql instance
-     * @param metaData The result set metadata
+     * @param dynaSql   The dyna sql instance
+     * @param resultSet The result set
      */
-    private void initFromMetaData(DynaSql dynaSql, ResultSetMetaData metaData) throws SQLException
+    private void initFromMetaData(DynaSql dynaSql, ResultSet resultSet) throws SQLException
     {
+        ResultSetMetaData metaData         = resultSet.getMetaData();
         String            tableName        = null;
         boolean           singleKnownTable = true;
         boolean           caseSensitive    = (dynaSql.getSqlBuilder() == null ? false : dynaSql.getSqlBuilder().isCaseSensitive());
 
-        for (int idx = 0; idx < metaData.getColumnCount(); idx++)
+        for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
         {
             String tableOfColumn = metaData.getTableName(idx);
 
-            if (tableName == null)
+            if ((tableOfColumn != null) && (tableOfColumn.length() > 0))
             {
-                tableName = tableOfColumn;
-            }
-            else if (!tableName.equals(tableOfColumn))
-            {
-                singleKnownTable = false;
+                if (tableName == null)
+                {
+                    tableName = tableOfColumn;
+                }
+                else if (!tableName.equals(tableOfColumn))
+                {
+                    singleKnownTable = false;
+                }
             }
 
             Table  table      = dynaSql.getDatabase().findTable(tableOfColumn, caseSensitive);
@@ -107,7 +112,7 @@ public class DynaSqlIterator implements Iterator
             }
             _columnsToProperties.put(columnName, propName);
         }
-        if (singleKnownTable)
+        if (singleKnownTable && (tableName != null))
         {
             _dynaClass = dynaSql.getDynaClass(tableName);
         }
@@ -131,14 +136,22 @@ public class DynaSqlIterator implements Iterator
     {
         if (_isAtEnd)
         {
-            return true;
+            return false;
         }
         else
         {
             try
             {
-                _isAtEnd = !_resultSet.next();
-                return !_isAtEnd;
+                if (_resultSet.next())
+                {
+                    return true;
+                }
+                else
+                {
+                    _isAtEnd = true;
+                    cleanUp();
+                    return false;
+                }
             }
             catch (SQLException ex)
             {
@@ -225,5 +238,29 @@ public class DynaSqlIterator implements Iterator
     protected void finalize() throws Throwable
     {
         cleanUp();
+    }
+
+    /**
+     * Determines whether the connection is still open.
+     * 
+     * @return <code>true</code> if the connection is still open
+     */
+    public boolean isConnectionOpen()
+    {
+        if (_resultSet == null)
+        {
+            return false;
+        }
+        try
+        {
+            Statement  stmt = _resultSet.getStatement();
+            Connection conn = stmt.getConnection();
+
+            return !conn.isClosed();
+        }
+        catch (SQLException ex)
+        {
+            return false;
+        }
     }
 }

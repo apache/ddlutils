@@ -16,6 +16,7 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.TestDatabaseWriterBase;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.util.DDLExecutor;
 
@@ -53,15 +54,7 @@ public class TestAgainstAxionDb extends TestDatabaseWriterBase
         "  </table>\n"+
         "</database>";
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.TestBuilderBase#getDatabaseName()
-     */
-    protected String getDatabaseName()
-    {
-        return "Axion";
-    }
-
-    public void testCreation() throws Exception
+    public void _testCreation() throws Exception
     {
         Database testDb = parseDatabaseFromString(COLUMN_TEST_SCHEMA);
 

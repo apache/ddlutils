@@ -17,7 +17,6 @@ package org.apache.ddlutils.util;
  */
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -37,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 public abstract class JdbcSupport {
 
     /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( JdbcSupport.class );
+    private final Log log = LogFactory.getLog(getClass());
     
     private DataSource dataSource;
     
@@ -89,7 +88,10 @@ public abstract class JdbcSupport {
     {
         try
         {
-            connection.close();
+            if ((connection != null) && !connection.isClosed())
+            {
+                connection.close();
+            }
         }
         catch (Exception e)
         {
@@ -98,40 +100,27 @@ public abstract class JdbcSupport {
     }
 
     /**
-     * Closes the given result set down.
+     * Closes the given statement (which also closes all result sets for this statement) and the
+     * connection it belongs to.
+     * 
+     * @param statement The statement
      */
-    protected void closeResultSet(ResultSet resultSet) {
-        if ( resultSet != null ) {
-            try {
-                resultSet.close();
+    public void closeStatementAndConnection(Statement statement)
+    {
+        if (statement != null)
+        {
+            try
+            {
+                if ((statement.getConnection() != null) && !statement.getConnection().isClosed())
+                {
+                    statement.close();
+                    returnConnection(statement.getConnection());
+                }
             }
-            catch (Exception e) {
-                log.warn("Ignoring exception closing result set: " + e, e);
+            catch (Exception e)
+            {
+                log.warn("Ignoring exception closing statement", e);
             }
         }
-    }
-
-    /**
-     * Closes the given statement down.
-     */
-    protected void closeStatement(Statement statement) {
-        if ( statement != null ) {
-            try {
-                statement.close();
-            }
-            catch (Exception e) {
-                log.warn("Ignoring exception closing statement: " + e, e);
-            }
-        }
-    }
-    
-    /**
-     * A helper method to close down any resources used and return the JDBC connection
-     * back to the pool
-     */
-    protected void closeResources(Connection connection, Statement statement, ResultSet resultSet) {
-        closeResultSet(resultSet);
-        closeStatement(statement);
-        returnConnection(connection);
     }
 }

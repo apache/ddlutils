@@ -146,7 +146,7 @@ public class DynaSql extends JdbcSupport
             // otherwise we're leaving it open for the iterator
             if (answer == null)
             {
-                closeResources(connection, statement, resultSet);
+                closeStatementAndConnection(statement);
             }
         }
     }
@@ -184,7 +184,7 @@ public class DynaSql extends JdbcSupport
             // if any exceptions are thrown, close things down
             if (answer == null)
             {
-                closeResources(connection, statement, resultSet);
+                closeStatementAndConnection(statement);
             }
         }
     }
@@ -243,7 +243,7 @@ public class DynaSql extends JdbcSupport
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
+            for (Iterator it = createResultSetIterator(resultSet); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
@@ -254,7 +254,7 @@ public class DynaSql extends JdbcSupport
         catch (SQLException ex)
         {
             // any other exception comes from the iterator which closes the resources automatically
-            closeResources(connection, statement, resultSet);
+            closeStatementAndConnection(statement);
         }
         return result;
     }
@@ -294,7 +294,7 @@ public class DynaSql extends JdbcSupport
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(resultSet); (rowIdx <= end) && it.hasNext(); rowIdx++)
+            for (Iterator it = createResultSetIterator(resultSet); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
@@ -305,7 +305,7 @@ public class DynaSql extends JdbcSupport
         catch (SQLException ex)
         {
             // any other exception comes from the iterator which closes the resources automatically
-            closeResources(connection, statement, resultSet);
+            closeStatementAndConnection(statement);
         }
         return result;
     }
@@ -486,7 +486,7 @@ public class DynaSql extends JdbcSupport
         }
         finally
         {
-            closeStatement(statement);
+            closeStatementAndConnection(statement);
             returnConnection(connection);
         }
     }
@@ -629,7 +629,7 @@ public class DynaSql extends JdbcSupport
         }
         finally
         {
-            closeStatement(statement);
+            closeStatementAndConnection(statement);
         }
         if (queryIdSql != null)
         {
@@ -670,7 +670,7 @@ public class DynaSql extends JdbcSupport
                 {
                     lastInsertedIds.close();
                 }
-                closeStatement(queryStmt);
+                closeStatementAndConnection(queryStmt);
             }
         }
     }
@@ -726,7 +726,7 @@ public class DynaSql extends JdbcSupport
         }
         finally
         {
-            closeStatement(statement);
+            closeStatementAndConnection(statement);
         }
     }
 

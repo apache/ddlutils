@@ -16,6 +16,7 @@ package org.apache.ddlutils.builder;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.TestBuilderBase;
 import org.apache.ddlutils.model.Database;
 
 /**

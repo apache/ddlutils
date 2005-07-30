@@ -929,6 +929,9 @@ public abstract class SqlBuilder {
         }
 
         // Next we drop the tables in reverse order to avoid referencial problems
+        // TODO: It might be more useful to either (or both)
+        //       * determine an order in which the tables can be dropped safely (via the foreignkeys)
+        //       * alter the tables first to drop the internal foreignkeys
         for (int idx = tables.size() - 1; idx >= 0; idx--)
         {
             Table table = (Table)tables.get(idx);

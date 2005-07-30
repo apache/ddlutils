@@ -1,4 +1,4 @@
-package org.apache.ddlutils.builder;
+package org.apache.ddlutils;
 
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
@@ -23,8 +23,11 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
+import org.apache.ddlutils.builder.SqlBuilder;
+import org.apache.ddlutils.builder.SqlBuilderFactory;
 import org.apache.ddlutils.io.DatabaseReader;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.util.DDLExecutor;
 import org.xml.sax.SAXException;
 
 /**

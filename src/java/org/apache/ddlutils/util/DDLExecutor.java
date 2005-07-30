@@ -202,7 +202,7 @@ public class DDLExecutor extends JdbcSupport {
             log.info( "Executed: "+ commandCount + " statement(s) with " + errors + " error(s)" );
         }
         finally {
-            closeStatement(statement);
+            closeStatementAndConnection(statement);
             returnConnection(connection);
         }
 

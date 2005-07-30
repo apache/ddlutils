@@ -21,7 +21,7 @@
 	     name="DdlUtils"
 	     basedir=".">
     <!-- Allow values set at the commandline or in the environment to override the defaults -->
-	<property environment="env"/>
+	  <property environment="env"/>
     <!-- Load the build properties -->
     <property file="build.properties"/>
 
@@ -175,13 +175,31 @@
         </javac>
     </target>
 
-    <target name="junit"
-            description="Runs the test cases"
-            depends="compile-tests">
+  <target name="junit"
+          description="Runs the test cases against the default database (Hsqldb)">
+    <antcall target="junit-hsqldb"/>
+ 	</target>
+
+  <target name="junit-hsqldb"
+          description="Runs the test cases against Hsqldb">
+    <property name="jdbc.properties.file" value="/jdbc.properties.hsqldb"/>
+    <antcall target="junit-internal"/>
+  </target>
+
+  <target name="junit-postgresql"
+          description="Runs the test cases against PostgreSQL">
+    <property name="jdbc.properties.file" value="/jdbc.properties.postgresql"/>
+    <antcall target="junit-internal"/>
+  </target>
+
+  <target name="junit-internal"
+          description="Actually runs the test cases"
+          depends="compile-tests">
         <junit dir="."
                printSummary="yes"
                fork="true"
                haltonerror="false">
+            <sysproperty key="jdbc.properties.file" value="${jdbc.properties.file}"/> 
             <formatter type="xml"/>
             <formatter type="plain"/>
             <classpath refid="compilation-classpath"/>
