@@ -111,10 +111,16 @@ public abstract class JdbcSupport {
         {
             try
             {
-                if ((statement.getConnection() != null) && !statement.getConnection().isClosed())
+                Connection conn = statement.getConnection();
+
+                if ((conn != null) && !conn.isClosed())
                 {
                     statement.close();
-                    returnConnection(statement.getConnection());
+                    // this might have closed the connection ?
+                    if (!conn.isClosed())
+                    {
+                        returnConnection(conn);
+                    }
                 }
             }
             catch (Exception e)
