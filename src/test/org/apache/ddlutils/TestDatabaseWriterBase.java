@@ -25,6 +25,8 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.builder.BuilderUtils;
 import org.apache.ddlutils.dynabean.DynaSqlException;
@@ -218,6 +220,35 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
         catch (Exception ex)
         {
             throw new DynaSqlException(ex);
+        }
+    }
+
+    /**
+     * Determines the value of the bean's property that has the given name. Depending on the
+     * case-setting of the current builder, the case of teh name is considered or not. 
+     * 
+     * @param bean     The bean
+     * @param propName The name of the property
+     * @return The value
+     */
+    protected Object getPropertyValue(DynaBean bean, String propName)
+    {
+        if (getBuilder().isCaseSensitive())
+        {
+            return bean.get(propName);
+        }
+        else
+        {
+            DynaProperty[] props = bean.getDynaClass().getDynaProperties();
+    
+            for (int idx = 0; idx < props.length; idx++)
+            {
+                if (propName.equalsIgnoreCase(props[idx].getName()))
+                {
+                    return bean.get(props[idx].getName());
+                }
+            }
+            throw new IllegalArgumentException("The bean has no property with the name "+propName);
         }
     }
 }

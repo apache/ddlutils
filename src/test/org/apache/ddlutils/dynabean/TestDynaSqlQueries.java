@@ -12,22 +12,22 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         createDatabase(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
-            "  <table name='testtable'>\n"+
-            "    <column name='id'   type='INTEGER' primaryKey='true'/>\n"+
-            "    <column name='text' type='VARCHAR' size='15'/>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='Id'   type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Text' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
 
         insertData(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<data>\n"+
-            "  <testtable id='1' text='Text 1'/>\n"+
-            "  <testtable id='2' text='Text 2'/>\n"+
-            "  <testtable id='3' text='Text 3'/>"+
+            "  <TestTable Id='1' Text='Text 1'/>\n"+
+            "  <TestTable Id='2' Text='Text 2'/>\n"+
+            "  <TestTable Id='3' Text='Text 3'/>"+
             "</data>");
 
         DynaSql         dynaSql = new DynaSql(getBuilder(), getDataSource(), getModel());
-        DynaSqlIterator it      = (DynaSqlIterator)dynaSql.query("SELECT * FROM testtable");
+        DynaSqlIterator it      = (DynaSqlIterator)dynaSql.query("SELECT * FROM TestTable");
         DynaBean        bean    = null;
 
         assertTrue(it.hasNext());
@@ -37,27 +37,27 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         bean = (DynaBean)it.next();
 
         assertEquals(new Integer(1),
-                     bean.get("id"));
+                     getPropertyValue(bean, "Id"));
         assertEquals("Text 1",
-                     bean.get("text"));
+                     getPropertyValue(bean, "Text"));
         
         assertTrue(it.hasNext());
 
         bean = (DynaBean)it.next();
 
         assertEquals(new Integer(2),
-                     bean.get("id"));
+                     getPropertyValue(bean, "Id"));
         assertEquals("Text 2",
-                     bean.get("text"));
+                     getPropertyValue(bean, "Text"));
 
         assertTrue(it.hasNext());
 
         bean = (DynaBean)it.next();
 
         assertEquals(new Integer(3),
-                     bean.get("id"));
+                     getPropertyValue(bean, "Id"));
         assertEquals("Text 3",
-                     bean.get("text"));
+                     getPropertyValue(bean, "Text"));
 
         assertFalse(it.hasNext());
         assertFalse(it.isConnectionOpen());
@@ -68,22 +68,22 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         createDatabase(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
-            "  <table name='testtable'>\n"+
-            "    <column name='id'   type='INTEGER' primaryKey='true'/>\n"+
-            "    <column name='text' type='VARCHAR' size='15'/>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='Id'   type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Text' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
 
         insertData(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<data>\n"+
-            "  <testtable id='1' text='Text 1'/>\n"+
-            "  <testtable id='2' text='Text 2'/>\n"+
-            "  <testtable id='3' text='Text 3'/>"+
+            "  <TestTable Id='1' Text='Text 1'/>\n"+
+            "  <TestTable Id='2' Text='Text 2'/>\n"+
+            "  <TestTable Id='3' Text='Text 3'/>"+
             "</data>");
 
         DynaSql  dynaSql = new DynaSql(getBuilder(), getDataSource(), getModel());
-        List     beans   = dynaSql.fetch("SELECT * FROM testtable");
+        List     beans   = dynaSql.fetch("SELECT * FROM TestTable");
 
         assertEquals(3,
                      beans.size());
@@ -91,23 +91,23 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         DynaBean bean = (DynaBean)beans.get(0);
 
         assertEquals(new Integer(1),
-                     bean.get("id"));
+                     getPropertyValue(bean, "Id"));
         assertEquals("Text 1",
-                     bean.get("text"));
+                     getPropertyValue(bean, "Text"));
         
         bean = (DynaBean)beans.get(1);
 
         assertEquals(new Integer(2),
-                     bean.get("id"));
+                     getPropertyValue(bean, "Id"));
         assertEquals("Text 2",
-                     bean.get("text"));
+                     getPropertyValue(bean, "Text"));
 
         bean = (DynaBean)beans.get(2);
 
         assertEquals(new Integer(3),
-                     bean.get("id"));
+                     getPropertyValue(bean, "Id"));
         assertEquals("Text 3",
-                     bean.get("text"));
+                     getPropertyValue(bean, "Text"));
     }
 
     public void testJoinQuery() throws Exception
@@ -115,28 +115,28 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         createDatabase(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
-            "  <table name='testtable1'>\n"+
-            "    <column name='id1' type='INTEGER' primaryKey='true'/>\n"+
-            "    <column name='id2' type='INTEGER'/>\n"+
+            "  <table name='TestTable1'>\n"+
+            "    <column name='Id1' type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Id2' type='INTEGER'/>\n"+
             "  </table>\n"+
-            "  <table name='testtable2'>\n"+
-            "    <column name='id'   type='INTEGER' primaryKey='true'/>\n"+
-            "    <column name='text' type='VARCHAR' size='15'/>\n"+
+            "  <table name='TestTable2'>\n"+
+            "    <column name='Id'   type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Text' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
 
         insertData(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<data>\n"+
-            "  <testtable1 id1='1'/>\n"+
-            "  <testtable1 id1='2' id2='3'/>\n"+
-            "  <testtable2 id='1' text='Text 1'/>\n"+
-            "  <testtable2 id='2' text='Text 2'/>\n"+
-            "  <testtable2 id='3' text='Text 3'/>"+
+            "  <TestTable1 Id1='1'/>\n"+
+            "  <TestTable1 Id1='2' Id2='3'/>\n"+
+            "  <TestTable2 Id='1' Text='Text 1'/>\n"+
+            "  <TestTable2 Id='2' Text='Text 2'/>\n"+
+            "  <TestTable2 Id='3' Text='Text 3'/>"+
             "</data>");
 
         DynaSql         dynaSql = new DynaSql(getBuilder(), getDataSource(), getModel());
-        DynaSqlIterator it      = (DynaSqlIterator)dynaSql.query("SELECT id1, text FROM testtable1, testtable2 WHERE id2 = id");
+        DynaSqlIterator it      = (DynaSqlIterator)dynaSql.query("SELECT Id1, Text FROM TestTable1, TestTable2 WHERE Id2 = Id");
         DynaBean        bean    = null;
 
         assertTrue(it.hasNext());
@@ -144,9 +144,9 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         bean = (DynaBean)it.next();
 
         assertEquals(new Integer(2),
-                     bean.get("id1"));
+                     getPropertyValue(bean, "Id1"));
         assertEquals("Text 3",
-                     bean.get("text"));
+                     getPropertyValue(bean, "Text"));
 
         assertFalse(it.hasNext());
         assertFalse(it.isConnectionOpen());
