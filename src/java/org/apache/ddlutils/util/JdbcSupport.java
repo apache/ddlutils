@@ -105,7 +105,7 @@ public abstract class JdbcSupport {
      * 
      * @param statement The statement
      */
-    public void closeStatementAndConnection(Statement statement)
+    public void closeStatement(Statement statement)
     {
         if (statement != null)
         {
@@ -116,11 +116,6 @@ public abstract class JdbcSupport {
                 if ((conn != null) && !conn.isClosed())
                 {
                     statement.close();
-                    // this might have closed the connection ?
-                    if (!conn.isClosed())
-                    {
-                        returnConnection(conn);
-                    }
                 }
             }
             catch (Exception e)

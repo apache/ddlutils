@@ -32,6 +32,8 @@ public class DynaSqlIterator implements Iterator
     private DynaClass _dynaClass;
     /** Maps column names to properties */
     private Map _columnsToProperties = new ListOrderedMap();
+    /** Whether the next call to hasNext or next needs advancement */
+    private boolean _needsAdvancing = true;
     /** Whether we're already at the end of the result set */
     private boolean _isAtEnd = false;
     /** Whether to close the statement and connection after finishing */
@@ -134,31 +136,8 @@ public class DynaSqlIterator implements Iterator
      */
     public boolean hasNext() throws DynaSqlException
     {
-        if (_isAtEnd)
-        {
-            return false;
-        }
-        else
-        {
-            try
-            {
-                if (_resultSet.next())
-                {
-                    return true;
-                }
-                else
-                {
-                    _isAtEnd = true;
-                    cleanUp();
-                    return false;
-                }
-            }
-            catch (SQLException ex)
-            {
-                cleanUp();
-                throw new DynaSqlException("Exception while advancing the resultset cursor", ex);
-            }
-        }
+        advanceIfNecessary();
+        return !_isAtEnd;
     }
 
     /* (non-Javadoc)
@@ -166,6 +145,7 @@ public class DynaSqlIterator implements Iterator
      */
     public Object next() throws DynaSqlException
     {
+        advanceIfNecessary();
         if (_isAtEnd)
         {
             throw new NoSuchElementException("No more elements in the resultset");
@@ -182,6 +162,7 @@ public class DynaSqlIterator implements Iterator
 
                     bean.set((String)entry.getValue(), _resultSet.getObject((String)entry.getKey()));
                 }
+                _needsAdvancing = true;
                 return bean;
             }
             catch (Exception ex)
@@ -192,6 +173,30 @@ public class DynaSqlIterator implements Iterator
         }
     }
 
+    /**
+     * Advances the result set if necessary.
+     */
+    private void advanceIfNecessary() throws DynaSqlException
+    {
+        if (_needsAdvancing && !_isAtEnd)
+        {
+            try
+            {
+                _isAtEnd        = !_resultSet.next();
+                _needsAdvancing = false;
+            }
+            catch (SQLException ex)
+            {
+                cleanUp();
+                throw new DynaSqlException("Could not retrieve next row from result set", ex);
+            }
+            if (_isAtEnd)
+            {
+                cleanUp();
+            }
+        }
+    }
+    
     /* (non-Javadoc)
      * @see java.util.Iterator#remove()
      */
