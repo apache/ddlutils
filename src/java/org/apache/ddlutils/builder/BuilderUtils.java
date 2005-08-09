@@ -32,6 +32,10 @@ public class BuilderUtils
     public static final String DRIVER_DB2                     = "COM.ibm.db2.jdbc.app.DB2Driver";
     /** The i-net DB2 jdbc driver */
     public static final String DRIVER_DB2_INET                = "com.inet.drda.DRDADriver";
+    /** The derby jdbc driver for use as a client for a normal server */
+    public static final String DRIVER_DERBY_CLIENT            = "org.apache.derby.jdbc.ClientDriver";
+    /** The derby jdbc driver for use as an embedded database */
+    public static final String DRIVER_DERBY_EMBEDDED          = "org.apache.derby.jdbc.EmbeddedDriver";
     /** The standard Firebird jdbc driver */
     public static final String DRIVER_FIREBIRD                = "org.firebirdsql.jdbc.FBDriver";
     /** The standard Hsqldb jdbc driver */
@@ -75,6 +79,8 @@ public class BuilderUtils
     public static final String SUBPROTOCOL_DB2                       = "db2";
     /** The subprotocol used by the i-net DB2 driver */
     public static final String SUBPROTOCOL_DB2_INET                  = "inetdb2";
+    /** The subprotocol used by the derby drivers */
+    public static final String SUBPROTOCOL_DERBY                     = "derby";
     /** The subprotocol used by the standard Firebird driver */
     public static final String SUBPROTOCOL_FIREBIRD                  = "firebirdsql";
     /** The subprotocol used by the standard Hsqldb driver */
@@ -141,6 +147,7 @@ public class BuilderUtils
         // drivers so we have no means to distinguish them
         jdbcSubProtocolToPlatform.put(SUBPROTOCOL_DB2,                       Db2Builder.DATABASENAME);
         jdbcSubProtocolToPlatform.put(SUBPROTOCOL_DB2_INET,                  Db2Builder.DATABASENAME);
+        jdbcSubProtocolToPlatform.put(SUBPROTOCOL_DERBY,                     DerbyBuilder.DATABASENAME);
         jdbcSubProtocolToPlatform.put(SUBPROTOCOL_FIREBIRD,                  FirebirdBuilder.DATABASENAME);
         jdbcSubProtocolToPlatform.put(SUBPROTOCOL_HSQLDB,                    HsqlDbBuilder.DATABASENAME);
         jdbcSubProtocolToPlatform.put(SUBPROTOCOL_INFORMIX,                  FirebirdBuilder.DATABASENAME);
@@ -167,6 +174,8 @@ public class BuilderUtils
 
         jdbcDriverToPlatform.put(DRIVER_DB2,                     Db2Builder.DATABASENAME);
         jdbcDriverToPlatform.put(DRIVER_DB2_INET,                Db2Builder.DATABASENAME);
+        jdbcDriverToPlatform.put(DRIVER_DERBY_EMBEDDED,          DerbyBuilder.DATABASENAME);
+        jdbcDriverToPlatform.put(DRIVER_DERBY_CLIENT,            DerbyBuilder.DATABASENAME);
         jdbcDriverToPlatform.put(DRIVER_FIREBIRD,                FirebirdBuilder.DATABASENAME);
         jdbcDriverToPlatform.put(DRIVER_HSQLDB,                  HsqlDbBuilder.DATABASENAME);
         jdbcDriverToPlatform.put(DRIVER_INFORMIX,                FirebirdBuilder.DATABASENAME);
