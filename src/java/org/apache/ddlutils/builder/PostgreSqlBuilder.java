@@ -34,7 +34,11 @@ import org.apache.ddlutils.model.Table;
 public class PostgreSqlBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "PostgreSql";
+    public static final String DATABASENAME      = "PostgreSql";
+    /** The standard PostgreSQL jdbc driver */
+    public static final String JDBC_DRIVER       = "org.postgresql.Driver";
+    /** The subprotocol used by the standard PostgreSQL driver */
+    public static final String JDBC_SUBPROTOCOL  = "postgresql";
 
     public PostgreSqlBuilder()
     {

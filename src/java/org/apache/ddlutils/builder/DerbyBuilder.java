@@ -25,7 +25,13 @@ package org.apache.ddlutils.builder;
 public class DerbyBuilder extends CloudscapeBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "Derby";
+    public static final String DATABASENAME         = "Derby";
+    /** The derby jdbc driver for use as a client for a normal server */
+    public static final String JDBC_DRIVER          = "org.apache.derby.jdbc.ClientDriver";
+    /** The derby jdbc driver for use as an embedded database */
+    public static final String JDBC_DRIVER_EMBEDDED = "org.apache.derby.jdbc.EmbeddedDriver";
+    /** The subprotocol used by the derby drivers */
+    public static final String JDBC_SUBPROTOCOL     = "derby";
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()

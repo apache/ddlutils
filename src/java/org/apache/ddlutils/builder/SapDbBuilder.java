@@ -32,8 +32,16 @@ import org.apache.ddlutils.model.Table;
 public class SapDbBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "SapDB";
+    public static final String DATABASENAME     = "SapDB";
 
+    // Note that SapDB and MaxDB currently use the same jdbc driver
+
+    /** The standard SapDB/MaxDB jdbc driver */
+    public static final String JDBC_DRIVER      = "com.sap.dbtech.jdbc.DriverSapDB";
+    /** The subprotocol used by the standard SapDB/MaxDB driver */
+    public static final String JDBC_SUBPROTOCOL = "sapdb";
+
+    
     public SapDbBuilder()
     {
         setMaxIdentifierLength(32);

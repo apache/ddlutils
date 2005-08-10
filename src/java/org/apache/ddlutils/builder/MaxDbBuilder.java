@@ -27,6 +27,8 @@ public class MaxDbBuilder extends SapDbBuilder
     /** Database name of this builder */
     public static final String DATABASENAME = "MaxDB";
 
+    // Note that SapDb and MaxDb currently use the same jdbc driver
+
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
      */

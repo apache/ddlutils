@@ -32,7 +32,11 @@ import org.apache.ddlutils.model.Table;
 public class HsqlDbBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "HsqlDb";
+    public static final String DATABASENAME     = "HsqlDb";
+    /** The standard Hsqldb jdbc driver */
+    public static final String JDBC_DRIVER      = "org.hsqldb.jdbcDriver";
+    /** The subprotocol used by the standard Hsqldb driver */
+    public static final String JDBC_SUBPROTOCOL = "hsqldb";
 
     /**
      * Creates a new instance of the Hsqldb builer.

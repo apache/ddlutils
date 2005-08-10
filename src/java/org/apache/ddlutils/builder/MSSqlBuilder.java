@@ -34,7 +34,11 @@ import org.apache.ddlutils.model.Table;
 public class MSSqlBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "MsSql";
+    public static final String DATABASENAME     = "MsSql";
+    /** The standard SQLServer jdbc driver */
+    public static final String JDBC_DRIVER      = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
+    /** The subprotocol used by the standard SQLServer driver */
+    public static final String JDBC_SUBPROTOCOL = "microsoft:sqlserver";
 
     public MSSqlBuilder()
     {

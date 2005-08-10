@@ -25,7 +25,11 @@ package org.apache.ddlutils.builder;
 public class FirebirdBuilder extends InterbaseBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "Firebird";
+    public static final String DATABASENAME     = "Firebird";
+    /** The standard Firebird jdbc driver */
+    public static final String JDBC_DRIVER      = "org.firebirdsql.jdbc.FBDriver";
+    /** The subprotocol used by the standard Firebird driver */
+    public static final String JDBC_SUBPROTOCOL = "firebirdsql";
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()

@@ -32,7 +32,11 @@ import org.apache.ddlutils.model.Table;
 public class MckoiSqlBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "McKoi";
+    public static final String DATABASENAME     = "McKoi";
+    /** The standard McKoi jdbc driver */
+    public static final String JDBC_DRIVER      = "com.mckoi.JDBCDriver";
+    /** The subprotocol used by the standard McKoi driver */
+    public static final String JDBC_SUBPROTOCOL = "mckoi";
 
     public MckoiSqlBuilder()
     {

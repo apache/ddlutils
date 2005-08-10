@@ -32,7 +32,11 @@ import org.apache.ddlutils.model.Table;
 public class Db2Builder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "DB2";
+    public static final String DATABASENAME     = "DB2";
+    /** The standard DB2 jdbc driver */
+    public static final String JDBC_DRIVER      = "COM.ibm.db2.jdbc.app.DB2Driver";
+    /** The subprotocol used by the standard DB2 driver */
+    public static final String JDBC_SUBPROTOCOL = "db2";
 
     public Db2Builder()
     {

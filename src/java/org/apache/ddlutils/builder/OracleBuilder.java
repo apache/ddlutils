@@ -33,7 +33,11 @@ import org.apache.ddlutils.model.Table;
 public class OracleBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "Oracle";
+    public static final String DATABASENAME     = "Oracle";
+    /** The standard Oracle jdbc driver */
+    public static final String JDBC_DRIVER      = "oracle.jdbc.driver.OracleDriver";
+    /** The subprotocol used by the standard Oracle driver */
+    public static final String JDBC_SUBPROTOCOL = "oracle";
 
     public OracleBuilder()
     {

@@ -32,7 +32,11 @@ import org.apache.ddlutils.model.Table;
 public class InterbaseBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "Interbase";
+    public static final String DATABASENAME     = "Interbase";
+    /** The interbase jdbc driver */
+    public static final String JDBC_DRIVER      = "interbase.interclient.Driver";
+    /** The subprotocol used by the interbase driver */
+    public static final String JDBC_SUBPROTOCOL = "interbase";
 
     public InterbaseBuilder()
     {

@@ -34,7 +34,13 @@ import org.apache.ddlutils.model.Table;
 public class MySqlBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "MySQL";
+    public static final String DATABASENAME     = "MySQL";
+    /** The standard MySQL jdbc driver */
+    public static final String JDBC_DRIVER      = "com.mysql.jdbc.Driver";
+    /** The old MySQL jdbc driver */
+    public static final String JDBC_DRIVER_OLD  = "org.gjt.mm.mysql.Driver";
+    /** The subprotocol used by the standard MySQL driver */
+    public static final String JDBC_SUBPROTOCOL = "mysql";
 
     public MySqlBuilder()
     {

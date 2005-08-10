@@ -33,7 +33,13 @@ import org.apache.ddlutils.model.Table;
 public class SybaseBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "Sybase";
+    public static final String DATABASENAME     = "Sybase";
+    /** The standard Sybase jdbc driver */
+    public static final String JDBC_DRIVER      = "com.sybase.jdbc2.jdbc.SybDriver";
+    /** The old Sybase jdbc driver */
+    public static final String JDBC_DRIVER_OLD  = "com.sybase.jdbc.SybDriver";
+    /** The subprotocol used by the standard Sybase driver */
+    public static final String JDBC_SUBPROTOCOL = "sybase:Tds";
 
     public SybaseBuilder()
     {

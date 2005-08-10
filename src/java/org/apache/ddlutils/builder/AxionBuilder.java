@@ -31,7 +31,11 @@ import org.apache.ddlutils.model.Table;
 public class AxionBuilder extends SqlBuilder
 {
     /** Database name of this builder */
-    public static final String DATABASENAME = "Axion";
+    public static final String DATABASENAME     = "Axion";
+    /** The axion jdbc driver */
+    public static final String JDBC_DRIVER      = "org.axiondb.jdbc.AxionDriver";
+    /** The subprotocol used by the axion driver */
+    public static final String JDBC_SUBPROTOCOL = "axiondb";
 
     public AxionBuilder()
     {
