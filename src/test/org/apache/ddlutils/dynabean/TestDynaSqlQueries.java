@@ -26,9 +26,8 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable Id='3' Text='Text 3'/>"+
             "</data>");
 
-        DynaSql         dynaSql = new DynaSql(getBuilder(), getDataSource(), getModel());
-        DynaSqlIterator it      = (DynaSqlIterator)dynaSql.query("SELECT * FROM TestTable");
-        DynaBean        bean    = null;
+        DynaSqlIterator it   = (DynaSqlIterator)getPlatform().query(getModel(), "SELECT * FROM TestTable");
+        DynaBean        bean = null;
 
         assertTrue(it.hasNext());
         // we call the method a second time to assert that the result set does not get advanced twice
@@ -82,8 +81,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable Id='3' Text='Text 3'/>"+
             "</data>");
 
-        DynaSql  dynaSql = new DynaSql(getBuilder(), getDataSource(), getModel());
-        List     beans   = dynaSql.fetch("SELECT * FROM TestTable");
+        List beans = getPlatform().fetch(getModel(), "SELECT * FROM TestTable");
 
         assertEquals(3,
                      beans.size());
@@ -135,9 +133,8 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable2 Id='3' Text='Text 3'/>"+
             "</data>");
 
-        DynaSql         dynaSql = new DynaSql(getBuilder(), getDataSource(), getModel());
-        DynaSqlIterator it      = (DynaSqlIterator)dynaSql.query("SELECT Id1, Text FROM TestTable1, TestTable2 WHERE Id2 = Id");
-        DynaBean        bean    = null;
+        DynaSqlIterator it   = (DynaSqlIterator)getPlatform().query(getModel(), "SELECT Id1, Text FROM TestTable1, TestTable2 WHERE Id2 = Id");
+        DynaBean        bean = null;
 
         assertTrue(it.hasNext());
 

@@ -17,58 +17,28 @@ package org.apache.ddlutils.builder;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
- * An SQL Builder for the <a href="http://axion.tigris.org/">Axion</a> JDBC database.
+ * The SQL Builder for the Axion database.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
 public class AxionBuilder extends SqlBuilder
 {
-    /** Database name of this builder */
-    public static final String DATABASENAME     = "Axion";
-    /** The axion jdbc driver */
-    public static final String JDBC_DRIVER      = "org.axiondb.jdbc.AxionDriver";
-    /** The subprotocol used by the axion driver */
-    public static final String JDBC_SUBPROTOCOL = "axiondb";
-
-    public AxionBuilder()
-    {
-        setRequiringNullAsDefaultValue(false);
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setIndicesEmbedded(true);
-        addNativeTypeMapping(Types.ARRAY,         "BLOB");
-        addNativeTypeMapping(Types.BINARY,        "VARBINARY");
-        addNativeTypeMapping(Types.BIT,           "BOOLEAN");
-        addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
-        addNativeTypeMapping(Types.DISTINCT,      "VARBINARY");
-        addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
-        addNativeTypeMapping(Types.LONGVARBINARY, "VARBINARY");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "VARCHAR");
-        addNativeTypeMapping(Types.NULL,          "VARBINARY");
-        addNativeTypeMapping(Types.NUMERIC,       "NUMBER");
-        addNativeTypeMapping(Types.OTHER,         "BLOB");
-        addNativeTypeMapping(Types.REAL,          "FLOAT");
-        addNativeTypeMapping(Types.REF,           "VARBINARY");
-        addNativeTypeMapping(Types.SMALLINT,      "SHORT");
-        addNativeTypeMapping(Types.STRUCT,        "VARBINARY");
-        addNativeTypeMapping(Types.TINYINT,       "SHORT");
-
-        addNativeTypeMapping("DATALINK", "VARBINARY");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
+    /**
+     * Creates a new axion sql builder.
+     * 
+     * @param info The plaftform information
      */
-    public String getDatabaseName()
+    public AxionBuilder(PlatformInfo info)
     {
-        return DATABASENAME;
+        super(info);
     }
 
     /* (non-Javadoc)

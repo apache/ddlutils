@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import javax.sql.DataSource;
+
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -46,7 +46,9 @@ public class DataToDatabaseSink implements DataSink
     private final Log _log = LogFactory.getLog(DataToDatabaseSink.class);
  
     /** Generates the sql and writes it to the database */
-    private DynaSql _dynaSql;
+    private Platform _platform;
+    /** The database model */
+    private Database _model;
     /** The connection to the database */
     private Connection _connection;
     /** Whether to stop when an error has occurred while inserting a bean into the database */
@@ -61,13 +63,13 @@ public class DataToDatabaseSink implements DataSink
     /**
      * Creates a new sink instance.
      * 
-     * @param dataSource The database to write to
-     * @param model      The database model
-     * @param builder    The sql builder
+     * @param platform The database platform
+     * @param model    The database model
      */
-    public DataToDatabaseSink(DataSource dataSource, Database model, SqlBuilder builder)
+    public DataToDatabaseSink(Platform platform, Database model)
     {
-        _dynaSql = new DynaSql(builder, dataSource, model);
+        _platform = platform;
+        _model    = model;
     }
 
     /**
@@ -145,7 +147,7 @@ public class DataToDatabaseSink implements DataSink
         // lists of already-processed identities for these tables
         _processedIdentities.clear();
         _waitingObjects.clear();
-        for (Iterator tableIt = _dynaSql.getDatabase().getTables().iterator(); tableIt.hasNext();)
+        for (Iterator tableIt = _model.getTables().iterator(); tableIt.hasNext();)
         {
             Table curTable = (Table)tableIt.next();
 
@@ -161,9 +163,9 @@ public class DataToDatabaseSink implements DataSink
         }
         try
         {
-            _connection = _dynaSql.borrowConnection();
+            _connection = _platform.borrowConnection();
         }
-        catch (SQLException ex)
+        catch (DynaSqlException ex)
         {
             throw new DataSinkException(ex);
         }
@@ -174,7 +176,7 @@ public class DataToDatabaseSink implements DataSink
      */
     public void addBean(DynaBean bean) throws DataSinkException
     {
-        Table table = _dynaSql.getSqlDynaClass(bean).getTable();
+        Table table = _model.getDynaClassFor(bean).getTable();
 
         if (!table.getForeignKeys().isEmpty())
         {
@@ -217,7 +219,7 @@ public class DataToDatabaseSink implements DataSink
         
         try
         {
-            _dynaSql.insert(bean, _connection);
+            _platform.insert(_model, bean, _connection);
             if (!_connection.getAutoCommit())
             {
                 _connection.commit();
@@ -227,11 +229,11 @@ public class DataToDatabaseSink implements DataSink
                 _log.debug("Inserted bean "+buildIdentityFromPKs(table, bean).toString());
             }
         }
-        catch (SQLException ex)
+        catch (Exception ex)
         {
             if (_haltOnErrors)
             {
-                _dynaSql.returnConnection(_connection);
+                _platform.returnConnection(_connection);
                 throw new DataSinkException(ex);
             }
             else

@@ -17,12 +17,9 @@ package org.apache.ddlutils.task;
  */
 
 import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
 
-import org.apache.ddlutils.builder.SqlBuilder;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.util.DDLExecutor;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -42,43 +39,26 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
             throw new BuildException("No database specified.");
         }
 
-        SqlBuilder   builder    = getSqlBuilder();
+        Platform     platform   = getPlatform();
         StringWriter writer     = new StringWriter();
-        Connection   connection = null;
 
-        builder.setWriter(writer);
+        platform.getSqlBuilder().setWriter(writer);
         try
         {
-            connection = getDataSource().getConnection();
             if (isAlterDatabase())
             {
-                builder.alterDatabase(model, connection, true, true);
+                platform.alterTables(model, true, true, true);
             }
             else
             {
-                builder.createDatabase(model);
+                platform.createTables(model, true, true);
             }
-            
-            DDLExecutor executor = new DDLExecutor(getDataSource());
 
-            executor.evaluateBatch(writer.toString());
             task.log("Created database", Project.MSG_INFO);
         }
         catch (Exception ex)
         {
             throw new BuildException(ex);
-        }
-        finally
-        {
-            if (connection != null)
-            {
-                try
-                {
-                    connection.close();
-                }
-                catch (SQLException ex)
-                {}
-            }
         }
     }
 }

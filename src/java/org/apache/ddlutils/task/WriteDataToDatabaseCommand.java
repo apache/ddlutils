@@ -22,8 +22,8 @@ import java.util.Iterator;
 
 import javax.sql.DataSource;
 
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.builder.SqlBuilderFactory;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DataConverterRegistration;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
@@ -96,10 +96,11 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
     {
         try
         {
-            SqlBuilder         builder = SqlBuilderFactory.newSqlBuilder(_databaseType);
-            DataToDatabaseSink sink    = new DataToDatabaseSink(_dataSource, model, builder);
-            DataReader         reader  = new DataReader();
+            Platform           platform = PlatformFactory.createNewPlatformInstance(_databaseType);
+            DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
+            DataReader         reader   = new DataReader();
 
+            platform.setDataSource(_dataSource);
             reader.setModel(model);
             reader.setSink(sink);
             for (Iterator it = _converters.iterator(); it.hasNext();)

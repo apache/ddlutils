@@ -20,11 +20,12 @@ import java.io.IOException;
 import java.sql.Types;
 import java.util.List;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
- * An SQL Builder for MySQL
+ * The SQL Builder for MySQL.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author John Marshall/Connectria
@@ -33,53 +34,14 @@ import org.apache.ddlutils.model.Table;
  */
 public class MySqlBuilder extends SqlBuilder
 {
-    /** Database name of this builder */
-    public static final String DATABASENAME     = "MySQL";
-    /** The standard MySQL jdbc driver */
-    public static final String JDBC_DRIVER      = "com.mysql.jdbc.Driver";
-    /** The old MySQL jdbc driver */
-    public static final String JDBC_DRIVER_OLD  = "org.gjt.mm.mysql.Driver";
-    /** The subprotocol used by the standard MySQL driver */
-    public static final String JDBC_SUBPROTOCOL = "mysql";
-
-    public MySqlBuilder()
-    {
-        setMaxIdentifierLength(64);
-        setRequiringNullAsDefaultValue(false);
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setIndicesEmbedded(false);
-        setCommentPrefix("#");
-        // the BINARY types are also handled by getSqlType(Column)
-        addNativeTypeMapping(Types.ARRAY,         "LONGBLOB");
-        addNativeTypeMapping(Types.BINARY,        "CHAR");
-        addNativeTypeMapping(Types.BIT,           "TINYINT(1)");
-        addNativeTypeMapping(Types.BLOB,          "LONGBLOB");
-        addNativeTypeMapping(Types.CLOB,          "LONGTEXT");
-        addNativeTypeMapping(Types.DISTINCT,      "LONGBLOB");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE");
-        addNativeTypeMapping(Types.JAVA_OBJECT,   "LONGBLOB");
-        addNativeTypeMapping(Types.LONGVARBINARY, "MEDIUMBLOB");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "MEDIUMTEXT");
-        addNativeTypeMapping(Types.NULL,          "MEDIUMBLOB");
-        addNativeTypeMapping(Types.NUMERIC,       "DECIMAL");
-        addNativeTypeMapping(Types.OTHER,         "LONGBLOB");
-        addNativeTypeMapping(Types.REAL,          "FLOAT");
-        addNativeTypeMapping(Types.REF,           "MEDIUMBLOB");
-        addNativeTypeMapping(Types.STRUCT,        "LONGBLOB");
-        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
-
-        // These types are only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN",  "TINYINT(1)");
-        addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
+    /**
+     * Creates a new builder instance.
+     * 
+     * @param info The platform info
      */
-    public String getDatabaseName()
+    public MySqlBuilder(PlatformInfo info)
     {
-        return DATABASENAME;
+        super(info);
     }
 
     /* (non-Javadoc)

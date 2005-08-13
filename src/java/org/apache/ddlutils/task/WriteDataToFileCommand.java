@@ -22,9 +22,8 @@ import java.util.Iterator;
 
 import javax.sql.DataSource;
 
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.builder.SqlBuilderFactory;
-import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DataWriter;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -81,18 +80,18 @@ public class WriteDataToFileCommand implements Command, WantsDatabaseInfo
     {
         try
         {
-            SqlBuilder builder = SqlBuilderFactory.newSqlBuilder(_databaseType);
-            DynaSql    dynaSql = new DynaSql(builder, _dataSource, model);
-            DataWriter writer  = new DataWriter(model, new FileOutputStream(_outputFile), _encoding);
-
+            Platform   platform = PlatformFactory.createNewPlatformInstance(_databaseType);
+            DataWriter writer   = new DataWriter(model, new FileOutputStream(_outputFile), _encoding);
+            
             // TODO: An advanced algorithm could be employed here that writes objects
             //       related by foreign keys, in the correct order
+            platform.setDataSource(_dataSource);
             writer.writeDocumentStart();
             for (Iterator tableIt = model.getTables().iterator(); tableIt.hasNext();)
             {
                 Table table = (Table)tableIt.next();
 
-                writer.write(dynaSql.query("select * from "+table.getName()));
+                writer.write(platform.query(model, "select * from "+table.getName()));
             }
             writer.writeDocumentEnd();
         }

@@ -18,22 +18,22 @@ package org.apache.ddlutils.io;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.digester.Rule;
-import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.xml.sax.Attributes;
 
 /**
- * A digester rule for creating dyna beans via the {@link org.apache.ddlutils.dynabean.DynaSql} class.
+ * A digester rule for creating dyna beans.
  * 
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision:$
  */
 public class DynaSqlCreateRule extends Rule
 {
-    /** The dyna sql instance to use for creating the dyna beans */
-    private DynaSql _dynaSql;
+    /** The database model for which we'l be creating beans */
+    private Database _model;
     /** The table that we're creating instances for */
-    private Table   _table;
+    private Table    _table;
     /** The object that will receive the read beans */
     private DataSink _receiver;
 
@@ -44,9 +44,9 @@ public class DynaSqlCreateRule extends Rule
      * @param table    The table that we're creating instances for
      * @param receiver The object that will receive the read beans
      */
-    public DynaSqlCreateRule(DynaSql dynaSql, Table table, DataSink receiver)
+    public DynaSqlCreateRule(Database model, Table table, DataSink receiver)
     {
-        _dynaSql  = dynaSql;
+        _model    = model;
         _table    = table;
         _receiver = receiver;
     }
@@ -56,7 +56,7 @@ public class DynaSqlCreateRule extends Rule
      */
     public void begin(String namespace, String name, Attributes attributes) throws Exception
     {
-        Object instance = _dynaSql.newInstance(_table.getName());
+        Object instance = _model.createDynaBeanFor(_table);
 
         if (digester.getLogger().isDebugEnabled())
         {

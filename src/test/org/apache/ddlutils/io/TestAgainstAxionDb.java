@@ -17,8 +17,6 @@ package org.apache.ddlutils.io;
  */
 
 import org.apache.ddlutils.TestDatabaseWriterBase;
-import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.util.DDLExecutor;
 
 public class TestAgainstAxionDb extends TestDatabaseWriterBase
 {
@@ -56,14 +54,6 @@ public class TestAgainstAxionDb extends TestDatabaseWriterBase
 
     public void _testCreation() throws Exception
     {
-        Database testDb = parseDatabaseFromString(COLUMN_TEST_SCHEMA);
-
-        getBuilder().createDatabase(testDb);
-
-        DDLExecutor executor = new DDLExecutor(getDataSource());
-        String      sql      = getBuilderOutput();
-
-        System.out.println(sql);
-        executor.evaluateBatch(sql);
+        createDatabase(COLUMN_TEST_SCHEMA);
     }
 }

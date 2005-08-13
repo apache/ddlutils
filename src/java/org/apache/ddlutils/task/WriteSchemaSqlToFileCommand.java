@@ -21,7 +21,8 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.ddlutils.builder.SqlBuilder;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.io.JdbcModelReader;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -59,14 +60,14 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
             throw new BuildException("Cannot overwrite output file "+_outputFile.getAbsolutePath());
         }
 
-        SqlBuilder builder    = getSqlBuilder();
+        Platform   platform   = getPlatform();
         Connection connection = null;
 
         try
         {
             FileWriter writer = new FileWriter(_outputFile);
 
-            builder.setWriter(writer);
+            platform.getSqlBuilder().setWriter(writer);
             if (isAlterDatabase())
             {
                 if (getDataSource() == null)
@@ -74,11 +75,14 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
                     throw new BuildException("No database specified.");
                 }
                 connection = getDataSource().getConnection();
-                builder.alterDatabase(model, connection, true, true);
+
+                Database currentModel = new JdbcModelReader(connection).getDatabase();
+
+                platform.getSqlBuilder().alterDatabase(currentModel, model, true, true);
             }
             else
             {
-                builder.createDatabase(model);
+                platform.getSqlBuilder().createTables(model);
             }
             writer.close();
             task.log("Written SQL to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);

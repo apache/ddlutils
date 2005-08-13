@@ -19,74 +19,36 @@ package org.apache.ddlutils.builder;
 import java.io.IOException;
 import java.sql.Types;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 
 /**
- * An SQL Builder for the Interbase database.
+ * The SQL Builder for the Interbase database.
  * 
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @version $Revision: 231306 $
  */
 public class InterbaseBuilder extends SqlBuilder
 {
-    /** Database name of this builder */
-    public static final String DATABASENAME     = "Interbase";
-    /** The interbase jdbc driver */
-    public static final String JDBC_DRIVER      = "interbase.interclient.Driver";
-    /** The subprotocol used by the interbase driver */
-    public static final String JDBC_SUBPROTOCOL = "interbase";
-
-    public InterbaseBuilder()
-    {
-        setMaxIdentifierLength(31);
-        setRequiringNullAsDefaultValue(false);
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setIndicesEmbedded(false);
-        setCommentPrefix("/*");
-        setCommentSuffix("*/");
-
-        // BINARY and VARBINARY are also handled by the getSqlType method
-        addNativeTypeMapping(Types.ARRAY,         "BLOB");
-        addNativeTypeMapping(Types.BIGINT,        "DECIMAL(38,0)");
-        addNativeTypeMapping(Types.BINARY,        "CHAR");
-        addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
-        addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
-        addNativeTypeMapping(Types.DISTINCT,      "BLOB");
-        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
-        addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT");
-        addNativeTypeMapping(Types.NULL,          "BLOB");
-        addNativeTypeMapping(Types.OTHER,         "BLOB");
-        addNativeTypeMapping(Types.REAL,          "FLOAT");
-        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        addNativeTypeMapping(Types.REF,           "BLOB");
-        addNativeTypeMapping(Types.STRUCT,        "BLOB");
-        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
-
-        // These types are only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN",  "DECIMAL(1,0)");
-        addNativeTypeMapping("DATALINK", "BLOB");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
+    /**
+     * Creates a new builder instance.
+     * 
+     * @param info The platform info
      */
-    public String getDatabaseName()
+    public InterbaseBuilder(PlatformInfo info)
     {
-        return DATABASENAME;
+        super(info);
     }
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#dropDatabase(org.apache.ddlutils.model.Database)
      */
-    public void dropDatabase(Database database) throws IOException
+    public void dropTables(Database database) throws IOException
     {
-        super.dropDatabase(database);
+        super.dropTables(database);
         print("COMMIT");
         printEndOfStatement();
     }

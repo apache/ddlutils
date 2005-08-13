@@ -18,9 +18,6 @@ package org.apache.ddlutils.builder;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -33,7 +30,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ddlutils.io.JdbcModelReader;
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -61,7 +58,8 @@ import org.apache.ddlutils.model.TypeMap;
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
-public abstract class SqlBuilder {
+public abstract class SqlBuilder
+{
 
     private static final String LINE_SEPERATOR = System.getProperty("line.separator", "\n");
 
@@ -74,33 +72,8 @@ public abstract class SqlBuilder {
     /** The indentation used to indent commands */
     private String _indent = "    ";
 
-    /** Whether the database requires the explicit stating of NULL as the default value */
-    private boolean _requiringNullAsDefaultValue = false;
-
-    /** Whether primary key constraints are embedded inside the create table statement */
-    private boolean _primaryKeyEmbedded = true;
-    
-    /** Whether foreign key constraints are embedded inside the create table statement */
-    private boolean _foreignKeysEmbedded = false;
-
-    /** Whether indices are embedded inside the create table statement */
-    private boolean _indicesEmbedded = false;
-
-    /** Whether embedded foreign key constraints are explicitly named */
-    private boolean _embeddedForeignKeysNamed = false;
-
-    /** Is an ALTER TABLE needed to drop indexes? */
-    private boolean _useAlterTableForDrop = false;
-
-    /** Specifies the maximum length that an identifier (name of a table, column, constraint etc.)
-     *  can have for this database; use -1 if there is no limit */
-    private int _maxIdentifierLength = -1;
-
-    /** Whether identifiers are case sensitive or not */
-    private boolean _caseSensitive = false;
-
-    /** The string used for escaping values when generating textual SQL statements */
-    private String _valueQuoteChar = "'";
+    /** The platform info */
+    private PlatformInfo _info;
 
     /** An optional locale specification for number and date formatting */
     private String _valueLocale;
@@ -113,61 +86,29 @@ public abstract class SqlBuilder {
 
     /** The number formatter */
     private NumberFormat _valueNumberFormat;
-    
-    /** Whether comments are supported */
-    private boolean _commentsSupported = true;
-
-    /** The string that starts a comment */
-    private String _commentPrefix = "--";
-
-    /** The string that ends a comment */
-    private String _commentSuffix = "";
-
-    /** Contains non-default mappings from jdbc to native types */
-    private HashMap _specialTypes = new HashMap();
 
     //
     // Configuration
     //                
 
     /**
-     * Adds a mapping from jdbc type to database-native type.
+     * Creates a new sql builder.
      * 
-     * @param jdbcTypeCode The jdbc type code as defined by {@link java.sql.Types}
-     * @param nativeType   The native type
+     * @param info The plaftform information
      */
-    protected void addNativeTypeMapping(int jdbcTypeCode, String nativeType)
+    public SqlBuilder(PlatformInfo info)
     {
-        _specialTypes.put(new Integer(jdbcTypeCode), nativeType);
+        _info = info;
     }
 
     /**
-     * Adds a mapping from jdbc type to database-native type. Note that this
-     * method accesses the named constant in {@link java.sql.Types} via reflection
-     * and is thus safe to use under JDK 1.2/1.3 even with constants defined
-     * only in later Java versions - for these, the method simply will not add
-     * a mapping.
+     * Returns the platform info object.
      * 
-     * @param jdbcTypeName The jdbc type name, one of the constants defined in
-     *                     {@link java.sql.Types}
-     * @param nativeType   The native type
+     * @return The info object
      */
-    protected void addNativeTypeMapping(String jdbcTypeName, String nativeType)
+    public PlatformInfo getPlatformInfo()
     {
-        try
-        {
-            Field constant = Types.class.getField(jdbcTypeName);
-
-            if (constant != null)
-            {
-                addNativeTypeMapping(constant.getInt(null), nativeType);
-            }
-        }
-        catch (Exception ex)
-        {
-            // ignore -> won't be defined
-            // TODO: add a logging statement
-        }
+        return _info;
     }
 
     /**
@@ -208,178 +149,6 @@ public abstract class SqlBuilder {
     public void setIndent(String indent)
     {
         _indent = indent;
-    }
-
-    /**
-     * Determines whether a NULL needs to be explicitly stated when the column
-     * has no specified default value. Default is false.
-     * 
-     * @return <code>true</code> if NULL must be written for empty default values
-     */
-    public boolean isRequiringNullAsDefaultValue()
-    {
-        return _requiringNullAsDefaultValue;
-    }
-    /**
-     * Specifies whether a NULL needs to be explicitly stated when the column
-     * has no specified default value. Default is false.
-     *
-     * @param requiresNullAsDefaultValue Whether NULL must be written for empty
-     *                                   default values
-     */
-    public void setRequiringNullAsDefaultValue(boolean requiresNullAsDefaultValue)
-    {
-        _requiringNullAsDefaultValue = requiresNullAsDefaultValue;
-    }
-
-    /**
-     * Determines whether primary key constraints are embedded in the create 
-     * table clause or as seperate alter table statements. The default is
-     * embedded pks.
-     * 
-     * @return <code>true</code> if pk constraints are embedded
-     */
-    public boolean isPrimaryKeyEmbedded()
-    {
-        return _primaryKeyEmbedded;
-    }
-
-    /**
-     * Specifies whether the primary key constraints are embedded in the create 
-     * table clause or as seperate alter table statements.
-     * 
-     * @param primaryKeyEmbedded Whether pk constraints are embedded
-     */
-    public void setPrimaryKeyEmbedded(boolean primaryKeyEmbedded)
-    {
-        _primaryKeyEmbedded = primaryKeyEmbedded;
-    }
-
-    /**
-     * Determines whether foreign key constraints are embedded in the create 
-     * table clause or as seperate alter table statements. Per default,
-     * foreign keys are external.
-     * 
-     * @return <code>true</code> if fk constraints are embedded
-     */
-    public boolean isForeignKeysEmbedded()
-    {
-        return _foreignKeysEmbedded;
-    }
-
-    /**
-     * Specifies whether foreign key constraints are embedded in the create 
-     * table clause or as seperate alter table statements.
-     * 
-     * @param foreignKeysEmbedded Whether fk constraints are embedded
-     */
-    public void setForeignKeysEmbedded(boolean foreignKeysEmbedded)
-    {
-        _foreignKeysEmbedded = foreignKeysEmbedded;
-    }
-
-    /**
-     * Determines whether the indices are embedded in the create table clause
-     * or as seperate statements. Per default, indices are external.
-     * 
-     * @return <code>true</code> if indices are embedded
-     */
-    public boolean isIndicesEmbedded()
-    {
-        return _indicesEmbedded;
-    }
-
-    /**
-     * Specifies whether indices are embedded in the create table clause or
-     * as seperate alter table statements.
-     * 
-     * @param indicesEmbedded Whether indices are embedded
-     */
-    public void setIndicesEmbedded(boolean indicesEmbedded)
-    {
-        _indicesEmbedded = indicesEmbedded;
-    }
-
-    /**
-     * Returns whether embedded foreign key constraints should have a name.
-     * 
-     * @return <code>true</code> if embedded fks have name
-     */
-    public boolean isEmbeddedForeignKeysNamed()
-    {
-        return _embeddedForeignKeysNamed;
-    }
-
-    /**
-     * Specifies whether embedded foreign key constraints should be named.
-     * 
-     * @param embeddedForeignKeysNamed Whether embedded fks shall have a name
-     */
-    public void setEmbeddedForeignKeysNamed(boolean embeddedForeignKeysNamed)
-    {
-        _embeddedForeignKeysNamed = embeddedForeignKeysNamed;
-    }
-
-    /**
-     * Determines whether an ALTER TABLE statement shall be used for dropping indices
-     * or constraints.  The default is false.
-     * 
-     * @return <code>true</code> if ALTER TABLE is required
-     */
-    public boolean isUseAlterTableForDrop()
-    {
-        return _useAlterTableForDrop;
-    }
-
-    /**
-     * Specifies whether an ALTER TABLE statement shall be used for dropping indices
-     * or constraints.
-     * 
-     * @param useAlterTableForDrop Whether ALTER TABLE will be used
-     */
-    public void setUseAlterTableForDrop(boolean useAlterTableForDrop)
-    {
-        _useAlterTableForDrop = useAlterTableForDrop;
-    }
-
-    /**
-     * Returns the maximum length of identifiers that this database allows.
-     * 
-     * @return The maximum identifier length, -1 if unlimited
-     */
-    public int getMaxIdentifierLength()
-    {
-        return _maxIdentifierLength;
-    }
-
-    /**
-     * Sets the maximum length of identifiers that this database allows.
-     * 
-     * @param maxIdentifierLength The maximum identifier length, -1 if unlimited
-     */
-    public void setMaxIdentifierLength(int maxIdentifierLength)
-    {
-        _maxIdentifierLength = maxIdentifierLength;
-    }
-
-    /**
-     * Determines whether the database has case sensitive identifiers.
-     *
-     * @return <code>true</code> if case of the the identifiers is important
-     */
-    public boolean isCaseSensitive()
-    {
-        return _caseSensitive;
-    }
-
-    /**
-     * Specifies whether the database has case sensitive identifiers.
-     *
-     * @param caseSensitive <code>true</code> if case of the the identifiers is important
-     */
-    public void setCaseSensitive(boolean caseSensitive)
-    {
-        _caseSensitive = caseSensitive;
     }
 
     /**
@@ -456,124 +225,40 @@ public abstract class SqlBuilder {
         _valueNumberFormat = null;
     }
 
-    /**
-     * Returns the text that is used for for quoting values (e.g. text) when
-     * printing default values and in generates insert/update/delete statements.
-     * 
-     * @return The quote text
-     */
-    public String getValueQuoteChar()
-    {
-        return _valueQuoteChar;
-    }
-
-    /**
-     * Sets the text that is used for for quoting values (e.g. text) when
-     * printing default values and in generates insert/update/delete statements.
-     *
-     * @param valueQuoteChar The new quote text
-     */
-    public void setValueQuoteChar(String valueQuoteChar)
-    {
-        _valueQuoteChar = valueQuoteChar;
-    }
-
-    /**
-     * Determines whether the database supports comments.
-     *
-     * @return <code>true</code> if comments are supported
-     */
-    public boolean getCommentsSupported()
-    {
-        return _commentsSupported;
-    }
-
-    /**
-     * Specifies whether comments are supported by the database.
-     * 
-     * @param commentsSupported <code>true</code> if comments are supported
-     */
-    public void setCommentsSupported(boolean commentsSupported)
-    {
-        _commentsSupported = commentsSupported;
-    }
-
-    /**
-     * Returns the string that denotes the beginning of a comment.
-     *
-     * @return The comment prefix
-     */
-    public String getCommentPrefix()
-    {
-        return _commentPrefix;
-    }
-
-    /**
-     * Sets the text that starts a comment.
-     * 
-     * @param commentPrefix The new comment prefix
-     */
-    public void setCommentPrefix(String commentPrefix)
-    {
-        _commentPrefix = (commentPrefix == null ? "" : commentPrefix);
-    }
-
-    /**
-     * Returns the string that denotes the end of a comment. Note that comments will
-     * be always on their own line.
-     *
-     * @return The comment suffix
-     */
-    public String getCommentSuffix()
-    {
-        return _commentSuffix;
-    }
-
-    /**
-     * Sets the text that ends a comment.
-     * 
-     * @param commentSuffix The new comment suffix
-     */
-    public void setCommentSuffix(String commentSuffix)
-    {
-        _commentSuffix = (commentSuffix == null ? "" : commentSuffix);
-    }
-
     //
     // public interface
     //
 
     /**
-     * Returns the name of the database that this builder is for.
-     * 
-     * @return The database name
-     */
-    public abstract String getDatabaseName();
-    
-    /**
-     * Outputs the DDL required to drop and recreate the database.
+     * Outputs the DDL required to drop and (re)create all tables in the database model.
      * 
      * @param database The database model 
      */
-    public void createDatabase(Database database) throws IOException
+    public void createTables(Database database) throws IOException
     {
-        createDatabase(database, true);
+        createTables(database, true);
     }
 
     /**
-     * Outputs the DDL required to drop (if requested) and recreate the database.
+     * Outputs the DDL required to drop (if requested) and (re)create all tables in the database model.
      * 
      * @param database   The database
      * @param dropTables Whether to drop tables before creating them
      */
-    public void createDatabase(Database database, boolean dropTables) throws IOException
+    public void createTables(Database database, boolean dropTables) throws IOException
     {
         if (dropTables)
         {
-            dropDatabase(database);
+            dropTables(database);
         }
 
-        createTables(database);
+        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
+        {
+            Table table = (Table)it.next();
+
+            writeTableComment(table);
+            createTable(database, table);
+        }
 
         // we're writing the external foreignkeys last to ensure that all referenced tables are already defined
         createExternalForeignKeys(database);
@@ -584,37 +269,33 @@ public abstract class SqlBuilder {
      * the current specified database schema. Drops and modifications will
      * not be made.
      *
-     * @param desiredDb  The desired database schema
-     * @param connection A connection to the existing database that shall be modified
-     * @throws IOException  If the ddl could notz be written
-     * @throws SQLException if there is an error reading the current schema
+     * @param currentModel  The current database schema
+     * @param desiredModel  The desired database schema
      */
-    public void alterDatabase(Database desiredDb, Connection connection) throws IOException, SQLException
+    public void alterDatabase(Database currentModel, Database desiredModel) throws IOException
     {
-        alterDatabase(desiredDb, connection, false, false);
+        alterDatabase(currentModel, desiredModel, false, false);
     }
 
     /**
      * Generates the DDL to modify an existing database so the schema matches
      * the current specified database schema.
      *
-     * @param desiredDb     The desired database schema
+     * @param currentModel  The current database schema
+     * @param desiredModel  The desired database schema
      * @param connection    A connection to the existing database that shall be modified
      * @param doDrops       Whether columns and indexes should be dropped if not in the
      *                      new schema
      * @param modifyColumns Whether columns should be altered for datatype, size as required
-     * @throws IOException  If the ddl could not be written
-     * @throws SQLException If there is an error reading the current schema
      */
-    public void alterDatabase(Database desiredDb, Connection connection, boolean doDrops, boolean modifyColumns) throws IOException, SQLException
+    public void alterDatabase(Database currentModel, Database desiredModel, boolean doDrops, boolean modifyColumns) throws IOException
     {
-        Database  currentDb = new JdbcModelReader(connection).getDatabase();
         ArrayList newTables = new ArrayList();
 
-        for (Iterator tableIt = desiredDb.getTables().iterator(); tableIt.hasNext();)
+        for (Iterator tableIt = desiredModel.getTables().iterator(); tableIt.hasNext();)
         {
             Table desiredTable = (Table)tableIt.next();
-            Table currentTable = currentDb.findTable(desiredTable.getName());
+            Table currentTable = currentModel.findTable(desiredTable.getName());
 
             if (currentTable == null)
             {
@@ -622,7 +303,7 @@ public abstract class SqlBuilder {
                 {
                     _log.info("Creating table " + desiredTable.getName());
                 }
-                createTable(desiredDb, desiredTable);
+                createTable(desiredModel, desiredTable);
                 // we're deferring foreignkey generation
                 newTables.add(desiredTable);
             }
@@ -675,7 +356,7 @@ public abstract class SqlBuilder {
                         {
                             _log.info("Creating foreign key " + desiredTable.getName() + "." + desiredFk);
                         }
-                        writeExternalForeignKeyCreateStmt(desiredDb, desiredTable, desiredFk);
+                        writeExternalForeignKeyCreateStmt(desiredModel, desiredTable, desiredFk);
                     }
                 }
 
@@ -785,14 +466,14 @@ public abstract class SqlBuilder {
         //TODO should we try to generate new FKs on existing tables?
         for (Iterator fkIt = newTables.iterator(); fkIt.hasNext();)
         {
-            createExternalForeignKeys(desiredDb, (Table)fkIt.next());
+            createExternalForeignKeys(desiredModel, (Table)fkIt.next());
         }
 
         // check for table drops
-        for (Iterator tableIt = currentDb.getTables().iterator(); tableIt.hasNext();)
+        for (Iterator tableIt = currentModel.getTables().iterator(); tableIt.hasNext();)
         {
             Table currentTable = (Table)tableIt.next();
-            Table desiredTable = desiredDb.findTable(currentTable.getName());
+            Table desiredTable = desiredModel.findTable(currentTable.getName());
 
             if ((desiredTable == null) && (currentTable.getName() != null) && (currentTable.getName().length() > 0))
             {
@@ -819,22 +500,6 @@ public abstract class SqlBuilder {
     }
 
     /** 
-     * Outputs the DDL to create all tables of the given database model.
-     * 
-     * @param database The database
-     */
-    public void createTables(Database database) throws IOException
-    {
-        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
-        {
-            Table table = (Table)it.next();
-
-            writeTableComment(table);
-            createTable(database, table);
-        }
-    }
-
-    /** 
      * Outputs the DDL to create the table along with any non-external constraints as well
      * as with external primary keys and indices (but not foreign keys).
      * 
@@ -849,15 +514,15 @@ public abstract class SqlBuilder {
 
         writeColumns(table);
 
-        if (isPrimaryKeyEmbedded())
+        if (getPlatformInfo().isPrimaryKeyEmbedded())
         {
             writeEmbeddedPrimaryKeysStmt(table);
         }
-        if (isForeignKeysEmbedded())
+        if (getPlatformInfo().isForeignKeysEmbedded())
         {
             writeEmbeddedForeignKeysStmt(database, table);
         }
-        if (isIndicesEmbedded())
+        if (getPlatformInfo().isIndicesEmbedded())
         {
             writeEmbeddedIndicesStmt(table);
         }
@@ -865,11 +530,11 @@ public abstract class SqlBuilder {
         print(")");
         printEndOfStatement();
 
-        if (!isPrimaryKeyEmbedded())
+        if (!getPlatformInfo().isPrimaryKeyEmbedded())
         {
             writeExternalPrimaryKeysCreateStmt(table);
         }
-        if (!isIndicesEmbedded())
+        if (!getPlatformInfo().isIndicesEmbedded())
         {
             writeExternalIndicesCreateStmt(table);
         }
@@ -896,7 +561,7 @@ public abstract class SqlBuilder {
      */
     public void createExternalForeignKeys(Database database, Table table) throws IOException
     {
-        if (!isForeignKeysEmbedded())
+        if (!getPlatformInfo().isForeignKeysEmbedded())
         {
             int numKey = 1;
 
@@ -912,7 +577,7 @@ public abstract class SqlBuilder {
      * 
      * @param database The database 
      */
-    public void dropDatabase(Database database) throws IOException
+    public void dropTables(Database database) throws IOException
     {
         List tables = database.getTables();
 
@@ -964,7 +629,7 @@ public abstract class SqlBuilder {
      */
     public void dropExternalForeignKeys(Table table) throws IOException
     {
-        if (!isForeignKeysEmbedded())
+        if (!getPlatformInfo().isForeignKeysEmbedded())
         {
             int numKey = 1;
 
@@ -1221,7 +886,7 @@ public abstract class SqlBuilder {
      */
     protected String getTableName(Table table)
     {
-        return shortenName(table.getName(), _maxIdentifierLength);
+        return shortenName(table.getName(), getPlatformInfo().getMaxIdentifierLength());
     }
     
     /** 
@@ -1276,7 +941,7 @@ public abstract class SqlBuilder {
      */
     protected String getColumnName(Column column) throws IOException
     {
-        return shortenName(column.getName(), _maxIdentifierLength);
+        return shortenName(column.getName(), getPlatformInfo().getMaxIdentifierLength());
     }
 
     /** 
@@ -1295,16 +960,16 @@ public abstract class SqlBuilder {
         if (column.getDefaultValue() != null)
         {
             print(" DEFAULT ");
-            print(_valueQuoteChar);
+            print(getPlatformInfo().getValueQuoteChar());
             print(column.getDefaultValue());
-            print(_valueQuoteChar);
+            print(getPlatformInfo().getValueQuoteChar());
         }
         if (column.isRequired())
         {
             print(" ");
             writeColumnNotNullableStmt();
         }
-        else if (isRequiringNullAsDefaultValue() &&
+        else if (getPlatformInfo().isRequiringNullAsDefaultValue() &&
                  (TypeMap.isTextType(column.getTypeCode()) || TypeMap.isBinaryType(column.getTypeCode())))
         {
             print(" ");
@@ -1379,7 +1044,7 @@ public abstract class SqlBuilder {
      */
     protected String getNativeType(Column column)
     {
-        String nativeType = (String)_specialTypes.get(new Integer(column.getTypeCode()));
+        String nativeType = (String)getPlatformInfo().getNativeType(column.getTypeCode());
 
         return nativeType == null ? column.getType() : nativeType;
     }
@@ -1405,7 +1070,7 @@ public abstract class SqlBuilder {
         {
             // Note: TIMESTAMP (java.sql.Timestamp) is properly handled by its toString method
             case Types.DATE:
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 if (!(value instanceof String) && (_valueDateFormat != null))
                 {
                     // TODO: Can the format method handle java.sql.Date properly ?
@@ -1415,10 +1080,10 @@ public abstract class SqlBuilder {
                 {
                     result.append(value.toString());
                 }
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 break;
             case Types.TIME:
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 if (!(value instanceof String) && (_valueTimeFormat != null))
                 {
                     // TODO: Can the format method handle java.sql.Date properly ?
@@ -1428,14 +1093,14 @@ public abstract class SqlBuilder {
                 {
                     result.append(value.toString());
                 }
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 break;
             case Types.REAL:
             case Types.NUMERIC:
             case Types.FLOAT:
             case Types.DOUBLE:
             case Types.DECIMAL:
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 if (!(value instanceof String) && (_valueNumberFormat != null))
                 {
                     result.append(_valueNumberFormat.format(value));
@@ -1444,12 +1109,12 @@ public abstract class SqlBuilder {
                 {
                     result.append(value.toString());
                 }
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 break;
             default:
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 result.append(value.toString());
-                result.append(_valueQuoteChar);
+                result.append(getPlatformInfo().getValueQuoteChar());
                 break;
         }
         return result.toString();
@@ -1559,7 +1224,7 @@ public abstract class SqlBuilder {
             result.append("_");
             result.append(suffix);
         }
-        return shortenName(result.toString(), _maxIdentifierLength);
+        return shortenName(result.toString(), getPlatformInfo().getMaxIdentifierLength());
     }
 
     /**
@@ -1731,13 +1396,13 @@ public abstract class SqlBuilder {
      */
     public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
     {
-        if (isUseAlterTableForDrop())
+        if (getPlatformInfo().isUseAlterTableForDrop())
         {
             writeTableAlterStmt(table);
         }
         print("DROP INDEX ");
         print(getIndexName(index));
-        if (!isUseAlterTableForDrop())
+        if (!getPlatformInfo().isUseAlterTableForDrop())
         {
             print(" ON ");
             print(getTableName(table));
@@ -1769,7 +1434,7 @@ public abstract class SqlBuilder {
                 println(",");
                 printIndent();
                 
-                if (isEmbeddedForeignKeysNamed())
+                if (getPlatformInfo().isEmbeddedForeignKeysNamed())
                 {
                     print("CONSTRAINT ");
                     print(getConstraintName(null, table, "FK", Integer.toString(numKey)));
@@ -1878,14 +1543,14 @@ public abstract class SqlBuilder {
      */
     protected void printComment(String text) throws IOException
     {
-        if (getCommentsSupported())
+        if (getPlatformInfo().isCommentsSupported())
         {
-            print(getCommentPrefix());
+            print(getPlatformInfo().getCommentPrefix());
             // Some databases insist on a space after the prefix
             print(" ");
             print(text);
             print(" ");
-            print(getCommentSuffix());
+            print(getPlatformInfo().getCommentSuffix());
             println();
         }
     }

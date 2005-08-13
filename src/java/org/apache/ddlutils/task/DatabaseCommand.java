@@ -1,8 +1,9 @@
 package org.apache.ddlutils.task;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.builder.SqlBuilderFactory;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
+import org.apache.ddlutils.PlatformUtils;
 import org.apache.tools.ant.BuildException;
 
 /**
@@ -78,35 +79,38 @@ public abstract class DatabaseCommand implements Command
     }
 
     /**
-     * Creates the sql builder for the configured database.
+     * Creates the platform for the configured database.
      * 
-     * @return The sql builder
+     * @return The platform
      */
-    protected SqlBuilder getSqlBuilder() throws BuildException
+    protected Platform getPlatform() throws BuildException
     {
-        // TODO: This should largely be deducable from the jdbc connection url
-        if (getDatabaseType() == null)
-        {
-            throw new BuildException("The database type needs to be defined.");
-        }
-
-        SqlBuilder builder = null;
+        Platform platform = null;
 
         try
         {
-            builder = SqlBuilderFactory.newSqlBuilder(getDatabaseType());
+            if (getDatabaseType() == null)
+            {
+                setDatabaseType(new PlatformUtils().determineDatabaseType(getDataSource()));
+                if (getDatabaseType() == null)
+                {
+                    throw new BuildException("The database type needs to be defined.");
+                }
+            }
+            platform = PlatformFactory.createNewPlatformInstance(getDatabaseType());
         }
         catch (Exception ex)
         {
-            throw new BuildException("Database type "+getDatabaseType()+" is not supported.");
+            throw new BuildException("Database type "+getDatabaseType()+" is not supported.", ex);
         }
-        if (builder == null)
+        if (platform == null)
         {
             throw new BuildException("Database type "+getDatabaseType()+" is not supported.");
         }
         else
         {
-            return builder;
+            platform.setDataSource(getDataSource());
+            return platform;
         }
     }
 }

@@ -15,7 +15,10 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -42,12 +45,13 @@ public class DynaSqlIterator implements Iterator
     /**
      * Creates a new iterator.
      * 
-     * @param dynaSql            The dyna sql instance
+     * @param platformInfo       The platform info
+     * @param model              The database model
      * @param resultSet          The result set
      * @param cleanUpAfterFinish Whether to close the statement and connection after finishing
      *                           the iteration, upon on exception, or when this iterator is garbage collected
      */
-    public DynaSqlIterator(DynaSql dynaSql, ResultSet resultSet, boolean cleanUpAfterFinish) throws DynaSqlException
+    public DynaSqlIterator(PlatformInfo platformInfo, Database model, ResultSet resultSet, boolean cleanUpAfterFinish) throws DynaSqlException
     {
         if (resultSet != null)
         {
@@ -56,7 +60,7 @@ public class DynaSqlIterator implements Iterator
 
             try
             {
-                initFromMetaData(dynaSql, resultSet);
+                initFromMetaData(platformInfo, model, resultSet);
             }
             catch (SQLException ex)
             {
@@ -73,15 +77,16 @@ public class DynaSqlIterator implements Iterator
     /**
      * Initializes this iterator from the resultset metadata.
      * 
-     * @param dynaSql   The dyna sql instance
-     * @param resultSet The result set
+     * @param platformInfo The platform info
+     * @param model        The database model
+     * @param resultSet    The result set
      */
-    private void initFromMetaData(DynaSql dynaSql, ResultSet resultSet) throws SQLException
+    private void initFromMetaData(PlatformInfo platformInfo, Database model, ResultSet resultSet) throws SQLException
     {
         ResultSetMetaData metaData         = resultSet.getMetaData();
         String            tableName        = null;
         boolean           singleKnownTable = true;
-        boolean           caseSensitive    = (dynaSql.getSqlBuilder() == null ? false : dynaSql.getSqlBuilder().isCaseSensitive());
+        boolean           caseSensitive    = platformInfo.isCaseSensitive();
 
         for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
         {
@@ -99,7 +104,7 @@ public class DynaSqlIterator implements Iterator
                 }
             }
 
-            Table  table      = dynaSql.getDatabase().findTable(tableOfColumn, caseSensitive);
+            Table  table      = model.findTable(tableOfColumn, caseSensitive);
             String columnName = metaData.getColumnName(idx);
             String propName   = columnName;
 
@@ -116,7 +121,7 @@ public class DynaSqlIterator implements Iterator
         }
         if (singleKnownTable && (tableName != null))
         {
-            _dynaClass = dynaSql.getDynaClass(tableName);
+            _dynaClass = model.getDynaClassFor(tableName);
         }
         else
         {

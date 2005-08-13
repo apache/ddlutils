@@ -20,12 +20,13 @@ import java.io.IOException;
 import java.sql.Types;
 import java.util.Iterator;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
- * An SQL Builder for PostgresSql, based upon version 7.2.
+ * The SQL Builder for PostgresSql.
  * 
  * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
@@ -33,50 +34,14 @@ import org.apache.ddlutils.model.Table;
  */
 public class PostgreSqlBuilder extends SqlBuilder
 {
-    /** Database name of this builder */
-    public static final String DATABASENAME      = "PostgreSql";
-    /** The standard PostgreSQL jdbc driver */
-    public static final String JDBC_DRIVER       = "org.postgresql.Driver";
-    /** The subprotocol used by the standard PostgreSQL driver */
-    public static final String JDBC_SUBPROTOCOL  = "postgresql";
-
-    public PostgreSqlBuilder()
-    {
-        // this is the default length though it might be changed when building PostgreSQL
-        // in file src/include/postgres_ext.h
-        setMaxIdentifierLength(31);
-        setRequiringNullAsDefaultValue(false);
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setIndicesEmbedded(false);
-        addNativeTypeMapping(Types.ARRAY,         "BYTEA");
-        addNativeTypeMapping(Types.BINARY,        "BYTEA");
-        addNativeTypeMapping(Types.BIT,           "BOOLEAN");
-        addNativeTypeMapping(Types.BLOB,          "BYTEA");
-        addNativeTypeMapping(Types.CLOB,          "TEXT");
-        addNativeTypeMapping(Types.DECIMAL,       "NUMERIC");
-        addNativeTypeMapping(Types.DISTINCT,      "BYTEA");
-        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.JAVA_OBJECT,   "BYTEA");
-        addNativeTypeMapping(Types.LONGVARBINARY, "BYTEA");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
-        addNativeTypeMapping(Types.NULL,          "BYTEA");
-        addNativeTypeMapping(Types.OTHER,         "BYTEA");
-        addNativeTypeMapping(Types.REF,           "BYTEA");
-        addNativeTypeMapping(Types.STRUCT,        "BYTEA");
-        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        addNativeTypeMapping(Types.VARBINARY,     "BYTEA");
-
-        addNativeTypeMapping("DATALINK", "BYTEA");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
+    /**
+     * Creates a new builder instance.
+     * 
+     * @param info The platform info
      */
-    public String getDatabaseName()
+    public PostgreSqlBuilder(PlatformInfo info)
     {
-        return DATABASENAME;
+        super(info);
     }
 
     /* (non-Javadoc)

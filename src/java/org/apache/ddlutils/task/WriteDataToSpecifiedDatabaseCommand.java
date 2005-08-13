@@ -19,8 +19,9 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.builder.SqlBuilderFactory;
+
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
@@ -36,9 +37,9 @@ import org.apache.tools.ant.types.FileSet;
 public class WriteDataToSpecifiedDatabaseCommand extends DatabaseCommand
 {
     /** A single data file to insert */
-    private File _singleDataFile = null;
+    private File      _singleDataFile = null;
     /** The input files */
-    private ArrayList  _fileSets = new ArrayList();
+    private ArrayList _fileSets = new ArrayList();
 
     /**
      * Adds a fileset.
@@ -72,10 +73,11 @@ public class WriteDataToSpecifiedDatabaseCommand extends DatabaseCommand
 
         try
         {
-            SqlBuilder         builder = SqlBuilderFactory.newSqlBuilder(getDatabaseType());
-            DataToDatabaseSink sink    = new DataToDatabaseSink(getDataSource(), model, builder);
-            DataReader         reader  = new DataReader();
+            Platform           platform = PlatformFactory.createNewPlatformInstance(getDatabaseType());
+            DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
+            DataReader         reader   = new DataReader();
 
+            platform.setDataSource(getDataSource());
             reader.setModel(model);
             reader.setSink(sink);
             if ((_singleDataFile != null) && !_fileSets.isEmpty())

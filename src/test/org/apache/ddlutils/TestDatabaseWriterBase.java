@@ -17,7 +17,6 @@ package org.apache.ddlutils;
  */
 
 import java.io.StringReader;
-import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -28,17 +27,14 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.ddlutils.builder.BuilderUtils;
-import org.apache.ddlutils.dynabean.DynaSqlException;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.util.DDLExecutor;
 
 /**
  * Base class for database writer tests.
  */
-public abstract class TestDatabaseWriterBase extends TestBuilderBase
+public abstract class TestDatabaseWriterBase extends TestPlatformBase
 {
     /** The name of the property that specifies properties file with the settings for the connection to test against */
     public static final String JDBC_PROPERTIES_PROPERTY = "jdbc.properties.file";
@@ -49,8 +45,8 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
 
     /** The data source to test against */
     private DataSource _dataSource;
-    /** The platform */
-    private String _platform;
+    /** The database name */
+    private String _databaseName;
     /** The database model */
     private Database _model;
 
@@ -96,19 +92,13 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
         {
             throw new DynaSqlException(ex);
         }
-        try
-        {
-            _platform = new BuilderUtils().determineDatabaseType(_dataSource);
-        }
-        catch (SQLException ex)
-        {
-            throw new DynaSqlException(ex);
-        }
-        if (_platform == null)
+
+        _databaseName = new PlatformUtils().determineDatabaseType(_dataSource);
+        if (_databaseName == null)
         {
             // could not determine, perhaps the property has been set ?
-            _platform = props.getProperty(PLATFORM_PROPERTY);
-            if (_platform == null)
+            _databaseName = props.getProperty(PLATFORM_PROPERTY);
+            if (_databaseName == null)
             {
                 throw new DynaSqlException("Could not determine platform from datasource, please specify it in the jdbc.properties via the ddlutils.platform property");
             }
@@ -130,7 +120,7 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
      */
     protected String getDatabaseName()
     {
-        return _platform;
+        return _databaseName;
     }
 
     /**
@@ -143,16 +133,15 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
         return _model;
     }
 
-    /**
-     * Returns a DDL executor instance.
-     * 
-     * @return The executor instance
+    
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.TestPlatformBase#setUp()
      */
-    protected DDLExecutor getDDLExecutor()
+    protected void setUp() throws Exception
     {
-        return new DDLExecutor(getDataSource(), getBuilder());
+        super.setUp();
+        getPlatform().setDataSource(getDataSource());
     }
-
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.TestBuilderBase#tearDown()
@@ -179,7 +168,7 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
         {
             _model = parseDatabaseFromString(schemaXml);
 
-            getDDLExecutor().createDatabase(_model, true);
+            getPlatform().createTables(_model, true, true);
         }
         catch (Exception ex)
         {
@@ -199,7 +188,7 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
             DataReader dataReader = new DataReader();
 
             dataReader.setModel(_model);
-            dataReader.setSink(new DataToDatabaseSink(getDataSource(), _model, getBuilder()));
+            dataReader.setSink(new DataToDatabaseSink(getPlatform(), _model));
             dataReader.parse(new StringReader(dataXml));
         }
         catch (Exception ex)
@@ -215,7 +204,7 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
     {
         try
         {
-            getDDLExecutor().dropDatabase(_model);
+            getPlatform().dropTables(_model, true);
         }
         catch (Exception ex)
         {
@@ -233,7 +222,7 @@ public abstract class TestDatabaseWriterBase extends TestBuilderBase
      */
     protected Object getPropertyValue(DynaBean bean, String propName)
     {
-        if (getBuilder().isCaseSensitive())
+        if (getPlatform().getPlatformInfo().isCaseSensitive())
         {
             return bean.get(propName);
         }

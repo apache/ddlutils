@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.DynaSqlException;
 
 /**
  * JdbcSupport is an abstract base class for objects which need to 
@@ -33,37 +34,53 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @version $Revision$
  */
-public abstract class JdbcSupport {
+public abstract class JdbcSupport
+{
 
     /** The Log to which logging calls will be made. */
-    private final Log log = LogFactory.getLog(getClass());
-    
-    private DataSource dataSource;
-    
-    public JdbcSupport() {
+    private final Log _log = LogFactory.getLog(getClass());
+    /** The data source */
+    private DataSource _dataSource;
+
+    /**
+     * Creates a new instance without a data source.
+     */
+    public JdbcSupport()
+    {
     }
 
-    public JdbcSupport(DataSource dataSource) {
-        this.dataSource = dataSource;
+    /**
+     * Creates a new instance that uses the given data source for talking to
+     * the database.
+     * 
+     * @param dataSource The data source
+     */
+    public JdbcSupport(DataSource dataSource)
+    {
+        _dataSource = dataSource;
     }
 
     // Properties
     //-------------------------------------------------------------------------                
     
     /**
-     * Returns the DataSource used to pool JDBC Connections.
-     * @return DataSource
+     * Returns the data source used for communicating with the database.
+     * 
+     * @return The data source
      */
-    public DataSource getDataSource() {
-        return dataSource;
+    public DataSource getDataSource()
+    {
+        return _dataSource;
     }
 
     /**
-     * Sets the DataSource used to pool JDBC Connections.
-     * @param dataSource The dataSource to set
+     * Sets the DataSource used for communicating with the database.
+     * 
+     * @param dataSource The data source
      */
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public void setDataSource(DataSource dataSource)
+    {
+        _dataSource = dataSource;
     }
 
     // Implementation methods    
@@ -72,15 +89,22 @@ public abstract class JdbcSupport {
     /**
      * Returns a (new) JDBC connection from the data source.
      * 
-     * @return A JDBC connection
+     * @return The connection
      */
-    public Connection borrowConnection() throws SQLException
+    public Connection borrowConnection() throws DynaSqlException
     {
-        return getDataSource().getConnection();
+        try
+        {
+            return getDataSource().getConnection();
+        }
+        catch (SQLException ex)
+        {
+            throw new DynaSqlException("Could not get a connection from the datasource", ex);
+        }
     }
     
     /**
-     * Closes a JDBC connection (returns it back to pool if a poolable datasource).
+     * Closes the given JDBC connection (returns it back to the pool if the datasource is poolable).
      * 
      * @param connection The connection
      */
@@ -95,7 +119,7 @@ public abstract class JdbcSupport {
         }
         catch (Exception e)
         {
-            log.error("Caught exception while returning connection to pool", e);
+            _log.warn("Caught exception while returning connection to pool", e);
         }
     }
 
@@ -120,7 +144,7 @@ public abstract class JdbcSupport {
             }
             catch (Exception e)
             {
-                log.warn("Ignoring exception closing statement", e);
+                _log.warn("Ignoring exception closing statement", e);
             }
         }
     }

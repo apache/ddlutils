@@ -17,14 +17,14 @@ package org.apache.ddlutils.builder;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 
 /**
- * An SQL Builder for Sybase
+ * The SQL Builder for Sybase
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
@@ -32,56 +32,14 @@ import org.apache.ddlutils.model.Table;
  */
 public class SybaseBuilder extends SqlBuilder
 {
-    /** Database name of this builder */
-    public static final String DATABASENAME     = "Sybase";
-    /** The standard Sybase jdbc driver */
-    public static final String JDBC_DRIVER      = "com.sybase.jdbc2.jdbc.SybDriver";
-    /** The old Sybase jdbc driver */
-    public static final String JDBC_DRIVER_OLD  = "com.sybase.jdbc.SybDriver";
-    /** The subprotocol used by the standard Sybase driver */
-    public static final String JDBC_SUBPROTOCOL = "sybase:Tds";
-
-    public SybaseBuilder()
-    {
-        setMaxIdentifierLength(30);
-        setRequiringNullAsDefaultValue(false);
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setIndicesEmbedded(false);
-        setCommentPrefix("/*");
-        setCommentSuffix("*/");
-
-        addNativeTypeMapping(Types.ARRAY,         "IMAGE");
-        addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
-        addNativeTypeMapping(Types.BLOB,          "IMAGE");
-        addNativeTypeMapping(Types.CLOB,          "TEXT");
-        addNativeTypeMapping(Types.DATE,          "DATETIME");
-        addNativeTypeMapping(Types.DISTINCT,      "IMAGE");
-        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.INTEGER,       "INT");
-        addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE");
-        addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
-        addNativeTypeMapping(Types.NULL,          "IMAGE");
-        addNativeTypeMapping(Types.OTHER,         "IMAGE");
-        addNativeTypeMapping(Types.REF,           "IMAGE");
-        addNativeTypeMapping(Types.STRUCT,        "IMAGE");
-        addNativeTypeMapping(Types.TIME,          "DATETIME");
-        addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-
-        // These types are only available since 1.4 so we're using the safe mapping method
-        addNativeTypeMapping("BOOLEAN",  "BIT");
-        addNativeTypeMapping("DATALINK", "IMAGE");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
+    /**
+     * Creates a new builder instance.
+     * 
+     * @param info The platform info
      */
-    public String getDatabaseName()
+    public SybaseBuilder(PlatformInfo info)
     {
-        return DATABASENAME;
+        super(info);
     }
 
     /* (non-Javadoc)

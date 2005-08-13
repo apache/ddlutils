@@ -20,45 +20,51 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.dynabean.DynaClassCache;
+import org.apache.ddlutils.dynabean.SqlDynaClass;
+
 /**
- * Models a database.
+ * Represents the database model, ie. the tables in the database. It also
+ * contains the corresponding dyna classes for creating dyna beans for the
+ * objects stored in the tables.
  *
- * @version $Id$
  * @author John Marshall/Connectria
  * @author Matthew Hawthorne
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @version $Revision$
  */
 public class Database
 {
-    private String name;
+    /** The name of the database model */
+    private String _name;
+    /** The method for generating primary keys (currently ignored) */
+    private String _idMethod;
+    /** The version of the model */
+    private String _version;
+    /** The tables */
+    private List _tables = new ArrayList();
 
-    private String idMethod;
-
-    /** Database version id */
-    private String version;
-
-    private List tables = new ArrayList();
-
-    public Database()
-    {
-    }
+    /** The dyna class cache for this model */
+    private DynaClassCache _dynaClassCache = new DynaClassCache();
 
     /**
      * Adds all tables from the other database to this database.
      * Note that the other database is not changed.
      * 
      * @param otherDb The other database model
-     * @exception IllegalArgumentException If duplicated tables were found
      */
-    public void mergeWith(Database otherDb) throws IllegalArgumentException
+    public void mergeWith(Database otherDb) throws DynaSqlException
     {
-        for (Iterator it = otherDb.tables.iterator(); it.hasNext();)
+        for (Iterator it = otherDb._tables.iterator(); it.hasNext();)
         {
             Table table = (Table)it.next();
 
             if (findTable(table.getName()) != null)
             {
-                // TODO: It might make more sense to log a warning and overwrite the table ?
-                throw new IllegalArgumentException("Table "+table.getName()+" already defined in this database");
+                // TODO: It might make more sense to log a warning and overwrite the table (or merge them) ?
+                throw new DynaSqlException("Cannot merge the models because table "+table.getName()+" already defined in this model");
             }
             try
             {
@@ -71,41 +77,107 @@ public class Database
         }
     }
 
+    /**
+     * Returns the name of this database model.
+     * 
+     * @return The name
+     */
     public String getName()
     {
-        return name;
+        return _name;
     }
 
+    /**
+     * Sets the name of this database model.
+     * 
+     * @param name The name
+     */
     public void setName(String name)
     {
-        this.name=name;
+        _name = name;
     }
 
+    /**
+     * Returns the version of this database model.
+     * 
+     * @return The version
+     */
     public String getVersion()
     {
-        return version;
+        return _version;
     }
 
-    public void setVersion(String ver)
+    /**
+     * Sets the version of this database model.
+     * 
+     * @param version The version
+     */
+    public void setVersion(String version)
     {
-        version = ver;
+        _version = version;
     }
 
+    /**
+     * Returns the method for generating primary key values.
+     * 
+     * @return The method
+     */
+    public String getIdMethod()
+    {
+        return _idMethod;
+    }
 
+    /**
+     * Sets the method for generating primary key values. Note that this
+     * value is ignored by DdlUtils and only for compatibility with Torque.
+     * 
+     * @param idMethod The method
+     */
     public void setIdMethod(String idMethod)
     {
-        this.idMethod=idMethod;
+        _idMethod = idMethod;
     }
 
-
-    public void addTable(Table table)
-    {
-        tables.add(table);
-    }
-
+    /**
+     * Returns the list of tables in this model.
+     * 
+     * @return The tables
+     */
     public List getTables()
     {
-        return tables;
+        return _tables;
+    }
+
+    /**
+     * Returns the table at the specified position.
+     * 
+     * @param index The index of the table
+     * @return The table
+     */
+    public Table getTable(int index)
+    {
+        return (Table)_tables.get(index);
+    }
+
+    /**
+     * Adds a table.
+     * 
+     * @param table The table to add
+     */
+    public void addTable(Table table)
+    {
+        _tables.add(table);
+    }
+
+    /**
+     * Replaces the table at the specified position.
+     * 
+     * @param index The index of the table
+     * @param table The new table
+     */
+    public void setTable(int index, Table table)
+    {
+        _tables.set(index, table);
     }
 
     // Helper methods
@@ -134,7 +206,7 @@ public class Database
      */
     public Table findTable(String name, boolean caseSensitive)
     {
-        for (Iterator iter = tables.iterator(); iter.hasNext();)
+        for (Iterator iter = _tables.iterator(); iter.hasNext();)
         {
             Table table = (Table) iter.next();
 
@@ -156,21 +228,46 @@ public class Database
         return null;
     }
 
-    // Additions for PropertyUtils
-
-    public void setTable(int index, Table table)
+    /**
+     * Returns the {@link org.apache.ddlutils.dynabean.SqlDynaClass} for the given table name. If the it does not
+     * exist yet, a new one will be created based on the Table definition.
+     * 
+     * @return The <code>SqlDynaClass</code> for the indicated table or <code>null</code>
+     *         if the model contains no such table
+     */
+    public SqlDynaClass getDynaClassFor(String tableName)
     {
-        addTable(table);
+        Table table = findTable(tableName);
+
+        return table != null ? _dynaClassCache.getDynaClass(table) : null;
     }
 
-    public Table getTable(int index)
+    /**
+     * Returns the {@link org.apache.ddlutils.dynabean.SqlDynaClass} for the given dyna bean.
+     * 
+     * @return The <code>SqlDynaClass</code> for the given bean
+     */
+    public SqlDynaClass getDynaClassFor(DynaBean bean)
     {
-        return (Table) tables.get(index);
+        return _dynaClassCache.getDynaClass(bean);
     }
 
+    /**
+     * Creates a new dyna bean for the given table.
+     * 
+     * @return The new dyna bean
+     */
+    public DynaBean createDynaBeanFor(Table table) throws DynaSqlException
+    {
+        return _dynaClassCache.createNewInstance(table);
+    }
 
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     public String toString()
     {
-        return super.toString() + "[name=" + name + ";tableCount=" + tables.size() + "]";
+        return super.toString() + "[name=" + _name + ";tableCount=" + _tables.size() + "]";
     }
 }

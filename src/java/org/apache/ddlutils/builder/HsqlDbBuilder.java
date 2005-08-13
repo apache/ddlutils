@@ -17,13 +17,12 @@ package org.apache.ddlutils.builder;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Table;
 
-
 /**
- * An SQL Builder for the <a href="http://hsqldb.sourceforge.net/">HsqlDb</a> JDBC database.
+ * The SQL Builder for the HsqlDb database.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
@@ -31,44 +30,14 @@ import org.apache.ddlutils.model.Table;
  */
 public class HsqlDbBuilder extends SqlBuilder
 {
-    /** Database name of this builder */
-    public static final String DATABASENAME     = "HsqlDb";
-    /** The standard Hsqldb jdbc driver */
-    public static final String JDBC_DRIVER      = "org.hsqldb.jdbcDriver";
-    /** The subprotocol used by the standard Hsqldb driver */
-    public static final String JDBC_SUBPROTOCOL = "hsqldb";
-
     /**
-     * Creates a new instance of the Hsqldb builer.
+     * Creates a new builder instance.
+     * 
+     * @param info The platform info
      */
-    public HsqlDbBuilder()
+    public HsqlDbBuilder(PlatformInfo info)
     {
-        super();
-        setRequiringNullAsDefaultValue(false);
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setIndicesEmbedded(false);
-        addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY");
-        addNativeTypeMapping(Types.BLOB,        "LONGVARBINARY");
-        addNativeTypeMapping(Types.CLOB,        "LONGVARCHAR");
-        addNativeTypeMapping(Types.DISTINCT,    "LONGVARBINARY");
-        addNativeTypeMapping(Types.FLOAT,       "DOUBLE");
-        addNativeTypeMapping(Types.JAVA_OBJECT, "OBJECT");
-        addNativeTypeMapping(Types.NULL,        "LONGVARBINARY");
-        addNativeTypeMapping(Types.OTHER,       "OTHER");
-        addNativeTypeMapping(Types.REF,         "LONGVARBINARY");
-        addNativeTypeMapping(Types.STRUCT,      "LONGVARBINARY");
-
-        addNativeTypeMapping("BOOLEAN",  "BIT");
-        addNativeTypeMapping("DATALINK", "LONGVARBINARY");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
-     */
-    public String getDatabaseName()
-    {
-        return DATABASENAME;
+        super(info);
     }
 
     /* (non-Javadoc)

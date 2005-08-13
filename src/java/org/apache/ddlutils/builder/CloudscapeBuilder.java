@@ -19,53 +19,26 @@ package org.apache.ddlutils.builder;
 import java.io.IOException;
 import java.sql.Types;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
- * An SQL Builder for Cloudscape.
+ * The SQL Builder for Cloudscape.
  * 
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @version $Revision$
  */
 public class CloudscapeBuilder extends SqlBuilder
 {
-    /** Database name of this builder */
-    public static final String DATABASENAME = "Cloudscape";
-
-    public CloudscapeBuilder()
-    {
-        setRequiringNullAsDefaultValue(false);
-        setPrimaryKeyEmbedded(true);
-        setForeignKeysEmbedded(false);
-        setIndicesEmbedded(false);
-        setMaxIdentifierLength(128);
-        // binary and varbinary are also handled by getSqlType
-        addNativeTypeMapping(Types.ARRAY,         "BLOB");
-        addNativeTypeMapping(Types.BINARY,        "CHAR");
-        addNativeTypeMapping(Types.BIT,           "CHAR FOR BIT DATA");
-        addNativeTypeMapping(Types.DISTINCT,      "BLOB");
-        addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
-        addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
-        addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
-        addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
-        addNativeTypeMapping(Types.OTHER,         "BLOB");
-        addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA");
-        addNativeTypeMapping(Types.REF,           "LONG VARCHAR FOR BIT DATA");
-        addNativeTypeMapping(Types.STRUCT,        "BLOB");
-        addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
-
-        addNativeTypeMapping("BOOLEAN",  "CHAR FOR BIT DATA");
-        addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA");
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDatabaseName()
+    /**
+     * Creates a new builder instance.
+     * 
+     * @param info The platform info
      */
-    public String getDatabaseName()
+    public CloudscapeBuilder(PlatformInfo info)
     {
-        return DATABASENAME;
+        super(info);
     }
 
     /* (non-Javadoc)

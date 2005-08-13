@@ -19,8 +19,8 @@ package org.apache.ddlutils.io;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
+
 import org.apache.commons.digester.Digester;
-import org.apache.ddlutils.dynabean.DynaSql;
 import org.apache.ddlutils.io.converters.DateConverter;
 import org.apache.ddlutils.io.converters.NumberConverter;
 import org.apache.ddlutils.io.converters.SqlTypeConverter;
@@ -196,10 +196,6 @@ public class DataReader extends Digester
                 throw new NullPointerException("No data sink model specified");
             }
 
-            DynaSql dynaSql = new DynaSql(null);
-    
-            dynaSql.setDatabase(_model);
-
             DigesterRules rules = new DigesterRules();
 
             rules.setCaseSensitive(isCaseSensitive());
@@ -210,7 +206,7 @@ public class DataReader extends Digester
                 Table  table = (Table)tableIt.next();
                 String path  = "data/"+table.getName();
     
-                addRule(path, new DynaSqlCreateRule(dynaSql, table, _sink));
+                addRule(path, new DynaSqlCreateRule(_model, table, _sink));
                 for (Iterator columnIt = table.getColumns().iterator(); columnIt.hasNext();)
                 {
                     Column           column    = (Column)columnIt.next();
