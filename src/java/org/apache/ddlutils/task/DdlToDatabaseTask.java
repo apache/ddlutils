@@ -62,6 +62,26 @@ public class DdlToDatabaseTask extends Task
     }
 
     /**
+     * Adds the "create database"-command.
+     * 
+     * @param command The command
+     */
+    public void addCreateDatabase(CreateDatabaseCommand command)
+    {
+        _commands.add(command);
+    }
+
+    /**
+     * Adds the "drop database"-command.
+     * 
+     * @param command The command
+     */
+    public void addDropDatabase(DropDatabaseCommand command)
+    {
+        _commands.add(command);
+    }
+
+    /**
      * Adds the "write dtd to file"-command.
      * 
      * @param command The command
@@ -152,7 +172,7 @@ public class DdlToDatabaseTask extends Task
                         }
                         catch (IllegalArgumentException ex)
                         {
-                            throw new BuildException("Could not merge with schema from file "+files[idx], ex);
+                            throw new BuildException("Could not merge with schema from file "+files[idx]+": "+ex.getLocalizedMessage(), ex);
                         }
                     }
                 }
@@ -189,7 +209,7 @@ public class DdlToDatabaseTask extends Task
             }
             catch (Exception ex)
             {
-                throw new BuildException("Could not read schema file "+schemaFile.getAbsolutePath(), ex);
+                throw new BuildException("Could not read schema file "+schemaFile.getAbsolutePath()+": "+ex.getLocalizedMessage(), ex);
             }
         }
         return model;
@@ -202,17 +222,11 @@ public class DdlToDatabaseTask extends Task
     {
         if (_commands.isEmpty())
         {
-            System.out.println("No sub tasks specified, so there is nothing to do.");
+            log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
             return;
         }
 
         Database model = readSchemaFiles();
-
-        if (model == null)
-        {
-            System.out.println("No schemas read, so there is nothing to do.");
-            return;
-        }
 
         for (Iterator it = _commands.iterator(); it.hasNext();)
         {

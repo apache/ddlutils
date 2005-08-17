@@ -58,11 +58,11 @@ public class PlatformFactory
     }
 
     /**
-     * Creates a new SqlBuilder for the given (case insensitive) database name
+     * Creates a new platform for the given (case insensitive) database name
      * or returns null if the database is not recognized.
      * 
      * @param databaseName The name of the database (case is not important)
-     * @return The builder or <code>null</code> if the database is not supported
+     * @return The platform or <code>null</code> if the database is not supported
      */
     public static synchronized Platform createNewPlatformInstance(String databaseName) throws IllegalAccessException, InstantiationException
     {

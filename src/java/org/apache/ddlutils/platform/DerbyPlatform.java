@@ -1,5 +1,11 @@
 package org.apache.ddlutils.platform;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import org.apache.ddlutils.DynaSqlException;
+
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
  * 
@@ -39,5 +45,46 @@ public class DerbyPlatform extends CloudscapePlatform
     public String getDatabaseName()
     {
         return DATABASENAME;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.platform.PlatformImplBase#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    {
+        // For Derby, you create databases by simply appending ";create=true" to the connection url
+        if (JDBC_DRIVER.equals(jdbcDriverClassName) ||
+            JDBC_DRIVER_EMBEDDED.equals(jdbcDriverClassName))
+        {
+            Connection connection = null;
+
+            try
+            {
+                Class.forName(jdbcDriverClassName);
+
+                connection = DriverManager.getConnection(connectionUrl + ";create=true", username, password);
+                logWarnings(connection);
+            }
+            catch (Exception ex)
+            {
+                throw new DynaSqlException("Error while trying to create a database", ex);
+            }
+            finally
+            {
+                if (connection != null)
+                {
+                    try
+                    {
+                        connection.close();
+                    }
+                    catch (SQLException ex)
+                    {}
+                }
+            }
+        }
+        else
+        {
+            throw new UnsupportedOperationException("Unable to create a Derby database via the driver "+jdbcDriverClassName);
+        }
     }
 }

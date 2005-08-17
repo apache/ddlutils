@@ -24,6 +24,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.io.JdbcModelReader;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -168,11 +169,6 @@ public class DatabaseToDdlTask extends Task
      */
     private Database readSchema()
     {
-        // TODO: This should largely be deducable from the jdbc connection url
-        if (_databaseType == null)
-        {
-            throw new BuildException("The database type needs to be defined.");
-        }
         if (_dataSource == null)
         {
             throw new BuildException("No database specified.");
@@ -201,7 +197,7 @@ public class DatabaseToDdlTask extends Task
         }
         catch (Exception ex)
         {
-            throw new BuildException("Could not read the schema from the specified database", ex);
+            throw new BuildException("Could not read the schema from the specified database: "+ex.getLocalizedMessage(), ex);
         }
     }
 
@@ -212,7 +208,7 @@ public class DatabaseToDdlTask extends Task
     {
         if (_commands.isEmpty())
         {
-            System.out.println("No sub tasks specified, so there is nothing to do.");
+            log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
             return;
         }
 
@@ -220,7 +216,7 @@ public class DatabaseToDdlTask extends Task
 
         if (model == null)
         {
-            System.out.println("No schemas read, so there is nothing to do.");
+            log("No schemas read, so there is nothing to do.", Project.MSG_INFO);
             return;
         }
 

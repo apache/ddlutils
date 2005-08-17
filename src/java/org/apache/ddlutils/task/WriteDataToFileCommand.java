@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
+import org.apache.ddlutils.PlatformUtils;
 import org.apache.ddlutils.io.DataWriter;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -80,6 +81,15 @@ public class WriteDataToFileCommand implements Command, WantsDatabaseInfo
     {
         try
         {
+            if (_databaseType == null)
+            {
+                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
+                if (_databaseType == null)
+                {
+                    throw new BuildException("The database type needs to be defined.");
+                }
+            }
+
             Platform   platform = PlatformFactory.createNewPlatformInstance(_databaseType);
             DataWriter writer   = new DataWriter(model, new FileOutputStream(_outputFile), _encoding);
             

@@ -85,17 +85,18 @@ public abstract class DatabaseCommand implements Command
      */
     protected Platform getPlatform() throws BuildException
     {
-        Platform platform = null;
+        BasicDataSource dataSource = getDataSource();
+        Platform        platform   = null;
 
         try
         {
             if (getDatabaseType() == null)
             {
-                setDatabaseType(new PlatformUtils().determineDatabaseType(getDataSource()));
-                if (getDatabaseType() == null)
-                {
-                    throw new BuildException("The database type needs to be defined.");
-                }
+                setDatabaseType(new PlatformUtils().determineDatabaseType(dataSource.getDriverClassName(), dataSource.getUrl()));
+            }
+            if (getDatabaseType() == null)
+            {
+                setDatabaseType(new PlatformUtils().determineDatabaseType(dataSource));
             }
             platform = PlatformFactory.createNewPlatformInstance(getDatabaseType());
         }

@@ -59,7 +59,7 @@ import org.apache.ddlutils.util.JdbcSupport;
 public abstract class PlatformImplBase extends JdbcSupport implements Platform
 {
     /** The log for this platform */
-    private final Log _log = LogFactory.getLog(Platform.class);
+    private final Log _log = LogFactory.getLog(getClass());
 
     /** The sql builder for this platform */
     private SqlBuilder _builder;
@@ -88,6 +88,33 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     public PlatformInfo getPlatformInfo()
     {
         return _builder.getPlatformInfo();
+    }
+
+    /**
+     * Returns the log for this platform.
+     * 
+     * @return The log
+     */
+    protected Log getLog()
+    {
+        return _log;
+    }
+
+    /**
+     * Logs any warnings associated to the given connection. Note that the connection needs
+     * to be open for this.
+     * 
+     * @param connection The open connection
+     */
+    protected void logWarnings(Connection connection) throws SQLException
+    {
+        SQLWarning warning = connection.getWarnings();
+
+        while (warning != null)
+        {
+            getLog().warn(warning.getLocalizedMessage(), warning.getCause());
+            warning = warning.getNextWarning();
+        }
     }
 
     /* (non-Javadoc)
@@ -200,6 +227,22 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             returnConnection(connection);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    {
+        throw new UnsupportedOperationException("Database creation is not supported for the database platform "+getDatabaseName());
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#dropDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
+    public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    {
+        throw new UnsupportedOperationException("Database deletion is not supported for the database platform "+getDatabaseName());
     }
 
     /* (non-Javadoc)

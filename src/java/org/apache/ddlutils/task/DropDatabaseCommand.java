@@ -16,6 +16,7 @@ package org.apache.ddlutils.task;
  * limitations under the License.
  */
 
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
@@ -23,16 +24,18 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * Command for writing a database schema into the database.
+ * Command for dropping a database.
  */
-public class WriteSchemaToDatabaseCommand extends DatabaseCommand
+public class DropDatabaseCommand extends DatabaseCommand
 {
     /* (non-Javadoc)
      * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
      */
     public void execute(Task task, Database model) throws BuildException
     {
-        if (getDataSource() == null)
+        BasicDataSource dataSource = getDataSource();
+
+        if (dataSource == null)
         {
             throw new BuildException("No database specified.");
         }
@@ -41,16 +44,16 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
 
         try
         {
-            if (isAlterDatabase())
-            {
-                platform.alterTables(model, true, true, true);
-            }
-            else
-            {
-                platform.createTables(model, true, true);
-            }
+            platform.dropDatabase(dataSource.getDriverClassName(),
+                                  dataSource.getUrl(),
+                                  dataSource.getUsername(),
+                                  dataSource.getPassword());
 
-            task.log("Written schema to database", Project.MSG_INFO);
+            task.log("Dropped database", Project.MSG_INFO);
+        }
+        catch (UnsupportedOperationException ex)
+        {
+            task.log("Database platform "+getPlatform().getDatabaseName()+" does not support database dropping via JDBC", Project.MSG_ERR);
         }
         catch (Exception ex)
         {

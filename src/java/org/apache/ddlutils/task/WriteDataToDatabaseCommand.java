@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
+import org.apache.ddlutils.PlatformUtils;
 import org.apache.ddlutils.io.DataConverterRegistration;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
@@ -96,6 +97,15 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
     {
         try
         {
+            if (_databaseType == null)
+            {
+                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
+                if (_databaseType == null)
+                {
+                    throw new BuildException("The database type needs to be defined.");
+                }
+            }
+
             Platform           platform = PlatformFactory.createNewPlatformInstance(_databaseType);
             DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
             DataReader         reader   = new DataReader();

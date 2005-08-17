@@ -113,6 +113,34 @@ public interface Platform
     public int evaluateBatch(Connection connection, String sql, boolean continueOnError) throws DynaSqlException;
 
     /**
+     * Creates the database specified by the given parameters. Please note that this method does not
+     * use a data source set via {@link #setDataSource(DataSource)} because it is not possible to
+     * retrieve the connection information from it without establishing a connection.<br/>
+     * The given connection url is the url that you'd use to connect to the already-created
+     * database. 
+     * 
+     * @param jdbcDriverClassName The jdbc driver class name
+     * @param connectionUrl       The url to connect to the database if it were already created
+     * @param username            The username for creating the database
+     * @param password            The password for creating the database
+     * 
+     * TODO: Support additional parameters which are platform specific (eg. encoding etc.)
+     */
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException;
+
+    /**
+     * Drops the database specified by the given parameters. Please note that this method does not
+     * use a data source set via {@link #setDataSource(DataSource)} because it is not possible to
+     * retrieve the connection information from it without establishing a connection.
+     * 
+     * @param jdbcDriverClassName The jdbc driver class name
+     * @param connectionUrl       The url to connect to the database
+     * @param username            The username for creating the database
+     * @param password            The password for creating the database
+     */
+    public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException;
+
+    /**
      * Creates the tables defined in the database model.
      * 
      * @param model           The database model
