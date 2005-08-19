@@ -19,9 +19,7 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
@@ -73,7 +71,7 @@ public class WriteDataToSpecifiedDatabaseCommand extends DatabaseCommand
 
         try
         {
-            Platform           platform = PlatformFactory.createNewPlatformInstance(getDatabaseType());
+            Platform           platform = getPlatform();
             DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
             DataReader         reader   = new DataReader();
 

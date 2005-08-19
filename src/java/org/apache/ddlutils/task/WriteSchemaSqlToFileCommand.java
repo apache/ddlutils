@@ -35,6 +35,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
 {
     /** The file to output the DTD to */
     private File _outputFile;
+    /** Whether to alter or re-set the database if it already exists */
+    private boolean _alterDb = true;
 
     /**
      * Sets the file to output the sql to.
@@ -44,6 +46,26 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
     public void setOutputFile(File outputFile)
     {
         _outputFile = outputFile;
+    }
+
+    /**
+     * Determines whether to alter the database if it already exists, or re-set it.
+     * 
+     * @return <code>true</code> if to alter the database
+     */
+    protected boolean isAlterDatabase()
+    {
+        return _alterDb;
+    }
+
+    /**
+     * Specifies whether to alter the database if it already exists, or re-set it.
+     * 
+     * @param alterTheDb <code>true</code> if to alter the database
+     */
+    public void setAlterDatabase(boolean alterTheDb)
+    {
+        _alterDb = alterTheDb;
     }
 
     /* (non-Javadoc)
@@ -89,7 +111,14 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
         }
         catch (Exception ex)
         {
-            throw new BuildException(ex);
+            if (isFailOnError())
+            {
+                throw new BuildException(ex);
+            }
+            else
+            {
+                task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
+            }
         }
         finally
         {
@@ -104,5 +133,4 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
             }
         }
     }
-
 }

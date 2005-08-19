@@ -243,8 +243,9 @@ public class DataToDatabaseSink implements DataSink
         }
         if (_processedIdentities.containsKey(table.getName()))
         {
-            Identity identity           = buildIdentityFromPKs(table, bean);
-            HashSet  identitiesForTable = (HashSet)_processedIdentities.get(table.getName());
+            Identity  identity           = buildIdentityFromPKs(table, bean);
+            HashSet   identitiesForTable = (HashSet)_processedIdentities.get(table.getName());
+            ArrayList finishedObjs       = new ArrayList();
 
             identitiesForTable.add(identity);
             for (Iterator waitingObjIt = _waitingObjects.iterator(); waitingObjIt.hasNext();)
@@ -259,13 +260,20 @@ public class DataToDatabaseSink implements DataSink
                     // prior to that we also update the fk fields in case one of the pk
                     // columns of the target object is auto-incremented by the database
                     updateFKColumns(waitingObj.getObject(), bean, fkIdentity.getForeignKeyName());
-                    addBean(waitingObj.getObject());
-                    if (_log.isDebugEnabled())
-                    {
-                        Table waitingObjTable = ((SqlDynaClass)waitingObj.getObject().getDynaClass()).getTable();
+                    // we defer handling of the finished objects to avoid concurrent modification exceptions
+                    finishedObjs.add(waitingObj.getObject());
+                }
+            }
+            for (Iterator finishedObjIt = finishedObjs.iterator(); finishedObjIt.hasNext();)
+            {
+                DynaBean finishedObj = (DynaBean)finishedObjIt.next();
 
-                        _log.debug("Inserted deferred bean "+buildIdentityFromPKs(waitingObjTable, waitingObj.getObject()));
-                    }
+                addBean(finishedObj);
+                if (_log.isDebugEnabled())
+                {
+                    Table waitingObjTable = ((SqlDynaClass)finishedObj.getDynaClass()).getTable();
+
+                    _log.debug("Inserted deferred bean "+buildIdentityFromPKs(waitingObjTable, finishedObj));
                 }
             }
         }

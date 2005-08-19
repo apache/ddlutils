@@ -27,6 +27,29 @@ import org.apache.tools.ant.Task;
  */
 public class WriteSchemaToDatabaseCommand extends DatabaseCommand
 {
+    /** Whether to alter or re-set the database if it already exists */
+    private boolean _alterDb = true;
+
+    /**
+     * Determines whether to alter the database if it already exists, or re-set it.
+     * 
+     * @return <code>true</code> if to alter the database
+     */
+    protected boolean isAlterDatabase()
+    {
+        return _alterDb;
+    }
+
+    /**
+     * Specifies whether to alter the database if it already exists, or re-set it.
+     * 
+     * @param alterTheDb <code>true</code> if to alter the database
+     */
+    public void setAlterDatabase(boolean alterTheDb)
+    {
+        _alterDb = alterTheDb;
+    }
+
     /* (non-Javadoc)
      * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
      */
@@ -54,7 +77,14 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
         }
         catch (Exception ex)
         {
-            throw new BuildException(ex);
+            if (isFailOnError())
+            {
+                throw new BuildException(ex);
+            }
+            else
+            {
+                task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
+            }
         }
     }
 }

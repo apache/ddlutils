@@ -57,7 +57,14 @@ public class CreateDatabaseCommand extends DatabaseCommand
         }
         catch (Exception ex)
         {
-            throw new BuildException(ex);
+            if (isFailOnError())
+            {
+                throw new BuildException(ex);
+            }
+            else
+            {
+                task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
+            }
         }
     }
 }
