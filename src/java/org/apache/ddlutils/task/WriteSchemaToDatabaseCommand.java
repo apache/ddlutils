@@ -29,6 +29,8 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
 {
     /** Whether to alter or re-set the database if it already exists */
     private boolean _alterDb = true;
+    /** Whether to drop tables and the associated constraints first */
+    private boolean _dropTablesFirst = true;
 
     /**
      * Determines whether to alter the database if it already exists, or re-set it.
@@ -50,6 +52,26 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
         _alterDb = alterTheDb;
     }
 
+    /**
+     * Determines whether to drop tables and the associated constraints first.
+     * 
+     * @return <code>true</code> if a drop shall be performed first
+     */
+    protected boolean isDropTablesFirst()
+    {
+        return _dropTablesFirst;
+    }
+
+    /**
+     * Specifies whether to drop tables and the associated constraints first.
+     * 
+     * @param doDrops <code>true</code> if a drop shall be performed first
+     */
+    public void setDropTablesFirst(boolean doDrops)
+    {
+        _dropTablesFirst = doDrops;
+    }
+
     /* (non-Javadoc)
      * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
      */
@@ -66,11 +88,11 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
         {
             if (isAlterDatabase())
             {
-                platform.alterTables(model, true, true, true);
+                platform.alterTables(model, _dropTablesFirst, true, true);
             }
             else
             {
-                platform.createTables(model, true, true);
+                platform.createTables(model, _dropTablesFirst, true);
             }
 
             task.log("Written schema to database", Project.MSG_INFO);

@@ -37,6 +37,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
     private File _outputFile;
     /** Whether to alter or re-set the database if it already exists */
     private boolean _alterDb = true;
+    /** Whether to drop tables and the associated constraints first */
+    private boolean _dropTablesFirst = true;
 
     /**
      * Sets the file to output the sql to.
@@ -66,6 +68,26 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
     public void setAlterDatabase(boolean alterTheDb)
     {
         _alterDb = alterTheDb;
+    }
+
+    /**
+     * Determines whether to drop tables and the associated constraints first.
+     * 
+     * @return <code>true</code> if a drop shall be performed first
+     */
+    protected boolean isDropTablesFirst()
+    {
+        return _dropTablesFirst;
+    }
+
+    /**
+     * Specifies whether to drop tables and the associated constraints first.
+     * 
+     * @param doDrops <code>true</code> if a drop shall be performed first
+     */
+    public void setDropTablesFirst(boolean doDrops)
+    {
+        _dropTablesFirst = doDrops;
     }
 
     /* (non-Javadoc)
@@ -100,11 +122,11 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
 
                 Database currentModel = new JdbcModelReader(connection).getDatabase();
 
-                platform.getSqlBuilder().alterDatabase(currentModel, model, true, true);
+                platform.getSqlBuilder().alterDatabase(currentModel, model, _dropTablesFirst, true);
             }
             else
             {
-                platform.getSqlBuilder().createTables(model);
+                platform.getSqlBuilder().createTables(model, _dropTablesFirst);
             }
             writer.close();
             task.log("Written SQL to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);
