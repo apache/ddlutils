@@ -17,43 +17,24 @@ package org.apache.ddlutils.task;
  */
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.io.JdbcModelReader;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
 
 /**
  * Ant task for working with a database, e.g. retrieving the schema from a database, dumping data,
  */
-public class DatabaseToDdlTask extends Task
+public class DatabaseToDdlTask extends DatabaseTaskBase
 {
-    /** The type of the database */
-    private String _databaseType;
-    /** The data source to use for accessing the database */
-    private BasicDataSource _dataSource;
     /** The specific schema to use */
     private String _schema;
     /** The specific catalog to use */
     private String _catalog;
     /** The table types to recognize when reading the model from the database */
     private String _tableTypes;
-    /** The sub tasks to execute */
-    private ArrayList _commands = new ArrayList();
-
-    /**
-     * Sets the database type.
-     * 
-     * @param type The database type
-     */
-    public void setDatabaseType(String type)
-    {
-        _databaseType = type;
-    }
 
     /**
      * Sets the database schema to access.
@@ -86,23 +67,13 @@ public class DatabaseToDdlTask extends Task
     }
 
     /**
-     * Adds the data source to use for accessing the database.
-     * 
-     * @param dataSource The data source
-     */
-    public void addConfiguredDatabase(BasicDataSource dataSource)
-    {
-        _dataSource = dataSource;
-    }
-
-    /**
      * Adds the "create dtd"-command.
      * 
      * @param command The command
      */
     public void addWriteDtdToFile(WriteDtdToFileCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -112,7 +83,7 @@ public class DatabaseToDdlTask extends Task
      */
     public void addWriteSchemaToFile(WriteSchemaToFileCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -122,7 +93,7 @@ public class DatabaseToDdlTask extends Task
      */
     public void addWriteSchemaSqlToFile(WriteSchemaSqlToFileCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -132,7 +103,7 @@ public class DatabaseToDdlTask extends Task
      */
     public void addWriteDataToDatabase(WriteDataToDatabaseCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -169,14 +140,14 @@ public class DatabaseToDdlTask extends Task
      */
     private Database readSchema()
     {
-        if (_dataSource == null)
+        if (getDataSource() == null)
         {
             throw new BuildException("No database specified.");
         }
 
         try
         {
-            JdbcModelReader reader = new JdbcModelReader(_dataSource.getConnection());
+            JdbcModelReader reader = new JdbcModelReader(getDataSource().getConnection());
 
             if ((_catalog != null) && (_catalog.length() > 0))
             {
@@ -206,7 +177,7 @@ public class DatabaseToDdlTask extends Task
      */
     public void execute() throws BuildException
     {
-        if (_commands.isEmpty())
+        if (!hasCommands())
         {
             log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
             return;
@@ -219,17 +190,6 @@ public class DatabaseToDdlTask extends Task
             log("No schemas read, so there is nothing to do.", Project.MSG_INFO);
             return;
         }
-
-        for (Iterator it = _commands.iterator(); it.hasNext();)
-        {
-            Command cmd = (Command)it.next();
-
-            if (cmd instanceof WantsDatabaseInfo)
-            {
-                ((WantsDatabaseInfo)cmd).setDatabaseInfo(_dataSource, _databaseType);
-            }
-            cmd.execute(this, model);
-        }
+        executeCommands(model);
     }
-
 }

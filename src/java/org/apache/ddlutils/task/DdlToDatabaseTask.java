@@ -26,20 +26,17 @@ import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 
 /**
  * Ant task for working with DDL, e.g. generating the database from a schema, inserting data,
  */
-public class DdlToDatabaseTask extends Task
+public class DdlToDatabaseTask extends DatabaseTaskBase
 {
     /** A single schema file to read */
     private File _singleSchemaFile = null;
     /** The input files */
     private ArrayList _fileSets = new ArrayList();
-    /** The sub tasks to execute */
-    private ArrayList _commands = new ArrayList();
 
     /**
      * Adds a fileset.
@@ -68,7 +65,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void addCreateDatabase(CreateDatabaseCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -78,7 +75,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void addDropDatabase(DropDatabaseCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -88,7 +85,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void addWriteDtdToFile(WriteDtdToFileCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -98,7 +95,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void addWriteSchemaToDatabase(WriteSchemaToDatabaseCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -108,7 +105,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void addWriteSchemaSqlToFile(WriteSchemaSqlToFileCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -118,7 +115,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void addWriteDataToDatabase(WriteDataToSpecifiedDatabaseCommand command)
     {
-        _commands.add(command);
+        addCommand(command);
     }
 
     /**
@@ -220,7 +217,7 @@ public class DdlToDatabaseTask extends Task
      */
     public void execute() throws BuildException
     {
-        if (_commands.isEmpty())
+        if (!hasCommands())
         {
             log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
             return;
@@ -228,12 +225,6 @@ public class DdlToDatabaseTask extends Task
 
         Database model = readSchemaFiles();
 
-        for (Iterator it = _commands.iterator(); it.hasNext();)
-        {
-            Command command = (Command)it.next();
-            
-            command.execute(this, model);
-        }
+        executeCommands(model);
     }
-
 }

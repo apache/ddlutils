@@ -20,11 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Iterator;
 
-import javax.sql.DataSource;
-
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.PlatformFactory;
-import org.apache.ddlutils.PlatformUtils;
 import org.apache.ddlutils.io.DataWriter;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -34,16 +30,12 @@ import org.apache.tools.ant.Task;
 /**
  * Command to dump data from the database into an XML file.
  */
-public class WriteDataToFileCommand implements Command, WantsDatabaseInfo
+public class WriteDataToFileCommand extends DatabaseCommand
 {
-    /** The data source pointing to the database */
-    private DataSource _dataSource;
-    /** The database type */
-    private String     _databaseType;
     /** The file to output the data to */
-    private File       _outputFile;
+    private File   _outputFile;
     /** The character encoding to use */
-    private String     _encoding;
+    private String _encoding;
 
     /**
      * Sets the file to output the data to.
@@ -66,36 +58,17 @@ public class WriteDataToFileCommand implements Command, WantsDatabaseInfo
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.task.WantsDatabaseInfo#setDatabaseInfo(javax.sql.DataSource, java.lang.String)
-     */
-    public void setDatabaseInfo(DataSource dataSource, String type) throws BuildException
-    {
-        _dataSource   = dataSource;
-        _databaseType = type;
-    }
-
-    /* (non-Javadoc)
      * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
      */
     public void execute(Task task, Database model) throws BuildException
     {
         try
         {
-            if (_databaseType == null)
-            {
-                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
-                if (_databaseType == null)
-                {
-                    throw new BuildException("The database type needs to be defined.");
-                }
-            }
-
-            Platform   platform = PlatformFactory.createNewPlatformInstance(_databaseType);
+            Platform   platform = getPlatform();
             DataWriter writer   = new DataWriter(model, new FileOutputStream(_outputFile), _encoding);
             
             // TODO: An advanced algorithm could be employed here that writes objects
             //       related by foreign keys, in the correct order
-            platform.setDataSource(_dataSource);
             writer.writeDocumentStart();
             for (Iterator tableIt = model.getTables().iterator(); tableIt.hasNext();)
             {

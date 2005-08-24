@@ -29,16 +29,6 @@ public abstract class DatabaseCommand implements Command
     }
 
     /**
-     * Sets the database type.
-     * 
-     * @param type The database type
-     */
-    public void setDatabaseType(String type)
-    {
-        _databaseType = type;
-    }
-
-    /**
      * Returns the data source to use for accessing the database.
      * 
      * @return The data source
@@ -49,13 +39,15 @@ public abstract class DatabaseCommand implements Command
     }
 
     /**
-     * Adds the data source to use for accessing the database.
+     * Sets the database info.
      * 
-     * @param dataSource The data source
+     * @param dataSource The data source pointing to the database
+     * @param type       The database type
      */
-    public void addConfiguredDatabase(BasicDataSource dataSource)
+    protected void setDatabaseInfo(BasicDataSource dataSource, String type)
     {
-        _dataSource = dataSource;
+        _dataSource   = dataSource;
+        _databaseType = type;
     }
 
     /**
@@ -86,32 +78,39 @@ public abstract class DatabaseCommand implements Command
      */
     protected Platform getPlatform() throws BuildException
     {
-        BasicDataSource dataSource = getDataSource();
-        Platform        platform   = null;
+        Platform platform = null;
 
+        if (_databaseType == null)
+        {
+            if (_dataSource == null)
+            {
+                throw new BuildException("No database specified.");
+            }
+            if (_databaseType == null)
+            {
+                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource.getDriverClassName(),
+                                                                          _dataSource.getUrl());
+            }
+            if (_databaseType == null)
+            {
+                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
+            }
+        }
         try
         {
-            if (getDatabaseType() == null)
-            {
-                setDatabaseType(new PlatformUtils().determineDatabaseType(dataSource.getDriverClassName(), dataSource.getUrl()));
-            }
-            if (getDatabaseType() == null)
-            {
-                setDatabaseType(new PlatformUtils().determineDatabaseType(dataSource));
-            }
-            platform = PlatformFactory.createNewPlatformInstance(getDatabaseType());
+            platform = PlatformFactory.createNewPlatformInstance(_databaseType);
         }
         catch (Exception ex)
         {
-            throw new BuildException("Database type "+getDatabaseType()+" is not supported.", ex);
+            throw new BuildException("Database type "+_databaseType+" is not supported.", ex);
         }
         if (platform == null)
         {
-            throw new BuildException("Database type "+getDatabaseType()+" is not supported.");
+            throw new BuildException("Database type "+_databaseType+" is not supported.");
         }
         else
         {
-            platform.setDataSource(getDataSource());
+            platform.setDataSource(_dataSource);
             return platform;
         }
     }

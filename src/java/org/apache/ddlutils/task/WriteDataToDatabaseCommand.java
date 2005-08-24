@@ -20,11 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.sql.DataSource;
-
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.PlatformFactory;
-import org.apache.ddlutils.PlatformUtils;
 import org.apache.ddlutils.io.DataConverterRegistration;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
@@ -38,18 +34,14 @@ import org.apache.tools.ant.types.FileSet;
 /**
  * Command for inserting data into a database.
  */
-public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
+public class WriteDataToDatabaseCommand extends DatabaseCommand
 {
-    /** The data source pointing to the database */
-    private DataSource _dataSource;
-    /** The database type */
-    private String     _databaseType;
     /** A single data file to insert */
-    private File       _singleDataFile = null;
+    private File      _singleDataFile = null;
     /** The input files */
-    private ArrayList  _fileSets = new ArrayList();
+    private ArrayList _fileSets = new ArrayList();
     /** The converterd */
-    private ArrayList  _converters = new ArrayList();
+    private ArrayList _converters = new ArrayList();
 
     /**
      * Adds a fileset.
@@ -82,35 +74,16 @@ public class WriteDataToDatabaseCommand implements Command, WantsDatabaseInfo
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.task.WantsDatabaseInfo#setDatabaseInfo(javax.sql.DataSource, java.lang.String)
-     */
-    public void setDatabaseInfo(DataSource dataSource, String type) throws BuildException
-    {
-        _dataSource   = dataSource;
-        _databaseType = type;
-    }
-
-    /* (non-Javadoc)
      * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
      */
     public void execute(Task task, Database model) throws BuildException
     {
         try
         {
-            if (_databaseType == null)
-            {
-                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
-                if (_databaseType == null)
-                {
-                    throw new BuildException("The database type needs to be defined.");
-                }
-            }
-
-            Platform           platform = PlatformFactory.createNewPlatformInstance(_databaseType);
+            Platform           platform = getPlatform();
             DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
             DataReader         reader   = new DataReader();
 
-            platform.setDataSource(_dataSource);
             reader.setModel(model);
             reader.setSink(sink);
             for (Iterator it = _converters.iterator(); it.hasNext();)
