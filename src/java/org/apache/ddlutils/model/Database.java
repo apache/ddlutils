@@ -16,11 +16,14 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
+import java.io.Serializable;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.dynabean.DynaClassCache;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
@@ -35,8 +38,11 @@ import org.apache.ddlutils.dynabean.SqlDynaClass;
  * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
-public class Database
+public class Database implements Serializable, Cloneable
 {
+    /** Unique ID for serialization purposes */
+    private static final long serialVersionUID = -3160443396757573868L;
+
     /** The name of the database model */
     private String _name;
     /** The method for generating primary keys (currently ignored) */
@@ -44,7 +50,7 @@ public class Database
     /** The version of the model */
     private String _version;
     /** The tables */
-    private List _tables = new ArrayList();
+    private ArrayList _tables = new ArrayList();
 
     /** The dyna class cache for this model */
     private DynaClassCache _dynaClassCache = new DynaClassCache();
@@ -139,24 +145,34 @@ public class Database
     }
 
     /**
-     * Returns the list of tables in this model.
+     * Returns the number of tables in this model.
+     * 
+     * @return The number of tables
+     */
+    public int getTableCount()
+    {
+        return _tables.size();
+    }
+
+    /**
+     * Returns the tables in this model.
      * 
      * @return The tables
      */
-    public List getTables()
+    public Table[] getTables()
     {
-        return _tables;
+        return (Table[])_tables.toArray(new Table[_tables.size()]);
     }
 
     /**
      * Returns the table at the specified position.
      * 
-     * @param index The index of the table
+     * @param idx The index of the table
      * @return The table
      */
-    public Table getTable(int index)
+    public Table getTable(int idx)
     {
-        return (Table)_tables.get(index);
+        return (Table)_tables.get(idx);
     }
 
     /**
@@ -166,25 +182,211 @@ public class Database
      */
     public void addTable(Table table)
     {
-        _tables.add(table);
+        if (table != null)
+        {
+            _tables.add(table);
+        }
     }
 
     /**
-     * Replaces the table at the specified position.
+     * Adds a table at the specified position.
      * 
-     * @param index The index of the table
-     * @param table The new table
+     * @param idx   The index where to insert the table
+     * @param table The table to add
      */
-    public void setTable(int index, Table table)
+    public void addTable(int idx, Table table)
     {
-        _tables.set(index, table);
+        if (table != null)
+        {
+            _tables.add(idx, table);
+        }
+    }
+
+    /**
+     * Removes the given table.
+     * 
+     * @param table The table to remove
+     */
+    public void removeTable(Table table)
+    {
+        if (table != null)
+        {
+            _tables.remove(table);
+        }
+    }
+
+    /**
+     * Removes the indicated table.
+     * 
+     * @param idx The index of the table to remove
+     */
+    public void removeTable(int idx)
+    {
+        _tables.remove(idx);
     }
 
     // Helper methods
 
     /**
+     * Initializes the model by establishing the relationships between elements in this model encoded
+     * eg. in foreign keys etc. Also checks that the model elements are valid (table and columns have
+     * a name, foreign keys rference existing tables etc.) 
+     */
+    public void initialize() throws ModelException
+    {
+        // we have to setup
+        // * target tables in foreign keys
+        // * columns in foreign key references
+        // * columns in indices
+        // * columns in uniques
+        HashSet namesOfProcessedTables  = new HashSet();
+        HashSet namesOfProcessedColumns = new HashSet();
+        HashSet namesOfProcessedFks     = new HashSet();
+        HashSet namesOfProcessedIndices = new HashSet();
+        int     tableIdx = 0;
+
+        if ((getName() == null) || (getName().length() == 0))
+        {
+            throw new ModelException("The database model has no name");
+        }
+
+        for (Iterator tableIt = _tables.iterator(); tableIt.hasNext(); tableIdx++)
+        {
+            Table curTable = (Table)tableIt.next();
+
+            if ((curTable.getName() == null) || (curTable.getName().length() == 0))
+            {
+                throw new ModelException("The table nr. "+tableIdx+" has no name");
+            }
+            if (namesOfProcessedTables.contains(curTable.getName()))
+            {
+                throw new ModelException("There are multiple tables with the name "+curTable.getName());
+            }
+            namesOfProcessedTables.add(curTable.getName());
+
+            namesOfProcessedColumns.clear();
+            namesOfProcessedFks.clear();
+            namesOfProcessedIndices.clear();
+
+            for (int idx = 0; idx < curTable.getColumnCount(); idx++)
+            {
+                Column column = curTable.getColumn(idx);
+
+                if ((column.getName() == null) || (column.getName().length() == 0))
+                {
+                    throw new ModelException("The column nr. "+idx+" in table "+curTable.getName()+" has no name");
+                }
+                if (namesOfProcessedColumns.contains(column.getName()))
+                {
+                    throw new ModelException("There are multiple column with the name "+column.getName()+" in the table "+curTable.getName());
+                }
+                namesOfProcessedColumns.add(column.getName());
+
+                if ((column.getType() == null) || (column.getType().length() == 0))
+                {
+                    throw new ModelException("The column nr. "+idx+" in table "+curTable.getName()+" has no type");
+                }
+                if ((column.getTypeCode() == Types.OTHER) && !"OTHER".equalsIgnoreCase(column.getType()))
+                {
+                    throw new ModelException("The column nr. "+idx+" in table "+curTable.getName()+" has an unknown type "+column.getType());
+                }
+                namesOfProcessedColumns.add(column.getName());
+            }
+
+            for (int idx = 0; idx < curTable.getForeignKeyCount(); idx++)
+            {
+                ForeignKey fk     = curTable.getForeignKey(idx);
+                String     fkName = (fk.getName() == null ? "" : fk.getName());
+                String     fkDesc = (fkName.length() == 0 ? "nr. " + idx : fkName);
+
+                if (fkName.length() > 0)
+                {
+                    if (namesOfProcessedFks.contains(fkName))
+                    {
+                        throw new ModelException("There are multiple foreign keys in table "+curTable.getName()+" with the name "+fkName);
+                    }
+                    namesOfProcessedFks.add(fkName);
+                }
+
+                if (fk.getForeignTable() == null)
+                {
+                    Table targetTable = findTable(fk.getForeignTableName(), true);
+
+                    if (targetTable == null)
+                    {
+                        throw new ModelException("The foreignkey "+fkDesc+" in table "+curTable.getName()+" references the undefined table "+fk.getForeignTableName());
+                    }
+                    else
+                    {
+                        fk.setForeignTable(targetTable);
+                    }
+                }
+                for (Iterator refIt = fk.getReferences().iterator(); refIt.hasNext();)
+                {
+                    Reference ref = (Reference)refIt.next();
+
+                    if (ref.getLocalColumn() == null)
+                    {
+                        Column localColumn = curTable.findColumn(ref.getLocalColumnName(), true);
+
+                        if (localColumn == null)
+                        {
+                            throw new ModelException("The foreignkey "+fkDesc+" in table "+curTable.getName()+" references the undefined local column "+ref.getLocalColumnName());
+                        }
+                        else
+                        {
+                            ref.setLocalColumn(localColumn);
+                        }
+                    }
+                    if (ref.getForeignColumn() == null)
+                    {
+                        Column foreignColumn = fk.getForeignTable().findColumn(ref.getForeignColumnName(), true);
+
+                        if (foreignColumn == null)
+                        {
+                            throw new ModelException("The foreignkey "+fkDesc+" in table "+curTable.getName()+" references the undefined local column "+ref.getForeignColumnName()+" in table "+fk.getForeignTable().getName());
+                        }
+                        else
+                        {
+                            ref.setForeignColumn(foreignColumn);
+                        }
+                    }
+                }
+            }
+
+            for (int idx = 0; idx < curTable.getIndexCount(); idx++)
+            {
+                Index  index     = curTable.getIndex(idx);
+                String indexName = (index.getName() == null ? "" : index.getName());
+                String indexDesc = (indexName.length() == 0 ? "nr. " + idx : indexName);
+
+                if (indexName.length() > 0)
+                {
+                    if (namesOfProcessedIndices.contains(indexName))
+                    {
+                        throw new ModelException("There are multiple indices in table "+curTable.getName()+" with the name "+indexName);
+                    }
+                    namesOfProcessedIndices.add(indexName);
+                }
+
+                int indexColumnIdx = 0;
+
+                for (Iterator indexColumnIt = index.getColumns().iterator(); indexColumnIt.hasNext(); indexColumnIdx++)
+                {
+                    IndexColumn indexColumn = (IndexColumn)indexColumnIt.next();
+
+                    if (curTable.findColumn(indexColumn.getName(), true) == null)
+                    {
+                        throw new ModelException("The index "+indexDesc+" in table "+curTable.getName()+" references the undefined column "+indexColumn.getName());
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
      * Finds the table with the specified name, using case insensitive matching.
-     * Note that this method is not called getTable(String) to avoid introspection
+     * Note that this method is not called getTable to avoid introspection
      * problems.
      * 
      * @param name The name of the table to find
@@ -197,7 +399,7 @@ public class Database
 
     /**
      * Finds the table with the specified name, using case insensitive matching.
-     * Note that this method is not called getTable(String) to avoid introspection
+     * Note that this method is not called getTable) to avoid introspection
      * problems.
      * 
      * @param name          The name of the table to find
@@ -262,12 +464,55 @@ public class Database
         return _dynaClassCache.createNewInstance(table);
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    protected Object clone() throws CloneNotSupportedException
+    {
+        Database result = new Database();
+
+        result._name     = _name;
+        result._idMethod = _idMethod;
+        result._version  = _version;
+        result._tables   = (ArrayList)_tables.clone();
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof Database)
+        {
+            Database other = (Database)obj;
+
+            return _name.equals(other._name) &&
+                   _tables.equals(other._tables);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37)
+               .append(_name)
+               .append(_tables)
+               .toHashCode();
+    }
+
     /*
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     public String toString()
     {
-        return super.toString() + "[name=" + _name + ";tableCount=" + _tables.size() + "]";
+        return "Database " + _name + " [" + _tables.size() + " tables]";
     }
 }

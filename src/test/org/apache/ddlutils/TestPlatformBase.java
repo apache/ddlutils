@@ -23,7 +23,7 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
-import org.apache.ddlutils.io.DatabaseReader;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.xml.sax.SAXException;
 
@@ -138,11 +138,9 @@ public abstract class TestPlatformBase extends TestCase
      * @param dbDef The database XML definition
      * @return The database model
      */
-    protected Database parseDatabaseFromString(String dbDef) throws IntrospectionException, IOException, SAXException
+    protected Database parseDatabaseFromString(String dbDef)
     {
-        DatabaseReader reader = new DatabaseReader();
-
-        return (Database)reader.parse(new StringReader(dbDef));
+        return new DatabaseIO().read(new StringReader(dbDef));
     }
 
     /**

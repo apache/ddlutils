@@ -69,7 +69,7 @@ public class InterbaseBuilder extends SqlBuilder
     protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
     {
         super.writeExternalForeignKeyCreateStmt(database, table, key);
-        if (key.getForeignTable() != null)
+        if (key.getForeignTableName() != null)
         {
             print("COMMIT");
             printEndOfStatement();

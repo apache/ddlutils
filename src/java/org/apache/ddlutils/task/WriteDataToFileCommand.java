@@ -18,7 +18,6 @@ package org.apache.ddlutils.task;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Iterator;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DataWriter;
@@ -70,9 +69,9 @@ public class WriteDataToFileCommand extends DatabaseCommand
             // TODO: An advanced algorithm could be employed here that writes objects
             //       related by foreign keys, in the correct order
             writer.writeDocumentStart();
-            for (Iterator tableIt = model.getTables().iterator(); tableIt.hasNext();)
+            for (int idx = 0; idx < model.getTableCount(); idx++)
             {
-                Table table = (Table)tableIt.next();
+                Table table = (Table)model.getTable(idx);
 
                 writer.write(platform.query(model, "select * from "+table.getName()));
             }

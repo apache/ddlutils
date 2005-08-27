@@ -20,17 +20,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// TODO: Add a name property to the foreignkey that is respected by
-//       create/alter/drop
+/**
+ * Represents a database foreign key.
+ */
 public class ForeignKey implements Cloneable
 {
-    private String name;
-    private String foreignTable;
-        
-    private ArrayList references = new ArrayList();
+    //  TODO: Make the create/alter/drop functionality respect the name property
+
+    /** The name of the foreign key, may be <code>null</code> */
+    private String    _name;
+    /** The target table */
+    private Table     _foreignTable;
+    /** The name of the foreign table */
+    private String    _foreignTableName;
+    /** The references between local and remote columns */
+    private ArrayList _references = new ArrayList();
 
     /**
-     * Creates a new foreign key object.
+     * Creates a new foreign key object that has no name.
      */
     public ForeignKey()
     {
@@ -40,23 +47,11 @@ public class ForeignKey implements Cloneable
     /**
      * Creates a new foreign key object.
      * 
-     * @param name The name of the foreignkey
+     * @param name The name of the foreign key
      */
     public ForeignKey(String name)
     {
-        this.name = name;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
-    public Object clone() throws CloneNotSupportedException
-    {
-        ForeignKey result = new ForeignKey();
-
-        result.foreignTable = foreignTable;
-        result.references   = (ArrayList)references.clone();
-        return result;
+        _name = name;
     }
 
     /**
@@ -66,42 +61,128 @@ public class ForeignKey implements Cloneable
      */
     public String getName()
     {
-        return name;
+        return _name;
     }
-    
-    public String getForeignTable()
+
+    /**
+     * Sets the name of this foreign key.
+     * 
+     * @param name The name
+     */
+    public void setName(String name)
     {
-        return foreignTable;
+        _name = name;
     }
-    
-    public void setForeignTable(String foreignTable)
+
+    /**
+     * Returns the foreign table.
+     *
+     * @return The foreign table
+     */
+    public Table getForeignTable()
     {
-        this.foreignTable= foreignTable;
+        return _foreignTable;
+    }
+
+    /**
+     * Sets the foreign table.
+     *
+     * @param foreignTable The foreign table
+     */
+    public void setForeignTable(Table foreignTable)
+    {
+        _foreignTable     = foreignTable;
+        _foreignTableName = (foreignTable == null ? null : foreignTable.getName());
+    }
+
+    /**
+     * Returns the name of the foreign table.
+     * 
+     * @return The table name
+     */
+    public String getForeignTableName()
+    {
+        return _foreignTableName;
     }
     
+    /**
+     * Sets the name of the foreign table. Please note that you should not use this method
+     * when manually constructing or manipulating the database model. Rather utilize the
+     * {@link #setForeignTable(Table)} method.
+     * 
+     * @param foreignTableName The table name
+     */
+    public void setForeignTableName(String foreignTableName)
+    {
+        if ((_foreignTable != null) && !_foreignTable.getName().equals(foreignTableName))
+        {
+            _foreignTable = null;
+        }
+        _foreignTableName = foreignTableName;
+    }
+
+    /**
+     * Adds a reference, ie. a mapping between a local column (in the table that owns this foreign key)
+     * and a remote column.
+     * 
+     * @param reference The reference to add
+     */
     public void addReference(Reference reference)
     {
-        references.add(reference);
+        _references.add(reference);
     }
-    
+
+    /**
+     * Returns the references.
+     * 
+     * @return The references
+     */
     public List getReferences()
     {
-        return references;
+        return _references;
     }
 
-    public Reference firstReference() {
-        return (Reference) (references.size() == 0 ? null : references.get(0));
+    /**
+     * Returns the indicated reference.
+     * 
+     * @param idx The index
+     * @return The reference
+     */
+    public Reference getReference(int idx)
+    {
+        return (Reference)_references.get(idx);
     }
 
-    public boolean equals(Object o) {
-        boolean result = o != null && getClass().equals(o.getClass());
-        if ( result ) {
-            ForeignKey fk = (ForeignKey) o;
-            result = this.foreignTable.equalsIgnoreCase(fk.foreignTable) && this.references.size() == fk.references.size();
-            if ( result ) {
+    /**
+     * Returns the first reference if it exists.
+     * 
+     * @return The first reference
+     */
+    public Reference getFirstReference()
+    {
+        return (Reference)(_references.isEmpty() ? null : _references.get(0));
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object other)
+    {
+        boolean result = (other != null) && getClass().equals(other.getClass());
+
+        if (result)
+        {
+            ForeignKey fk = (ForeignKey) other;
+
+            result = _foreignTableName.equals(fk._foreignTableName) &&
+                     (_references.size() == fk._references.size());
+
+            if (result)
+            {
                 //check all references - need to ensure order is same for valid comparison
-                List copyThis = (List) this.references.clone();
-                List copyThat = (List) fk.references.clone();
+                List copyThis = (List)_references.clone();
+                List copyThat = (List)fk._references.clone();
+
                 Collections.sort(copyThis);
                 Collections.sort(copyThat);
                 result = copyThis.equals(copyThat);
@@ -109,9 +190,25 @@ public class ForeignKey implements Cloneable
         }
         return result;
     }
-    
-    public String toString() {
-        return "ForeignKey[" + this.foreignTable + "]";
-        //TODO show references
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    public String toString()
+    {
+        //TODO show name and references
+        return "ForeignKey[" + _foreignTableName + "]";
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        ForeignKey result = new ForeignKey(_name);
+
+        result._foreignTableName = _foreignTableName;
+        result._references       = (ArrayList)_references.clone();
+        return result;
     }
 }

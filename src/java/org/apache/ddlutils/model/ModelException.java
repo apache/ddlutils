@@ -1,4 +1,4 @@
-package org.apache.ddlutils;
+package org.apache.ddlutils.model;
 
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
@@ -16,21 +16,20 @@ package org.apache.ddlutils;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.DdlUtilsException;
 
 /**
- * Is thrown when by the {@link org.apache.ddlutils.dynabean.DynaSql} and
- * related classes when a database operation fails, but a normal
- * {@link java.sql.SQLException} cannot be generated.
+ * Indicates a model error.
  */
-public class DynaSqlException extends DdlUtilsException 
+public class ModelException extends DdlUtilsException 
 {
     /** Constant for serializing instances of this class */
-    private static final long serialVersionUID = 7524362294381844776L;
-
+    private static final long serialVersionUID = -694578915559780711L;
+    
     /**
      * Creates a new empty exception object.
      */
-    public DynaSqlException()
+    public ModelException()
     {
         super();
     }
@@ -40,7 +39,7 @@ public class DynaSqlException extends DdlUtilsException
      * 
      * @param msg The exception message
      */
-    public DynaSqlException(String msg)
+    public ModelException(String msg)
     {
         super(msg);
     }
@@ -50,7 +49,7 @@ public class DynaSqlException extends DdlUtilsException
      * 
      * @param baseEx The base exception
      */
-    public DynaSqlException(Throwable baseEx)
+    public ModelException(Throwable baseEx)
     {
         super(baseEx);
     }
@@ -61,7 +60,7 @@ public class DynaSqlException extends DdlUtilsException
      * @param msg    The exception message
      * @param baseEx The base exception
      */
-    public DynaSqlException(String msg, Throwable baseEx)
+    public ModelException(String msg, Throwable baseEx)
     {
         super(msg, baseEx);
     }

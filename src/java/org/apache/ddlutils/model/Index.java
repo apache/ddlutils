@@ -16,58 +16,53 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
-
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
-public class Index implements Cloneable
+/**
+ * Represents an index definition for a table which may be either unique or non-unique.
+ */
+public interface Index extends Cloneable, Serializable
 {
-    protected String    name;
-    protected ArrayList indexColumns = new ArrayList();
-    protected boolean   unique       = false;
-
-    public Index() {}
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * Determines whether this index is unique or not.
+     * 
+     * @return <code>true</code> if the index is an unique one
      */
-    public Object clone() throws CloneNotSupportedException
-    {
-        Index result = new Index();
+    public boolean isUnique();
 
-        result.name         = name;
-        result.indexColumns = (ArrayList)indexColumns.clone();
-        result.unique       = unique;
-        return result;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
+    /**
+     * Returns the name of the index.
+     * 
+     * @return The name
+     */
+    public String getName();
     
-    public void setName(String name)
-    {
-        if ( name == null ) throw new IllegalArgumentException("Null index name");
-        this.name = name;
-    }
-    
-    public void addIndexColumn(IndexColumn indexColumn)
-    {
-        indexColumns.add(indexColumn);
-    }
-    
-    public List getIndexColumns()
-    {
-        return indexColumns;
-    }
+    /**
+     * Sets the name of the index.
+     * 
+     * @param name The name
+     */
+    public void setName(String name);
 
-    public boolean isUnique() {
-        return unique;
-    }
+    /**
+     * Adds a column that makes up this index.
+     * @param column
+     */
+    public void addColumn(IndexColumn column);
 
-    public void setUnique(boolean unique) {
-        this.unique = unique;
-    }
+    /**
+     * Returns the indicated column making up this index.
+     * 
+     * @param idx The index of the column
+     * @return The column
+     */
+    public IndexColumn getColumn(int idx);
 
+    /**
+     * Returns the columns that make up this index.
+     * 
+     * @return The columns
+     */
+    public List getColumns();
 }

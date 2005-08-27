@@ -17,14 +17,12 @@ package org.apache.ddlutils.dynabean;
  */
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.beanutils.BasicDynaClass;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -46,13 +44,17 @@ public class SqlDynaClass extends BasicDynaClass {
     /**
      * Creates a new SqlDynaClass instance from a Table model.
      */
-    public static SqlDynaClass newInstance(Table table) {
+    public static SqlDynaClass newInstance(Table table)
+    {
         List properties = new ArrayList();
-        for (Iterator iter = table.getColumns().iterator(); iter.hasNext(); ) {
-            Column column = (Column) iter.next();
-            properties.add( new SqlDynaProperty(column));
+
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
+        {
+            properties.add(new SqlDynaProperty(table.getColumn(idx)));
         }
+
         SqlDynaProperty[] array = new SqlDynaProperty[properties.size()];
+
         properties.toArray(array);
         return new SqlDynaClass(table, array);
     }

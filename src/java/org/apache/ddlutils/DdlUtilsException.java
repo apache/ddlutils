@@ -16,21 +16,20 @@ package org.apache.ddlutils;
  * limitations under the License.
  */
 
+import org.apache.commons.lang.exception.NestableRuntimeException;
 
 /**
- * Is thrown when by the {@link org.apache.ddlutils.dynabean.DynaSql} and
- * related classes when a database operation fails, but a normal
- * {@link java.sql.SQLException} cannot be generated.
+ * Base class for DdlUtils exceptions
  */
-public class DynaSqlException extends DdlUtilsException 
+public class DdlUtilsException extends NestableRuntimeException 
 {
     /** Constant for serializing instances of this class */
-    private static final long serialVersionUID = 7524362294381844776L;
+    private static final long serialVersionUID = 5624776387174310551L;
 
     /**
      * Creates a new empty exception object.
      */
-    public DynaSqlException()
+    public DdlUtilsException()
     {
         super();
     }
@@ -40,7 +39,7 @@ public class DynaSqlException extends DdlUtilsException
      * 
      * @param msg The exception message
      */
-    public DynaSqlException(String msg)
+    public DdlUtilsException(String msg)
     {
         super(msg);
     }
@@ -50,7 +49,7 @@ public class DynaSqlException extends DdlUtilsException
      * 
      * @param baseEx The base exception
      */
-    public DynaSqlException(Throwable baseEx)
+    public DdlUtilsException(Throwable baseEx)
     {
         super(baseEx);
     }
@@ -61,7 +60,7 @@ public class DynaSqlException extends DdlUtilsException
      * @param msg    The exception message
      * @param baseEx The base exception
      */
-    public DynaSqlException(String msg, Throwable baseEx)
+    public DdlUtilsException(String msg, Throwable baseEx)
     {
         super(msg, baseEx);
     }

@@ -110,9 +110,9 @@ public class DataWriter
         Table        table     = dynaClass.getTable();
 
         _output.println("  <" + table.getName());
-        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
-            Column column = (Column)it.next();
+            Column column = table.getColumn(idx);
             Object value  = bean.get(column.getName());
 
             if (value != null)

@@ -147,17 +147,17 @@ public class DataToDatabaseSink implements DataSink
         // lists of already-processed identities for these tables
         _processedIdentities.clear();
         _waitingObjects.clear();
-        for (Iterator tableIt = _model.getTables().iterator(); tableIt.hasNext();)
+        for (int tableIdx = 0; tableIdx < _model.getTableCount(); tableIdx++)
         {
-            Table curTable = (Table)tableIt.next();
+            Table table = _model.getTable(tableIdx);
 
-            for (Iterator fkIt = curTable.getForeignKeys().iterator(); fkIt.hasNext();)
+            for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
             {
-                ForeignKey curFk = (ForeignKey)fkIt.next();
+                ForeignKey curFk = table.getForeignKey(fkIdx);
 
-                if (!_processedIdentities.containsKey(curFk.getForeignTable()))
+                if (!_processedIdentities.containsKey(curFk.getForeignTableName()))
                 {
-                    _processedIdentities.put(curFk.getForeignTable(), new HashSet());
+                    _processedIdentities.put(curFk.getForeignTableName(), new HashSet());
                 }
             }
         }
@@ -178,18 +178,18 @@ public class DataToDatabaseSink implements DataSink
     {
         Table table = _model.getDynaClassFor(bean).getTable();
 
-        if (!table.getForeignKeys().isEmpty())
+        if (table.getForeignKeyCount() > 0)
         {
             WaitingObject waitingObj = new WaitingObject(bean);
 
-            for (Iterator fkIt = table.getForeignKeys().iterator(); fkIt.hasNext();)
+            for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
             {
-                ForeignKey fk         = (ForeignKey)fkIt.next();
+                ForeignKey fk         = table.getForeignKey(idx);
                 Identity   fkIdentity = buildIdentityFromFK(table, fk, bean);
 
                 if (fkIdentity != null)
                 {
-                    HashSet identitiesForTable = (HashSet)_processedIdentities.get(fk.getForeignTable());
+                    HashSet identitiesForTable = (HashSet)_processedIdentities.get(fk.getForeignTableName());
     
                     if (!identitiesForTable.contains(fkIdentity))
                     {
@@ -303,20 +303,20 @@ public class DataToDatabaseSink implements DataSink
             {
                 Reference ref = (Reference)it.next();
                 
-                result.append(ref.getLocal());
+                result.append(ref.getLocalColumnName());
                 if (it.hasNext())
                 {
                     result.append(",");
                 }
             }
             result.append("]->");
-            result.append(fk.getForeignTable());
+            result.append(fk.getForeignTableName());
             result.append("[");
             for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
             {
                 Reference ref = (Reference)it.next();
                 
-                result.append(ref.getForeign());
+                result.append(ref.getForeignColumnName());
                 if (it.hasNext())
                 {
                     result.append(",");
@@ -339,9 +339,9 @@ public class DataToDatabaseSink implements DataSink
     {
         Identity identity = new Identity(table.getName());
 
-        for (Iterator it = table.getPrimaryKeyColumns().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
-            Column column = (Column)it.next();
+            Column column = table.getColumn(idx);
 
             identity.setIdentityColumn(column.getName(), bean.get(column.getName()));
         }
@@ -359,18 +359,18 @@ public class DataToDatabaseSink implements DataSink
      */
     private Identity buildIdentityFromFK(Table owningTable, ForeignKey fk, DynaBean bean)
     {
-        Identity identity = new Identity(fk.getForeignTable(), getFKName(owningTable, fk));
+        Identity identity = new Identity(fk.getForeignTableName(), getFKName(owningTable, fk));
 
         for (Iterator refIt = fk.getReferences().iterator(); refIt.hasNext();)
         {
             Reference reference = (Reference)refIt.next();
-            Object    value     = bean.get(reference.getLocal());
+            Object    value     = bean.get(reference.getLocalColumnName());
 
             if (value == null)
             {
                 return null;
             }
-            identity.setIdentityColumn(reference.getForeign(), value);
+            identity.setIdentityColumn(reference.getForeignColumnName(), value);
         }
         return identity;
     }
@@ -389,11 +389,11 @@ public class DataToDatabaseSink implements DataSink
         Table      targetTable = ((SqlDynaClass)referencedBean.getDynaClass()).getTable();
         ForeignKey fk          = null;
 
-        for (Iterator it = sourceTable.getForeignKeys().iterator(); it.hasNext();)
+        for (int idx = 0; idx < sourceTable.getForeignKeyCount(); idx++)
         {
-            ForeignKey curFk = (ForeignKey)it.next();
+            ForeignKey curFk = sourceTable.getForeignKey(idx);
 
-            if (curFk.getForeignTable().equalsIgnoreCase(targetTable.getName()))
+            if (curFk.getForeignTableName().equalsIgnoreCase(targetTable.getName()))
             {
                 if (fkName.equals(getFKName(sourceTable, curFk)))
                 {
@@ -407,8 +407,8 @@ public class DataToDatabaseSink implements DataSink
             for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
             {
                 Reference curRef       = (Reference)it.next();
-                Column    sourceColumn = sourceTable.findColumn(curRef.getLocal());
-                Column    targetColumn = targetTable.findColumn(curRef.getForeign());
+                Column    sourceColumn = sourceTable.findColumn(curRef.getLocalColumnName());
+                Column    targetColumn = targetTable.findColumn(curRef.getForeignColumnName());
 
                 referencingBean.set(sourceColumn.getName(), referencedBean.get(targetColumn.getName()));
             }

@@ -18,7 +18,6 @@ package org.apache.ddlutils.builder;
 
 import java.io.IOException;
 import java.sql.Types;
-import java.util.Iterator;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
@@ -60,9 +59,9 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     public void createTable(Database database, Table table) throws IOException
     {
-        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
-            Column column = (Column)it.next();
+            Column column = table.getColumn(idx);
 
             if (column.isAutoIncrement())
             {

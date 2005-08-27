@@ -38,6 +38,8 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.UniqueIndex;
+import org.apache.ddlutils.model.NonUniqueIndex;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
@@ -165,7 +167,7 @@ public class JdbcModelReader
                     table.setType(getValueAsString(tableData, "TABLE_TYPE", availableColumns, "UNKNOWN"));
                     table.setCatalog(getValueAsString(tableData, "TABLE_CAT", availableColumns, null));
                     table.setSchema(getValueAsString(tableData, "TABLE_SCHEM", availableColumns, null));
-                    table.setRemarks(getValueAsString(tableData, "REMARKS", availableColumns, ""));
+                    table.setDescription(getValueAsString(tableData, "REMARKS", availableColumns, ""));
                     tables.add(table);
                 }
             }
@@ -329,13 +331,13 @@ public class JdbcModelReader
                         fks.add(currFk);
                     }
                     currFk = new ForeignKey(getValueAsString(fkData, "FK_NAME", availableColumns, null));
-                    currFk.setForeignTable(pkTable);
+                    currFk.setForeignTableName(pkTable);
                     prevPkTable = pkTable;
                 }
                 Reference ref = new Reference();
 
-                ref.setForeign(getValueAsString(fkData, "PKCOLUMN_NAME", availableColumns, null));
-                ref.setLocal(getValueAsString(fkData, "FKCOLUMN_NAME", availableColumns, null));
+                ref.setForeignColumnName(getValueAsString(fkData, "PKCOLUMN_NAME", availableColumns, null));
+                ref.setLocalColumnName(getValueAsString(fkData, "FKCOLUMN_NAME", availableColumns, null));
                 currFk.addReference(ref);
             }
             if (currFk != null)
@@ -378,15 +380,22 @@ public class JdbcModelReader
 
             while (indexData.next())
             {
-                String indexName = getValueAsString(indexData, "INDEX_NAME", availableColumns, null);
-                Index  index     = (Index)indicesByName.get(indexName);
+                String  indexName = getValueAsString(indexData, "INDEX_NAME", availableColumns, null);
+                boolean isUnique  = !getValueAsBoolean(indexData, "NON_UNIQUE", availableColumns, true);
+                Index   index     = (Index)indicesByName.get(indexName);
 
                 if ((index == null) && (indexName != null))
                 {
-                    index = new Index();
+                    if (isUnique)
+                    {
+                        index = new UniqueIndex();
+                    }
+                    else
+                    {
+                        index = new NonUniqueIndex();
+                    }
 
                     index.setName(indexName);
-                    index.setUnique(!getValueAsBoolean(indexData, "NON_UNIQUE", availableColumns, true));
                     indicesByName.put(indexName, index);
                 }
                 if (index != null)
@@ -394,7 +403,7 @@ public class JdbcModelReader
                     IndexColumn ic = new IndexColumn();
 
                     ic.setName(getValueAsString(indexData, "COLUMN_NAME", availableColumns, null));
-                    index.addIndexColumn(ic);
+                    index.addColumn(ic);
                 }
             }
             indices.addAll(indicesByName.values());

@@ -16,12 +16,11 @@ package org.apache.ddlutils.task;
  * limitations under the License.
  */
 
-import java.beans.IntrospectionException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.ddlutils.io.DatabaseReader;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
@@ -125,17 +124,9 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
      */
     private Database readSchemaFiles()
     {
-        DatabaseReader reader = null;
+        DatabaseIO reader = new DatabaseIO();
         Database       model  = null;
 
-        try
-        {
-            reader = new DatabaseReader();
-        }
-        catch (IntrospectionException ex)
-        {
-            throw new BuildException(ex);
-        }
         if ((_singleSchemaFile != null) && !_fileSets.isEmpty())
         {
             throw new BuildException("Please use either the schemafile attribute or the sub fileset element, but not both");
@@ -185,7 +176,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
      * @param schemaFile The schema file
      * @return The model
      */
-    private Database readSingleSchemaFile(DatabaseReader reader, File schemaFile)
+    private Database readSingleSchemaFile(DatabaseIO reader, File schemaFile)
     {
         Database model = null;
 
@@ -201,7 +192,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
         {
             try
             {
-                model = (Database)reader.parse(schemaFile);
+                model = reader.read(schemaFile);
                 log("Read schema file "+schemaFile.getAbsolutePath(), Project.MSG_INFO);
             }
             catch (Exception ex)

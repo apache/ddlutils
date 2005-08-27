@@ -24,7 +24,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -252,9 +251,9 @@ public abstract class SqlBuilder
             dropTables(database);
         }
 
-        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
+        for (int idx = 0; idx < database.getTableCount(); idx++)
         {
-            Table table = (Table)it.next();
+            Table table = database.getTable(idx);
 
             writeTableComment(table);
             createTable(database, table);
@@ -292,9 +291,9 @@ public abstract class SqlBuilder
     {
         ArrayList newTables = new ArrayList();
 
-        for (Iterator tableIt = desiredModel.getTables().iterator(); tableIt.hasNext();)
+        for (int tableIdx = 0; tableIdx < desiredModel.getTableCount(); tableIdx++)
         {
-            Table desiredTable = (Table)tableIt.next();
+            Table desiredTable = desiredModel.getTable(tableIdx);
             Table currentTable = currentModel.findTable(desiredTable.getName());
 
             if (currentTable == null)
@@ -309,9 +308,9 @@ public abstract class SqlBuilder
             }
             else
             {
-                for (Iterator columnIt = desiredTable.getColumns().iterator(); columnIt.hasNext();)
+                for (int columnIdx = 0; columnIdx < desiredTable.getColumnCount(); columnIdx++)
                 {
-                    Column desiredColumn = (Column)columnIt.next();
+                    Column desiredColumn = desiredTable.getColumn(columnIdx);
                     Column currentColumn = currentTable.findColumn(desiredColumn.getName());
 
                     if (null == currentColumn)
@@ -348,8 +347,9 @@ public abstract class SqlBuilder
                 }
 
                 // add fk constraints
-                for (Iterator fkIt = desiredTable.getForeignKeys().iterator(); fkIt.hasNext();) {
-                    ForeignKey desiredFk = (ForeignKey) fkIt.next();
+                for (int fkIdx = 0; fkIdx < desiredTable.getForeignKeyCount(); fkIdx++)
+                {
+                    ForeignKey desiredFk = desiredTable.getForeignKey(fkIdx);
                     ForeignKey currentFk = currentTable.findForeignKey(desiredFk);
                     if ( currentFk == null ) {
                         if (_log.isInfoEnabled())
@@ -362,9 +362,9 @@ public abstract class SqlBuilder
 
                 // TODO: should we check the index fields for differences?
                 //create new indexes
-                for (Iterator indexIt = desiredTable.getIndexes().iterator(); indexIt.hasNext();)
+                for (int indexIdx = 0; indexIdx < desiredTable.getIndexCount(); indexIdx++)
                 {
-                    Index desiredIndex = (Index)indexIt.next();
+                    Index desiredIndex = desiredTable.getIndex(indexIdx);
                     Index currentIndex = currentTable.findIndex(desiredIndex.getName());
 
                     if (null == currentIndex)
@@ -378,8 +378,9 @@ public abstract class SqlBuilder
                 }
 
                 // drop fk constraints
-                for (Iterator fkIt = currentTable.getForeignKeys().iterator(); fkIt.hasNext();) {
-                    ForeignKey currentFk = (ForeignKey) fkIt.next();
+                for (int fkIdx = 0; fkIdx < currentTable.getForeignKeyCount(); fkIdx++)
+                {
+                    ForeignKey currentFk = currentTable.getForeignKey(fkIdx);
                     ForeignKey desiredFk = desiredTable.findForeignKey(currentFk);
 
                     if ( desiredFk == null ) {
@@ -395,9 +396,9 @@ public abstract class SqlBuilder
 
 
                 //Drop columns
-                for (Iterator columnIt = currentTable.getColumns().iterator(); columnIt.hasNext();)
+                for (int columnIdx = 0; columnIdx < currentTable.getColumnCount(); columnIdx++)
                 {
-                    Column currentColumn = (Column)columnIt.next();
+                    Column currentColumn = currentTable.getColumn(columnIdx);
                     Column desiredColumn = desiredTable.findColumn(currentColumn.getName());
 
                     if (null == desiredColumn)
@@ -424,9 +425,9 @@ public abstract class SqlBuilder
                 }
 
                 //Drop indexes
-                for (Iterator indexIt = currentTable.getIndexes().iterator(); indexIt.hasNext();)
+                for (int indexIdx = 0; indexIdx < currentTable.getIndexCount(); indexIdx++)
                 {
-                    Index currentIndex = (Index)indexIt.next();
+                    Index currentIndex = currentTable.getIndex(indexIdx);
                     Index desiredIndex = desiredTable.findIndex(currentIndex.getName());
 
                     if (null == desiredIndex)
@@ -434,7 +435,7 @@ public abstract class SqlBuilder
                         // make sure this isn't the primary key index
                         boolean  isPk = true;
 
-                        for (Iterator columnIt = currentIndex.getIndexColumns().iterator(); columnIt.hasNext();)
+                        for (Iterator columnIt = currentIndex.getColumns().iterator(); columnIt.hasNext();)
                         {
                             IndexColumn indexColumn = (IndexColumn)columnIt.next();
                             Column      column      = currentTable.findColumn(indexColumn.getName());
@@ -470,9 +471,9 @@ public abstract class SqlBuilder
         }
 
         // check for table drops
-        for (Iterator tableIt = currentModel.getTables().iterator(); tableIt.hasNext();)
+        for (int idx = 0; idx < currentModel.getTableCount(); idx++)
         {
-            Table currentTable = (Table)tableIt.next();
+            Table currentTable = currentModel.getTable(idx);
             Table desiredTable = desiredModel.findTable(currentTable.getName());
 
             if ((desiredTable == null) && (currentTable.getName() != null) && (currentTable.getName().length() > 0))
@@ -547,9 +548,9 @@ public abstract class SqlBuilder
      */
     public void createExternalForeignKeys(Database database) throws IOException
     {
-        for (Iterator it = database.getTables().iterator(); it.hasNext(); )
+        for (int idx = 0; idx < database.getTableCount(); idx++)
         {
-            createExternalForeignKeys(database, (Table)it.next());
+            createExternalForeignKeys(database, database.getTable(idx));
         }
     }
 
@@ -563,11 +564,9 @@ public abstract class SqlBuilder
     {
         if (!getPlatformInfo().isForeignKeysEmbedded())
         {
-            int numKey = 1;
-
-            for (Iterator it = table.getForeignKeys().iterator(); it.hasNext(); numKey++)
+            for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
             {
-                writeExternalForeignKeyCreateStmt(database, table, (ForeignKey)it.next());
+                writeExternalForeignKeyCreateStmt(database, table, table.getForeignKey(idx));
             }
         }
     }
@@ -579,12 +578,10 @@ public abstract class SqlBuilder
      */
     public void dropTables(Database database) throws IOException
     {
-        List tables = database.getTables();
-
         // we're dropping the external foreignkeys first
-        for (int idx = tables.size() - 1; idx >= 0; idx--)
+        for (int idx = database.getTableCount() - 1; idx >= 0; idx--)
         {
-            Table table = (Table)tables.get(idx);
+            Table table = database.getTable(idx);
 
             if ((table.getName() != null) &&
                 (table.getName().length() > 0))
@@ -597,9 +594,9 @@ public abstract class SqlBuilder
         // TODO: It might be more useful to either (or both)
         //       * determine an order in which the tables can be dropped safely (via the foreignkeys)
         //       * alter the tables first to drop the internal foreignkeys
-        for (int idx = tables.size() - 1; idx >= 0; idx--)
+        for (int idx = database.getTableCount() - 1; idx >= 0; idx--)
         {
-            Table table = (Table)tables.get(idx);
+            Table table = database.getTable(idx);
 
             if ((table.getName() != null) &&
                 (table.getName().length() > 0))
@@ -631,11 +628,9 @@ public abstract class SqlBuilder
     {
         if (!getPlatformInfo().isForeignKeysEmbedded())
         {
-            int numKey = 1;
-
-            for (Iterator it = table.getForeignKeys().iterator(); it.hasNext(); numKey++)
+            for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
             {
-                writeExternalForeignKeyDropStmt(table, (ForeignKey)it.next());
+                writeExternalForeignKeyDropStmt(table, table.getForeignKey(idx));
             }
         }
     }
@@ -659,9 +654,9 @@ public abstract class SqlBuilder
         buffer.append(getTableName(table));
         buffer.append(" (");
 
-        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
-            Column column = (Column)it.next();
+            Column column = table.getColumn(idx);
 
             if (columnValues.containsKey(column.getName()))
             {
@@ -690,9 +685,9 @@ public abstract class SqlBuilder
         else
         {
             addComma = false;
-            for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+            for (int idx = 0; idx < table.getColumnCount(); idx++)
             {
-                Column column = (Column)it.next();
+                Column column = table.getColumn(idx);
 
                 if (columnValues.containsKey(column.getName()))
                 {
@@ -729,9 +724,9 @@ public abstract class SqlBuilder
         buffer.append(getTableName(table));
         buffer.append(" SET ");
 
-        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
-            Column column = (Column)it.next();
+            Column column = table.getColumn(idx);
 
             if (!column.isPrimaryKey() && columnValues.containsKey(column.getName()))
             {
@@ -754,9 +749,9 @@ public abstract class SqlBuilder
         }
         buffer.append(" WHERE ");
         addSep = false;
-        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
-            Column column = (Column)it.next();
+            Column column = table.getColumn(idx);
 
             if (column.isPrimaryKey() && columnValues.containsKey(column.getName()))
             {
@@ -922,11 +917,11 @@ public abstract class SqlBuilder
      */
     protected void writeColumns(Table table) throws IOException
     {
-        for (Iterator it = table.getColumns().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
             printIndent();
-            writeColumn(table, (Column)it.next());
-            if (it.hasNext())
+            writeColumn(table, table.getColumn(idx));
+            if (idx < table.getColumnCount() - 1)
             {
                 println(",");
             }
@@ -1195,7 +1190,7 @@ public abstract class SqlBuilder
     protected String getForeignKeyName(ForeignKey fk) {
         //table and local column should be sufficient - is it possible for one
         //column to reference multiple tables
-        return fk.firstReference().getLocal() + "_" + fk.getForeignTable();
+        return fk.getFirstReference().getLocalColumnName() + "_" + fk.getForeignTableName();
     }
 
     /**
@@ -1234,9 +1229,9 @@ public abstract class SqlBuilder
      */
     protected void writeEmbeddedPrimaryKeysStmt(Table table) throws IOException
     {
-        List primaryKeyColumns = table.getPrimaryKeyColumns();
+        Column[] primaryKeyColumns = table.getPrimaryKeyColumns();
 
-        if (!primaryKeyColumns.isEmpty() && shouldGeneratePrimaryKeys(primaryKeyColumns))
+        if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
         {
             println(",");
             printIndent();
@@ -1251,9 +1246,9 @@ public abstract class SqlBuilder
      */
     protected void writeExternalPrimaryKeysCreateStmt(Table table) throws IOException
     {
-        List primaryKeyColumns = table.getPrimaryKeyColumns();
+        Column[] primaryKeyColumns = table.getPrimaryKeyColumns();
 
-        if (!primaryKeyColumns.isEmpty() && shouldGeneratePrimaryKeys(primaryKeyColumns))
+        if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
         {
             print("ALTER TABLE ");
             println(getTableName(table));
@@ -1275,11 +1270,11 @@ public abstract class SqlBuilder
      * @param primaryKeyColumns The pk columns
      * @return <code>true</code> if a pk statement should be generated for the columns
      */
-    protected boolean shouldGeneratePrimaryKeys(List primaryKeyColumns)
+    protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
     {
-        for (Iterator it = primaryKeyColumns.iterator(); it.hasNext();)
+        for (int idx = 0; idx < primaryKeyColumns.length; idx++)
         {
-            if (!((Column)it.next()).isAutoIncrement())
+            if (!primaryKeyColumns[idx].isAutoIncrement())
             {
                 return true;
             }
@@ -1293,13 +1288,13 @@ public abstract class SqlBuilder
      * @param table             The table
      * @param primaryKeyColumns The primary columns
      */
-    protected void writePrimaryKeyStmt(Table table, List primaryKeyColumns) throws IOException
+    protected void writePrimaryKeyStmt(Table table, Column[] primaryKeyColumns) throws IOException
     {
         print("PRIMARY KEY (");
-        for (Iterator it = primaryKeyColumns.iterator(); it.hasNext();)
+        for (int idx = 0; idx < primaryKeyColumns.length; idx++)
         {
-            print(getColumnName((Column)it.next()));
-            if (it.hasNext())
+            print(getColumnName(primaryKeyColumns[idx]));
+            if (idx < primaryKeyColumns.length - 1)
             {
                 print(", ");
             }
@@ -1326,9 +1321,9 @@ public abstract class SqlBuilder
      */
     protected void writeExternalIndicesCreateStmt(Table table) throws IOException
     {
-        for (Iterator it = table.getIndexes().iterator(); it.hasNext();)
+        for (int idx = 0; idx < table.getIndexCount(); idx++)
         {
-            writeExternalIndexCreateStmt(table, (Index)it.next());
+            writeExternalIndexCreateStmt(table, table.getIndex(idx));
         }
     }
 
@@ -1367,7 +1362,7 @@ public abstract class SqlBuilder
             print(getTableName(table));
             print(" (");
 
-            for (Iterator it = index.getIndexColumns().iterator(); it.hasNext();)
+            for (Iterator it = index.getColumns().iterator(); it.hasNext();)
             {
                 IndexColumn idxColumn = (IndexColumn)it.next();
 
@@ -1419,13 +1414,11 @@ public abstract class SqlBuilder
      */
     protected void writeEmbeddedForeignKeysStmt(Database database, Table table) throws IOException
     {
-        int numKey = 1;
-
-        for (Iterator it = table.getForeignKeys().iterator(); it.hasNext(); numKey++)
+        for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
         {
-            ForeignKey key = (ForeignKey)it.next();
+            ForeignKey key = table.getForeignKey(idx);
 
-            if (key.getForeignTable() == null)
+            if (key.getForeignTableName() == null)
             {
                 _log.warn("Foreign key table is null for key " + key);
             }
@@ -1437,13 +1430,13 @@ public abstract class SqlBuilder
                 if (getPlatformInfo().isEmbeddedForeignKeysNamed())
                 {
                     print("CONSTRAINT ");
-                    print(getConstraintName(null, table, "FK", Integer.toString(numKey)));
+                    print(getConstraintName(null, table, "FK", Integer.toString(idx)));
                     print(" ");
                 }
                 print("FOREIGN KEY (");
                 writeLocalReferences(key);
                 print(") REFERENCES ");
-                print(getTableName(database.findTable(key.getForeignTable())));
+                print(getTableName(database.findTable(key.getForeignTableName())));
                 print(" (");
                 writeForeignReferences(key);
                 print(")");
@@ -1461,7 +1454,7 @@ public abstract class SqlBuilder
      */
     protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
     {
-        if (key.getForeignTable() == null)
+        if (key.getForeignTableName() == null)
         {
             _log.warn("Foreign key table is null for key " + key);
         }
@@ -1474,7 +1467,7 @@ public abstract class SqlBuilder
             print(" FOREIGN KEY (");
             writeLocalReferences(key);
             print(") REFERENCES ");
-            print(getTableName(database.findTable(key.getForeignTable())));
+            print(getTableName(database.findTable(key.getForeignTableName())));
             print(" (");
             writeForeignReferences(key);
             print(")");
@@ -1491,7 +1484,7 @@ public abstract class SqlBuilder
     {
         for (Iterator it = key.getReferences().iterator(); it.hasNext();)
         {
-            print(((Reference)it.next()).getLocal());
+            print(((Reference)it.next()).getLocalColumnName());
             if (it.hasNext())
             {
                 print(", ");
@@ -1508,7 +1501,7 @@ public abstract class SqlBuilder
     {
         for (Iterator it = key.getReferences().iterator(); it.hasNext();)
         {
-            print(((Reference)it.next()).getForeign());
+            print(((Reference)it.next()).getForeignColumnName());
             if (it.hasNext())
             {
                 print(", ");

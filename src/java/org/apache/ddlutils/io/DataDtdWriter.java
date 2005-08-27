@@ -19,7 +19,6 @@ package org.apache.ddlutils.io;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Iterator;
 
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -47,12 +46,12 @@ public class DataDtdWriter
 
         writer.println("<!-- DTD for XML data files for database "+model.getName()+" -->\n");
         writer.println("<!ELEMENT data (");
-        for (Iterator tableIt = model.getTables().iterator(); tableIt.hasNext();)
+        for (int idx = 0; idx < model.getTableCount(); idx++)
         {
-            Table table = (Table)tableIt.next();
+            Table table = model.getTable(idx);
 
             writer.print("    "+table.getName());
-            if (tableIt.hasNext())
+            if (idx < model.getTableCount() - 1)
             {
                 writer.println(" |");
             }
@@ -62,9 +61,9 @@ public class DataDtdWriter
             }
         }
         writer.println(")*>");
-        for (Iterator tableIt = model.getTables().iterator(); tableIt.hasNext();)
+        for (int idx = 0; idx < model.getTableCount(); idx++)
         {
-            writeTableElement((Table)tableIt.next(), writer);
+            writeTableElement(model.getTable(idx), writer);
         }
     }
 
@@ -78,11 +77,10 @@ public class DataDtdWriter
     {
         writer.println("\n<!ELEMENT "+table.getName()+" EMPTY>");
         writer.println("<!ATTLIST "+table.getName());
-        for (Iterator columnIt = table.getColumns().iterator(); columnIt.hasNext();)
-        {
-            Column column = (Column)columnIt.next();
 
-            writeColumnAttributeEntry(column, writer);
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
+        {
+            writeColumnAttributeEntry(table.getColumn(idx), writer);
         }
         writer.println(">");
     }

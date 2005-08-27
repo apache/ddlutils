@@ -18,7 +18,6 @@ package org.apache.ddlutils.io;
 
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.apache.commons.digester.Digester;
 import org.apache.ddlutils.io.converters.DateConverter;
@@ -200,16 +199,16 @@ public class DataReader extends Digester
 
             rules.setCaseSensitive(isCaseSensitive());
             setRules(rules);
-            for (Iterator tableIt = _model.getTables().iterator(); tableIt.hasNext();)
+            for (int tableIdx = 0; tableIdx < _model.getTableCount(); tableIdx++)
             {
                 // TODO: For now we hardcode the root as 'data' but ultimately we should wildcard it ('?')
-                Table  table = (Table)tableIt.next();
+                Table  table = _model.getTable(tableIdx);
                 String path  = "data/"+table.getName();
     
                 addRule(path, new DynaSqlCreateRule(_model, table, _sink));
-                for (Iterator columnIt = table.getColumns().iterator(); columnIt.hasNext();)
+                for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
                 {
-                    Column           column    = (Column)columnIt.next();
+                    Column           column    = (Column)table.getColumn(columnIdx);
                     SqlTypeConverter converter = getRegisteredConverter(table, column);
     
                     addRule(path, new SetColumnPropertyRule(column, converter, isCaseSensitive()));

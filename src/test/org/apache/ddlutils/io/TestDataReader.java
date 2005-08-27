@@ -78,8 +78,8 @@ public class TestDataReader extends TestCase
 
     public void testRead() throws Exception
     {
-        DatabaseReader  modelReader = new DatabaseReader();
-        Database        model       = (Database)modelReader.parse(new StringReader(TEST_SCHEMA));
+        DatabaseIO  modelReader = new DatabaseIO();
+        Database        model       = modelReader.read(new StringReader(TEST_SCHEMA));
         final ArrayList readObjects = new ArrayList();
         DataReader      dataReader  = new DataReader();
 

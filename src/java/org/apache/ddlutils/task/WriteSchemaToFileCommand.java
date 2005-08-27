@@ -19,7 +19,7 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.io.FileWriter;
 
-import org.apache.ddlutils.io.DatabaseWriter;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -59,11 +59,10 @@ public class WriteSchemaToFileCommand implements Command
 
         try
         {
-            FileWriter     outputWriter = new FileWriter(_outputFile);
-            DatabaseWriter dbWriter     = new DatabaseWriter(outputWriter);
+            FileWriter outputWriter = new FileWriter(_outputFile);
+            DatabaseIO dbIO         = new DatabaseIO();
 
-            dbWriter.enablePrettyPrint();
-            dbWriter.write(model);
+            dbIO.write(model, outputWriter);
             outputWriter.close();
             task.log("Written schema to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);
         }

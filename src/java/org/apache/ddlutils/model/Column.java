@@ -18,8 +18,10 @@ package org.apache.ddlutils.model;
 
 public class Column implements Cloneable
 {
+    // TODO: Implement equals and hashcode
     private String name;
     private String javaName;
+    private String description;
     private boolean primaryKey = false;
     private boolean required = false;
     private boolean autoIncrement = false;
@@ -133,6 +135,26 @@ public class Column implements Cloneable
     public void setJavaName(String javaName)
     {
         this.javaName = javaName;
+    }
+
+    /**
+     * Returns the description.
+     *
+     * @return The description
+     */
+    public String getDescription()
+    {
+        return description;
+    }
+
+    /**
+     * Sets the description.
+     *
+     * @param description The description
+     */
+    public void setDescription(String description)
+    {
+        this.description = description;
     }
 
     public boolean isPrimaryKey()

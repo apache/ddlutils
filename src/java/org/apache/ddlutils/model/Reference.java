@@ -16,68 +16,177 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
-
+/**
+ * Represents a reference between a column in the local table and a column in another table. 
+ */
 public class Reference implements Cloneable, Comparable
 {
-    private String local;
-    private String foreign;
+    /** The local column */
+    private Column _localColumn;
+    /** The foreign column */
+    private Column _foreignColumn;
+    /** The name of the local column */
+    private String _localColumnName;
+    /** The name of the foreign column */
+    private String _foreignColumnName;
+
+    /**
+     * Creates a new, empty reference.
+     */
+    public Reference()
+    {}
+
+    /**
+     * Creates a new reference between the two given columns.
+     * 
+     * @param localColumn   The local column
+     * @param foreignColumn The remote column
+     */
+    public Reference(Column localColumn, Column foreignColumn)
+    {
+        setLocalColumn(localColumn);
+        setForeignColumn(foreignColumn);
+    }
+
+    /**
+     * Returns the local column.
+     *
+     * @return The local column
+     */
+    public Column getLocalColumn()
+    {
+        return _localColumn;
+    }
+
+    /**
+     * Sets the local column.
+     *
+     * @param localColumn The local column
+     */
+    public void setLocalColumn(Column localColumn)
+    {
+        _localColumn     = localColumn;
+        _localColumnName = (localColumn == null ? null : localColumn.getName());
+    }
+
+    /**
+     * Returns the foreign column.
+     *
+     * @return The foreign column
+     */
+    public Column getForeignColumn()
+    {
+        return _foreignColumn;
+    }
+
+    /**
+     * Sets the foreign column.
+     *
+     * @param foreignColumn The foreign column
+     */
+    public void setForeignColumn(Column foreignColumn)
+    {
+        _foreignColumn     = foreignColumn;
+        _foreignColumnName = (foreignColumn == null ? null : foreignColumn.getName());
+    }
+
+    /**
+     * Returns the name of the local column.
+     * 
+     * @return The column name
+     */
+    public String getLocalColumnName()
+    {
+        return _localColumnName;
+    }
+
+    /**
+     * Sets the name of the local column. Note that you should not use this method when
+     * manipulating the model manually. Rather use the {@link #setLocalColumn(Column)} method.
+     * 
+     * @param localColumnName The column name
+     */
+    public void setLocalColumnName(String localColumnName)
+    {
+        if ((_localColumn != null) && !_localColumn.getName().equals(localColumnName))
+        {
+            _localColumn = null;
+        }
+        _localColumnName = localColumnName;
+    }
     
-    public Reference() {}
+    /**
+     * Returns the name of the foreign column.
+     * 
+     * @return The column name
+     */
+    public String getForeignColumnName()
+    {
+        return _foreignColumnName;
+    }
+    
+    /**
+     * Sets the name of the remote column. Note that you should not use this method when
+     * manipulating the model manually. Rather use the {@link #setForeignColumn(Column)} method.
+     * 
+     * @param foreignColumnName The column name
+     */
+    public void setForeignColumnName(String foreignColumnName)
+    {
+        if ((_foreignColumn != null) && !_foreignColumn.getName().equals(foreignColumnName))
+        {
+            _foreignColumn = null;
+        }
+        _foreignColumnName = foreignColumnName;
+    }
 
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
     public Object clone() throws CloneNotSupportedException
     {
-        Reference result = new Reference();
-
-        result.local   = local;
-        result.foreign = foreign;
-        return result;
-    }
-
-    public String getLocal()
-    {
-        return local;
-    }
-    
-    public void setLocal(String local)
-    {
-        this.local = local;
-    }
-    
-    public String getForeign()
-    {
-        return foreign;
-    }
-    
-    public void setForeign(String foreign)
-    {
-        this.foreign = foreign;
-    }
-    
-    public boolean equals(Object o) {
-        boolean result = o != null && getClass().equals(o.getClass());
-        if ( result ) {
-            Reference ref = (Reference) o;
-            result = this.local.equalsIgnoreCase(ref.local) && this.foreign.equalsIgnoreCase(ref.foreign);
-        }
-        return result;
+        return new Reference(getLocalColumn(), getForeignColumn());
     }
 
     /* (non-Javadoc)
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
-    public int compareTo(Object o) {
-        Reference ref = (Reference) o;
-        int result = this.local.compareTo(ref.local);
-        if ( result == 0 ) {
-            result = this.foreign.compareTo(ref.foreign);
+    public int compareTo(Object other)
+    {
+        Reference ref = (Reference)other;
+
+        int result = getLocalColumnName().compareTo(ref.getLocalColumnName());
+
+        if (result == 0)
+        {
+            result = getForeignColumnName().compareTo(ref.getForeignColumnName());
         }
         return result;
     }
-    
-    public String toString() {
-        return "Reference[" + this.local + " to " + this.foreign + "]";
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object other)
+    {
+        boolean result = (other != null) && getClass().equals(other.getClass());
+
+        if (result)
+        {
+            Reference ref = (Reference) other;
+
+            // TODO: Compare the columns, not their names
+            result = getLocalColumnName().equals(ref.getLocalColumnName()) &&
+                     getForeignColumnName().equals(ref.getForeignColumnName());
+        }
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    public String toString()
+    {
+        return "Reference[" + getLocalColumnName() + " to " + getForeignColumnName() + "]";
     }
 }

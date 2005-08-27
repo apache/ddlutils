@@ -16,217 +16,415 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Models a table.
- *
- * @version $Id$
- * @author John Marshall/Connectria
- * @author Matthew Hawthorne
- */
-import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.list.PredicatedList;
 
-public class Table implements Cloneable
+/**
+ * Represents a table in the database model.
+ * 
+ * @version $Revision$
+ */
+public class Table implements Serializable, Cloneable
 {
-    private static final Predicate UNIQUE_PREDICATE = new Predicate() {
-        public boolean evaluate(Object input) {
-            return ((Index)input).isUnique();
-        }
-    };
+    /** Unique ID for serialization purposes */
+    private static final long serialVersionUID = -5541154961302342608L;
 
-    private String catalog = null;
+    /** The catalog of this table as read from the database */
+    private String _catalog = null;
+    /** The table's schema */
+    private String _schema = null;
+    /** The name */
+    private String _name = null;
+    /** A desription of the table */
+    private String _description = null;
+    /** The table's type as read from the database */
+    private String _type = null;
+    /** The columns in this table */
+    private ArrayList _columns = new ArrayList();
+    /** The foreign keys associated to this table */
+    private ArrayList _foreignKeys = new ArrayList();
+    /** The indices applied to this table */
+    private ArrayList _indices = new ArrayList();
 
-    private String name = null;
-
-    private String javaName = null;
-
-    private String schema = null;
-
-    private String remarks = null;
-
-    private String type = null;
-
-    private ArrayList columns = new ArrayList();
-
-    private ArrayList foreignKeys = new ArrayList();
-
-    private ArrayList indexes = new ArrayList();
-
-    public Table()
-    {
-    }
-
-    public String toString()
-    {
-        return super.toString() + "[name=" + name + "]";
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * Returns the catalog of this table as read from the database.
+     * 
+     * @return The catalog
      */
-    public Object clone() throws CloneNotSupportedException
-    {
-        Table result = new Table();
-
-        result.catalog     = catalog;
-        result.name        = name;
-        result.javaName    = javaName;
-        result.schema      = schema;
-        result.remarks     = remarks;
-        result.type        = type;
-        result.columns     = (ArrayList)columns.clone();
-        result.foreignKeys = (ArrayList)foreignKeys.clone();
-        result.indexes     = (ArrayList)indexes.clone();
-        return result;
-    }
-
     public String getCatalog()
     {
-        return this.catalog;
+        return _catalog;
     }
 
+    /**
+     * Sets the catalog of this table.
+     * 
+     * @param catalog The catalog
+     */
     public void setCatalog(String catalog)
     {
-        this.catalog = catalog;
+        _catalog = catalog;
     }
 
-    public String getRemarks()
-    {
-        return this.remarks;
-    }
-
-    public void setRemarks(String remarks)
-    {
-        this.remarks = remarks;
-    }
-
+    /**
+     * Returns the schema of this table as read from the database.
+     * 
+     * @return The schema
+     */
     public String getSchema()
     {
-        return this.schema;
+        return _schema;
     }
 
+    /**
+     * Sets the schema of this table.
+     * 
+     * @param schema The schema
+     */
     public void setSchema(String schema)
     {
-        this.schema = schema;
+        _schema = schema;
     }
 
+    /**
+     * Returns the type of this table as read from the database.
+     * 
+     * @return The type
+     */
     public String getType()
     {
-        return (type == null) ? "(null)" : type;
+        return _type;
     }
 
+    /**
+     * Sets the type of this table.
+     * 
+     * @param type The type
+     */
     public void setType(String type)
     {
-        this.type = type;
+        _type = type;
     }
 
+    /**
+     * Returns the name of the table.
+     * 
+     * @return The name
+     */
     public String getName()
     {
-        return name;
+        return _name;
     }
 
+    /**
+     * Sets the name of the table.
+     * 
+     * @param name The name
+     */
     public void setName(String name)
     {
-        this.name=name;
+        _name = name;
     }
 
-    public String getJavaName()
+    /**
+     * Returns the description of the table.
+     *
+     * @return The description
+     */
+    public String getDescription()
     {
-        return javaName;
+        return _description;
     }
 
-    public void setJavaName(String javaName)
+    /**
+     * Sets the description of the table.
+     *
+     * @param description The description
+     */
+    public void setDescription(String description)
     {
-        this.javaName = javaName;
+        _description = description;
     }
 
+    /**
+     * Returns the number of columns in this table.
+     * 
+     * @return The number of columns
+     */
+    public int getColumnCount()
+    {
+        return _columns.size();
+    }
+
+    /**
+     * Returns the column at the specified position.
+     * 
+     * @param idx The column index
+     * @return The column at this position
+     */
+    public Column getColumn(int idx)
+    {
+        return (Column)_columns.get(idx);
+    }
+
+    /**
+     * Returns the columns in this table.
+     * 
+     * @return The columns
+     */
+    public Column[] getColumns()
+    {
+        return (Column[])_columns.toArray(new Column[_columns.size()]);
+    }
+
+    /**
+     * Adds the given column.
+     * 
+     * @param column The column
+     */
     public void addColumn(Column column)
     {
-        columns.add(column);
-    }
-
-    public void addAll(List columns)
-    {
-        if(columns != null &&
-           columns.size() > 0)
+        if (column != null)
         {
-            int columnsSize = columns.size();
-            for(int i = 0; i < columnsSize; i++)
-            {
-                Column column = (Column) columns.get(i);
-                if(column != null)
-                {
-                    this.addColumn(column);
-                }
-            }
+            _columns.add(column);
         }
     }
 
-    public List getColumns()
+    /**
+     * Adds the given column at the specified position .
+     * 
+     * @param idx    The index where to add the column
+     * @param column The column
+     */
+    public void addColumn(int idx, Column column)
     {
-        return columns;
+        if (column != null)
+        {
+            _columns.add(idx, column);
+        }
     }
 
+    /**
+     * Removes the given column.
+     * 
+     * @param column The column to remove
+     */
+    public void removeColumn(Column column)
+    {
+        if (column != null)
+        {
+            _columns.remove(column);
+        }
+    }
+
+    /**
+     * Removes the indicated column.
+     * 
+     * @param idx The index of the column to remove
+     */
+    public void removeColumn(int idx)
+    {
+        _columns.remove(idx);
+    }
+
+    /**
+     * Returns the number of foreign keys.
+     * 
+     * @return The number of foreign keys
+     */
+    public int getForeignKeyCount()
+    {
+        return _foreignKeys.size();
+    }
+
+    /**
+     * Returns the foreign key at the given position.
+     * 
+     * @param idx The foreign key index
+     * @return The foreign key
+     */
+    public ForeignKey getForeignKey(int idx)
+    {
+        return (ForeignKey)_foreignKeys.get(idx);
+    }
+
+    /**
+     * Returns the foreign keys of this table.
+     * 
+     * @return The foreign keys
+     */
+    public ForeignKey[] getForeignKeys()
+    {
+        return (ForeignKey[])_foreignKeys.toArray(new ForeignKey[_foreignKeys.size()]);
+    }
+
+    /**
+     * Adds the given foreign key.
+     * 
+     * @param foreignKey The foreign key
+     */
     public void addForeignKey(ForeignKey foreignKey)
     {
-        foreignKeys.add(foreignKey);
+        if (foreignKey != null)
+        {
+            _foreignKeys.add(foreignKey);
+        }
     }
 
-    public List getForeignKeys()
+    /**
+     * Adds the given foreign key at the specified position.
+     * 
+     * @param idx        The index to add the foreign key at
+     * @param foreignKey The foreign key
+     */
+    public void addForeignKey(int idx, ForeignKey foreignKey)
     {
-        return foreignKeys;
+        if (foreignKey != null)
+        {
+            _foreignKeys.add(idx, foreignKey);
+        }
     }
 
-    public Column getColumn(int index)
+    /**
+     * Removes the given foreign key.
+     * 
+     * @param foreignKey The foreign key to remove
+     */
+    public void removeForeignKey(ForeignKey foreignKey)
     {
-        return (Column) columns.get(index);
+        if (foreignKey != null)
+        {
+            _foreignKeys.remove(foreignKey);
+        }
     }
 
-    public ForeignKey getForeignKey(int index)
+    /**
+     * Removes the indicated foreign key.
+     * 
+     * @param idx The index of the foreign key to remove
+     */
+    public void removeForeignKey(int idx)
     {
-        return (ForeignKey) foreignKeys.get(index);
+        _foreignKeys.remove(idx);
     }
 
+    /**
+     * Returns the number of indices.
+     * 
+     * @return The number of indices
+     */
+    public int getIndexCount()
+    {
+        return _indices.size();
+    }
+
+    /**
+     * Returns the index at the specified position.
+     * 
+     * @param idx The position
+     * @return The index
+     */
+    public Index getIndex(int idx)
+    {
+        return (Index)_indices.get(idx);
+    }
+
+    /**
+     * Adds the given index.
+     * 
+     * @param index The index
+     */
     public void addIndex(Index index)
     {
-        indexes.add(index);
-    }
-
-    public List getIndexes()
-    {
-        return indexes;
-    }
-
-    public Index getIndex(int index)
-    {
-        return (Index) indexes.get(index);
-    }
-
-//take this out of Unique is annoying
-//this is in here to support <unique> in the xml
-    /**
-     * Add a unique index to this table
-     * @param index The unique index
-     */
-    public void addUnique(Unique index)
-    {
-        addIndex(index);
+        if (index != null)
+        {
+            _indices.add(index);
+        }
     }
 
     /**
-     * Gets a list of unique indexes on this table.
-     * @return an Iterator of Index objects where isUnique == true
+     * Adds the given index at the specified position.
+     * 
+     * @param idx   The position to add the index at
+     * @param index The index
      */
-    public Iterator getUniques()
+    public void addIndex(int idx, Index index)
     {
-        return new FilterIterator( indexes.iterator(), UNIQUE_PREDICATE );
+        if (index != null)
+        {
+            _indices.add(idx, index);
+        }
     }
-//end unique
 
+    /**
+     * Returns the indices of this table.
+     * 
+     * @return The indices
+     */
+    public Index[] getIndices()
+    {
+        return (Index[])_indices.toArray(new Index[_indices.size()]);
+    }
+
+    /**
+     * Gets a list of non-unique indices on this table.
+     * 
+     * @return The unique indices
+     */
+    public Index[] getNonUniqueIndices()
+    {
+        List nonUniqueIndices = PredicatedList.decorate(_indices, new Predicate() {
+            public boolean evaluate(Object input) {
+                return !((Index)input).isUnique();
+            }
+        });
+
+        return (Index[])nonUniqueIndices.toArray(new Index[nonUniqueIndices.size()]);
+    }
+
+    /**
+     * Gets a list of unique indices on this table.
+     * 
+     * @return The unique indices
+     */
+    public Index[] getUniqueIndices()
+    {
+        List uniqueIndices = PredicatedList.decorate(_indices, new Predicate() {
+            public boolean evaluate(Object input) {
+                return ((Index)input).isUnique();
+            }
+        });
+
+        return (Index[])uniqueIndices.toArray(new Index[uniqueIndices.size()]);
+    }
+
+    /**
+     * Removes the given index.
+     * 
+     * @param index The index to remove
+     */
+    public void removeIndex(Index index)
+    {
+        if (index != null)
+        {
+            _indices.remove(index);
+        }
+    }
+
+    /**
+     * Removes the indicated index.
+     * 
+     * @param idx The position of the index to remove
+     */
+    public void removeIndex(int idx)
+    {
+        _indices.remove(idx);
+    }
 
     // Helper methods
     //-------------------------------------------------------------------------
@@ -237,10 +435,11 @@ public class Table implements Cloneable
      */
     public boolean hasPrimaryKey()
     {
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
+        for (Iterator it = _columns.iterator(); it.hasNext(); )
         {
-            Column column = (Column) iter.next();
-            if ( column.isPrimaryKey() )
+            Column column = (Column)it.next();
+
+            if (column.isPrimaryKey())
             {
                 return true;
             }
@@ -272,9 +471,9 @@ public class Table implements Cloneable
      */
     public Column findColumn(String name, boolean caseSensitive)
     {
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
+        for (Iterator it = _columns.iterator(); it.hasNext(); )
         {
-            Column column = (Column) iter.next();
+            Column column = (Column)it.next();
 
             if (caseSensitive)
             {
@@ -296,73 +495,127 @@ public class Table implements Cloneable
 
     /**
      * Finds the index with the specified name, using case insensitive matching.
-     * Note that this method is not called getIndex(String) to avoid introspection
+     * Note that this method is not called getIndex to avoid introspection
      * problems.
+     * 
+     * @param name The name of the index
+     * @return The index or <code>null</code> if there is no such index
      */
     public Index findIndex(String name)
     {
-        for (Iterator iter = getIndexes().iterator(); iter.hasNext(); )
-        {
-            Index index = (Index) iter.next();
+        return findIndex(name, false);
+    }
 
-            // column names are typically case insensitive
-            if (index.getName().equalsIgnoreCase( name ))
+    /**
+     * Finds the index with the specified name, using case insensitive matching.
+     * Note that this method is not called getIndex to avoid introspection
+     * problems.
+     * 
+     * @param name          The name of the index
+     * @param caseSensitive Whether case matters for the names
+     * @return The index or <code>null</code> if there is no such index
+     */
+    public Index findIndex(String name, boolean caseSensitive)
+    {
+        for (int idx = 0; idx < getIndexCount(); idx++)
+        {
+            Index index = getIndex(idx);
+
+            if (caseSensitive)
             {
-                return index;
+                if (index.getName().equals(name))
+                {
+                    return index;
+                }
+            }
+            else
+            {
+                if (index.getName().equalsIgnoreCase(name))
+                {
+                    return index;
+                }
             }
         }
         return null;
     }
 
     /**
-     * Finds a ForeignKey within the table that matches the supplied ForeignKey
-     * exactly, meaning the foreign table and all column references are the same.
+     * Finds the foreign key in this table that is equal to the supplied foreign key.
+     * 
+     * @param key The foreign key to search for
+     * @return The found foreign key
      */
     public ForeignKey findForeignKey(ForeignKey key)
     {
-        ForeignKey result = null;
-        for (Iterator iter = getForeignKeys().iterator(); iter.hasNext(); )
+        for (int idx = 0; idx < getForeignKeyCount(); idx++)
         {
-            ForeignKey fk = (ForeignKey) iter.next();
-            if ( fk.equals(key) ) {
-                result = key;
-                break;
-            }
-        }
-        return result;
-    }
+            ForeignKey fk = getForeignKey(idx);
 
-    /**
-     * @return a List of primary key columns or an empty list if there are no
-     * primary key columns for this Table
-     */
-    public List getPrimaryKeyColumns()
-    {
-        List answer = new ArrayList();
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
-        {
-            Column column = (Column) iter.next();
-            if ( column.isPrimaryKey() )
+            if (fk.equals(key))
             {
-                answer.add(column);
+                return fk;
             }
         }
-        return answer;
+        return null;
     }
 
     /**
-     * @return the auto increment column, if there is one, otherwise null is returned
+     * Returns the primary key columns of this table.
+     * 
+     * @return The primary key columns
+     */
+    public Column[] getPrimaryKeyColumns()
+    {
+        List pkColumns = PredicatedList.decorate(_columns, new Predicate() {
+            public boolean evaluate(Object input) {
+                return ((Column)input).isPrimaryKey();
+            }
+        });
+
+        return (Column[])pkColumns.toArray(new Column[pkColumns.size()]);
+    }
+
+    /**
+     * Returns the auto increment column in this table if there is one.
+     * 
+     * @return The column or <code>null</code> if there is none in this table
      */
     public Column getAutoIncrementColumn()
     {
-        for (Iterator iter = getColumns().iterator(); iter.hasNext(); )
+        for (int idx = 0; idx < getColumnCount(); idx++)
         {
-            Column column = (Column) iter.next();
-            if ( column.isAutoIncrement() )
+            Column column = getColumn(idx);
+
+            if (column.isAutoIncrement())
             {
                 return column;
             }
         }
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        Table result = new Table();
+
+        result._catalog     = _catalog;
+        result._schema      = _schema;
+        result._name        = _name;
+        result._type        = _type;
+        result._columns     = (ArrayList)_columns.clone();
+        result._foreignKeys = (ArrayList)_foreignKeys.clone();
+        result._indices     = (ArrayList)_indices.clone();
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    public String toString()
+    {
+        return "Table " + _name + " [" + _columns.size() + " columns]";
     }
 }
