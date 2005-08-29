@@ -184,7 +184,22 @@ public class DatabaseIO
     {
         try
         {
-            getWriter(new BufferedWriter(new FileWriter(filename))).write(model);
+            BufferedWriter writer = null;
+
+            try
+            {
+                writer = new BufferedWriter(new FileWriter(filename));
+    
+                getWriter(writer).write(model);
+                writer.flush();
+            }
+            finally
+            {
+                if (writer != null)
+                {
+                    writer.close();
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -193,7 +208,8 @@ public class DatabaseIO
     }
 
     /**
-     * Writes the database model to the given output stream.
+     * Writes the database model to the given output stream. Note that this method
+     * does not flush the stream.
      * 
      * @param model  The database model
      * @param output The output stream
@@ -211,7 +227,8 @@ public class DatabaseIO
     }
 
     /**
-     * Writes the database model to the given output writer.
+     * Writes the database model to the given output writer. Note that this method
+     * does not flush the writer.
      * 
      * @param model  The database model
      * @param output The output writer
