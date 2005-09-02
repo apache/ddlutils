@@ -19,10 +19,10 @@ package org.apache.ddlutils.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.collections.Predicate;
-import org.apache.commons.collections.list.PredicatedList;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * Represents a table in the database model.
@@ -378,7 +378,7 @@ public class Table implements Serializable, Cloneable
      */
     public Index[] getNonUniqueIndices()
     {
-        List nonUniqueIndices = PredicatedList.decorate(_indices, new Predicate() {
+        Collection nonUniqueIndices = CollectionUtils.select(_indices, new Predicate() {
             public boolean evaluate(Object input) {
                 return !((Index)input).isUnique();
             }
@@ -394,7 +394,7 @@ public class Table implements Serializable, Cloneable
      */
     public Index[] getUniqueIndices()
     {
-        List uniqueIndices = PredicatedList.decorate(_indices, new Predicate() {
+        Collection uniqueIndices = CollectionUtils.select(_indices, new Predicate() {
             public boolean evaluate(Object input) {
                 return ((Index)input).isUnique();
             }
@@ -566,7 +566,7 @@ public class Table implements Serializable, Cloneable
      */
     public Column[] getPrimaryKeyColumns()
     {
-        List pkColumns = PredicatedList.decorate(_columns, new Predicate() {
+        Collection pkColumns = CollectionUtils.select(_columns, new Predicate() {
             public boolean evaluate(Object input) {
                 return ((Column)input).isPrimaryKey();
             }
