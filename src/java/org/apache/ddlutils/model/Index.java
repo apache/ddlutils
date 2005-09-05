@@ -17,7 +17,6 @@ package org.apache.ddlutils.model;
  */
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Represents an index definition for a table which may be either unique or non-unique.
@@ -46,10 +45,11 @@ public interface Index extends Cloneable, Serializable
     public void setName(String name);
 
     /**
-     * Adds a column that makes up this index.
-     * @param column
+     * Returns the number of columns that make up this index.
+     * 
+     * @return The number of index columns
      */
-    public void addColumn(IndexColumn column);
+    public int getColumnCount();
 
     /**
      * Returns the indicated column making up this index.
@@ -64,5 +64,34 @@ public interface Index extends Cloneable, Serializable
      * 
      * @return The columns
      */
-    public List getColumns();
+    public IndexColumn[] getColumns();
+
+    /**
+     * Adds a column that makes up this index.
+     * 
+     * @param column The column to add
+     */
+    public void addColumn(IndexColumn column);
+
+    /**
+     * Adds a column that makes up this index at the specified position.
+     * 
+     * @param idx    The position to add the index colum at
+     * @param column The column to add
+     */
+    public void addColumn(int idx, IndexColumn column);
+
+    /**
+     * Removes the given index column from this index.
+     * 
+     * @param column The column to remove
+     */
+    public void removeColumn(IndexColumn column);
+
+    /**
+     * Removes the column at the specified position in this index.
+     * 
+     * @param idx The position of the index column to remove
+     */
+    public void removeColumn(int idx);
 }

@@ -17,7 +17,6 @@ package org.apache.ddlutils.model;
  */
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides compatibility with Torque-style xml with separate &lt;index&gt; and
@@ -27,15 +26,10 @@ import java.util.List;
  * @author John Marshall/Connectria
  * @version $Revision$
  */
-public class UniqueIndex implements Index
+public class UniqueIndex extends NonUniqueIndex
 {
     /** Unique ID for serialization purposes */
     private static final long serialVersionUID = -4097003126550294993L;
-
-    /** The name of the index */
-    protected String    _name;
-    /** The columns making up the unique index */
-    protected ArrayList _columns = new ArrayList();
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.model.Index#isUnique()
@@ -43,46 +37,6 @@ public class UniqueIndex implements Index
     public boolean isUnique()
     {
         return true;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#getName()
-     */
-    public String getName()
-    {
-        return _name;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#setName(java.lang.String)
-     */
-    public void setName(String name)
-    {
-        _name = name;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#addColumn(org.apache.ddlutils.model.IndexColumn)
-     */
-    public void addColumn(IndexColumn column)
-    {
-        _columns.add(column);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#getColumn(int)
-     */
-    public IndexColumn getColumn(int idx)
-    {
-        return (IndexColumn)_columns.get(idx);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#getColumns()
-     */
-    public List getColumns()
-    {
-        return _columns;
     }
 
     /* (non-Javadoc)

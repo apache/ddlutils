@@ -122,24 +122,13 @@ public class ForeignKey implements Cloneable
     }
 
     /**
-     * Adds a reference, ie. a mapping between a local column (in the table that owns this foreign key)
-     * and a remote column.
+     * Returns the number of references.
      * 
-     * @param reference The reference to add
+     * @return The number of references
      */
-    public void addReference(Reference reference)
+    public int getReferenceCount()
     {
-        _references.add(reference);
-    }
-
-    /**
-     * Returns the references.
-     * 
-     * @return The references
-     */
-    public List getReferences()
-    {
-        return _references;
+        return _references.size();
     }
 
     /**
@@ -154,6 +143,16 @@ public class ForeignKey implements Cloneable
     }
 
     /**
+     * Returns the references.
+     * 
+     * @return The references
+     */
+    public Reference[] getReferences()
+    {
+        return (Reference[])_references.toArray(new Reference[_references.size()]);
+    }
+
+    /**
      * Returns the first reference if it exists.
      * 
      * @return The first reference
@@ -161,6 +160,58 @@ public class ForeignKey implements Cloneable
     public Reference getFirstReference()
     {
         return (Reference)(_references.isEmpty() ? null : _references.get(0));
+    }
+
+    /**
+     * Adds a reference, ie. a mapping between a local column (in the table that owns this foreign key)
+     * and a remote column.
+     * 
+     * @param reference The reference to add
+     */
+    public void addReference(Reference reference)
+    {
+        if (reference != null)
+        {
+            _references.add(reference);
+        }
+    }
+
+    /**
+     * Adds a reference, ie. a mapping between a local column (in the table that owns this foreign key)
+     * and a remote column, at the specified place.
+     * 
+     * @param idx       The index to add the reference at
+     * @param reference The reference to add
+     */
+    public void addReference(int idx, Reference reference)
+    {
+        if (reference != null)
+        {
+            _references.add(idx, reference);
+        }
+    }
+
+    /**
+     * Removes the given reference.
+     * 
+     * @param reference The reference to remove
+     */
+    public void removeReference(Reference reference)
+    {
+        if (reference != null)
+        {
+            _references.remove(reference);
+        }
+    }
+
+    /**
+     * Removes the indicated reference.
+     * 
+     * @param idx The index of the reference to remove
+     */
+    public void removeReference(int idx)
+    {
+        _references.remove(idx);
     }
 
     /* (non-Javadoc)

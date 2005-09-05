@@ -17,7 +17,6 @@ package org.apache.ddlutils.model;
  */
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents an index definition for a table.
@@ -58,11 +57,11 @@ public class NonUniqueIndex implements Index
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#addColumn(org.apache.ddlutils.model.IndexColumn)
+     * @see org.apache.ddlutils.model.Index#getColumnCount()
      */
-    public void addColumn(IndexColumn column)
+    public int getColumnCount()
     {
-        _columns.add(column);
+        return _columns.size();
     }
 
     /* (non-Javadoc)
@@ -76,9 +75,47 @@ public class NonUniqueIndex implements Index
     /* (non-Javadoc)
      * @see org.apache.ddlutils.model.Index#getColumns()
      */
-    public List getColumns()
+    public IndexColumn[] getColumns()
     {
-        return _columns;
+        return (IndexColumn[])_columns.toArray(new IndexColumn[_columns.size()]);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.model.Index#addColumn(org.apache.ddlutils.model.IndexColumn)
+     */
+    public void addColumn(IndexColumn column)
+    {
+        if (column != null)
+        {
+            _columns.add(column);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.model.Index#addColumn(int, org.apache.ddlutils.model.IndexColumn)
+     */
+    public void addColumn(int idx, IndexColumn column)
+    {
+        if (column != null)
+        {
+            _columns.add(idx, column);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.model.Index#removeColumn(org.apache.ddlutils.model.IndexColumn)
+     */
+    public void removeColumn(IndexColumn column)
+    {
+        _columns.remove(column);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.model.Index#removeColumn(int)
+     */
+    public void removeColumn(int idx)
+    {
+        _columns.remove(idx);
     }
 
     /* (non-Javadoc)

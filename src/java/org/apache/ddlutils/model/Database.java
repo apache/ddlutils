@@ -321,9 +321,9 @@ public class Database implements Serializable, Cloneable
                         fk.setForeignTable(targetTable);
                     }
                 }
-                for (Iterator refIt = fk.getReferences().iterator(); refIt.hasNext();)
+                for (int refIdx = 0; refIdx < fk.getReferenceCount(); refIdx++)
                 {
-                    Reference ref = (Reference)refIt.next();
+                    Reference ref = fk.getReference(refIdx);
 
                     if (ref.getLocalColumn() == null)
                     {
@@ -369,11 +369,9 @@ public class Database implements Serializable, Cloneable
                     namesOfProcessedIndices.add(indexName);
                 }
 
-                int indexColumnIdx = 0;
-
-                for (Iterator indexColumnIt = index.getColumns().iterator(); indexColumnIt.hasNext(); indexColumnIdx++)
+                for (int indexColumnIdx = 0; indexColumnIdx < index.getColumnCount(); indexColumnIdx++)
                 {
-                    IndexColumn indexColumn = (IndexColumn)indexColumnIt.next();
+                    IndexColumn indexColumn = index.getColumn(indexColumnIdx);
 
                     if (curTable.findColumn(indexColumn.getName(), true) == null)
                     {

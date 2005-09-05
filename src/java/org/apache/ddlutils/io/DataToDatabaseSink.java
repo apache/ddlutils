@@ -299,28 +299,24 @@ public class DataToDatabaseSink implements DataSink
 
             result.append(owningTable.getName());
             result.append("[");
-            for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
+            for (int idx = 0; idx < fk.getReferenceCount(); idx++)
             {
-                Reference ref = (Reference)it.next();
-                
-                result.append(ref.getLocalColumnName());
-                if (it.hasNext())
+                if (idx > 0)
                 {
                     result.append(",");
                 }
+                result.append(fk.getReference(idx).getLocalColumnName());
             }
             result.append("]->");
             result.append(fk.getForeignTableName());
             result.append("[");
-            for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
+            for (int idx = 0; idx < fk.getReferenceCount(); idx++)
             {
-                Reference ref = (Reference)it.next();
-                
-                result.append(ref.getForeignColumnName());
-                if (it.hasNext())
+                if (idx > 0)
                 {
                     result.append(",");
                 }
+                result.append(fk.getReference(idx).getForeignColumnName());
             }
             result.append("]");
             return result.toString();
@@ -361,9 +357,9 @@ public class DataToDatabaseSink implements DataSink
     {
         Identity identity = new Identity(fk.getForeignTableName(), getFKName(owningTable, fk));
 
-        for (Iterator refIt = fk.getReferences().iterator(); refIt.hasNext();)
+        for (int idx = 0; idx < fk.getReferenceCount(); idx++)
         {
-            Reference reference = (Reference)refIt.next();
+            Reference reference = (Reference)fk.getReference(idx);
             Object    value     = bean.get(reference.getLocalColumnName());
 
             if (value == null)
@@ -404,9 +400,9 @@ public class DataToDatabaseSink implements DataSink
         }
         if (fk != null)
         {
-            for (Iterator it = fk.getReferences().iterator(); it.hasNext();)
+            for (int idx = 0; idx < fk.getReferenceCount(); idx++)
             {
-                Reference curRef       = (Reference)it.next();
+                Reference curRef       = fk.getReference(idx);
                 Column    sourceColumn = sourceTable.findColumn(curRef.getLocalColumnName());
                 Column    targetColumn = targetTable.findColumn(curRef.getForeignColumnName());
 

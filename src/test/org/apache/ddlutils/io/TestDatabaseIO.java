@@ -223,7 +223,7 @@ public class TestDatabaseIO extends TestCase
         assertEquals(someTable.getName(),
                      fk.getForeignTableName());
         assertEquals(1,
-                     fk.getReferences().size());
+                     fk.getReferenceCount());
 
         Reference ref = fk.getFirstReference();
 
@@ -347,7 +347,7 @@ public class TestDatabaseIO extends TestCase
                      index.getName());
         assertFalse(index.isUnique());
         assertEquals(1,
-                     index.getColumns().size());
+                     index.getColumnCount());
 
         IndexColumn indexColumn = index.getColumn(0);
 
@@ -360,7 +360,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(index.getName());
         assertFalse(index.isUnique());
         assertEquals(2,
-                     index.getColumns().size());
+                     index.getColumnCount());
 
         indexColumn = index.getColumn(0);
 
@@ -471,7 +471,7 @@ public class TestDatabaseIO extends TestCase
                      index.getName());
         assertTrue(index.isUnique());
         assertEquals(1,
-                     index.getColumns().size());
+                     index.getColumnCount());
 
         IndexColumn indexColumn = index.getColumn(0);
 
@@ -484,7 +484,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(index.getName());
         assertFalse(index.isUnique());
         assertEquals(1,
-                     index.getColumns().size());
+                     index.getColumnCount());
 
         indexColumn = index.getColumn(0);
 
@@ -670,7 +670,7 @@ public class TestDatabaseIO extends TestCase
         assertEquals("A",
                      fk.getForeignTableName());
         assertEquals(1,
-                     fk.getReferences().size());
+                     fk.getReferenceCount());
 
         Reference ref = fk.getFirstReference();
 
@@ -688,7 +688,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(index.getName());
         assertTrue(index.isUnique());
         assertEquals(1,
-                     index.getColumns().size());
+                     index.getColumnCount());
 
         IndexColumn indexColumn = index.getColumn(0);
 
@@ -775,7 +775,7 @@ public class TestDatabaseIO extends TestCase
         assertEquals("A",
                      fk.getForeignTableName());
         assertEquals(1,
-                     fk.getReferences().size());
+                     fk.getReferenceCount());
 
         ref = fk.getFirstReference();
 
@@ -796,7 +796,7 @@ public class TestDatabaseIO extends TestCase
         assertEquals("C",
                      fk.getForeignTableName());
         assertEquals(1,
-                     fk.getReferences().size());
+                     fk.getReferenceCount());
 
         ref = fk.getFirstReference();
 
@@ -814,7 +814,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(index.getName());
         assertFalse(index.isUnique());
         assertEquals(2,
-                     index.getColumns().size());
+                     index.getColumnCount());
 
         indexColumn = index.getColumn(0);
 
@@ -887,7 +887,7 @@ public class TestDatabaseIO extends TestCase
                      index.getName());
         assertFalse(index.isUnique());
         assertEquals(1,
-                     index.getColumns().size());
+                     index.getColumnCount());
 
         indexColumn = index.getColumn(0);
 

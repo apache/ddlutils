@@ -35,7 +35,6 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
-import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 
@@ -435,9 +434,9 @@ public abstract class SqlBuilder
                         // make sure this isn't the primary key index
                         boolean  isPk = true;
 
-                        for (Iterator columnIt = currentIndex.getColumns().iterator(); columnIt.hasNext();)
+                        for (int columnIdx = 0; columnIdx < currentIndex.getColumnCount(); columnIdx++)
                         {
-                            IndexColumn indexColumn = (IndexColumn)columnIt.next();
+                            IndexColumn indexColumn = currentIndex.getColumn(columnIdx);
                             Column      column      = currentTable.findColumn(indexColumn.getName());
 
                             if (column != null && !column.isPrimaryKey())
@@ -1362,20 +1361,21 @@ public abstract class SqlBuilder
             print(getTableName(table));
             print(" (");
 
-            for (Iterator it = index.getColumns().iterator(); it.hasNext();)
+            for (int idx = 0; idx < index.getColumnCount(); idx++)
             {
-                IndexColumn idxColumn = (IndexColumn)it.next();
-
+                IndexColumn idxColumn = index.getColumn(idx);
                 Column col = table.findColumn(idxColumn.getName());
-                if ( col == null ) {
+
+                if (col == null)
+                {
                     //would get null pointer on next line anyway, so throw exception
                     throw new RuntimeException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
                 }
-                print(getColumnName(col));
-                if (it.hasNext())
+                if (idx > 0)
                 {
                     print(", ");
                 }
+                print(getColumnName(col));
             }
 
             print(")");
@@ -1482,13 +1482,13 @@ public abstract class SqlBuilder
      */
     protected void writeLocalReferences(ForeignKey key) throws IOException
     {
-        for (Iterator it = key.getReferences().iterator(); it.hasNext();)
+        for (int idx = 0; idx < key.getReferenceCount(); idx++)
         {
-            print(((Reference)it.next()).getLocalColumnName());
-            if (it.hasNext())
+            if (idx > 0)
             {
                 print(", ");
             }
+            print(key.getReference(idx).getLocalColumnName());
         }
     }
 
@@ -1499,13 +1499,13 @@ public abstract class SqlBuilder
      */
     protected void writeForeignReferences(ForeignKey key) throws IOException
     {
-        for (Iterator it = key.getReferences().iterator(); it.hasNext();)
+        for (int idx = 0; idx < key.getReferenceCount(); idx++)
         {
-            print(((Reference)it.next()).getForeignColumnName());
-            if (it.hasNext())
+            if (idx > 0)
             {
                 print(", ");
             }
+            print(key.getReference(idx).getForeignColumnName());
         }
     }
 
