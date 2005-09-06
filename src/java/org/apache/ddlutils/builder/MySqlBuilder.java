@@ -18,7 +18,6 @@ package org.apache.ddlutils.builder;
 
 import java.io.IOException;
 import java.sql.Types;
-import java.util.List;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
@@ -91,9 +90,9 @@ public class MySqlBuilder extends SqlBuilder
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#shouldGeneratePrimaryKeys(List)
+     * @see org.apache.ddlutils.builder.SqlBuilder#shouldGeneratePrimaryKeys(org.apache.ddlutils.model.Column[])
      */
-    protected boolean shouldGeneratePrimaryKeys(List primaryKeyColumns)
+    protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
     {
         /*
          * mySQL requires primary key indication for autoincrement key columns

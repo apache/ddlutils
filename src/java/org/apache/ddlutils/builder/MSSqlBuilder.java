@@ -105,12 +105,16 @@ public class MSSqlBuilder extends SqlBuilder
         print("IDENTITY (1,1) ");
     }
 
-    protected boolean shouldGeneratePrimaryKeys(java.util.List primaryKeyColumns) {
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#shouldGeneratePrimaryKeys(org.apache.ddlutils.model.Column[])
+     */
+    protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
+    {
         /*
          * requires primary key indication for autoincrement key columns
          * I'm not sure why the default skips the pk statement if all are identity
          */
-        return primaryKeyColumns.size() > 0;
+        return primaryKeyColumns.length > 0;
     }
 
     public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
