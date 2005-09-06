@@ -71,7 +71,7 @@ public class TestMySqlPlatform extends TestPlatformBase
             "    COL_SMALLINT        SMALLINT,\n"+
             "    COL_STRUCT          LONGBLOB,\n"+
             "    COL_TIME            TIME,\n"+
-            "    COL_TIMESTAMP       TIMESTAMP,\n"+
+            "    COL_TIMESTAMP       DATETIME,\n"+
             "    COL_TINYINT         TINYINT,\n"+
             "    COL_VARBINARY       VARCHAR(15) BINARY,\n"+
             "    COL_VARCHAR         VARCHAR(15)\n"+
