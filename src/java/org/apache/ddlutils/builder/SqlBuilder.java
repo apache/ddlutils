@@ -280,7 +280,6 @@ public abstract class SqlBuilder
      *
      * @param currentModel  The current database schema
      * @param desiredModel  The desired database schema
-     * @param connection    A connection to the existing database that shall be modified
      * @param doDrops       Whether columns and indexes should be dropped if not in the
      *                      new schema
      * @param modifyColumns Whether columns should be altered for datatype, size as required
@@ -306,159 +305,8 @@ public abstract class SqlBuilder
             }
             else
             {
-                for (int columnIdx = 0; columnIdx < desiredTable.getColumnCount(); columnIdx++)
-                {
-                    Column desiredColumn = desiredTable.getColumn(columnIdx);
-                    Column currentColumn = currentTable.findColumn(desiredColumn.getName());
-
-                    if (null == currentColumn)
-                    {
-                        if (_log.isInfoEnabled())
-                        {
-                            _log.info("Creating column " + desiredTable.getName() + "." + desiredColumn.getName());
-                        }
-                        writeColumnAlterStmt(desiredTable, desiredColumn, true);
-                    }
-                    else if (columnsDiffer(desiredColumn, currentColumn))
-                    {
-                        if (modifyColumns)
-                        {
-                            if (_log.isInfoEnabled())
-                            {
-                                _log.info("Altering column " + desiredTable.getName() + "." + desiredColumn.getName());
-                                _log.info("  desired = " + desiredColumn.toStringAll());
-                                _log.info("  current = " + currentColumn.toStringAll());
-                            }
-                            writeColumnAlterStmt(desiredTable, desiredColumn, false);
-                        }
-                        else
-                        {
-                            String text = "Column " + currentColumn.getName() + " in table " + currentTable.getName() + " differs from current specification";
-
-                            if (_log.isInfoEnabled())
-                            {
-                                _log.info(text);
-                            }
-                            printComment(text);
-                        }
-                    }
-                }
-
-                // add fk constraints
-                for (int fkIdx = 0; fkIdx < desiredTable.getForeignKeyCount(); fkIdx++)
-                {
-                    ForeignKey desiredFk = desiredTable.getForeignKey(fkIdx);
-                    ForeignKey currentFk = currentTable.findForeignKey(desiredFk);
-                    if ( currentFk == null ) {
-                        if (_log.isInfoEnabled())
-                        {
-                            _log.info("Creating foreign key " + desiredTable.getName() + "." + desiredFk);
-                        }
-                        writeExternalForeignKeyCreateStmt(desiredModel, desiredTable, desiredFk);
-                    }
-                }
-
-                // TODO: should we check the index fields for differences?
-                //create new indexes
-                for (int indexIdx = 0; indexIdx < desiredTable.getIndexCount(); indexIdx++)
-                {
-                    Index desiredIndex = desiredTable.getIndex(indexIdx);
-                    Index currentIndex = currentTable.findIndex(desiredIndex.getName());
-
-                    if (null == currentIndex)
-                    {
-                        if (_log.isInfoEnabled())
-                        {
-                            _log.info("Creating index " + desiredTable.getName() + "." + desiredIndex.getName());
-                        }
-                        writeExternalIndexCreateStmt(desiredTable, desiredIndex);
-                    }
-                }
-
-                // drop fk constraints
-                for (int fkIdx = 0; fkIdx < currentTable.getForeignKeyCount(); fkIdx++)
-                {
-                    ForeignKey currentFk = currentTable.getForeignKey(fkIdx);
-                    ForeignKey desiredFk = desiredTable.findForeignKey(currentFk);
-
-                    if ( desiredFk == null ) {
-                        if (_log.isInfoEnabled())
-                        {
-                            _log.info((doDrops ? "" : "Not ") + "Dropping foreign key " + currentTable.getName() + "." + currentFk);
-                        }
-                        if ( doDrops ) {
-                            writeExternalForeignKeyDropStmt(currentTable, currentFk);
-                        }
-                    }
-                }
-
-
-                //Drop columns
-                for (int columnIdx = 0; columnIdx < currentTable.getColumnCount(); columnIdx++)
-                {
-                    Column currentColumn = currentTable.getColumn(columnIdx);
-                    Column desiredColumn = desiredTable.findColumn(currentColumn.getName());
-
-                    if (null == desiredColumn)
-                    {
-                        if (doDrops)
-                        {
-                            if (_log.isInfoEnabled())
-                            {
-                                _log.info("Dropping column " + currentTable.getName() + "." + currentColumn.getName());
-                            }
-                            writeColumnDropStmt(currentTable, currentColumn);
-                        }
-                        else
-                        {
-                            String text = "Column " + currentColumn.getName() + " can be dropped from table " + currentTable.getName();
-
-                            if (_log.isInfoEnabled())
-                            {
-                                _log.info(text);
-                            }
-                            printComment(text);
-                        }
-                    }
-                }
-
-                //Drop indexes
-                for (int indexIdx = 0; indexIdx < currentTable.getIndexCount(); indexIdx++)
-                {
-                    Index currentIndex = currentTable.getIndex(indexIdx);
-                    Index desiredIndex = desiredTable.findIndex(currentIndex.getName());
-
-                    if (null == desiredIndex)
-                    {
-                        // make sure this isn't the primary key index
-                        boolean  isPk = true;
-
-                        for (int columnIdx = 0; columnIdx < currentIndex.getColumnCount(); columnIdx++)
-                        {
-                            IndexColumn indexColumn = currentIndex.getColumn(columnIdx);
-                            Column      column      = currentTable.findColumn(indexColumn.getName());
-
-                            if (column != null && !column.isPrimaryKey())
-                            {
-                                isPk = false;
-                                break;
-                            }
-                        }
-                        if (!isPk)
-                        {
-                            if (_log.isInfoEnabled())
-                            {
-                                _log.info((doDrops ? "" : "Not ") + "Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
-                            }
-                            if ( doDrops )
-                            {
-                                writeExternalIndexDropStmt(currentTable, currentIndex);
-                            }
-                        }
-                    }
-                }
-
-            } 
+                alterTable(currentTable, desiredModel, desiredTable, doDrops, modifyColumns);
+            }
         }
 
         // generating deferred foreignkeys
@@ -498,6 +346,176 @@ public abstract class SqlBuilder
         }
     }
 
+    /**
+     * Alters the given currently existing table object to match the given desired table object.
+     * 
+     * @param currentTable The current table definition
+     * @param desiredModel The desired model
+     * @param desiredTable The desired table definition
+     * @param doDrops       Whether columns and indexes should be dropped if not in the
+     *                      new schema
+     * @param modifyColumns Whether columns should be altered for datatype, size as required
+     */
+    protected void alterTable(Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
+    {
+        for (int columnIdx = 0; columnIdx < desiredTable.getColumnCount(); columnIdx++)
+        {
+            Column desiredColumn = desiredTable.getColumn(columnIdx);
+            Column currentColumn = currentTable.findColumn(desiredColumn.getName());
+
+            if (null == currentColumn)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Creating column " + desiredTable.getName() + "." + desiredColumn.getName());
+                }
+                writeColumnAlterStmt(desiredTable, desiredColumn, true);
+            }
+            else if (columnsDiffer(desiredColumn, currentColumn))
+            {
+                if (modifyColumns)
+                {
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info("Altering column " + desiredTable.getName() + "." + desiredColumn.getName());
+                        _log.info("  desired = " + desiredColumn.toStringAll());
+                        _log.info("  current = " + currentColumn.toStringAll());
+                    }
+                    writeColumnAlterStmt(desiredTable, desiredColumn, false);
+                }
+                else
+                {
+                    String text = "Column " + currentColumn.getName() + " in table " + currentTable.getName() + " differs from current specification";
+
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info(text);
+                    }
+                    printComment(text);
+                }
+            }
+        }
+
+        // add fk constraints
+        for (int fkIdx = 0; fkIdx < desiredTable.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey desiredFk = desiredTable.getForeignKey(fkIdx);
+            ForeignKey currentFk = currentTable.findForeignKey(desiredFk);
+
+            if (currentFk == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Creating foreign key " + desiredTable.getName() + "." + desiredFk);
+                }
+                writeExternalForeignKeyCreateStmt(desiredModel, desiredTable, desiredFk);
+            }
+        }
+
+        // TODO: should we check the index fields for differences?
+        //create new indexes
+        for (int indexIdx = 0; indexIdx < desiredTable.getIndexCount(); indexIdx++)
+        {
+            Index desiredIndex = desiredTable.getIndex(indexIdx);
+            Index currentIndex = currentTable.findIndex(desiredIndex.getName());
+
+            if (currentIndex == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Creating index " + desiredTable.getName() + "." + desiredIndex.getName());
+                }
+                writeExternalIndexCreateStmt(desiredTable, desiredIndex);
+            }
+        }
+
+        // drop fk constraints
+        for (int fkIdx = 0; fkIdx < currentTable.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey currentFk = currentTable.getForeignKey(fkIdx);
+            ForeignKey desiredFk = desiredTable.findForeignKey(currentFk);
+
+            if (desiredFk == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info((doDrops ? "" : "Not ") + "Dropping foreign key " + currentTable.getName() + "." + currentFk);
+                }
+                if (doDrops)
+                {
+                    writeExternalForeignKeyDropStmt(currentTable, currentFk);
+                }
+            }
+        }
+
+
+        //Drop columns
+        for (int columnIdx = 0; columnIdx < currentTable.getColumnCount(); columnIdx++)
+        {
+            Column currentColumn = currentTable.getColumn(columnIdx);
+            Column desiredColumn = desiredTable.findColumn(currentColumn.getName());
+
+            if (desiredColumn == null)
+            {
+                if (doDrops)
+                {
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info("Dropping column " + currentTable.getName() + "." + currentColumn.getName());
+                    }
+                    writeColumnDropStmt(currentTable, currentColumn);
+                }
+                else
+                {
+                    String text = "Column " + currentColumn.getName() + " can be dropped from table " + currentTable.getName();
+
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info(text);
+                    }
+                    printComment(text);
+                }
+            }
+        }
+
+        //Drop indexes
+        for (int indexIdx = 0; indexIdx < currentTable.getIndexCount(); indexIdx++)
+        {
+            Index currentIndex = currentTable.getIndex(indexIdx);
+            Index desiredIndex = desiredTable.findIndex(currentIndex.getName());
+
+            if (desiredIndex == null)
+            {
+                // make sure this isn't the primary key index
+                boolean  isPk = true;
+
+                for (int columnIdx = 0; columnIdx < currentIndex.getColumnCount(); columnIdx++)
+                {
+                    IndexColumn indexColumn = currentIndex.getColumn(columnIdx);
+                    Column      column      = currentTable.findColumn(indexColumn.getName());
+
+                    if ((column != null) && !column.isPrimaryKey())
+                    {
+                        isPk = false;
+                        break;
+                    }
+                }
+                if (!isPk)
+                {
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info((doDrops ? "" : "Not ") + "Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
+                    }
+                    if (doDrops)
+                    {
+                        writeExternalIndexDropStmt(currentTable, currentIndex);
+                    }
+                }
+            }
+        }
+
+    } 
+    
     /** 
      * Outputs the DDL to create the table along with any non-external constraints as well
      * as with external primary keys and indices (but not foreign keys).
