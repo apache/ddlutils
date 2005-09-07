@@ -305,7 +305,9 @@ public abstract class SqlBuilder
             }
             else
             {
-                alterTable(currentTable, desiredModel, desiredTable, doDrops, modifyColumns);
+                alterTable(currentModel, currentTable,
+                           desiredModel, desiredTable,
+                           doDrops, modifyColumns);
             }
         }
 
@@ -349,6 +351,7 @@ public abstract class SqlBuilder
     /**
      * Alters the given currently existing table object to match the given desired table object.
      * 
+     * @param currentModel The current model
      * @param currentTable The current table definition
      * @param desiredModel The desired model
      * @param desiredTable The desired table definition
@@ -356,7 +359,7 @@ public abstract class SqlBuilder
      *                      new schema
      * @param modifyColumns Whether columns should be altered for datatype, size as required
      */
-    protected void alterTable(Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
+    protected void alterTable(Database currentModel, Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
     {
         for (int columnIdx = 0; columnIdx < desiredTable.getColumnCount(); columnIdx++)
         {
