@@ -75,6 +75,10 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.VARBINARY,     "BYTEA");
         info.addNativeTypeMapping("DATALINK", "BYTEA");
 
+        // no support for specifying the size for these types
+        info.setHasSize(Types.BINARY, false);
+        info.setHasSize(Types.VARBINARY, false);
+
         setSqlBuilder(new PostgreSqlBuilder(info));
     }
 

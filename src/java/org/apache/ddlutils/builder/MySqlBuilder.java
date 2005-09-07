@@ -66,13 +66,13 @@ public class MySqlBuilder extends SqlBuilder
 
                 sqlType.append(getNativeType(column));
                 sqlType.append("(");
-                if (column.getSize() != null)
+                if (column.getSize() == null)
                 {
-                    sqlType.append(column.getSize());
+                    sqlType.append("254");
                 }
                 else
                 {
-                    sqlType.append("254");
+                    sqlType.append(column.getSize());
                 }
                 sqlType.append(") BINARY");
                 return sqlType.toString();

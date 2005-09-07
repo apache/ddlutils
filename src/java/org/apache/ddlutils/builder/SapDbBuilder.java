@@ -17,10 +17,8 @@ package org.apache.ddlutils.builder;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -40,22 +38,6 @@ public class SapDbBuilder extends SqlBuilder
     public SapDbBuilder(PlatformInfo info)
     {
         super(info);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
-     */
-    protected String getSqlType(Column column)
-    {
-        switch (column.getTypeCode())
-        {
-            // no support for specifying the size for these types:
-            case Types.BINARY:
-            case Types.VARBINARY:
-                return getNativeType(column);
-            default:
-                return super.getSqlType(column);
-        }
     }
 
     /* (non-Javadoc)

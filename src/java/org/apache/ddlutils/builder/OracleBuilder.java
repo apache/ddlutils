@@ -77,13 +77,20 @@ public class OracleBuilder extends SqlBuilder
             // we need to always specify a size for these types
             case Types.BINARY:
             case Types.VARCHAR:
-                String result = super.getSqlType(column);
+                StringBuffer sqlType = new StringBuffer();
 
+                sqlType.append(getNativeType(column));
+                sqlType.append("(");
                 if (column.getSize() == null)
                 {
-                    result += "(254)";
+                    sqlType.append("254");
                 }
-                return result;
+                else
+                {
+                    sqlType.append(column.getSize());
+                }
+                sqlType.append(")");
+                return sqlType.toString();
             default:
                 return super.getSqlType(column);
         }

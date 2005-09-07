@@ -72,6 +72,10 @@ public class SapDbPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.VARBINARY,     "LONG BYTE");
         info.addNativeTypeMapping("DATALINK", "LONG BYTE");
 
+        // no support for specifying the size for these types
+        info.setHasSize(Types.BINARY, false);
+        info.setHasSize(Types.VARBINARY, false);
+
         setSqlBuilder(new SapDbBuilder(info));
     }
 

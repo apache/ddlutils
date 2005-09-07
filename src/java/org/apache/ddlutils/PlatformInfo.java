@@ -3,6 +3,7 @@ package org.apache.ddlutils;
 import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,38 @@ public class PlatformInfo
 
     /** Contains non-default mappings from jdbc to native types */
     private HashMap _nativeTypes = new HashMap();
+
+    /** Contains those JDBC types whose corresponding native types have a null value as the default value */
+    private HashSet _typesWithNullDefault = new HashSet();
+
+    /** Contains those JDBC types whose corresponding native types are types that have a size on this platform */
+    private HashSet _typesWithSize = new HashSet();
+
+    /** Contains those JDBC types whose corresponding native types are types that have precision and scale on this platform */
+    private HashSet _typesWithPrecisionAndScale = new HashSet();
+
+    /**
+     * Creates a new platform info object.
+     */
+    public PlatformInfo()
+    {
+        _typesWithNullDefault.add(new Integer(Types.CHAR));
+        _typesWithNullDefault.add(new Integer(Types.VARCHAR));
+        _typesWithNullDefault.add(new Integer(Types.LONGVARCHAR));
+        _typesWithNullDefault.add(new Integer(Types.CLOB));
+        _typesWithNullDefault.add(new Integer(Types.BINARY));
+        _typesWithNullDefault.add(new Integer(Types.VARBINARY));
+        _typesWithNullDefault.add(new Integer(Types.LONGVARBINARY));
+        _typesWithNullDefault.add(new Integer(Types.BLOB));
+
+        _typesWithSize.add(new Integer(Types.CHAR));
+        _typesWithSize.add(new Integer(Types.VARCHAR));
+        _typesWithSize.add(new Integer(Types.BINARY));
+        _typesWithSize.add(new Integer(Types.VARBINARY));
+
+        _typesWithPrecisionAndScale.add(new Integer(Types.DECIMAL));
+        _typesWithPrecisionAndScale.add(new Integer(Types.NUMERIC));
+    }
 
     /**
      * Determines whether a NULL needs to be explicitly stated when the column
@@ -382,5 +415,100 @@ public class PlatformInfo
     public String getNativeType(int typeCode)
     {
         return (String)_nativeTypes.get(new Integer(typeCode));
+    }
+
+    /**
+     * Specifies whether the native type for the given sql type code (one of the
+     * {@link java.sql.Types} constants) has a null default value on this platform.
+     * 
+     * @param sqlTypeCode    The sql type code
+     * @param hasNullDefault <code>true</code> if the native type has a null default value
+     */
+    public void setHasNullDefault(int sqlTypeCode, boolean hasNullDefault)
+    {
+        if (hasNullDefault)
+        {
+            _typesWithNullDefault.add(new Integer(sqlTypeCode));
+        }
+        else
+        {
+            _typesWithNullDefault.remove(new Integer(sqlTypeCode));
+        }
+    }
+
+    /**
+     * Determines whether the native type for the given sql type code (one of the
+     * {@link java.sql.Types} constants) has a null default value on this platform.
+     * 
+     * @param sqlTypeCode The sql type code
+     * @return <code>true</code> if the native type has a null default value
+     */
+    public boolean hasNullDefault(int sqlTypeCode)
+    {
+        return _typesWithNullDefault.contains(new Integer(sqlTypeCode));
+    }
+
+    /**
+     * Specifies whether the native type for the given sql type code (one of the
+     * {@link java.sql.Types} constants) has a size specification on this platform.
+     * 
+     * @param sqlTypeCode The sql type code
+     * @param hasSize     <code>true</code> if the native type has a size specification
+     */
+    public void setHasSize(int sqlTypeCode, boolean hasSize)
+    {
+        if (hasSize)
+        {
+            _typesWithSize.add(new Integer(sqlTypeCode));
+        }
+        else
+        {
+            _typesWithSize.remove(new Integer(sqlTypeCode));
+        }
+    }
+
+    /**
+     * Determines whether the native type for the given sql type code (one of the
+     * {@link java.sql.Types} constants) has a size specification on this platform.
+     * 
+     * @param sqlTypeCode The sql type code
+     * @return <code>true</code> if the native type has a size specification
+     */
+    public boolean hasSize(int sqlTypeCode)
+    {
+        return _typesWithSize.contains(new Integer(sqlTypeCode));
+    }
+
+    /**
+     * Specifies whether the native type for the given sql type code (one of the
+     * {@link java.sql.Types} constants) has precision and scale specifications on
+     * this platform.
+     * 
+     * @param sqlTypeCode          The sql type code
+     * @param hasPrecisionAndScale <code>true</code> if the native type has precision and scale specifications
+     */
+    public void setHasPrecisionAndScale(int sqlTypeCode, boolean hasPrecisionAndScale)
+    {
+        if (hasPrecisionAndScale)
+        {
+            _typesWithPrecisionAndScale.add(new Integer(sqlTypeCode));
+        }
+        else
+        {
+            _typesWithPrecisionAndScale.remove(new Integer(sqlTypeCode));
+        }
+    }
+
+    /**
+     * Determines whether the native type for the given sql type code (one of the
+     * {@link java.sql.Types} constants) has precision and scale specifications on
+     * this platform.
+     * 
+     * @param sqlTypeCode The sql type code
+     * @return <code>true</code> if the native type has precision and scale specifications
+     */
+    public boolean hasPrecisionAndScale(int sqlTypeCode)
+    {
+        return _typesWithPrecisionAndScale.contains(new Integer(sqlTypeCode));
     }
 }

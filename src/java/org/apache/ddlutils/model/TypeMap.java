@@ -63,19 +63,6 @@ public class TypeMap
     public static final String VARBINARY     = "VARBINARY";
     public static final String VARCHAR       = "VARCHAR";
 
-    private static final String[] TEXT_TYPES =
-    {
-        CHAR, VARCHAR, LONGVARCHAR, CLOB
-    };
-    private static final String[] BINARY_TYPES =
-    {
-        BINARY, VARBINARY, LONGVARBINARY, BLOB
-    };
-    private static final String[] DECIMAL_TYPES =
-    {
-        NUMERIC, DECIMAL
-    };
-
     private static Hashtable sqlTypeNameToTypeID = new Hashtable();
     private static Hashtable typeIdToSqlTypeName = new Hashtable();
 
@@ -142,94 +129,6 @@ public class TypeMap
 
         return answer == null ? OTHER : answer;
     }
-
-    /**
-     * Determines whether the indicated type is a textual type.
-     *
-     * @param type The code of type to check (as defined by {@link java.sql.Types}
-     */
-    public static final boolean isTextType(int type)
-    {
-        return isTextType(getJdbcTypeName(type));
-    }
-
-    /**
-     * Determines whether the indicated type is a textual type.
-     *
-     * @param type The type to check
-     */
-    public static final boolean isTextType(String type)
-    {
-        for (int i = 0; i < TEXT_TYPES.length; i++)
-        {
-            if (type.equalsIgnoreCase(TEXT_TYPES[i]))
-            {
-                return true;
-            }
-        }
-
-        // If we get this far, there were no matches.
-        return false;
-    }
-
-    /**
-     * Determines whether the indicated type is a binary type.
-     *
-     * @param type The code of type to check (as defined by {@link java.sql.Types}
-     */
-    public static final boolean isBinaryType(int type)
-    {
-        return isBinaryType(getJdbcTypeName(type));
-    }
-
-    /**
-     * Determines whether the indicated type is a binary type.
-     *
-     * @param type The type to check
-     */
-    public static final boolean isBinaryType(String type)
-    {
-        for (int i = 0; i < BINARY_TYPES.length; i++)
-        {
-            if (type.equalsIgnoreCase(BINARY_TYPES[i]))
-            {
-                return true;
-            }
-        }
-
-        // If we get this far, there were no matches.
-        return false;
-    }
-
-    /**
-     * Returns true if values for the type need have size and scale measurements
-     *
-     * @param type The type to check.
-     */
-    public static final boolean typeHasScaleAndPrecision(int type)
-    {
-        return typeHasScaleAndPrecision(getJdbcTypeName(type));
-    }
-
-    /**
-     * Returns true if values for the type need have size and scale measurements
-     *
-     * @param type The type to check.
-     */
-    public static final boolean typeHasScaleAndPrecision(String type)
-    {
-        for (int i = 0; i < DECIMAL_TYPES.length; i++)
-        {
-            if (type.equalsIgnoreCase(DECIMAL_TYPES[i]))
-            {
-                return true;
-            }
-        }
-
-        // If we get this far, there were no matches.
-        return false;
-    }
-
 
     /**
      * Registers the fact that the given Integer SQL ID maps to the given SQL name

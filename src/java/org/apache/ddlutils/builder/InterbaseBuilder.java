@@ -118,20 +118,9 @@ public class InterbaseBuilder extends SqlBuilder
     {
         switch (column.getTypeCode())
         {
-            // we need to always specify a size for these types
             case Types.BINARY:
             case Types.VARBINARY:
-                StringBuffer sqlType = new StringBuffer();
-
-                sqlType.append(getNativeType(column));
-                if (column.getSize() != null)
-                {
-                    sqlType.append(" (");
-                    sqlType.append(column.getSize());
-                    sqlType.append(")");
-                }
-                sqlType.append(" CHARACTER SET OCTETS");
-                return sqlType.toString();
+                return super.getSqlType(column) + " CHARACTER SET OCTETS";
             default:
                 return super.getSqlType(column);
         }

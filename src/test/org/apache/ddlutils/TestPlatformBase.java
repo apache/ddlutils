@@ -47,7 +47,7 @@ public abstract class TestPlatformBase extends TestCase
         "    <column name=\"COL_CLOB\"            type=\"CLOB\"/>\n"+
         "    <column name=\"COL_DATALINK\"        type=\"DATALINK\"/>\n"+
         "    <column name=\"COL_DATE\"            type=\"DATE\"/>\n"+
-        "    <column name=\"COL_DECIMAL\"         type=\"DECIMAL\" scale=\"3\" size=\"15\"/>\n"+
+        "    <column name=\"COL_DECIMAL\"         type=\"DECIMAL\" size=\"15,3\"/>\n"+
         "    <column name=\"COL_DECIMAL_NOSCALE\" type=\"DECIMAL\" size=\"15\"/>\n"+
         "    <column name=\"COL_DISTINCT\"        type=\"DISTINCT\"/>\n"+
         "    <column name=\"COL_DOUBLE\"          type=\"DOUBLE\"/>\n"+
@@ -61,7 +61,7 @@ public abstract class TestPlatformBase extends TestCase
         "    <column name=\"COL_OTHER\"           type=\"OTHER\"/>\n"+
         "    <column name=\"COL_REAL\"            type=\"REAL\"/>\n"+
         "    <column name=\"COL_REF\"             type=\"REF\"/>\n"+
-        "    <column name=\"COL_SMALLINT\"        type=\"SMALLINT\"/>\n"+
+        "    <column name=\"COL_SMALLINT\"        type=\"SMALLINT\" size=\"5\"/>\n"+
         "    <column name=\"COL_STRUCT\"          type=\"STRUCT\"/>\n"+
         "    <column name=\"COL_TIME\"            type=\"TIME\"/>\n"+
         "    <column name=\"COL_TIMESTAMP\"       type=\"TIMESTAMP\"/>\n"+

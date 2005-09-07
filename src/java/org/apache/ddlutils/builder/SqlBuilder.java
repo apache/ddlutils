@@ -36,7 +36,6 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.model.TypeMap;
 
 /**
  * This class is a collection of Strategy methods for creating the DDL required to create and drop 
@@ -964,7 +963,7 @@ public abstract class SqlBuilder
             writeColumnNotNullableStmt();
         }
         else if (getPlatformInfo().isRequiringNullAsDefaultValue() &&
-                 (TypeMap.isTextType(column.getTypeCode()) || TypeMap.isBinaryType(column.getTypeCode())))
+                 getPlatformInfo().hasNullDefault(column.getTypeCode()))
         {
             print(" ");
             writeColumnNullableStmt();
@@ -1018,14 +1017,20 @@ public abstract class SqlBuilder
 
         if (column.getSize() != null)
         {
-            sqlType.append("(");
-            sqlType.append(column.getSize());
-            if (TypeMap.typeHasScaleAndPrecision(column.getType()))
+            if (getPlatformInfo().hasSize(column.getTypeCode()))
             {
+                sqlType.append("(");
+                sqlType.append(column.getSize());
+                sqlType.append(")");
+            }
+            else if (getPlatformInfo().hasPrecisionAndScale(column.getTypeCode()))
+            {
+                sqlType.append("(");
+                sqlType.append(column.getSize());
                 sqlType.append(",");
                 sqlType.append(column.getScale());
+                sqlType.append(")");
             }
-            sqlType.append(")");
         }
         return sqlType.toString();
     }

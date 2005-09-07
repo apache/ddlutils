@@ -54,13 +54,13 @@ public class CloudscapeBuilder extends SqlBuilder
                 
                 sqlType.append(getNativeType(column));
                 sqlType.append(" (");
-                if (column.getSize() != null)
+                if (column.getSize() == null)
                 {
-                    sqlType.append(column.getSize());
+                    sqlType.append("254");
                 }
                 else
                 {
-                    sqlType.append("254");
+                    sqlType.append(column.getSize());
                 }
                 sqlType.append(") FOR BIT DATA");
                 return sqlType.toString();
