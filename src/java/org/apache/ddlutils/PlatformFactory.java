@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.apache.ddlutils.platform.AxionPlatform;
 import org.apache.ddlutils.platform.CloudscapePlatform;
 import org.apache.ddlutils.platform.Db2Platform;
@@ -64,11 +66,45 @@ public class PlatformFactory
      * @param databaseName The name of the database (case is not important)
      * @return The platform or <code>null</code> if the database is not supported
      */
-    public static synchronized Platform createNewPlatformInstance(String databaseName) throws IllegalAccessException, InstantiationException
+    public static synchronized Platform createNewPlatformInstance(String databaseName) throws DdlUtilsException
     {
         Class platformClass = (Class)_platforms.get(databaseName.toLowerCase());
 
-        return platformClass != null ? (Platform)platformClass.newInstance() : null;
+        try
+        {
+            return platformClass != null ? (Platform)platformClass.newInstance() : null;
+        }
+        catch (Exception ex)
+        {
+            throw new DdlUtilsException("Could not create platform for database "+databaseName, ex);
+        }
+    }
+
+    /**
+     * Creates a new platform for the specified database. This is a shortcut method that uses
+     * {@link PlatformUtils#determineDatabaseType(String, String)} to determine the parameter
+     * for {@link #createNewPlatformInstance(String)}.
+     * 
+     * @param jdbcDriver        The jdbc driver
+     * @param jdbcConnectionUrl The connection url
+     * @return The platform or <code>null</code> if the database is not supported
+     */
+    public static synchronized Platform createNewPlatformInstance(String jdbcDriver, String jdbcConnectionUrl) throws DdlUtilsException
+    {
+        return createNewPlatformInstance(new PlatformUtils().determineDatabaseType(jdbcDriver, jdbcConnectionUrl));
+    }
+
+    /**
+     * Creates a new platform for the specified database. This is a shortcut method that uses
+     * {@link PlatformUtils#determineDatabaseType(DataSource)} to determine the parameter
+     * for {@link #createNewPlatformInstance(String)}.
+     * 
+     * @param dataSource The data source for the database
+     * @return The platform or <code>null</code> if the database is not supported
+     */
+    public static synchronized Platform createNewPlatformInstance(DataSource dataSource) throws DdlUtilsException
+    {
+        return createNewPlatformInstance(new PlatformUtils().determineDatabaseType(dataSource));
     }
 
     /**
