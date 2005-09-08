@@ -1,21 +1,22 @@
 package org.apache.ddlutils;
 
-import org.apache.ddlutils.builder.TestAxionPlatform;
-import org.apache.ddlutils.builder.TestCloudscapePlatform;
-import org.apache.ddlutils.builder.TestDB2Platform;
-import org.apache.ddlutils.builder.TestDerbyPlatform;
-import org.apache.ddlutils.builder.TestFirebirdPlatform;
-import org.apache.ddlutils.builder.TestHsqlDbPlatform;
-import org.apache.ddlutils.builder.TestInterbasePlatform;
-import org.apache.ddlutils.builder.TestMSSqlPlatform;
-import org.apache.ddlutils.builder.TestMaxDbPlatform;
-import org.apache.ddlutils.builder.TestMcKoiPlatform;
-import org.apache.ddlutils.builder.TestMySqlPlatform;
-import org.apache.ddlutils.builder.TestOracle8Platform;
-import org.apache.ddlutils.builder.TestOracle9Platform;
-import org.apache.ddlutils.builder.TestPostgresqlPlatform;
-import org.apache.ddlutils.builder.TestSapDbPlatform;
-import org.apache.ddlutils.builder.TestSybasePlatform;
+import org.apache.ddlutils.platform.TestAxionPlatform;
+import org.apache.ddlutils.platform.TestCloudscapePlatform;
+import org.apache.ddlutils.platform.TestDB2Platform;
+import org.apache.ddlutils.platform.TestDerbyPlatform;
+import org.apache.ddlutils.platform.TestFirebirdPlatform;
+import org.apache.ddlutils.platform.TestHsqlDbPlatform;
+import org.apache.ddlutils.platform.TestInterbasePlatform;
+import org.apache.ddlutils.platform.TestMSSqlPlatform;
+import org.apache.ddlutils.platform.TestMaxDbPlatform;
+import org.apache.ddlutils.platform.TestMcKoiPlatform;
+import org.apache.ddlutils.platform.TestMySqlPlatform;
+import org.apache.ddlutils.platform.TestOracle8Platform;
+import org.apache.ddlutils.platform.TestOracle9Platform;
+import org.apache.ddlutils.platform.TestPlatformUtils;
+import org.apache.ddlutils.platform.TestPostgresqlPlatform;
+import org.apache.ddlutils.platform.TestSapDbPlatform;
+import org.apache.ddlutils.platform.TestSybasePlatform;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -55,6 +56,7 @@ public class RunAllTests extends TestCase
     {
         TestSuite suite = new TestSuite("Ddlutils tests");
 
+        suite.addTestSuite(TestPlatformUtils.class);
         suite.addTestSuite(TestAxionPlatform.class);
         suite.addTestSuite(TestCloudscapePlatform.class);
         suite.addTestSuite(TestDB2Platform.class);

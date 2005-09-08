@@ -31,11 +31,17 @@ import org.apache.ddlutils.builder.OracleBuilder;
 public class Oracle8Platform extends PlatformImplBase
 {
     /** Database name of this platform */
-    public static final String DATABASENAME     = "Oracle";
+    public static final String DATABASENAME              = "Oracle";
     /** The standard Oracle jdbc driver */
-    public static final String JDBC_DRIVER      = "oracle.jdbc.driver.OracleDriver";
-    /** The subprotocol used by the standard Oracle driver */
-    public static final String JDBC_SUBPROTOCOL = "oracle";
+    public static final String JDBC_DRIVER               = "oracle.jdbc.driver.OracleDriver";
+    /** The old Oracle jdbc driver */
+    public static final String JDBC_DRIVER_OLD           = "oracle.jdbc.dnlddriver.OracleDriver";
+    /** The thin subprotocol used by the standard Oracle driver */
+    public static final String JDBC_SUBPROTOCOL_THIN     = "oracle:thin";
+    /** The thin subprotocol used by the standard Oracle driver */
+    public static final String JDBC_SUBPROTOCOL_OCI8     = "oracle:oci8";
+    /** The thin subprotocol used by the standard Oracle driver */
+    public static final String JDBC_SUBPROTOCOL_THIN_OLD = "oracle:dnldthin";
 
     /**
      * Creates a new platform instance.

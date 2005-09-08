@@ -31,6 +31,10 @@ public class CloudscapePlatform extends PlatformImplBase
 {
     /** Database name of this platform */
     public static final String DATABASENAME = "Cloudscape";
+    /** A subprotocol used by the DB2 network driver */
+    public static final String JDBC_SUBPROTOCOL_1 = "db2j:net";
+    /** A subprotocol used by the DB2 network driver */
+    public static final String JDBC_SUBPROTOCOL_2 = "cloudscape:net";
 
     /**
      * Creates a new platform instance.
