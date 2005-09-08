@@ -17,6 +17,7 @@ package org.apache.ddlutils.io;
  */
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -66,7 +67,7 @@ public class JdbcModelReader
     private String schema = "%";
     /** The table types to recognize */
     private String[] tableTypes = { "TABLE" };
-    /** The patern to recognize when parsing a default value */
+    /** The pattern to recognize when parsing a default value */
     private Pattern defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)");
 
     /**
@@ -144,13 +145,15 @@ public class JdbcModelReader
      * 
      * @return The list of tables
      */
-    public List getTables() throws SQLException
+    private List getTables() throws SQLException
     {
         ResultSet tableData = null;
 
         try
         {
-            tableData = connection.getMetaData().getTables(catalog, schema, "%", tableTypes);
+            DatabaseMetaData metaData = connection.getMetaData();
+
+            tableData = metaData.getTables(catalog, schema, "%", tableTypes);
             
             Set  availableColumns = determineAvailableColumns(tableData);
             List tables           = new ArrayList();
@@ -176,15 +179,15 @@ public class JdbcModelReader
             {
                 Table table = (Table)it.next();
 
-                for (Iterator columnIt = getColumnsForTable(table.getName()).iterator(); columnIt.hasNext();)
+                for (Iterator columnIt = getColumnsForTable(metaData, table.getName()).iterator(); columnIt.hasNext();)
                 {
                     table.addColumn((Column)columnIt.next());
                 }
-                for (Iterator fkIt = getForeignKeysForTable(table.getName()).iterator(); fkIt.hasNext();)
+                for (Iterator fkIt = getForeignKeysForTable(metaData, table.getName()).iterator(); fkIt.hasNext();)
                 {
                     table.addForeignKey((ForeignKey)fkIt.next());
                 }
-                for (Iterator idxIt = getIndicesForTable(table.getName()).iterator(); idxIt.hasNext();)
+                for (Iterator idxIt = getIndicesForTable(metaData, table.getName()).iterator(); idxIt.hasNext();)
                 {
                     table.addIndex((Index)idxIt.next());
                 }
@@ -203,20 +206,21 @@ public class JdbcModelReader
     /**
      * Returns a list of {@link Column} instances for the indicated table.
      * 
+     * @param metaData  The database meta data
      * @param tableName The name of the table
      * @return The list of columns
      */
-    private List getColumnsForTable(String tableName) throws SQLException
+    private List getColumnsForTable(DatabaseMetaData metaData, String tableName) throws SQLException
     {
         ResultSet columnData = null;
 
         try
         {
-            columnData = connection.getMetaData().getColumns(catalog, schema, tableName, null);
+            columnData = metaData.getColumns(catalog, schema, tableName, null);
 
             Set  availableColumns = determineAvailableColumns(columnData);
             List columns          = new ArrayList();
-            List primaryKeys      = getPrimaryKeysForTable(tableName);
+            List primaryKeys      = getPrimaryKeysForTable(metaData, tableName);
 
             while (columnData.next())
             {
@@ -269,17 +273,18 @@ public class JdbcModelReader
      * Retrieves a list of the columns composing the primary key for a given
      * table.
      *
+     * @param metaData  The database meta data
      * @param tableName The name of the table from which to retrieve PK information
      * @return The list of the primary key column names
      */
-    public List getPrimaryKeysForTable(String tableName) throws SQLException
+    private List getPrimaryKeysForTable(DatabaseMetaData metaData, String tableName) throws SQLException
     {
         List      pks   = new ArrayList();
         ResultSet pkData = null;
 
         try
         {
-            pkData = connection.getMetaData().getPrimaryKeys(catalog, schema, tableName);
+            pkData = metaData.getPrimaryKeys(catalog, schema, tableName);
             while (pkData.next())
             {
                 pks.add(pkData.getString("COLUMN_NAME"));
@@ -302,17 +307,18 @@ public class JdbcModelReader
     /**
      * Retrieves a list of the foreign keys of the indicated table.
      *
+     * @param metaData  The database meta data
      * @param tableName The name of the table from which to retrieve FK information
      * @return The list of foreign keys
      */
-    public List getForeignKeysForTable(String tableName) throws SQLException
+    private List getForeignKeysForTable(DatabaseMetaData metaData, String tableName) throws SQLException
     {
         List      fks    = new ArrayList();
         ResultSet fkData = null;
 
         try
         {
-            fkData = connection.getMetaData().getImportedKeys(catalog, schema, tableName);
+            fkData = metaData.getImportedKeys(catalog, schema, tableName);
 
             Set        availableColumns = determineAvailableColumns(fkData);
             String     prevPkTable      = null;
@@ -363,17 +369,18 @@ public class JdbcModelReader
     /**
      * Determines the indices for the indicated table.
      * 
+     * @param metaData  The database meta data
      * @param tableName The name of the table
      * @return The list of indices
      */
-    private List getIndicesForTable(String tableName) throws SQLException
+    private List getIndicesForTable(DatabaseMetaData metaData, String tableName) throws SQLException
     {
         ResultSet indexData = null;
         List      indices   = new ArrayList();
 
         try 
         {
-            indexData = connection.getMetaData().getIndexInfo(catalog, schema, tableName, false, false);
+            indexData = metaData.getIndexInfo(catalog, schema, tableName, false, false);
 
             Set availableColumns = determineAvailableColumns(indexData);
             Map indicesByName    = new LinkedMap();

@@ -4,23 +4,19 @@ List of things to be done for the next version of DdlUtils:
 * Enhance doc:
     - The Ant task
     - How to use DdlUtils in code
-* Update commons-betwixt replace .betwixt files with a multi-mapping
-* Remove DDL subpackage and jelly-dependency which is not used anymore anyway
 * Separate generation of alter statements for an existing databases from the reading
   of the model from the existing database to allow for alter statement generation with two
   database models without having to connect to the database and thus allow for testing the
   alter statement generation without an actual live database
 * Add unit tests for:
-    - Model reading
     - SQL generation (including alteration)
     - Roundtrip (database specific)
+* Replace usage of java.util.regex with some alternative that is Java 1.3 (1.2 ?) compatible
 * Add support for chosing the character set (ASCII, UNICODE) if the database supports it
   (perhaps a more generic configuration mechanism for overriding defaults)
 * Add the ability to configure the datatype mapping (ant task, API)
 * Replace System.out/System.err writes with logging statements
 * Extract interfaces from the model classes and inroduce a factory for creating the concrete model objects
-* Make associations in the model (foreignkey, indices) stonger-typed by referencing the columns instead
-  of using only their names
 * Add functionality and ant tasks to dump data from the database
 * Add integration with DbUnit to allow DbUnit to use the schema and data files
 * Add proper handling of names (table, column, ...) that contain whitespaces and similar (-> escaping)
