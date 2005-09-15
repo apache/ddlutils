@@ -50,6 +50,8 @@
                destdir="${build.java.dir}"
                deprecation="true"
                debug="true"
+               source="1.2"
+               target="1.2"
                optimize="false">
             <classpath refid="compilation-classpath"/>
         </javac>
