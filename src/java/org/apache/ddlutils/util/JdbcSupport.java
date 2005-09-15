@@ -19,6 +19,8 @@ package org.apache.ddlutils.util;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import javax.sql.DataSource;
 
@@ -36,11 +38,12 @@ import org.apache.ddlutils.DynaSqlException;
  */
 public abstract class JdbcSupport
 {
-
     /** The Log to which logging calls will be made. */
-    private final Log _log = LogFactory.getLog(getClass());
+    private final Log _log = LogFactory.getLog(JdbcSupport.class);
     /** The data source */
     private DataSource _dataSource;
+    /** The names of the currently borrowed connections (for debugging) */
+    private HashSet _openConnectionNames = new HashSet();
 
     /**
      * Creates a new instance without a data source.
@@ -95,7 +98,16 @@ public abstract class JdbcSupport
     {
         try
         {
-            return getDataSource().getConnection();
+            Connection connection = getDataSource().getConnection();
+
+            if (_log.isDebugEnabled())
+            {
+                String connName = connection.toString();
+
+                _log.debug("Borrowed connection "+connName+" from data source");
+                _openConnectionNames.add(connName);
+            }
+            return connection;
         }
         catch (SQLException ex)
         {
@@ -114,6 +126,31 @@ public abstract class JdbcSupport
         {
             if ((connection != null) && !connection.isClosed())
             {
+                if (_log.isDebugEnabled())
+                {
+                    String connName = connection.toString();
+
+                    _openConnectionNames.remove(connName);
+
+                    StringBuffer logMsg = new StringBuffer();
+
+                    logMsg.append("Returning connection ");
+                    logMsg.append(connName);
+                    logMsg.append(" to data source.\nRemaining connections:");
+                    if (_openConnectionNames.isEmpty())
+                    {
+                        logMsg.append(" None");
+                    }
+                    else
+                    {
+                        for (Iterator it = _openConnectionNames.iterator(); it.hasNext();)
+                        {
+                          logMsg.append("\n    ");
+                          logMsg.append(it.next().toString());
+                        }
+                    }
+                    _log.debug(logMsg.toString());
+                }
                 connection.close();
             }
         }
