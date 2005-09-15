@@ -3,6 +3,8 @@ package org.apache.ddlutils.platform;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.ddlutils.DynaSqlException;
 
@@ -48,21 +50,47 @@ public class DerbyPlatform extends CloudscapePlatform
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.platform.PlatformImplBase#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map)
      */
-    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
     {
         // For Derby, you create databases by simply appending ";create=true" to the connection url
         if (JDBC_DRIVER.equals(jdbcDriverClassName) ||
             JDBC_DRIVER_EMBEDDED.equals(jdbcDriverClassName))
         {
-            Connection connection = null;
+            StringBuffer creationUrl = new StringBuffer();
+            Connection   connection  = null;
 
+            creationUrl.append(connectionUrl);
+            creationUrl.append(";create=true");
+            if ((parameters != null) && !parameters.isEmpty())
+            {
+                for (Iterator it = parameters.entrySet().iterator(); it.hasNext();)
+                {
+                    Map.Entry entry = (Map.Entry)it.next();
+
+                    // no need to specify create twice (and create=false wouldn't help anyway)
+                    if ("create".equalsIgnoreCase(entry.getKey().toString()))
+                    {
+                        creationUrl.append(";");
+                        creationUrl.append(entry.getKey().toString());
+                        creationUrl.append("=");
+                        if (entry.getValue() != null)
+                        {
+                            creationUrl.append(entry.getValue().toString());
+                        }
+                    }
+                }
+            }
+            if (getLog().isDebugEnabled())
+            {
+                getLog().debug("About to create database using this URL: "+creationUrl.toString());
+            }
             try
             {
                 Class.forName(jdbcDriverClassName);
 
-                connection = DriverManager.getConnection(connectionUrl + ";create=true", username, password);
+                connection = DriverManager.getConnection(creationUrl.toString(), username, password);
                 logWarnings(connection);
             }
             catch (Exception ex)

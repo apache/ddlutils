@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.commons.beanutils.DynaBean;
@@ -230,9 +231,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map)
      */
-    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
     {
         throw new UnsupportedOperationException("Database creation is not supported for the database platform "+getDatabaseName());
     }

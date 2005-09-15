@@ -16,6 +16,7 @@ package org.apache.ddlutils.task;
  * limitations under the License.
  */
 
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
@@ -25,9 +26,25 @@ import org.apache.tools.ant.Task;
 
 /**
  * Command for creating a database.
+ * 
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @version $Revision: 231306 $
  */
 public class CreateDatabaseCommand extends DatabaseCommand
 {
+    /** The additional creation parameters */
+    private ListOrderedMap _parameters = new ListOrderedMap();
+
+    /**
+     * Adds a parameter which is a name-value pair.
+     * 
+     * @param param The parameter
+     */
+    public void addConfiguredParameter(NamedValue param)
+    {
+        _parameters.put(param.getName(), param.getValue());
+    }
+
     /* (non-Javadoc)
      * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
      */
@@ -47,7 +64,8 @@ public class CreateDatabaseCommand extends DatabaseCommand
             platform.createDatabase(dataSource.getDriverClassName(),
                                     dataSource.getUrl(),
                                     dataSource.getUsername(),
-                                    dataSource.getPassword());
+                                    dataSource.getPassword(),
+                                    _parameters);
 
             task.log("Created database", Project.MSG_INFO);
         }

@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -117,16 +118,17 @@ public interface Platform
      * use a data source set via {@link #setDataSource(DataSource)} because it is not possible to
      * retrieve the connection information from it without establishing a connection.<br/>
      * The given connection url is the url that you'd use to connect to the already-created
-     * database. 
+     * database.<br/>
+     * On some platforms, this method suppurts additional parameters. These are documented in the
+     * manual section for the individual platforms. 
      * 
      * @param jdbcDriverClassName The jdbc driver class name
      * @param connectionUrl       The url to connect to the database if it were already created
      * @param username            The username for creating the database
      * @param password            The password for creating the database
-     * 
-     * TODO: Support additional parameters which are platform specific (eg. encoding etc.)
+     * @param parameters          Additional parameters relevant to database creation (which are platform specific)
      */
-    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException;
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException;
 
     /**
      * Drops the database specified by the given parameters. Please note that this method does not

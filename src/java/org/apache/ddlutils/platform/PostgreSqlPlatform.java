@@ -21,6 +21,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
@@ -97,9 +99,10 @@ public class PostgreSqlPlatform extends PlatformImplBase
      * @param connectionUrl       The url to connect to the database if it were already created
      * @param username            The username for creating the database
      * @param password            The password for creating the database
+     * @param parameters          Additional parameters for the operation
      * @param createDb            Whether to create or drop the database
      */
-    private void createOrDropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, boolean createDb) throws DynaSqlException, UnsupportedOperationException
+    private void createOrDropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters, boolean createDb) throws DynaSqlException, UnsupportedOperationException
     {
         if (JDBC_DRIVER.equals(jdbcDriverClassName))
         {
@@ -110,25 +113,42 @@ public class PostgreSqlPlatform extends PlatformImplBase
                 throw new DynaSqlException("Cannot parse the given connection url "+connectionUrl);
             }
 
-            int        paramPos   = connectionUrl.lastIndexOf('?');
-            String     dbName     = (paramPos > slashPos ? connectionUrl.substring(slashPos + 1, paramPos) : connectionUrl.substring(slashPos + 1));
-            Connection connection = null;
-            Statement  stmt       = null;
+            int          paramPos   = connectionUrl.lastIndexOf('?');
+            String       baseDb     = connectionUrl.substring(0, slashPos + 1) + "template1";
+            String       dbName     = (paramPos > slashPos ? connectionUrl.substring(slashPos + 1, paramPos) : connectionUrl.substring(slashPos + 1));
+            Connection   connection = null;
+            Statement    stmt       = null;
+            StringBuffer sql        = new StringBuffer();
 
+            sql.append(createDb ? "CREATE" : "DROP");
+            sql.append(" DATABASE ");
+            sql.append(dbName);
+            if ((parameters != null) && !parameters.isEmpty())
+            {
+                for (Iterator it = parameters.entrySet().iterator(); it.hasNext();)
+                {
+                    Map.Entry entry = (Map.Entry)it.next();
+
+                    sql.append(" ");
+                    sql.append(entry.getKey().toString());
+                    if (entry.getValue() != null)
+                    {
+                        sql.append(" ");
+                        sql.append(entry.getValue().toString());
+                    }
+                }
+            }
+            if (getLog().isDebugEnabled())
+            {
+                getLog().debug("About to create database via "+baseDb+" using this SQL: "+sql.toString());
+            }
             try
             {
                 Class.forName(jdbcDriverClassName);
 
-                connection = DriverManager.getConnection(connectionUrl.substring(0, slashPos + 1) + "template1", username, password);
+                connection = DriverManager.getConnection(baseDb, username, password);
                 stmt       = connection.createStatement();
-                if (createDb)
-                {
-                    stmt.execute("CREATE DATABASE "+dbName);
-                }
-                else
-                {
-                    stmt.execute("DROP DATABASE "+dbName);
-                }
+                stmt.execute(sql.toString());
                 logWarnings(connection);
             }
             catch (Exception ex)
@@ -164,13 +184,13 @@ public class PostgreSqlPlatform extends PlatformImplBase
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.platform.PlatformImplBase#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map)
      */
-    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
     {
         // With PostgreSQL, you create a database by executing "CREATE DATABASE" in an existing database (usually 
         // the template1 database because it usually exists)
-        createOrDropDatabase(jdbcDriverClassName, connectionUrl, username, password, true);
+        createOrDropDatabase(jdbcDriverClassName, connectionUrl, username, password, parameters, true);
     }
 
     /* (non-Javadoc)
@@ -180,7 +200,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
     {
         // With PostgreSQL, you create a database by executing "DROP DATABASE" in an existing database (usually 
         // the template1 database because it usually exists)
-        createOrDropDatabase(jdbcDriverClassName, connectionUrl, username, password, false);
+        createOrDropDatabase(jdbcDriverClassName, connectionUrl, username, password, null, false);
     }
 
     
