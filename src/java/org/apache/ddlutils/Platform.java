@@ -40,9 +40,9 @@ public interface Platform
     /**
      * Returns the name of the database that this platform is for.
      * 
-     * @return The database name
+     * @return The name
      */
-    public String getDatabaseName();
+    public String getName();
 
     /**
      * Returns the info object for this platform.

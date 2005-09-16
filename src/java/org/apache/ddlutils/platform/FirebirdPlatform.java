@@ -32,9 +32,9 @@ public class FirebirdPlatform extends InterbasePlatform
     public static final String JDBC_SUBPROTOCOL = "firebirdsql";
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getDatabaseName()
+     * @see org.apache.ddlutils.builder.Platform#getName()
      */
-    public String getDatabaseName()
+    public String getName()
     {
         return DATABASENAME;
     }

@@ -16,7 +16,10 @@ package org.apache.ddlutils.task;
  * limitations under the License.
  */
 
-import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
@@ -33,16 +36,16 @@ import org.apache.tools.ant.Task;
 public class CreateDatabaseCommand extends DatabaseCommand
 {
     /** The additional creation parameters */
-    private ListOrderedMap _parameters = new ListOrderedMap();
+    private ArrayList _parameters = new ArrayList();
 
     /**
      * Adds a parameter which is a name-value pair.
      * 
      * @param param The parameter
      */
-    public void addConfiguredParameter(NamedValue param)
+    public void addConfiguredParameter(Parameter param)
     {
-        _parameters.put(param.getName(), param.getValue());
+        _parameters.add(param);
     }
 
     /* (non-Javadoc)
@@ -58,20 +61,20 @@ public class CreateDatabaseCommand extends DatabaseCommand
         }
 
         Platform platform = getPlatform();
-
+        
         try
         {
             platform.createDatabase(dataSource.getDriverClassName(),
                                     dataSource.getUrl(),
                                     dataSource.getUsername(),
                                     dataSource.getPassword(),
-                                    _parameters);
+                                    getFilteredParameters(platform.getName()));
 
             task.log("Created database", Project.MSG_INFO);
         }
         catch (UnsupportedOperationException ex)
         {
-            task.log("Database platform "+getPlatform().getDatabaseName()+" does not support database creation via JDBC", Project.MSG_ERR);
+            task.log("Database platform "+getPlatform().getName()+" does not support database creation via JDBC", Project.MSG_ERR);
         }
         catch (Exception ex)
         {
@@ -84,5 +87,27 @@ public class CreateDatabaseCommand extends DatabaseCommand
                 task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
             }
         }
+    }
+
+    /**
+     * Filters the parameters for the indicated platform.
+     * 
+     * @param platformName The name of the platform
+     * @return The filtered parameters
+     */
+    private Map getFilteredParameters(String platformName)
+    {
+        LinkedHashMap parameters = new LinkedHashMap();
+
+        for (Iterator it = _parameters.iterator(); it.hasNext();)
+        {
+            Parameter param = (Parameter)it.next();
+
+            if (param.isForPlatform(platformName))
+            {
+                parameters.put(param.getName(), param.getValue());
+            }
+        }
+        return parameters;
     }
 }

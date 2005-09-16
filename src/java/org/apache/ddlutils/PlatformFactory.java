@@ -16,13 +16,9 @@ package org.apache.ddlutils;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
-
 import org.apache.ddlutils.platform.AxionPlatform;
 import org.apache.ddlutils.platform.CloudscapePlatform;
 import org.apache.ddlutils.platform.Db2Platform;
@@ -52,13 +48,24 @@ import org.apache.ddlutils.platform.SybasePlatform;
 public class PlatformFactory
 {
     /** The database name -> platform map */
-    private static Map _platforms = new HashMap();
+    private static Map _platforms = null;
 
-    static
+    /**
+     * Returns the platform map.
+     * 
+     * @return The platform list
+     */
+    private static synchronized Map getPlatforms()
     {
-        registerDatabases();
+        if (_platforms == null)
+        {
+            // lazy initialization
+            _platforms = new HashMap();
+            registerPlatforms();
+        }
+        return _platforms;
     }
-
+    
     /**
      * Creates a new platform for the given (case insensitive) database name
      * or returns null if the database is not recognized.
@@ -68,7 +75,7 @@ public class PlatformFactory
      */
     public static synchronized Platform createNewPlatformInstance(String databaseName) throws DdlUtilsException
     {
-        Class platformClass = (Class)_platforms.get(databaseName.toLowerCase());
+        Class platformClass = (Class)getPlatforms().get(databaseName.toLowerCase());
 
         try
         {
@@ -108,55 +115,73 @@ public class PlatformFactory
     }
 
     /**
-     * Returns a list of all supported databases.
+     * Returns a list of all supported platforms.
      * 
-     * @return The currently registered database types
+     * @return The names of the currently registered platforms
      */
-    public static synchronized List getDatabaseTypes()
+    public static synchronized String[] getSupportedPlatforms()
     {
-        // return a copy to prevent modification
-        List answer = new ArrayList();
-
-        answer.addAll(_platforms.keySet());
-        return answer;
+        return (String[])getPlatforms().keySet().toArray(new String[0]);
     }
 
+    /**
+     * Determines whether the indicated platform is supported.
+     * 
+     * @param platformName The name of the platform
+     * @return <code>true</code> if the platform is supported
+     */
+    public static boolean isPlatformSupported(String platformName)
+    {
+        return getPlatforms().containsKey(platformName.toLowerCase());
+    }
 
     /**
      * Registers a new platform.
      * 
-     * @param databaseName  The database name
+     * @param platformName  The platform name
      * @param platformClass The platform class which must implement the {@link Platform} interface
      */
-    public static synchronized void registerDatabase(String databaseName, Class platformClass)
+    public static synchronized void registerPlatform(String platformName, Class platformClass)
+    {
+        addPlatform(getPlatforms(), platformName, platformClass);
+    }
+
+    /**
+     * Registers the known platforms.
+     */
+    private static void registerPlatforms()
+    {
+        addPlatform(_platforms, AxionPlatform.DATABASENAME,      AxionPlatform.class);
+        addPlatform(_platforms, CloudscapePlatform.DATABASENAME, CloudscapePlatform.class);
+        addPlatform(_platforms, Db2Platform.DATABASENAME,        Db2Platform.class);
+        addPlatform(_platforms, DerbyPlatform.DATABASENAME,      DerbyPlatform.class);
+        addPlatform(_platforms, FirebirdPlatform.DATABASENAME,   FirebirdPlatform.class);
+        addPlatform(_platforms, HsqlDbPlatform.DATABASENAME,     HsqlDbPlatform.class);
+        addPlatform(_platforms, InterbasePlatform.DATABASENAME,  InterbasePlatform.class);
+        addPlatform(_platforms, MaxDbPlatform.DATABASENAME,      MaxDbPlatform.class);
+        addPlatform(_platforms, MckoiPlatform.DATABASENAME,      MckoiPlatform.class);
+        addPlatform(_platforms, MSSqlPlatform.DATABASENAME,      MSSqlPlatform.class);
+        addPlatform(_platforms, MySqlPlatform.DATABASENAME,      MySqlPlatform.class);
+        addPlatform(_platforms, Oracle8Platform.DATABASENAME,    Oracle8Platform.class);
+        addPlatform(_platforms, Oracle9Platform.DATABASENAME,    Oracle9Platform.class);
+        addPlatform(_platforms, PostgreSqlPlatform.DATABASENAME, PostgreSqlPlatform.class);
+        addPlatform(_platforms, SapDbPlatform.DATABASENAME,      SapDbPlatform.class);
+        addPlatform(_platforms, SybasePlatform.DATABASENAME,     SybasePlatform.class);
+    }
+
+    /**
+     * Registers a new platform.
+     * 
+     * @param platformMap   The map to add the platform info to 
+     * @param platformName  The platform name
+     * @param platformClass The platform class which must implement the {@link Platform} interface
+     */
+    private static synchronized void addPlatform(Map platformMap, String platformName, Class platformClass)
     {
         if (!Platform.class.isAssignableFrom(platformClass))
         {
             throw new IllegalArgumentException("Cannot register class "+platformClass.getName()+" because it does not implement the "+Platform.class.getName()+" interface");
         }
-        _platforms.put(databaseName.toLowerCase(), platformClass);        
-    }
-
-    /**
-     * Registers the predefined builders.
-     */
-    protected static void registerDatabases()
-    {
-        registerDatabase(AxionPlatform.DATABASENAME,      AxionPlatform.class);
-        registerDatabase(CloudscapePlatform.DATABASENAME, CloudscapePlatform.class);
-        registerDatabase(Db2Platform.DATABASENAME,        Db2Platform.class);
-        registerDatabase(DerbyPlatform.DATABASENAME,      DerbyPlatform.class);
-        registerDatabase(FirebirdPlatform.DATABASENAME,   FirebirdPlatform.class);
-        registerDatabase(HsqlDbPlatform.DATABASENAME,     HsqlDbPlatform.class);
-        registerDatabase(InterbasePlatform.DATABASENAME,  InterbasePlatform.class);
-        registerDatabase(MaxDbPlatform.DATABASENAME,      MaxDbPlatform.class);
-        registerDatabase(MckoiPlatform.DATABASENAME,      MckoiPlatform.class);
-        registerDatabase(MSSqlPlatform.DATABASENAME,      MSSqlPlatform.class);
-        registerDatabase(MySqlPlatform.DATABASENAME,      MySqlPlatform.class);
-        registerDatabase(Oracle8Platform.DATABASENAME,    Oracle8Platform.class);
-        registerDatabase(Oracle9Platform.DATABASENAME,    Oracle9Platform.class);
-        registerDatabase(PostgreSqlPlatform.DATABASENAME, PostgreSqlPlatform.class);
-        registerDatabase(SapDbPlatform.DATABASENAME,      SapDbPlatform.class);
-        registerDatabase(SybasePlatform.DATABASENAME,     SybasePlatform.class);
+        platformMap.put(platformName.toLowerCase(), platformClass);        
     }
 }

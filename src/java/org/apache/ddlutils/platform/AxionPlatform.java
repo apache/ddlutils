@@ -69,9 +69,9 @@ public class AxionPlatform extends PlatformImplBase
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#getDatabaseName()
+     * @see org.apache.ddlutils.Platform#getName()
      */
-    public String getDatabaseName()
+    public String getName()
     {
         return DATABASENAME;
     }

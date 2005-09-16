@@ -74,9 +74,9 @@ public class Db2Platform extends PlatformImplBase
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getDatabaseName()
+     * @see org.apache.ddlutils.builder.Platform#getName()
      */
-    public String getDatabaseName()
+    public String getName()
     {
         return DATABASENAME;
     }

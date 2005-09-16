@@ -42,9 +42,9 @@ public class DerbyPlatform extends CloudscapePlatform
     public static final String JDBC_SUBPROTOCOL     = "derby";
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getDatabaseName()
+     * @see org.apache.ddlutils.builder.Platform#getName()
      */
-    public String getDatabaseName()
+    public String getName()
     {
         return DATABASENAME;
     }

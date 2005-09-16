@@ -235,7 +235,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
     {
-        throw new UnsupportedOperationException("Database creation is not supported for the database platform "+getDatabaseName());
+        throw new UnsupportedOperationException("Database creation is not supported for the database platform "+getName());
     }
 
     /* (non-Javadoc)
@@ -243,7 +243,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
     {
-        throw new UnsupportedOperationException("Database deletion is not supported for the database platform "+getDatabaseName());
+        throw new UnsupportedOperationException("Database deletion is not supported for the database platform "+getName());
     }
 
     /* (non-Javadoc)

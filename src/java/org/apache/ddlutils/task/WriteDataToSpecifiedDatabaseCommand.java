@@ -138,7 +138,7 @@ public class WriteDataToSpecifiedDatabaseCommand extends DatabaseCommand
             }
             catch (Exception ex)
             {
-                throw new BuildException("Could not read data file "+schemaFile.getAbsolutePath(), ex);
+                throw new BuildException("Could not read data file "+schemaFile.getAbsolutePath()+": "+ex.getLocalizedMessage(), ex);
             }
         }
     }
