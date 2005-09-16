@@ -238,7 +238,7 @@ public class DataToDatabaseSink implements DataSink
             }
             else
             {
-                _log.debug("Exception while inserting a bean into the database", ex);
+                _log.warn("Exception while inserting a bean into the database", ex);
             }
         }
         if (_processedIdentities.containsKey(table.getName()))
@@ -333,13 +333,12 @@ public class DataToDatabaseSink implements DataSink
      */
     private Identity buildIdentityFromPKs(Table table, DynaBean bean)
     {
-        Identity identity = new Identity(table.getName());
+        Identity identity  = new Identity(table.getName());
+        Column[] pkColumns = table.getPrimaryKeyColumns();
 
-        for (int idx = 0; idx < table.getColumnCount(); idx++)
+        for (int idx = 0; idx < pkColumns.length; idx++)
         {
-            Column column = table.getColumn(idx);
-
-            identity.setIdentityColumn(column.getName(), bean.get(column.getName()));
+            identity.setIdentityColumn(pkColumns[idx].getName(), bean.get(pkColumns[idx].getName()));
         }
         return identity;
     }
