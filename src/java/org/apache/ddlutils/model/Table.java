@@ -576,22 +576,19 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
-     * Returns the auto increment column in this table if there is one.
+     * Returns the auto increment columns in this table.
      * 
-     * @return The column or <code>null</code> if there is none in this table
+     * @return The columns
      */
-    public Column getAutoIncrementColumn()
+    public Column[] getAutoIncrementColumn()
     {
-        for (int idx = 0; idx < getColumnCount(); idx++)
-        {
-            Column column = getColumn(idx);
-
-            if (column.isAutoIncrement())
-            {
-                return column;
+        Collection autoIncrColumns = CollectionUtils.select(_columns, new Predicate() {
+            public boolean evaluate(Object input) {
+                return ((Column)input).isAutoIncrement();
             }
-        }
-        return null;
+        });
+
+        return (Column[])autoIncrColumns.toArray(new Column[autoIncrColumns.size()]);
     }
 
     /* (non-Javadoc)

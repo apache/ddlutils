@@ -68,7 +68,10 @@ public class CloudscapeBuilder extends SqlBuilder
                 return super.getSqlType(column);
         }
     }
-    
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+     */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
         print("GENERATED ALWAYS AS IDENTITY");

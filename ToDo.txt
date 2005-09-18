@@ -25,3 +25,9 @@ List of things to be done for the next version of DdlUtils:
 * It might be useful to add support for the ARRAY jdbc data type in the way that PostgreSQL does, by
   simply adding brackets to the base type instead of using the ARRAY literal as this does not define the base
   type at all
+* It would be helpful if the platform impl check the length of user-supplied identifiers (table names,
+  column names, fk names, index names) before any SQL is send to the database
+* Add check for databases that only support one auto-increment field (eg. MySQL, HsqlDb, McKoi)
+* Add ability to specify the sorting direction of an index-column (ascending/descending) - this is at least supported in Derby
+* Rather than dropping the indices/foreign keys that are at the current table, it would be better to simply drop any
+  of the constraints/triggers connected to a table (if that is possible)

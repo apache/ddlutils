@@ -44,26 +44,6 @@ public class InterbaseBuilder extends SqlBuilder
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropDatabase(org.apache.ddlutils.model.Database)
-     */
-    public void dropTables(Database database) throws IOException
-    {
-        super.dropTables(database);
-        print("COMMIT");
-        printEndOfStatement();
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#createTables(org.apache.ddlutils.model.Database)
-     */
-    public void createTables(Database database) throws IOException
-    {
-        super.createTables(database);
-        print("COMMIT");
-        printEndOfStatement();
-    }
-
-    /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#writeExternalForeignKeyCreateStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey)
      */
     protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
@@ -77,36 +57,55 @@ public class InterbaseBuilder extends SqlBuilder
     }
 
     /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#writeExternalForeignKeyDropStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey)
+     */
+    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
+    {
+        super.writeExternalForeignKeyDropStmt(table, foreignKey);
+        print("COMMIT");
+        printEndOfStatement();
+    }
+
+    /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Table)
      */
     public void createTable(Database database, Table table) throws IOException
     {
         super.createTable(database, table);
+        print("COMMIT");
+        printEndOfStatement();
 
         // creating generator and trigger for auto-increment
-        Column column = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumn();
 
-        if (column != null)
+        for (int idx = 0; idx < columns.length; idx++)
         {
             print("CREATE GENERATOR ");
-            print(getConstraintName("gen", table, column.getName(), null));
+            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
             printEndOfStatement();
-            print("CREATE TRIGGER trg_");
-            print(getConstraintName("trg", table, column.getName(), null));
+            print("COMMIT");
+            printEndOfStatement();
+            print("SET TERM !!");
+            printEndOfStatement();
+            print("CREATE TRIGGER ");
+            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
             print(" FOR ");
-            println(getTableName(table));
-            println("ACTIVE BEFORE INSERT POSITION 0");
-            println("AS");
+            printlnIdentifier(getTableName(table));
+            println("ACTIVE BEFORE INSERT POSITION 0 AS");
             println("BEGIN");
             print("IF (NEW.");
-            print(getColumnName(column));
+            printIdentifier(getColumnName(columns[idx]));
             println(" IS NULL) THEN");
             print("NEW.");
-            print(getColumnName(column));
+            printIdentifier(getColumnName(columns[idx]));
             print(" = GEN_ID(");
-            print(getConstraintName("gen", table, column.getName(), null));
+            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
             println(", 1);");
-            print("END");
+            println("END !!");
+            print("SET TERM ");
+            print(getPlatformInfo().getSqlCommandDelimiter());
+            println(" !!");
+            print("COMMIT");
             printEndOfStatement();
         }
     }
@@ -131,19 +130,20 @@ public class InterbaseBuilder extends SqlBuilder
      */
     public void dropTable(Table table) throws IOException
     {
-        // dropping generator and trigger for auto-increment
-        Column column = table.getAutoIncrementColumn();
+        // dropping generators for auto-increment
+        Column[] columns = table.getAutoIncrementColumn();
 
-        if (column != null)
+        for (int idx = 0; idx < columns.length; idx++)
         {
-            print("DROP TRIGGER trg_");
-            print(getConstraintName("trg", table, column.getName(), null));
+            print("DELETE FROM RDB$GENERATOR WHERE RDB$GENERATOR_NAME = ");
+            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
             printEndOfStatement();
-            print("DROP GENERATOR gen_");
-            print(getConstraintName("gen", table, column.getName(), null));
+            print("COMMIT");
             printEndOfStatement();
         }
         super.dropTable(table);
+        print("COMMIT");
+        printEndOfStatement();
     }
 
     /* (non-Javadoc)

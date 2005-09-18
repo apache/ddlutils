@@ -44,14 +44,15 @@ public class MckoiBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE IF EXISTS ");
-        print(getTableName(table));
+        printIdentifier(getTableName(table));
         printEndOfStatement();
     }
 
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        print("DEFAULT UNIQUEKEY('");
-        print(getTableName(table));
-        print("')");
+        // we start at value 1 to avoid issues with jdbc
+        print("DEFAULT UNIQUEKEY(");
+        printIdentifier(getTableName(table));
+        print(") + 1");
     }
 }

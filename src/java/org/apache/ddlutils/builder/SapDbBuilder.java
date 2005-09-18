@@ -19,6 +19,7 @@ package org.apache.ddlutils.builder;
 import java.io.IOException;
 
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -46,8 +47,16 @@ public class SapDbBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE ");
-        print(getTableName(table));
+        printIdentifier(getTableName(table));
         print(" CASCADE");
         printEndOfStatement();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+     */
+    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    {
+        print("DEFAULT SERIAL(1)");
     }
 }

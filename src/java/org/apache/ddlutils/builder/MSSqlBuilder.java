@@ -17,9 +17,11 @@ package org.apache.ddlutils.builder;
  */
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -44,21 +46,21 @@ public class MSSqlBuilder extends SqlBuilder
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropExternalForeignKey(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey, int)
+     * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table)
      */
-    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException
+    public void createTable(Database database, Table table) throws IOException
     {
-        String constraintName = getConstraintName(null, table, "FK", Integer.toString(numKey));
+        writeQuotationOnStatement();
+        super.createTable(database, table);
+    }
 
-        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name='");
-        print(constraintName);
-        println("'");
-        printIndent();
-        print("ALTER TABLE ");
-        print(getTableName(table));
-        print(" DROP CONSTRAINT ");
-        print(constraintName);
-        printEndOfStatement();
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#alterTable(org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table, boolean, boolean)
+     */
+    protected void alterTable(Database currentModel, Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
+    {
+        writeQuotationOnStatement();
+        super.alterTable(currentModel, currentTable, desiredModel, desiredTable, doDrops, modifyColumns);
     }
 
     /* (non-Javadoc)
@@ -68,9 +70,10 @@ public class MSSqlBuilder extends SqlBuilder
     {
         String tableName = getTableName(table);
 
-        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = '");
-        print(tableName);
-        println("')");
+        writeQuotationOnStatement();
+        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = ");
+        printIdentifier(tableName);
+        println(")");
         println("BEGIN");
         println("     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)");
         println("     DECLARE refcursor CURSOR FOR");
@@ -82,9 +85,8 @@ public class MSSqlBuilder extends SqlBuilder
         println("       where tables.id = ref.rkeyid");
         println("         and cons.id = ref.constid");
         println("         and reftables.id = ref.fkeyid");
-        print("         and tables.name = '");
-        print(tableName);
-        println("'");
+        print("         and tables.name = ");
+        printlnIdentifier(tableName);
         println("     OPEN refcursor");
         println("     FETCH NEXT from refcursor into @reftable, @constraintname");
         println("     while @@FETCH_STATUS = 0");
@@ -95,11 +97,23 @@ public class MSSqlBuilder extends SqlBuilder
         println("     CLOSE refcursor");
         println("     DEALLOCATE refcursor");
         print("     DROP TABLE ");
-        println(tableName);
+        printlnIdentifier(tableName);
         print("END");
         printEndOfStatement();
     }
-    
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#dropExternalForeignKeys(org.apache.ddlutils.model.Table)
+     */
+    public void dropExternalForeignKeys(Table table) throws IOException
+    {
+        writeQuotationOnStatement();
+        super.dropExternalForeignKeys(table);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+     */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
         print("IDENTITY (1,1) ");
@@ -117,20 +131,85 @@ public class MSSqlBuilder extends SqlBuilder
         return primaryKeyColumns.length > 0;
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#writeExternalIndexDropStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Index)
+     */
     public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
     {
         print("DROP INDEX ");
-        print( getTableName(table) );
-        print( "." );
-        print( getIndexName(index) );
+        printIdentifier(getTableName(table));
+        print(".");
+        printIdentifier(getIndexName(index));
         printEndOfStatement();
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAlterStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column, boolean)
+     */
     public void writeColumnAlterStmt(Table table, Column column, boolean isNewColumn) throws IOException
     {
         writeTableAlterStmt(table);
         print(isNewColumn ? "ADD " : "ALTER COLUMN ");
         writeColumn(table, column);
         printEndOfStatement();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#dropExternalForeignKey(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey, int)
+     */
+    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException
+    {
+        String constraintName = getConstraintName(null, table, "FK", Integer.toString(numKey));
+
+        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name=");
+        printIdentifier(constraintName);
+        println();
+        printIndent();
+        print("ALTER TABLE ");
+        printIdentifier(getTableName(table));
+        print(" DROP CONSTRAINT ");
+        printIdentifier(constraintName);
+        printEndOfStatement();
+    }
+
+    /**
+     * Writes the statement that turns on the ability to write delimited identifiers.
+     */
+    private void writeQuotationOnStatement() throws IOException
+    {
+        print("SET quoted_identifier on");
+        printEndOfStatement();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getDeleteSql(org.apache.ddlutils.model.Table, java.util.HashMap, boolean)
+     */
+    public String getDeleteSql(Table table, HashMap pkValues, boolean genPlaceholders)
+    {
+        return getQuotationOnStatement() + super.getDeleteSql(table, pkValues, genPlaceholders);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getInsertSql(org.apache.ddlutils.model.Table, java.util.HashMap, boolean)
+     */
+    public String getInsertSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    {
+        return getQuotationOnStatement() + super.getInsertSql(table, columnValues, genPlaceholders);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#getUpdateSql(org.apache.ddlutils.model.Table, java.util.HashMap, boolean)
+     */
+    public String getUpdateSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    {
+        return getQuotationOnStatement() + super.getUpdateSql(table, columnValues, genPlaceholders);
+    }
+
+    /**
+     * Writes the statement that turns on the ability to write delimited identifiers.
+     */
+    private String getQuotationOnStatement()
+    {
+        return "SET quoted_identifier on" + getPlatformInfo().getSqlCommandDelimiter() + "\n";
     }
 }

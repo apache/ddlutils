@@ -51,6 +51,8 @@ public class MySqlPlatform extends PlatformImplBase
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
         info.setCommentPrefix("#");
+        // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
+        info.setDelimiterToken("`");
         // the BINARY types are also handled by MySqlBuilder.getSqlType(Column)
         info.addNativeTypeMapping(Types.ARRAY,         "LONGBLOB");
         info.addNativeTypeMapping(Types.BINARY,        "CHAR");

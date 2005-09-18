@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.builder.DerbyBuilder;
 
 /*
  * Copyright 1999-2004 The Apache Software Foundation.
@@ -40,6 +41,13 @@ public class DerbyPlatform extends CloudscapePlatform
     public static final String JDBC_DRIVER_EMBEDDED = "org.apache.derby.jdbc.EmbeddedDriver";
     /** The subprotocol used by the derby drivers */
     public static final String JDBC_SUBPROTOCOL     = "derby";
+
+    public DerbyPlatform()
+    {
+        super();
+        // we override the builder
+        setSqlBuilder(new DerbyBuilder(getSqlBuilder().getPlatformInfo()));
+    }
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.builder.Platform#getName()

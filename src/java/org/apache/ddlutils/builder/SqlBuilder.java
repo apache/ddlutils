@@ -529,7 +529,7 @@ public abstract class SqlBuilder
     public void createTable(Database database, Table table) throws IOException 
     {
         print("CREATE TABLE ");
-        println(getTableName(table));
+        printlnIdentifier(getTableName(table));
         println("(");
 
         writeColumns(table);
@@ -634,7 +634,7 @@ public abstract class SqlBuilder
     public void dropTable(Table table) throws IOException
     {
         print("DROP TABLE ");
-        print(getTableName(table));
+        printIdentifier(getTableName(table));
         printEndOfStatement();
     }
 
@@ -670,7 +670,7 @@ public abstract class SqlBuilder
         StringBuffer buffer   = new StringBuffer("INSERT INTO ");
         boolean      addComma = false;
 
-        buffer.append(getTableName(table));
+        buffer.append(getDelimitedIdentifier(getTableName(table)));
         buffer.append(" (");
 
         for (int idx = 0; idx < table.getColumnCount(); idx++)
@@ -683,7 +683,7 @@ public abstract class SqlBuilder
                 {
                     buffer.append(", ");
                 }
-                buffer.append(column.getName());
+                buffer.append(getDelimitedIdentifier(column.getName()));
                 addComma = true;
             }
         }
@@ -740,7 +740,7 @@ public abstract class SqlBuilder
         StringBuffer buffer = new StringBuffer("UPDATE ");
         boolean      addSep = false;
 
-        buffer.append(getTableName(table));
+        buffer.append(getDelimitedIdentifier(getTableName(table)));
         buffer.append(" SET ");
 
         for (int idx = 0; idx < table.getColumnCount(); idx++)
@@ -753,7 +753,7 @@ public abstract class SqlBuilder
                 {
                     buffer.append(", ");
                 }
-                buffer.append(column.getName());
+                buffer.append(getDelimitedIdentifier(column.getName()));
                 buffer.append(" = ");
                 if (genPlaceholders)
                 {
@@ -778,7 +778,7 @@ public abstract class SqlBuilder
                 {
                     buffer.append(" AND ");
                 }
-                buffer.append(column.getName());
+                buffer.append(getDelimitedIdentifier(column.getName()));
                 buffer.append(" = ");
                 if (genPlaceholders)
                 {
@@ -810,7 +810,7 @@ public abstract class SqlBuilder
         StringBuffer buffer = new StringBuffer("DELETE FROM ");
         boolean      addSep = false;
 
-        buffer.append(getTableName(table));
+        buffer.append(getDelimitedIdentifier(getTableName(table)));
         if ((pkValues != null) && !pkValues.isEmpty())
         {
             buffer.append(" WHERE ");
@@ -823,7 +823,7 @@ public abstract class SqlBuilder
                 {
                     buffer.append(" AND ");
                 }
-                buffer.append(entry.getKey());
+                buffer.append(getDelimitedIdentifier(entry.getKey().toString()));
                 buffer.append(" = ");
                 if (genPlaceholders)
                 {
@@ -925,7 +925,7 @@ public abstract class SqlBuilder
     protected void writeTableAlterStmt(Table table) throws IOException
     {
         print("ALTER TABLE ");
-        println(getTableName(table));
+        printlnIdentifier(getTableName(table));
         printIndent();
     }
 
@@ -967,16 +967,16 @@ public abstract class SqlBuilder
     protected void writeColumn(Table table, Column column) throws IOException
     {
         //see comments in columnsDiffer about null/"" defaults
-        print(getColumnName(column));
+        printIdentifier(getColumnName(column));
         print(" ");
         print(getSqlType(column));
 
         if (column.getDefaultValue() != null)
         {
             print(" DEFAULT ");
-            print(getPlatformInfo().getValueQuoteChar());
+            print(getPlatformInfo().getValueQuoteToken());
             print(column.getDefaultValue());
-            print(getPlatformInfo().getValueQuoteChar());
+            print(getPlatformInfo().getValueQuoteToken());
         }
         if (column.isRequired())
         {
@@ -1021,7 +1021,7 @@ public abstract class SqlBuilder
     {
         writeTableAlterStmt(table);
         print("DROP COLUMN ");
-        print(getColumnName(column));
+        printIdentifier(getColumnName(column));
         printEndOfStatement();
     }
 
@@ -1090,7 +1090,7 @@ public abstract class SqlBuilder
         {
             // Note: TIMESTAMP (java.sql.Timestamp) is properly handled by its toString method
             case Types.DATE:
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 if (!(value instanceof String) && (_valueDateFormat != null))
                 {
                     // TODO: Can the format method handle java.sql.Date properly ?
@@ -1100,10 +1100,10 @@ public abstract class SqlBuilder
                 {
                     result.append(value.toString());
                 }
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 break;
             case Types.TIME:
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 if (!(value instanceof String) && (_valueTimeFormat != null))
                 {
                     // TODO: Can the format method handle java.sql.Date properly ?
@@ -1113,14 +1113,14 @@ public abstract class SqlBuilder
                 {
                     result.append(value.toString());
                 }
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 break;
             case Types.REAL:
             case Types.NUMERIC:
             case Types.FLOAT:
             case Types.DOUBLE:
             case Types.DECIMAL:
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 if (!(value instanceof String) && (_valueNumberFormat != null))
                 {
                     result.append(_valueNumberFormat.format(value));
@@ -1129,12 +1129,12 @@ public abstract class SqlBuilder
                 {
                     result.append(value.toString());
                 }
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 break;
             default:
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 result.append(value.toString());
-                result.append(getPlatformInfo().getValueQuoteChar());
+                result.append(getPlatformInfo().getValueQuoteToken());
                 break;
         }
         return result.toString();
@@ -1212,10 +1212,25 @@ public abstract class SqlBuilder
         }
     }
 
-    protected String getForeignKeyName(ForeignKey fk) {
+    /**
+     * Determines a unique name for the given foreign key.
+     * 
+     * @param fk The foreign key
+     * @return The name
+     */
+    protected String getForeignKeyName(ForeignKey fk)
+    {
         //table and local column should be sufficient - is it possible for one
         //column to reference multiple tables
-        return fk.getFirstReference().getLocalColumnName() + "_" + fk.getForeignTableName();
+        StringBuffer name = new StringBuffer();
+
+        for (int idx = 0; idx < fk.getReferenceCount(); idx++)
+        {
+            name.append(fk.getReference(idx).getLocalColumnName());
+            name.append("_");
+        }
+        name.append(fk.getForeignTableName());
+        return name.toString();
     }
 
     /**
@@ -1276,10 +1291,10 @@ public abstract class SqlBuilder
         if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
         {
             print("ALTER TABLE ");
-            println(getTableName(table));
+            printlnIdentifier(getTableName(table));
             printIndent();
             print("ADD CONSTRAINT ");
-            print(getConstraintName(null, table, "PK", null));
+            printIdentifier(getConstraintName(null, table, "PK", null));
             print(" ");
             writePrimaryKeyStmt(table, primaryKeyColumns);
             printEndOfStatement();
@@ -1318,7 +1333,7 @@ public abstract class SqlBuilder
         print("PRIMARY KEY (");
         for (int idx = 0; idx < primaryKeyColumns.length; idx++)
         {
-            print(getColumnName(primaryKeyColumns[idx]));
+            printIdentifier(getColumnName(primaryKeyColumns[idx]));
             if (idx < primaryKeyColumns.length - 1)
             {
                 print(", ");
@@ -1382,15 +1397,15 @@ public abstract class SqlBuilder
                 print(" UNIQUE");
             }
             print(" INDEX ");
-            print(getIndexName(index));
+            printIdentifier(getIndexName(index));
             print(" ON ");
-            print(getTableName(table));
+            printIdentifier(getTableName(table));
             print(" (");
 
             for (int idx = 0; idx < index.getColumnCount(); idx++)
             {
                 IndexColumn idxColumn = index.getColumn(idx);
-                Column col = table.findColumn(idxColumn.getName());
+                Column      col       = table.findColumn(idxColumn.getName());
 
                 if (col == null)
                 {
@@ -1401,7 +1416,7 @@ public abstract class SqlBuilder
                 {
                     print(", ");
                 }
-                print(getColumnName(col));
+                printIdentifier(getColumnName(col));
             }
 
             print(")");
@@ -1422,7 +1437,7 @@ public abstract class SqlBuilder
             writeTableAlterStmt(table);
         }
         print("DROP INDEX ");
-        print(getIndexName(index));
+        printIdentifier(getIndexName(index));
         if (!getPlatformInfo().isUseAlterTableForDrop())
         {
             print(" ON ");
@@ -1456,13 +1471,13 @@ public abstract class SqlBuilder
                 if (getPlatformInfo().isEmbeddedForeignKeysNamed())
                 {
                     print("CONSTRAINT ");
-                    print(getConstraintName(null, table, "FK", Integer.toString(idx)));
+                    printIdentifier(getConstraintName(null, table, "FK", Integer.toString(idx)));
                     print(" ");
                 }
                 print("FOREIGN KEY (");
                 writeLocalReferences(key);
                 print(") REFERENCES ");
-                print(getTableName(database.findTable(key.getForeignTableName())));
+                printIdentifier(getTableName(database.findTable(key.getForeignTableName())));
                 print(" (");
                 writeForeignReferences(key);
                 print(")");
@@ -1489,11 +1504,11 @@ public abstract class SqlBuilder
             writeTableAlterStmt(table);
 
             print("ADD CONSTRAINT ");
-            print(getConstraintName(null, table, "FK", getForeignKeyName(key)));
+            printIdentifier(key.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(key)) : key.getName());
             print(" FOREIGN KEY (");
             writeLocalReferences(key);
             print(") REFERENCES ");
-            print(getTableName(database.findTable(key.getForeignTableName())));
+            printIdentifier(getTableName(database.findTable(key.getForeignTableName())));
             print(" (");
             writeForeignReferences(key);
             print(")");
@@ -1514,7 +1529,7 @@ public abstract class SqlBuilder
             {
                 print(", ");
             }
-            print(key.getReference(idx).getLocalColumnName());
+            printIdentifier(key.getReference(idx).getLocalColumnName());
         }
     }
 
@@ -1531,7 +1546,7 @@ public abstract class SqlBuilder
             {
                 print(", ");
             }
-            print(key.getReference(idx).getForeignColumnName());
+            printIdentifier(key.getReference(idx).getForeignColumnName());
         }
     }
 
@@ -1547,7 +1562,7 @@ public abstract class SqlBuilder
     {
         writeTableAlterStmt(table);
         print("DROP CONSTRAINT ");
-        print(getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)));
+        printIdentifier(foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName());
         printEndOfStatement();
     }
 
@@ -1580,7 +1595,7 @@ public abstract class SqlBuilder
      */
     protected void printEndOfStatement() throws IOException
     {
-        println(";");
+        println(getPlatformInfo().getSqlCommandDelimiter());
         println();
     }
 
@@ -1600,6 +1615,47 @@ public abstract class SqlBuilder
     protected void print(String text) throws IOException
     {
         _writer.write(text);
+    }
+
+    /**
+     * Returns the delimited version of the identifier (if configured).
+     * 
+     * @param identifier The identifier
+     * @return The delimited version of the identifier unless the platform is configured
+     *         to use undelimited identifiers; in that case, the identifier is returned unchanged
+     */
+    protected String getDelimitedIdentifier(String identifier)
+    {
+        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            return getPlatformInfo().getDelimiterToken() + identifier + getPlatformInfo().getDelimiterToken();
+        }
+        else
+        {
+            return identifier;
+        }
+    }
+
+    /**
+     * Prints the given identifier. For most databases, this will
+     * be a delimited identifier.
+     * 
+     * @param identifier The identifier
+     */
+    protected void printIdentifier(String identifier) throws IOException
+    {
+        print(getDelimitedIdentifier(identifier));
+    }
+
+    /**
+     * Prints the given identifier followed by a newline. For most databases, this will
+     * be a delimited identifier.
+     * 
+     * @param identifier The identifier
+     */
+    protected void printlnIdentifier(String identifier) throws IOException
+    {
+        println(getDelimitedIdentifier(identifier));
     }
 
     /**

@@ -19,7 +19,6 @@ package org.apache.ddlutils.builder;
 import java.io.IOException;
 
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -47,12 +46,7 @@ public class AxionBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE IF EXISTS ");
-        print(getTableName(table));
+        printIdentifier(getTableName(table));
         printEndOfStatement();
-    }
-    
-    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
-    {
-        print("IDENTITY");
     }
 }

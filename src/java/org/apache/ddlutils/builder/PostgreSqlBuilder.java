@@ -48,9 +48,18 @@ public class PostgreSqlBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE ");
-        print(getTableName(table));
+        printIdentifier(getTableName(table));
         print(" CASCADE");
         printEndOfStatement();
+
+        Column[] columns = table.getAutoIncrementColumn();
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            print("DROP SEQUENCE ");
+            printIdentifier(getConstraintName(null, table, columns[idx].getName(), "seq"));
+            printEndOfStatement();
+        }
     }
 
     /* (non-Javadoc)
@@ -79,7 +88,7 @@ public class PostgreSqlBuilder extends SqlBuilder
     private void createAutoIncrementSequence(Table table, Column column) throws IOException
     {
         print("CREATE SEQUENCE ");
-        print(getConstraintName(null, table, column.getName(), "seq"));
+        printIdentifier(getConstraintName(null, table, column.getName(), "seq"));
         printEndOfStatement();
     }
 
@@ -88,9 +97,9 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        print("UNIQUE DEFAULT nextval('");
-        print(getConstraintName(null, table, column.getName(), "seq"));
-        print("')");
+        print("UNIQUE DEFAULT nextval(");
+        printIdentifier(getConstraintName(null, table, column.getName(), "seq"));
+        print(")");
     }
 
     /* (non-Javadoc)
@@ -98,15 +107,29 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     public String getSelectLastInsertId(Table table)
     {
-        Column autoIncrColumn = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumn();
 
-        if (autoIncrColumn == null)
+        if (columns.length == 0)
         {
             return null;
         }
         else
         {
-            return "SELECT CURRVAL('" + getConstraintName(null, table, autoIncrColumn.getName(), "seq") + "') AS " + autoIncrColumn.getName();
+            StringBuffer result = new StringBuffer();
+    
+            result.append("SELECT ");
+            for (int idx = 0; idx < columns.length; idx++)
+            {
+                if (idx > 0)
+                {
+                    result.append(", ");
+                }
+                result.append("CURRVAL(");
+                result.append(getDelimitedIdentifier(getConstraintName(null, table, columns[idx].getName(), "seq")));
+                result.append(") AS ");
+                result.append(getDelimitedIdentifier(columns[idx].getName()));
+            }
+            return result.toString();
         }
     }
 }

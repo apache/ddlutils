@@ -43,27 +43,69 @@ public class OracleBuilder extends SqlBuilder
         super(info);
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(org.apache.ddlutils.model.Table)
+     */
     public void dropTable(Table table) throws IOException
     {
         print("DROP TABLE ");
-        print(getTableName(table));
+        printIdentifier(getTableName(table));
         print(" CASCADE CONSTRAINTS");
         printEndOfStatement();
+
+        Column[] columns = table.getAutoIncrementColumn();
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            print("DROP TRIGGER ");
+            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
+            printEndOfStatement();
+            print("DROP SEQUENCE ");
+            printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
+            printEndOfStatement();
+        }
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#dropExternalForeignKeys(org.apache.ddlutils.model.Table)
+     */
+    public void dropExternalForeignKeys(Table table) throws IOException
+    {
+        // no need to as we drop the table with CASCASE CONSTRAINTS
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table)
+     */
     public void createTable(Database database, Table table) throws IOException
     {
         // lets create any sequences
-        Column column = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumn();
 
-        if (column != null)
+        for (int idx = 0; idx < columns.length; idx++)
         {
-            createSequence(table, column);
+            print("CREATE SEQUENCE ");
+            printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
+            printEndOfStatement();
         }
+
         super.createTable(database, table);
-        if (column != null)
+
+        for (int idx = 0; idx < columns.length; idx++)
         {
-            createSequenceTrigger(table, column);
+            print("CREATE OR REPLACE TRIGGER ");
+            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
+            print(" BEFORE INSERT ON ");
+            printIdentifier(getTableName(table));
+            println(" FOR EACH ROW");
+            println("BEGIN");
+            print("SELECT ");
+            printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
+            print(".nextval INTO :new.");
+            printIdentifier(getColumnName(columns[idx]));
+            println(" FROM dual;");
+            print("END");
+            printEndOfStatement();
         }
     }
 
@@ -96,43 +138,11 @@ public class OracleBuilder extends SqlBuilder
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+     */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-    }
-
-    /**
-     * Creates a sequence so that values can be auto incremented.
-     * 
-     * @param table  The table
-     * @param column The column
-     */
-    protected void createSequence(Table table, Column column) throws IOException
-    {
-        print("CREATE SEQUENCE ");
-        print(getConstraintName(null, table, "seq", null));
-        printEndOfStatement();
-    }
-
-    /**
-     * Creates a trigger for the auto-increment sequence.
-     * 
-     * @param table  The table
-     * @param column The column
-     */
-    protected void createSequenceTrigger(Table table, Column column) throws IOException
-    {
-        print("CREATE OR REPLACE TRIGGER ");
-        print(getConstraintName(null, table, "trg", null));
-        print(" BEFORE INSERT ON ");
-        println(getTableName(table));
-        println("FOR EACH ROW");
-        println("BEGIN");
-        print("SELECT ");
-        print(getConstraintName(null, table, "seq", null));
-        print(".nextval INTO :new.");
-        print(getColumnName(column));
-        println(" FROM dual;");
-        print("END");
-        printEndOfStatement();
+        // we're using sequences instead
     }
 }

@@ -603,34 +603,38 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             return;
         }
 
-        Column autoIdColumn = model.findTable(dynaClass.getTableName()).getAutoIncrementColumn();
+        Column[] columns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumn();
 
-        if (autoIdColumn != null)
+        if (columns.length > 0)
         {
-            // We have to remove the auto-increment column as some databases won't like
-            // it being present in the insert command
             SqlDynaProperty[] newProperties = new SqlDynaProperty[properties.length - 1];
             int               newIdx        = 0;
 
-            for (int idx = 0; idx < properties.length; idx++)
+            // We have to remove the auto-increment columns as some databases won't like
+            // it being present in the insert command
+
+            for (int propIdx = 0; propIdx < properties.length; propIdx++)
             {
-                if (properties[idx].getColumn() != autoIdColumn)
+                for (int autoIncrColumnIdx = 0; autoIncrColumnIdx < columns.length; autoIncrColumnIdx++)
                 {
-                    newProperties[newIdx++] = properties[idx];
+                    if (properties[propIdx].getColumn() != columns[autoIncrColumnIdx])
+                    {
+                        newProperties[newIdx++] = properties[propIdx];
+                    }
                 }
             }
             properties = newProperties;
         }
         
         String            insertSql    = createInsertSql(model, dynaClass, properties, null);
-        String            queryIdSql   = autoIdColumn != null ? createSelectLastInsertIdSql(model, dynaClass) : null;
+        String            queryIdSql   = columns.length > 0 ? createSelectLastInsertIdSql(model, dynaClass) : null;
         PreparedStatement statement    = null;
 
         if (_log.isDebugEnabled())
         {
             _log.debug("About to execute SQL: " + insertSql);
         }
-        if ((autoIdColumn != null) && (queryIdSql == null))
+        if ((columns.length > 0) && (queryIdSql == null))
         {
             _log.warn("The database does not support querying for auto-generated pk values");
         }
@@ -678,9 +682,12 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
                 lastInsertedIds.next();
 
-                Object value = lastInsertedIds.getObject(autoIdColumn.getName());
-
-                PropertyUtils.setProperty(dynaBean, autoIdColumn.getName(), value);
+                for (int idx = 0; idx < columns.length; idx++)
+                {
+                    Object value = lastInsertedIds.getObject(columns[idx].getName());
+    
+                    PropertyUtils.setProperty(dynaBean, columns[idx].getName(), value);
+                }
             }
             catch (NoSuchMethodException ex)
             {

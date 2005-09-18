@@ -41,8 +41,14 @@ public class PlatformInfo
     /** Whether identifiers are case sensitive or not */
     private boolean _caseSensitive = false;
 
+    /** Whether delimited identifiers are used or not */
+    private boolean _useDelimitedIdentifiers = true;
+
+    /** The string used for delimiting SQL identifiers, eg. table names, column names etc. */
+    private String _delimiterToken = "\"";
+
     /** The string used for escaping values when generating textual SQL statements */
-    private String _valueQuoteChar = "'";
+    private String _valueQuoteToken = "'";
 
     /** Whether comments are supported */
     private boolean _commentsSupported = true;
@@ -264,14 +270,59 @@ public class PlatformInfo
     }
 
     /**
+     * Determines whether delimited identifiers are used or normal SQL92 identifiers
+     * (which may only contain alphanumerical characters and the underscore, must start
+     * with a letter and cannot be a reserved keyword).
+     * Per default, delimited identifiers are used
+     *
+     * @return <code>true</code> if delimited identifiers are used
+     */
+    public boolean isUseDelimitedIdentifiers()
+    {
+        return _useDelimitedIdentifiers;
+    }
+
+    /**
+     * Determines whether delimited identifiers are used or normal SQL92 identifiers.
+     *
+     * @param useDelimitedIdentifiers <code>true</code> if delimited identifiers are used
+     */
+    public void setUseDelimitedIdentifiers(boolean useDelimitedIdentifiers)
+    {
+        _useDelimitedIdentifiers = useDelimitedIdentifiers;
+    }
+
+    /**
+     * Returns the text that is used to delimit identifiers (eg. table names).
+     * Per default, this is a double quotation character (").
+     *
+     * @return The delimiter text
+     */
+    public String getDelimiterToken()
+    {
+        return _delimiterToken;
+    }
+
+    /**
+     * Sets the text that is used to delimit identifiers (eg. table names).
+     *
+     * @param delimiterToken The delimiter text
+     */
+    public void setDelimiterToken(String delimiterToken)
+    {
+        _delimiterToken = delimiterToken;
+    }
+
+    /**
      * Returns the text that is used for for quoting values (e.g. text) when
      * printing default values and in generates insert/update/delete statements.
+     * Per default, this is a single quotation character (').
      * 
      * @return The quote text
      */
-    public String getValueQuoteChar()
+    public String getValueQuoteToken()
     {
-        return _valueQuoteChar;
+        return _valueQuoteToken;
     }
 
     /**
@@ -280,9 +331,9 @@ public class PlatformInfo
      *
      * @param valueQuoteChar The new quote text
      */
-    public void setValueQuoteChar(String valueQuoteChar)
+    public void setValueQuoteToken(String valueQuoteChar)
     {
-        _valueQuoteChar = valueQuoteChar;
+        _valueQuoteToken = valueQuoteChar;
     }
 
     /**

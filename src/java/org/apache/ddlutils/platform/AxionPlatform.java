@@ -46,7 +46,7 @@ public class AxionPlatform extends PlatformImplBase
         info.setRequiringNullAsDefaultValue(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(true);
+        info.setIndicesEmbedded(false);
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
         info.addNativeTypeMapping(Types.BINARY,        "VARBINARY");
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
