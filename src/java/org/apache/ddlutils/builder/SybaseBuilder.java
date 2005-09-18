@@ -110,8 +110,11 @@ public class SybaseBuilder extends SqlBuilder
      */
     private void writeQuotationOnStatement() throws IOException
     {
-        print("SET quoted_identifier on");
-        printEndOfStatement();
+        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            print("SET quoted_identifier on");
+            printEndOfStatement();
+        }
     }
 
     /* (non-Javadoc)
@@ -143,6 +146,13 @@ public class SybaseBuilder extends SqlBuilder
      */
     private String getQuotationOnStatement()
     {
-        return "SET quoted_identifier on" + getPlatformInfo().getSqlCommandDelimiter() + "\n";
+        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            return "SET quoted_identifier on" + getPlatformInfo().getSqlCommandDelimiter() + "\n";
+        }
+        else
+        {
+            return "";
+        }
     }
 }
