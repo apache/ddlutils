@@ -212,6 +212,46 @@ public class Column implements Cloneable
         this.typeCode = TypeMap.getJdbcTypeCode(type);
     }
 
+    /**
+     * Determines whether this column is of a numeric type.
+     * 
+     * @return <code>true</code> if this column is of a numeric type
+     */
+    public boolean isOfNumericType()
+    {
+        return TypeMap.isNumericType(getTypeCode());
+    }
+
+    /**
+     * Determines whether this column is of a text type.
+     * 
+     * @return <code>true</code> if this column is of a text type
+     */
+    public boolean isOfTextType()
+    {
+        return TypeMap.isTextType(getTypeCode());
+    }
+
+    /**
+     * Determines whether this column is of a binary type.
+     * 
+     * @return <code>true</code> if this column is of a binary type
+     */
+    public boolean isOfBinaryType()
+    {
+        return TypeMap.isBinaryType(getTypeCode());
+    }
+
+    /**
+     * Determines whether this column is of a special type.
+     * 
+     * @return <code>true</code> if this column is of a special type
+     */
+    public boolean isOfSpecialType()
+    {
+        return TypeMap.isSpecialType(getTypeCode());
+    }
+    
     public String getSize()
     {
         return size;
