@@ -18,24 +18,52 @@ package org.apache.ddlutils.dynabean;
 
 import org.apache.commons.beanutils.BasicDynaBean;
 import org.apache.commons.beanutils.DynaClass;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.beanutils.DynaProperty;
 
 /**
  * SqlDynaBean is a DynaBean which can be persisted as a single row in 
  * a Database Table.
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
-public class SqlDynaBean extends BasicDynaBean {
+public class SqlDynaBean extends BasicDynaBean
+{
+    /** Unique ID for serializaion purposes */
+    private static final long serialVersionUID = -6946514447446174227L;
 
-    /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( SqlDynaBean.class );
-    
-    public SqlDynaBean(DynaClass dynaClass) {
+    /**
+     * Creates a new dyna bean of the given class.
+     * 
+     * @param dynaClass The dyna class
+     */
+    public SqlDynaBean(DynaClass dynaClass)
+    {
         super(dynaClass);
     }
 
-    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    public String toString()
+    {
+        StringBuffer   result = new StringBuffer();
+        DynaClass      type   = getDynaClass();
+        DynaProperty[] props  = type.getDynaProperties();
+
+        result.append(type.getName());
+        result.append(": ");
+        for (int idx = 0; idx < props.length; idx++)
+        {
+            if (idx > 0)
+            {
+                result.append(", ");
+            }
+            result.append(props[idx].getName());
+            result.append(" = ");
+            result.append(get(props[idx].getName()));
+        }
+        return result.toString();
+    }
 }

@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.builder.SqlBuilder;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
 
 /**
  * A platform encapsulates the database-related functionality such as performing queries
@@ -218,6 +219,15 @@ public interface Platform
     public void dropTables(Connection connection, Database model, boolean continueOnError) throws DynaSqlException; 
 
     /**
+     * Performs the given SQL query returning an iterator over the results.
+     *
+     * @param model The database model to use
+     * @param sql   The sql query to perform
+     * @return An iterator for the dyna beans resulting from the query
+     */
+    public Iterator query(Database model, String sql) throws DynaSqlException;
+
+    /**
      * Performs the given parameterized SQL query returning an iterator over the results.
      *
      * @param model      The database model to use
@@ -230,11 +240,23 @@ public interface Platform
     /**
      * Performs the given SQL query returning an iterator over the results.
      *
-     * @param model The database model to use
-     * @param sql   The sql query to perform
+     * @param model      The database model to use
+     * @param sql        The sql query to perform
+     * @param queryHints The tables that are queried (optional)
      * @return An iterator for the dyna beans resulting from the query
      */
-    public Iterator query(Database model, String sql) throws DynaSqlException;
+    public Iterator query(Database model, String sql, Table[] queryHints) throws DynaSqlException;
+
+    /**
+     * Performs the given parameterized SQL query returning an iterator over the results.
+     *
+     * @param model      The database model to use
+     * @param sql        The sql query to perform
+     * @param parameters The query parameter values
+     * @param queryHints The tables that are queried (optional)
+     * @return An iterator for the dyna beans resulting from the query
+     */
+    public Iterator query(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException;
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
@@ -257,6 +279,30 @@ public interface Platform
      * @return The dyna beans resulting from the query
      */
     public List fetch(Database model, String sql, Collection parameters) throws DynaSqlException;
+
+    /**
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String)} method all beans will be
+     * materialized and the connection will be closed before returning the beans. 
+     * 
+     * @param model      The database model to use
+     * @param sql        The sql query
+     * @param queryHints The tables that are queried (optional)
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(Database model, String sql, Table[] queryHints) throws DynaSqlException;
+
+    /**
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String, Collection)} method all beans will be
+     * materialized and the connection will be closed before returning the beans. 
+     * 
+     * @param sql        The parameterized query
+     * @param parameters The parameter values
+     * @param queryHints The tables that are queried (optional)
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException;
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
@@ -290,6 +336,41 @@ public interface Platform
      * @return The dyna beans resulting from the query
      */
     public List fetch(Database model, String sql, Collection parameters, int start, int end) throws DynaSqlException;
+
+    /**
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String)} method all beans will be
+     * materialized and the connection will be closed before returning the beans.
+     * Also, the two int parameters specify which rows of the result set to use.
+     * If there are more rows than desired, they will be ignored (and not read
+     * from the database).
+     * 
+     * @param model      The database model to use
+     * @param sql        The sql query
+     * @param queryHints The tables that are queried (optional)
+     * @param start Row number to start from (0 for first row)
+     * @param end   Row number to stop at (inclusively; -1 for last row)
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(Database model, String sql, Table[] queryHints, int start, int end) throws DynaSqlException;
+
+    /**
+     * Queries for a list of dyna beans representing rows of the given query.
+     * In contrast to the {@link #query(String, Collection)} method all beans will be
+     * materialized and the connection will be closed before returning the beans.
+     * Also, the two int parameters specify which rows of the result set to use.
+     * If there are more rows than desired, they will be ignored (and not read
+     * from the database).
+     * 
+     * @param model      The database model to use
+     * @param sql        The parameterized sql query
+     * @param parameters The parameter values
+     * @param queryHints The tables that are queried (optional)
+     * @param start      Row number to start from (0 for first row)
+     * @param end        Row number to stop at (inclusively; -1 for last row)
+     * @return The dyna beans resulting from the query
+     */
+    public List fetch(Database model, String sql, Collection parameters, Table[] queryHints, int start, int end) throws DynaSqlException;
 
     /**
      * Stores the given bean in the database, inserting it if there is no primary key

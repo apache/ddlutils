@@ -17,8 +17,6 @@ package org.apache.ddlutils.dynabean;
  */
 
 import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.model.Column;
 
 /**
@@ -28,51 +26,60 @@ import org.apache.ddlutils.model.Column;
  * an autoIncrement column and the SQL type etc.
  *
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
-public class SqlDynaProperty extends DynaProperty {
+public class SqlDynaProperty extends DynaProperty
+{
+    /** Unique ID for serializaion purposes */
+    private static final long serialVersionUID = -4491018827449106588L;
 
-    /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( SqlDynaProperty.class );
-
-    private Column column;    
+    /** The column for which this dyna property is defined */
+    private Column _column;    
 
     /**
-     * Construct a property that accepts any data type.
+     * Creates a property instance for the given column that accepts any data type.
      *
-     * @param name Name of the property being described
-     * @param column the database Column this property maps to
+     * @param column The column
      */
-    public SqlDynaProperty(Column column) {
+    public SqlDynaProperty(Column column)
+    {
         super(column.getName());
-        this.column = column;
+        _column = column;
     }
 
     /**
-     * Construct a property that accepts any data type.
+     * Creates a property instance for the given column that only accepts the given type.
      *
-     * @param name Name of the property being described
-     * @param column the database Column this property maps to
+     * @param column The column
+     * @param type   The type of the property
      */
-    public SqlDynaProperty(Column column, Class type) {
+    public SqlDynaProperty(Column column, Class type)
+    {
         super(column.getName(), type);
-        this.column = column;
+        _column = column;
     }
 
     /**
-     * @return the database Column this property maps to
+     * Returns the column for which this property is defined.
+     * 
+     * @return The column
      */
-    public Column getColumn() {
-        return column;
+    public Column getColumn()
+    {
+        return _column;
     }
 
     // Helper methods
     //-------------------------------------------------------------------------                
     
     /**
-     * @return whether the property is part of the primary key
+     * Determines whether this property is for a primary key column.
+     * 
+     * @return <code>true</code> if the property is for a primary key column
      */
-    public boolean isPrimaryKey() {
+    public boolean isPrimaryKey()
+    {
         return getColumn().isPrimaryKey();
     }    
     

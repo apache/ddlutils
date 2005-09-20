@@ -377,6 +377,22 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public Iterator query(Database model, String sql) throws DynaSqlException
     {
+        return query(model, sql, (Table[])null);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection)
+     */
+    public Iterator query(Database model, String sql, Collection parameters) throws DynaSqlException
+    {
+        return query(model, sql, parameters, null);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String, org.apache.ddlutils.model.Table[])
+     */
+    public Iterator query(Database model, String sql, Table[] queryHints) throws DynaSqlException
+    {
         Connection connection = borrowConnection();
         Statement  statement  = null;
         ResultSet  resultSet  = null;
@@ -386,7 +402,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sql);
-            answer    = createResultSetIterator(model, resultSet);
+            answer    = createResultSetIterator(model, resultSet, queryHints);
             return answer;
         }
         catch (SQLException ex)
@@ -406,9 +422,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection)
+     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, org.apache.ddlutils.model.Table[])
      */
-    public Iterator query(Database model, String sql, Collection parameters) throws DynaSqlException
+    public Iterator query(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException
     {
         Connection        connection = borrowConnection();
         PreparedStatement statement  = null;
@@ -426,7 +442,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 statement.setObject(paramIdx, iter.next());
             }
             resultSet = statement.executeQuery();
-            answer    = createResultSetIterator(model, resultSet);
+            answer    = createResultSetIterator(model, resultSet, queryHints);
             return answer;
         }
         catch (SQLException ex)
@@ -450,13 +466,29 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public List fetch(Database model, String sql) throws DynaSqlException
     {
-        return fetch(model, sql, 0, -1);
+        return fetch(model, sql, (Table[])null, 0, -1);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, org.apache.ddlutils.model.Table[])
+     */
+    public List fetch(Database model, String sql, Table[] queryHints) throws DynaSqlException
+    {
+        return fetch(model, sql, queryHints, 0, -1);
     }
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, int, int)
      */
     public List fetch(Database model, String sql, int start, int end) throws DynaSqlException
+    {
+        return fetch(model, sql, (Table[])null, start, end);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, org.apache.ddlutils.model.Table[], int, int)
+     */
+    public List fetch(Database model, String sql, Table[] queryHints, int start, int end) throws DynaSqlException
     {
         Connection connection = borrowConnection();
         Statement  statement  = null;
@@ -470,7 +502,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(model, resultSet); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
+            for (Iterator it = createResultSetIterator(model, resultSet, queryHints); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
@@ -493,13 +525,29 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public List fetch(Database model, String sql, Collection parameters) throws DynaSqlException
     {
-        return fetch(model, sql, parameters, 0, -1);
+        return fetch(model, sql, parameters, null, 0, -1);
     }
 
     /* (non-Javadoc)
      * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, int, int)
      */
     public List fetch(Database model, String sql, Collection parameters, int start, int end) throws DynaSqlException
+    {
+        return fetch(model, sql, parameters, null, start, end);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, org.apache.ddlutils.model.Table[])
+     */
+    public List fetch(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException
+    {
+        return fetch(model, sql, parameters, queryHints, 0, -1);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, org.apache.ddlutils.model.Table[], int, int)
+     */
+    public List fetch(Database model, String sql, Collection parameters, Table[] queryHints, int start, int end) throws DynaSqlException
     {
         Connection        connection = borrowConnection();
         PreparedStatement statement  = null;
@@ -520,7 +568,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(model, resultSet); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
+            for (Iterator it = createResultSetIterator(model, resultSet, queryHints); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
@@ -1044,9 +1092,11 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      *
      * @param model     The database model
      * @param resultSet The result set to iterate over
+     * @param queryHints         The tables that were queried in the query that produced the given result set
+     *                           (optional)
      */
-    protected DynaSqlIterator createResultSetIterator(Database model, ResultSet resultSet)
+    protected DynaSqlIterator createResultSetIterator(Database model, ResultSet resultSet, Table[] queryHints)
     {
-        return new DynaSqlIterator(getPlatformInfo(), model, resultSet, true);
+        return new DynaSqlIterator(getPlatformInfo(), model, resultSet, queryHints, true);
     }
 }

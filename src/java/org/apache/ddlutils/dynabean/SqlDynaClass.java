@@ -21,8 +21,6 @@ import java.util.List;
 
 import org.apache.commons.beanutils.BasicDynaClass;
 import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -30,19 +28,27 @@ import org.apache.ddlutils.model.Table;
  * Table in a Database.
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
  * @version $Revision$
  */
-public class SqlDynaClass extends BasicDynaClass {
+public class SqlDynaClass extends BasicDynaClass
+{
+    /** Unique ID for serializaion purposes */
+    private static final long serialVersionUID = -5768155698352911245L;
 
-    /** The Log to which logging calls will be made. */
-    private static final Log log = LogFactory.getLog( SqlDynaClass.class );
-    
-    private Table table;
-    private SqlDynaProperty[] primaryKeys;
-    private SqlDynaProperty[] nonPrimaryKeyProperties;
+    /** The table for which this dyna class is defined */
+    private Table _table;
+    /** The primary key dyna properties */
+    private SqlDynaProperty[] _primaryKeyProperties;
+    /** The non-primary key dyna properties */
+    private SqlDynaProperty[] _nonPrimaryKeyProperties;
     
     /**
-     * Creates a new SqlDynaClass instance from a Table model.
+     * Factory method for creating and initializing a new dyna class instance
+     * for the given table.
+     * 
+     * @param table The table
+     * @return The dyna class for the table
      */
     public static SqlDynaClass newInstance(Table table)
     {
@@ -58,88 +64,109 @@ public class SqlDynaClass extends BasicDynaClass {
         properties.toArray(array);
         return new SqlDynaClass(table, array);
     }
-    
-    public SqlDynaClass(Table table) {
-        super(table.getName(), SqlDynaBean.class);
-        this.table = table;
-    }
 
-    public SqlDynaClass(Table table, SqlDynaProperty[] properties) {
+    /**
+     * Creates a new dyna class instance for the given table that has the given properties.
+     * 
+     * @param table      The table
+     * @param properties The dyna properties
+     */
+    public SqlDynaClass(Table table, SqlDynaProperty[] properties)
+    {
         super(table.getName(), SqlDynaBean.class, properties);
-        this.table = table;
+        _table = table;
     }
 
     /**
-     * @return the database Table this DynaClass maps to
+     * Returns the table for which this dyna class is defined.
+     * 
+     * @return The table
      */
-    public Table getTable() {
-        return table;
+    public Table getTable()
+    {
+        return _table;
     }
 
     // Helper methods
     //-------------------------------------------------------------------------                
     
     /**
-     * @return the name of the table
+     * Returns the table name for which this dyna class is defined.
+     * 
+     * @return The table name
      */
-    public String getTableName() {
+    public String getTableName()
+    {
         return getTable().getName();
     }    
     
     /**
-     * @return the SqlDynaProperty objects of this class
+     * Returns the properties of this dyna class.
+     * 
+     * @return The properties
      */
-    public SqlDynaProperty[] getSqlDynaProperties() {
-        return (SqlDynaProperty[]) getDynaProperties();
+    public SqlDynaProperty[] getSqlDynaProperties()
+    {
+        return (SqlDynaProperty[])getDynaProperties();
     }
     
     /**
-     * @return an array of the primary key DynaProperty objects
+     * Returns the properties for the primary keys of the corresponding table.
+     * 
+     * @return The properties
      */
-    public SqlDynaProperty[] getPrimaryKeyProperties() {
-        if ( primaryKeys == null ) {
+    public SqlDynaProperty[] getPrimaryKeyProperties()
+    {
+        if (_primaryKeyProperties == null)
+        {
             initPrimaryKeys();
         }
-        return primaryKeys;
+        return _primaryKeyProperties;
     }
 
     /**
-     * @return an array of the non-primary key DynaProperty objects
+     * Returns the properties for the non-primary keys of the corresponding table.
+     * 
+     * @return The properties
      */
-    public SqlDynaProperty[] getNonPrimaryKeyProperties() {
-        if ( nonPrimaryKeyProperties == null ) {
+    public SqlDynaProperty[] getNonPrimaryKeyProperties()
+    {
+        if (_nonPrimaryKeyProperties == null)
+        {
             initPrimaryKeys();
         }
-        return nonPrimaryKeyProperties;
+        return _nonPrimaryKeyProperties;
     }
     
     // Implementation methods    
     //-------------------------------------------------------------------------                
 
     /**
-     * Creates the primary key and non primary key property arrays, laziliy.
+     * Initializes the primary key and non primary key property arrays.
      */
-    protected void initPrimaryKeys() {
-        List primaryKeyList = new ArrayList();
-        List otherList = new ArrayList();
-        
+    protected void initPrimaryKeys()
+    {
+        List           pkProps    = new ArrayList();
+        List           nonPkProps = new ArrayList();
         DynaProperty[] properties = getDynaProperties();
-        for (int i = 0, size = properties.length; i < size; i++ ) {
-            DynaProperty property = properties[i];
-            if (property instanceof SqlDynaProperty) {
-                SqlDynaProperty sqlProperty = (SqlDynaProperty) property;
-                if ( sqlProperty.isPrimaryKey() ) {
-                    primaryKeyList.add( sqlProperty );
+
+        for (int idx = 0; idx < properties.length; idx++)
+        {
+            if (properties[idx] instanceof SqlDynaProperty)
+            {
+                SqlDynaProperty sqlProperty = (SqlDynaProperty)properties[idx];
+
+                if (sqlProperty.isPrimaryKey())
+                {
+                    pkProps.add(sqlProperty);
                 }
-                else {
-                    otherList.add( sqlProperty );
+                else
+                {
+                    nonPkProps.add(sqlProperty);
                 }
             }
         }
-        this.primaryKeys = new SqlDynaProperty[primaryKeyList.size()];
-        primaryKeyList.toArray(this.primaryKeys);
-        
-        this.nonPrimaryKeyProperties = new SqlDynaProperty[otherList.size()];
-        otherList.toArray(this.nonPrimaryKeyProperties);
+        _primaryKeyProperties    = (SqlDynaProperty[])pkProps.toArray(new SqlDynaProperty[pkProps.size()]);
+        _nonPrimaryKeyProperties = (SqlDynaProperty[])nonPkProps.toArray(new SqlDynaProperty[nonPkProps.size()]);
     }
 }

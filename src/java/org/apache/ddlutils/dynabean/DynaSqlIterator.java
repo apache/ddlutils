@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -48,10 +49,12 @@ public class DynaSqlIterator implements Iterator
      * @param platformInfo       The platform info
      * @param model              The database model
      * @param resultSet          The result set
+     * @param queryHints         The tables that were queried in the query that produced the given result set
+     *                           (optional)
      * @param cleanUpAfterFinish Whether to close the statement and connection after finishing
      *                           the iteration, upon on exception, or when this iterator is garbage collected
      */
-    public DynaSqlIterator(PlatformInfo platformInfo, Database model, ResultSet resultSet, boolean cleanUpAfterFinish) throws DynaSqlException
+    public DynaSqlIterator(PlatformInfo platformInfo, Database model, ResultSet resultSet, Table[] queryHints, boolean cleanUpAfterFinish) throws DynaSqlException
     {
         if (resultSet != null)
         {
@@ -60,7 +63,7 @@ public class DynaSqlIterator implements Iterator
 
             try
             {
-                initFromMetaData(platformInfo, model, resultSet);
+                initFromMetaData(platformInfo, model, resultSet, queryHints);
             }
             catch (SQLException ex)
             {
@@ -80,33 +83,44 @@ public class DynaSqlIterator implements Iterator
      * @param platformInfo The platform info
      * @param model        The database model
      * @param resultSet    The result set
+     * @param queryHints   The tables that were queried in the query that produced the given result set
      */
-    private void initFromMetaData(PlatformInfo platformInfo, Database model, ResultSet resultSet) throws SQLException
+    private void initFromMetaData(PlatformInfo platformInfo, Database model, ResultSet resultSet, Table[] queryHints) throws SQLException
     {
-        ResultSetMetaData metaData         = resultSet.getMetaData();
-        String            tableName        = null;
-        boolean           singleKnownTable = true;
-        boolean           caseSensitive    = platformInfo.isCaseSensitive();
+        ResultSetMetaData metaData           = resultSet.getMetaData();
+        String            tableName          = null;
+        boolean           singleKnownTable   = true;
+        boolean           caseSensitive      = platformInfo.isUseDelimitedIdentifiers();
+        Map               preparedQueryHints = prepareQueryHints(queryHints, caseSensitive);
 
         for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
         {
+            String columnName    = metaData.getColumnName(idx);
             String tableOfColumn = metaData.getTableName(idx);
+            Table  table         = null;
 
             if ((tableOfColumn != null) && (tableOfColumn.length() > 0))
             {
-                if (tableName == null)
-                {
-                    tableName = tableOfColumn;
-                }
-                else if (!tableName.equals(tableOfColumn))
-                {
-                    singleKnownTable = false;
-                }
+                // the JDBC driver gave us enough meta data info
+                table = model.findTable(tableOfColumn, caseSensitive);
+            }
+            else
+            {
+                // not enough info in the meta data of the result set, lets try the
+                // user-supplied query hints
+                table         = (Table)preparedQueryHints.get(caseSensitive ? columnName : columnName.toLowerCase());
+                tableOfColumn = (table == null ? null : table.getName());
+            }
+            if (tableName == null)
+            {
+                tableName = tableOfColumn;
+            }
+            else if (!tableName.equals(tableOfColumn))
+            {
+                singleKnownTable = false;
             }
 
-            Table  table      = model.findTable(tableOfColumn, caseSensitive);
-            String columnName = metaData.getColumnName(idx);
-            String propName   = columnName;
+            String propName = columnName;
 
             if (table != null)
             {
@@ -134,6 +148,36 @@ public class DynaSqlIterator implements Iterator
             }
             _dynaClass = new BasicDynaClass("result", BasicDynaBean.class, props);
         }
+    }
+
+    /**
+     * Prepares the query hints by extracting the column names and using them as keys
+     * into the resulting map pointing to the corresponding table.
+     *  
+     * @param queryHints The query hints
+     * @return The column name -> table map
+     */
+    private Map prepareQueryHints(Table[] queryHints, boolean caseSensitive)
+    {
+        Map result = new HashMap();
+
+        for (int tableIdx = 0; (queryHints != null) && (tableIdx < queryHints.length); tableIdx++)
+        {
+            for (int columnIdx = 0; columnIdx < queryHints[tableIdx].getColumnCount(); columnIdx++)
+            {
+                String columnName = queryHints[tableIdx].getColumn(columnIdx).getName();
+
+                if (caseSensitive)
+                {
+                    columnName = columnName.toLowerCase();
+                }
+                if (!result.containsKey(columnName))
+                {
+                    result.put(columnName, queryHints[tableIdx]);
+                }
+            }
+        }
+        return result;
     }
     
     /* (non-Javadoc)
