@@ -17,6 +17,8 @@ public abstract class DatabaseCommand implements Command
     private BasicDataSource _dataSource;
     /** Whether to stop execution upon an error */
     private boolean _failOnError = true;
+    /** Whether to use delimited SQL identifiers */
+    private boolean _useDelimitedSqlIdentifiers = true;
 
     /**
      * Returns the database type.
@@ -72,6 +74,26 @@ public abstract class DatabaseCommand implements Command
     }
 
     /**
+     * Determines whether delimited SQL identifiers shall be used (the default).
+     *
+     * @return <code>true</code> if delimited SQL identifiers shall be used
+     */
+    public boolean isUseDelimitedSqlIdentifiers()
+    {
+        return _useDelimitedSqlIdentifiers;
+    }
+
+    /**
+     * Specifies whether delimited SQL identifiers shall be used.
+     *
+     * @param useDelimitedSqlIdentifiers <code>true</code> if delimited SQL identifiers shall be used
+     */
+    public void setUseDelimitedSqlIdentifiers(boolean useDelimitedSqlIdentifiers)
+    {
+        _useDelimitedSqlIdentifiers = useDelimitedSqlIdentifiers;
+    }
+
+    /**
      * Creates the platform for the configured database.
      * 
      * @return The platform
@@ -108,10 +130,9 @@ public abstract class DatabaseCommand implements Command
         {
             throw new BuildException("Database type "+_databaseType+" is not supported.");
         }
-        else
-        {
-            platform.setDataSource(_dataSource);
-            return platform;
-        }
+        platform.setDataSource(_dataSource);
+        platform.getPlatformInfo().setUseDelimitedIdentifiers(isUseDelimitedSqlIdentifiers());
+
+        return platform;
     }
 }
