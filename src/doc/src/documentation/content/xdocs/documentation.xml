@@ -17,12 +17,40 @@
 <!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
 <document> 
   <header> 
-    <title>Summary</title> 
+    <title>Overview</title> 
   </header> 
   <body> 
     <section>
       <title>What is DdlUtils</title>
-      <note>Coming soon</note>
+      <p>
+        In short, DdlUtils is both a library and a set of <a href="ext:ant">Ant</a> tasks that allows
+        the manipulation of schemas in a database. It allows to create and drop complete databases,
+        and the creation, alteration and removal of tables.<br/>
+        Additionally, it provides an easy way to insert data that is specified in XML, into a database
+        and the reverse, extracting data from a database into an XML file.
+      </p>
+      <p>
+        DdlUtils strives to be database independent. The schemas are specified in the database-agnostic
+        Turbine XML format that is for instance also used by <a href="ext:torque">Torque</a> and
+        <a href="ext:ojb">OJB</a>.
+      </p>
+    </section>
+    <section>
+      <title>Where to start</title>
+      <p>
+        There are basically two ways to use  DdlUtils which are explained in these sections:
+      </p>
+      <ul>
+        <li>
+          Examples of how to use the <strong>API</strong> are shown
+          <a href="site:documentation/api-usage">here</a>. The Javadoc documentation for the API can be
+          found <a href="ext:ddlutils/javadoc">here</a>.
+        </li>
+        <li>
+          The <strong>Ant tasks</strong> are explained in detail in
+          <a href="site:documentation/ant-tasks">this document</a>.
+        </li>
+      </ul>
     </section>
   </body>
 </document>

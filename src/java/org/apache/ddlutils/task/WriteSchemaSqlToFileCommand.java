@@ -37,8 +37,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
     private File _outputFile;
     /** Whether to alter or re-set the database if it already exists */
     private boolean _alterDb = true;
-    /** Whether to drop tables and the associated constraints first */
-    private boolean _dropTablesFirst = true;
+    /** Whether to drop tables and the associated constraints if necessary */
+    private boolean _doDrops = true;
 
     /**
      * Sets the file to output the sql to.
@@ -71,23 +71,23 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
     }
 
     /**
-     * Determines whether to drop tables and the associated constraints first.
+     * Determines whether to drop tables and the associated constraints if necessary.
      * 
-     * @return <code>true</code> if a drop shall be performed first
+     * @return <code>true</code> if drops shall be performed if necessary
      */
-    protected boolean isDropTablesFirst()
+    protected boolean isDoDrops()
     {
-        return _dropTablesFirst;
+        return _doDrops;
     }
 
     /**
-     * Specifies whether to drop tables and the associated constraints first.
+     * Specifies whether to drop tables and the associated constraints if necessary.
      * 
-     * @param doDrops <code>true</code> if a drop shall be performed first
+     * @param doDrops <code>true</code> if drops shall be performed if necessary
      */
-    public void setDropTablesFirst(boolean doDrops)
+    public void setDoDrops(boolean doDrops)
     {
-        _dropTablesFirst = doDrops;
+        _doDrops = doDrops;
     }
 
     /* (non-Javadoc)
@@ -122,11 +122,11 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
 
                 Database currentModel = new JdbcModelReader(connection).getDatabase();
 
-                platform.getSqlBuilder().alterDatabase(currentModel, model, _dropTablesFirst, true);
+                platform.getSqlBuilder().alterDatabase(currentModel, model, _doDrops, true);
             }
             else
             {
-                platform.getSqlBuilder().createTables(model, _dropTablesFirst);
+                platform.getSqlBuilder().createTables(model, _doDrops);
             }
             writer.close();
             task.log("Written SQL to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);

@@ -23,86 +23,98 @@
     <section>
       <title>DdlUtils' Ant tasks</title>
       <p>
-        DdlUtils comes with two <a href="ext:ant">Ant</a> tasks that allow you to create the
-        database structure, and to dump the database structure to XML, both from within your
-        build file.
+        DdlUtils comes with two <a href="ext:ant">Ant</a> tasks that allow you to manipulate the
+        database structure, insert data into the database, and to dump the database structure and
+        data contained in it, to XML.
       </p>
       <p>
         Lets see examples for how to use them:
       </p>
       <source><![CDATA[
 <path id="runtime.classpath">
-    <fileset dir="lib">
-        <include name="**/*.jar"/>
-        <include name="**/*.zip"/>
-    </fileset>
+  <fileset dir="lib">
+    <include name="**/*.jar"/>
+    <include name="**/*.zip"/>
+  </fileset>
 </path>
 
-<taskdef name="ddl"
-         classname="org.apache.ddlutils.task.DDLTask">
-  <classpath refid="runtime.classpath"/>
-</taskdef>
 
-<target name="database-setup" description="Creates database structure">
-  <ddl xmlFile="schema/schema.xml" 
-       targetDatabase="mysql"
-       output="target/schema.sql"
-       dbUrl="jdbc:mysql://localhost:3306/test"
-       dbUser="user"
-       dbPassword="pass"
-       dbDriver="com.mysql.jdbc.Driver"
-       alterDb="true"
-       executeSql="true"
-       modifyColumns="true"
-       doDrops="true"
-  />
+<target name="database-setup"
+        description="Creates the database structure and inserts data into the database">
+  <taskdef name="ddlToDatabase"
+           classname="org.apache.ddlutils.task.DdlToDatabaseTask">
+    <classpath refid="runtime-classpath"/>
+  </taskdef>
+  <ddlToDatabase>
+    <database url="jdbc:postgresql://localhost/test"
+              driverClassName="org.postgresql.Driver"
+              username="someuser"
+              password="somepassword"/>
+    <fileset dir="src/schema">
+      <include name="project-schema.xml"/>
+    </fileset>
+
+    <createDatabase failonerror="false"/>
+    <writeSchemaToDatabase/> 
+    <writeDataToDatabase datafile="src/data/data.xml"/> 
+  </ddlToDatabase>
 </target>]]></source>
       <p>
-        This snippet essentially uses the <code>DDLTask</code> to create the SQL necessary
-        to alter (attribute <code>alterDb</code>) the database schema of the existing MySQL
-        database at <code>localhost:3306/test</code> so that it matches the structure defined
-        in the file <code>schema/schema.xml</code>. This SQL is written to
-        <code>target/schema.sql</code> and then executed against the database (because of
-        attribute <code>executeSql</code>).
+        This snippet essentially uses the <code>DdlToDatabaseTask</code> task to create the a PostgreSQL
+        database at <code>//localhost/test</code>, establish the database structure (tables etc.)
+        defined in the file <code>src/schema/project-schema.xml</code> in this database, and then
+        inserts the data defined in <code>src/data/data.xml</code>.
       </p>
       <p>
         Required for this to work is that both DdlUtils and the JDBC driver are available
         in the path specified by <code>runtime.classpath</code>. In the above snippet, this path
         contains all JARs and ZIPs in sub-directory <code>lib</code>.
       </p>
+      <note>
+        Not every database platform supports creation of new databases via JDBC. Please refer to the
+        documentation of the support for the individual databases
+        <a href="site:documentation/database-support">here</a>.
+      </note>
       <p>
-        The opposite direction is achieved via the <code>JdbcToSchemaTask</code> task:
+        The opposite direction is achieved via the <code>DatabaseToDdlTask</code> task:
       </p>
       <source><![CDATA[
 <path id="runtime.classpath">
-    <fileset dir="lib">
-        <include name="**/*.jar"/>
-        <include name="**/*.zip"/>
-    </fileset>
+  <fileset dir="lib">
+    <include name="**/*.jar"/>
+    <include name="**/*.zip"/>
+  </fileset>
 </path>
 
-<taskdef name="jdbc2Schema"
-         classname="org.apache.ddlutils.task.JdbcToSchemaTask">
-  <classpath refid="runtime.classpath"/>
-</taskdef>
-
 <target name="database-dump" description="Dumps the database structure">
-  <jdbc2Schema outputFile="schema/schema-dump.xml" 
-               dbUrl="jdbc:mysql://localhost:3306/test"
-               dbUser="user"
-               dbPassword="pass"
-               dbDriver="com.mysql.jdbc.Driver"
-  />
+  <taskdef name="databaseToDdl"
+           classname="org.apache.ddlutils.task.DatabaseToDdlTask">
+    <classpath refid="runtime-classpath"/>
+  </taskdef>
+  <databaseToDdl>
+    <database url="jdbc:derby:ddlutils"
+              driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+              username=""
+              password=""/>
+
+    <writeSchemaToFile outputFile="db-schema.xml"/>
+  </databaseToDdl>
 </target>]]></source>
       <p>
         Here, the database schema is retrieved via the specified JDBC driver and written
-        to the file <code>schema/schema-dump.xml</code>.
+        to the file <code>db-schema.xml</code>.
       </p>
     </section>
     <section>
-      <title>DDLTask reference</title>
+      <title>DdlToDatabaseTask reference</title>
       <p>
-        Class name: <code>org.apache.ddlutils.task.DDLTask</code>
+        Class name: <code>org.apache.ddlutils.task.DdlToDatabaseTask</code>
+      </p>
+      <p>
+        This is the container for sub tasks that operate in the direction file -> database, eg.
+        that create/drop a schema in the database, insert data into the database. They also
+        create DTDs for these data files, and dump the SQL for creating a schema in the database
+        to a file.
       </p>
       <table>
         <tr>
@@ -113,106 +125,378 @@
           <th>Meaning</th>
         </tr>
         <tr>
-          <td>alterDb</td>
-          <td>no</td>
-          <td>true, false</td>
-          <td>false</td>
-          <td>Whether the generated sql shall alter the database rather than replacing it
-              completely (which would result in the removal of all data already in the
-              tables). Note that this requires a database connection.</td>
-        </tr>
-        <tr>
-          <td>dbCatalog</td>
+          <td>schemaFile</td>
           <td>no</td>
           <td></td>
           <td></td>
-          <td>The database catalog to use. This value depends on the database.</td>
+          <td>
+            The single file that contains the database file. Use this instead of an embedded
+            <code>fileset</code> if you only have one schema file.
+          </td>
         </tr>
         <tr>
-          <td>dbDriver</td>
-          <td>yes if <code>executeSql = true</code> or <code>alterDb = true</code></td>
-          <td></td>
-          <td></td>
-          <td>The fully qualified class name of the JDBC driver.</td>
-        </tr>
-        <tr>
-          <td>dbPassword</td>
+          <td>databaseType</td>
           <td>no</td>
+          <td>
+            axion, cloudscape, db2, derby, firebird, hsqldb, interbase, maxdb, mckoi, mssql,
+            mysql, oracle, oracle9, postgresql, sapdb, sybase
+          </td>
           <td></td>
-          <td></td>
-          <td>The password to use for the JDBC connection.</td>
-        </tr>
-        <tr>
-          <td>dbSchema</td>
-          <td>no</td>
-          <td></td>
-          <td></td>
-          <td>The schema in the database to use. This value depends on the database.</td>
-        </tr>
-        <tr>
-          <td>dbUrl</td>
-          <td>yes if <code>executeSql = true</code> or <code>alterDb = true</code></td>
-          <td></td>
-          <td></td>
-          <td>The JDBC connection url. This value depends on the used JDBC driver.</td>
-        </tr>
-        <tr>
-          <td>dbUser</td>
-          <td>no</td>
-          <td></td>
-          <td></td>
-          <td>The user name to use for the JDBC connection.</td>
-        </tr>
-        <tr>
-          <td>doDrops</td>
-          <td>no</td>
-          <td>true, false</td>
-          <td>false</td>
-          <td>Whether drops shall be performed when modifying an existing database
-              (<code>alterDb = true</code>).</td>
-        </tr>
-        <tr>
-          <td>executeSql</td>
-          <td>no</td>
-          <td>true, false</td>
-          <td>false</td>
-          <td>Whether to execute the generated sql (which requires a database connection).</td>
-        </tr>
-        <tr>
-          <td>modifyColumns</td>
-          <td>no</td>
-          <td>true, false</td>
-          <td>false</td>
-          <td>Whether columns can be modified when chaning an existing database
-              (<code>alterDb = true</code>).</td>
-        </tr>
-        <tr>
-          <td>output</td>
-          <td>yes</td>
-          <td></td>
-          <td></td>
-          <td>The file to write the generated SQL to.</td>
-        </tr>
-        <tr>
-          <td>targetDatabase</td>
-          <td>yes</td>
-          <td>axion, cloudscape, db2, firebird, hsqldb, maxdb, mckoi, mssql, mysql, oracle, postgresql, sapdb, sybase</td>
-          <td></td>
-          <td>For which database to generate.</td>
-        </tr>
-        <tr>
-          <td>xmlFile</td>
-          <td>yes</td>
-          <td></td>
-          <td></td>
-          <td>The schema file containing the database definition.</td>
+          <td>
+            The database type. You should only need to specify this if DdlUtils is not able to
+            derive the setting from the name of the used jdbc driver or the jdbc connection url.
+            If you need to specify this, please post your jdbc driver and connection url combo
+            to the user mailing list so that DdlUtils can be enhanced to support this combo.
+          </td>
         </tr>
       </table>
+      <section>
+        <title>Subelement: fileset</title>
+        <p>
+          Specifies the schema files to operate with. For details see the
+          <a href="ext:ant/manual/coretypes/fileset">section in the Ant manual</a>.
+        </p>
+      </section>
+      <section>
+        <title>Subelement: dataSource</title>
+        <p>
+          Specifies the connection to the database. This is basically a
+          <code>org.apache.commons.dbcp.BasicDataSource</code>. See the
+          <a href="ext:jakarta/commons/dbcp/javadoc/">commons-dbcp Javadoc</a>
+          for the supported properties. Usually you only need to specify
+        </p>
+        <ul>
+          <li><code>url</code> - the jdbc connection url</li>
+          <li><code>driverClassName</code> - the fully qualified class name of the jdbc driver
+              (which must be in the classpath that you used to define the DdlToDatabaseTask task)</li>
+          <li><code>username</code> - the username</li>
+          <li><code>password</code> - the password</li>
+        </ul>
+      </section>
+      <section>
+        <title>Subtask: createDatabase</title>
+        <p>
+          The sub task for creating the target database. Note that this is only supported on some database
+          platforms. See <a href="site:documentation/database-support">here</a> for details on which
+          platforms support this.<br/>
+          This sub task does not require schema files. Therefore the <code>fileset</code> subelement and
+          the <code>schemaFile</code> attribute can be omitted.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>Specifies whether the execution shall stop if an error has occurred while the task runs.</td>
+          </tr>
+          <tr>
+            <td>useDelimitedSqlIdentifiers</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>
+              Whether DdlUtils shall use delimited (quoted) identifiers (table names, column names etc.)
+              In most databases, undelimited identifiers will be converted to uppercase by the database,
+              and the case of the identifier is ignored when performing any SQL command. Undelimited
+              identifiers can contain only alphanumerical characters and the underscore. Also, no reserved
+              words can be used as such identifiers.<br/>
+              The limitations do not exist for delimited identifiers. However case of the identifier will be
+              important in every SQL command executed against the database.
+            </td>
+          </tr>
+        </table>
+        <section>
+          <title>Subelement: parameter</title>
+          <p>
+            Specifies a parameter for the creation of the database. These are usually platform specific.
+          </p>
+          <table>
+            <tr>
+              <th>Attribute</th>
+              <th>Required ?</th>
+              <th>Possible values</th>
+              <th>Default value</th>
+              <th>Meaning</th>
+            </tr>
+            <tr>
+              <td>name</td>
+              <td>yes</td>
+              <td></td>
+              <td></td>
+              <td>Specifies the name of the parameter. See <a href="site:documentation/database-support">here</a>
+                  for the parameters supported by the individual platforms.</td>
+            </tr>
+            <tr>
+              <td>value</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>The parameter value. If none is given, <code>null</code> is used.</td>
+            </tr>
+            <tr>
+              <td>platforms</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>
+                Comma-separated list of platforms where the parameter shall be processed (see
+                <code>databaseType</code> attribute above for the possible values). For every platform
+                not in this list, the parameter is ignored. If none is given, then the parameter
+                is processed for every platform.
+              </td>
+            </tr>
+          </table>
+        </section>
+      </section>
+      <section>
+        <title>Subtask: dropDatabase</title>
+        <p>
+          The sub task for dropping the target database. Note that this is only supported on some database
+          platforms. See <a href="site:documentation/database-support">here</a> for details on which
+          platforms support this.<br/>
+          This sub task does not require schema files. Therefore the <code>fileset</code> subelement and
+          the <code>schemaFile</code> attribute can be omitted.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>useDelimitedSqlIdentifiers</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+        </table>
+      </section>
+      <section>
+        <title>Subtask: writeDtdToFile</title>
+        <p>
+          Creates a DTD that specifies the layout for data XML files.<br/>
+          This sub task does not require a database connection, so the <code>dataSource</code> subelement
+          can be omitted.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>outputFile</td>
+            <td>yes</td>
+            <td></td>
+            <td></td>
+            <td>The name of the file to write the DTD to.</td>
+          </tr>
+          <tr>
+            <td>useDelimitedSqlIdentifiers</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+        </table>
+      </section>
+      <section>
+        <title>Subtask: writeSchemaToDatabase</title>
+        <p>
+          Creates the schema in the database that is described by the schema XML files specified for
+          the enclosing task.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>alterDatabase</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>Specifies whether DdlUtils shall alter existing tables rather than dropping them and
+                creating them new.</td>
+          </tr>
+          <tr>
+            <td>doDrops</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>
+              Whether tables and external constraints can be dropped if necessary. Note that this is also
+              relevant when <code>alterDatabase</code> is <code>true</code>. For instance, a table has a
+              foreign key constraint in the database but not in the schema. If <code>doDrops = true</code>
+              then DdlUtils will drop the constraint, otherwise it will be unchanged thus possibly leading
+              to unexpected errors.
+            </td>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>useDelimitedSqlIdentifiers</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+        </table>
+      </section>
+      <section>
+        <title>Subtask: writeSchemaSqlToFile</title>
+        <p>
+          Creates the SQL commands necessary to create the schema in the database that is described by
+          the schema XML files specified for the enclosing task. Note that this subtask requires either
+          the specification of the data source in the enclosing task, or the use of the
+          <code>databaseType</code> attribute at the enclosing task.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>alterDatabase</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>doDrops</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>outputFile</td>
+            <td>yes</td>
+            <td></td>
+            <td></td>
+            <td>The name of the file to write the SQL commands to.</td>
+          </tr>
+          <tr>
+            <td>useDelimitedSqlIdentifiers</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+        </table>
+      </section>
+      <section>
+        <title>Subtask: writeDataToDatabase</title>
+        <p>
+          Inserts the data defined by the data XML file(s) into the database. This requires the schema
+          in the database to match the schema defined by the XML files specified at the enclosing task.
+        </p>
+        <p>
+          DdlUtils will honor the order imposed by the foreign keys. Ie. first all required entries are
+          inserted, then the dependent ones. Obviously this requires that no circular references exist
+          in the schema (DdlUtils currently does not check this).
+        </p>
+        <p>
+          In order to define data for foreign key dependencies that use auto-incrementing primary keys,
+          simply use unique values for their columns. DdlUtils will automatically use the real primary
+          key values. Note though that not every database supports the retrieval of auto-increment values.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>dataFile</td>
+            <td>no</td>
+            <td></td>
+            <td></td>
+            <td>The name of the single XML file that contains the data to insert into the database.</td>
+          </tr>
+          <tr>
+            <td>useDelimitedSqlIdentifiers</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+        </table>
+        <section>
+          <title>Subelement: fileset</title>
+          <p>
+            Specifies the XML files that contain the data to insert. DdlUtils processes them in the
+            order that they appear in the fileset(s). For details on the <code>FileSet</code> element
+            see the <a href="ext:ant/manual/coretypes/fileset">section in the Ant manual</a>.
+          </p>
+        </section>
+      </section>
     </section>
     <section>
-      <title>JdbcToSchemaTask reference</title>
+      <title>DatabaseToDdlTask reference</title>
       <p>
-        Class name: <code>org.apache.ddlutils.task.JdbcToSchemaTask</code>
+        Class name: <code>org.apache.ddlutils.task.DatabaseToDdlTask</code>
+      </p>
+      <p>
+        This is the container for sub tasks that operate in the direction database -> file, eg.
+        that create/drop a schema in the database, insert data into the database. They also
+        create DTDs for these data files, and dump the SQL for creating a schema in the database
+        to a file.
       </p>
       <table>
         <tr>
@@ -223,55 +507,157 @@
           <th>Meaning</th>
         </tr>
         <tr>
-          <td>dbCatalog</td>
+          <td>catalog</td>
           <td>no</td>
           <td></td>
-          <td></td>
-          <td>The database catalog to use. This value depends on the database.</td>
+          <td>%</td>
+          <td>
+            Specifies the catalog(s) to access. This is only necessary for some databases.
+            The pattern is that of
+            <a href="ext:java/api/databaseMetaData-getTables">java.sql.DatabaseMetaData#getTables</a>.
+            The special pattern '%' indicates that every catalog shall be used.
+          </td>
         </tr>
         <tr>
-          <td>dbDriver</td>
-          <td>yes</td>
+          <td>databaseType</td>
+          <td>no</td>
+          <td>axion, cloudscape, db2, derby, firebird, hsqldb, interbase, maxdb, mckoi, mssql,
+              mysql, oracle, oracle9, postgresql, sapdb, sybase</td>
           <td></td>
-          <td></td>
-          <td>The fully qualified class name of the JDBC driver.</td>
+          <td>
+            The database type. You should only need to specify this if DdlUtils is not able to
+            derive the setting from the name of the used jdbc driver or the jdbc connection url.
+            If you need to specify this, please post your jdbc driver and connection url combo
+            to the user mailing list so that DdlUtils can be enhanced to support this combo.
+          </td>
         </tr>
         <tr>
-          <td>dbPassword</td>
+          <td>schema</td>
           <td>no</td>
           <td></td>
-          <td></td>
-          <td>The password to use for the JDBC connection.</td>
+          <td>%</td>
+          <td>
+            Specifies the table schema(s) to access. This is only necessary for some databases.
+            The pattern is that of
+            <a href="ext:java/api/databaseMetaData-getTables">java.sql.DatabaseMetaData#getTables</a>.
+            The special pattern '%' indicates that every table schema shall be used.
+          </td>
         </tr>
         <tr>
-          <td>dbSchema</td>
+          <td>tableTypes</td>
           <td>no</td>
           <td></td>
-          <td></td>
-          <td>The schema in the database to use. This value depends on the database.</td>
-        </tr>
-        <tr>
-          <td>dbUrl</td>
-          <td>yes</td>
-          <td></td>
-          <td></td>
-          <td>The JDBC connection url. This value depends on the used JDBC driver.</td>
-        </tr>
-        <tr>
-          <td>dbUser</td>
-          <td>no</td>
-          <td></td>
-          <td></td>
-          <td>The user name to use for the JDBC connection.</td>
-        </tr>
-        <tr>
-          <td>outputFile</td>
-          <td>yes</td>
-          <td></td>
-          <td></td>
-          <td>The file to write the schema to.</td>
+          <td>TABLE</td>
+          <td>
+            Specifies the table types to processed.
+            For details and typical table types see
+            <a href="ext:java/api/databaseMetaData-getTables">java.sql.DatabaseMetaData#getTables</a>.
+            Per default, only tables of type <code>TABLE</code>, eg. user tables, are processed.
+          </td>
         </tr>
       </table>
+      <section>
+        <title>Subelement: dataSource</title>
+        <p>
+          Specifies the connection to the database. This is basically a
+          <code>org.apache.commons.dbcp.BasicDataSource</code>. See the
+          <a href="ext:jakarta/commons/dbcp/javadoc/">commons-dbcp Javadoc</a>
+          for the supported properties. Usually you only need to specify
+        </p>
+        <ul>
+          <li><code>url</code> - the jdbc connection url</li>
+          <li><code>driverClassName</code> - the fully qualified class name of the jdbc driver
+              (which must be in the classpath that you used to define the DdlToDatabaseTask task)</li>
+          <li><code>username</code> - the username</li>
+          <li><code>password</code> - the password</li>
+        </ul>
+      </section>
+      <section>
+        <title>Subtask: writeDtdToFile</title>
+        <p>
+          Same as for the <code>DdlToDatabaseTask</code> task.
+        </p>
+      </section>
+      <section>
+        <title>Subtask: writeSchemaToFile</title>
+        <p>
+          Dumps the schema in the database to a schema XML file.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>outputFile</td>
+            <td>yes</td>
+            <td></td>
+            <td></td>
+            <td>The name of the file to write the schema XML to.</td>
+          </tr>
+        </table>
+      </section>
+      <section>
+        <title>Subtask: writeSchemaSqlToFile</title>
+        <p>
+          Creates the SQL commands necessary to re-create the schema in the database. In contrast to the
+          sub task of the same name in the <code>DdlToDatabaseTask</code>, this sub task operates on the
+          schema in the database.
+        </p>
+        <table>
+          <tr>
+            <th>Attribute</th>
+            <th>Required ?</th>
+            <th>Possible values</th>
+            <th>Default value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>alterDatabase</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>doDrops</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>outputFile</td>
+            <td>yes</td>
+            <td></td>
+            <td></td>
+            <td>The name of the file to write the SQL commands to.</td>
+          </tr>
+          <tr>
+            <td>useDelimitedSqlIdentifiers</td>
+            <td>no</td>
+            <td>true,false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+        </table>
+      </section>
+      <section>
+        <title>Subtask: writeDataToDatabase</title>
+        <p>
+          Same as for the <code>DdlToDatabaseTask</code> task.
+        </p>
+      </section>
     </section>
   </body>
 </document>

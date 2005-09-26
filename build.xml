@@ -96,7 +96,7 @@
         <fail unless="commons.resolver.available" message="Please make the Apache XML Commons Resolver library available in the classpath, e.g. by copying the xml-commons-resolver jar file from the 'tools/ant/lib' subdirectory of your Forrest installation (${env.FORREST_HOME}/tools/ant/lib) into the lib subdirectory of your Ant installation (${env.ANT_HOME}/lib)."/>
 
         <delete dir="${build.doc.dir}"
-        	    failonerror="false"/>
+        	      failonerror="false"/>
         <mkdir dir="${build.doc.dir}"/>
 
         <!-- Copy all forrest src stuff to a temporary directoy -->
@@ -116,17 +116,19 @@
             <fileset dir="${build.javadoc.dir}"/>
         </copy>
 
-    	<ant antfile="${env.FORREST_HOME}/forrest.build.xml"
-    		 dir="${build.doc.dir}"
-    		 inheritall="false"
-    		 target="site">
-    		<property name="forrest.home" value="${env.FORREST_HOME}"/>
-    	</ant>
+        <ant antfile="${env.FORREST_HOME}/main/forrest.build.xml"
+             dir="${build.doc.dir}"
+             inheritall="false"
+             target="site">
+            <property name="forrest.home" value="${env.FORREST_HOME}"/>
+        </ant>
         <!-- Finally we can copy the generated documentation to its designated place -->
+     <!-- 
         <mkdir dir="${doc.dir}"/>
         <copy todir="${doc.dir}">
             <fileset dir="${forrest.output.dir}"/>
         </copy>
+     -->
     </target>
 
     <!-- ================================================================== -->

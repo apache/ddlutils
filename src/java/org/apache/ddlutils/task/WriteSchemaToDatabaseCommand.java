@@ -29,8 +29,8 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
 {
     /** Whether to alter or re-set the database if it already exists */
     private boolean _alterDb = true;
-    /** Whether to drop tables and the associated constraints first */
-    private boolean _dropTablesFirst = true;
+    /** Whether to drop tables and the associated constraints if necessary */
+    private boolean _doDrops = true;
 
     /**
      * Determines whether to alter the database if it already exists, or re-set it.
@@ -53,23 +53,23 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
     }
 
     /**
-     * Determines whether to drop tables and the associated constraints first.
+     * Determines whether to drop tables and the associated constraints if necessary.
      * 
-     * @return <code>true</code> if a drop shall be performed first
+     * @return <code>true</code> if drops shall be performed
      */
-    protected boolean isDropTablesFirst()
+    protected boolean isDoDrops()
     {
-        return _dropTablesFirst;
+        return _doDrops;
     }
 
     /**
-     * Specifies whether to drop tables and the associated constraints first.
+     * Specifies whether to drop tables and the associated constraints if necessary.
      * 
-     * @param doDrops <code>true</code> if a drop shall be performed first
+     * @param doDrops <code>true</code> if drops shall be performed
      */
-    public void setDropTablesFirst(boolean doDrops)
+    public void setDoDrops(boolean doDrops)
     {
-        _dropTablesFirst = doDrops;
+        _doDrops = doDrops;
     }
 
     /* (non-Javadoc)
@@ -88,11 +88,11 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
         {
             if (isAlterDatabase())
             {
-                platform.alterTables(model, _dropTablesFirst, true, true);
+                platform.alterTables(model, _doDrops, true, true);
             }
             else
             {
-                platform.createTables(model, _dropTablesFirst, true);
+                platform.createTables(model, _doDrops, true);
             }
 
             task.log("Written schema to database", Project.MSG_INFO);

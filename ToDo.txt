@@ -2,7 +2,6 @@ List of things to be done for the next version of DdlUtils:
 
 * Fix Javadoc errors
 * Enhance doc:
-    - The Ant task
     - How to use DdlUtils in code
 * Separate generation of alter statements for an existing databases from the reading
   of the model from the existing database to allow for alter statement generation with two
@@ -19,7 +18,6 @@ List of things to be done for the next version of DdlUtils:
 * Extract interfaces from the model classes and inroduce a factory for creating the concrete model objects
 * Add functionality and ant tasks to dump data from the database
 * Add integration with DbUnit to allow DbUnit to use the schema and data files
-* Add proper handling of names (table, column, ...) that contain whitespaces and similar (-> escaping)
 * Add notion of jdbc types not directly supported by the database which are mapped to some large binary type,
   and add warnings when they are used (-> logging)
 * It might be useful to add support for the ARRAY jdbc data type in the way that PostgreSQL does, by
