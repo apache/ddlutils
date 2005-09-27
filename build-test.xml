@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="test" name="DdlUtils Test" basedir=".">
+  <!-- Allow values set at the commandline or in the environment to override the defaults -->
+  <property environment="env"/>
+  <!-- Load the build properties -->
+  <property file="build.properties"/>
+
+  <!-- The classpath used for compiling and generating the documentation -->
+  <path id="runtime-classpath">
+    <pathelement path="${build.java.dir}"/>
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+      <include name="**/*.zip"/>
+    </fileset>
+  </path>
+
+  <target name="test">
+    <taskdef name="ddlToDatabase"
+             classname="org.apache.ddlutils.task.DdlToDatabaseTask">
+      <classpath refid="runtime-classpath"/>
+    </taskdef>
+    <taskdef name="databaseToDdl"
+             classname="org.apache.ddlutils.task.DatabaseToDdlTask">
+      <classpath refid="runtime-classpath"/>
+    </taskdef>
+    <taskdef name="dumpMetadata"
+             classname="org.apache.ddlutils.task.DumpMetadataTask">
+      <classpath refid="runtime-classpath"/>
+    </taskdef>
+<!--
+    <dumpMetadata outputFile="metadata.xml">
+      <database url="jdbc:postgresql://localhost/visite"
+                driverClassName="org.postgresql.Driver"
+                username="postgres"
+                password="root123"/>
+    </dumpMetadata>
+-->
+<!--
+    <databaseToDdl databaseType="postgresql" schema="public" tableTypes="TABLE">
+      <database url="jdbc:postgresql://localhost/visite"
+                driverClassName="org.postgresql.Driver"
+                username="postgres"
+                password="root123"/>
+      <writeSchemaToFile outputFile="test.xml"/>
+    </databaseToDdl>
+-->
+<!--
+    <databaseToDdl databaseType="postgresql">
+      <database url="jdbc:postgresql://localhost/ddlutils"
+                driverClassName="org.postgresql.Driver"
+                username="postgres"
+                password="postgres123"/>
+      <writeSchemaToFile outputFile="test.xml"/>
+    </databaseToDdl>
+-->
+<!-- 
+    <ddlToDatabase>
+      <fileset dir=".">
+        <include name="test-db.xml"/>
+      </fileset>
+      <writeSchemaToDatabase databaseType="postgresql">
+        <database url="jdbc:postgresql://localhost/ddlutils"
+                  driverClassName="org.postgresql.Driver"
+                  username="postgres"
+                  password="root123"/>
+      </writeSchemaToDatabase>
+      <writeDataToDatabase databaseType="postgresql" dataFile="test-data.xml">
+        <database url="jdbc:postgresql://localhost/ddlutils"
+                  driverClassName="org.postgresql.Driver"
+                  username="postgres"
+                  password="root123"/>
+      </writeDataToDatabase>
+    </ddlToDatabase>
+-->
+    <ddlToDatabase>
+      <database url="jdbc:postgresql://localhost/ddlutilstest"
+                driverClassName="org.postgresql.Driver"
+                username="postgres"
+                password="root123"/>
+      <createDatabase> 
+         <parameter name="ENCODING" value="'LATIN9'"/> 
+      </createDatabase> 
+    </ddlToDatabase>
+<!--
+    <ddlToDatabase>
+      <fileset dir="src/test-input">
+        <include name="datamodel.xml"/>
+      </fileset>
+      <writeDtdToFile outputFile="test.dtd"/>
+      <writeSchemaSqlToFile outputFile="test.sql" databaseType="cloudscape">
+        <database url="jdbc:derby:ddlutils"
+                  driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+                  username=""
+                  password=""/>
+      </writeSchemaSqlToFile>
+      <writeSchemaToDatabase databaseType="cloudscape">
+        <database url="jdbc:derby:ddlutils"
+                  driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+                  username=""
+                  password=""/>
+      </writeSchemaToDatabase>
+    </ddlToDatabase>
+    <databaseToDdl databaseType="cloudscape">
+      <database url="jdbc:derby:ddlutils"
+                driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+                username=""
+                password=""/>
+      <writeSchemaToFile outputFile="test.xml"/>
+    </databaseToDdl>
+-->
+
+  </target>
+</project>

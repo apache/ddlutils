@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,15 @@ package org.apache.ddlutils.io;
 
 import org.apache.ddlutils.TestDatabaseWriterBase;
 
+/**
+ * Performs tests against Axion.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
+ */
 public class TestAgainstAxionDb extends TestDatabaseWriterBase
 {
-    /** The database schema for testing all column types that Axion supports */
+    /** The database schema for testing all column types that Axion supports. */
     public static final String COLUMN_TEST_SCHEMA =
         "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
         "<database name=\"datatypetest\">\n"+
@@ -52,6 +58,9 @@ public class TestAgainstAxionDb extends TestDatabaseWriterBase
         "  </table>\n"+
         "</database>";
 
+    /**
+     * Tests the database creation.
+     */
     public void _testCreation() throws Exception
     {
         createDatabase(COLUMN_TEST_SCHEMA);

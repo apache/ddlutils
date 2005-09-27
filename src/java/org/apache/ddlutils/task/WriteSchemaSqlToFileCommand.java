@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,17 @@ import org.apache.tools.ant.Task;
 
 /**
  * Creates the SQL for a schema and writes it to a file.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class WriteSchemaSqlToFileCommand extends DatabaseCommand
 {
-    /** The file to output the DTD to */
+    /** The file to output the DTD to. */
     private File _outputFile;
-    /** Whether to alter or re-set the database if it already exists */
+    /** Whether to alter or re-set the database if it already exists. */
     private boolean _alterDb = true;
-    /** Whether to drop tables and the associated constraints if necessary */
+    /** Whether to drop tables and the associated constraints if necessary. */
     private boolean _doDrops = true;
 
     /**
@@ -90,8 +93,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
         _doDrops = doDrops;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
+    /**
+     * {@inheritDoc}
      */
     public void execute(Task task, Database model) throws BuildException
     {

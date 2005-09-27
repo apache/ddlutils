@@ -1,7 +1,7 @@
 package org.apache.ddlutils.util;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import org.apache.ddlutils.model.TypeMap;
 
 /**
  * Little helper class providing functions for dealing with the newer JDBC functionality.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public abstract class Jdbc3Utils
 {

@@ -1,7 +1,7 @@
 package org.apache.ddlutils.dynabean;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import org.apache.commons.beanutils.DynaProperty;
  * SqlDynaBean is a DynaBean which can be persisted as a single row in 
  * a Database Table.
  *
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class SqlDynaBean extends BasicDynaBean
 {
-    /** Unique ID for serializaion purposes */
+    /** Unique ID for serializaion purposes. */
     private static final long serialVersionUID = -6946514447446174227L;
 
     /**
@@ -43,8 +43,8 @@ public class SqlDynaBean extends BasicDynaBean
         super(dynaClass);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * {@inheritDoc}
      */
     public String toString()
     {

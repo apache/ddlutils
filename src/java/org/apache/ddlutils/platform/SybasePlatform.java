@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,18 @@ import org.apache.ddlutils.builder.SybaseBuilder;
 /**
  * The platform implementation for Sybase.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class SybasePlatform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME     = "Sybase";
-    /** The standard Sybase jdbc driver */
+    /** The standard Sybase jdbc driver. */
     public static final String JDBC_DRIVER      = "com.sybase.jdbc2.jdbc.SybDriver";
-    /** The old Sybase jdbc driver */
+    /** The old Sybase jdbc driver. */
     public static final String JDBC_DRIVER_OLD  = "com.sybase.jdbc.SybDriver";
-    /** The subprotocol used by the standard Sybase driver */
+    /** The subprotocol used by the standard Sybase driver. */
     public static final String JDBC_SUBPROTOCOL = "sybase:Tds";
 
     /**
@@ -78,8 +78,8 @@ public class SybasePlatform extends PlatformImplBase
         setSqlBuilder(new SybaseBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

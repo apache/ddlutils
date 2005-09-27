@@ -1,8 +1,7 @@
 package org.apache.ddlutils.platform;
 
-
 /*
- * Copyright 1999-2002,2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +22,16 @@ package org.apache.ddlutils.platform;
  * Note that DdlUtils is currently not able to distinguish them based on the
  * jdbc driver or subprotocol as they are identical.   
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class MaxDbPlatform extends SapDbPlatform
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME = "MaxDB";
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

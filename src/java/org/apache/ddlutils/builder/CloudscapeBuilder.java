@@ -1,7 +1,7 @@
 package org.apache.ddlutils.builder;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.apache.ddlutils.model.Table;
 /**
  * The SQL Builder for Cloudscape.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class CloudscapeBuilder extends SqlBuilder
@@ -41,8 +41,8 @@ public class CloudscapeBuilder extends SqlBuilder
         super(info);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected String getSqlType(Column column)
     {
@@ -69,8 +69,8 @@ public class CloudscapeBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {

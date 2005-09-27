@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,26 +48,26 @@ import org.apache.ddlutils.model.Table;
 /**
  * An utility class to create a Database model from a live database.
  *
- * @author <a href="mailto:drfish@cox.net">J. Russell Smyth</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author J. Russell Smyth
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class JdbcModelReader
 {
-    /** The Log to which logging calls will be made */
+    /** The Log to which logging calls will be made. */
     private final Log log = LogFactory.getLog(JdbcModelReader.class);
 
-    /** Contains default column sizes (minimum sizes that a JDBC-compliant db must support) */
+    /** Contains default column sizes (minimum sizes that a JDBC-compliant db must support). */
     private HashMap defaultSizes = new HashMap();
-    /** The database connection */
+    /** The database connection. */
     private Connection connection = null;
-    /** The database catalog to read */
+    /** The database catalog to read. */
     private String catalog = "%";
-    /** The database schema to read */
+    /** The database schema to read. */
     private String schema = "%";
-    /** The table types to recognize */
+    /** The table types to recognize. */
     private String[] tableTypes = { "TABLE" };
-    /** The pattern to recognize when parsing a default value */
+    /** The pattern to recognize when parsing a default value. */
     private Pattern defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)");
 
     /**

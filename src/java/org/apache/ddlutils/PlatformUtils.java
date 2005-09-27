@@ -1,7 +1,7 @@
 package org.apache.ddlutils;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,88 +44,88 @@ import org.apache.ddlutils.platform.SybasePlatform;
 /**
  * Utility functions for dealing with database platforms.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 279421 $
  */
 public class PlatformUtils
 {
     // Extended drivers that support more than one database
 
-    /** The DataDirect Connect DB2 jdbc driver */
+    /** The DataDirect Connect DB2 jdbc driver. */
     public static final String JDBC_DRIVER_DATADIRECT_DB2        = "com.ddtek.jdbc.db2.DB2Driver";
-    /** The DataDirect Connect SQLServer jdbc driver */
+    /** The DataDirect Connect SQLServer jdbc driver. */
     public static final String JDBC_DRIVER_DATADIRECT_SQLSERVER  = "com.ddtek.jdbc.sqlserver.SQLServerDriver";
-    /** The DataDirect Connect Oracle jdbc driver */
+    /** The DataDirect Connect Oracle jdbc driver. */
     public static final String JDBC_DRIVER_DATADIRECT_ORACLE     = "com.ddtek.jdbc.oracle.OracleDriver";
-    /** The DataDirect Connect Sybase jdbc driver */
+    /** The DataDirect Connect Sybase jdbc driver. */
     public static final String JDBC_DRIVER_DATADIRECT_SYBASE     = "com.ddtek.jdbc.sybase.SybaseDriver";
-    /** The i-net DB2 jdbc driver */
+    /** The i-net DB2 jdbc driver. */
     public static final String JDBC_DRIVER_INET_DB2              = "com.inet.drda.DRDADriver";
-    /** The i-net Oracle jdbc driver */
+    /** The i-net Oracle jdbc driver. */
     public static final String JDBC_DRIVER_INET_ORACLE           = "com.inet.ora.OraDriver";
-    /** The i-net SQLServer jdbc driver */
+    /** The i-net SQLServer jdbc driver. */
     public static final String JDBC_DRIVER_INET_SQLSERVER        = "com.inet.tds.TdsDriver";
-    /** The i-net Sybase jdbc driver */
+    /** The i-net Sybase jdbc driver. */
     public static final String JDBC_DRIVER_INET_SYBASE           = "com.inet.syb.SybDriver";
-    /** The i-net pooled jdbc driver for SQLServer and Sybase */
+    /** The i-net pooled jdbc driver for SQLServer and Sybase. */
     public static final String JDBC_DRIVER_INET_POOLED           = "com.inet.pool.PoolDriver";
-    /** The JNetDirect SQLServer jdbc driver */
+    /** The JNetDirect SQLServer jdbc driver. */
     public static final String JDBC_DRIVER_JSQLCONNECT_SQLSERVER = "com.jnetdirect.jsql.JSQLDriver";
-    /** The jTDS jdbc driver for SQLServer and Sybase */
+    /** The jTDS jdbc driver for SQLServer and Sybase. */
     public static final String JDBC_DRIVER_JTDS                  = "net.sourceforge.jtds.jdbc.Driver";
 
-    /** The subprotocol used by the DataDirect DB2 driver */
+    /** The subprotocol used by the DataDirect DB2 driver. */
     public static final String JDBC_SUBPROTOCOL_DATADIRECT_DB2            = "datadirect:db2";
-    /** The subprotocol used by the DataDirect SQLServer driver */
+    /** The subprotocol used by the DataDirect SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_DATADIRECT_SQLSERVER      = "datadirect:sqlserver";
-    /** The subprotocol used by the DataDirect Oracle driver */
+    /** The subprotocol used by the DataDirect Oracle driver. */
     public static final String JDBC_SUBPROTOCOL_DATADIRECT_ORACLE         = "datadirect:oracle";
-    /** The subprotocol used by the DataDirect Sybase driver */
+    /** The subprotocol used by the DataDirect Sybase driver. */
     public static final String JDBC_SUBPROTOCOL_DATADIRECT_SYBASE         = "datadirect:sybase";
-    /** The subprotocol used by the i-net DB2 driver */
+    /** The subprotocol used by the i-net DB2 driver. */
     public static final String JDBC_SUBPROTOCOL_INET_DB2                  = "inetdb2";
-    /** The subprotocol used by the i-net Oracle driver */
+    /** The subprotocol used by the i-net Oracle driver. */
     public static final String JDBC_SUBPROTOCOL_INET_ORACLE               = "inetora";
-    /** A subprotocol used by the i-net SQLServer driver */
+    /** A subprotocol used by the i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER            = "inetdae";
-    /** A subprotocol used by the i-net SQLServer driver */
+    /** A subprotocol used by the i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER6           = "inetdae6";
-    /** A subprotocol used by the i-net SQLServer driver */
+    /** A subprotocol used by the i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER7           = "inetdae7";
-    /** A subprotocol used by the i-net SQLServer driver */
+    /** A subprotocol used by the i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER7A          = "inetdae7a";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER_POOLED_1   = "inetpool:inetdae";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER6_POOLED_1  = "inetpool:inetdae6";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER7_POOLED_1  = "inetpool:inetdae7";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER7A_POOLED_1 = "inetpool:inetdae7a";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER_POOLED_2   = "inetpool:jdbc:inetdae";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER6_POOLED_2  = "inetpool:jdbc:inetdae6";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER7_POOLED_2  = "inetpool:jdbc:inetdae7";
-    /** A subprotocol used by the pooled i-net SQLServer driver */
+    /** A subprotocol used by the pooled i-net SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SQLSERVER7A_POOLED_2 = "inetpool:jdbc:inetdae7a";
-    /** The subprotocol used by the i-net Sybase driver */
+    /** The subprotocol used by the i-net Sybase driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SYBASE               = "inetsyb";
-    /** The subprotocol used by the pooled i-net Sybase driver */
+    /** The subprotocol used by the pooled i-net Sybase driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SYBASE_POOLED_1      = "inetpool:inetsyb";
-    /** The subprotocol used by the pooled i-net Sybase driver */
+    /** The subprotocol used by the pooled i-net Sybase driver. */
     public static final String JDBC_SUBPROTOCOL_INET_SYBASE_POOLED_2      = "inetpool:jdbc:inetsyb";
-    /** The subprotocol used by the JNetDirect SQLServer driver */
+    /** The subprotocol used by the JNetDirect SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_JSQLCONNECT_SQLSERVER     = "JSQLConnect";
-    /** The subprotocol used by the jTDS SQLServer driver */
+    /** The subprotocol used by the jTDS SQLServer driver. */
     public static final String JDBC_SUBPROTOCOL_JTDS_SQLSERVER            = "jtds:sqlserver";
-    /** The subprotocol used by the jTDS Sybase driver */
+    /** The subprotocol used by the jTDS Sybase driver. */
     public static final String JDBC_SUBPROTOCOL_JTDS_SYBASE               = "jtds:sybase";
 
-    /** Maps the sub-protocl part of a jdbc connection url to a OJB platform name */
+    /** Maps the sub-protocl part of a jdbc connection url to a OJB platform name. */
     private HashMap jdbcSubProtocolToPlatform = new HashMap();
-    /** Maps the jdbc driver name to a OJB platform name */
+    /** Maps the jdbc driver name to a OJB platform name. */
     private HashMap jdbcDriverToPlatform      = new HashMap();
 
     /**
@@ -251,7 +251,7 @@ public class PlatformUtils
     /**
      * Tries to determine the database type for the given jdbc driver and connection url.
      * 
-     * @param driverClassName   The fully qualified name of the JDBC driver 
+     * @param driverName        The fully qualified name of the JDBC driver 
      * @param jdbcConnectionUrl The connection url
      * @return The database type or <code>null</code> if the database type couldn't be determined
      */

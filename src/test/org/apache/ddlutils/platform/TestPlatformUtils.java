@@ -1,44 +1,64 @@
 package org.apache.ddlutils.platform;
 
+/*
+ * Copyright 1999-2005 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import org.apache.ddlutils.PlatformUtils;
 
 import junit.framework.TestCase;
 
 /**
- * Tests the {@link org.apache.ddlutils.PlatformUtils#determineDatabaseType(String, String)} method.
+ * Tests the {@link org.apache.ddlutils.PlatformUtils} class.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 279421 $
  */
 public class TestPlatformUtils extends TestCase
 {
-    /** The tested platform utils object */
+    /** The tested platform utils object. */
     private PlatformUtils _platformUtils;
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
+    /**
+     * {@inheritDoc}
      */
     protected void setUp() throws Exception
     {
         _platformUtils = new PlatformUtils();
     }
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#tearDown()
+    /**
+     * {@inheritDoc}
      */
     protected void tearDown() throws Exception
     {
         _platformUtils = null;
     }
 
-    // TODO: test urls for each database
-
+    /**
+     * Tests the determination of the Axion platform via its JDBC driver.
+     */
     public void testAxionDriver()
     {
         assertEquals(AxionPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("org.axiondb.jdbc.AxionDriver", null));
     }
 
+    /**
+     * Tests the determination of the Axion platform via JDBC connection urls.
+     */
     public void testAxionUrl()
     {
         assertEquals(AxionPlatform.DATABASENAME,
@@ -47,6 +67,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:axiondb:testdb:/tmp/testdbdir"));
     }
 
+    /**
+     * Tests the determination of the Db2 platform via its JDBC drivers.
+     */
     public void testDb2Driver()
     {
         assertEquals(Db2Platform.DATABASENAME,
@@ -63,6 +86,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType("com.inet.drda.DRDADriver", null));
     }
 
+    /**
+     * Tests the determination of the Db2 platform via JDBC connection urls.
+     */
     public void testDb2Url()
     {
         assertEquals(Db2Platform.DATABASENAME,
@@ -79,6 +105,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:inetdb2://server1:50000"));
     }
 
+    /**
+     * Tests the determination of the Cloudscape platform via JDBC connection urls.
+     */
     public void testCloudscapeUrl()
     {
         assertEquals(CloudscapePlatform.DATABASENAME,
@@ -87,6 +116,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:cloudscape:net:database"));
     }
 
+    /**
+     * Tests the determination of the Derby platform via its JDBC drivers.
+     */
     public void testDerbyDriver()
     {
         assertEquals(DerbyPlatform.DATABASENAME,
@@ -95,18 +127,27 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType("org.apache.derby.jdbc.EmbeddedDriver", null));
     }
 
+    /**
+     * Tests the determination of the Derby platform via JDBC connection urls.
+     */
     public void testDerbyUrl()
     {
         assertEquals(DerbyPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType(null, "jdbc:derby:sample"));
     }
 
+    /**
+     * Tests the determination of the Firebird platform via its JDBC driver.
+     */
     public void testFirebirdDriver()
     {
         assertEquals(FirebirdPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("org.firebirdsql.jdbc.FBDriver", null));
     }
 
+    /**
+     * Tests the determination of the Firebird platform via JDBC connection urls.
+     */
     public void testFirebirdUrl()
     {
         assertEquals(FirebirdPlatform.DATABASENAME,
@@ -119,36 +160,54 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:firebirdsql:embedded:localhost/8080:/path/to/db.fdb"));
     }
 
+    /**
+     * Tests the determination of the HsqlDb platform via its JDBC driver.
+     */
     public void testHsqldbDriver()
     {
         assertEquals(HsqlDbPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("org.hsqldb.jdbcDriver", null));
     }
 
+    /**
+     * Tests the determination of the HsqlDb platform via JDBC connection urls.
+     */
     public void testHsqldbUrl()
     {
         assertEquals(HsqlDbPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType(null, "jdbc:hsqldb:/opt/db/testdb"));
     }
 
+    /**
+     * Tests the determination of the Interbase platform via its JDBC driver.
+     */
     public void testInterbaseDriver()
     {
         assertEquals(InterbasePlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("interbase.interclient.Driver", null));
     }
 
+    /**
+     * Tests the determination of the Interbase platform via JDBC connection urls.
+     */
     public void testInterbaseUrl()
     {
         assertEquals(InterbasePlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType(null, "jdbc:interbase://localhost/e:/testbed/database/employee.gdb"));
     }
 
+    /**
+     * Tests the determination of the McKoi platform via its JDBC driver.
+     */
     public void testMckoiDriver()
     {
         assertEquals(MckoiPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("com.mckoi.JDBCDriver", null));
     }
 
+    /**
+     * Tests the determination of the McKoi platform via JDBC connection urls.
+     */
     public void testMckoiUrl()
     {
         assertEquals(MckoiPlatform.DATABASENAME,
@@ -157,6 +216,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:mckoi://db.myhost.org/"));
     }
 
+    /**
+     * Tests the determination of the Microsoft Sql Server platform via its JDBC drivers.
+     */
     public void testMsSqlDriver()
     {
         assertEquals(MSSqlPlatform.DATABASENAME,
@@ -172,6 +234,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType("com.inet.tds.TdsDriver", null));
     }
 
+    /**
+     * Tests the determination of the Microsoft Sql Server platform via JDBC connection urls.
+     */
     public void testMsSqlUrl()
     {
         assertEquals(MSSqlPlatform.DATABASENAME,
@@ -212,6 +277,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:jtds:sqlserver://localhost:8080/test"));
     }
 
+    /**
+     * Tests the determination of the MySql platform via its JDBC drivers.
+     */
     public void testMySqlDriver()
     {
         assertEquals(MySqlPlatform.DATABASENAME,
@@ -220,12 +288,18 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType("org.gjt.mm.mysql.Driver", null));
     }
 
+    /**
+     * Tests the determination of the MySql platform via JDBC connection urls.
+     */
     public void testMySqlUrl()
     {
         assertEquals(MySqlPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType(null, "jdbc:mysql://localhost:1234/test"));
     }
 
+    /**
+     * Tests the determination of the Oracle 8 platform via its JDBC drivers.
+     */
     public void testOracleDriver()
     {
         assertEquals(Oracle8Platform.DATABASENAME,
@@ -240,6 +314,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType("com.inet.ora.OraDriver", null));
     }
 
+    /**
+     * Tests the determination of the Oracle 8 platform via JDBC connection urls.
+     */
     public void testOracleUrl()
     {
         assertEquals(Oracle8Platform.DATABASENAME,
@@ -258,12 +335,18 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:inetora:www.inetsoftware.de:1521:orcl?traceLevel=2"));
     }
 
+    /**
+     * Tests the determination of the PostgreSql platform via its JDBC driver.
+     */
     public void testPostgreSqlDriver()
     {
         assertEquals(PostgreSqlPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("org.postgresql.Driver", null));
     }
 
+    /**
+     * Tests the determination of the PostgreSql platform via JDBC connection urls.
+     */
     public void testPostgreSqlUrl()
     {
         assertEquals(PostgreSqlPlatform.DATABASENAME,
@@ -272,18 +355,27 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType(null, "jdbc:postgresql://[::1]:5740/accounting"));
     }
 
+    /**
+     * Tests the determination of the MaxDb platform via its JDBC driver.
+     */
     public void testMaxDbDriver()
     {
         assertEquals(MaxDbPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("com.sap.dbtech.jdbc.DriverSapDB", null));
     }
 
+    /**
+     * Tests the determination of the MaxDb platform via JDBC connection urls.
+     */
     public void testMaxDbUrl()
     {
         assertEquals(MaxDbPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType(null, "jdbc:sapdb://servermachine:9876/TST"));
     }
 
+    /**
+     * Tests the determination of the Sybase platform via its JDBC drivers.
+     */
     public void testSybaseDriver()
     {
         assertEquals(SybasePlatform.DATABASENAME,
@@ -298,6 +390,9 @@ public class TestPlatformUtils extends TestCase
                      _platformUtils.determineDatabaseType("com.inet.syb.SybDriver", null));
     }
 
+    /**
+     * Tests the determination of the Sybase platform via JDBC connection urls.
+     */
     public void testSybaseUrl()
     {
         assertEquals(SybasePlatform.DATABASENAME,

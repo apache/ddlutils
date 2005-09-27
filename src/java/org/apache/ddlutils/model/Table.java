@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,28 +27,29 @@ import org.apache.commons.collections.CollectionUtils;
 /**
  * Represents a table in the database model.
  * 
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class Table implements Serializable, Cloneable
 {
-    /** Unique ID for serialization purposes */
+    /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -5541154961302342608L;
 
-    /** The catalog of this table as read from the database */
+    /** The catalog of this table as read from the database. */
     private String _catalog = null;
-    /** The table's schema */
+    /** The table's schema. */
     private String _schema = null;
-    /** The name */
+    /** The name. */
     private String _name = null;
-    /** A desription of the table */
+    /** A desription of the table. */
     private String _description = null;
-    /** The table's type as read from the database */
+    /** The table's type as read from the database. */
     private String _type = null;
-    /** The columns in this table */
+    /** The columns in this table. */
     private ArrayList _columns = new ArrayList();
-    /** The foreign keys associated to this table */
+    /** The foreign keys associated to this table. */
     private ArrayList _foreignKeys = new ArrayList();
-    /** The indices applied to this table */
+    /** The indices applied to this table. */
     private ArrayList _indices = new ArrayList();
 
     /**
@@ -430,8 +431,9 @@ public class Table implements Serializable, Cloneable
     //-------------------------------------------------------------------------
 
     /**
-     * @return true if there is at least one primary key column
-     *  on this table
+     * Determines whether there is at least one primary key column on this table.
+     * 
+     * @return <code>true</code> if there are one or more primary key columns
      */
     public boolean hasPrimaryKey()
     {
@@ -591,8 +593,8 @@ public class Table implements Serializable, Cloneable
         return (Column[])autoIncrColumns.toArray(new Column[autoIncrColumns.size()]);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
     {
@@ -608,8 +610,8 @@ public class Table implements Serializable, Cloneable
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * {@inheritDoc}
      */
     public String toString()
     {

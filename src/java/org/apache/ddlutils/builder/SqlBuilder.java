@@ -1,7 +1,7 @@
 package org.apache.ddlutils.builder;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,38 +50,38 @@ import org.apache.ddlutils.model.Table;
  * 
  * TODO: It might be useful to add foreignkey analysis for creation/dropping of tables 
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author James Strachan
  * @author John Marshall/Connectria
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public abstract class SqlBuilder
 {
-
+    /** The line separator for in between sql commands. */
     private static final String LINE_SEPERATOR = System.getProperty("line.separator", "\n");
 
     /** The Log to which logging calls will be made. */
     protected final Log _log = LogFactory.getLog(SqlBuilder.class);
     
-    /** The current Writer used to output the SQL to */
+    /** The current Writer used to output the SQL to. */
     private Writer _writer;
     
-    /** The indentation used to indent commands */
+    /** The indentation used to indent commands. */
     private String _indent = "    ";
 
-    /** The platform info */
+    /** The platform info. */
     private PlatformInfo _info;
 
-    /** An optional locale specification for number and date formatting */
+    /** An optional locale specification for number and date formatting. */
     private String _valueLocale;
 
-    /** The date formatter */
+    /** The date formatter. */
     private DateFormat _valueDateFormat;
 
-    /** The date time formatter */
+    /** The date time formatter. */
     private DateFormat _valueTimeFormat;
 
-    /** The number formatter */
+    /** The number formatter. */
     private NumberFormat _valueNumberFormat;
 
     //
@@ -131,7 +131,7 @@ public abstract class SqlBuilder
     /** 
      * Returns the string used to indent the SQL.
      * 
-     * @param The indentation string
+     * @return The indentation string
      */
     public String getIndent()
     {
@@ -165,8 +165,8 @@ public abstract class SqlBuilder
      * (when printing default values and in generates insert/update/delete
      * statements).
      *
-     * @param locale The new locale or <code>null</code> if default formatting
-     *               should be used; Format is "language[_country[_variant]]"
+     * @param localeStr The new locale or <code>null</code> if default formatting
+     *                  should be used; Format is "language[_country[_variant]]"
      */
     public void setValueLocale(String localeStr)
     {
@@ -381,8 +381,8 @@ public abstract class SqlBuilder
                     if (_log.isInfoEnabled())
                     {
                         _log.info("Altering column " + desiredTable.getName() + "." + desiredColumn.getName());
-                        _log.info("  desired = " + desiredColumn.toStringAll());
-                        _log.info("  current = " + currentColumn.toStringAll());
+                        _log.info("  desired = " + desiredColumn.toVerboseString());
+                        _log.info("  current = " + currentColumn.toVerboseString());
                     }
                     writeColumnAlterStmt(desiredTable, desiredColumn, false);
                 }
@@ -1057,7 +1057,7 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Returns the database-native type for the given column
+     * Returns the database-native type for the given column.
      * 
      * @param column The column
      * @return The native type
@@ -1152,7 +1152,7 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Prints that a column is nullable 
+     * Prints that a column is nullable.
      */
     protected void writeColumnNullableStmt() throws IOException
     {
@@ -1160,7 +1160,7 @@ public abstract class SqlBuilder
     }
     
     /**
-     * Prints that a column is not nullable
+     * Prints that a column is not nullable.
      */
     protected void writeColumnNotNullableStmt() throws IOException 
     {
@@ -1491,7 +1491,6 @@ public abstract class SqlBuilder
      * @param database The database model
      * @param table    The table 
      * @param key      The foreign key
-     * @param numKey   The number of the key, starting with 1
      */
     protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
     {
@@ -1552,11 +1551,10 @@ public abstract class SqlBuilder
 
     /**
      * Generates the statement to drop a foreignkey constraint from the database using an
-     * alter table statement-
+     * alter table statement.
      *
-     * @param table  The table 
-     * @param key    The foreign key
-     * @param numKey The number of the key, starting with 1
+     * @param table      The table 
+     * @param foreignKey The foreign key
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
     {
@@ -1670,7 +1668,7 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Prints the characters used to indent SQL
+     * Prints the characters used to indent SQL.
      */
     protected void printIndent() throws IOException
     {

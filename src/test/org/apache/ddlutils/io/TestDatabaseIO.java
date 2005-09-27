@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,9 @@ import org.apache.ddlutils.model.Table;
 
 /**
  * Tests the database reading/writing via the {@link org.apache.ddlutils.io.DatabaseIO} class.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class TestDatabaseIO extends TestCase
 {
@@ -934,6 +937,9 @@ public class TestDatabaseIO extends TestCase
             writeModel(model));
     }
 
+    /**
+     * Tests that an exception is generated when an index references an undefined column.
+     */
     public void testUndefinedIndexColumn()
     {
         try
@@ -958,6 +964,9 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when the database element has no name attribute.
+     */
     public void testDatabaseWithoutName()
     {
         try
@@ -978,6 +987,9 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when the table element has no name attribute.
+     */
     public void testTableWithoutName()
     {
         try
@@ -998,6 +1010,9 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when two table elements have the same value in their name attributes.
+     */
     public void testTwoTablesWithTheSameName()
     {
         try
@@ -1024,6 +1039,9 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when the column element has no name attribute.
+     */
     public void testColumnWithoutName()
     {
         try
@@ -1043,6 +1061,10 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when two column elements within the same table
+     * element have the same value in their name attributes.
+     */
     public void testTwoColumnsWithTheSameName()
     {
         try
@@ -1065,6 +1087,9 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when the column element has no type attribute.
+     */
     public void testColumnWithoutType()
     {
         try
@@ -1084,6 +1109,9 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when the a unique index references an undefined column.
+     */
     public void testUndefinedUniqueColumn()
     {
         try
@@ -1107,6 +1135,9 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when two indices have the same value in their name attributes.
+     */
     public void testTwoIndicesWithTheSameName()
     {
         try
@@ -1139,6 +1170,10 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when two unique indices have the
+     * same value in their name attributes.
+     */
     public void testTwoUniqueIndicesWithTheSameName()
     {
         try
@@ -1171,6 +1206,10 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Tests that an exception is generated when a unique and a normal index
+     * have the same value in their name attributes.
+     */
     public void testUniqueAndNormalIndexWithTheSameName()
     {
         try

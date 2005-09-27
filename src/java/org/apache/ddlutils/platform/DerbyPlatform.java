@@ -1,16 +1,7 @@
 package org.apache.ddlutils.platform;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.apache.ddlutils.DynaSqlException;
-import org.apache.ddlutils.builder.DerbyBuilder;
-
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,23 +16,35 @@ import org.apache.ddlutils.builder.DerbyBuilder;
  * limitations under the License.
  */
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.builder.DerbyBuilder;
+
 /**
  * The platform implementation for Derby.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class DerbyPlatform extends CloudscapePlatform
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME         = "Derby";
-    /** The derby jdbc driver for use as a client for a normal server */
+    /** The derby jdbc driver for use as a client for a normal server. */
     public static final String JDBC_DRIVER          = "org.apache.derby.jdbc.ClientDriver";
-    /** The derby jdbc driver for use as an embedded database */
+    /** The derby jdbc driver for use as an embedded database. */
     public static final String JDBC_DRIVER_EMBEDDED = "org.apache.derby.jdbc.EmbeddedDriver";
-    /** The subprotocol used by the derby drivers */
+    /** The subprotocol used by the derby drivers. */
     public static final String JDBC_SUBPROTOCOL     = "derby";
 
+    /**
+     * Creates a new Derby platform instance.
+     */
     public DerbyPlatform()
     {
         super();
@@ -49,16 +52,16 @@ public class DerbyPlatform extends CloudscapePlatform
         setSqlBuilder(new DerbyBuilder(getSqlBuilder().getPlatformInfo()));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {
         return DATABASENAME;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map)
+    /**
+     * {@inheritDoc}
      */
     public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
     {

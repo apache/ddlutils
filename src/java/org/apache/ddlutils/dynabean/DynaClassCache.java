@@ -1,7 +1,7 @@
 package org.apache.ddlutils.dynabean;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import org.apache.ddlutils.model.Table;
  * Provides a cache of dyna class instances for a specific model, as well as
  * helper methods for dealing with these classes.
  *
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision: 231110 $
  */
 public class DynaClassCache
 {
-    /** A cache of the SqlDynaClasses per table name */
+    /** A cache of the SqlDynaClasses per table name. */
     private Map _dynaClassCache = new HashMap();
 
     /**
@@ -118,6 +118,7 @@ public class DynaClassCache
     /**
      * Returns the {@link SqlDynaClass} for the given bean.
      * 
+     * @param dynaBean The bean
      * @return The dyna bean class
      */
     public SqlDynaClass getDynaClass(DynaBean dynaBean) throws DynaSqlException
@@ -139,6 +140,7 @@ public class DynaClassCache
      * Creates a new {@link SqlDynaClass} instance for the given table based on the table definition.
      * 
      * @param table The table
+     * @return The new dyna class
      */
     private SqlDynaClass createDynaClass(Table table)
     {

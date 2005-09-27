@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,21 @@ import java.util.List;
 
 /**
  * Represents a database foreign key.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision$
  */
 public class ForeignKey implements Cloneable
 {
     //  TODO: Make the create/alter/drop functionality respect the name property
 
-    /** The name of the foreign key, may be <code>null</code> */
+    /** The name of the foreign key, may be <code>null</code>. */
     private String    _name;
-    /** The target table */
+    /** The target table. */
     private Table     _foreignTable;
-    /** The name of the foreign table */
+    /** The name of the foreign table. */
     private String    _foreignTableName;
-    /** The references between local and remote columns */
+    /** The references between local and remote columns. */
     private ArrayList _references = new ArrayList();
 
     /**
@@ -214,8 +217,8 @@ public class ForeignKey implements Cloneable
         _references.remove(idx);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
+    /**
+     * {@inheritDoc}
      */
     public boolean equals(Object other)
     {
@@ -242,8 +245,8 @@ public class ForeignKey implements Cloneable
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * {@inheritDoc}
      */
     public String toString()
     {
@@ -251,8 +254,8 @@ public class ForeignKey implements Cloneable
         return "ForeignKey[" + _foreignTableName + "]";
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
     {

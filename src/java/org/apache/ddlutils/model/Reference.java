@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,20 @@ package org.apache.ddlutils.model;
  */
 
 /**
- * Represents a reference between a column in the local table and a column in another table. 
+ * Represents a reference between a column in the local table and a column in another table.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision$
  */
 public class Reference implements Cloneable, Comparable
 {
-    /** The local column */
+    /** The local column. */
     private Column _localColumn;
-    /** The foreign column */
+    /** The foreign column. */
     private Column _foreignColumn;
-    /** The name of the local column */
+    /** The name of the local column. */
     private String _localColumnName;
-    /** The name of the foreign column */
+    /** The name of the foreign column. */
     private String _foreignColumnName;
 
     /**
@@ -140,16 +143,16 @@ public class Reference implements Cloneable, Comparable
         _foreignColumnName = foreignColumnName;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
     {
         return new Reference(getLocalColumn(), getForeignColumn());
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
+    /**
+     * {@inheritDoc}
      */
     public int compareTo(Object other)
     {
@@ -164,8 +167,8 @@ public class Reference implements Cloneable, Comparable
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
+    /**
+     * {@inheritDoc}
      */
     public boolean equals(Object other)
     {
@@ -182,8 +185,8 @@ public class Reference implements Cloneable, Comparable
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * {@inheritDoc}
      */
     public String toString()
     {

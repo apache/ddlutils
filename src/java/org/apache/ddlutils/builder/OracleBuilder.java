@@ -1,7 +1,7 @@
 package org.apache.ddlutils.builder;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.apache.ddlutils.model.Table;
 /**
  * The SQL Builder for Oracle.
  *
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class OracleBuilder extends SqlBuilder
@@ -43,8 +43,8 @@ public class OracleBuilder extends SqlBuilder
         super(info);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void dropTable(Table table) throws IOException
     {
@@ -66,16 +66,16 @@ public class OracleBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropExternalForeignKeys(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void dropExternalForeignKeys(Table table) throws IOException
     {
         // no need to as we drop the table with CASCASE CONSTRAINTS
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void createTable(Database database, Table table) throws IOException
     {
@@ -109,8 +109,8 @@ public class OracleBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected String getSqlType(Column column)
     {
@@ -138,8 +138,8 @@ public class OracleBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {

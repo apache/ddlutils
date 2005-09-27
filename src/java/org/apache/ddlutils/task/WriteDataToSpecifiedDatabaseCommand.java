@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,15 @@ import org.apache.tools.ant.types.FileSet;
 
 /**
  * Command for inserting data into a database that is specified as a sub-element.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class WriteDataToSpecifiedDatabaseCommand extends DatabaseCommand
 {
-    /** A single data file to insert */
+    /** A single data file to insert. */
     private File      _singleDataFile = null;
-    /** The input files */
+    /** The input files. */
     private ArrayList _fileSets = new ArrayList();
 
     /**
@@ -59,8 +62,8 @@ public class WriteDataToSpecifiedDatabaseCommand extends DatabaseCommand
         _singleDataFile = dataFile;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
+    /**
+     * {@inheritDoc}
      */
     public void execute(Task task, Database model) throws BuildException
     {

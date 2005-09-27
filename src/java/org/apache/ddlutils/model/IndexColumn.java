@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,42 +16,77 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
-public class IndexColumn implements Cloneable
-{
-    protected String name;
-    protected String size;
-    
-    public IndexColumn() {}
+import java.io.Serializable;
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+/**
+ * Represents a column of an index in the database model.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision$
+ */
+public class IndexColumn implements Cloneable, Serializable
+{
+    /** Unique ID for serialization purposes. */
+    private static final long serialVersionUID = -5009366896427504739L;
+
+    /** The name of the column. */
+    protected String _name;
+    /** The size of the column in the index. */
+    protected String _size;
+
+    // TODO: Implement equals, hashCode and toString
+    // TODO: It might be useful if the referenced column is directly acessible here ?
+
+    /**
+     * Returns the name of the column.
+     * 
+     * @return The name
+     */
+    public String getName()
+    {
+        return _name;
+    }
+    
+    /**
+     * Sets the name of the column.
+     * 
+     * @param name The name
+     */
+    public void setName(String name)
+    {
+        _name = name;
+    }
+
+    /**
+     * Returns the size of the column in the index.
+     * 
+     * @return The size
+     */
+    public String getSize()
+    {
+        return _size;
+    }
+
+    /**
+     * Sets the size of the column in the index.
+     * 
+     * @param size The size
+     */
+    public void setSize(String size)
+    {
+        _size = size;
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
     {
         IndexColumn result = new IndexColumn();
 
-        result.name = name;
-        result.size = size;
+        result._name = _name;
+        result._size = _size;
         return result;
     }
-
-    public String getName()
-    {
-        return name;
-    }
-    
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public String getSize()
-    {
-        return size;
-    }
-
-    public void setSize(String size)
-    {
-        this.size = size;
-    }
 }
+

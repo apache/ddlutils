@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,17 @@ import org.apache.tools.ant.Task;
 
 /**
  * Command for writing the database schema to a file.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class WriteSchemaToFileCommand implements Command
 {
-    /** The file to output the DTD to */
+    /** The file to output the schema to. */
     private File _outputFile;
 
     /**
-     * Sets the file to output the DTD to.
+     * Sets the file to output the schema to.
      * 
      * @param outputFile The output file
      */
@@ -43,8 +46,8 @@ public class WriteSchemaToFileCommand implements Command
         _outputFile = outputFile;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
+    /**
+     * {@inheritDoc}
      */
     public void execute(Task task, Database model) throws BuildException
     {

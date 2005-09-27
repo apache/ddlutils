@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import java.sql.Types;
 /**
  * The platform for Oracle 9.
  *
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class Oracle9Platform extends Oracle8Platform
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME = "Oracle9";
 
     /**
@@ -36,5 +36,13 @@ public class Oracle9Platform extends Oracle8Platform
     {
         super();
         getPlatformInfo().addNativeTypeMapping(Types.TIMESTAMP, "TIMESTAMP");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getName()
+    {
+        return DATABASENAME;
     }
 }

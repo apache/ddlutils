@@ -1,7 +1,7 @@
 package org.apache.ddlutils;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import org.xml.sax.SAXException;
 /**
  * Base class for builder tests.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public abstract class TestPlatformBase extends TestCase
 {
-    /** The database schema for testing the column types */
+    /** The database schema for testing the column types. */
     public static final String COLUMN_TEST_SCHEMA =
         "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
         "<database name='datatypetest'>\n" +
@@ -74,7 +74,7 @@ public abstract class TestPlatformBase extends TestCase
         "  </table>\n" +
         "</database>";
 
-    /** The database schema for testing column constraints */
+    /** The database schema for testing column constraints. */
     public static final String COLUMN_CONSTRAINT_TEST_SCHEMA =
         "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
         "<database name='columnconstraintstest'>\n" +
@@ -88,7 +88,7 @@ public abstract class TestPlatformBase extends TestCase
         "  </table>\n" +
         "</database>";
 
-    /** The database schema for testing table constraints, ie. foreign keys and indices */
+    /** The database schema for testing table constraints, ie. foreign keys and indices. */
     public static final String TABLE_CONSTRAINT_TEST_SCHEMA =
         "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
         "<database name='tableconstraintstest'>\n" +
@@ -124,16 +124,13 @@ public abstract class TestPlatformBase extends TestCase
         "  </table>\n" +
         "</database>";
 
-    /** The tested platform */
+    /** The tested platform. */
     private Platform _platform;
-
-    /** The writer that the builder of the platform writes to */
+    /** The writer that the builder of the platform writes to. */
     private StringWriter _writer;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see junit.framework.TestCase#setUp()
+    /**
+     * {@inheritDoc}
      */
     protected void setUp() throws Exception
     {
@@ -142,10 +139,8 @@ public abstract class TestPlatformBase extends TestCase
         _platform.getSqlBuilder().setWriter(_writer);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see junit.framework.TestCase#tearDown()
+    /**
+     * {@inheritDoc}
      */
     protected void tearDown() throws Exception
     {

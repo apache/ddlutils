@@ -1,5 +1,21 @@
 package org.apache.ddlutils.dynabean;
 
+/*
+ * Copyright 1999-2005 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -27,20 +43,23 @@ import org.apache.ddlutils.model.Table;
  * If the query is against a known table, then {@link org.apache.ddlutils.dynabean.SqlDynaBean} instances
  * are created from the rows, otherwise normal {@link org.apache.commons.beanutils.DynaBean} instances
  * are created.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DynaSqlIterator implements Iterator
 {
-    /** The base result set */
+    /** The base result set. */
     private ResultSet _resultSet;
-    /** The dyna class to use for creating beans */
+    /** The dyna class to use for creating beans. */
     private DynaClass _dynaClass;
-    /** Maps column names to properties */
+    /** Maps column names to properties. */
     private Map _columnsToProperties = new ListOrderedMap();
-    /** Whether the next call to hasNext or next needs advancement */
+    /** Whether the next call to hasNext or next needs advancement. */
     private boolean _needsAdvancing = true;
-    /** Whether we're already at the end of the result set */
+    /** Whether we're already at the end of the result set. */
     private boolean _isAtEnd = false;
-    /** Whether to close the statement and connection after finishing */
+    /** Whether to close the statement and connection after finishing. */
     private boolean _cleanUpAfterFinish;
 
     /**
@@ -154,7 +173,8 @@ public class DynaSqlIterator implements Iterator
      * Prepares the query hints by extracting the column names and using them as keys
      * into the resulting map pointing to the corresponding table.
      *  
-     * @param queryHints The query hints
+     * @param queryHints    The query hints
+     * @param caseSensitive Whether the case of the column names is important
      * @return The column name -> table map
      */
     private Map prepareQueryHints(Table[] queryHints, boolean caseSensitive)
@@ -180,8 +200,8 @@ public class DynaSqlIterator implements Iterator
         return result;
     }
     
-    /* (non-Javadoc)
-     * @see java.util.Iterator#hasNext()
+    /**
+     * {@inheritDoc}
      */
     public boolean hasNext() throws DynaSqlException
     {
@@ -189,8 +209,8 @@ public class DynaSqlIterator implements Iterator
         return !_isAtEnd;
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Iterator#next()
+    /**
+     * {@inheritDoc}
      */
     public Object next() throws DynaSqlException
     {
@@ -246,8 +266,8 @@ public class DynaSqlIterator implements Iterator
         }
     }
     
-    /* (non-Javadoc)
-     * @see java.util.Iterator#remove()
+    /**
+     * {@inheritDoc}
      */
     public void remove() throws DynaSqlException
     {
@@ -286,8 +306,8 @@ public class DynaSqlIterator implements Iterator
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#finalize()
+    /**
+     * {@inheritDoc}
      */
     protected void finalize() throws Throwable
     {

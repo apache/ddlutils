@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ import org.apache.ddlutils.builder.OracleBuilder;
 /**
  * The platform for Oracle 8.
  *
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class Oracle8Platform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME              = "Oracle";
-    /** The standard Oracle jdbc driver */
+    /** The standard Oracle jdbc driver. */
     public static final String JDBC_DRIVER               = "oracle.jdbc.driver.OracleDriver";
-    /** The old Oracle jdbc driver */
+    /** The old Oracle jdbc driver. */
     public static final String JDBC_DRIVER_OLD           = "oracle.jdbc.dnlddriver.OracleDriver";
-    /** The thin subprotocol used by the standard Oracle driver */
+    /** The thin subprotocol used by the standard Oracle driver. */
     public static final String JDBC_SUBPROTOCOL_THIN     = "oracle:thin";
-    /** The thin subprotocol used by the standard Oracle driver */
+    /** The thin subprotocol used by the standard Oracle driver. */
     public static final String JDBC_SUBPROTOCOL_OCI8     = "oracle:oci8";
-    /** The thin subprotocol used by the standard Oracle driver */
+    /** The thin subprotocol used by the standard Oracle driver. */
     public static final String JDBC_SUBPROTOCOL_THIN_OLD = "oracle:dnldthin";
 
     /**
@@ -86,8 +86,8 @@ public class Oracle8Platform extends PlatformImplBase
         setSqlBuilder(new OracleBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

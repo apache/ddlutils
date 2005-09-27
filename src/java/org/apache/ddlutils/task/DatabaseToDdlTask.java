@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,19 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
 /**
- * Ant task for working with a database, e.g. retrieving the schema from a database, dumping data,
+ * Ant task for working with a database, e.g. retrieving the schema from a
+ * database, dumping data, etc.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DatabaseToDdlTask extends DatabaseTaskBase
 {
-    /** The specific schema to use */
+    /** The specific schema to use. */
     private String _schema;
-    /** The specific catalog to use */
+    /** The specific catalog to use. */
     private String _catalog;
-    /** The table types to recognize when reading the model from the database */
+    /** The table types to recognize when reading the model from the database. */
     private String _tableTypes;
 
     /**
@@ -87,7 +91,7 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
-     * Adds the "write schema sql to file"-command
+     * Adds the "write schema sql to file"-command.
      * 
      * @param command The command
      */
@@ -97,7 +101,7 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
-     * Adds the "write data into database"-command
+     * Adds the "write data into database"-command.
      * 
      * @param command The command
      */
@@ -172,8 +176,8 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tools.ant.Task#execute()
+    /**
+     * {@inheritDoc}
      */
     public void execute() throws BuildException
     {

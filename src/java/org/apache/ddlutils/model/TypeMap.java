@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,122 +26,167 @@ import org.apache.ddlutils.util.Jdbc3Utils;
  * A class that maps SQL type names to their JDBC type ID found in
  * {@link java.sql.Types} and vice versa.
  *
- * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Jason van Zyl
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision$
  */
-public class TypeMap
+public abstract class TypeMap
 {
+    /** The string representation of the {@link java.sql.Types#ARRAY} constant. */
     public static final String ARRAY         = "ARRAY";
+    /** The string representation of the {@link java.sql.Types#BIGINT} constant. */
     public static final String BIGINT        = "BIGINT";
+    /** The string representation of the {@link java.sql.Types#BINARY} constant. */
     public static final String BINARY        = "BINARY";
+    /** The string representation of the {@link java.sql.Types#BIT} constant. */
     public static final String BIT           = "BIT";
+    /** The string representation of the {@link java.sql.Types#BLOB} constant. */
     public static final String BLOB          = "BLOB";
+    /** The string representation of the {@link java.sql.Types#BOOLEAN} constant. */
     public static final String BOOLEAN       = "BOOLEAN";
+    /** The string representation of the {@link java.sql.Types#CHAR} constant. */
     public static final String CHAR          = "CHAR";
+    /** The string representation of the {@link java.sql.Types#CLOB} constant. */
     public static final String CLOB          = "CLOB";
+    /** The string representation of the {@link java.sql.Types#DATALINK} constant. */
     public static final String DATALINK      = "DATALINK";
+    /** The string representation of the {@link java.sql.Types#DATE} constant. */
     public static final String DATE          = "DATE";
+    /** The string representation of the {@link java.sql.Types#DECIMAL} constant. */
     public static final String DECIMAL       = "DECIMAL";
+    /** The string representation of the {@link java.sql.Types#DISTINCT} constant. */
     public static final String DISTINCT      = "DISTINCT";
+    /** The string representation of the {@link java.sql.Types#DOUBLE} constant. */
     public static final String DOUBLE        = "DOUBLE";
+    /** The string representation of the {@link java.sql.Types#FLOAT} constant. */
     public static final String FLOAT         = "FLOAT";
+    /** The string representation of the {@link java.sql.Types#INTEGER} constant. */
     public static final String INTEGER       = "INTEGER";
+    /** The string representation of the {@link java.sql.Types#JAVA_OBJECT} constant. */
     public static final String JAVA_OBJECT   = "JAVA_OBJECT";
+    /** The string representation of the {@link java.sql.Types#LONGVARBINARY} constant. */
     public static final String LONGVARBINARY = "LONGVARBINARY";
+    /** The string representation of the {@link java.sql.Types#LONGVARCHAR} constant. */
     public static final String LONGVARCHAR   = "LONGVARCHAR";
+    /** The string representation of the {@link java.sql.Types#NULL} constant. */
     public static final String NULL          = "NULL";
+    /** The string representation of the {@link java.sql.Types#NUMERIC} constant. */
     public static final String NUMERIC       = "NUMERIC";
+    /** The string representation of the {@link java.sql.Types#OTHER} constant. */
     public static final String OTHER         = "OTHER";
+    /** The string representation of the {@link java.sql.Types#REAL} constant. */
     public static final String REAL          = "REAL";
+    /** The string representation of the {@link java.sql.Types#REF} constant. */
     public static final String REF           = "REF";
+    /** The string representation of the {@link java.sql.Types#SMALLINT} constant. */
     public static final String SMALLINT      = "SMALLINT";
+    /** The string representation of the {@link java.sql.Types#STRUCT} constant. */
     public static final String STRUCT        = "STRUCT";
+    /** The string representation of the {@link java.sql.Types#TIME} constant. */
     public static final String TIME          = "TIME";
+    /** The string representation of the {@link java.sql.Types#TIMESTAMP} constant. */
     public static final String TIMESTAMP     = "TIMESTAMP";
+    /** The string representation of the {@link java.sql.Types#TINYINT} constant. */
     public static final String TINYINT       = "TINYINT";
+    /** The string representation of the {@link java.sql.Types#VARBINARY} constant. */
     public static final String VARBINARY     = "VARBINARY";
+    /** The string representation of the {@link java.sql.Types#VARCHAR} constant. */
     public static final String VARCHAR       = "VARCHAR";
 
-    private static HashMap _sqlTypeNameToTypeID = new HashMap();
-    private static HashMap _typeIdToSqlTypeName = new HashMap();
+    /** Maps type names to the corresponding {@link java.sql.Types} constants. */
+    private static HashMap _typeNameToTypeCode = new HashMap();
+    /** Maps {@link java.sql.Types} type code constants to the corresponding type names. */
+    private static HashMap _typeCodeToTypeName = new HashMap();
+    /** Contains the type codes of the numeric types. */
     private static HashSet _numericTypes        = new HashSet();
+    /** Contains the type codes of the text types. */
     private static HashSet _textTypes           = new HashSet();
+    /** Contains the type codes of the binary types. */
     private static HashSet _binaryTypes         = new HashSet();
+    /** Contains the type codes of the special types (eg. OTHER, REF etc.). */
     private static HashSet _specialTypes        = new HashSet();
 
     static
     {
-        registerSqlTypeID(Types.ARRAY,         ARRAY,         false, false, false, true);
-        registerSqlTypeID(Types.BIGINT,        BIGINT,        true,  false, false, false);
-        registerSqlTypeID(Types.BINARY,        BINARY,        false, false, true,  false);
-        registerSqlTypeID(Types.BIT,           BIT,           true,  false, false, false);
-        registerSqlTypeID(Types.BLOB,          BLOB,          false, false, true,  false);
-        registerSqlTypeID(Types.CHAR,          CHAR,          false, true,  false, false);
-        registerSqlTypeID(Types.CLOB,          CLOB,          false, true,  false, false);
-        registerSqlTypeID(Types.DATE,          DATE,          false, false, false, false);
-        registerSqlTypeID(Types.DECIMAL,       DECIMAL,       true,  false, false, false);
-        registerSqlTypeID(Types.DISTINCT,      DISTINCT,      false, false, false, true);
-        registerSqlTypeID(Types.DOUBLE,        DOUBLE,        true,  false, false, false);
-        registerSqlTypeID(Types.FLOAT,         FLOAT,         true,  false, false, false);
-        registerSqlTypeID(Types.INTEGER,       INTEGER,       true,  false, false, false);
-        registerSqlTypeID(Types.JAVA_OBJECT,   JAVA_OBJECT,   false, false, false, true);
-        registerSqlTypeID(Types.LONGVARBINARY, LONGVARBINARY, false, false, true,  false);
-        registerSqlTypeID(Types.LONGVARCHAR,   LONGVARCHAR,   false, true,  false, false);
-        registerSqlTypeID(Types.NULL,          NULL,          false, false, false, true);
-        registerSqlTypeID(Types.NUMERIC,       NUMERIC,       true,  false, false, false);
-        registerSqlTypeID(Types.OTHER,         OTHER,         false, false, false, true);
-        registerSqlTypeID(Types.REAL,          REAL,          true,  false, false, false);
-        registerSqlTypeID(Types.REF,           REF,           false, false, false, true);
-        registerSqlTypeID(Types.SMALLINT,      SMALLINT,      true,  false, false, false);
-        registerSqlTypeID(Types.STRUCT,        STRUCT,        false, false, false, true);
-        registerSqlTypeID(Types.TIME,          TIME,          false, false, false, false);
-        registerSqlTypeID(Types.TIMESTAMP,     TIMESTAMP,     false, false, false, false);
-        registerSqlTypeID(Types.TINYINT,       TINYINT,       true,  false, false, false);
-        registerSqlTypeID(Types.VARBINARY,     VARBINARY,     false, false, true,  false);
-        registerSqlTypeID(Types.VARCHAR,       VARCHAR,       false, true,  false, false);
+        registerJdbcType(Types.ARRAY,         ARRAY,         false, false, false, true);
+        registerJdbcType(Types.BIGINT,        BIGINT,        true,  false, false, false);
+        registerJdbcType(Types.BINARY,        BINARY,        false, false, true,  false);
+        registerJdbcType(Types.BIT,           BIT,           true,  false, false, false);
+        registerJdbcType(Types.BLOB,          BLOB,          false, false, true,  false);
+        registerJdbcType(Types.CHAR,          CHAR,          false, true,  false, false);
+        registerJdbcType(Types.CLOB,          CLOB,          false, true,  false, false);
+        registerJdbcType(Types.DATE,          DATE,          false, false, false, false);
+        registerJdbcType(Types.DECIMAL,       DECIMAL,       true,  false, false, false);
+        registerJdbcType(Types.DISTINCT,      DISTINCT,      false, false, false, true);
+        registerJdbcType(Types.DOUBLE,        DOUBLE,        true,  false, false, false);
+        registerJdbcType(Types.FLOAT,         FLOAT,         true,  false, false, false);
+        registerJdbcType(Types.INTEGER,       INTEGER,       true,  false, false, false);
+        registerJdbcType(Types.JAVA_OBJECT,   JAVA_OBJECT,   false, false, false, true);
+        registerJdbcType(Types.LONGVARBINARY, LONGVARBINARY, false, false, true,  false);
+        registerJdbcType(Types.LONGVARCHAR,   LONGVARCHAR,   false, true,  false, false);
+        registerJdbcType(Types.NULL,          NULL,          false, false, false, true);
+        registerJdbcType(Types.NUMERIC,       NUMERIC,       true,  false, false, false);
+        registerJdbcType(Types.OTHER,         OTHER,         false, false, false, true);
+        registerJdbcType(Types.REAL,          REAL,          true,  false, false, false);
+        registerJdbcType(Types.REF,           REF,           false, false, false, true);
+        registerJdbcType(Types.SMALLINT,      SMALLINT,      true,  false, false, false);
+        registerJdbcType(Types.STRUCT,        STRUCT,        false, false, false, true);
+        registerJdbcType(Types.TIME,          TIME,          false, false, false, false);
+        registerJdbcType(Types.TIMESTAMP,     TIMESTAMP,     false, false, false, false);
+        registerJdbcType(Types.TINYINT,       TINYINT,       true,  false, false, false);
+        registerJdbcType(Types.VARBINARY,     VARBINARY,     false, false, true,  false);
+        registerJdbcType(Types.VARCHAR,       VARCHAR,       false, true,  false, false);
 
         // only available in JDK 1.4 and above:
         if (Jdbc3Utils.supportsJava14JdbcTypes())
         {
-            registerSqlTypeID(Jdbc3Utils.determineBooleanTypeCode(),  BOOLEAN,  true,  false, false, false);
-            registerSqlTypeID(Jdbc3Utils.determineDatalinkTypeCode(), DATALINK, false, false, false, true);
+            registerJdbcType(Jdbc3Utils.determineBooleanTypeCode(),  BOOLEAN,  true,  false, false, false);
+            registerJdbcType(Jdbc3Utils.determineDatalinkTypeCode(), DATALINK, false, false, false, true);
         }
     }
 
-    
     /**
-     * Returns the JDBC type name which maps to {@link java.sql.Types}
-     * for the given SQL name of type
+     * Returns the JDBC type code (one of the {@link java.sql.Types} constants) that
+     * corresponds to the given JDBC type name.
+     * 
+     * @param typeName The JDBC type name (case is ignored)
+     * @return The type code or <code>null</code> if the type is unknown
      */
-    public static int getJdbcTypeCode(String typeName)
+    public static Integer getJdbcTypeCode(String typeName)
     {
-        Integer answer = (Integer)_sqlTypeNameToTypeID.get(typeName.toUpperCase());
-
-        return answer != null ? answer.intValue() : Types.OTHER;
+        return (Integer)_typeNameToTypeCode.get(typeName.toUpperCase());
     }
 
     /**
-     * Returns the name which maps to the given {@link java.sql.Types} 
-     * type code 
+     * Returns the JDBC type name that corresponds to the given type code
+     * (one of the {@link java.sql.Types} constants).
+     * 
+     * @param typeCode The type code
+     * @return The JDBC type name (one of the constants in this class) or
+     *         <code>null</code> if the type is unknown
      */
     public static String getJdbcTypeName(int typeCode)
     {
-        String answer = (String)_typeIdToSqlTypeName.get(new Integer(typeCode));
-
-        return answer == null ? OTHER : answer;
+        return (String)_typeCodeToTypeName.get(new Integer(typeCode));
     }
 
     /**
-     * Registers the fact that the given Integer SQL ID maps to the given SQL name
+     * Registers a JDBC type.
+     * 
+     * @param typeCode      The type code (one of the {@link java.sql.Types} constants)
+     * @param typeName      The type name (case is ignored)
+     * @param isNumericType Whether the type is a numeric type
+     * @param isTextType    Whether the type is a text type
+     * @param isBinaryType  Whether the type is a binary type
+     * @param isSpecialType Whether the type is a special type
      */
-    protected static void registerSqlTypeID(int sqlTypeID, String name, boolean isNumericType, boolean isTextType, boolean isBinaryType, boolean isSpecialType) 
+    protected static void registerJdbcType(int typeCode, String typeName, boolean isNumericType, boolean isTextType, boolean isBinaryType, boolean isSpecialType) 
     {
-        Integer typeId = new Integer(sqlTypeID);
+        Integer typeId = new Integer(typeCode);
 
-        _sqlTypeNameToTypeID.put(name, typeId);
-        _typeIdToSqlTypeName.put(typeId, name);
+        _typeNameToTypeCode.put(typeName.toUpperCase(), typeId);
+        _typeCodeToTypeName.put(typeId, typeName.toUpperCase());
         if (isNumericType)
         {
             _numericTypes.add(typeId);
@@ -208,4 +253,3 @@ public class TypeMap
         return _specialTypes.contains(new Integer(sqlTypeID));
     }
 }
-

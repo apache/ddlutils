@@ -1,11 +1,7 @@
 package org.apache.ddlutils.io;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +16,25 @@ import java.util.Map;
  * limitations under the License.
  */
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Stores the identity of an database object as defined by its primary keys. Is used
  * by {@link org.apache.ddlutils.io.DataToDatabaseSink} class for inserting objects
  * in the correct order. 
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class Identity
 {
-    /** The name of the table */
+    /** The name of the table. */
     private String _tableName;
-    /** The optional foreign key name whose referenced object this identity represents */
+    /** The optional foreign key name whose referenced object this identity represents. */
     private String _fkName;
-    /** The identity columns and their values */
+    /** The identity columns and their values. */
     private HashMap _columnValues = new HashMap();
 
     /**
@@ -80,8 +82,8 @@ public class Identity
         _columnValues.put(name, value);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
+    /**
+     * {@inheritDoc}
      */
     public boolean equals(Object obj)
     {
@@ -124,16 +126,16 @@ public class Identity
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
+    /**
+     * {@inheritDoc}
      */
     public int hashCode()
     {
         return toString().hashCode();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * {@inheritDoc}
      */
     public String toString()
     {

@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ import org.xml.sax.SAXException;
 /**
  * This class provides functions to read and write database models from/to XML.
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author James Strachan
  * @author Matthew Hawthorne
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class DatabaseIO
 {
-    /** Whether to use the internal dtd that comes with commons-sql */
+    /** Whether to use the internal dtd that comes with DdlUtils. */
     private boolean _useInternalDtd = true;
 
     /**

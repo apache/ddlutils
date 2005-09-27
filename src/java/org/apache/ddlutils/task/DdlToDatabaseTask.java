@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,16 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
 /**
- * Ant task for working with DDL, e.g. generating the database from a schema, inserting data,
+ * Ant task for working with DDL, e.g. generating the database from a schema, inserting data.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DdlToDatabaseTask extends DatabaseTaskBase
 {
-    /** A single schema file to read */
+    /** A single schema file to read. */
     private File _singleSchemaFile = null;
-    /** The input files */
+    /** The input files. */
     private ArrayList _fileSets = new ArrayList();
 
     /**
@@ -88,7 +91,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     }
 
     /**
-     * Adds the "write schema to database"-command
+     * Adds the "write schema to database"-command.
      * 
      * @param command The command
      */
@@ -98,7 +101,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     }
 
     /**
-     * Adds the "write schema sql to file"-command
+     * Adds the "write schema sql to file"-command.
      * 
      * @param command The command
      */
@@ -108,7 +111,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     }
 
     /**
-     * Adds the "write data to database"-command
+     * Adds the "write data to database"-command.
      * 
      * @param command The command
      */
@@ -203,8 +206,8 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
         return model;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tools.ant.Task#execute()
+    /**
+     * {@inheritDoc}
      */
     public void execute() throws BuildException
     {

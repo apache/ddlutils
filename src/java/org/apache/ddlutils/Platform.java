@@ -1,7 +1,7 @@
 package org.apache.ddlutils;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.apache.ddlutils.model.Table;
  * A platform encapsulates the database-related functionality such as performing queries
  * and manipulations. It also contains an sql builder that is specific to this platform.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231110 $
  */
 public interface Platform
@@ -92,7 +92,6 @@ public interface Platform
      * configured as {@link PlatformInfo#getSqlCommandDelimiter()} of the info object
      * of this platform.
      * 
-     * @param connection      The connection to the database
      * @param sql             The sql statements to execute
      * @param continueOnError Whether to continue executing the sql commands when an error occurred
      * @return The number of errors
@@ -166,17 +165,19 @@ public interface Platform
      * Alters the database schema so that it match the given model. Drops and table modifications will
      * not be made.
      *
-     * @param desiredDb The desired database schema
+     * @param desiredDb       The desired database schema
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
      */
     public void alterTables(Database desiredDb, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Alters the database schema so that it match the given model.
      *
-     * @param desiredDb     The desired database schema
-     * @param doDrops       Whether columns, tables and indexes should be dropped if not in the
-     *                      new schema
-     * @param modifyColumns Whether columns should be altered for datatype, size as required
+     * @param desiredDb       The desired database schema
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
      */
     public void alterTables(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
@@ -184,26 +185,27 @@ public interface Platform
      * Alters the database schema so that it match the given model. Drops and table modifications will
      * not be made.
      *
-     * @param connection A connection to the existing database that shall be modified
-     * @param desiredDb  The desired database schema
+     * @param connection      A connection to the existing database that shall be modified
+     * @param desiredDb       The desired database schema
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
      */
     public void alterTables(Connection connection, Database desiredDb, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Alters the database schema so that it match the given model.
      *
-     * @param connection    A connection to the existing database that shall be modified
-     * @param desiredDb     The desired database schema
-     * @param doDrops       Whether columns, tables and indexes should be dropped if not in the
-     *                      new schema
-     * @param modifyColumns Whether columns should be altered for datatype, size as required
+     * @param connection      A connection to the existing database that shall be modified
+     * @param desiredDb       The desired database schema
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
      */
     public void alterTables(Connection connection, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Drops the tables defined in the given database.
      * 
-     * @param connection      The connection to the database
      * @param model           The database model
      * @param continueOnError Whether to continue executing the sql commands when an error occurred
      */
@@ -260,7 +262,7 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String)} method all beans will be
+     * In contrast to the {@link #query(Database, String)} method all beans will be
      * materialized and the connection will be closed before returning the beans. 
      * 
      * @param model The database model to use
@@ -271,9 +273,11 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String, Collection)} method all beans will be
-     * materialized and the connection will be closed before returning the beans. 
+     * In contrast to the {@link #query(Database, String, Collection)} method
+     * all beans will be materialized and the connection will be closed before
+     * returning the beans. 
      * 
+     * @param model      The database model to use
      * @param sql        The parameterized query
      * @param parameters The parameter values
      * @return The dyna beans resulting from the query
@@ -282,7 +286,7 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String)} method all beans will be
+     * In contrast to the {@link #query(Database, String)} method all beans will be
      * materialized and the connection will be closed before returning the beans. 
      * 
      * @param model      The database model to use
@@ -294,9 +298,11 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String, Collection)} method all beans will be
-     * materialized and the connection will be closed before returning the beans. 
+     * In contrast to the {@link #query(Database, String, Collection)} method
+     * all beans will be materialized and the connection will be closed before
+     * returning the beans. 
      * 
+     * @param model      The database model to use
      * @param sql        The parameterized query
      * @param parameters The parameter values
      * @param queryHints The tables that are queried (optional)
@@ -306,7 +312,7 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String)} method all beans will be
+     * In contrast to the {@link #query(Database, String)} method all beans will be
      * materialized and the connection will be closed before returning the beans.
      * Also, the two int parameters specify which rows of the result set to use.
      * If there are more rows than desired, they will be ignored (and not read
@@ -322,11 +328,11 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String, Collection)} method all beans will be
-     * materialized and the connection will be closed before returning the beans.
-     * Also, the two int parameters specify which rows of the result set to use.
-     * If there are more rows than desired, they will be ignored (and not read
-     * from the database).
+     * In contrast to the {@link #query(Database, String, Collection)} method all
+     * beans will be materialized and the connection will be closed before returning
+     * the beans. Also, the two int parameters specify which rows of the result set
+     * to use. If there are more rows than desired, they will be ignored (and not
+     * read from the database).
      * 
      * @param model      The database model to use
      * @param sql        The parameterized sql query
@@ -339,11 +345,11 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String)} method all beans will be
-     * materialized and the connection will be closed before returning the beans.
-     * Also, the two int parameters specify which rows of the result set to use.
-     * If there are more rows than desired, they will be ignored (and not read
-     * from the database).
+     * In contrast to the {@link #query(Database, String, Table[])} method all
+     * beans will be materialized and the connection will be closed before
+     * returning the beans. Also, the two int parameters specify which rows of
+     * the result set to use. If there are more rows than desired, they will be
+     * ignored (and not read from the database).
      * 
      * @param model      The database model to use
      * @param sql        The sql query
@@ -356,11 +362,11 @@ public interface Platform
 
     /**
      * Queries for a list of dyna beans representing rows of the given query.
-     * In contrast to the {@link #query(String, Collection)} method all beans will be
-     * materialized and the connection will be closed before returning the beans.
-     * Also, the two int parameters specify which rows of the result set to use.
-     * If there are more rows than desired, they will be ignored (and not read
-     * from the database).
+     * In contrast to the {@link #query(Database, String, Collection, Table[])}
+     * method all beans will be materialized and the connection will be closed
+     * before returning the beans. Also, the two int parameters specify which
+     * rows of the result set to use. If there are more rows than desired, they
+     * will be ignored (and not read from the database).
      * 
      * @param model      The database model to use
      * @param sql        The parameterized sql query
@@ -384,6 +390,7 @@ public interface Platform
     /**
      * Returns the sql for inserting the given bean.
      * 
+     * @param model    The database model to use
      * @param dynaBean The bean
      * @return The insert sql
      */

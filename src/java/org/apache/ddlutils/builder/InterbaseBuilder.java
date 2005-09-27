@@ -1,7 +1,7 @@
 package org.apache.ddlutils.builder;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.apache.ddlutils.model.Table;
 /**
  * The SQL Builder for the Interbase database.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class InterbaseBuilder extends SqlBuilder
@@ -43,8 +43,8 @@ public class InterbaseBuilder extends SqlBuilder
         super(info);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeExternalForeignKeyCreateStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey)
+    /**
+     * {@inheritDoc}
      */
     protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
     {
@@ -56,8 +56,8 @@ public class InterbaseBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeExternalForeignKeyDropStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey)
+    /**
+     * {@inheritDoc}
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
     {
@@ -66,8 +66,8 @@ public class InterbaseBuilder extends SqlBuilder
         printEndOfStatement();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void createTable(Database database, Table table) throws IOException
     {
@@ -110,8 +110,8 @@ public class InterbaseBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected String getSqlType(Column column)
     {
@@ -125,8 +125,8 @@ public class InterbaseBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void dropTable(Table table) throws IOException
     {
@@ -146,8 +146,8 @@ public class InterbaseBuilder extends SqlBuilder
         printEndOfStatement();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#printAutoIncrementColumn(Table,Column)
+    /**
+     * {@inheritDoc}
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {

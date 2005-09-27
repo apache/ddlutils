@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io.converters;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,14 @@ import java.sql.Types;
 /**
  * Converts between {@link java.sql.Date} and {@link java.lang.String} using the standard
  * representation "yyyy", or "yyyy-mm", or "yyyy-mm-dd".
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DateConverter implements SqlTypeConverter 
 {
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.io.converters.SqlTypeConverter#convertFromString(java.lang.String, int)
+    /**
+     * {@inheritDoc}
      */
     public Object convertFromString(String textRep, int sqlTypeCode) throws Exception
     {
@@ -73,8 +76,8 @@ public class DateConverter implements SqlTypeConverter
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.io.converters.SqlTypeConverter#convertToString(java.lang.Object, int)
+    /**
+     * {@inheritDoc}
      */
     public String convertToString(Object obj, int sqlTypeCode)
     {

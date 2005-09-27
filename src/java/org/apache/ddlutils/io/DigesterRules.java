@@ -1,5 +1,21 @@
 package org.apache.ddlutils.io;
 
+/*
+ * Copyright 1999-2005 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import java.util.List;
 import org.apache.commons.digester.Rule;
 import org.apache.commons.digester.RulesBase;
@@ -7,10 +23,13 @@ import org.apache.commons.digester.RulesBase;
 /**
  * An extended rules implementation that is able to match case-insensitively. Per default,
  * the rules are matches disregarding the case.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DigesterRules extends RulesBase
 {
-    /** Whether to be case sensitive or not */
+    /** Whether to be case sensitive or not. */
     private boolean _caseSensitive = false;
 
     /**
@@ -23,7 +42,6 @@ public class DigesterRules extends RulesBase
         return _caseSensitive;
     }
 
-
     /**
      * Specifies whether this rules object shall match case sensitively.
      *
@@ -34,17 +52,16 @@ public class DigesterRules extends RulesBase
         _caseSensitive = beCaseSensitive;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.RulesBase#add(java.lang.String, org.apache.commons.digester.Rule)
+    /**
+     * {@inheritDoc}
      */
     public void add(String pattern, Rule rule)
     {
         super.add(_caseSensitive ? pattern : pattern.toLowerCase(), rule);
     }
 
-
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.RulesBase#lookup(java.lang.String, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     protected List lookup(String namespaceURI, String pattern)
     {

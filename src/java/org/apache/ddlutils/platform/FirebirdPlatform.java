@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ package org.apache.ddlutils.platform;
 /**
  * The platform implementation for the Firebird database.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class FirebirdPlatform extends InterbasePlatform
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME     = "Firebird";
-    /** The standard Firebird jdbc driver */
+    /** The standard Firebird jdbc driver. */
     public static final String JDBC_DRIVER      = "org.firebirdsql.jdbc.FBDriver";
-    /** The subprotocol used by the standard Firebird driver */
+    /** The subprotocol used by the standard Firebird driver. */
     public static final String JDBC_SUBPROTOCOL = "firebirdsql";
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

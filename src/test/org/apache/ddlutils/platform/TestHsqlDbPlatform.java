@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,13 @@ import org.apache.ddlutils.platform.HsqlDbPlatform;
  * Tests the Hsqldb platform.
  * 
  * @author David Carlson
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231110 $
  */
 public class TestHsqlDbPlatform extends TestPlatformBase
 {
-    /*
-     * (non-Javadoc)
-     * @see org.apache.ddlutils.builder.TestPlatformBase#getDatabaseName()
+    /**
+     * {@inheritDoc}
      */
     protected String getDatabaseName()
     {

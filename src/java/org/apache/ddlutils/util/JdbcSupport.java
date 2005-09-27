@@ -1,7 +1,7 @@
 package org.apache.ddlutils.util;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +33,16 @@ import org.apache.ddlutils.DynaSqlException;
  * perform JDBC operations. It contains a number of useful methods 
  * for implementation inheritence..
  *
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author James Strachan
  * @version $Revision$
  */
 public abstract class JdbcSupport
 {
     /** The Log to which logging calls will be made. */
     private final Log _log = LogFactory.getLog(JdbcSupport.class);
-    /** The data source */
+    /** The data source. */
     private DataSource _dataSource;
-    /** The names of the currently borrowed connections (for debugging) */
+    /** The names of the currently borrowed connections (for debugging). */
     private HashSet _openConnectionNames = new HashSet();
 
     /**

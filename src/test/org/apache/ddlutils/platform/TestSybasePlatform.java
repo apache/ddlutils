@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import org.apache.ddlutils.platform.SybasePlatform;
 /**
  * Tests the Sybase platform.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231110 $
  */
 public class TestSybasePlatform extends TestPlatformBase
 {
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.TestPlatformBase#getDatabaseName()
+    /**
+     * {@inheritDoc}
      */
     protected String getDatabaseName()
     {
@@ -119,9 +119,11 @@ public class TestSybasePlatform extends TestPlatformBase
     {
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
-            "ALTER TABLE \"table3\" DROP CONSTRAINT \"testfk\";\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = \"testfk\")\n"+
+            "    ALTER TABLE \"table3\" DROP CONSTRAINT \"testfk\";\n"+
             "SET quoted_identifier on;\n"+
-            "ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_F_OL_FK_2_table1\";\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = \"table2_FK_COL_F_OL_FK_2_table1\")\n"+
+            "    ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_F_OL_FK_2_table1\";\n"+
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = \"table3\")\n"+

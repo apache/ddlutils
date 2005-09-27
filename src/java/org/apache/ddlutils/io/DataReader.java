@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,22 @@ import org.xml.sax.SAXException;
 /**
  * Reads data XML into dyna beans matching a specified database model.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DataReader extends Digester
 {
-    /** The database model */
+    /** The database model. */
     private Database _model;
-    /** The object to receive the read beans */
+    /** The object to receive the read beans. */
     private DataSink _sink;
-    /** Specifies whether the (lazy) configuration of the digester still needs to be performed */
+    /** Specifies whether the (lazy) configuration of the digester still needs to be performed. */
     private boolean  _needsConfiguration = true;
-    /** The converters per type */
+    /** The converters per type. */
     private HashMap  _convertersPerType = new HashMap();
-    /** The converters per table-column path */
+    /** The converters per table-column path. */
     private HashMap  _convertersPerPath = new HashMap();
-    /** Whether to be case sensitive or not */
+    /** Whether to be case sensitive or not. */
     private boolean _caseSensitive = false;
 
     /**
@@ -179,8 +179,8 @@ public class DataReader extends Digester
         _caseSensitive = beCaseSensitive;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.Digester#configure()
+    /**
+     * {@inheritDoc}
      */
     protected void configure()
     {
@@ -220,8 +220,8 @@ public class DataReader extends Digester
         super.configure();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.Digester#endDocument()
+    /**
+     * {@inheritDoc}
      */
     public void endDocument() throws SAXException
     {
@@ -229,8 +229,8 @@ public class DataReader extends Digester
         _sink.end();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.Digester#startDocument()
+    /**
+     * {@inheritDoc}
      */
     public void startDocument() throws SAXException
     {

@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,16 @@ import org.apache.ddlutils.builder.PostgreSqlBuilder;
 /**
  * The platform implementation for PostgresSql.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class PostgreSqlPlatform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME      = "PostgreSql";
-    /** The standard PostgreSQL jdbc driver */
+    /** The standard PostgreSQL jdbc driver. */
     public static final String JDBC_DRIVER       = "org.postgresql.Driver";
-    /** The subprotocol used by the standard PostgreSQL driver */
+    /** The subprotocol used by the standard PostgreSQL driver. */
     public static final String JDBC_SUBPROTOCOL  = "postgresql";
 
     /**
@@ -84,8 +84,8 @@ public class PostgreSqlPlatform extends PlatformImplBase
         setSqlBuilder(new PostgreSqlBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {
@@ -183,8 +183,8 @@ public class PostgreSqlPlatform extends PlatformImplBase
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map)
+    /**
+     * {@inheritDoc}
      */
     public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
     {
@@ -193,8 +193,8 @@ public class PostgreSqlPlatform extends PlatformImplBase
         createOrDropDatabase(jdbcDriverClassName, connectionUrl, username, password, parameters, true);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.platform.PlatformImplBase#dropDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
     {
@@ -202,6 +202,4 @@ public class PostgreSqlPlatform extends PlatformImplBase
         // the template1 database because it usually exists)
         createOrDropDatabase(jdbcDriverClassName, connectionUrl, username, password, null, false);
     }
-
-    
 }

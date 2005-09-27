@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,24 +35,23 @@ import org.apache.ddlutils.dynabean.SqlDynaClass;
  *
  * @author John Marshall/Connectria
  * @author Matthew Hawthorne
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class Database implements Serializable, Cloneable
 {
-    /** Unique ID for serialization purposes */
+    /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -3160443396757573868L;
 
-    /** The name of the database model */
+    /** The name of the database model. */
     private String _name;
-    /** The method for generating primary keys (currently ignored) */
+    /** The method for generating primary keys (currently ignored). */
     private String _idMethod;
-    /** The version of the model */
+    /** The version of the model. */
     private String _version;
-    /** The tables */
+    /** The tables. */
     private ArrayList _tables = new ArrayList();
-
-    /** The dyna class cache for this model */
+    /** The dyna class cache for this model. */
     private DynaClassCache _dynaClassCache = new DynaClassCache();
 
     /**
@@ -432,6 +431,7 @@ public class Database implements Serializable, Cloneable
      * Returns the {@link org.apache.ddlutils.dynabean.SqlDynaClass} for the given table name. If the it does not
      * exist yet, a new one will be created based on the Table definition.
      * 
+     * @param tableName The name of the table to create the bean for
      * @return The <code>SqlDynaClass</code> for the indicated table or <code>null</code>
      *         if the model contains no such table
      */
@@ -445,6 +445,7 @@ public class Database implements Serializable, Cloneable
     /**
      * Returns the {@link org.apache.ddlutils.dynabean.SqlDynaClass} for the given dyna bean.
      * 
+     * @param bean The dyna bean
      * @return The <code>SqlDynaClass</code> for the given bean
      */
     public SqlDynaClass getDynaClassFor(DynaBean bean)
@@ -455,6 +456,7 @@ public class Database implements Serializable, Cloneable
     /**
      * Creates a new dyna bean for the given table.
      * 
+     * @param table The table to create the bean for
      * @return The new dyna bean
      */
     public DynaBean createDynaBeanFor(Table table) throws DynaSqlException
@@ -462,8 +464,21 @@ public class Database implements Serializable, Cloneable
         return _dynaClassCache.createNewInstance(table);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * Convenience method that combines {@link #createDynaBeanFor(Table)} and
+     * {@link #findTable(String, boolean)}.
+     * 
+     * @param tableName     The name of the table to create the bean for
+     * @param caseSensitive Whether case matters for the names
+     * @return The new dyna bean
+     */
+    public DynaBean createDynaBeanFor(String tableName, boolean caseSensitive) throws DynaSqlException
+    {
+        return _dynaClassCache.createNewInstance(findTable(tableName, caseSensitive));
+    }
+
+    /**
+     * {@inheritDoc}
      */
     protected Object clone() throws CloneNotSupportedException
     {
@@ -476,8 +491,8 @@ public class Database implements Serializable, Cloneable
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
+    /**
+     * {@inheritDoc}
      */
     public boolean equals(Object obj)
     {
@@ -494,8 +509,8 @@ public class Database implements Serializable, Cloneable
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
+    /**
+     * {@inheritDoc}
      */
     public int hashCode()
     {
@@ -505,9 +520,8 @@ public class Database implements Serializable, Cloneable
                .toHashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * {@inheritDoc}
      */
     public String toString()
     {

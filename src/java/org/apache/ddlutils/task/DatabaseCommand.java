@@ -1,5 +1,21 @@
 package org.apache.ddlutils.task;
 
+/*
+ * Copyright 1999-2005 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
@@ -8,16 +24,19 @@ import org.apache.tools.ant.BuildException;
 
 /**
  * Base type for commands that have the database info embedded.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public abstract class DatabaseCommand implements Command
 {
-    /** The type of the database */
+    /** The type of the database. */
     private String _databaseType;
-    /** The data source to use for accessing the database */
+    /** The data source to use for accessing the database. */
     private BasicDataSource _dataSource;
-    /** Whether to stop execution upon an error */
+    /** Whether to stop execution upon an error. */
     private boolean _failOnError = true;
-    /** Whether to use delimited SQL identifiers */
+    /** Whether to use delimited SQL identifiers. */
     private boolean _useDelimitedSqlIdentifiers = true;
 
     /**

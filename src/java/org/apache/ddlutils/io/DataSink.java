@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.apache.commons.beanutils.DynaBean;
 /**
  * Marks classes that can receive dyna beans read by the {@link org.apache.ddlutils.io.DataReader}.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public interface DataSink
 {

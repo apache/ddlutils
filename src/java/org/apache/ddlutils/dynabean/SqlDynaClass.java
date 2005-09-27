@@ -1,7 +1,7 @@
 package org.apache.ddlutils.dynabean;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,20 @@ import org.apache.ddlutils.model.Table;
  * SqlDynaClass is a DynaClass which is associated with a persistent 
  * Table in a Database.
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class SqlDynaClass extends BasicDynaClass
 {
-    /** Unique ID for serializaion purposes */
+    /** Unique ID for serializaion purposes. */
     private static final long serialVersionUID = -5768155698352911245L;
 
-    /** The table for which this dyna class is defined */
+    /** The table for which this dyna class is defined. */
     private Table _table;
-    /** The primary key dyna properties */
+    /** The primary key dyna properties. */
     private SqlDynaProperty[] _primaryKeyProperties;
-    /** The non-primary key dyna properties */
+    /** The non-primary key dyna properties. */
     private SqlDynaProperty[] _nonPrimaryKeyProperties;
     
     /**

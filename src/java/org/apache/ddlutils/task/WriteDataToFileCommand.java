@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,15 @@ import org.apache.tools.ant.Task;
 
 /**
  * Command to dump data from the database into an XML file.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class WriteDataToFileCommand extends DatabaseCommand
 {
-    /** The file to output the data to */
+    /** The file to output the data to. */
     private File   _outputFile;
-    /** The character encoding to use */
+    /** The character encoding to use. */
     private String _encoding;
 
     /**
@@ -56,8 +59,8 @@ public class WriteDataToFileCommand extends DatabaseCommand
         _encoding = encoding;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.task.Command#execute(org.apache.tools.ant.Task, org.apache.ddlutils.model.Database)
+    /**
+     * {@inheritDoc}
      */
     public void execute(Task task, Database model) throws BuildException
     {

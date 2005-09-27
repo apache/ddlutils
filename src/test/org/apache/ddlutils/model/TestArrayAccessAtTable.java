@@ -1,22 +1,44 @@
 package org.apache.ddlutils.model;
 
+/*
+ * Copyright 1999-2005 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import junit.framework.TestCase;
 
 /**
- * Test case for DDLUTILS-6
+ * Test case for DDLUTILS-6.
  * 
  * @author Christoffer Hammarström
+ * @version $Revision: 289996 $
  */
 public class TestArrayAccessAtTable extends TestCase
 {
+    /** The tested table. */
     private Table          _testedTable;
+    /** The first tested column. */
     private Column         _column1;
+    /** The second tested column. */
     private Column         _column2;
+    /** The tested unique index. */
     private UniqueIndex    _uniqueIndex;
+    /** The tested non-unique index. */
     private NonUniqueIndex _nonUniqueIndex;
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
+    /**
+     * {@inheritDoc}
      */
     public void setUp()
     {
@@ -39,6 +61,9 @@ public class TestArrayAccessAtTable extends TestCase
         _testedTable.addIndex(_nonUniqueIndex);
     }
 
+    /**
+     * Tests that the primary key columns are correctly extracted.
+     */
     public void testGetPrimaryKeyColumns()
     {
         Column[] primaryKeyColumns = _testedTable.getPrimaryKeyColumns();
@@ -49,6 +74,9 @@ public class TestArrayAccessAtTable extends TestCase
                    primaryKeyColumns[0]);
     }
 
+    /**
+     * Tests that the columns are correctly extracted.
+     */
     public void testGetColumns()
     {
         Column[] columns = _testedTable.getColumns();
@@ -61,6 +89,9 @@ public class TestArrayAccessAtTable extends TestCase
                    columns[1]);
     }
 
+    /**
+     * Tests that the non-unique indices are correctly extracted.
+     */
     public void testGetNonUniqueIndices()
     {
         Index[] nonUniqueIndices = _testedTable.getNonUniqueIndices();
@@ -71,6 +102,9 @@ public class TestArrayAccessAtTable extends TestCase
                    nonUniqueIndices[0]);
     }
 
+    /**
+     * Tests that the unique indices are correctly extracted.
+     */
     public void testGetUniqueIndices()
     {
         Index[] uniqueIndices = _testedTable.getUniqueIndices();
@@ -80,5 +114,4 @@ public class TestArrayAccessAtTable extends TestCase
         assertSame(_uniqueIndex,
                    uniqueIndices[0]);
     }
-
 }

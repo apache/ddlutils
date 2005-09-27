@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,25 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-import java.sql.Types;
-
 import org.apache.ddlutils.io.converters.SqlTypeConverter;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.tools.ant.BuildException;
 
 /**
  * Represents the registration of a data converter for tasks that work on data files.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DataConverterRegistration
 {
-    /** The converter */
+    /** The converter. */
     private SqlTypeConverter _converter;
-    /** The sql type for which the converter shall be registered */
+    /** The sql type for which the converter shall be registered. */
     private int _typeCode = Integer.MIN_VALUE;
-    /** The table name */
+    /** The table name. */
     private String _table;
-    /** The column name */
+    /** The column name. */
     private String _column;
 
     /**
@@ -80,10 +81,15 @@ public class DataConverterRegistration
      */
     public void setJdbcType(String jdbcTypeName) throws BuildException
     {
-        _typeCode = TypeMap.getJdbcTypeCode(jdbcTypeName);
-        if ((_typeCode == Types.OTHER) && !TypeMap.OTHER.equalsIgnoreCase(jdbcTypeName))
+        Integer typeCode = TypeMap.getJdbcTypeCode(jdbcTypeName);
+
+        if (typeCode == null)
         {
             throw new BuildException("Unknown jdbc type "+jdbcTypeName);
+        }
+        else
+        {
+            _typeCode = typeCode.intValue();
         }
     }
 

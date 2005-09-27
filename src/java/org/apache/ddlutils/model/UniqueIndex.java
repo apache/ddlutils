@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,19 @@ import java.util.ArrayList;
  */
 public class UniqueIndex extends NonUniqueIndex
 {
-    /** Unique ID for serialization purposes */
+    /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -4097003126550294993L;
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#isUnique()
+    /**
+     * {@inheritDoc}
      */
     public boolean isUnique()
     {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
     {

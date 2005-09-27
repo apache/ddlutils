@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.apache.ddlutils.builder.InterbaseBuilder;
 /**
  * The platform implementation for the Interbase database.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class InterbasePlatform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME     = "Interbase";
-    /** The interbase jdbc driver */
+    /** The interbase jdbc driver. */
     public static final String JDBC_DRIVER      = "interbase.interclient.Driver";
-    /** The subprotocol used by the interbase driver */
+    /** The subprotocol used by the interbase driver. */
     public static final String JDBC_SUBPROTOCOL = "interbase";
 
     /**
@@ -76,8 +76,8 @@ public class InterbasePlatform extends PlatformImplBase
         setSqlBuilder(new InterbaseBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

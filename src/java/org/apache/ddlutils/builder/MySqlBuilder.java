@@ -1,7 +1,7 @@
 package org.apache.ddlutils.builder;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.apache.ddlutils.model.Table;
 /**
  * The SQL Builder for MySQL.
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
+ * @author James Strachan
  * @author John Marshall/Connectria
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class MySqlBuilder extends SqlBuilder
@@ -43,8 +43,8 @@ public class MySqlBuilder extends SqlBuilder
         super(info);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(Table)
+    /**
+     * {@inheritDoc}
      */
     public void dropTable(Table table) throws IOException
     { 
@@ -53,8 +53,8 @@ public class MySqlBuilder extends SqlBuilder
         printEndOfStatement();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getSqlType(org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected String getSqlType(Column column)
     {
@@ -81,33 +81,29 @@ public class MySqlBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#printAutoIncrementColumn(Table,Column)
+    /**
+     * {@inheritDoc}
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
         print("AUTO_INCREMENT");
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#shouldGeneratePrimaryKeys(org.apache.ddlutils.model.Column[])
+    /**
+     * {@inheritDoc}
      */
     protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
     {
-        /*
-         * mySQL requires primary key indication for autoincrement key columns
-         * I'm not sure why the default skips the pk statement if all are identity
-         */
+        // mySQL requires primary key indication for autoincrement key columns
+        // I'm not sure why the default skips the pk statement if all are identity
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getSelectLastInsertId(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public String getSelectLastInsertId(Table table)
     {
         return "SELECT LAST_INSERT_ID()";
     }
-
-    
 }

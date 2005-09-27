@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,22 +25,22 @@ import org.xml.sax.Attributes;
 /**
  * A digester rule for creating dyna beans.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DynaSqlCreateRule extends Rule
 {
-    /** The database model for which we'l be creating beans */
+    /** The database model for which we'l be creating beans. */
     private Database _model;
-    /** The table that we're creating instances for */
+    /** The table that we're creating instances for. */
     private Table    _table;
-    /** The object that will receive the read beans */
+    /** The object that will receive the read beans. */
     private DataSink _receiver;
 
     /**
      * Creates a new creation rule that creates dyna bean instances.
      * 
-     * @param dynaSql  The dyna sql instance to use for creating the dyna beans
+     * @param model    The database model that we're operating on
      * @param table    The table that we're creating instances for
      * @param receiver The object that will receive the read beans
      */
@@ -51,8 +51,8 @@ public class DynaSqlCreateRule extends Rule
         _receiver = receiver;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.Rule#begin(java.lang.String, java.lang.String, org.xml.sax.Attributes)
+    /**
+     * {@inheritDoc}
      */
     public void begin(String namespace, String name, Attributes attributes) throws Exception
     {
@@ -65,8 +65,8 @@ public class DynaSqlCreateRule extends Rule
         digester.push(instance);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.Rule#end(java.lang.String, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public void end(String namespace, String name) throws Exception
     {
@@ -78,5 +78,4 @@ public class DynaSqlCreateRule extends Rule
         }
         _receiver.addBean(top);
     }
-
 }

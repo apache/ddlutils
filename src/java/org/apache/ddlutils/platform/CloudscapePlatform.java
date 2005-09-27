@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.apache.ddlutils.builder.CloudscapeBuilder;
 /**
  * The Cloudscape platform implementation.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class CloudscapePlatform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME = "Cloudscape";
-    /** A subprotocol used by the DB2 network driver */
+    /** A subprotocol used by the DB2 network driver. */
     public static final String JDBC_SUBPROTOCOL_1 = "db2j:net";
-    /** A subprotocol used by the DB2 network driver */
+    /** A subprotocol used by the DB2 network driver. */
     public static final String JDBC_SUBPROTOCOL_2 = "cloudscape:net";
 
     /**
@@ -70,8 +70,8 @@ public class CloudscapePlatform extends PlatformImplBase
         setSqlBuilder(new CloudscapeBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

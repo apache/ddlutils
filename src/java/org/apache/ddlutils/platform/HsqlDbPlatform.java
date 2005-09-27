@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2002,2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.apache.ddlutils.builder.HsqlDbBuilder;
 /**
  * The platform implementation for the HsqlDb database.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class HsqlDbPlatform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME     = "HsqlDb";
-    /** The standard Hsqldb jdbc driver */
+    /** The standard Hsqldb jdbc driver. */
     public static final String JDBC_DRIVER      = "org.hsqldb.jdbcDriver";
-    /** The subprotocol used by the standard Hsqldb driver */
+    /** The subprotocol used by the standard Hsqldb driver. */
     public static final String JDBC_SUBPROTOCOL = "hsqldb";
 
     /**
@@ -63,8 +63,8 @@ public class HsqlDbPlatform extends PlatformImplBase
         setSqlBuilder(new HsqlDbBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

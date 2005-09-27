@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,200 +16,227 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
-public class Column implements Cloneable
+import java.io.Serializable;
+
+/**
+ * Represents a column in the database model.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision$
+ */
+public class Column implements Cloneable, Serializable
 {
+    /** Unique ID for serialization purposes. */
+    private static final long serialVersionUID = -6226348998874210093L;
+
+    /** The name of the column. */
+    private String _name;
+    /** The java name of the column (optional and unused by DdlUtils, for Torque compatibility). */
+    private String _javaName;
+    /** The column's description. */
+    private String _description;
+    /** Whether the column is a primary key column. */
+    private boolean _primaryKey;
+    /** Whether the column is required, ie. it must not contain <code>NULL</code>. */
+    private boolean _required;
+    /** Whether the column's value is incremented automatically. */
+    private boolean _autoIncrement;
+    /** The JDBC type code, one of the constants in {@link java.sql.Types}. */
+    private int _typeCode;
+    /** The name of the JDBC type. */
+    private String _type;
+    /** The size of the column for JDBC types that require/support this. */
+    private String _size;
+    /** The scale of the column for JDBC types that require/support this. */
+    private int _scale = 0;
+    /** The precision radix of the column for JDBC types that require/support this. */
+    private int _precisionRadix = 10;
+    /** The ordinal position of the column for JDBC types that require/support this. */
+    private int _ordinalPosition = 0;
+    /** The default value. */
+    private String _defaultValue;
+
     // TODO: Implement equals and hashcode
-    private String name;
-    private String javaName;
-    private String description;
-    private boolean primaryKey = false;
-    private boolean required = false;
-    private boolean autoIncrement = false;
-    private int typeCode;
-    private String type;
-    private String size = null;
-    private String defaultValue = null;
-    private int scale = 0;
-    private int precisionRadix = 10;
-    private int ordinalPosition = 0;
 
-    public Column()
-    {
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * Returns the name of the column.
+     * 
+     * @return The name
      */
-    public Object clone() throws CloneNotSupportedException
-    {
-        Column result = new Column();
-
-        result.name            = name;
-        result.javaName        = javaName;
-        result.primaryKey      = primaryKey;
-        result.required        = required;
-        result.autoIncrement   = autoIncrement;
-        result.typeCode        = typeCode;
-        result.type            = type;
-        result.size            = size;
-        result.defaultValue    = defaultValue;
-        result.scale           = scale;
-        result.precisionRadix  = precisionRadix;
-        result.ordinalPosition = ordinalPosition;
-        return result;
-    }
-
-    public Column(String name, String javaName, int typeCode, String size, boolean required, boolean
-                  primaryKey, boolean autoIncrement, String defaultValue)
-    {
-        this.name = name;
-        this.javaName = javaName;
-        this.typeCode = typeCode;
-        this.type = TypeMap.getJdbcTypeName(typeCode);
-        this.size = size;
-        this.required = required;
-        this.primaryKey = primaryKey;
-        this.autoIncrement = autoIncrement;
-        this.defaultValue = defaultValue;
-    }
-
-    public Column(String name, String javaName, String type, String size, boolean required, boolean
-                  primaryKey, boolean autoIncrement, String defaultValue  )
-    {
-        this(name, javaName, TypeMap.getJdbcTypeCode(type), size, required, primaryKey, autoIncrement, defaultValue);
-    }
-
-    public Column(String name, String javaName, int typeCode, String size, boolean required, boolean
-                  primaryKey, boolean autoIncrement, String defaultValue,
-                  int scale)
-    {
-        this.name = name;
-        this.javaName = javaName;
-        this.typeCode = typeCode;
-        this.type = TypeMap.getJdbcTypeName(typeCode);
-        this.size = size;
-        this.required = required;
-        this.primaryKey = primaryKey;
-        this.autoIncrement = autoIncrement;
-        this.defaultValue = defaultValue;
-        this.scale = scale;
-    }
-
-    public String toString()
-    {
-        return super.toString() + "[name=" + name + ";type=" + type + "]";
-    }
-
-    public String toStringAll()
-    {
-        return "Column[name=" + name +
-            ";javaName=" + javaName +
-            ";type=" + type +
-            ";typeCode=" + typeCode +
-            ";size=" + size +
-            ";required=" + required +
-            ";pk=" + primaryKey +
-            ";auto=" + autoIncrement +
-            ";default=" + defaultValue +
-            ";scale=" + scale +
-            ";prec=" + precisionRadix +
-            ";ord=" + ordinalPosition +
-            "]";
-    }
-
     public String getName()
     {
-        return name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public String getJavaName()
-    {
-        return javaName;
-    }
-
-    public void setJavaName(String javaName)
-    {
-        this.javaName = javaName;
+        return _name;
     }
 
     /**
-     * Returns the description.
+     * Sets the name of the column.
+     * 
+     * @param name The name
+     */
+    public void setName(String name)
+    {
+        _name = name;
+    }
+
+    /**
+     * Returns the java name of the column. This property is unused by DdlUtils and only
+     * for Torque compatibility.
+     * 
+     * @return The java name
+     */
+    public String getJavaName()
+    {
+        return _javaName;
+    }
+
+    /**
+     * Sets the java name of the column. This property is unused by DdlUtils and only
+     * for Torque compatibility.
+     * 
+     * @param javaName The java name
+     */
+    public void setJavaName(String javaName)
+    {
+        _javaName = javaName;
+    }
+
+    /**
+     * Returns the description of the column.
      *
      * @return The description
      */
     public String getDescription()
     {
-        return description;
+        return _description;
     }
 
     /**
-     * Sets the description.
+     * Sets the description of the column.
      *
      * @param description The description
      */
     public void setDescription(String description)
     {
-        this.description = description;
-    }
-
-    public boolean isPrimaryKey()
-    {
-        return primaryKey;
-    }
-
-    public void setPrimaryKey(boolean primaryKey)
-    {
-        this.primaryKey = primaryKey;
-    }
-
-    public boolean isRequired()
-    {
-        return required;
-    }
-
-    public void setRequired(boolean required)
-    {
-        this.required = required;
-    }
-
-    public boolean isAutoIncrement()
-    {
-        return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement)
-    {
-        this.autoIncrement = autoIncrement;
-    }
-
-    public int getTypeCode()
-    {
-        return typeCode;
-    }
-
-    public void setTypeCode(int typeCode)
-    {
-        this.typeCode = typeCode;
-        this.type = TypeMap.getJdbcTypeName(typeCode);
-    }
-
-    public String getType()
-    {
-        return type;
+        _description = description;
     }
 
     /**
-     * Set this columns type by name
+     * Determines whether this column is a primary key column.
+     * 
+     * @return <code>true</code> if this column is a primary key column
+     */
+    public boolean isPrimaryKey()
+    {
+        return _primaryKey;
+    }
+
+    /**
+     * Specifies whether this column is a primary key column.
+     * 
+     * @param primaryKey <code>true</code> if this column is a primary key column
+     */
+    public void setPrimaryKey(boolean primaryKey)
+    {
+        _primaryKey = primaryKey;
+    }
+
+    /**
+     * Determines whether this column is a required column, ie. that it is not allowed
+     * to contain <code>NULL</code> values.
+     * 
+     * @return <code>true</code> if this column is a required column
+     */
+    public boolean isRequired()
+    {
+        return _required;
+    }
+
+    /**
+     * Specifies whether this column is a required column, ie. that it is not allowed
+     * to contain <code>NULL</code> values.
+     * 
+     * @param required <code>true</code> if this column is a required column
+     */
+    public void setRequired(boolean required)
+    {
+        _required = required;
+    }
+
+    /**
+     * Determines whether this column is an auto-increment column.
+     * 
+     * @return <code>true</code> if this column is an auto-increment column
+     */
+    public boolean isAutoIncrement()
+    {
+        return _autoIncrement;
+    }
+
+    /**
+     * Specifies whether this column is an auto-increment column.
+     * 
+     * @param autoIncrement <code>true</code> if this column is an auto-increment column
+     */
+    public void setAutoIncrement(boolean autoIncrement)
+    {
+        _autoIncrement = autoIncrement;
+    }
+
+    /**
+     * Returns the code (one of the constants in {@link java.sql.Types}) of the
+     * JDBC type of the column.
+     * 
+     * @return The type code
+     */
+    public int getTypeCode()
+    {
+        return _typeCode;
+    }
+
+    /**
+     * Sets the code (one of the constants in {@link java.sql.Types}) of the
+     * JDBC type of the column. 
+     * 
+     * @param typeCode The type code
+     */
+    public void setTypeCode(int typeCode)
+    {
+        _type = TypeMap.getJdbcTypeName(typeCode);
+        if (_type == null)
+        {
+            throw new ModelException("Unknown JDBC type code "+typeCode);
+        }
+        _typeCode = typeCode;
+    }
+
+    /**
+     * Returns the JDBC type of the column.
+     * 
+     * @return The type
+     */
+    public String getType()
+    {
+        return _type;
+    }
+
+    /**
+     * Sets the JDBC type of the column.
+     *
+     * @param type The type
      */
     public void setType(String type)
     {
-        this.type = type;
-        this.typeCode = TypeMap.getJdbcTypeCode(type);
+        Integer typeCode = TypeMap.getJdbcTypeCode(type);
+
+        if (typeCode == null)
+        {
+            throw new ModelException("Unknown JDBC type "+type);
+        }
+        else
+        {
+            _typeCode = typeCode.intValue();
+        }
+        _type = type;
     }
 
     /**
@@ -252,16 +279,32 @@ public class Column implements Cloneable
         return TypeMap.isSpecialType(getTypeCode());
     }
     
+    /**
+     * Returns the size of the column.
+     * 
+     * @return The size
+     */
     public String getSize()
     {
-        return size;
+        return _size;
     }
 
+    /**
+     * Returns the size of the column as an integer.
+     * 
+     * @return The size as an integer
+     */
     public int getSizeAsInt()
     {
-        return size == null ? 0 : Integer.parseInt(size);
+        return _size == null ? 0 : Integer.parseInt(_size);
     }
 
+    /**
+     * Sets the size of the column. This is either a simple integer value or
+     * a comma-separated pair of integer values specifying the size and scale.
+     * 
+     * @param size The size
+     */
     public void setSize(String size)
     {
         if (size != null)
@@ -270,56 +313,171 @@ public class Column implements Cloneable
     
             if (pos < 0)
             {
-                this.size = size;
+                _size = size;
             }
             else
             {
-                this.size = size.substring(0, pos);
-                scale     = Integer.parseInt(size.substring(pos + 1));
+                _size  = size.substring(0, pos);
+                _scale = Integer.parseInt(size.substring(pos + 1));
             }
         }
     }
     
+    /**
+     * Returns the scale of the column.
+     * 
+     * @return The scale
+     */
     public int getScale()
     {
-        return this.scale;
+        return this._scale;
     }
 
+    /**
+     * Sets the scale of the column.
+     *
+     * @param scale The scale
+     */
     public void setScale(int scale)
     {
-        this.scale = scale;
+        _scale = scale;
     }
 
-    public String getDefaultValue()
-    {
-        return defaultValue;
-    }
-
-    public void setDefaultValue(String defaultValue)
-    {
-        this.defaultValue = defaultValue;
-    }
-
+    /**
+     * Returns the precision radix of the column.
+     * 
+     * @return The precision radix
+     */
     public int getPrecisionRadix()
     {
-        return this.precisionRadix;
+        return this._precisionRadix;
     }
 
+    /**
+     * Sets the precision radix of the column.
+     * 
+     * @param precisionRadix The precision radix
+     */
     public void setPrecisionRadix(int precisionRadix)
     {
-        this.precisionRadix = precisionRadix;
+        _precisionRadix = precisionRadix;
     }
 
+    /**
+     * Returns the ordinal position of the column.
+     * 
+     * @return The ordinal position
+     */
     public int getOrdinalPosition()
     {
-        return this.ordinalPosition;
+        return this._ordinalPosition;
     }
 
+    /**
+     * Sets the ordinal position of the column.
+     * 
+     * @param ordinalPosition The ordinal position
+     */
     public void setOrdinalPosition(int ordinalPosition)
     {
-        this.ordinalPosition = ordinalPosition;
+        _ordinalPosition = ordinalPosition;
     }
 
+    /**
+     * Returns the default value of the column.
+     * 
+     * @return The default value
+     */
+    public String getDefaultValue()
+    {
+        return _defaultValue;
+    }
 
+    /**
+     * Sets the default value of the column. Note that this expression will be used
+     * within quotation marks when generating the column, and thus is subject to
+     * the conversion rules of the target database.
+     * 
+     * @param defaultValue The default value
+     */
+    public void setDefaultValue(String defaultValue)
+    {
+        _defaultValue = defaultValue;
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Object clone() throws CloneNotSupportedException
+    {
+        Column result = new Column();
+
+        result._name            = _name;
+        result._javaName        = _javaName;
+        result._primaryKey      = _primaryKey;
+        result._required        = _required;
+        result._autoIncrement   = _autoIncrement;
+        result._typeCode        = _typeCode;
+        result._type            = _type;
+        result._size            = _size;
+        result._defaultValue    = _defaultValue;
+        result._scale           = _scale;
+        result._precisionRadix  = _precisionRadix;
+        result._ordinalPosition = _ordinalPosition;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("Column [name=");
+        result.append(getName());
+        result.append("; type=");
+        result.append(getType());
+        result.append("]");
+
+        return result.toString();
+    }
+
+    /**
+     * Returns a verbose string representation of this column.
+     * 
+     * @return The string representation
+     */
+    public String toVerboseString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("Column [name=");
+        result.append(getName());
+        result.append("; javaName=");
+        result.append(getJavaName());
+        result.append("; type=");
+        result.append(getType());
+        result.append("; typeCode=");
+        result.append(getTypeCode());
+        result.append("; size=");
+        result.append(getSize());
+        result.append("; required=");
+        result.append(isRequired());
+        result.append("; primaryKey=");
+        result.append(isPrimaryKey());
+        result.append("; autoIncrement=");
+        result.append(isAutoIncrement());
+        result.append("; defaultValue=");
+        result.append(getDefaultValue());
+        result.append("; scale=");
+        result.append(getScale());
+        result.append("; precisionRadix=");
+        result.append(getPrecisionRadix());
+        result.append("; ordinalPosition=");
+        result.append(getOrdinalPosition());
+        result.append("]");
+
+        return result.toString();
+    }
 }

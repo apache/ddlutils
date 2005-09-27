@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,20 +53,20 @@ import org.apache.ddlutils.util.JdbcSupport;
 /**
  * Base class for platform implementations.
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision: 231110 $
  */
 public abstract class PlatformImplBase extends JdbcSupport implements Platform
 {
-    /** The log for this platform */
+    /** The log for this platform. */
     private final Log _log = LogFactory.getLog(getClass());
 
-    /** The sql builder for this platform */
+    /** The sql builder for this platform. */
     private SqlBuilder _builder;
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#getSqlBuilder()
+    /**
+     * {@inheritDoc}
      */
     public SqlBuilder getSqlBuilder()
     {
@@ -83,8 +83,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         _builder = builder;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#getPlatformInfo()
+    /**
+     * {@inheritDoc}
      */
     public PlatformInfo getPlatformInfo()
     {
@@ -118,8 +118,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#evaluateBatch(java.lang.String, boolean)
+    /**
+     * {@inheritDoc}
      */
     public int evaluateBatch(String sql, boolean continueOnError) throws DynaSqlException
     {
@@ -135,8 +135,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#evaluateBatch(java.sql.Connection, java.lang.String, boolean)
+    /**
+     * {@inheritDoc}
      */
     public int evaluateBatch(Connection connection, String sql, boolean continueOnError) throws DynaSqlException
     {
@@ -213,8 +213,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return errors;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#createTables(org.apache.ddlutils.model.Database, boolean, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void createTables(Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
@@ -230,24 +230,24 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#createDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map)
+    /**
+     * {@inheritDoc}
      */
     public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
     {
         throw new UnsupportedOperationException("Database creation is not supported for the database platform "+getName());
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#dropDatabase(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
     {
         throw new UnsupportedOperationException("Database deletion is not supported for the database platform "+getName());
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#createTables(java.sql.Connection, org.apache.ddlutils.model.Database, boolean, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void createTables(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
@@ -268,16 +268,16 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         evaluateBatch(connection, sql, continueOnError);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#alterTables(org.apache.ddlutils.model.Database, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void alterTables(Database desiredDb, boolean continueOnError) throws DynaSqlException
     {
         alterTables(desiredDb, false, false, continueOnError);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#alterTables(org.apache.ddlutils.model.Database, boolean, boolean, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void alterTables(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
@@ -293,8 +293,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#alterTables(java.sql.Connection, org.apache.ddlutils.model.Database, boolean, boolean, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void alterTables(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
@@ -325,16 +325,16 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         evaluateBatch(connection, sql, continueOnError);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#alterTables(java.sql.Connection, org.apache.ddlutils.model.Database, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void alterTables(Connection connection, Database desiredDb, boolean continueOnError) throws DynaSqlException
     {
         alterTables(connection, desiredDb, false, false, continueOnError);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#dropTables(org.apache.ddlutils.model.Database, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void dropTables(Database model, boolean continueOnError) throws DynaSqlException
     {
@@ -350,8 +350,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#dropTables(java.sql.Connection, org.apache.ddlutils.model.Database, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void dropTables(Connection connection, Database model, boolean continueOnError) throws DynaSqlException 
     {
@@ -372,24 +372,24 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         evaluateBatch(connection, sql, continueOnError);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public Iterator query(Database model, String sql) throws DynaSqlException
     {
         return query(model, sql, (Table[])null);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection)
+    /**
+     * {@inheritDoc}
      */
     public Iterator query(Database model, String sql, Collection parameters) throws DynaSqlException
     {
         return query(model, sql, parameters, null);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String, org.apache.ddlutils.model.Table[])
+    /**
+     * {@inheritDoc}
      */
     public Iterator query(Database model, String sql, Table[] queryHints) throws DynaSqlException
     {
@@ -421,8 +421,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#query(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, org.apache.ddlutils.model.Table[])
+    /**
+     * {@inheritDoc}
      */
     public Iterator query(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException
     {
@@ -461,32 +461,32 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql) throws DynaSqlException
     {
         return fetch(model, sql, (Table[])null, 0, -1);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, org.apache.ddlutils.model.Table[])
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql, Table[] queryHints) throws DynaSqlException
     {
         return fetch(model, sql, queryHints, 0, -1);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, int, int)
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql, int start, int end) throws DynaSqlException
     {
         return fetch(model, sql, (Table[])null, start, end);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, org.apache.ddlutils.model.Table[], int, int)
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql, Table[] queryHints, int start, int end) throws DynaSqlException
     {
@@ -520,32 +520,32 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection)
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql, Collection parameters) throws DynaSqlException
     {
         return fetch(model, sql, parameters, null, 0, -1);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, int, int)
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql, Collection parameters, int start, int end) throws DynaSqlException
     {
         return fetch(model, sql, parameters, null, start, end);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, org.apache.ddlutils.model.Table[])
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException
     {
         return fetch(model, sql, parameters, queryHints, 0, -1);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#fetch(org.apache.ddlutils.model.Database, java.lang.String, java.util.Collection, org.apache.ddlutils.model.Table[], int, int)
+    /**
+     * {@inheritDoc}
      */
     public List fetch(Database model, String sql, Collection parameters, Table[] queryHints, int start, int end) throws DynaSqlException
     {
@@ -620,8 +620,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return _builder.getSelectLastInsertId(table);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#getInsertSql(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public String getInsertSql(Database model, DynaBean dynaBean)
     {
@@ -637,8 +637,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return createInsertSql(model, dynaClass, properties, dynaBean);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#insert(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean, java.sql.Connection)
+    /**
+     * {@inheritDoc}
      */
     public void insert(Database model, DynaBean dynaBean, Connection connection) throws DynaSqlException
     {
@@ -771,8 +771,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#insert(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public void insert(Database model, DynaBean dynaBean) throws DynaSqlException
     {
@@ -808,8 +808,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return _builder.getUpdateSql(table, columnValues, bean == null);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#getUpdateSql(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public String getUpdateSql(Database model, DynaBean dynaBean)
     {
@@ -825,8 +825,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return createUpdateSql(model, dynaClass, primaryKeys, dynaClass.getNonPrimaryKeyProperties(), dynaBean);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#update(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean, java.sql.Connection)
+    /**
+     * {@inheritDoc}
      */
     public void update(Database model, DynaBean dynaBean, Connection connection) throws DynaSqlException
     {
@@ -881,8 +881,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#update(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public void update(Database model, DynaBean dynaBean) throws DynaSqlException
     {
@@ -911,8 +911,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#store(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public void store(Database model, DynaBean dynaBean) throws DynaSqlException
     {
@@ -954,8 +954,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return _builder.getDeleteSql(table, pkValues, bean == null);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#getDeleteSql(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public String getDeleteSql(Database model, DynaBean dynaBean)
     {
@@ -973,8 +973,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#delete(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public void delete(Database model, DynaBean dynaBean) throws DynaSqlException
     {
@@ -990,8 +990,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#delete(org.apache.ddlutils.model.Database, org.apache.commons.beanutils.DynaBean, java.sql.Connection)
+    /**
+     * {@inheritDoc}
      */
     public void delete(Database model, DynaBean dynaBean, Connection connection) throws DynaSqlException
     {
@@ -1090,10 +1090,11 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * Creates an iterator over the given result set.
      *
-     * @param model     The database model
-     * @param resultSet The result set to iterate over
-     * @param queryHints         The tables that were queried in the query that produced the given result set
-     *                           (optional)
+     * @param model      The database model
+     * @param resultSet  The result set to iterate over
+     * @param queryHints The tables that were queried in the query that produced the
+     *                   given result set (optional)
+     * @return The iterator
      */
     protected DynaSqlIterator createResultSetIterator(Database model, ResultSet resultSet, Table[] queryHints)
     {

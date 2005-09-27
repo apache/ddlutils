@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2002,2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,16 @@ import org.xml.sax.SAXException;
  * An entity resolver that matches the specific database dtds to the one that comes
  * with commons-sql, and that can handle file url's.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
+ * @version $Revision$
  */
 public class LocalEntityResolver implements EntityResolver
 {
+    /** The default DTD. */
     private static final String DTD_PREFIX = "http://db.apache.org/torque/dtd/database";
 
-    /* (non-Javadoc)
-     * @see org.xml.sax.EntityResolver#resolveEntity(java.lang.String, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException
     {

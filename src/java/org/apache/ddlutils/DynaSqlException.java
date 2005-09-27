@@ -1,7 +1,7 @@
 package org.apache.ddlutils;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@ package org.apache.ddlutils;
  * limitations under the License.
  */
 
-
 /**
- * Is thrown when by the {@link org.apache.ddlutils.dynabean.DynaSql} and
- * related classes when a database operation fails, but a normal
- * {@link java.sql.SQLException} cannot be generated.
+ * This exception is thrown when a database operation failed.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DynaSqlException extends DdlUtilsException 
 {
-    /** Constant for serializing instances of this class */
+    /** Constant for serializing instances of this class. */
     private static final long serialVersionUID = 7524362294381844776L;
 
     /**

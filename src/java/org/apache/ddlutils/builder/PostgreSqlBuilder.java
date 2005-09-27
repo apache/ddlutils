@@ -1,7 +1,7 @@
 package org.apache.ddlutils.builder;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.apache.ddlutils.model.Table;
 /**
  * The SQL Builder for PostgresSql.
  * 
- * @author <a href="mailto:john@zenplex.com">John Thorhauer</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author John Thorhauer
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class PostgreSqlBuilder extends SqlBuilder
@@ -42,8 +42,8 @@ public class PostgreSqlBuilder extends SqlBuilder
         super(info);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(Table)
+    /**
+     * {@inheritDoc}
      */
     public void dropTable(Table table) throws IOException
     { 
@@ -62,8 +62,8 @@ public class PostgreSqlBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void createTable(Database database, Table table) throws IOException
     {
@@ -92,8 +92,8 @@ public class PostgreSqlBuilder extends SqlBuilder
         printEndOfStatement();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
@@ -102,8 +102,8 @@ public class PostgreSqlBuilder extends SqlBuilder
         print(")");
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getSelectLastInsertId(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public String getSelectLastInsertId(Table table)
     {

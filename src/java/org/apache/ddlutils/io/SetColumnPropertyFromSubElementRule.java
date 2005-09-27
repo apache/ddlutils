@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import org.apache.ddlutils.model.Column;
  * A digester rule for setting a bean property that corresponds to a column
  * with the value derived from a sub element. 
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class SetColumnPropertyFromSubElementRule extends Rule
 {
-    /** The column that this rule shall set */
+    /** The column that this rule shall set. */
     private Column _column;
-    /** The converter for generating the property value from a string */
+    /** The converter for generating the property value from a string. */
     private SqlTypeConverter _converter;
 
     /**
@@ -47,9 +47,8 @@ public class SetColumnPropertyFromSubElementRule extends Rule
         _converter = converter;
     }
 
-    
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.Rule#body(java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public void body(String text) throws Exception
     {

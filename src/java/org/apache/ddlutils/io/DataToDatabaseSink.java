@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,25 +39,28 @@ import org.apache.ddlutils.model.Table;
  * Data sink that directly inserts the beans into the database. If configured, it will make
  * sure that the beans are inserted in the correct order according to the foreignkeys. Note
  * that this will only work if there are no circles.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DataToDatabaseSink implements DataSink
 {
-    /** Our log */
+    /** Our log. */
     private final Log _log = LogFactory.getLog(DataToDatabaseSink.class);
  
-    /** Generates the sql and writes it to the database */
+    /** Generates the sql and writes it to the database. */
     private Platform _platform;
-    /** The database model */
+    /** The database model. */
     private Database _model;
-    /** The connection to the database */
+    /** The connection to the database. */
     private Connection _connection;
-    /** Whether to stop when an error has occurred while inserting a bean into the database */
+    /** Whether to stop when an error has occurred while inserting a bean into the database. */
     private boolean _haltOnErrors = true;
-    /** Whether to delay the insertion of beans so that the beans referenced by it via foreignkeys, are already inserted into the database */
+    /** Whether to delay the insertion of beans so that the beans referenced by it via foreignkeys, are already inserted into the database. */
     private boolean _ensureFkOrder = true;
-    /** Stores the already-processed identities per table name */
+    /** Stores the already-processed identities per table name. */
     private HashMap _processedIdentities = new HashMap();
-    /** Stores the objects that are waiting for other objects to be inserted */
+    /** Stores the objects that are waiting for other objects to be inserted. */
     private ArrayList _waitingObjects = new ArrayList();
 
     /**
@@ -119,8 +122,8 @@ public class DataToDatabaseSink implements DataSink
         _ensureFkOrder = ensureFkOrder;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.io.DataSink#end()
+    /**
+     * {@inheritDoc}
      */
     public void end() throws DataSinkException
     {
@@ -138,8 +141,8 @@ public class DataToDatabaseSink implements DataSink
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.io.DataSink#start()
+    /**
+     * {@inheritDoc}
      */
     public void start() throws DataSinkException
     {
@@ -171,8 +174,8 @@ public class DataToDatabaseSink implements DataSink
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.io.DataSink#addBean(org.apache.commons.beanutils.DynaBean)
+    /**
+     * {@inheritDoc}
      */
     public void addBean(DynaBean bean) throws DataSinkException
     {

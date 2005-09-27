@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io.converters;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@ import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * Converts between the various number types (including boolean types) and {@link java.lang.String}.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class NumberConverter implements SqlTypeConverter
 {
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.io.converters.SqlTypeConverter#convertFromString(java.lang.String, int)
+    /**
+     * {@inheritDoc}
      */
     public Object convertFromString(String textRep, int sqlTypeCode) throws Exception
     {
@@ -38,7 +41,6 @@ public class NumberConverter implements SqlTypeConverter
         }
         else
         {
-            Object result      = textRep;
             Class  targetClass = null;
 
             switch (sqlTypeCode)
@@ -79,8 +81,8 @@ public class NumberConverter implements SqlTypeConverter
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.io.converters.SqlTypeConverter#convertToString(java.lang.Object, int)
+    /**
+     * {@inheritDoc}
      */
     public String convertToString(Object obj, int sqlTypeCode) throws Exception
     {

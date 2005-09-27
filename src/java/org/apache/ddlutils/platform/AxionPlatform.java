@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.apache.ddlutils.builder.AxionBuilder;
 /**
  * The platform for the Axion database.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class AxionPlatform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME     = "Axion";
-    /** The axion jdbc driver */
+    /** The axion jdbc driver. */
     public static final String JDBC_DRIVER      = "org.axiondb.jdbc.AxionDriver";
-    /** The subprotocol used by the axion driver */
+    /** The subprotocol used by the axion driver. */
     public static final String JDBC_SUBPROTOCOL = "axiondb";
 
     /**
@@ -68,8 +68,8 @@ public class AxionPlatform extends PlatformImplBase
         setSqlBuilder(new AxionBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

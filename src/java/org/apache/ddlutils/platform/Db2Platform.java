@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,24 +24,24 @@ import org.apache.ddlutils.builder.Db2Builder;
 /**
  * The DB2 platform implementation.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class Db2Platform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME     = "DB2";
-    /** The standard DB2 jdbc driver */
+    /** The standard DB2 jdbc driver. */
     public static final String JDBC_DRIVER      = "com.ibm.db2.jcc.DB2Driver";
-    /** Older name for the jdbc driver */
+    /** Older name for the jdbc driver. */
     public static final String JDBC_DRIVER_OLD1 = "COM.ibm.db2.jdbc.app.DB2Driver";
-    /** Older name for the jdbc driver */
+    /** Older name for the jdbc driver. */
     public static final String JDBC_DRIVER_OLD2 = "COM.ibm.db2os390.sqlj.jdbc.DB2SQLJDriver";
-    /** The subprotocol used by the standard DB2 driver */
+    /** The subprotocol used by the standard DB2 driver. */
     public static final String JDBC_SUBPROTOCOL = "db2";
-    /** An alternative subprotocol used by the standard DB2 driver on OS/390 */
+    /** An alternative subprotocol used by the standard DB2 driver on OS/390. */
     public static final String JDBC_SUBPROTOCOL_OS390_1 = "db2os390";
-    /** An alternative subprotocol used by the standard DB2 driver on OS/390 */
+    /** An alternative subprotocol used by the standard DB2 driver on OS/390. */
     public static final String JDBC_SUBPROTOCOL_OS390_2 = "db2os390sqlj";
 
     /**
@@ -73,8 +73,8 @@ public class Db2Platform extends PlatformImplBase
         setSqlBuilder(new Db2Builder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

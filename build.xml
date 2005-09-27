@@ -20,231 +20,245 @@
 <project default="dist"
 	     name="DdlUtils"
 	     basedir=".">
-    <!-- Allow values set at the commandline or in the environment to override the defaults -->
-	  <property environment="env"/>
-    <!-- Load the build properties -->
-    <property file="build.properties"/>
+  <!-- Allow values set at the commandline or in the environment to override the defaults -->
+  <property environment="env"/>
+  <!-- Load the build properties -->
+  <property file="build.properties"/>
 
-    <!-- The classpath used for compiling and generating the documentation -->
-    <path id="compilation-classpath">
-        <fileset dir="${lib.dir}">
-            <include name="**/*.jar"/>
-            <include name="**/*.zip"/>
-        </fileset>
-        <pathelement path="${build.java.dir}"/>
-        <pathelement path="${build.test.dir}"/>
-    </path>
+  <!-- The classpath used for compiling and generating the documentation -->
+  <path id="compilation-classpath">
+    <fileset dir="${lib.dir}">
+        <include name="**/*.jar"/>
+        <include name="**/*.zip"/>
+    </fileset>
+    <pathelement path="${build.java.dir}"/>
+    <pathelement path="${build.test.dir}"/>
+  </path>
 
-    <target name="init"
-            description="Initializes the build process">
-        <tstamp/>
-        <mkdir dir="${build.dir}"/>
-        <mkdir dir="${build.java.dir}"/>
-        <mkdir dir="${dist.dir}"/>
-    </target>
+  <target name="init"
+          description="Initializes the build process">
+      <tstamp/>
+      <mkdir dir="${build.dir}"/>
+      <mkdir dir="${build.java.dir}"/>
+      <mkdir dir="${dist.dir}"/>
+  </target>
 
-    <target name="compile"
-            description="Compiles the code"
-            depends="init">
-        <javac srcdir="${src.java.dir}"
-               destdir="${build.java.dir}"
-               deprecation="true"
-               debug="true"
-               source="1.2"
-               target="1.2"
-               optimize="false">
-            <classpath refid="compilation-classpath"/>
-        </javac>
-    </target>
+  <target name="compile"
+          description="Compiles the code"
+          depends="init">
+    <javac srcdir="${src.java.dir}"
+           destdir="${build.java.dir}"
+           deprecation="true"
+           debug="true"
+           source="1.2"
+           target="1.2"
+           optimize="false">
+      <classpath refid="compilation-classpath"/>
+    </javac>
+  </target>
 
-    <target name="jar"
-            description="Creates the jar"
-            depends="compile">
-        <copy todir="${build.java.dir}/resources">
-            <fileset dir="${src.resources.dir}"/>
-        </copy>
-        <copy todir="${build.java.dir}">
-            <fileset dir="${src.java.dir}"
-                     excludes="**/*.java"/>
-        </copy>
-        <jar jarfile="${dist.dir}/${dist-filename-prefix}.jar"
-             basedir="${build.java.dir}"/>
-    </target>
+  <target name="jar"
+          description="Creates the jar"
+          depends="compile">
+    <copy todir="${build.java.dir}/resources">
+      <fileset dir="${src.resources.dir}"/>
+    </copy>
+    <copy todir="${build.java.dir}">
+      <fileset dir="${src.java.dir}"
+               excludes="**/*.java"/>
+    </copy>
+    <jar jarfile="${dist.dir}/${dist-filename-prefix}.jar"
+         basedir="${build.java.dir}"/>
+  </target>
 
-    <target name="clean"
-            description="Cleans up the generated directories">
-        <delete failonerror="false"
-                dir="${build.dir}"/>
-        <delete failonerror="false"
-                dir="${dist.dir}"/>
-    </target>
+  <target name="clean"
+          description="Cleans up the generated directories">
+    <delete failonerror="false"
+            dir="${build.dir}"/>
+    <delete failonerror="false"
+            dir="${dist.dir}"/>
+  </target>
 
-    <!-- ================================================================== -->
-    <!-- Build the documentation                                            -->
-    <!-- ================================================================== -->
-    <target name="doc"
-    	    depends="javadoc"
-            description="Builds the complete documentation using Forrest">
-        <fail message="Please set the FORREST_HOME environment variable to the 'src/core' subdirectory of your Forrest installation. If you don't have yet installed Forrest, you can get it from http://forrest.apache.org.">
-            <condition>
-                <not>
-                    <isset property="env.FORREST_HOME"/>
-                </not>
-            </condition>
-        </fail>
-        <available classname="org.apache.xml.resolver.Resolver" property="commons.resolver.available"/>
-        <fail unless="commons.resolver.available" message="Please make the Apache XML Commons Resolver library available in the classpath, e.g. by copying the xml-commons-resolver jar file from the 'tools/ant/lib' subdirectory of your Forrest installation (${env.FORREST_HOME}/tools/ant/lib) into the lib subdirectory of your Ant installation (${env.ANT_HOME}/lib)."/>
+  <!-- ================================================================== -->
+  <!-- Build the documentation                                            -->
+  <!-- ================================================================== -->
+  <target name="doc"
+  	    depends="javadoc"
+          description="Builds the complete documentation using Forrest">
+    <fail message="Please set the FORREST_HOME environment variable to the 'src/core' subdirectory of your Forrest installation. If you don't have yet installed Forrest, you can get it from http://forrest.apache.org.">
+      <condition>
+        <not>
+          <isset property="env.FORREST_HOME"/>
+        </not>
+      </condition>
+    </fail>
+    <available classname="org.apache.xml.resolver.Resolver" property="commons.resolver.available"/>
+    <fail unless="commons.resolver.available" message="Please make the Apache XML Commons Resolver library available in the classpath, e.g. by copying the xml-commons-resolver jar file from the 'tools/ant/lib' subdirectory of your Forrest installation (${env.FORREST_HOME}/tools/ant/lib) into the lib subdirectory of your Ant installation (${env.ANT_HOME}/lib)."/>
 
-        <delete dir="${build.doc.dir}"
-        	      failonerror="false"/>
-        <mkdir dir="${build.doc.dir}"/>
+    <delete dir="${build.doc.dir}"
+    	      failonerror="false"/>
+    <mkdir dir="${build.doc.dir}"/>
 
-        <!-- Copy all forrest src stuff to a temporary directoy -->
-        <copy todir="${build.doc.dir}">
-            <fileset dir="${src.doc.dir}"/>
-        </copy>
-    	<!-- We're copying the contents of the ToDo.txt and ReleaseNotes.txt into
-    	     the corresponding documentation source files, otherwise we would loose the
-    	     menu when the user clicks on the corresponding menu entries -->
-        <loadfile property="todo.content" srcfile="${basedir}/ToDo.txt"/>
-        <loadfile property="release-notes.content" srcfile="${basedir}/ReleaseNotes.txt"/>
-        <replace file="${build.doc.dir}/src/documentation/content/xdocs/to-do.xml" token="@@content@@" value="${todo.content}"/>
-        <replace file="${build.doc.dir}/src/documentation/content/xdocs/release-notes.xml" token="@@content@@" value="${release-notes.content}"/>
+    <!-- Copy all forrest src stuff to a temporary directoy -->
+    <copy todir="${build.doc.dir}">
+      <fileset dir="${src.doc.dir}"/>
+    </copy>
+  	<!-- We're copying the contents of the ToDo.txt and ReleaseNotes.txt into
+  	     the corresponding documentation source files, otherwise we would loose the
+  	     menu when the user clicks on the corresponding menu entries -->
+    <loadfile property="todo.content" srcfile="${basedir}/ToDo.txt"/>
+    <loadfile property="release-notes.content" srcfile="${basedir}/ReleaseNotes.txt"/>
+    <replace file="${build.doc.dir}/src/documentation/content/xdocs/to-do.xml" token="@@content@@" value="${todo.content}"/>
+    <replace file="${build.doc.dir}/src/documentation/content/xdocs/release-notes.xml" token="@@content@@" value="${release-notes.content}"/>
 
-        <!-- Copy generated javadoc into the forrest structure in the temporary directoy -->
-        <copy todir="${forrest.javadoc.destdir}">
-            <fileset dir="${build.javadoc.dir}"/>
-        </copy>
+    <!-- Copy generated javadoc into the forrest structure in the temporary directoy -->
+    <copy todir="${forrest.javadoc.destdir}">
+      <fileset dir="${build.javadoc.dir}"/>
+    </copy>
 
-        <ant antfile="${env.FORREST_HOME}/main/forrest.build.xml"
-             dir="${build.doc.dir}"
-             inheritall="false"
-             target="site">
-            <property name="forrest.home" value="${env.FORREST_HOME}"/>
-        </ant>
-        <!-- Finally we can copy the generated documentation to its designated place -->
-     <!-- 
-        <mkdir dir="${doc.dir}"/>
-        <copy todir="${doc.dir}">
-            <fileset dir="${forrest.output.dir}"/>
-        </copy>
-     -->
-    </target>
+    <ant antfile="${env.FORREST_HOME}/main/forrest.build.xml"
+         dir="${build.doc.dir}"
+         inheritall="false"
+         target="site">
+      <property name="forrest.home" value="${env.FORREST_HOME}"/>
+    </ant>
+    <!-- Finally we can copy the generated documentation to its designated place -->
+    <mkdir dir="${doc.dir}"/>
+    <copy todir="${doc.dir}">
+      <fileset dir="${forrest.output.dir}"/>
+    </copy>
+  </target>
 
-    <!-- ================================================================== -->
-    <!-- Build the API JavaDocs                                             -->
-    <!-- ================================================================== -->
-    <target name="javadoc"
-            depends="init"
-            description="Builds the API javadocs.">
-        <mkdir dir="${build.javadoc.dir}"/>
-        <javadoc sourcepath="${src.java.dir}"
-        		 classpathref="compilation-classpath"
-                 destdir="${build.javadoc.dir}"
-                 doctitle="${javadoc.title}"
-                 windowtitle="${javadoc.title} API documentation"
-                 bottom="${javadoc.footer}"
-            	 protected="true"
-                 author="true"
-                 version="true"
-                 packagenames="org.*"/>
-    </target>
+  <!-- ================================================================== -->
+  <!-- Build the API JavaDocs                                             -->
+  <!-- ================================================================== -->
+  <target name="javadoc"
+          depends="init"
+          description="Builds the API javadocs.">
+    <mkdir dir="${build.javadoc.dir}"/>
+    <javadoc sourcepath="${src.java.dir}"
+    		     classpathref="compilation-classpath"
+             destdir="${build.javadoc.dir}"
+             doctitle="${javadoc.title}"
+             windowtitle="${javadoc.title} API documentation"
+             bottom="${javadoc.footer}"
+        	   protected="true"
+             author="true"
+             version="true"
+             packagenames="org.*">
+      <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/> 
+      <link href="http://jakarta.apache.org/commons/lang/apidocs/"/>
+      <link href="http://jakarta.apache.org/commons/beanutils/apidocs/"/>
+      <link href="http://jakarta.apache.org/commons/digester/apidocs/"/>
+      <link href="http://jakarta.apache.org/commons/betwixt/apidocs/"/>
+    </javadoc> 
+  </target>
 
-    <!-- ================================================================== -->
-    <!-- Build the doc archive                                              -->
-    <!-- ================================================================== -->
-    <target name="doc-archive" depends="doc"
-            description="Builds the complete documentation archive.">
-        <zip zipfile="${dist.dir}/${dist-filename-prefix}-doc.zip"
-             basedir="."
-             includes="doc/**"/>
-    </target>
+  <!-- ================================================================== -->
+  <!-- Build the doc archive                                              -->
+  <!-- ================================================================== -->
+  <target name="doc-archive" depends="doc"
+          description="Builds the complete documentation archive.">
+    <zip zipfile="${dist.dir}/${dist-filename-prefix}-doc.zip"
+         basedir="."
+         includes="doc/**"/>
+  </target>
 
-    <!-- ================================================================== -->
-    <!-- Creates the DdlUtils distribution                                  -->
-    <!-- ================================================================== -->
-    <target name="dist"
-            description="Creates the distribution"
-            depends="jar, doc-archive"/>
+  <!-- ================================================================== -->
+  <!-- Creates the DdlUtils distribution                                  -->
+  <!-- ================================================================== -->
+  <target name="dist"
+          description="Creates the distribution"
+          depends="jar, doc-archive"/>
 
-    <target name="compile-tests"
-            description="Compiles the unit tests"
-            depends="compile">
-        <mkdir dir="${build.test.dir}"/>
-        <javac srcdir="${src.test.dir}"
-               destdir="${build.test.dir}"
-               deprecation="true"
-               debug="true"
-               optimize="false">
-            <classpath refid="compilation-classpath"/>
-        </javac>
-    </target>
+  <target name="compile-tests"
+          description="Compiles the unit tests"
+          depends="compile">
+    <mkdir dir="${build.test.dir}"/>
+    <javac srcdir="${src.test.dir}"
+           destdir="${build.test.dir}"
+           deprecation="true"
+           debug="true"
+           optimize="false">
+      <classpath refid="compilation-classpath"/>
+    </javac>
+  </target>
 
+  <!-- ================================================================== -->
+  <!-- Runs the test cases                                                -->
+  <!-- ================================================================== -->
   <target name="junit"
           description="Runs the test cases against the default database (Hsqldb)">
     <antcall target="junit-hsqldb"/>
  	</target>
 
+  <!-- ================================================================== -->
+  <!-- Runs the test cases against HsqlDb                                 -->
+  <!-- ================================================================== -->
   <target name="junit-hsqldb"
           description="Runs the test cases against Hsqldb">
     <property name="jdbc.properties.file" value="/jdbc.properties.hsqldb"/>
-    <antcall target="junit-internal"/>
+    <antcall target="-junit-internal"/>
   </target>
 
+  <!-- ================================================================== -->
+  <!-- Runs the test cases against PostgreSQL                             -->
+  <!-- ================================================================== -->
   <target name="junit-postgresql"
           description="Runs the test cases against PostgreSQL">
     <property name="jdbc.properties.file" value="/jdbc.properties.postgresql"/>
-    <antcall target="junit-internal"/>
+    <antcall target="-junit-internal"/>
   </target>
 
-  <target name="junit-internal"
-          description="Actually runs the test cases"
+  <target name="-junit-internal"
           depends="compile-tests">
-        <junit dir="."
-               printSummary="yes"
-               fork="true"
-               haltonerror="false">
-            <sysproperty key="jdbc.properties.file" value="${jdbc.properties.file}"/> 
-            <formatter type="xml"/>
-            <formatter type="plain"/>
-            <classpath refid="compilation-classpath"/>
-            <batchtest todir="${build.test.dir}">
-                <fileset dir="${src.test.dir}"
-                         includes="**/Test*.java"/>
-            </batchtest>
-        </junit>
-    </target>
+    <junit dir="."
+           printSummary="yes"
+           fork="true"
+           haltonerror="false">
+      <sysproperty key="jdbc.properties.file" value="${jdbc.properties.file}"/> 
+      <formatter type="xml"/>
+      <formatter type="plain"/>
+      <classpath refid="compilation-classpath"/>
+      <batchtest todir="${build.test.dir}">
+          <fileset dir="${src.test.dir}"
+                   includes="**/Test*.java"/>
+      </batchtest>
+    </junit>
+  </target>
 
-    <target name="junit-report"
-            description="Creates a test report in html form">
-        <junitreport todir="${build.test.dir}">
-            <fileset dir="${build.test.dir}" casesensitive="false">
-                <include name="test*.xml"/>
-            </fileset>
-            <report format="frames"
-                    todir="${build.test.dir}"/>
-        </junitreport>
-    </target>
+  <!-- ================================================================== -->
+  <!-- Creates the test report                                            -->
+  <!-- ================================================================== -->
+  <target name="junit-report"
+          description="Creates a test report in html form">
+    <junitreport todir="${build.test.dir}">
+      <fileset dir="${build.test.dir}" casesensitive="false">
+          <include name="test*.xml"/>
+      </fileset>
+      <report format="frames"
+              todir="${build.test.dir}"/>
+    </junitreport>
+  </target>
 
-<!--
-    <target name="doc" description="Creates documentation via XSLT">
-        <mkdir dir="${build.doc.dir}"/>
-        <style basedir="${src.doc.dir}"
-               destdir="${build.doc.dir}"
-               extension=".html"
-               style="${src.doc.dir}/stylesheets/site.xsl"
-               excludes="empty.xml"
-               includes="**/*.xml">
-          <param name="relative-path" expression="."/>
-        </style>
-        <copy todir="${build.doc.dir}/images" filtering="no">
-          <fileset dir="${src.doc.dir}/images">
-            <include name="**/*.gif"/>
-            <include name="**/*.jpeg"/>
-            <include name="**/*.jpg"/>
-            <include name="**/*.png"/>
-          </fileset>
-        </copy>
-    </target>
--->
+  <!-- ================================================================== -->
+  <!-- Runs Checkstyle over DdlUtils                                      -->
+  <!-- ================================================================== -->
+  <target name="checkstyle"
+          description="Checks the sourcecode via Checkstyle">
+    <taskdef resource="checkstyletask.properties"
+             classpathref="compilation-classpath"/>
+
+    <checkstyle config="${src.check.dir}/ddlutils-checks.xml"
+                failOnViolation="false">
+      <fileset dir="${src.java.dir}"
+               includes="**/*.java"/>
+      <fileset dir="${src.test.dir}"
+               includes="**/*.java"/>
+
+      <formatter type="plain"/>
+      <!-- Location of cache-file (project specific) -->
+      <property key="checkstyle.cache.file" file="${build.check.dir}/checkstyle/cachefile"/>
+    </checkstyle>
+  </target>
 </project>

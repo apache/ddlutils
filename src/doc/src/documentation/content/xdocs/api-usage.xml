@@ -45,21 +45,14 @@
         accomplished with a few lines of code:
       </p>
       <source><![CDATA[
-import java.beans.IntrospectionException;
-import java.io.IOException;
-import org.apache.ddlutils.io.DatabaseReader;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
-import org.xml.sax.SAXException;
 
 ...
 
-public Database readDatabaseFromXML(String fileName) throws IOException,
-                                                            SAXException,
-                                                            IntrospectionException
+public Database readDatabaseFromXML(String fileName)
 {
-    DatabaseReader reader = new DatabaseReader();
-
-    return (Database)reader.parse(fileName);
+    return new DatabaseIO().read(fileName);
 }]]></source>
     </section>
     <section>
@@ -68,22 +61,14 @@ public Database readDatabaseFromXML(String fileName) throws IOException,
         Writing a model to XML is just as easy as reading from XML:
       </p>
       <source><![CDATA[
-import java.beans.IntrospectionException;
-import java.io.FileWriter;
-import java.io.IOException;
-import org.apache.ddlutils.io.DatabaseWriter;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
-import org.xml.sax.SAXException;
 
 ...
 
-public void writeDatabaseToXML(Database db, String fileName) throws IOException,
-                                                                    SAXException,
-                                                                    IntrospectionException
+public void writeDatabaseToXML(Database db, String fileName)
 {
-    DatabaseWriter writer = new DatabaseWriter(new FileWriter(fileName));
-
-    writer.write(db);
+    new DatabaseIO().write(db, fileName);
 }]]></source>
     </section>
     <section>
@@ -133,57 +118,26 @@ public Database readDatabase(String driverClassName,
         is the same: create the sql and execute it:
       </p>
       <source><![CDATA[
-import java.io.IOException;
-import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
 import javax.sql.DataSource;
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.builder.SqlBuilderFactory;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.util.DDLExecutor;
 
 ...
 
 public void changeDatabase(DataSource dataSource,
-                           String     databaseName,
                            Database   targetModel,
-                           boolean    alterDb) throws IllegalAccessException,
-                                                      InstantiationException,
-                                                      IOException,
-                                                      SQLException
+                           boolean    alterDb)
 {
-    SqlBuilder   builder    = SqlBuilderFactory.newSqlBuilder(databaseName);
-    StringWriter writer     = new StringWriter();
-    Connection   connection = null;
-
-    builder.setWriter(writer);
-    try
+    Platform platform = PlatformFactory.createNewPlatformInstance(dataSource);
+    
+    if (alterDb)
     {
-        connection = dataSource.getConnection();
-        if (alterDb)
-        {
-            builder.alterDatabase(targetModel, connection, true, true);
-        }
-        else
-        {
-            builder.createDatabase(targetModel);
-        }
-        
-        String sql = writer.toString();
-
-        // you could dump the SQL to a file here
-
-        DDLExecutor executor = new DDLExecutor(dataSource);
-
-        executor.evaluateBatch(sql);
+        platform.alterTables(targetModel, true, alterDb, false);
     }
-    finally
+    else
     {
-        if (connection != null)
-        {
-            connection.close();
-        }
+        platform.createTables(targetModel, true, false);
     }
 }]]></source>
     </section>
@@ -198,33 +152,27 @@ public void changeDatabase(DataSource dataSource,
         which can be inserted by DdlUtils into the database:
       </p>
       <source><![CDATA[
-import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.builder.SqlBuilderFactory;
-import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.model.Database;
 
 ...
 
 public void insertData(DataSource dataSource,
-                       String     databaseName,
-                       Database   database) throws IllegalAccessException,
-                                                   InstantiationException,
-                                                   SQLException
+                       Database   database)
 {
-    SqlBuilder builder = SqlBuilderFactory.newSqlBuilder(databaseName);
-    DynaSql    dynaSql = new DynaSql(builder, dataSource, database);
-
+    Platform platform = PlatformFactory.createNewPlatformInstance(dataSource);
+    
     // "author" is a table of the model
-    DynaBean author = dynaSql.newInstance("author");
-
+    DynaBean author = database.createDynaBeanFor("author", false);
+    
     // "name" and "whatever" are columns of table "author"
     author.set("name",     "James");
     author.set("whatever", new Integer(1234));
-
-    dynaSql.insert(author);
+    
+    platform.insert(database, author);
 }]]></source>
     </section>
     <section>
@@ -240,38 +188,28 @@ public void insertData(DataSource dataSource,
         to stdout:
       </p>
       <source><![CDATA[
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import javax.sql.DataSource;
-
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.ddlutils.builder.SqlBuilder;
-import org.apache.ddlutils.builder.SqlBuilderFactory;
-import org.apache.ddlutils.dynabean.DynaSql;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.model.Database;
 
 ...
 
 public void dumpBooks(DataSource dataSource,
-                      String   databaseName,
-                      Database database) throws IllegalAccessException,
-                                                InstantiationException,
-                                                SQLException
+                      Database database)
 {
-    SqlBuilder builder = SqlBuilderFactory.newSqlBuilder(databaseName);
-    DynaSql    dynaSql = new DynaSql(builder, dataSource, database);
-    ArrayList  params  = new ArrayList();
-
+    Platform  platform = PlatformFactory.createNewPlatformInstance(dataSource);
+    ArrayList params   = new ArrayList();
+    
     params.add("Some title");
 
-    Iterator iter = dynaSql.query("select * from book where title = ?", params);
-
-    while (iter.hasNext())
+    for (Iterator it = platform.query(database, "select * from book where title = ?", params); it.hasNext();)
     {
-        DynaBean book = (DynaBean)iter.next();
-
+        DynaBean book = (DynaBean)it.next();
+        
         System.out.println(book.get("title"));
     }
 }]]></source>

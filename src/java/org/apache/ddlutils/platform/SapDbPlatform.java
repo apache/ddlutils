@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2002,2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.apache.ddlutils.builder.SapDbBuilder;
 /**
  * The SapDB platform implementation.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class SapDbPlatform extends PlatformImplBase
 {
-    /** Database name of this platform */
+    /** Database name of this platform. */
     public static final String DATABASENAME     = "SapDB";
-    /** The standard SapDB/MaxDB jdbc driver */
+    /** The standard SapDB/MaxDB jdbc driver. */
     public static final String JDBC_DRIVER      = "com.sap.dbtech.jdbc.DriverSapDB";
-    /** The subprotocol used by the standard SapDB/MaxDB driver */
+    /** The subprotocol used by the standard SapDB/MaxDB driver. */
     public static final String JDBC_SUBPROTOCOL = "sapdb";
 
     /**
@@ -79,8 +79,8 @@ public class SapDbPlatform extends PlatformImplBase
         setSqlBuilder(new SapDbBuilder(info));
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.Platform#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {

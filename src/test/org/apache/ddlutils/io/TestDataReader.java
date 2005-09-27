@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,12 @@ import org.apache.ddlutils.model.Database;
 /**
  * Tests the {@link org.apache.ddlutils.io.DataReader} class.
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class TestDataReader extends TestCase
 {
+    /** The tested XML database schema. */
     private static final String TEST_SCHEMA = 
         "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
         "<database name=\"bookstore\">\n"+
@@ -55,6 +56,7 @@ public class TestDataReader extends TestCase
         "  </table>\n"+
         "</database>";
 
+    /** The test data. */
     private static final String TEST_DATA =
         "<data>\n"+
         "  <author author_id=\"1\" name=\"Ernest Hemingway\"/>\n"+
@@ -76,9 +78,12 @@ public class TestDataReader extends TestCase
         "  </book>\n"+
         "</data>";
 
+    /**
+     * Tests reading the data from XML.
+     */
     public void testRead() throws Exception
     {
-        DatabaseIO  modelReader = new DatabaseIO();
+        DatabaseIO      modelReader = new DatabaseIO();
         Database        model       = modelReader.read(new StringReader(TEST_SCHEMA));
         final ArrayList readObjects = new ArrayList();
         DataReader      dataReader  = new DataReader();

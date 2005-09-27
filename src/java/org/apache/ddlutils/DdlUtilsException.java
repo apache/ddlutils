@@ -1,7 +1,7 @@
 package org.apache.ddlutils;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ package org.apache.ddlutils;
 import org.apache.commons.lang.exception.NestableRuntimeException;
 
 /**
- * Base class for DdlUtils exceptions
+ * Base class for DdlUtils exceptions.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class DdlUtilsException extends NestableRuntimeException 
 {
-    /** Constant for serializing instances of this class */
+    /** Constant for serializing instances of this class. */
     private static final long serialVersionUID = 5624776387174310551L;
 
     /**

@@ -1,7 +1,7 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,23 +25,24 @@ import org.xml.sax.Attributes;
 /**
  * A digester rule for setting a bean property that corresponds to a column. 
  * 
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
- * @version $Revision:$
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class SetColumnPropertyRule extends Rule
 {
-    /** The column that this rule shall set */
+    /** The column that this rule shall set. */
     private Column _column;
-    /** The converter for generating the property value from a string */
+    /** The converter for generating the property value from a string. */
     private SqlTypeConverter _converter;
-    /** Whether to be case sensitive or not when comparing the attribute name */
+    /** Whether to be case sensitive or not when comparing the attribute name. */
     private boolean _caseSensitive;
 
     /**
      * Creates a new creation rule that sets the property corresponding to the given column.
      * 
-     * @param column    The column that this rule shall set
-     * @param converter The converter to be used for this column
+     * @param column          The column that this rule shall set
+     * @param converter       The converter to be used for this column
+     * @param beCaseSensitive Whether the rule shall compare the attribute names case sensitively
      */
     public SetColumnPropertyRule(Column column, SqlTypeConverter converter, boolean beCaseSensitive)
     {
@@ -50,8 +51,8 @@ public class SetColumnPropertyRule extends Rule
         _caseSensitive = beCaseSensitive;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.digester.Rule#begin(org.xml.sax.Attributes)
+    /**
+     * {@inheritDoc}
      */
     public void begin(Attributes attributes) throws Exception
     {

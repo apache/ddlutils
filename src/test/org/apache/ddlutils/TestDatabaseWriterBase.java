@@ -1,7 +1,7 @@
 package org.apache.ddlutils;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,21 +33,24 @@ import org.apache.ddlutils.model.Database;
 
 /**
  * Base class for database writer tests.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public abstract class TestDatabaseWriterBase extends TestPlatformBase
 {
-    /** The name of the property that specifies properties file with the settings for the connection to test against */
+    /** The name of the property that specifies properties file with the settings for the connection to test against. */
     public static final String JDBC_PROPERTIES_PROPERTY = "jdbc.properties.file";
-    /** The prefix for properties of the datasource */
+    /** The prefix for properties of the datasource. */
     public static final String DATASOURCE_PROPERTY_PREFIX = "datasource.";
-    /** The property for specifying the platform */
+    /** The property for specifying the platform. */
     public static final String PLATFORM_PROPERTY = "ddlutils.platform";
 
-    /** The data source to test against */
+    /** The data source to test against. */
     private DataSource _dataSource;
-    /** The database name */
+    /** The database name. */
     private String _databaseName;
-    /** The database model */
+    /** The database model. */
     private Database _model;
 
     /**
@@ -115,8 +118,8 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         return _dataSource;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.TestBuilderBase#getDatabaseName()
+    /**
+     * {@inheritDoc}
      */
     protected String getDatabaseName()
     {
@@ -133,9 +136,8 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         return _model;
     }
 
-    
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.TestPlatformBase#setUp()
+    /**
+     * {@inheritDoc}
      */
     protected void setUp() throws Exception
     {
@@ -143,8 +145,8 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         getPlatform().setDataSource(getDataSource());
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.TestBuilderBase#tearDown()
+    /**
+     * {@inheritDoc}
      */
     protected void tearDown() throws Exception
     {
@@ -157,10 +159,9 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
 
     /**
-     * Creates a new database from the given XML database schema.
+     * Creates a new database model from the given XML database schema.
      * 
      * @param schemaXml The XML database schema
-     * @return The database model
      */
     protected void createDatabase(String schemaXml) throws DynaSqlException
     {

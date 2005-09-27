@@ -12,8 +12,8 @@
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=org.postgresql.Driver
 datasource.url=jdbc:postgresql://localhost/ddlutils
-#datasource.username=
-#datasource.password=
+datasource.username=postgres
+datasource.password=root123
 
 #
 # PostgreSQL comes with its own DataSource implementations which can be configured like this:

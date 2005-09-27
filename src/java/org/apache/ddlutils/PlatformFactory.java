@@ -1,7 +1,7 @@
 package org.apache.ddlutils;
 
 /*
- * Copyright 1999-2002,2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,13 @@ import org.apache.ddlutils.platform.SybasePlatform;
  * insensitive database name. Note that this is a convenience class as the platforms
  * can also simply be created via their constructors.
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision: 209952 $
  */
 public class PlatformFactory
 {
-    /** The database name -> platform map */
+    /** The database name -> platform map. */
     private static Map _platforms = null;
 
     /**
@@ -104,14 +104,18 @@ public class PlatformFactory
     /**
      * Creates a new platform for the specified database. This is a shortcut method that uses
      * {@link PlatformUtils#determineDatabaseType(DataSource)} to determine the parameter
-     * for {@link #createNewPlatformInstance(String)}.
+     * for {@link #createNewPlatformInstance(String)}. Note that this method sets the data source
+     * at the returned platform instance (method {@link Platform#setDataSource(DataSource)}).
      * 
      * @param dataSource The data source for the database
      * @return The platform or <code>null</code> if the database is not supported
      */
     public static synchronized Platform createNewPlatformInstance(DataSource dataSource) throws DdlUtilsException
     {
-        return createNewPlatformInstance(new PlatformUtils().determineDatabaseType(dataSource));
+        Platform platform = createNewPlatformInstance(new PlatformUtils().determineDatabaseType(dataSource));
+
+        platform.setDataSource(dataSource);
+        return platform;
     }
 
     /**

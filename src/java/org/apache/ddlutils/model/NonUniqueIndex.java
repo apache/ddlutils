@@ -1,7 +1,7 @@
 package org.apache.ddlutils.model;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,68 +20,70 @@ import java.util.ArrayList;
 
 /**
  * Represents an index definition for a table.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class NonUniqueIndex implements Index
 {
-    /** Unique ID for serialization purposes */
+    /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -3591499395114850301L;
 
-    /** The name of the index */
+    /** The name of the index. */
     protected String    _name;
-    /** The columns making up the index */
+    /** The columns making up the index. */
     protected ArrayList _columns = new ArrayList();
 
-    
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#isUnique()
+    /**
+     * {@inheritDoc}
      */
     public boolean isUnique()
     {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#getName()
+    /**
+     * {@inheritDoc}
      */
     public String getName()
     {
         return _name;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#setName(java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public void setName(String name)
     {
         _name = name;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#getColumnCount()
+    /**
+     * {@inheritDoc}
      */
     public int getColumnCount()
     {
         return _columns.size();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#getColumn(int)
+    /**
+     * {@inheritDoc}
      */
     public IndexColumn getColumn(int idx)
     {
         return (IndexColumn)_columns.get(idx);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#getColumns()
+    /**
+     * {@inheritDoc}
      */
     public IndexColumn[] getColumns()
     {
         return (IndexColumn[])_columns.toArray(new IndexColumn[_columns.size()]);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#addColumn(org.apache.ddlutils.model.IndexColumn)
+    /**
+     * {@inheritDoc}
      */
     public void addColumn(IndexColumn column)
     {
@@ -91,8 +93,8 @@ public class NonUniqueIndex implements Index
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#addColumn(int, org.apache.ddlutils.model.IndexColumn)
+    /**
+     * {@inheritDoc}
      */
     public void addColumn(int idx, IndexColumn column)
     {
@@ -102,30 +104,30 @@ public class NonUniqueIndex implements Index
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#removeColumn(org.apache.ddlutils.model.IndexColumn)
+    /**
+     * {@inheritDoc}
      */
     public void removeColumn(IndexColumn column)
     {
         _columns.remove(column);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.model.Index#removeColumn(int)
+    /**
+     * {@inheritDoc}
      */
     public void removeColumn(int idx)
     {
         _columns.remove(idx);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
     {
         NonUniqueIndex result = new NonUniqueIndex();
 
-        result._name     = _name;
+        result._name    = _name;
         result._columns = (ArrayList)_columns.clone();
         return result;
     }

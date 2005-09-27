@@ -1,7 +1,7 @@
 package org.apache.ddlutils.dynabean;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ import org.apache.ddlutils.model.Column;
  * for the property such as whether the property is a primary key column, 
  * an autoIncrement column and the SQL type etc.
  *
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class SqlDynaProperty extends DynaProperty
 {
-    /** Unique ID for serializaion purposes */
+    /** Unique ID for serializaion purposes. */
     private static final long serialVersionUID = -4491018827449106588L;
 
-    /** The column for which this dyna property is defined */
+    /** The column for which this dyna property is defined. */
     private Column _column;    
 
     /**

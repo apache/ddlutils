@@ -1,5 +1,21 @@
 package org.apache.ddlutils;
 
+/*
+ * Copyright 1999-2005 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.HashMap;
@@ -10,68 +26,71 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Conatains information about the database platform such as supported features and native type mappings.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
  */
 public class PlatformInfo
 {
     /** The Log to which logging calls will be made. */
     private final Log _log = LogFactory.getLog(PlatformInfo.class);
 
-    /** Whether the database requires the explicit stating of NULL as the default value */
+    /** Whether the database requires the explicit stating of NULL as the default value. */
     private boolean _requiringNullAsDefaultValue = false;
 
-    /** Whether primary key constraints are embedded inside the create table statement */
+    /** Whether primary key constraints are embedded inside the create table statement. */
     private boolean _primaryKeyEmbedded = true;
     
-    /** Whether foreign key constraints are embedded inside the create table statement */
+    /** Whether foreign key constraints are embedded inside the create table statement. */
     private boolean _foreignKeysEmbedded = false;
 
-    /** Whether indices are embedded inside the create table statement */
+    /** Whether indices are embedded inside the create table statement. */
     private boolean _indicesEmbedded = false;
 
-    /** Whether embedded foreign key constraints are explicitly named */
+    /** Whether embedded foreign key constraints are explicitly named. */
     private boolean _embeddedForeignKeysNamed = false;
 
-    /** Is an ALTER TABLE needed to drop indexes? */
+    /** Whether an ALTER TABLE is needed to drop indexes. */
     private boolean _useAlterTableForDrop = false;
 
     /** Specifies the maximum length that an identifier (name of a table, column, constraint etc.)
-     *  can have for this database; use -1 if there is no limit */
+        can have for this database; use -1 if there is no limit. */
     private int _maxIdentifierLength = -1;
 
-    /** Whether identifiers are case sensitive or not */
+    /** Whether identifiers are case sensitive or not. */
     private boolean _caseSensitive = false;
 
-    /** Whether delimited identifiers are used or not */
+    /** Whether delimited identifiers are used or not. */
     private boolean _useDelimitedIdentifiers = true;
 
     /** The string used for delimiting SQL identifiers, eg. table names, column names etc. */
     private String _delimiterToken = "\"";
 
-    /** The string used for escaping values when generating textual SQL statements */
+    /** The string used for escaping values when generating textual SQL statements. */
     private String _valueQuoteToken = "'";
 
-    /** Whether comments are supported */
+    /** Whether comments are supported. */
     private boolean _commentsSupported = true;
 
-    /** The string that starts a comment */
+    /** The string that starts a comment. */
     private String _commentPrefix = "--";
 
-    /** The string that ends a comment */
+    /** The string that ends a comment. */
     private String _commentSuffix = "";
 
-    /** The text separating individual sql commands */
+    /** The text separating individual sql commands. */
     private String _sqlCommandDelimiter = ";";
 
-    /** Contains non-default mappings from jdbc to native types */
+    /** Contains non-default mappings from jdbc to native types. */
     private HashMap _nativeTypes = new HashMap();
 
-    /** Contains those JDBC types whose corresponding native types have a null value as the default value */
+    /** Contains those JDBC types whose corresponding native types have a null value as the default value. */
     private HashSet _typesWithNullDefault = new HashSet();
 
-    /** Contains those JDBC types whose corresponding native types are types that have a size on this platform */
+    /** Contains those JDBC types whose corresponding native types are types that have a size on this platform. */
     private HashSet _typesWithSize = new HashSet();
 
-    /** Contains those JDBC types whose corresponding native types are types that have precision and scale on this platform */
+    /** Contains those JDBC types whose corresponding native types are types that have precision and scale on this platform. */
     private HashSet _typesWithPrecisionAndScale = new HashSet();
 
     /**

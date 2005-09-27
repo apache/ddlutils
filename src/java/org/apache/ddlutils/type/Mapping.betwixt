@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-
-<info>
-  <element name="mapping">
-    <attribute name="name" property="name" />
-    <attribute name="SQLName" property="SQLName" />
-    <attribute name="format" property="format" />
-  </element>
-</info>

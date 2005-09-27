@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,19 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.Task;
 
+/**
+ * Base class for DdlUtils Ant tasks that operate on a database.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: 289996 $
+ */
 public abstract class DatabaseTaskBase extends Task
 {
-    /** The type of the database */
+    /** The type of the database. */
     private String _databaseType;
-    /** The data source to use for accessing the database */
+    /** The data source to use for accessing the database. */
     private BasicDataSource _dataSource;
-    /** The sub tasks to execute */
+    /** The sub tasks to execute. */
     private ArrayList _commands = new ArrayList();
 
     /**

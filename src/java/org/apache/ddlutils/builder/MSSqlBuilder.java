@@ -1,7 +1,7 @@
 package org.apache.ddlutils.builder;
 
 /*
- * Copyright 1999-2004 The Apache Software Foundation.
+ * Copyright 1999-2005 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.apache.ddlutils.model.Table;
 /**
  * The SQL Builder for the Microsoft SQL Server.
  * 
- * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
- * @author <a href="mailto:tomdz@apache.org">Thomas Dudziak</a>
+ * @author James Strachan
+ * @author Thomas Dudziak
  * @version $Revision$
  */
 public class MSSqlBuilder extends SqlBuilder
@@ -45,8 +45,8 @@ public class MSSqlBuilder extends SqlBuilder
         super(info);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#createTable(org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void createTable(Database database, Table table) throws IOException
     {
@@ -54,8 +54,8 @@ public class MSSqlBuilder extends SqlBuilder
         super.createTable(database, table);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#alterTable(org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Database, org.apache.ddlutils.model.Table, boolean, boolean)
+    /**
+     * {@inheritDoc}
      */
     protected void alterTable(Database currentModel, Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
     {
@@ -63,8 +63,8 @@ public class MSSqlBuilder extends SqlBuilder
         super.alterTable(currentModel, currentTable, desiredModel, desiredTable, doDrops, modifyColumns);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropTable(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void dropTable(Table table) throws IOException
     {
@@ -102,8 +102,8 @@ public class MSSqlBuilder extends SqlBuilder
         printEndOfStatement();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropExternalForeignKeys(org.apache.ddlutils.model.Table)
+    /**
+     * {@inheritDoc}
      */
     public void dropExternalForeignKeys(Table table) throws IOException
     {
@@ -111,16 +111,16 @@ public class MSSqlBuilder extends SqlBuilder
         super.dropExternalForeignKeys(table);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAutoIncrementStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column)
+    /**
+     * {@inheritDoc}
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
         print("IDENTITY (1,1) ");
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#shouldGeneratePrimaryKeys(org.apache.ddlutils.model.Column[])
+    /**
+     * {@inheritDoc}
      */
     protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
     {
@@ -131,8 +131,8 @@ public class MSSqlBuilder extends SqlBuilder
         return primaryKeyColumns.length > 0;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeExternalIndexDropStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Index)
+    /**
+     * {@inheritDoc}
      */
     public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
     {
@@ -143,8 +143,8 @@ public class MSSqlBuilder extends SqlBuilder
         printEndOfStatement();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#writeColumnAlterStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.Column, boolean)
+    /**
+     * {@inheritDoc}
      */
     public void writeColumnAlterStmt(Table table, Column column, boolean isNewColumn) throws IOException
     {
@@ -154,16 +154,16 @@ public class MSSqlBuilder extends SqlBuilder
         printEndOfStatement();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#dropExternalForeignKey(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey, int)
+    /**
+     * {@inheritDoc}
      */
-    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey, int numKey) throws IOException
+    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
     {
-        String constraintName = getConstraintName(null, table, "FK", Integer.toString(numKey));
+        String constraintName = foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName();
 
-        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type ='RI' AND name=");
+        print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = ");
         printIdentifier(constraintName);
-        println();
+        println(")");
         printIndent();
         print("ALTER TABLE ");
         printIdentifier(getTableName(table));
@@ -184,24 +184,24 @@ public class MSSqlBuilder extends SqlBuilder
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getDeleteSql(org.apache.ddlutils.model.Table, java.util.HashMap, boolean)
+    /**
+     * {@inheritDoc}
      */
     public String getDeleteSql(Table table, HashMap pkValues, boolean genPlaceholders)
     {
         return getQuotationOnStatement() + super.getDeleteSql(table, pkValues, genPlaceholders);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getInsertSql(org.apache.ddlutils.model.Table, java.util.HashMap, boolean)
+    /**
+     * {@inheritDoc}
      */
     public String getInsertSql(Table table, HashMap columnValues, boolean genPlaceholders)
     {
         return getQuotationOnStatement() + super.getInsertSql(table, columnValues, genPlaceholders);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.ddlutils.builder.SqlBuilder#getUpdateSql(org.apache.ddlutils.model.Table, java.util.HashMap, boolean)
+    /**
+     * {@inheritDoc}
      */
     public String getUpdateSql(Table table, HashMap columnValues, boolean genPlaceholders)
     {
@@ -209,7 +209,9 @@ public class MSSqlBuilder extends SqlBuilder
     }
 
     /**
-     * Writes the statement that turns on the ability to write delimited identifiers.
+     * Returns the statement that turns on the ability to write delimited identifiers.
+     * 
+     * @return The quotation-on statement
      */
     private String getQuotationOnStatement()
     {
