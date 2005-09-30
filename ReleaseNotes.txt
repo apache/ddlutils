@@ -3,4 +3,10 @@ Changes since the migration from commons-sql to DdlUtils:
 * Replaced 'commons-sql' with 'DdlUtils' in the doc and the build file
 * Package names have been changed from org.apache.commons.sql to org.apache.ddlutils
 * New mailing lists ddlutils-user@db.apache.org and ddlutils-dev@db.apache.org
-* Documentation is now in Forrest format (http://forrest.apache.org)
+* Documentation is now in Forrest format (http://forrest.apache.org) using Forrest 0.7
+* JIRA for the project has been created at http://issues.apache.org/jira/secure/BrowseProject.jspa?id=10731
+* Ant tasks have been revamped to be more user-friendly
+* DdlUtils now can import data from XML files into the database
+* Large scale restructuring of the SqlBuilder part into a platform and a sql builer part
+* Simplification of the public API (eg. see the "Api Usage" documentation part)
+* Update and fix of the Javadoc

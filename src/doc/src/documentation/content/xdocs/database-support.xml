@@ -610,7 +610,8 @@
       <p>
         The DdlUtils support for <a href="ext:db2">IBM DB2</a> is based upon version <strong>7</strong>.
         The datatypes and SQL elements in DB2 are described in the
-        <a href="ext:db2/manual">DB2 SQL Reference V7</a>.
+        <a href="ext:db2/manual">DB2 SQL Reference V7</a>. Some specifics related to the JDBC driver and
+        suggested typemappings can also be found <a href="ext:db2/jdbc-mappings">here</a>.
       </p>
       <table>
         <tr>
@@ -669,7 +670,7 @@
         </tr>
         <tr>
           <td>BIT</td>
-          <td>CHAR FOR BIT DATA</td>
+          <td>SMALLINT</td>
           <td>DB2 has no native boolean type</td>
         </tr>
         <tr>
@@ -679,7 +680,7 @@
         </tr>
         <tr>
           <td>BOOLEAN</td>
-          <td>CHAR FOR BIT DATA</td>
+          <td>SMALLINT</td>
           <td>DB2 has no native boolean type</td>
         </tr>
         <tr>
@@ -719,7 +720,7 @@
         </tr>
         <tr>
           <td>FLOAT</td>
-          <td>FLOAT</td>
+          <td>REAL</td>
           <td></td>
         </tr>
         <tr>

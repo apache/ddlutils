@@ -53,12 +53,12 @@ See http://forrest.apache.org/docs/linking.html for more info
     <api-usage label="Using the API" href="api-usage.html" description="How to use DdlUtils in your code"/>
     <javadoc label="Javadoc" href="ext:ddlutils/javadoc" description="The API documentation"/>
   </documentation>
-
+<!-- 
   <all label="Whole site">
     <all_site label="Full HTML" href="wholesite.html"/>
     <all_sitePDF label="Full PDF" href="wholesite.pdf"/>
   </all>
-
+-->
   <external-refs>
     <ddlutils>
       <jira href="http://issues.apache.org/jira/secure/BrowseProject.jspa?id=10731"/>
@@ -96,6 +96,7 @@ See http://forrest.apache.org/docs/linking.html for more info
     </cloudscape>
     <db2 href="http://www-130.ibm.com/developerworks/db2/">
       <manual href="ftp://ftp.software.ibm.com/ps/products/db2/info/vr7/pdf/letter/db2s0e70.pdf"/>
+      <jdbc-mappings href="http://publib.boulder.ibm.com/infocenter/db2help/topic/com.ibm.db2.udb.doc/ad/rjvjdata.htm#jvregou"/>
     </db2>
     <derby href="http://incubator.apache.org/derby/">
       <manual href="manuals/reference/sqlj02.html#Reference+Manual"/>

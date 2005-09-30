@@ -47,9 +47,9 @@ public class TestDB2Platform extends TestPlatformBase
             "    \"COL_ARRAY\"         BLOB,\n"+
             "    \"COL_BIGINT\"        BIGINT,\n"+
             "    \"COL_BINARY\"        CHAR(254) FOR BIT DATA,\n"+
-            "    \"COL_BIT\"           CHAR FOR BIT DATA,\n"+
+            "    \"COL_BIT\"           SMALLINT,\n"+
             "    \"COL_BLOB\"          BLOB,\n"+
-            "    \"COL_BOOLEAN\"       CHAR FOR BIT DATA,\n"+
+            "    \"COL_BOOLEAN\"       SMALLINT,\n"+
             "    \"COL_CHAR\"          CHAR(15),\n"+
             "    \"COL_CLOB\"          CLOB,\n"+
             "    \"COL_DATALINK\"      DATALINK,\n"+
@@ -58,7 +58,7 @@ public class TestDB2Platform extends TestPlatformBase
             "    \"COL_DECIM_NOSCALE\" DECIMAL(15,0),\n"+       // only 18 characters allowed for identifiers
             "    \"COL_DISTINCT\"      DISTINCT,\n"+
             "    \"COL_DOUBLE\"        DOUBLE,\n"+
-            "    \"COL_FLOAT\"         FLOAT,\n"+
+            "    \"COL_FLOAT\"         REAL,\n"+
             "    \"COL_INTEGER\"       INTEGER,\n"+
             "    \"COL_JAVA_OBJECT\"   BLOB,\n"+
             "    \"COL_LONGVARBINARY\" LONG VARCHAR FOR BIT DATA,\n"+

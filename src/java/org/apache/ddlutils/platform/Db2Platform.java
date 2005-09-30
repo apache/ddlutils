@@ -59,7 +59,8 @@ public class Db2Platform extends PlatformImplBase
         // the BINARY types are also handled by Db2Builder.getSqlType(Column)
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
         info.addNativeTypeMapping(Types.BINARY,        "CHAR");
-        info.addNativeTypeMapping(Types.BIT,           "CHAR FOR BIT DATA");
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT");
+        info.addNativeTypeMapping(Types.FLOAT,         "REAL");
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
@@ -68,7 +69,7 @@ public class Db2Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
-        info.addNativeTypeMapping("BOOLEAN", "CHAR FOR BIT DATA");
+        info.addNativeTypeMapping("BOOLEAN", "SMALLINT");
 
         setSqlBuilder(new Db2Builder(info));
     }
