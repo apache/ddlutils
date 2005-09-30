@@ -72,7 +72,7 @@ public class MSSqlBuilder extends SqlBuilder
 
         writeQuotationOnStatement();
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = ");
-        printIdentifier(tableName);
+        printAlwaysQuotedIdentifier(tableName);
         println(")");
         println("BEGIN");
         println("     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)");
@@ -86,7 +86,7 @@ public class MSSqlBuilder extends SqlBuilder
         println("         and cons.id = ref.constid");
         println("         and reftables.id = ref.fkeyid");
         print("         and tables.name = ");
-        printlnIdentifier(tableName);
+        printAlwaysQuotedIdentifier(tableName);
         println("     OPEN refcursor");
         println("     FETCH NEXT from refcursor into @reftable, @constraintname");
         println("     while @@FETCH_STATUS = 0");
@@ -162,7 +162,7 @@ public class MSSqlBuilder extends SqlBuilder
         String constraintName = foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName();
 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = ");
-        printIdentifier(constraintName);
+        printAlwaysQuotedIdentifier(constraintName);
         println(")");
         printIndent();
         print("ALTER TABLE ");
@@ -222,6 +222,26 @@ public class MSSqlBuilder extends SqlBuilder
         else
         {
             return "";
+        }
+    }
+
+    /**
+     * Prints the given identifier with enforced quotes. If delimited identifiers are
+     * turned on, this will use the normal {@link SqlBuilder#printIdentifier(String)}
+     * method. If not, single quotation marks are used around the identifier.
+     * 
+     * @param identifier The identifier
+     */
+    private void printAlwaysQuotedIdentifier(String identifier) throws IOException
+    {
+        if (!getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            print("'");
+        }
+        printIdentifier(identifier);
+        if (!getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            print("'");
         }
     }
 }

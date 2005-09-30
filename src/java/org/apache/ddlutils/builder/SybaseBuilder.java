@@ -68,7 +68,7 @@ public class SybaseBuilder extends SqlBuilder
     {
         writeQuotationOnStatement();
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = ");
-        printIdentifier(getTableName(table));
+        printAlwaysQuotedIdentifier(getTableName(table));
         println(")");
         println("BEGIN");
         printIndent();
@@ -86,7 +86,7 @@ public class SybaseBuilder extends SqlBuilder
         String constraintName = foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName();
 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = ");
-        printIdentifier(constraintName);
+        printAlwaysQuotedIdentifier(constraintName);
         println(")");
         printIndent();
         print("ALTER TABLE ");
@@ -155,6 +155,26 @@ public class SybaseBuilder extends SqlBuilder
         else
         {
             return "";
+        }
+    }
+
+    /**
+     * Prints the given identifier with enforced quotes. If delimited identifiers are
+     * turned on, this will use the normal {@link SqlBuilder#printIdentifier(String)}
+     * method. If not, single quotation marks are used around the identifier.
+     * 
+     * @param identifier The identifier
+     */
+    private void printAlwaysQuotedIdentifier(String identifier) throws IOException
+    {
+        if (!getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            print("'");
+        }
+        printIdentifier(identifier);
+        if (!getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            print("'");
         }
     }
 }
