@@ -134,7 +134,7 @@ public class DataWriter
     {
         while (beans.hasNext())
         {
-            write((SqlDynaBean)beans);
+            write((SqlDynaBean)beans.next());
         }
     }
 
