@@ -43,7 +43,7 @@ public class TestSybasePlatform extends TestPlatformBase
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = \"coltype\")\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'coltype')\n"+
             "BEGIN\n"+
             "    DROP TABLE \"coltype\"\n"+
             "END;\n"+
@@ -94,7 +94,7 @@ public class TestSybasePlatform extends TestPlatformBase
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = \"constraints\")\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'constraints')\n"+
             "BEGIN\n"+
             "    DROP TABLE \"constraints\"\n"+
             "END;\n"+
@@ -119,24 +119,24 @@ public class TestSybasePlatform extends TestPlatformBase
     {
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = \"testfk\")\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = 'testfk')\n"+
             "    ALTER TABLE \"table3\" DROP CONSTRAINT \"testfk\";\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = \"table2_FK_COL_F_OL_FK_2_table1\")\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = 'table2_FK_COL_F_OL_FK_2_table1')\n"+
             "    ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_F_OL_FK_2_table1\";\n"+
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = \"table3\")\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table3')\n"+
             "BEGIN\n"+
             "    DROP TABLE \"table3\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = \"table2\")\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table2')\n"+
             "BEGIN\n"+
             "    DROP TABLE \"table2\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = \"table1\")\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table1')\n"+
             "BEGIN\n"+
             "    DROP TABLE \"table1\"\n"+
             "END;\n"+

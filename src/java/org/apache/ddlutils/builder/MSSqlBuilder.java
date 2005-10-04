@@ -72,7 +72,7 @@ public class MSSqlBuilder extends SqlBuilder
 
         writeQuotationOnStatement();
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = ");
-        printAlwaysQuotedIdentifier(tableName);
+        printAlwaysSingleQuotedIdentifier(tableName);
         println(")");
         println("BEGIN");
         println("     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)");
@@ -86,7 +86,7 @@ public class MSSqlBuilder extends SqlBuilder
         println("         and cons.id = ref.constid");
         println("         and reftables.id = ref.fkeyid");
         print("         and tables.name = ");
-        printAlwaysQuotedIdentifier(tableName);
+        printAlwaysSingleQuotedIdentifier(tableName);
         println("     OPEN refcursor");
         println("     FETCH NEXT from refcursor into @reftable, @constraintname");
         println("     while @@FETCH_STATUS = 0");
@@ -162,7 +162,7 @@ public class MSSqlBuilder extends SqlBuilder
         String constraintName = foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName();
 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = ");
-        printAlwaysQuotedIdentifier(constraintName);
+        printAlwaysSingleQuotedIdentifier(constraintName);
         println(")");
         printIndent();
         print("ALTER TABLE ");
@@ -226,22 +226,15 @@ public class MSSqlBuilder extends SqlBuilder
     }
 
     /**
-     * Prints the given identifier with enforced quotes. If delimited identifiers are
-     * turned on, this will use the normal {@link SqlBuilder#printIdentifier(String)}
-     * method. If not, single quotation marks are used around the identifier.
+     * Prints the given identifier with enforced single quotes around it regardless of whether 
+     * delimited identifiers are turned on or not.
      * 
      * @param identifier The identifier
      */
-    private void printAlwaysQuotedIdentifier(String identifier) throws IOException
+    private void printAlwaysSingleQuotedIdentifier(String identifier) throws IOException
     {
-        if (!getPlatformInfo().isUseDelimitedIdentifiers())
-        {
-            print("'");
-        }
-        printIdentifier(identifier);
-        if (!getPlatformInfo().isUseDelimitedIdentifiers())
-        {
-            print("'");
-        }
+        print("'");
+        print(identifier);
+        print("'");
     }
 }
