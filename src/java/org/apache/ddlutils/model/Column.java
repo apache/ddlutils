@@ -46,13 +46,11 @@ public class Column implements Cloneable, Serializable
     /** The name of the JDBC type. */
     private String _type;
     /** The size of the column for JDBC types that require/support this. */
-    private String _size;
+    private String _size = "0";
+    /** The size of the column for JDBC types that require/support this. */
+    private int _sizeAsInt = 0;
     /** The scale of the column for JDBC types that require/support this. */
     private int _scale = 0;
-    /** The precision radix of the column for JDBC types that require/support this. */
-    private int _precisionRadix = 10;
-    /** The ordinal position of the column for JDBC types that require/support this. */
-    private int _ordinalPosition = 0;
     /** The default value. */
     private String _defaultValue;
 
@@ -296,7 +294,7 @@ public class Column implements Cloneable, Serializable
      */
     public int getSizeAsInt()
     {
-        return _size == null ? 0 : Integer.parseInt(_size);
+        return _sizeAsInt;
     }
 
     /**
@@ -310,16 +308,18 @@ public class Column implements Cloneable, Serializable
         if (size != null)
         {
             int pos = size.indexOf(",");
-    
+
             if (pos < 0)
             {
-                _size = size;
+                _size  = size;
+                _scale = 0;
             }
             else
             {
                 _size  = size.substring(0, pos);
                 _scale = Integer.parseInt(size.substring(pos + 1));
             }
+            _sizeAsInt = Integer.parseInt(_size);
         }
     }
     
@@ -330,7 +330,7 @@ public class Column implements Cloneable, Serializable
      */
     public int getScale()
     {
-        return this._scale;
+        return _scale;
     }
 
     /**
@@ -350,7 +350,7 @@ public class Column implements Cloneable, Serializable
      */
     public int getPrecisionRadix()
     {
-        return this._precisionRadix;
+        return _sizeAsInt;
     }
 
     /**
@@ -360,27 +360,8 @@ public class Column implements Cloneable, Serializable
      */
     public void setPrecisionRadix(int precisionRadix)
     {
-        _precisionRadix = precisionRadix;
-    }
-
-    /**
-     * Returns the ordinal position of the column.
-     * 
-     * @return The ordinal position
-     */
-    public int getOrdinalPosition()
-    {
-        return this._ordinalPosition;
-    }
-
-    /**
-     * Sets the ordinal position of the column.
-     * 
-     * @param ordinalPosition The ordinal position
-     */
-    public void setOrdinalPosition(int ordinalPosition)
-    {
-        _ordinalPosition = ordinalPosition;
+        _sizeAsInt = precisionRadix;
+        _size      = String.valueOf(precisionRadix);
     }
 
     /**
@@ -422,8 +403,8 @@ public class Column implements Cloneable, Serializable
         result._size            = _size;
         result._defaultValue    = _defaultValue;
         result._scale           = _scale;
-        result._precisionRadix  = _precisionRadix;
-        result._ordinalPosition = _ordinalPosition;
+        result._size            = _size;
+        result._sizeAsInt       = _sizeAsInt;
         return result;
     }
 
@@ -470,12 +451,10 @@ public class Column implements Cloneable, Serializable
         result.append(isAutoIncrement());
         result.append("; defaultValue=");
         result.append(getDefaultValue());
-        result.append("; scale=");
-        result.append(getScale());
         result.append("; precisionRadix=");
         result.append(getPrecisionRadix());
-        result.append("; ordinalPosition=");
-        result.append(getOrdinalPosition());
+        result.append("; scale=");
+        result.append(getScale());
         result.append("]");
 
         return result.toString();
