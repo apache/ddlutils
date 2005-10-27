@@ -46,9 +46,9 @@ public class Column implements Cloneable, Serializable
     /** The name of the JDBC type. */
     private String _type;
     /** The size of the column for JDBC types that require/support this. */
-    private String _size = "0";
+    private String _size;
     /** The size of the column for JDBC types that require/support this. */
-    private int _sizeAsInt = 0;
+    private Integer _sizeAsInt;
     /** The scale of the column for JDBC types that require/support this. */
     private int _scale = 0;
     /** The default value. */
@@ -294,7 +294,7 @@ public class Column implements Cloneable, Serializable
      */
     public int getSizeAsInt()
     {
-        return _sizeAsInt;
+        return _sizeAsInt == null ? 0 : _sizeAsInt.intValue();
     }
 
     /**
@@ -319,7 +319,13 @@ public class Column implements Cloneable, Serializable
                 _size  = size.substring(0, pos);
                 _scale = Integer.parseInt(size.substring(pos + 1));
             }
-            _sizeAsInt = Integer.parseInt(_size);
+            _sizeAsInt = new Integer(_size);
+        }
+        else
+        {
+            _size      = null;
+            _sizeAsInt = null;
+            _scale     = 0;
         }
     }
     
@@ -350,7 +356,7 @@ public class Column implements Cloneable, Serializable
      */
     public int getPrecisionRadix()
     {
-        return _sizeAsInt;
+        return getSizeAsInt();
     }
 
     /**
@@ -360,7 +366,7 @@ public class Column implements Cloneable, Serializable
      */
     public void setPrecisionRadix(int precisionRadix)
     {
-        _sizeAsInt = precisionRadix;
+        _sizeAsInt = new Integer(precisionRadix);
         _size      = String.valueOf(precisionRadix);
     }
 
