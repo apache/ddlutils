@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.Task;
 
@@ -31,10 +32,8 @@ import org.apache.tools.ant.Task;
  */
 public abstract class DatabaseTaskBase extends Task
 {
-    /** The type of the database. */
-    private String _databaseType;
-    /** The data source to use for accessing the database. */
-    private BasicDataSource _dataSource;
+    /** The platform configuration. */
+    private PlatformConfiguration _platformConf = new PlatformConfiguration();
     /** The sub tasks to execute. */
     private ArrayList _commands = new ArrayList();
 
@@ -45,7 +44,7 @@ public abstract class DatabaseTaskBase extends Task
      */
     public String getDatabaseType()
     {
-        return _databaseType;
+        return _platformConf.getDatabaseType();
     }
 
     /**
@@ -55,7 +54,7 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void setDatabaseType(String type)
     {
-        _databaseType = type;
+        _platformConf.setDatabaseType(type);
     }
 
     /**
@@ -65,7 +64,7 @@ public abstract class DatabaseTaskBase extends Task
      */
     public BasicDataSource getDataSource()
     {
-        return _dataSource;
+        return _platformConf.getDataSource();
     }
 
     /**
@@ -75,7 +74,27 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void addConfiguredDatabase(BasicDataSource dataSource)
     {
-        _dataSource = dataSource;
+        _platformConf.setDataSource(dataSource);
+    }
+
+    /**
+     * Determines whether delimited SQL identifiers shall be used (the default).
+     *
+     * @return <code>true</code> if delimited SQL identifiers shall be used
+     */
+    public boolean isUseDelimitedSqlIdentifiers()
+    {
+        return _platformConf.isUseDelimitedSqlIdentifiers();
+    }
+
+    /**
+     * Specifies whether delimited SQL identifiers shall be used.
+     *
+     * @param useDelimitedSqlIdentifiers <code>true</code> if delimited SQL identifiers shall be used
+     */
+    public void setUseDelimitedSqlIdentifiers(boolean useDelimitedSqlIdentifiers)
+    {
+        _platformConf.setUseDelimitedSqlIdentifiers(useDelimitedSqlIdentifiers);
     }
 
     /**
@@ -99,6 +118,16 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
+     * Creates the platform for the configured database.
+     * 
+     * @return The platform
+     */
+    protected Platform getPlatform()
+    {
+        return _platformConf.getPlatform();
+    }
+    
+    /**
      * Executes the commands.
      * 
      * @param model The database model
@@ -111,7 +140,7 @@ public abstract class DatabaseTaskBase extends Task
 
             if (cmd instanceof DatabaseCommand)
             {
-                ((DatabaseCommand)cmd).setDatabaseInfo(getDataSource(), getDatabaseType());
+                ((DatabaseCommand)cmd).setPlatformConfiguration(_platformConf);
             }
             cmd.execute(this, model);
         }

@@ -62,6 +62,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
     /** The sql builder for this platform. */
     private SqlBuilder _builder;
+    /** The model reader for this platform. */
+    private JdbcModelReader _modelReader = new JdbcModelReader();
 
     /**
      * {@inheritDoc}
@@ -79,6 +81,24 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     protected void setSqlBuilder(SqlBuilder builder)
     {
         _builder = builder;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public JdbcModelReader getModelReader()
+    {
+        return _modelReader;
+    }
+
+    /**
+     * Sets the model reader for this platform.
+     * 
+     * @param modelReader The model reader
+     */
+    protected void setModelReader(JdbcModelReader modelReader)
+    {
+        _modelReader = modelReader;
     }
 
     /**
@@ -297,16 +317,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     public void alterTables(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         String   sql          = null;
-        Database currentModel = null;
-
-        try
-        {
-            currentModel = new JdbcModelReader(connection).getDatabase();
-        }
-        catch (SQLException ex)
-        {
-            throw new DynaSqlException("Error while reading the model from the database", ex);
-        }
+        Database currentModel = readModelFromDatabase(connection);
 
         try
         {
@@ -1036,6 +1047,54 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         finally
         {
             closeStatement(statement);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */    
+    public Database readModelFromDatabase() throws DynaSqlException
+    {
+        return readModelFromDatabase(borrowConnection());
+    }
+
+    /**
+     * {@inheritDoc}
+     */    
+    public Database readModelFromDatabase(Connection connection) throws DynaSqlException
+    {
+        try
+        {
+            return getModelReader().getDatabase(connection);
+        }
+        catch (SQLException ex)
+        {
+            throw new DynaSqlException(ex);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Database readModelFromDatabase(String catalog, String schema, String[] tableTypes) throws DynaSqlException
+    {
+        return readModelFromDatabase(borrowConnection(), catalog, schema, tableTypes);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Database readModelFromDatabase(Connection connection, String catalog, String schema, String[] tableTypes) throws DynaSqlException
+    {
+        try
+        {
+            JdbcModelReader reader = getModelReader();
+            
+            return reader.getDatabase(connection, catalog, schema, tableTypes);
+        }
+        catch (SQLException ex)
+        {
+            throw new DynaSqlException(ex);
         }
     }
 

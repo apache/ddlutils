@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
@@ -151,24 +150,7 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
 
         try
         {
-            JdbcModelReader reader = new JdbcModelReader(getDataSource().getConnection());
-
-            if ((_catalog != null) && (_catalog.length() > 0))
-            {
-                reader.setCatalog(_catalog);
-            }
-            if ((_schema != null) && (_schema.length() > 0))
-            {
-                reader.setSchema(_schema);
-            }
-
-            String[] tableTypes = getTableTypes();
-
-            if (tableTypes.length > 0)
-            {
-                reader.setTableTypes(tableTypes);
-            }
-            return reader.getDatabase();
+            return getPlatform().readModelFromDatabase(_catalog, _schema, getTableTypes());
         }
         catch (Exception ex)
         {

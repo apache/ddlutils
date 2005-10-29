@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.ddlutils.platform.SqlBuilder;
 
 /**
@@ -53,11 +54,18 @@ public interface Platform
     public PlatformInfo getPlatformInfo();
     
     /**
-     * Returns the sql builder for the this database.
+     * Returns the sql builder for the this platform.
      * 
      * @return The sql builder
      */
     public SqlBuilder getSqlBuilder();
+
+    /**
+     * Returns the model reader (which reads a database model from a live database) for this platform.
+     * 
+     * @return The model reader
+     */
+    public JdbcModelReader getModelReader();
 
     /**
      * Returns the data source that this platform uses to access the database.
@@ -466,4 +474,46 @@ public interface Platform
      * @param connection The database connection
      */
     public void delete(Database model, DynaBean dynaBean, Connection connection) throws DynaSqlException;
+
+    /**
+     * Reads the database model from the live database as specified by the data source set for
+     * this platform.
+     * 
+     * @return The database model
+     * @throws DynaSqlException If an error occurred during reading the model
+     */
+    public Database readModelFromDatabase() throws DynaSqlException;
+
+    /**
+     * Reads the database model from the live database as specified by the data source set for
+     * this platform.
+     * 
+     * @param catalog    The catalog to acess in the database; use <code>null</code> for the default value
+     * @param schema     The schema to acess in the database; use <code>null</code> for the default value
+     * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
+     * @return The database model
+     * @throws DynaSqlException If an error occurred during reading the model
+     */
+    public Database readModelFromDatabase(String catalog, String schema, String[] tableTypes) throws DynaSqlException;
+
+    /**
+     * Reads the database model from the live database to which the given connection is pointing.
+     * 
+     * @param connection The connection to the database
+     * @return The database model
+     * @throws DynaSqlException If an error occurred during reading the model
+     */
+    public Database readModelFromDatabase(Connection connection) throws DynaSqlException;
+
+    /**
+     * Reads the database model from the live database to which the given connection is pointing.
+     * 
+     * @param connection The connection to the database
+     * @param catalog    The catalog to acess in the database; use <code>null</code> for the default value
+     * @param schema     The schema to acess in the database; use <code>null</code> for the default value
+     * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
+     * @return The database model
+     * @throws DynaSqlException If an error occurred during reading the model
+     */
+    public Database readModelFromDatabase(Connection connection, String catalog, String schema, String[] tableTypes) throws DynaSqlException;
 }

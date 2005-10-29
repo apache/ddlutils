@@ -23,7 +23,6 @@ import java.sql.SQLException;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -121,9 +120,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
                 {
                     throw new BuildException("No database specified.");
                 }
-                connection = getDataSource().getConnection();
 
-                Database currentModel = new JdbcModelReader(connection).getDatabase();
+                Database currentModel = platform.readModelFromDatabase();
 
                 platform.getSqlBuilder().alterDatabase(currentModel, model, _doDrops, true);
             }

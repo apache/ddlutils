@@ -18,8 +18,6 @@ package org.apache.ddlutils.task;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.PlatformFactory;
-import org.apache.ddlutils.PlatformUtils;
 import org.apache.tools.ant.BuildException;
 
 /**
@@ -30,14 +28,10 @@ import org.apache.tools.ant.BuildException;
  */
 public abstract class DatabaseCommand implements Command
 {
-    /** The type of the database. */
-    private String _databaseType;
-    /** The data source to use for accessing the database. */
-    private BasicDataSource _dataSource;
+    /** The platform configuration. */
+    private PlatformConfiguration _platformConf = new PlatformConfiguration();
     /** Whether to stop execution upon an error. */
     private boolean _failOnError = true;
-    /** Whether to use delimited SQL identifiers. */
-    private boolean _useDelimitedSqlIdentifiers = true;
 
     /**
      * Returns the database type.
@@ -46,7 +40,7 @@ public abstract class DatabaseCommand implements Command
      */
     protected String getDatabaseType()
     {
-        return _databaseType;
+        return _platformConf.getDatabaseType();
     }
 
     /**
@@ -56,19 +50,17 @@ public abstract class DatabaseCommand implements Command
      */
     protected BasicDataSource getDataSource()
     {
-        return _dataSource;
+        return _platformConf.getDataSource();
     }
 
     /**
-     * Sets the database info.
+     * Sets the platform configuration.
      * 
-     * @param dataSource The data source pointing to the database
-     * @param type       The database type
+     * @param platformConf The platform configuration
      */
-    protected void setDatabaseInfo(BasicDataSource dataSource, String type)
+    protected void setPlatformConfiguration(PlatformConfiguration platformConf)
     {
-        _dataSource   = dataSource;
-        _databaseType = type;
+        _platformConf = platformConf;
     }
 
     /**
@@ -93,65 +85,12 @@ public abstract class DatabaseCommand implements Command
     }
 
     /**
-     * Determines whether delimited SQL identifiers shall be used (the default).
-     *
-     * @return <code>true</code> if delimited SQL identifiers shall be used
-     */
-    public boolean isUseDelimitedSqlIdentifiers()
-    {
-        return _useDelimitedSqlIdentifiers;
-    }
-
-    /**
-     * Specifies whether delimited SQL identifiers shall be used.
-     *
-     * @param useDelimitedSqlIdentifiers <code>true</code> if delimited SQL identifiers shall be used
-     */
-    public void setUseDelimitedSqlIdentifiers(boolean useDelimitedSqlIdentifiers)
-    {
-        _useDelimitedSqlIdentifiers = useDelimitedSqlIdentifiers;
-    }
-
-    /**
      * Creates the platform for the configured database.
      * 
      * @return The platform
      */
     protected Platform getPlatform() throws BuildException
     {
-        Platform platform = null;
-
-        if (_databaseType == null)
-        {
-            if (_dataSource == null)
-            {
-                throw new BuildException("No database specified.");
-            }
-            if (_databaseType == null)
-            {
-                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource.getDriverClassName(),
-                                                                          _dataSource.getUrl());
-            }
-            if (_databaseType == null)
-            {
-                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
-            }
-        }
-        try
-        {
-            platform = PlatformFactory.createNewPlatformInstance(_databaseType);
-        }
-        catch (Exception ex)
-        {
-            throw new BuildException("Database type "+_databaseType+" is not supported.", ex);
-        }
-        if (platform == null)
-        {
-            throw new BuildException("Database type "+_databaseType+" is not supported.");
-        }
-        platform.setDataSource(_dataSource);
-        platform.getPlatformInfo().setUseDelimitedIdentifiers(isUseDelimitedSqlIdentifiers());
-
-        return platform;
+        return _platformConf.getPlatform();
     }
 }

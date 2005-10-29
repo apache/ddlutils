@@ -17,7 +17,6 @@ package org.apache.ddlutils.platform;
  */
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -39,11 +38,11 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
-import org.apache.ddlutils.model.UniqueIndex;
-import org.apache.ddlutils.model.NonUniqueIndex;
 import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.NonUniqueIndex;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.UniqueIndex;
 
 /**
  * An utility class to create a Database model from a live database.
@@ -55,85 +54,125 @@ import org.apache.ddlutils.model.Table;
 public class JdbcModelReader
 {
     /** The Log to which logging calls will be made. */
-    private final Log log = LogFactory.getLog(JdbcModelReader.class);
+    private final Log _log = LogFactory.getLog(JdbcModelReader.class);
 
     /** Contains default column sizes (minimum sizes that a JDBC-compliant db must support). */
-    private HashMap defaultSizes = new HashMap();
-    /** The database connection. */
-    private Connection connection = null;
-    /** The database catalog to read. */
-    private String catalog = "%";
-    /** The database schema to read. */
-    private String schema = "%";
-    /** The table types to recognize. */
-    private String[] tableTypes = { "TABLE" };
+    private HashMap _defaultSizes = new HashMap();
+    /** The default database catalog to read. */
+    private String _defaultCatalog = "%";
+    /** The sefault database schema(s) to read. */
+    private String _defaultSchemaPattern = "%";
+    /** The table types to recognize per default. */
+    private String[] _defaultTableTypes = { "TABLE" };
     /** The pattern to recognize when parsing a default value. */
-    private Pattern defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)");
+    private Pattern _defaultPattern = Pattern.compile("\\(\\'?(.*?)\\'?\\)");
 
     /**
-     * Creates a new model reader instance for the given connection.
-     * 
-     * @param conn The database connection
+     * Creates a new model reader instance.
      */
-    public JdbcModelReader(Connection conn)
+    public JdbcModelReader()
     {
-        connection = conn;
-        defaultSizes.put(new Integer(Types.CHAR),          "254");
-        defaultSizes.put(new Integer(Types.VARCHAR),       "254");
-        defaultSizes.put(new Integer(Types.LONGVARCHAR),   "254");
-        defaultSizes.put(new Integer(Types.BINARY),        "254");
-        defaultSizes.put(new Integer(Types.VARBINARY),     "254");
-        defaultSizes.put(new Integer(Types.LONGVARBINARY), "254");
-        defaultSizes.put(new Integer(Types.INTEGER),       "32");
-        defaultSizes.put(new Integer(Types.BIGINT),        "64");
-        defaultSizes.put(new Integer(Types.REAL),          "7,0");
-        defaultSizes.put(new Integer(Types.FLOAT),         "15,0");
-        defaultSizes.put(new Integer(Types.DOUBLE),        "15,0");
-        defaultSizes.put(new Integer(Types.DECIMAL),       "15,15");
-        defaultSizes.put(new Integer(Types.NUMERIC),       "15,15");
+        _defaultSizes.put(new Integer(Types.CHAR),          "254");
+        _defaultSizes.put(new Integer(Types.VARCHAR),       "254");
+        _defaultSizes.put(new Integer(Types.LONGVARCHAR),   "254");
+        _defaultSizes.put(new Integer(Types.BINARY),        "254");
+        _defaultSizes.put(new Integer(Types.VARBINARY),     "254");
+        _defaultSizes.put(new Integer(Types.LONGVARBINARY), "254");
+        _defaultSizes.put(new Integer(Types.INTEGER),       "32");
+        _defaultSizes.put(new Integer(Types.BIGINT),        "64");
+        _defaultSizes.put(new Integer(Types.REAL),          "7,0");
+        _defaultSizes.put(new Integer(Types.FLOAT),         "15,0");
+        _defaultSizes.put(new Integer(Types.DOUBLE),        "15,0");
+        _defaultSizes.put(new Integer(Types.DECIMAL),       "15,15");
+        _defaultSizes.put(new Integer(Types.NUMERIC),       "15,15");
     }
 
     /**
-     * Sets the catalog in the database to read.
+     * Returns the catalog in the database to read per default.
+     *
+     * @return The default catalog
+     */
+    public String getDefaultCatalog()
+    {
+        return _defaultCatalog;
+    }
+
+    /**
+     * Sets the catalog in the database to read per default.
      * 
      * @param catalog The catalog
      */
-    public void setCatalog(String catalog)
+    public void setDefaultCatalog(String catalog)
     {
-        this.catalog = catalog;
+        _defaultCatalog = catalog;
     }
 
     /**
-     * Sets the schema in the database to read.
-     * 
-     * @param schema The schema
+     * Returns the schema in the database to read per default.
+     *
+     * @return The default schema
      */
-    public void setSchema(String schema)
+    public String getDefaultSchemaPattern()
     {
-        this.schema = schema;
+        return _defaultSchemaPattern;
     }
 
     /**
-     * Sets the table types to recognize. Typical types are "TABLE", "VIEW", "SYSTEM TABLE",
-     * "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
+     * Sets the schema in the database to read per default.
+     * 
+     * @param schemaPattern The schema
+     */
+    public void setDefaultSchemaPattern(String schemaPattern)
+    {
+        _defaultSchemaPattern = schemaPattern;
+    }
+
+    /**
+     * Returns the table types to recognize per default.
+     *
+     * @return The default table types
+     */
+    public String[] getDefaultTableTypes()
+    {
+        return _defaultTableTypes;
+    }
+
+    /**
+     * Sets the table types to recognize per default. Typical types are "TABLE", "VIEW",
+     * "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
      * 
      * @param types The table types
      */
-    public void setTableTypes(String[] types)
+    public void setDefaultTableTypes(String[] types)
     {
-        this.tableTypes = types;
+        _defaultTableTypes = types;
     }
 
     /**
-     * Creates the database model.
+     * Reads the database model from the given connection.
      * 
+     * @param connection The connection
      * @return The database model
      */
-    public Database getDatabase() throws SQLException
+    public Database getDatabase(Connection connection) throws SQLException
+    {
+        return getDatabase(connection, null, null, null);
+    }
+
+    /**
+     * Reads the database model from the given connection.
+     * 
+     * @param connection The connection
+     * @param catalog    The catalog to acess in the database; use <code>null</code> for the default value
+     * @param schema     The schema to acess in the database; use <code>null</code> for the default value
+     * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
+     * @return The database model
+     */
+    public Database getDatabase(Connection connection, String catalog, String schema, String[] tableTypes) throws SQLException
     {
         Database db = new Database();
 
-        for (Iterator it = getTables().iterator(); it.hasNext();)
+        for (Iterator it = getTables(connection, catalog, schema, tableTypes).iterator(); it.hasNext();)
         {
             db.addTable((Table)it.next());
         }
@@ -143,18 +182,27 @@ public class JdbcModelReader
     /**
      * Returns a list of {@link Table} instances for the tables in the database.
      * 
+     * @param connection    The connection
+     * @param catalog       The catalog to acess in the database; use <code>null</code> for the default value
+     * @param schemaPattern The schema(s) to acess in the database; use <code>null</code> for the default value
+     * @param tableTypes    The table types to process; use <code>null</code> or an empty list for the default ones
      * @return The list of tables
      */
-    private List getTables() throws SQLException
+    private List getTables(Connection connection, String catalog, String schemaPattern, String[] tableTypes) throws SQLException
     {
         ResultSet tableData = null;
 
         try
         {
-            DatabaseMetaData metaData = connection.getMetaData();
+            DatabaseMetaDataWrapper metaData = new DatabaseMetaDataWrapper();
 
-            tableData = metaData.getTables(catalog, schema, "%", tableTypes);
+            metaData.setMetaData(connection.getMetaData());
+            metaData.setCatalog(catalog == null ? getDefaultCatalog() : catalog);
+            metaData.setSchemaPattern(schemaPattern == null ? getDefaultSchemaPattern() : schemaPattern);
+            metaData.setTableTypes((tableTypes == null) || (tableTypes.length == 0) ? getDefaultTableTypes() : tableTypes);
             
+            tableData = metaData.getTables("%");
+
             Set  availableColumns = determineAvailableColumns(tableData);
             List tables           = new ArrayList();
 
@@ -210,13 +258,13 @@ public class JdbcModelReader
      * @param tableName The name of the table
      * @return The list of columns
      */
-    private List getColumnsForTable(DatabaseMetaData metaData, String tableName) throws SQLException
+    private List getColumnsForTable(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
     {
         ResultSet columnData = null;
 
         try
         {
-            columnData = metaData.getColumns(catalog, schema, tableName, null);
+            columnData = metaData.getColumns(tableName, null);
 
             Set  availableColumns = determineAvailableColumns(columnData);
             List columns          = new ArrayList();
@@ -232,7 +280,7 @@ public class JdbcModelReader
                 col.setScale(getValueAsInt(columnData, "DECIMAL_DIGITS", availableColumns, 0));
                 // we're setting the size after the precision and radix in case
                 // the database prefers to return them in the size value 
-                col.setSize(getValueAsString(columnData, "COLUMN_SIZE", availableColumns, (String)defaultSizes.get(new Integer(col.getTypeCode()))));
+                col.setSize(getValueAsString(columnData, "COLUMN_SIZE", availableColumns, (String)_defaultSizes.get(new Integer(col.getTypeCode()))));
                 col.setRequired("NO".equalsIgnoreCase(getValueAsString(columnData, "IS_NULLABLE", availableColumns, "YES").trim()));
                 if (primaryKeys.contains(col.getName()))
                 {
@@ -248,7 +296,7 @@ public class JdbcModelReader
 
                 if (columnDefaultValue != null)
                 {
-                    Matcher m = defaultPattern.matcher(columnDefaultValue);
+                    Matcher m = _defaultPattern.matcher(columnDefaultValue);
 
                     if (m.matches())
                     {
@@ -277,14 +325,14 @@ public class JdbcModelReader
      * @param tableName The name of the table from which to retrieve PK information
      * @return The list of the primary key column names
      */
-    private List getPrimaryKeysForTable(DatabaseMetaData metaData, String tableName) throws SQLException
+    private List getPrimaryKeysForTable(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
     {
         List      pks   = new ArrayList();
         ResultSet pkData = null;
 
         try
         {
-            pkData = metaData.getPrimaryKeys(catalog, schema, tableName);
+            pkData = metaData.getPrimaryKeys(tableName);
             while (pkData.next())
             {
                 pks.add(pkData.getString("COLUMN_NAME"));
@@ -292,7 +340,7 @@ public class JdbcModelReader
         }
         catch (SQLException ex)
         {
-            log.warn("Could not determine the primary keys of table "+tableName, ex);
+            _log.warn("Could not determine the primary keys of table "+tableName, ex);
         }
         finally
         {
@@ -311,14 +359,14 @@ public class JdbcModelReader
      * @param tableName The name of the table from which to retrieve FK information
      * @return The list of foreign keys
      */
-    private List getForeignKeysForTable(DatabaseMetaData metaData, String tableName) throws SQLException
+    private List getForeignKeysForTable(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
     {
         List      fks    = new ArrayList();
         ResultSet fkData = null;
 
         try
         {
-            fkData = metaData.getImportedKeys(catalog, schema, tableName);
+            fkData = metaData.getForeignKeys(tableName);
 
             Set        availableColumns = determineAvailableColumns(fkData);
             String     prevPkTable      = null;
@@ -354,7 +402,7 @@ public class JdbcModelReader
         }
         catch (SQLException ex)
         {
-            log.warn("Could not determine the foreignkeys of table "+tableName, ex);
+            _log.warn("Could not determine the foreignkeys of table "+tableName, ex);
         }
         finally
         {
@@ -373,14 +421,14 @@ public class JdbcModelReader
      * @param tableName The name of the table
      * @return The list of indices
      */
-    private List getIndicesForTable(DatabaseMetaData metaData, String tableName) throws SQLException
+    private List getIndicesForTable(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
     {
         ResultSet indexData = null;
         List      indices   = new ArrayList();
 
         try 
         {
-            indexData = metaData.getIndexInfo(catalog, schema, tableName, false, false);
+            indexData = metaData.getIndices(tableName, false, false);
 
             Set availableColumns = determineAvailableColumns(indexData);
             Map indicesByName    = new LinkedMap();
@@ -417,7 +465,7 @@ public class JdbcModelReader
         }
         catch (SQLException ex)
         {
-            log.trace("Could determine the indices for the table "+tableName, ex);
+            _log.trace("Could determine the indices for the table "+tableName, ex);
         }
         finally
         {
