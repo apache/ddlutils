@@ -274,6 +274,22 @@ public class JdbcModelReader
             {
                 Column col = new Column();
 
+                // As suggested by Alexandre Borgoltz, we're reading the COLUMN_DEF first because Oracle
+                // has problems otherwise (it seemingly requires a LONG column to be the first to be read)
+                // See also DDLUTILS-29
+                String columnDefaultValue = getValueAsString(columnData, "COLUMN_DEF", availableColumns, null);
+
+                if (columnDefaultValue != null)
+                {
+                    // Sometimes the default comes back with parenthesis around it (jTDS/mssql)
+                    Matcher m = _defaultPattern.matcher(columnDefaultValue);
+
+                    if (m.matches())
+                    {
+                        columnDefaultValue = m.group(1);
+                    }
+                    col.setDefaultValue(columnDefaultValue);
+                }
                 col.setName(getValueAsString(columnData, "COLUMN_NAME", availableColumns, "UNKNOWN"));
                 col.setTypeCode(getValueAsInt(columnData, "DATA_TYPE", availableColumns, java.sql.Types.OTHER));
                 col.setPrecisionRadix(getValueAsInt(columnData, "NUM_PREC_RADIX", availableColumns, 10));
@@ -291,19 +307,6 @@ public class JdbcModelReader
                     col.setPrimaryKey(false);
                 }
 
-                // sometimes the default comes back with parenthesis around it (jTDS/mssql)
-                String columnDefaultValue = getValueAsString(columnData, "COLUMN_DEF", availableColumns, null);
-
-                if (columnDefaultValue != null)
-                {
-                    Matcher m = _defaultPattern.matcher(columnDefaultValue);
-
-                    if (m.matches())
-                    {
-                        columnDefaultValue = m.group(1);
-                    }
-                    col.setDefaultValue(columnDefaultValue);
-                }
                 columns.add(col);
             }
             return columns;
