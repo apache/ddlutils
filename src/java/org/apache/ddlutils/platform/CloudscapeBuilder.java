@@ -1,4 +1,4 @@
-package org.apache.ddlutils.builder;
+package org.apache.ddlutils.platform;
 
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
@@ -24,33 +24,21 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
- * The SQL Builder for MySQL.
+ * The SQL Builder for Cloudscape.
  * 
- * @author James Strachan
- * @author John Marshall/Connectria
  * @author Thomas Dudziak
  * @version $Revision$
  */
-public class MySqlBuilder extends SqlBuilder
+public class CloudscapeBuilder extends SqlBuilder
 {
     /**
      * Creates a new builder instance.
      * 
      * @param info The platform info
      */
-    public MySqlBuilder(PlatformInfo info)
+    public CloudscapeBuilder(PlatformInfo info)
     {
         super(info);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void dropTable(Table table) throws IOException
-    { 
-        print("DROP TABLE IF EXISTS ");
-        printIdentifier(getTableName(table));
-        printEndOfStatement();
     }
 
     /**
@@ -63,9 +51,9 @@ public class MySqlBuilder extends SqlBuilder
             case Types.BINARY:
             case Types.VARBINARY:
                 StringBuffer sqlType = new StringBuffer();
-
+                
                 sqlType.append(getNativeType(column));
-                sqlType.append("(");
+                sqlType.append(" (");
                 if (column.getSize() == null)
                 {
                     sqlType.append("254");
@@ -74,7 +62,7 @@ public class MySqlBuilder extends SqlBuilder
                 {
                     sqlType.append(column.getSize());
                 }
-                sqlType.append(") BINARY");
+                sqlType.append(") FOR BIT DATA");
                 return sqlType.toString();
             default:
                 return super.getSqlType(column);
@@ -86,24 +74,6 @@ public class MySqlBuilder extends SqlBuilder
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        print("AUTO_INCREMENT");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
-    {
-        // mySQL requires primary key indication for autoincrement key columns
-        // I'm not sure why the default skips the pk statement if all are identity
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getSelectLastInsertId(Table table)
-    {
-        return "SELECT LAST_INSERT_ID()";
+        print("GENERATED ALWAYS AS IDENTITY");
     }
 }

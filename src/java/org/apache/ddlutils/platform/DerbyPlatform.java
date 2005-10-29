@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.DynaSqlException;
-import org.apache.ddlutils.builder.DerbyBuilder;
 
 /**
  * The platform implementation for Derby.

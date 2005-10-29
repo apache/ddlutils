@@ -25,9 +25,9 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.ddlutils.builder.SqlBuilder;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.SqlBuilder;
 
 /**
  * A platform encapsulates the database-related functionality such as performing queries

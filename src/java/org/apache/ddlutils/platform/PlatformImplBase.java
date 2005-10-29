@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.builder.SqlBuilder;
 import org.apache.ddlutils.dynabean.DynaSqlIterator;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;

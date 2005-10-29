@@ -1,4 +1,4 @@
-package org.apache.ddlutils.builder;
+package org.apache.ddlutils.platform;
 
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
@@ -23,20 +23,20 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
- * The SQL Builder for SapDB.
+ * The SQL Builder for the Mckoi database.
  * 
  * @author James Strachan
  * @author Thomas Dudziak
  * @version $Revision$
  */
-public class SapDbBuilder extends SqlBuilder
+public class MckoiBuilder extends SqlBuilder
 {
     /**
      * Creates a new builder instance.
      * 
      * @param info The platform info
      */
-    public SapDbBuilder(PlatformInfo info)
+    public MckoiBuilder(PlatformInfo info)
     {
         super(info);
     }
@@ -46,9 +46,8 @@ public class SapDbBuilder extends SqlBuilder
      */
     public void dropTable(Table table) throws IOException
     { 
-        print("DROP TABLE ");
+        print("DROP TABLE IF EXISTS ");
         printIdentifier(getTableName(table));
-        print(" CASCADE");
         printEndOfStatement();
     }
 
@@ -57,6 +56,9 @@ public class SapDbBuilder extends SqlBuilder
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        print("DEFAULT SERIAL(1)");
+        // we start at value 1 to avoid issues with jdbc
+        print("DEFAULT UNIQUEKEY(");
+        printIdentifier(getTableName(table));
+        print(") + 1");
     }
 }

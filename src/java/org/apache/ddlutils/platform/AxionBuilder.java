@@ -1,4 +1,4 @@
-package org.apache.ddlutils.builder;
+package org.apache.ddlutils.platform;
 
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
@@ -22,20 +22,20 @@ import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Table;
 
 /**
- * The SQL Builder for the HsqlDb database.
+ * The SQL Builder for the Axion database.
  * 
  * @author James Strachan
  * @author Thomas Dudziak
  * @version $Revision$
  */
-public class HsqlDbBuilder extends SqlBuilder
+public class AxionBuilder extends SqlBuilder
 {
     /**
-     * Creates a new builder instance.
+     * Creates a new axion sql builder.
      * 
-     * @param info The platform info
+     * @param info The plaftform information
      */
-    public HsqlDbBuilder(PlatformInfo info)
+    public AxionBuilder(PlatformInfo info)
     {
         super(info);
     }
@@ -45,9 +45,8 @@ public class HsqlDbBuilder extends SqlBuilder
      */
     public void dropTable(Table table) throws IOException
     { 
-        print("DROP TABLE ");
+        print("DROP TABLE IF EXISTS ");
         printIdentifier(getTableName(table));
-        print(" IF EXISTS");
         printEndOfStatement();
     }
 }

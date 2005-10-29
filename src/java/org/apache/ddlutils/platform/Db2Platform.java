@@ -19,7 +19,6 @@ package org.apache.ddlutils.platform;
 import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.builder.Db2Builder;
 
 /**
  * The DB2 platform implementation.

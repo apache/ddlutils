@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.builder.PostgreSqlBuilder;
 
 /**
  * The platform implementation for PostgresSql.

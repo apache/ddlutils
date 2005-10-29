@@ -19,7 +19,6 @@ package org.apache.ddlutils.platform;
 import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.builder.MSSqlBuilder;
 
 /**
  * The platform implementation for the Microsoft SQL Server database.
