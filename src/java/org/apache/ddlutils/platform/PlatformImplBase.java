@@ -43,7 +43,6 @@ import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.dynabean.DynaSqlIterator;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
-import org.apache.ddlutils.io.JdbcModelReader;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;

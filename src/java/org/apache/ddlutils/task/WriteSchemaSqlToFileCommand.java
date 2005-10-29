@@ -22,8 +22,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.io.JdbcModelReader;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
