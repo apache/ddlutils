@@ -52,7 +52,7 @@ public class Database implements Serializable, Cloneable
     /** The tables. */
     private ArrayList _tables = new ArrayList();
     /** The dyna class cache for this model. */
-    private DynaClassCache _dynaClassCache = new DynaClassCache();
+    private transient DynaClassCache _dynaClassCache = null;
 
     /**
      * Adds all tables from the other database to this database.
@@ -428,6 +428,20 @@ public class Database implements Serializable, Cloneable
     }
 
     /**
+     * Returns the dyna class cache. If none is available yet, a new one will be created.
+     * 
+     * @return The dyna class cache
+     */
+    private DynaClassCache getDynaClassCache()
+    {
+        if (_dynaClassCache == null)
+        {
+            _dynaClassCache = new DynaClassCache();
+        }
+        return _dynaClassCache;
+    }
+
+    /**
      * Returns the {@link org.apache.ddlutils.dynabean.SqlDynaClass} for the given table name. If the it does not
      * exist yet, a new one will be created based on the Table definition.
      * 
@@ -439,7 +453,7 @@ public class Database implements Serializable, Cloneable
     {
         Table table = findTable(tableName);
 
-        return table != null ? _dynaClassCache.getDynaClass(table) : null;
+        return table != null ? getDynaClassCache().getDynaClass(table) : null;
     }
 
     /**
@@ -450,7 +464,7 @@ public class Database implements Serializable, Cloneable
      */
     public SqlDynaClass getDynaClassFor(DynaBean bean)
     {
-        return _dynaClassCache.getDynaClass(bean);
+        return getDynaClassCache().getDynaClass(bean);
     }
 
     /**
@@ -461,7 +475,7 @@ public class Database implements Serializable, Cloneable
      */
     public DynaBean createDynaBeanFor(Table table) throws DynaSqlException
     {
-        return _dynaClassCache.createNewInstance(table);
+        return getDynaClassCache().createNewInstance(table);
     }
 
     /**
@@ -474,7 +488,7 @@ public class Database implements Serializable, Cloneable
      */
     public DynaBean createDynaBeanFor(String tableName, boolean caseSensitive) throws DynaSqlException
     {
-        return _dynaClassCache.createNewInstance(findTable(tableName, caseSensitive));
+        return getDynaClassCache().createNewInstance(findTable(tableName, caseSensitive));
     }
 
     /**
