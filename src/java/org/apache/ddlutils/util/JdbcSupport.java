@@ -42,26 +42,12 @@ public abstract class JdbcSupport
     private final Log _log = LogFactory.getLog(JdbcSupport.class);
     /** The data source. */
     private DataSource _dataSource;
+    /** The username for accessing the database. */
+    private String _username;
+    /** The password for accessing the database. */
+    private String _password;
     /** The names of the currently borrowed connections (for debugging). */
     private HashSet _openConnectionNames = new HashSet();
-
-    /**
-     * Creates a new instance without a data source.
-     */
-    public JdbcSupport()
-    {
-    }
-
-    /**
-     * Creates a new instance that uses the given data source for talking to
-     * the database.
-     * 
-     * @param dataSource The data source
-     */
-    public JdbcSupport(DataSource dataSource)
-    {
-        _dataSource = dataSource;
-    }
 
     // Properties
     //-------------------------------------------------------------------------                
@@ -86,6 +72,47 @@ public abstract class JdbcSupport
         _dataSource = dataSource;
     }
 
+
+    /**
+     * Returns the username used to access the database.
+     * 
+     * @return The username
+     */
+    public String getUsername()
+    {
+        return _username;
+    }
+
+    /**
+     * Sets the username to be used to access the database.
+     * 
+     * @param username The username
+     */
+    public void setUsername(String username)
+    {
+        _username = username;
+    }
+
+    /**
+     * Returns the password used to access the database.
+     * 
+     * @return The password
+     */
+    public String getPassword()
+    {
+        return _password;
+    }
+
+    /**
+     * Sets the password to be used to access the database.
+     * 
+     * @param password The password
+     */
+    public void setPassword(String password)
+    {
+        _password = password;
+    }
+
     // Implementation methods    
     //-------------------------------------------------------------------------                
 
@@ -98,8 +125,16 @@ public abstract class JdbcSupport
     {
         try
         {
-            Connection connection = getDataSource().getConnection();
+            Connection connection = null;
 
+            if (_username == null)
+            {
+                connection = getDataSource().getConnection();
+            }
+            else
+            {
+                connection = getDataSource().getConnection(_username, _password);
+            }
             if (_log.isDebugEnabled())
             {
                 String connName = connection.toString();

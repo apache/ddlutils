@@ -90,7 +90,8 @@ public class PlatformFactory
     /**
      * Creates a new platform for the specified database. This is a shortcut method that uses
      * {@link PlatformUtils#determineDatabaseType(String, String)} to determine the parameter
-     * for {@link #createNewPlatformInstance(String)}.
+     * for {@link #createNewPlatformInstance(String)}. Note that no database connection is
+     * established when using this method.
      * 
      * @param jdbcDriver        The jdbc driver
      * @param jdbcConnectionUrl The connection url
@@ -115,6 +116,27 @@ public class PlatformFactory
         Platform platform = createNewPlatformInstance(new PlatformUtils().determineDatabaseType(dataSource));
 
         platform.setDataSource(dataSource);
+        return platform;
+    }
+
+    /**
+     * Creates a new platform for the specified database. This is a shortcut method that uses
+     * {@link PlatformUtils#determineDatabaseType(DataSource)} to determine the parameter
+     * for {@link #createNewPlatformInstance(String)}. Note that this method sets the data source
+     * at the returned platform instance (method {@link Platform#setDataSource(DataSource)}).
+     * 
+     * @param dataSource The data source for the database
+     * @param username   The user name to use for connecting to the database
+     * @param password   The password to use for connecting to the database
+     * @return The platform or <code>null</code> if the database is not supported
+     */
+    public static synchronized Platform createNewPlatformInstance(DataSource dataSource, String username, String password) throws DdlUtilsException
+    {
+        Platform platform = createNewPlatformInstance(new PlatformUtils().determineDatabaseType(dataSource, username, password));
+
+        platform.setDataSource(dataSource);
+        platform.setUsername(username);
+        platform.setPassword(password);
         return platform;
     }
 

@@ -66,7 +66,7 @@ public interface Platform
      * @return The model reader
      */
     public JdbcModelReader getModelReader();
-
+    
     /**
      * Returns the data source that this platform uses to access the database.
      * 
@@ -80,6 +80,34 @@ public interface Platform
      * @param dataSource The data source
      */
     public void setDataSource(DataSource dataSource);
+
+    /**
+     * Returns the username that this platform shall use to access the database.
+     * 
+     * @return The username
+     */
+    public String getUsername();
+
+    /**
+     * Sets the username that this platform shall use to access the database.
+     * 
+     * @param username The username
+     */
+    public void setUsername(String username);
+
+    /**
+     * Returns the password that this platform shall use to access the database.
+     * 
+     * @return The password
+     */
+    public String getPassword();
+
+    /**
+     * Sets the password that this platform shall use to access the database.
+     * 
+     * @param password The password
+     */
+    public void setPassword(String password);
 
     /**
      * Returns a (new) JDBC connection from the data source.
