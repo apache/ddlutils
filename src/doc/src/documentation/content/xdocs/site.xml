@@ -64,6 +64,7 @@ See http://forrest.apache.org/docs/linking.html for more info
       <jira href="http://issues.apache.org/jira/secure/BrowseProject.jspa?id=10731"/>
       <javadoc href="api/index.html">
         <model href="?org/apache/ddlutils/model/package-summary.html"/>
+        <converter href="org/apache/ddlutils/io/converters/SqlTypeConverter.html"/>
       </javadoc>
       <svn-view href="http://svn.apache.org/viewcvs.cgi/db/ddlutils/trunk/"/>
       <user-list>

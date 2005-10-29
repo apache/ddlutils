@@ -31,7 +31,7 @@ public class DateConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public Object convertFromString(String textRep, int sqlTypeCode) throws Exception
+    public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException
     {
         if (sqlTypeCode != Types.DATE)
         {
@@ -48,27 +48,37 @@ public class DateConverter implements SqlTypeConverter
             int    day        = 1;
             int    slashPos   = dateAsText.indexOf('-');
 
-            if (slashPos < 0)
+            try
             {
-                year = Integer.parseInt(dateAsText);
-            }
-            else
-            {
-                year       = Integer.parseInt(dateAsText.substring(0, slashPos));
-                dateAsText = dateAsText.substring(slashPos + 1);
-                slashPos   = dateAsText.indexOf('-');
                 if (slashPos < 0)
                 {
-                    month = Integer.parseInt(dateAsText);
+                    year = Integer.parseInt(dateAsText);
                 }
                 else
                 {
-                    month = Integer.parseInt(dateAsText.substring(0, slashPos));
-                    day   = Integer.parseInt(dateAsText.substring(slashPos + 1));
+                    year       = Integer.parseInt(dateAsText.substring(0, slashPos));
+                    dateAsText = dateAsText.substring(slashPos + 1);
+                    slashPos   = dateAsText.indexOf('-');
+                    if (slashPos < 0)
+                    {
+                        month = Integer.parseInt(dateAsText);
+                    }
+                    else
+                    {
+                        month = Integer.parseInt(dateAsText.substring(0, slashPos));
+                        day   = Integer.parseInt(dateAsText.substring(slashPos + 1));
+                    }
                 }
+                return new Date(year - 1900, month - 1, day);
             }
-            return new Date(year - 1900, month - 1, day);
-            
+            catch (NumberFormatException ex)
+            {
+                throw new ConversionException(ex);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                throw new ConversionException(ex);
+            }
         }
         else
         {
@@ -79,8 +89,8 @@ public class DateConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public String convertToString(Object obj, int sqlTypeCode)
+    public String convertToString(Object obj, int sqlTypeCode) throws ConversionException
     {
-        return (obj == null ? null : obj.toString());
+        return obj == null ? null : obj.toString();
     }
 }

@@ -115,17 +115,25 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
      * 
      * @param command The command
      */
-    public void addWriteDataToDatabase(WriteDataToSpecifiedDatabaseCommand command)
+    public void addWriteDataToDatabase(WriteDataToDatabaseCommand command)
     {
         addCommand(command);
     }
 
     /**
-     * Reads the schemas from the specified files and merges them into one database model.
+     * Adds the "write data to file"-command.
      * 
-     * @return The database model
+     * @param command The command
      */
-    private Database readSchemaFiles()
+    public void addWriteDataToFile(WriteDataToFileCommand command)
+    {
+        addCommand(command);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Database readModel()
     {
         DatabaseIO reader = new DatabaseIO();
         Database       model  = null;
@@ -204,21 +212,5 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
             }
         }
         return model;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void execute() throws BuildException
-    {
-        if (!hasCommands())
-        {
-            log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
-            return;
-        }
-
-        Database model = readSchemaFiles();
-
-        executeCommands(model);
     }
 }

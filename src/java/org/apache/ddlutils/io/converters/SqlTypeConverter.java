@@ -31,7 +31,7 @@ public interface SqlTypeConverter
      * @param sqlTypeCode The target sql type code, one of the constants in {@link java.sql.Types}
      * @return The corresponding object
      */
-    public Object convertFromString(String textRep, int sqlTypeCode) throws Exception;
+    public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException;
 
     /**
      * Converts the given object to a string representation.
@@ -40,5 +40,5 @@ public interface SqlTypeConverter
      * @param sqlTypeCode The corresponding source type code
      * @return The textual representation
      */
-    public String convertToString(Object obj, int sqlTypeCode) throws Exception;
+    public String convertToString(Object obj, int sqlTypeCode) throws ConversionException;
 }

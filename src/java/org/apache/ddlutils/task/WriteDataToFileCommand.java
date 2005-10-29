@@ -32,7 +32,7 @@ import org.apache.tools.ant.Task;
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class WriteDataToFileCommand extends DatabaseCommand
+public class WriteDataToFileCommand extends ConvertingDatabaseCommand
 {
     /** The file to output the data to. */
     private File   _outputFile;
@@ -67,16 +67,19 @@ public class WriteDataToFileCommand extends DatabaseCommand
         try
         {
             Platform   platform = getPlatform();
-            DataWriter writer   = new DataWriter(model, new FileOutputStream(_outputFile), _encoding);
+            DataWriter writer   = new DataWriter(new FileOutputStream(_outputFile), _encoding);
+            Table[]    tables   = new Table[1];
             
+            registerConverters(writer.getConverterConfiguration());
+
             // TODO: An advanced algorithm could be employed here that writes objects
             //       related by foreign keys, in the correct order
             writer.writeDocumentStart();
             for (int idx = 0; idx < model.getTableCount(); idx++)
             {
-                Table table = (Table)model.getTable(idx);
+                tables[0] = (Table)model.getTable(idx);
 
-                writer.write(platform.query(model, "select * from "+table.getName()));
+                writer.write(platform.query(model, "select * from "+tables[0].getName(), tables));
             }
             writer.writeDocumentEnd();
         }

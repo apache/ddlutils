@@ -33,7 +33,7 @@ public class NumberConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public Object convertFromString(String textRep, int sqlTypeCode) throws Exception
+    public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException
     {
         if (textRep == null)
         {
@@ -84,7 +84,7 @@ public class NumberConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public String convertToString(Object obj, int sqlTypeCode) throws Exception
+    public String convertToString(Object obj, int sqlTypeCode) throws ConversionException
     {
         if (obj == null)
         {

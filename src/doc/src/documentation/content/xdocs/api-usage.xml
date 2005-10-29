@@ -72,31 +72,25 @@ public void writeDatabaseToXML(Database db, String fileName)
 }]]></source>
     </section>
     <section>
-      <title>Reading from a database</title>
+      <title>Reading the model from a live database</title>
       <p>
         Reading the database model from a live database is only slightly more involved
-        because we first need to establish a connection to it:
+        because we first need to create a platform instance via the data source pointing
+        to the database:
       </p>
       <source><![CDATA[
-import java.sql.SQLException;
-import org.apache.ddlutils.io.JdbcModelReader;
+import javax.sql.DataSource;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.util.DataSourceWrapper;
 
-public Database readDatabase(String driverClassName,
-                             String databaseUrl,
-                             String username,
-                             String password) throws ClassNotFoundException,
-                                                     SQLException
+...
+
+public Database readDatabase(DataSource dataSource)
 {
-    // you could also use a datasource provided by your jdbc driver or from commons-dbcp
+    Platform platform = PlatformFactory.createNewPlatformInstance(dataSource);
 
-    DataSourceWrapper dataSource = new DataSourceWrapper(driverClassName, databaseUrl, username, password);
-    JdbcModelReader   reader     = new JdbcModelReader(dataSource.getConnection());
-
-    // set catalog and schema at the reader if the database requires it
-
-    return reader.getDatabase();
+    return platform.readModelFromDatabase();
 }]]></source>
     </section>
     <section>

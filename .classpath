@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="lib/commons-betwixt-0.7.jar"/>
 	<classpathentry kind="lib" path="lib/ant-1.6.5.jar"/>
 	<classpathentry kind="lib" path="lib/commons-beanutils-1.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/stax-api-1.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -187,7 +187,7 @@ public class DynaSqlIterator implements Iterator
             {
                 String columnName = queryHints[tableIdx].getColumn(columnIdx).getName();
 
-                if (caseSensitive)
+                if (!caseSensitive)
                 {
                     columnName = columnName.toLowerCase();
                 }

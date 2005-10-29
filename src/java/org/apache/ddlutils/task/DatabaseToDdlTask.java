@@ -21,7 +21,6 @@ import java.util.StringTokenizer;
 
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 
 /**
  * Ant task for working with a database, e.g. retrieving the schema from a
@@ -110,6 +109,16 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
+     * Adds the "write data into file"-command.
+     * 
+     * @param command The command
+     */
+    public void addWriteDataToFile(WriteDataToFileCommand command)
+    {
+        addCommand(command);
+    }
+
+    /**
      * Returns the table types to recognize.
      * 
      * @return The table types
@@ -137,11 +146,9 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
-     * Reads the schema(s) from the specified database.
-     * 
-     * @return The database model
+     * {@inheritDoc}
      */
-    private Database readSchema()
+    protected Database readModel()
     {
         if (getDataSource() == null)
         {
@@ -156,26 +163,5 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
         {
             throw new BuildException("Could not read the schema from the specified database: "+ex.getLocalizedMessage(), ex);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void execute() throws BuildException
-    {
-        if (!hasCommands())
-        {
-            log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
-            return;
-        }
-
-        Database model = readSchema();
-
-        if (model == null)
-        {
-            log("No schemas read, so there is nothing to do.", Project.MSG_INFO);
-            return;
-        }
-        executeCommands(model);
     }
 }

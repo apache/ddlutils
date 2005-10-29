@@ -31,7 +31,7 @@ public class TimestampConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public Object convertFromString(String textRep, int sqlTypeCode) throws Exception
+    public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException
     {
         return sqlTypeCode == Types.TIMESTAMP ? Timestamp.valueOf(textRep) : (Object)textRep;
     }
@@ -39,8 +39,8 @@ public class TimestampConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public String convertToString(Object obj, int sqlTypeCode)
+    public String convertToString(Object obj, int sqlTypeCode) throws ConversionException
     {
-        return ((Timestamp)obj).toString();
+        return (obj == null ? null : ((Timestamp)obj).toString());
     }
 }

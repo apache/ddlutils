@@ -22,6 +22,9 @@ import java.util.Iterator;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
+import org.apache.tools.ant.AntClassLoader;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -126,7 +129,14 @@ public abstract class DatabaseTaskBase extends Task
     {
         return _platformConf.getPlatform();
     }
-    
+
+    /**
+     * Reads the database model on which the commands will work.
+     * 
+     * @return The database model
+     */
+    protected abstract Database readModel();
+
     /**
      * Executes the commands.
      * 
@@ -143,6 +153,42 @@ public abstract class DatabaseTaskBase extends Task
                 ((DatabaseCommand)cmd).setPlatformConfiguration(_platformConf);
             }
             cmd.execute(this, model);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void execute() throws BuildException
+    {
+        if (!hasCommands())
+        {
+            log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
+            return;
+        }
+
+        ClassLoader    sysClassLoader = Thread.currentThread().getContextClassLoader();
+        AntClassLoader newClassLoader = new AntClassLoader(getClass().getClassLoader(), true);
+
+        // we're changing the thread classloader so that we can access resources
+        // from the classpath used to load this task's class
+        Thread.currentThread().setContextClassLoader(newClassLoader);
+        
+        try
+        {
+            Database model = readModel();
+    
+            if (model == null)
+            {
+                log("No schemas read, so there is nothing to do.", Project.MSG_INFO);
+                return;
+            }
+            executeCommands(model);
+        }
+        finally
+        {
+            // rollback of our classloader change
+            Thread.currentThread().setContextClassLoader(sysClassLoader);
         }
     }
 }

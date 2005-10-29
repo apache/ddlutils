@@ -16,15 +16,8 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-import java.sql.Types;
-import java.util.HashMap;
-
 import org.apache.commons.digester.Digester;
-import org.apache.ddlutils.io.converters.DateConverter;
-import org.apache.ddlutils.io.converters.NumberConverter;
 import org.apache.ddlutils.io.converters.SqlTypeConverter;
-import org.apache.ddlutils.io.converters.TimeConverter;
-import org.apache.ddlutils.io.converters.TimestampConverter;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -44,76 +37,19 @@ public class DataReader extends Digester
     private DataSink _sink;
     /** Specifies whether the (lazy) configuration of the digester still needs to be performed. */
     private boolean  _needsConfiguration = true;
-    /** The converters per type. */
-    private HashMap  _convertersPerType = new HashMap();
-    /** The converters per table-column path. */
-    private HashMap  _convertersPerPath = new HashMap();
+    /** The converters. */
+    private ConverterConfiguration _converterConf = new ConverterConfiguration();
     /** Whether to be case sensitive or not. */
     private boolean _caseSensitive = false;
 
     /**
-     * Creates a new data reader instance.
-     */
-    public DataReader()
-    {
-        super();
-
-        NumberConverter numberConverter = new NumberConverter();
-
-        registerConverter(Types.DATE,      new DateConverter());
-        registerConverter(Types.TIME,      new TimeConverter());
-        registerConverter(Types.TIMESTAMP, new TimestampConverter());
-        registerConverter(Types.BIGINT,    numberConverter);
-        registerConverter(Types.BIT,       numberConverter);
-        registerConverter(Types.DECIMAL,   numberConverter);
-        registerConverter(Types.DOUBLE,    numberConverter);
-        registerConverter(Types.FLOAT,     numberConverter);
-        registerConverter(Types.INTEGER,   numberConverter);
-        registerConverter(Types.NUMERIC,   numberConverter);
-        registerConverter(Types.REAL,      numberConverter);
-        registerConverter(Types.SMALLINT,  numberConverter);
-        registerConverter(Types.TINYINT,   numberConverter);
-    }
-
-    /**
-     * Registers the given type converter for an sql type.
+     * Returns the converter configuration of this data reader.
      * 
-     * @param sqlTypeCode The type code, one of the {@link java.sql.Types} constants
-     * @param converter   The converter
+     * @return The converter configuration
      */
-    public void registerConverter(int sqlTypeCode, SqlTypeConverter converter)
+    public ConverterConfiguration getConverterConfiguration()
     {
-        _convertersPerType.put(new Integer(sqlTypeCode), converter);
-    }
-
-    /**
-     * Registers the given type converter for the specified column.
-     * 
-     * @param tableName  The name of the table
-     * @param columnName The name of the column
-     * @param converter  The converter
-     */
-    public void registerConverter(String tableName, String columnName, SqlTypeConverter converter)
-    {
-        _convertersPerPath.put(tableName +"/" + columnName, converter);
-    }
-
-    /**
-     * Returns the converter registered for the specified column.
-     * 
-     * @param table  The table
-     * @param column The column
-     * @return The converter
-     */
-    public SqlTypeConverter getRegisteredConverter(Table table, Column column)
-    {
-        SqlTypeConverter result = (SqlTypeConverter)_convertersPerPath.get(table.getName() + "/" + column.getName());
-
-        if (result == null)
-        {
-            result = (SqlTypeConverter)_convertersPerType.get(new Integer(column.getTypeCode()));
-        }
-        return result;
+        return _converterConf;
     }
 
     /**
@@ -209,7 +145,7 @@ public class DataReader extends Digester
                 for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
                 {
                     Column           column    = (Column)table.getColumn(columnIdx);
-                    SqlTypeConverter converter = getRegisteredConverter(table, column);
+                    SqlTypeConverter converter = _converterConf.getRegisteredConverter(table, column);
     
                     addRule(path, new SetColumnPropertyRule(column, converter, isCaseSensitive()));
                     addRule(path + "/" + column.getName(), new SetColumnPropertyFromSubElementRule(column, converter));

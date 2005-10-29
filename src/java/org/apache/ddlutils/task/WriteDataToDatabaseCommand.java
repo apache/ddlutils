@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.io.DataConverterRegistration;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
@@ -37,14 +36,12 @@ import org.apache.tools.ant.types.FileSet;
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class WriteDataToDatabaseCommand extends DatabaseCommand
+public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
 {
     /** A single data file to insert. */
     private File      _singleDataFile = null;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
-    /** The converterd. */
-    private ArrayList _converters = new ArrayList();
 
     /**
      * Adds a fileset.
@@ -54,16 +51,6 @@ public class WriteDataToDatabaseCommand extends DatabaseCommand
     public void addConfiguredFileset(FileSet fileset)
     {
         _fileSets.add(fileset);
-    }
-
-    /**
-     * Registers a converter.
-     * 
-     * @param converterRegistration The registration info
-     */
-    public void addConfiguredConverter(DataConverterRegistration converterRegistration)
-    {
-        _converters.add(converterRegistration);
     }
 
     /**
@@ -89,26 +76,7 @@ public class WriteDataToDatabaseCommand extends DatabaseCommand
 
             reader.setModel(model);
             reader.setSink(sink);
-            for (Iterator it = _converters.iterator(); it.hasNext();)
-            {
-                DataConverterRegistration registrationInfo = (DataConverterRegistration)it.next();
-
-                if (registrationInfo.getTypeCode() != Integer.MIN_VALUE)
-                {
-                    reader.registerConverter(registrationInfo.getTypeCode(),
-                                             registrationInfo.getConverter());
-                }
-                else
-                {
-                    if ((registrationInfo.getTable() == null) || (registrationInfo.getColumn() == null)) 
-                    {
-                        throw new BuildException("Please specify either the jdbc type or a table/column pair for which the converter shall be defined");
-                    }
-                    reader.registerConverter(registrationInfo.getTable(),
-                                             registrationInfo.getColumn(),
-                                             registrationInfo.getConverter());
-                }
-            }
+            registerConverters(reader.getConverterConfiguration());
             if ((_singleDataFile != null) && !_fileSets.isEmpty())
             {
                 throw new BuildException("Please use either the datafile attribute or the sub fileset element, but not both");

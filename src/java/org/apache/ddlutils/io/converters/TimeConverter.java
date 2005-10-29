@@ -31,7 +31,7 @@ public class TimeConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public Object convertFromString(String textRep, int sqlTypeCode) throws Exception
+    public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException
     {
         if (sqlTypeCode != Types.TIME)
         {
@@ -48,27 +48,37 @@ public class TimeConverter implements SqlTypeConverter
             int    seconds    = 0;
             int    slashPos   = timeAsText.indexOf(':');
 
-            if (slashPos < 0)
+            try
             {
-                hours = Integer.parseInt(timeAsText);
-            }
-            else
-            {
-                hours      = Integer.parseInt(timeAsText.substring(0, slashPos));
-                timeAsText = timeAsText.substring(slashPos + 1);
-                slashPos   = timeAsText.indexOf(':');
                 if (slashPos < 0)
                 {
-                    minutes = Integer.parseInt(timeAsText);
+                    hours = Integer.parseInt(timeAsText);
                 }
                 else
                 {
-                    minutes = Integer.parseInt(timeAsText.substring(0, slashPos));
-                    seconds = Integer.parseInt(timeAsText.substring(slashPos + 1));
+                    hours      = Integer.parseInt(timeAsText.substring(0, slashPos));
+                    timeAsText = timeAsText.substring(slashPos + 1);
+                    slashPos   = timeAsText.indexOf(':');
+                    if (slashPos < 0)
+                    {
+                        minutes = Integer.parseInt(timeAsText);
+                    }
+                    else
+                    {
+                        minutes = Integer.parseInt(timeAsText.substring(0, slashPos));
+                        seconds = Integer.parseInt(timeAsText.substring(slashPos + 1));
+                    }
                 }
+                return new Time(hours, minutes, seconds);
             }
-            return new Time(hours, minutes, seconds);
-            
+            catch (NumberFormatException ex)
+            {
+                throw new ConversionException(ex);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                throw new ConversionException(ex);
+            }
         }
         else
         {
@@ -79,7 +89,7 @@ public class TimeConverter implements SqlTypeConverter
     /**
      * {@inheritDoc}
      */
-    public String convertToString(Object obj, int sqlTypeCode)
+    public String convertToString(Object obj, int sqlTypeCode) throws ConversionException
     {
         return obj == null ? null : obj.toString();
     }
