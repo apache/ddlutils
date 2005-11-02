@@ -3,16 +3,16 @@
 	<classpathentry kind="src" path="src/java"/>
 	<classpathentry output="target/test" kind="src" path="src/test"/>
 	<classpathentry sourcepath="JRE_SRC" kind="var" path="JRE_LIB"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/junit-3.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/commons-collections-3.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-dbcp-1.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang-2.0.jar"/>
-	<classpathentry kind="lib" path="lib/commons-digester-1.7.jar"/>
-	<classpathentry kind="lib" path="lib/commons-betwixt-0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-dbcp-1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-digester-1.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-betwixt-0.7.jar"/>
 	<classpathentry kind="lib" path="lib/ant-1.6.5.jar"/>
-	<classpathentry kind="lib" path="lib/commons-beanutils-1.7.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-beanutils-1.7.0.jar"/>
 	<classpathentry kind="lib" path="lib/stax-api-1.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
