@@ -187,6 +187,6 @@ public class DatabaseMetaDataWrapper
      */
     public ResultSet getIndices(String tableNamePattern, boolean unique, boolean approximate) throws SQLException
     {
-        return getMetaData().getImportedKeys(getCatalog(), getSchemaPattern(), tableNamePattern);
+        return getMetaData().getIndexInfo(getCatalog(), getSchemaPattern(), tableNamePattern, unique, approximate);
     }
 }
