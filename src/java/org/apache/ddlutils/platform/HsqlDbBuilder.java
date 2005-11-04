@@ -50,4 +50,14 @@ public class HsqlDbBuilder extends SqlBuilder
         print(" IF EXISTS");
         printEndOfStatement();
     }
+
+    /**
+     * @see org.apache.ddlutils.platform.SqlBuilder#getSelectLastInsertId(org.apache.ddlutils.model.Table)
+     */
+    public String getSelectLastInsertId(Table table) 
+    {
+        return "CALL IDENTITY()";
+    }
+    
+    
 }
