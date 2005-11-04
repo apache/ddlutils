@@ -157,6 +157,8 @@ public class DataWriter
 
     /**
      * Prints the indentation if we're pretty-printing.
+     * 
+     * @param level The indentation level
      */
     private void indentIfPrettyPrinting(int level) throws DataWriterException
     {

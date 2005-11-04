@@ -48,7 +48,7 @@ import org.apache.ddlutils.model.Table;
  * it requires. Though often that can be quite complex when attempting to reuse code across many databases.
  * Hopefully only a small amount code needs to be changed on a per database basis.
  * 
- * TODO: It might be useful to add foreignkey analysis for creation/dropping of tables 
+ * TODO: It might be useful to add foreignkey analysis for creation/dropping of tables
  * 
  * @author James Strachan
  * @author John Marshall/Connectria

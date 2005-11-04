@@ -49,6 +49,14 @@ public class WriteSchemaToFileCommand implements Command
     /**
      * {@inheritDoc}
      */
+    public boolean isRequiringModel()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void execute(Task task, Database model) throws BuildException
     {
         if (_outputFile == null)

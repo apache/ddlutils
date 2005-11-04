@@ -93,4 +93,12 @@ public abstract class DatabaseCommand implements Command
     {
         return _platformConf.getPlatform();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isRequiringModel()
+    {
+        return true;
+    }
 }

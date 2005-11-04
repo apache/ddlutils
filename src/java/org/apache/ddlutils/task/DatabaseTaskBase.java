@@ -142,12 +142,16 @@ public abstract class DatabaseTaskBase extends Task
      * 
      * @param model The database model
      */
-    protected void executeCommands(Database model)
+    protected void executeCommands(Database model) throws BuildException
     {
         for (Iterator it = _commands.iterator(); it.hasNext();)
         {
             Command cmd = (Command)it.next();
 
+            if (cmd.isRequiringModel() && (model == null))
+            {
+                throw new BuildException("No database model specified");
+            }
             if (cmd instanceof DatabaseCommand)
             {
                 ((DatabaseCommand)cmd).setPlatformConfiguration(_platformConf);
@@ -176,14 +180,7 @@ public abstract class DatabaseTaskBase extends Task
         
         try
         {
-            Database model = readModel();
-    
-            if (model == null)
-            {
-                log("No schemas read, so there is nothing to do.", Project.MSG_INFO);
-                return;
-            }
-            executeCommands(model);
+            executeCommands(readModel());
         }
         finally
         {

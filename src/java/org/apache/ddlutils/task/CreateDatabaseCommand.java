@@ -51,6 +51,14 @@ public class CreateDatabaseCommand extends DatabaseCommand
     /**
      * {@inheritDoc}
      */
+    public boolean isRequiringModel()
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void execute(Task task, Database model) throws BuildException
     {
         BasicDataSource dataSource = getDataSource();

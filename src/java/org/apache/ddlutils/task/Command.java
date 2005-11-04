@@ -29,6 +29,14 @@ import org.apache.tools.ant.Task;
 public interface Command
 {
     /**
+     * Specifies whether this command requires a model, i.e. whether the second
+     * argument in {@link #execute(Task, Database)} cannot be <code>null</code>.
+     * 
+     * @return <code>true</code> if this command requires a model 
+     */
+    public boolean isRequiringModel();
+
+    /**
      * Executes this command.
      * 
      * @param task  The executing task
