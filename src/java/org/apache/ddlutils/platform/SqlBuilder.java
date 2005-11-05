@@ -22,7 +22,6 @@ import java.sql.Types;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -665,7 +664,7 @@ public abstract class SqlBuilder
      *                        prepared statement
      * @return The insertion sql
      */
-    public String getInsertSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    public String getInsertSql(Table table, Map columnValues, boolean genPlaceholders)
     {
         StringBuffer buffer   = new StringBuffer("INSERT INTO ");
         boolean      addComma = false;
@@ -735,7 +734,7 @@ public abstract class SqlBuilder
      *                        prepared statement (both for the pk values and the object values)
      * @return The update sql
      */
-    public String getUpdateSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    public String getUpdateSql(Table table, Map columnValues, boolean genPlaceholders)
     {
         StringBuffer buffer = new StringBuffer("UPDATE ");
         boolean      addSep = false;
@@ -805,7 +804,7 @@ public abstract class SqlBuilder
      *                        prepared statement
      * @return The delete sql
      */
-    public String getDeleteSql(Table table, HashMap pkValues, boolean genPlaceholders)
+    public String getDeleteSql(Table table, Map pkValues, boolean genPlaceholders)
     {
         StringBuffer buffer = new StringBuffer("DELETE FROM ");
         boolean      addSep = false;
