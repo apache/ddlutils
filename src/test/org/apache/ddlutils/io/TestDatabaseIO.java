@@ -19,6 +19,7 @@ package org.apache.ddlutils.io;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Types;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 
@@ -92,7 +93,7 @@ public class TestDatabaseIO extends TestCase
                      table.getName());
         assertEquals("Some table",
                      table.getDescription());
-        assertNull(table.getAutoIncrementColumn());
+        assertEquals(0, table.getAutoIncrementColumn().length);
         assertEquals(1,
                      table.getColumnCount());
         assertEquals(0,
@@ -163,7 +164,7 @@ public class TestDatabaseIO extends TestCase
                      someTable.getName());
         assertEquals("Some table",
                      someTable.getDescription());
-        assertNull(someTable.getAutoIncrementColumn());
+        assertEquals(0, someTable.getAutoIncrementColumn().length);
         assertEquals(1,
                      someTable.getColumnCount());
         assertEquals(0,
@@ -194,7 +195,7 @@ public class TestDatabaseIO extends TestCase
                      anotherTable.getName());
         assertEquals("And another table",
                      anotherTable.getDescription());
-        assertNull(anotherTable.getAutoIncrementColumn());
+        assertEquals(0, anotherTable.getAutoIncrementColumn().length);
         assertEquals(1,
                      anotherTable.getColumnCount());
         assertEquals(1,
@@ -292,7 +293,7 @@ public class TestDatabaseIO extends TestCase
         assertEquals("TableWidthIndex",
                      table.getName());
         assertNull(table.getDescription());
-        assertNull(table.getAutoIncrementColumn());
+        assertEquals(0, table.getAutoIncrementColumn().length);
         assertEquals(3,
                      table.getColumnCount());
         assertEquals(0,
@@ -450,9 +451,9 @@ public class TestDatabaseIO extends TestCase
         assertNull(column.getDefaultValue());
         assertNull(column.getDefaultValue());
         assertNull(column.getDescription());
-
-        assertEquals(column,
-                     table.getAutoIncrementColumn());
+        
+        assertEquals(1, table.getAutoIncrementColumn().length);
+        assertEquals(column, table.getAutoIncrementColumn()[0]);
 
         column = table.getColumn(1);
 
@@ -624,8 +625,9 @@ public class TestDatabaseIO extends TestCase
         assertNull(column.getDefaultValue());
         assertEquals("The primary key of table A",
                      column.getDescription());
+        assertEquals(1, table.getAutoIncrementColumn().length);
         assertEquals(column,
-                     table.getAutoIncrementColumn());
+                     table.getAutoIncrementColumn()[0]);
 
         column = table.getColumn(1);
 
@@ -707,7 +709,7 @@ public class TestDatabaseIO extends TestCase
                      table.getName());
         assertEquals("Table B",
                      table.getDescription());
-        assertNull(table.getAutoIncrementColumn());
+        assertEquals(0, table.getAutoIncrementColumn().length);
         assertEquals(3,
                      table.getColumnCount());
         assertEquals(2,
@@ -839,7 +841,7 @@ public class TestDatabaseIO extends TestCase
                      table.getName());
         assertEquals("Table C",
                      table.getDescription());
-        assertNull(table.getAutoIncrementColumn());
+        assertEquals(0, table.getAutoIncrementColumn().length);
         assertEquals(2,
                      table.getColumnCount());
         assertEquals(0,
@@ -1242,6 +1244,21 @@ public class TestDatabaseIO extends TestCase
         {}
     }
 
+    /**
+     * Need to check this with the betwixt team..
+     * This piece of xml will end up with a Database object with on Table named NotATable, which
+     * is clearly wrong.
+     */
+    public void testFaultReadOfTable() 
+    {
+        Database database = readModel(
+                "<database name='db' >\n" +
+                "  <index name='NotATable'/>\n" +
+                "</database>");
+        
+        System.out.println("Table : " + Arrays.asList(database.getTables()));
+        assertEquals(0, database.getTableCount());
+    }
     // TODO: Tests that include:
     // * foreign key references undefined table
     // * foreign key references undefined local column

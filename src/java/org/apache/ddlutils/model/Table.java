@@ -578,7 +578,8 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
-     * Returns the auto increment columns in this table.
+     * Returns the auto increment columns in this table. If no incrementcolumns
+     * are found, it will return an empty array.
      * 
      * @return The columns
      */
