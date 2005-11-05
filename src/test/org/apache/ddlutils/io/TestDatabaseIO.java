@@ -1248,6 +1248,7 @@ public class TestDatabaseIO extends TestCase
      * Need to check this with the betwixt team..
      * This piece of xml will end up with a Database object with on Table named NotATable, which
      * is clearly wrong.
+     * See http://issues.apache.org/bugzilla/show_bug.cgi?id=37369 for more info.
      */
     public void testFaultReadOfTable() 
     {
