@@ -660,7 +660,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             return;
         }
 
-        Column[] columns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumn();
+        Column[] columns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumns();
 
         if (columns.length > 0)
         {

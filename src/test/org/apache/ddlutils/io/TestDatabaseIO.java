@@ -93,7 +93,7 @@ public class TestDatabaseIO extends TestCase
                      table.getName());
         assertEquals("Some table",
                      table.getDescription());
-        assertEquals(0, table.getAutoIncrementColumn().length);
+        assertEquals(0, table.getAutoIncrementColumns().length);
         assertEquals(1,
                      table.getColumnCount());
         assertEquals(0,
@@ -164,7 +164,7 @@ public class TestDatabaseIO extends TestCase
                      someTable.getName());
         assertEquals("Some table",
                      someTable.getDescription());
-        assertEquals(0, someTable.getAutoIncrementColumn().length);
+        assertEquals(0, someTable.getAutoIncrementColumns().length);
         assertEquals(1,
                      someTable.getColumnCount());
         assertEquals(0,
@@ -195,7 +195,7 @@ public class TestDatabaseIO extends TestCase
                      anotherTable.getName());
         assertEquals("And another table",
                      anotherTable.getDescription());
-        assertEquals(0, anotherTable.getAutoIncrementColumn().length);
+        assertEquals(0, anotherTable.getAutoIncrementColumns().length);
         assertEquals(1,
                      anotherTable.getColumnCount());
         assertEquals(1,
@@ -293,7 +293,7 @@ public class TestDatabaseIO extends TestCase
         assertEquals("TableWidthIndex",
                      table.getName());
         assertNull(table.getDescription());
-        assertEquals(0, table.getAutoIncrementColumn().length);
+        assertEquals(0, table.getAutoIncrementColumns().length);
         assertEquals(3,
                      table.getColumnCount());
         assertEquals(0,
@@ -452,8 +452,8 @@ public class TestDatabaseIO extends TestCase
         assertNull(column.getDefaultValue());
         assertNull(column.getDescription());
         
-        assertEquals(1, table.getAutoIncrementColumn().length);
-        assertEquals(column, table.getAutoIncrementColumn()[0]);
+        assertEquals(1, table.getAutoIncrementColumns().length);
+        assertEquals(column, table.getAutoIncrementColumns()[0]);
 
         column = table.getColumn(1);
 
@@ -625,9 +625,9 @@ public class TestDatabaseIO extends TestCase
         assertNull(column.getDefaultValue());
         assertEquals("The primary key of table A",
                      column.getDescription());
-        assertEquals(1, table.getAutoIncrementColumn().length);
+        assertEquals(1, table.getAutoIncrementColumns().length);
         assertEquals(column,
-                     table.getAutoIncrementColumn()[0]);
+                     table.getAutoIncrementColumns()[0]);
 
         column = table.getColumn(1);
 
@@ -709,7 +709,7 @@ public class TestDatabaseIO extends TestCase
                      table.getName());
         assertEquals("Table B",
                      table.getDescription());
-        assertEquals(0, table.getAutoIncrementColumn().length);
+        assertEquals(0, table.getAutoIncrementColumns().length);
         assertEquals(3,
                      table.getColumnCount());
         assertEquals(2,
@@ -841,7 +841,7 @@ public class TestDatabaseIO extends TestCase
                      table.getName());
         assertEquals("Table C",
                      table.getDescription());
-        assertEquals(0, table.getAutoIncrementColumn().length);
+        assertEquals(0, table.getAutoIncrementColumns().length);
         assertEquals(2,
                      table.getColumnCount());
         assertEquals(0,

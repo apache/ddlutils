@@ -583,7 +583,7 @@ public class Table implements Serializable, Cloneable
      * 
      * @return The columns
      */
-    public Column[] getAutoIncrementColumn()
+    public Column[] getAutoIncrementColumns()
     {
         Collection autoIncrColumns = CollectionUtils.select(_columns, new Predicate() {
             public boolean evaluate(Object input) {

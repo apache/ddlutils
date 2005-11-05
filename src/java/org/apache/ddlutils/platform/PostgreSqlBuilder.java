@@ -52,7 +52,7 @@ public class PostgreSqlBuilder extends SqlBuilder
         print(" CASCADE");
         printEndOfStatement();
 
-        Column[] columns = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {
@@ -107,7 +107,7 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     public String getSelectLastInsertId(Table table)
     {
-        Column[] columns = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumns();
 
         if (columns.length == 0)
         {

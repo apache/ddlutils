@@ -53,7 +53,7 @@ public class OracleBuilder extends SqlBuilder
         print(" CASCADE CONSTRAINTS");
         printEndOfStatement();
 
-        Column[] columns = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {
@@ -80,7 +80,7 @@ public class OracleBuilder extends SqlBuilder
     public void createTable(Database database, Table table) throws IOException
     {
         // lets create any sequences
-        Column[] columns = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {

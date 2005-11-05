@@ -76,7 +76,7 @@ public class InterbaseBuilder extends SqlBuilder
         printEndOfStatement();
 
         // creating generator and trigger for auto-increment
-        Column[] columns = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {
@@ -131,7 +131,7 @@ public class InterbaseBuilder extends SqlBuilder
     public void dropTable(Table table) throws IOException
     {
         // dropping generators for auto-increment
-        Column[] columns = table.getAutoIncrementColumn();
+        Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {
