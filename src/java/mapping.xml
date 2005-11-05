@@ -15,8 +15,8 @@
       <attribute name="name"        property="name"/>
       <attribute name="description" property="description"/>
 
-      <element name="column"      property="columns"     updater="addColumn"/>
-      <element name="foreign-key" property="foreignKeys" updater="addForeignKey"/>
+      <element property="columns"     updater="addColumn"/>
+      <element property="foreignKeys" updater="addForeignKey"/>
       <element property="indices"     updater="addIndex"/>
     </element>
   </class>

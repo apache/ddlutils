@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -62,7 +63,7 @@ public class TestDatabaseIO extends TestCase
         StringWriter writer = new StringWriter();
 
         new DatabaseIO().write(model, writer);
-        return writer.toString();
+        return StringUtils.replace(writer.toString(), "\r\n", "\n");
     }
 
     /**
