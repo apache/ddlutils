@@ -314,6 +314,7 @@ public class JdbcModelReader
                 // the database prefers to return them in the size value 
                 col.setSize(getValueAsString(columnData, "COLUMN_SIZE", availableColumns, (String)_defaultSizes.get(new Integer(col.getTypeCode()))));
                 col.setRequired("NO".equalsIgnoreCase(getValueAsString(columnData, "IS_NULLABLE", availableColumns, "YES").trim()));
+                col.setDescription(getValueAsString(columnData, "REMARKS", availableColumns, null));                
                 if (primaryKeys.contains(col.getName()))
                 {
                     col.setPrimaryKey(true);
