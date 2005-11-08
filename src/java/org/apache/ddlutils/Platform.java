@@ -516,8 +516,8 @@ public interface Platform
      * Reads the database model from the live database as specified by the data source set for
      * this platform.
      * 
-     * @param catalog    The catalog to acess in the database; use <code>null</code> for the default value
-     * @param schema     The schema to acess in the database; use <code>null</code> for the default value
+     * @param catalog    The catalog to access in the database; use <code>null</code> for the default value
+     * @param schema     The schema to access in the database; use <code>null</code> for the default value
      * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
      * @return The database model
      * @throws DynaSqlException If an error occurred during reading the model
@@ -537,8 +537,8 @@ public interface Platform
      * Reads the database model from the live database to which the given connection is pointing.
      * 
      * @param connection The connection to the database
-     * @param catalog    The catalog to acess in the database; use <code>null</code> for the default value
-     * @param schema     The schema to acess in the database; use <code>null</code> for the default value
+     * @param catalog    The catalog to access in the database; use <code>null</code> for the default value
+     * @param schema     The schema to access in the database; use <code>null</code> for the default value
      * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
      * @return The database model
      * @throws DynaSqlException If an error occurred during reading the model
