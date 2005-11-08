@@ -172,6 +172,22 @@ public class JdbcModelReader
     {
         Database db = new Database();
 
+        try 
+        {
+            db.setName(connection.getCatalog());
+            if (catalog == null)
+            {
+                catalog = db.getName();
+            }
+        } 
+        catch(Exception e) 
+        {
+            _log.info("Cannot determine the catalog name from connection.");
+            if (catalog != null)
+            {
+                db.setName(catalog);
+            }
+        }
         for (Iterator it = getTables(connection, catalog, schema, tableTypes).iterator(); it.hasNext();)
         {
             db.addTable((Table)it.next());
