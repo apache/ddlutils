@@ -55,14 +55,15 @@
            optimize="false">
       <classpath refid="compilation-classpath"/>
     </javac>
+    <copy todir="${build.java.dir}">
+      <fileset dir="${src.java.dir}"
+               excludes="**/*.java"/>
+    </copy>
   </target>
 
   <target name="jar"
           description="Creates the jar"
           depends="compile">
-    <copy todir="${build.java.dir}/resources">
-      <fileset dir="${src.resources.dir}"/>
-    </copy>
     <copy todir="${build.java.dir}">
       <fileset dir="${src.java.dir}"
                excludes="**/*.java"/>
