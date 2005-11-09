@@ -732,7 +732,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 // we'll have to commit the statement(s) because otherwise most likely
                 // the auto increment hasn't happened yet (the db didn't actually
                 // perform the insert yet so no triggering of sequences did occur)
-                connection.commit();
+                if (!connection.getAutoCommit())
+                {
+                    connection.commit();
+                }
 
                 queryStmt       = connection.createStatement();
                 lastInsertedIds = queryStmt.executeQuery(queryIdSql);
