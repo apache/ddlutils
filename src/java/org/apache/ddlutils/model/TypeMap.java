@@ -144,6 +144,10 @@ public abstract class TypeMap
             registerJdbcType(Jdbc3Utils.determineBooleanTypeCode(),  BOOLEAN,  true,  false, false, false);
             registerJdbcType(Jdbc3Utils.determineDatalinkTypeCode(), DATALINK, false, false, false, true);
         }
+
+        // Torque/Turbine extensions which we only support when reading from an XML schema
+        _typeNameToTypeCode.put("BOOLEANINT",  new Integer(Types.TINYINT));
+        _typeNameToTypeCode.put("BOOLEANCHAR", new Integer(Types.CHAR));
     }
 
     /**

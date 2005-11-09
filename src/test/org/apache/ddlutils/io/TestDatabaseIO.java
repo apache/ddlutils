@@ -1261,6 +1261,78 @@ public class TestDatabaseIO extends TestCase
         System.out.println("Table : " + Arrays.asList(database.getTables()));
         assertEquals(0, database.getTableCount());
     }
+
+    /**
+     * Tests the Torque/Turbine extensions BOOLEANINT & BOOLEANCHAR.
+     */
+    public void testTurbineExtension() throws Exception
+    {
+        Database model = readModel(
+            "<database name='test'>\n" +
+            "  <table name='SomeTable'>\n" +
+            "    <column name='intField'\n" +
+            "            type='BOOLEANINT'/>\n" +
+            "    <column name='charField'\n" +
+            "            type='BOOLEANCHAR'/>\n" +
+            "  </table>\n" +
+            "</database>");
+
+        assertEquals("test",
+                     model.getName());
+        assertEquals(1,
+                     model.getTableCount());
+        
+        Table table = model.getTable(0);
+
+        assertEquals("SomeTable",
+                     table.getName());
+        assertNull(table.getDescription());
+        assertEquals(0, table.getAutoIncrementColumns().length);
+        assertEquals(2,
+                     table.getColumnCount());
+        assertEquals(0,
+                     table.getForeignKeyCount());
+        assertEquals(0,
+                     table.getIndexCount());
+
+        Column column = table.getColumn(0);
+
+        assertEquals("intField",
+                     column.getName());
+        assertEquals("TINYINT",
+                     column.getType());
+        assertEquals(Types.TINYINT,
+                     column.getTypeCode());
+        assertFalse(column.isPrimaryKey());
+        assertFalse(column.isRequired());
+        assertFalse(column.isAutoIncrement());
+        assertNull(column.getDefaultValue());
+        assertNull(column.getDescription());
+
+        column = table.getColumn(1);
+
+        assertEquals("charField",
+                     column.getName());
+        assertEquals("CHAR",
+                     column.getType());
+        assertEquals(Types.CHAR,
+                     column.getTypeCode());
+        assertFalse(column.isPrimaryKey());
+        assertFalse(column.isRequired());
+        assertFalse(column.isAutoIncrement());
+        assertNull(column.getDefaultValue());
+        assertNull(column.getDescription());
+
+        assertEquals(
+            "  <database name=\"test\">\n" +
+            "    <table name=\"SomeTable\">\n" +
+            "      <column name=\"intField\" primaryKey=\"false\" required=\"false\" type=\"TINYINT\" autoIncrement=\"false\"/>\n" +
+            "      <column name=\"charField\" primaryKey=\"false\" required=\"false\" type=\"CHAR\" autoIncrement=\"false\"/>\n" +
+            "    </table>\n" +
+            "  </database>\n",
+            writeModel(model));
+    }
+
     // TODO: Tests that include:
     // * foreign key references undefined table
     // * foreign key references undefined local column

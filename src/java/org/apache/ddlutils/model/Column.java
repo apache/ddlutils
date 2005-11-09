@@ -233,8 +233,10 @@ public class Column implements Cloneable, Serializable
         else
         {
             _typeCode = typeCode.intValue();
+            // we get the corresponding string value from the TypeMap in order
+            // to detect extension types which we don't want in the model
+            _type = TypeMap.getJdbcTypeName(_typeCode);
         }
-        _type = type;
     }
 
     /**
