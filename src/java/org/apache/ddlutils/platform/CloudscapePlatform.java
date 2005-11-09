@@ -50,7 +50,7 @@ public class CloudscapePlatform extends PlatformImplBase
         // BINARY and VARBINARY will also be handled by CloudscapeBuilder.getSqlType
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
         info.addNativeTypeMapping(Types.BINARY,        "CHAR");
-        info.addNativeTypeMapping(Types.BIT,           "CHAR FOR BIT DATA");
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT");
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB");
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
@@ -63,7 +63,7 @@ public class CloudscapePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
-        info.addNativeTypeMapping("BOOLEAN",  "CHAR FOR BIT DATA");
+        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA");
 
         setSqlBuilder(new CloudscapeBuilder(info));

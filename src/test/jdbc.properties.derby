@@ -12,5 +12,7 @@ datasource.driverClassName=org.apache.derby.jdbc.EmbeddedDriver
 #datasource.driverClassName=org.apache.derby.jdbc.ClientDriver
 
 datasource.url=jdbc:derby:../database/ddlutils
-#datasource.username=
-#datasource.password=
+# The default username for Derby is app; for every other user the must be a corresponding schema defined
+# in the database; see http://db.apache.org/derby/faq.html#schema_exist for details
+datasource.username=app
+datasource.password=
