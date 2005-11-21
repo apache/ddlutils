@@ -97,9 +97,9 @@ public class PostgreSqlBuilder extends SqlBuilder
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
-        print("UNIQUE DEFAULT nextval(");
-        printIdentifier(getConstraintName(null, table, column.getName(), "seq"));
-        print(")");
+        print("UNIQUE DEFAULT nextval('");
+        print(getConstraintName(null, table, column.getName(), "seq"));
+        print("')");
     }
 
     /**
@@ -124,9 +124,9 @@ public class PostgreSqlBuilder extends SqlBuilder
                 {
                     result.append(", ");
                 }
-                result.append("CURRVAL(");
-                result.append(getDelimitedIdentifier(getConstraintName(null, table, columns[idx].getName(), "seq")));
-                result.append(") AS ");
+                result.append("currval('");
+                result.append(getConstraintName(null, table, columns[idx].getName(), "seq"));
+                result.append("') AS ");
                 result.append(getDelimitedIdentifier(columns[idx].getName()));
             }
             return result.toString();
