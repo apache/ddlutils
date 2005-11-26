@@ -18,6 +18,7 @@ package org.apache.ddlutils.platform;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
@@ -69,9 +70,9 @@ public class InterbaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void createTable(Database database, Table table) throws IOException
+    public void createTable(Database database, Table table, Map parameters) throws IOException
     {
-        super.createTable(database, table);
+        super.createTable(database, table, parameters);
         print("COMMIT");
         printEndOfStatement();
 

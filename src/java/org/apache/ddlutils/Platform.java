@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -198,6 +199,27 @@ public interface Platform
     public void createTables(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException;
 
     /**
+     * Creates the tables defined in the database model.
+     * 
+     * @param model           The database model
+     * @param params          The parameters used in the creation
+     * @param dropTablesFirst Whether to drop the tables prior to creating them (anew)
+     * @param continueOnError Whether to continue executing the sql commands when an error occurred
+     */
+    public void createTables(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Creates the tables defined in the database model.
+     * 
+     * @param connection      The connection to the database
+     * @param model           The database model
+     * @param params          The parameters used in the creation
+     * @param dropTablesFirst Whether to drop the tables prior to creating them (anew)
+     * @param continueOnError Whether to continue executing the sql commands when an error occurred
+     */
+    public void createTables(Connection connection, Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException;
+
+    /**
      * Alters the database schema so that it match the given model. Drops and table modifications will
      * not be made.
      *
@@ -221,6 +243,28 @@ public interface Platform
      * Alters the database schema so that it match the given model. Drops and table modifications will
      * not be made.
      *
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(Database desiredDb, CreationParameters params, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model.
+     *
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model. Drops and table modifications will
+     * not be made.
+     *
      * @param connection      A connection to the existing database that shall be modified
      * @param desiredDb       The desired database schema
      * @param continueOnError Whether to continue with the next sql statement when an error occurred
@@ -238,6 +282,30 @@ public interface Platform
      * @param continueOnError Whether to continue with the next sql statement when an error occurred
      */
     public void alterTables(Connection connection, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model. Drops and table modifications will
+     * not be made.
+     *
+     * @param connection      A connection to the existing database that shall be modified
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(Connection connection, Database desiredDb, CreationParameters params, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model.
+     *
+     * @param connection      A connection to the existing database that shall be modified
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(Connection connection, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Drops the tables defined in the given database.

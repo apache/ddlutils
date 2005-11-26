@@ -18,6 +18,7 @@ package org.apache.ddlutils.platform;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
@@ -77,7 +78,7 @@ public class OracleBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void createTable(Database database, Table table) throws IOException
+    public void createTable(Database database, Table table, Map parameters) throws IOException
     {
         // lets create any sequences
         Column[] columns = table.getAutoIncrementColumns();
@@ -89,7 +90,7 @@ public class OracleBuilder extends SqlBuilder
             printEndOfStatement();
         }
 
-        super.createTable(database, table);
+        super.createTable(database, table, parameters);
 
         for (int idx = 0; idx < columns.length; idx++)
         {

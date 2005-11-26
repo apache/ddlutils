@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -33,7 +34,7 @@ import org.apache.tools.ant.Task;
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class WriteSchemaSqlToFileCommand extends DatabaseCommand
+public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationParameters
 {
     /** The file to output the DTD to. */
     private File _outputFile;
@@ -106,8 +107,10 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
             throw new BuildException("Cannot overwrite output file "+_outputFile.getAbsolutePath());
         }
 
-        Platform   platform   = getPlatform();
-        Connection connection = null;
+        Platform           platform        = getPlatform();
+        boolean            isCaseSensitive = platform.getPlatformInfo().isUseDelimitedIdentifiers();
+        CreationParameters params          = getFilteredParameters(model, platform.getName(), isCaseSensitive);
+        Connection         connection      = null;
 
         try
         {
@@ -123,11 +126,11 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommand
 
                 Database currentModel = platform.readModelFromDatabase();
 
-                platform.getSqlBuilder().alterDatabase(currentModel, model, _doDrops, true);
+                platform.getSqlBuilder().alterDatabase(currentModel, model, params, _doDrops, true);
             }
             else
             {
-                platform.getSqlBuilder().createTables(model, _doDrops);
+                platform.getSqlBuilder().createTables(model, params, _doDrops);
             }
             writer.close();
             task.log("Written SQL to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);

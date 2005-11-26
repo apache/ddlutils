@@ -234,6 +234,22 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
+    {
+        throw new UnsupportedOperationException("Database creation is not supported for the database platform "+getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    {
+        throw new UnsupportedOperationException("Database deletion is not supported for the database platform "+getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void createTables(Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
         Connection connection = borrowConnection();
@@ -251,22 +267,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
-    {
-        throw new UnsupportedOperationException("Database creation is not supported for the database platform "+getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
-    {
-        throw new UnsupportedOperationException("Database deletion is not supported for the database platform "+getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void createTables(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
         String sql = null;
@@ -277,6 +277,45 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             getSqlBuilder().setWriter(buffer);
             getSqlBuilder().createTables(model, dropTablesFirst);
+            sql = buffer.toString();
+        }
+        catch (IOException e)
+        {
+            // won't happen because we're using a string writer
+        }
+        evaluateBatch(connection, sql, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createTables(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            createTables(connection, model, params, dropTablesFirst, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createTables(Connection connection, Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
+    {
+        String sql = null;
+
+        try
+        {
+            StringWriter buffer = new StringWriter();
+
+            getSqlBuilder().setWriter(buffer);
+            getSqlBuilder().createTables(model, params, dropTablesFirst);
             sql = buffer.toString();
         }
         catch (IOException e)
@@ -314,6 +353,39 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
+    public void alterTables(Database desiredDb, CreationParameters params, boolean continueOnError) throws DynaSqlException
+    {
+        alterTables(desiredDb, params, false, false, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void alterTables(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            alterTables(connection, desiredDb, params, doDrops, modifyColumns, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void alterTables(Connection connection, Database desiredDb, boolean continueOnError) throws DynaSqlException
+    {
+        alterTables(connection, desiredDb, false, false, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void alterTables(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         String   sql          = null;
@@ -337,9 +409,32 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Connection connection, Database desiredDb, boolean continueOnError) throws DynaSqlException
+    public void alterTables(Connection connection, Database desiredDb, CreationParameters params, boolean continueOnError) throws DynaSqlException
     {
-        alterTables(connection, desiredDb, false, false, continueOnError);
+        alterTables(connection, desiredDb, params, false, false, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void alterTables(Connection connection, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    {
+        String   sql          = null;
+        Database currentModel = readModelFromDatabase(connection);
+
+        try
+        {
+            StringWriter buffer = new StringWriter();
+
+            getSqlBuilder().setWriter(buffer);
+            getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
+            sql = buffer.toString();
+        }
+        catch (IOException ex)
+        {
+            // won't happen because we're using a string writer
+        }
+        evaluateBatch(connection, sql, continueOnError);
     }
 
     /**

@@ -17,6 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.MySqlPlatform;
 
 /**
@@ -137,5 +138,38 @@ public class TestMySqlPlatform extends TestPlatformBase
             "ALTER TABLE `table2` ADD CONSTRAINT `table2_FK_COL_FK_1_COL_FK_2_table1` FOREIGN KEY (`COL_FK_1`, `COL_FK_2`) REFERENCES `table1` (`COL_PK_2`, `COL_PK_1`);\n"+
             "ALTER TABLE `table3` ADD CONSTRAINT `testfk` FOREIGN KEY (`COL_FK`) REFERENCES `table2` (`COL_PK`);\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+    }
+
+    /**
+     * Tests the usage of creation parameters.
+     */
+    public void testCreationParameters1() throws Exception
+    {
+        Database           testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        CreationParameters params = new CreationParameters();
+
+        params.addParameter(testDb.getTable(0),
+                            "ROW_FORMAT",
+                            "COMPRESSED");
+        params.addParameter(null,
+                            "ENGINE",
+                            "INNODB");
+
+        getPlatformInfo().setCommentsSupported(false);
+        getPlatform().getSqlBuilder().createTables(testDb, params, true);
+
+        assertEqualsIgnoringWhitespaces(
+            "DROP TABLE IF EXISTS `constraints`;\n" +
+            "CREATE TABLE `constraints`\n"+
+            "(\n"+
+            "    `COL_PK`               VARCHAR(32),\n"+
+            "    `COL_PK_AUTO_INCR`     INTEGER AUTO_INCREMENT,\n"+
+            "    `COL_NOT_NULL`         CHAR(100) BINARY NOT NULL,\n"+
+            "    `COL_NOT_NULL_DEFAULT` DOUBLE DEFAULT '-2.0' NOT NULL,\n"+
+            "    `COL_DEFAULT`          CHAR(4) DEFAULT 'test',\n"+
+            "    `COL_AUTO_INCR`        BIGINT AUTO_INCREMENT,\n"+
+            "    PRIMARY KEY (`COL_PK`, `COL_PK_AUTO_INCR`)\n"+
+            ") ENGINE=INNODB ROW_FORMAT=COMPRESSED;\n",
+            getBuilderOutput());
     }
 }

@@ -17,6 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
@@ -65,7 +66,7 @@ public class PostgreSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void createTable(Database database, Table table) throws IOException
+    public void createTable(Database database, Table table, Map parameters) throws IOException
     {
         for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
@@ -76,7 +77,7 @@ public class PostgreSqlBuilder extends SqlBuilder
                 createAutoIncrementSequence(table, column);
             }
         }
-        super.createTable(database, table);
+        super.createTable(database, table, parameters);
     }
 
     /**

@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Database;
@@ -46,10 +46,10 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void createTable(Database database, Table table) throws IOException
+    public void createTable(Database database, Table table, Map parameters) throws IOException
     {
         writeQuotationOnStatement();
-        super.createTable(database, table);
+        super.createTable(database, table, parameters);
     }
 
     /**
@@ -120,7 +120,7 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public String getDeleteSql(Table table, HashMap pkValues, boolean genPlaceholders)
+    public String getDeleteSql(Table table, Map pkValues, boolean genPlaceholders)
     {
         return getQuotationOnStatement() + super.getDeleteSql(table, pkValues, genPlaceholders);
     }
@@ -128,7 +128,7 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public String getInsertSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    public String getInsertSql(Table table, Map columnValues, boolean genPlaceholders)
     {
         return getQuotationOnStatement() + super.getInsertSql(table, columnValues, genPlaceholders);
     }
@@ -136,7 +136,7 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public String getUpdateSql(Table table, HashMap columnValues, boolean genPlaceholders)
+    public String getUpdateSql(Table table, Map columnValues, boolean genPlaceholders)
     {
         return getQuotationOnStatement() + super.getUpdateSql(table, columnValues, genPlaceholders);
     }

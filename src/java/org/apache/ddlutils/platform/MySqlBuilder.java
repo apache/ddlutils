@@ -18,6 +18,8 @@ package org.apache.ddlutils.platform;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
@@ -106,4 +108,35 @@ public class MySqlBuilder extends SqlBuilder
     {
         return "SELECT LAST_INSERT_ID()";
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeTableCreationStmtEnding(Table table, Map parameters) throws IOException
+    {
+        if (parameters != null)
+        {
+            print(" ");
+            // MySql supports additional table creation options which are appended
+            // at the end of the CREATE TABLE statement
+            for (Iterator it = parameters.entrySet().iterator(); it.hasNext();)
+            {
+                Map.Entry entry = (Map.Entry)it.next();
+
+                print(entry.getKey().toString());
+                if (entry.getValue() != null)
+                {
+                    print("=");
+                    print(entry.getValue().toString());
+                }
+                if (it.hasNext())
+                {
+                    print(" ");
+                }
+            }
+        }
+        super.writeTableCreationStmtEnding(table, parameters);
+    }
+
+
 }

@@ -18,6 +18,7 @@ package org.apache.ddlutils.task;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -28,7 +29,7 @@ import org.apache.tools.ant.Task;
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class WriteSchemaToDatabaseCommand extends DatabaseCommand
+public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationParameters
 {
     /** Whether to alter or re-set the database if it already exists. */
     private boolean _alterDb = true;
@@ -85,17 +86,19 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommand
             throw new BuildException("No database specified.");
         }
 
-        Platform platform = getPlatform();
+        Platform           platform        = getPlatform();
+        boolean            isCaseSensitive = platform.getPlatformInfo().isUseDelimitedIdentifiers();
+        CreationParameters params          = getFilteredParameters(model, platform.getName(), isCaseSensitive);
 
         try
         {
             if (isAlterDatabase())
             {
-                platform.alterTables(model, _doDrops, true, true);
+                platform.alterTables(model, params, _doDrops, true, true);
             }
             else
             {
-                platform.createTables(model, _doDrops, true);
+                platform.createTables(model, params, _doDrops, true);
             }
 
             task.log("Written schema to database", Project.MSG_INFO);

@@ -358,6 +358,66 @@
             <td>See above.</td>
           </tr>
         </table>
+        <section>
+          <title>Subelement: parameter</title>
+          <p>
+            Specifies a parameter for the creation of the tables. These are usually platform specific.
+            If no table name is specified, the parameter is applied to all tables.
+          </p>
+          <note>
+            Parameters are only applied when creating new tables, not when altering existing ones.
+          </note>
+          <table>
+            <tr>
+              <th>Attribute</th>
+              <th>Required ?</th>
+              <th>Possible values</th>
+              <th>Default value</th>
+              <th>Meaning</th>
+            </tr>
+            <tr>
+              <td>name</td>
+              <td>yes</td>
+              <td></td>
+              <td></td>
+              <td>Specifies the name of the parameter. See <a href="site:documentation/database-support">here</a>
+                  for the parameters supported by the individual platforms.</td>
+            </tr>
+            <tr>
+              <td>table</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>Specifies the name of the table where this parameter shall be applied.</td>
+            </tr>
+            <tr>
+              <td>tables</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>Specifies the comma-separated list of table names where this parameter shall be applied.</td>
+            </tr>
+            <tr>
+              <td>value</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>The parameter value. If none is given, <code>null</code> is used.</td>
+            </tr>
+            <tr>
+              <td>platforms</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>
+                Comma-separated list of platforms where the parameter shall be processed (see
+                <code>databaseType</code> attribute above for the possible values). For every platform
+                not in this list, the parameter is ignored. If none is given, then the parameter
+                is processed for every platform.
+              </td>
+            </tr>
+          </table>
+        </section>
       </section>
       <section>
         <title>Subtask: writeSchemaSqlToFile</title>
@@ -404,6 +464,12 @@
             <td>The name of the file to write the SQL commands to.</td>
           </tr>
         </table>
+        <section>
+          <title>Subelement: parameter</title>
+          <p>
+            Same as for <code>writeSchemaToDatabase</code>.
+          </p>
+        </section>
       </section>
       <section>
         <title>Subtask: writeDataToDatabase</title>
@@ -473,7 +539,7 @@
               <td></td>
               <td></td>
               <td>
-                Specifies the fully qualified class name of the parameter. Note that the class is
+                Specifies the fully qualified class name of the converter. Note that the class is
                 required to implement
                 <a href="ext:ddlutils/javadoc/converter">org.apache.ddlutils.io.converters.SqlTypeConverter</a>.
               </td>

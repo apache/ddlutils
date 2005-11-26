@@ -232,7 +232,7 @@ public abstract class SqlBuilder
      */
     public void createTables(Database database) throws IOException
     {
-        createTables(database, true);
+        createTables(database, null, true);
     }
 
     /**
@@ -242,6 +242,18 @@ public abstract class SqlBuilder
      * @param dropTables Whether to drop tables before creating them
      */
     public void createTables(Database database, boolean dropTables) throws IOException
+    {
+        createTables(database, null, dropTables);
+    }
+
+    /**
+     * Outputs the DDL required to drop (if requested) and (re)create all tables in the database model.
+     * 
+     * @param database   The database
+     * @param params     The parameters used in the creation
+     * @param dropTables Whether to drop tables before creating them
+     */
+    public void createTables(Database database, CreationParameters params, boolean dropTables) throws IOException
     {
         if (dropTables)
         {
@@ -253,7 +265,7 @@ public abstract class SqlBuilder
             Table table = database.getTable(idx);
 
             writeTableComment(table);
-            createTable(database, table);
+            createTable(database, table, (params == null ? null : params.getParametersFor(table)));
         }
 
         // we're writing the external foreignkeys last to ensure that all referenced tables are already defined
@@ -285,6 +297,23 @@ public abstract class SqlBuilder
      */
     public void alterDatabase(Database currentModel, Database desiredModel, boolean doDrops, boolean modifyColumns) throws IOException
     {
+        alterDatabase(currentModel, desiredModel, null, doDrops, modifyColumns);
+    }        
+
+    /**
+     * Generates the DDL to modify an existing database so the schema matches
+     * the current specified database schema.
+     *
+     * @param currentModel  The current database schema
+     * @param desiredModel  The desired database schema
+     * @param params        The parameters used in the creation of new tables. Note that for existing
+     *                      tables, parameters won't be applied
+     * @param doDrops       Whether columns and indexes should be dropped if not in the
+     *                      new schema
+     * @param modifyColumns Whether columns should be altered for datatype, size as required
+     */
+    public void alterDatabase(Database currentModel, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns) throws IOException
+    {
         ArrayList newTables = new ArrayList();
 
         for (int tableIdx = 0; tableIdx < desiredModel.getTableCount(); tableIdx++)
@@ -298,7 +327,7 @@ public abstract class SqlBuilder
                 {
                     _log.info("Creating table " + desiredTable.getName());
                 }
-                createTable(desiredModel, desiredTable);
+                createTable(desiredModel, desiredTable, params.getParametersFor(desiredTable));
                 // we're deferring foreignkey generation
                 newTables.add(desiredTable);
             }
@@ -527,6 +556,19 @@ public abstract class SqlBuilder
      */
     public void createTable(Database database, Table table) throws IOException 
     {
+        createTable(database, table, null); 
+    }
+
+    /** 
+     * Outputs the DDL to create the table along with any non-external constraints as well
+     * as with external primary keys and indices (but not foreign keys).
+     * 
+     * @param database   The database model
+     * @param table      The table
+     * @param parameters Additional platform-specific parameters for the table creation
+     */
+    public void createTable(Database database, Table table, Map parameters) throws IOException 
+    {
         print("CREATE TABLE ");
         printlnIdentifier(getTableName(table));
         println("(");
@@ -547,7 +589,7 @@ public abstract class SqlBuilder
         }
         println();
         print(")");
-        printEndOfStatement();
+        writeTableCreationStmtEnding(table, parameters);
 
         if (!getPlatformInfo().isPrimaryKeyEmbedded())
         {
@@ -926,6 +968,19 @@ public abstract class SqlBuilder
         print("ALTER TABLE ");
         printlnIdentifier(getTableName(table));
         printIndent();
+    }
+
+    /** 
+     * Writes the end of the table creation statement. Per default,
+     * only the end of the statement is written, but this can be changed
+     * in subclasses.
+     * 
+     * @param table      The table
+     * @param parameters Additional platform-specific parameters for the table creation
+     */
+    protected void writeTableCreationStmtEnding(Table table, Map parameters) throws IOException
+    {
+        printEndOfStatement();
     }
 
     /**
