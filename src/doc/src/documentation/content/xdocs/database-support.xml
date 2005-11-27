@@ -211,23 +211,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -409,29 +409,29 @@
         <a href="ext:cloudscape/manual">IBM Cloudscape Reference Manual</a>.
       </p>
       <p>
-        The <a href="ext:derby">Apache Derby</a> project is based upon Cloudscape. The SQL syntax and
-        datatypes supported by Derby are described in the Datatypes section in the
-        <a href="ext:derby/manual">Reference Manual</a>.
+        The <a href="ext:derby">Apache Derby</a> project is based upon Cloudscape version 10, which IBM
+        contributed to Apache in 2004. The SQL syntax and datatypes supported by Derby are described in
+        the Datatypes section in the <a href="ext:derby/manual">Reference Manual</a>.
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -615,23 +615,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -821,23 +821,23 @@
       </note>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -1020,23 +1020,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -1223,23 +1223,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -1422,23 +1422,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -1621,23 +1621,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -1821,23 +1821,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -2019,23 +2019,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -2219,23 +2219,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
           <td>no</td>
         </tr>
         <tr>
@@ -2422,23 +2422,23 @@
       </p>
       <table>
         <tr>
-          <td><code>NULL</code> is explicitly specified as default value</td>
+          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Primary key definitions embedded in table definition</td>
+          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
           <td>yes</td>
         </tr>
         <tr>
-          <td>Foreign key definitions embedded in table definition</td>
+          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Indices embedded in table definition</td>
+          <td>DdlUtils uses indices embedded in the table definition</td>
           <td>no</td>
         </tr>
         <tr>
-          <td>Uses ALTER TABLE statements for dropping tables </td>
+          <td>DdlUtils uses ALTER TABLE statements for dropping tables</td>
           <td>no</td>
         </tr>
         <tr>

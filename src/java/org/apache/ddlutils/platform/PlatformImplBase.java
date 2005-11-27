@@ -269,7 +269,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void createTables(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
-        String sql = createTablesSql(model, dropTablesFirst, continueOnError);
+        String sql = getCreateTablesSql(model, dropTablesFirst, continueOnError);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -277,7 +277,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String createTablesSql(Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
+    public String getCreateTablesSql(Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
         String sql = null;
 
@@ -318,7 +318,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void createTables(Connection connection, Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
-        String sql = createTablesSql(model, params, dropTablesFirst, continueOnError);
+        String sql = getCreateTablesSql(model, params, dropTablesFirst, continueOnError);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -326,7 +326,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String createTablesSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
+    public String getCreateTablesSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
     {
         String sql = null;
 
@@ -373,13 +373,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String alterTablesSql(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            return alterTablesSql(connection, desiredDb, doDrops, modifyColumns, continueOnError);
+            return getAlterTablesSql(connection, desiredDb, doDrops, modifyColumns, continueOnError);
         }
         finally
         {
@@ -415,13 +415,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String alterTablesSql(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            return alterTablesSql(connection, desiredDb, params, doDrops, modifyColumns, continueOnError);
+            return getAlterTablesSql(connection, desiredDb, params, doDrops, modifyColumns, continueOnError);
         }
         finally
         {
@@ -442,7 +442,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void alterTables(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
-        String sql = alterTablesSql(connection, desiredModel, doDrops, modifyColumns, continueOnError);
+        String sql = getAlterTablesSql(connection, desiredModel, doDrops, modifyColumns, continueOnError);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -450,7 +450,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String alterTablesSql(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         String   sql          = null;
         Database currentModel = readModelFromDatabase(connection);
@@ -483,7 +483,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void alterTables(Connection connection, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
-        String sql = alterTablesSql(connection, desiredModel, params, doDrops, modifyColumns, continueOnError);
+        String sql = getAlterTablesSql(connection, desiredModel, params, doDrops, modifyColumns, continueOnError);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -491,7 +491,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String alterTablesSql(Connection connection, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Connection connection, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         String   sql          = null;
         Database currentModel = readModelFromDatabase(connection);
@@ -533,7 +533,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void dropTables(Connection connection, Database model, boolean continueOnError) throws DynaSqlException 
     {
-        String sql = dropTablesSql(model, continueOnError);
+        String sql = getDropTablesSql(model, continueOnError);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -541,7 +541,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String dropTablesSql(Database model, boolean continueOnError) throws DynaSqlException 
+    public String getDropTablesSql(Database model, boolean continueOnError) throws DynaSqlException 
     {
         String sql = null;
 

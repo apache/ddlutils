@@ -206,7 +206,7 @@ public interface Platform
      * @param continueOnError Whether to continue executing the sql commands when an error occurred
      * @return The SQL statements
      */
-    public String createTablesSql(Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException;
+    public String getCreateTablesSql(Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Creates the tables defined in the database model.
@@ -238,7 +238,7 @@ public interface Platform
      * @param continueOnError Whether to continue executing the sql commands when an error occurred
      * @return The SQL statements
      */
-    public String createTablesSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException;
+    public String getCreateTablesSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Alters the database schema so that it match the given model. Drops and table modifications will
@@ -270,7 +270,7 @@ public interface Platform
      * @param continueOnError Whether to continue with the next sql statement when an error occurred
      * @return The SQL statements
      */
-    public String alterTablesSql(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+    public String getAlterTablesSql(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Alters the database schema so that it match the given model. Drops and table modifications will
@@ -305,7 +305,7 @@ public interface Platform
      * @param continueOnError Whether to continue with the next sql statement when an error occurred
      * @return The SQL statements
      */
-    public String alterTablesSql(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+    public String getAlterTablesSql(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Alters the database schema so that it match the given model. Drops and table modifications will
@@ -340,7 +340,7 @@ public interface Platform
      * @param continueOnError Whether to continue with the next sql statement when an error occurred
      * @return The SQL statements
      */
-    public String alterTablesSql(Connection connection, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+    public String getAlterTablesSql(Connection connection, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Alters the database schema so that it match the given model. Drops and table modifications will
@@ -378,7 +378,7 @@ public interface Platform
      * @param continueOnError Whether to continue with the next sql statement when an error occurred
      * @return The SQL statements
      */
-    public String alterTablesSql(Connection connection, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+    public String getAlterTablesSql(Connection connection, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Drops the tables defined in the given database.
@@ -395,7 +395,7 @@ public interface Platform
      * @param continueOnError Whether to continue executing the sql commands when an error occurred
      * @return The SQL statements
      */
-    public String dropTablesSql(Database model, boolean continueOnError) throws DynaSqlException;
+    public String getDropTablesSql(Database model, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Drops the tables defined in the given database.
