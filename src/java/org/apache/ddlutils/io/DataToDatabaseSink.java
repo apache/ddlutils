@@ -58,6 +58,12 @@ public class DataToDatabaseSink implements DataSink
     private boolean _haltOnErrors = true;
     /** Whether to delay the insertion of beans so that the beans referenced by it via foreignkeys, are already inserted into the database. */
     private boolean _ensureFkOrder = true;
+    /** Whether to use batch mode inserts. */
+    private boolean _useBatchMode = false;
+    /** The queued objects for batch insertion. */
+    private ArrayList _batchQueue = new ArrayList();
+    /** The number of beans to insert in one batch. */
+    private int _batchSize = 1024;
     /** Stores the already-processed identities per table name. */
     private HashMap _processedIdentities = new HashMap();
     /** Stores the objects that are waiting for other objects to be inserted. */
@@ -123,10 +129,52 @@ public class DataToDatabaseSink implements DataSink
     }
 
     /**
+     * Determines whether batch mode is used for inserting the beans.
+     *
+     * @return <code>true</code> if batch mode is used (<code>false</code> per default)
+     */
+    public boolean isUseBatchMode()
+    {
+        return _useBatchMode;
+    }
+
+    /**
+     * Specifies whether batch mode is used for inserting the beans. Note that this requires
+     * that the primary key values are not defined by the database.
+     *
+     * @param useBatchMode <code>true</code> if batch mode shall be used
+     */
+    public void setUseBatchMode(boolean useBatchMode)
+    {
+        _useBatchMode = useBatchMode;
+    }
+
+    /**
+     * Returns the (maximum) number of beans to insert in one batch.
+     *
+     * @return The number of beans
+     */
+    public int getBatchSize()
+    {
+        return _batchSize;
+    }
+
+    /**
+     * Sets the (maximum) number of beans to insert in one batch.
+     *
+     * @param batchSize The number of beans
+     */
+    public void setBatchSize(int batchSize)
+    {
+        _batchSize = batchSize;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void end() throws DataSinkException
     {
+        purgeBatchQueue();
         try
         {
             _connection.close();
@@ -219,31 +267,7 @@ public class DataToDatabaseSink implements DataSink
                 return;
             }
         }
-        
-        try
-        {
-            _platform.insert(_model, bean, _connection);
-            if (!_connection.getAutoCommit())
-            {
-                _connection.commit();
-            }
-            if (_log.isDebugEnabled())
-            {
-                _log.debug("Inserted bean "+buildIdentityFromPKs(table, bean).toString());
-            }
-        }
-        catch (Exception ex)
-        {
-            if (_haltOnErrors)
-            {
-                _platform.returnConnection(_connection);
-                throw new DataSinkException(ex);
-            }
-            else
-            {
-                _log.warn("Exception while inserting a bean into the database", ex);
-            }
-        }
+        insertBeanIntoDatabase(table, bean);
         if (_processedIdentities.containsKey(table.getName()))
         {
             Identity  identity           = buildIdentityFromPKs(table, bean);
@@ -282,6 +306,94 @@ public class DataToDatabaseSink implements DataSink
         }
     }
 
+    /**
+     * Inserts the bean into the database or batch queue.
+     * 
+     * @param table The table
+     * @param bean  The bean
+     */
+    private void insertBeanIntoDatabase(Table table, DynaBean bean) throws DataSinkException
+    {
+        if (_useBatchMode)
+        {
+            _batchQueue.add(bean);
+            if (_batchQueue.size() >= _batchSize)
+            {
+                purgeBatchQueue();
+            }
+        }
+        else
+        {
+            insertSingleBeanIntoDatabase(table, bean);
+        }
+    }
+
+    /**
+     * Purges the batch queue by inserting the objects into the database.
+     */
+    private void purgeBatchQueue() throws DataSinkException
+    {
+        try
+        {
+            _platform.insert(_connection, _model, _batchQueue);
+            if (!_connection.getAutoCommit())
+            {
+                _connection.commit();
+            }
+            if (_log.isDebugEnabled())
+            {
+                _log.debug("Inserted "+_batchQueue.size()+" beans in batch mode ");
+            }
+        }
+        catch (Exception ex)
+        {
+            if (_haltOnErrors)
+            {
+                _platform.returnConnection(_connection);
+                throw new DataSinkException(ex);
+            }
+            else
+            {
+                _log.warn("Exception while inserting "+_batchQueue.size()+" beans via batch mode into the database", ex);
+            }
+        }
+        _batchQueue.clear();
+    }
+    
+    /**
+     * Directly inserts the given bean into the database.
+     * 
+     * @param table The table of the bean
+     * @param bean  The bean
+     */
+    private void insertSingleBeanIntoDatabase(Table table, DynaBean bean) throws DataSinkException
+    {
+        try
+        {
+            _platform.insert(_connection, _model, bean);
+            if (!_connection.getAutoCommit())
+            {
+                _connection.commit();
+            }
+            if (_log.isDebugEnabled())
+            {
+                _log.debug("Inserted bean "+buildIdentityFromPKs(table, bean).toString());
+            }
+        }
+        catch (Exception ex)
+        {
+            if (_haltOnErrors)
+            {
+                _platform.returnConnection(_connection);
+                throw new DataSinkException(ex);
+            }
+            else
+            {
+                _log.warn("Exception while inserting a bean into the database", ex);
+            }
+        }
+    }
+    
     /**
      * Returns the name of the given foreign key. If it has no name, then a temporary one
      * is generated from the names of the relevant tables and columns.

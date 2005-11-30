@@ -42,7 +42,11 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     private File      _singleDataFile = null;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
-
+    /** Whether we should use batch mode. */
+    private Boolean _useBatchMode;
+    /** The maximum number of objects to insert in one batch. */
+    private Integer _batchSize;
+    
     /**
      * Adds a fileset.
      * 
@@ -64,6 +68,26 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
+     * Sets the maximum number of objects to insert in one batch.
+     *
+     * @param batchSize The number of objects
+     */
+    public void setBatchSize(int batchSize)
+    {
+        _batchSize = new Integer(batchSize);
+    }
+
+    /**
+     * Specifies whether we shall be using batch mode.
+     *
+     * @param useBatchMode <code>true</code> if we shall use batch mode
+     */
+    public void setUseBatchMode(boolean useBatchMode)
+    {
+        _useBatchMode = Boolean.valueOf(useBatchMode);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void execute(Task task, Database model) throws BuildException
@@ -74,6 +98,15 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
             DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
             DataReader         reader   = new DataReader();
 
+            if (_useBatchMode != null)
+            {
+                sink.setUseBatchMode(_useBatchMode.booleanValue());
+                if (_batchSize != null)
+                {
+                    sink.setBatchSize(_batchSize.intValue());
+                }
+            }
+            
             reader.setModel(model);
             reader.setSink(sink);
             registerConverters(reader.getConverterConfiguration());

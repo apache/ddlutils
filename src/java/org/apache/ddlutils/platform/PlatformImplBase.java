@@ -828,7 +828,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void insert(Database model, DynaBean dynaBean, Connection connection) throws DynaSqlException
+    public void insert(Connection connection, Database model, DynaBean dynaBean) throws DynaSqlException
     {
         SqlDynaClass      dynaClass  = model.getDynaClassFor(dynaBean);
         SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
@@ -971,7 +971,149 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
         try
         {
-            insert(model, dynaBean, connection);
+            insert(connection, model, dynaBean);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void insert(Connection connection, Database model, Collection dynaBeans) throws DynaSqlException
+    {
+        SqlDynaClass      dynaClass  = null;
+        SqlDynaProperty[] properties = null;
+        PreparedStatement statement  = null;
+        int               addedStmts = 0;
+
+        for (Iterator it = dynaBeans.iterator(); it.hasNext();)
+        {
+            DynaBean     dynaBean     = (DynaBean)it.next();
+            SqlDynaClass curDynaClass = model.getDynaClassFor(dynaBean);
+
+            if (curDynaClass != dynaClass)
+            {
+                if (dynaClass != null)
+                {
+                    executeBatch(statement, addedStmts, dynaClass.getTableName());
+                    addedStmts = 0;
+                }
+
+                dynaClass  = curDynaClass;
+                properties = dynaClass.getSqlDynaProperties();
+    
+                if (properties.length == 0)
+                {
+                    _log.warn("Cannot insert instances of type " + dynaClass + " because it has no properties");
+                    continue;
+                }
+    
+                Column[] columns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumns();
+    
+                if (columns.length > 0)
+                {
+                    SqlDynaProperty[] newProperties = new SqlDynaProperty[properties.length - 1];
+                    int               newIdx        = 0;
+    
+                    // We have to remove the auto-increment columns as some databases won't like
+                    // it being present in the insert command
+    
+                    for (int propIdx = 0; propIdx < properties.length; propIdx++)
+                    {
+                        for (int autoIncrColumnIdx = 0; autoIncrColumnIdx < columns.length; autoIncrColumnIdx++)
+                        {
+                            if (properties[propIdx].getColumn() != columns[autoIncrColumnIdx])
+                            {
+                                newProperties[newIdx++] = properties[propIdx];
+                            }
+                        }
+                    }
+                    properties = newProperties;
+                }
+
+                String insertSql = createInsertSql(model, dynaClass, properties, null);
+
+                if (_log.isDebugEnabled())
+                {
+                    _log.debug("Starting new batch with SQL: " + insertSql);
+                }
+                try
+                {
+                    statement = connection.prepareStatement(insertSql);
+                }
+                catch (SQLException ex)
+                {
+                    throw new DynaSqlException("Error while preparing insert statement", ex);
+                }
+            }
+            try
+            {
+                for (int idx = 0; idx < properties.length; idx++ )
+                {
+                    setObject(statement, idx + 1, dynaBean, properties[idx]);
+                }
+                statement.addBatch();
+                addedStmts++;
+            }
+            catch (SQLException ex)
+            {
+                throw new DynaSqlException("Error while adding batch insert", ex);
+            }
+        }
+        if (dynaClass != null)
+        {
+            executeBatch(statement, addedStmts, dynaClass.getTableName());
+        }
+    }
+
+    /**
+     * Performs the batch for the given statement, and checks that the specified amount of rows have been changed.
+     * 
+     * @param statement The prepared statement
+     * @param numRows   The number of rows that should change
+     * @param tableName The name of the changed table
+     */
+    private void executeBatch(PreparedStatement statement, int numRows, String tableName) throws DynaSqlException
+    {
+        if (statement != null)
+        {
+            try
+            {
+                int[] results = statement.executeBatch();
+
+                closeStatement(statement);
+
+                int sum = 0;
+
+                for (int idx = 0; (results != null) && (idx < results.length); idx++)
+                {
+                    sum += results[idx];
+                }
+                if (sum != numRows)
+                {
+                    _log.warn("Attempted to insert " + numRows + " rows into table " + tableName + " but changed " + sum + " rows");
+                }
+            }
+            catch (SQLException ex)
+            {
+                throw new DynaSqlException("Error while inserting into the database", ex);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void insert(Database model, Collection dynaBeans) throws DynaSqlException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            insert(connection, model, dynaBeans);
         }
         finally
         {
@@ -1019,7 +1161,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void update(Database model, DynaBean dynaBean, Connection connection) throws DynaSqlException
+    public void update(Connection connection, Database model, DynaBean dynaBean) throws DynaSqlException
     {
         SqlDynaClass      dynaClass   = model.getDynaClassFor(dynaBean);
         SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
@@ -1081,7 +1223,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
         try
         {
-            update(model, dynaBean, connection);
+            update(connection, model, dynaBean);
         }
         finally
         {
@@ -1096,7 +1238,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      * @param connection The connection
      * @return <code>true</code> if this dyna bean has a primary key
      */
-    protected boolean exists(DynaBean dynaBean, Connection connection)
+    protected boolean exists(Connection connection, DynaBean dynaBean)
     {
         // TODO: check for the pk value, and if present, query against database
         return false;
@@ -1111,13 +1253,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
         try
         {
-            if (exists(dynaBean, connection))
+            if (exists(connection, dynaBean))
             {
-                update(model, dynaBean, connection);
+                update(connection, model, dynaBean);
             }
             else
             {
-                insert(model, dynaBean, connection);
+                insert(connection, model, dynaBean);
             }
         }
         finally
@@ -1173,7 +1315,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
         try
         {
-            delete(model, dynaBean, connection);
+            delete(connection, model, dynaBean);
         }
         finally
         {
@@ -1184,7 +1326,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void delete(Database model, DynaBean dynaBean, Connection connection) throws DynaSqlException
+    public void delete(Connection connection, Database model, DynaBean dynaBean) throws DynaSqlException
     {
         PreparedStatement statement  = null;
 
