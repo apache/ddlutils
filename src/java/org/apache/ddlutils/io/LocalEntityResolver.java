@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
 
 /**
  * An entity resolver that matches the specific database dtds to the one that comes
- * with commons-sql, and that can handle file url's.
+ * with DdlUtils, and that can handle file url's.
  * 
  * @author Thomas Dudziak
  * @version $Revision$
@@ -45,7 +45,7 @@ public class LocalEntityResolver implements EntityResolver
 
         if (systemId.startsWith(DTD_PREFIX))
         {
-            InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("resources/database.dtd");
+            InputStream input = getClass().getResourceAsStream("/database.dtd");
 
             if (input != null)
             {

@@ -69,7 +69,8 @@
                excludes="**/*.java"/>
     </copy>
     <jar jarfile="${dist.dir}/${dist-filename-prefix}.jar"
-         basedir="${build.java.dir}"/>
+         basedir="${build.java.dir}"
+         excludes="**/package.html"/>
   </target>
 
   <target name="clean"

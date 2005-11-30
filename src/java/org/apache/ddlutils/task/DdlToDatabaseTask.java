@@ -39,6 +39,18 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     private File _singleSchemaFile = null;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
+    /** Whether XML input files are validated against the internal or an external DTD. */
+    private boolean _useInternalDtd = true;
+
+    /**
+     * Specifies whether XML input files are validated against the internal or an external DTD.
+     *
+     * @param isValidating <code>true</code> if input files are to be validated against the internal DTD
+     */
+    public void setUseInternalDtd(boolean useInternalDtd)
+    {
+        _useInternalDtd = useInternalDtd;
+    }
 
     /**
      * Adds a fileset.
@@ -136,8 +148,9 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     protected Database readModel()
     {
         DatabaseIO reader = new DatabaseIO();
-        Database       model  = null;
+        Database   model  = null;
 
+        reader.setUseInternalDtd(_useInternalDtd);
         if ((_singleSchemaFile != null) && !_fileSets.isEmpty())
         {
             throw new BuildException("Please use either the schemafile attribute or the sub fileset element, but not both");
