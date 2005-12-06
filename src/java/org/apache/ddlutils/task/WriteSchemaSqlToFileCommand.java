@@ -117,13 +117,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
             FileWriter writer = new FileWriter(_outputFile);
 
             platform.getSqlBuilder().setWriter(writer);
-            if (isAlterDatabase())
+            if (isAlterDatabase() && (getDataSource() != null))
             {
-                if (getDataSource() == null)
-                {
-                    throw new BuildException("No database specified.");
-                }
-
                 Database currentModel = platform.readModelFromDatabase();
 
                 platform.getSqlBuilder().alterDatabase(currentModel, model, params, _doDrops, true);
