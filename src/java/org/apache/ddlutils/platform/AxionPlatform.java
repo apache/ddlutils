@@ -62,6 +62,7 @@ public class AxionPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.SMALLINT,      "SHORT");
         info.addNativeTypeMapping(Types.STRUCT,        "VARBINARY");
         info.addNativeTypeMapping(Types.TINYINT,       "SHORT");
+        info.addNativeTypeMapping(Types.BIGINT,        "LONG");
         info.addNativeTypeMapping("DATALINK", "VARBINARY");
 
         setSqlBuilder(new AxionBuilder(info));

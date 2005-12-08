@@ -17,6 +17,7 @@ package org.apache.ddlutils.io;
  */
 
 import org.apache.ddlutils.TestDatabaseWriterBase;
+import org.apache.ddlutils.platform.AxionPlatform;
 
 /**
  * Performs tests against Axion.
@@ -64,5 +65,13 @@ public class TestAgainstAxionDb extends TestDatabaseWriterBase
     public void _testCreation() throws Exception
     {
         createDatabase(COLUMN_TEST_SCHEMA);
+    }
+
+    /**
+     * @see org.apache.ddlutils.TestDatabaseWriterBase#getDatabaseName()
+     */
+    protected String getDatabaseName()
+    {
+        return AxionPlatform.DATABASENAME;
     }
 }

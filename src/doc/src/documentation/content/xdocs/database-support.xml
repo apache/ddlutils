@@ -256,7 +256,7 @@
         </tr>
         <tr>
           <td>BIGINT</td>
-          <td>BIGINT</td>
+          <td>LONG (cvs head has support for BIGINT)</td>
           <td></td>
         </tr>
         <tr>
