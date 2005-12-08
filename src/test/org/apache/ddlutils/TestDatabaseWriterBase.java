@@ -169,7 +169,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         {
             _model = parseDatabaseFromString(schemaXml);
 
-            getPlatform().createTables(_model, true, true);
+            getPlatform().createTables(_model, true, false);
         }
         catch (Exception ex)
         {
