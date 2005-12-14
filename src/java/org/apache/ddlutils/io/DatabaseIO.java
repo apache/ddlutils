@@ -44,8 +44,30 @@ import org.xml.sax.SAXException;
  */
 public class DatabaseIO
 {
+    /** Whether to validate the XML. */
+    private boolean _validateXml = true;
     /** Whether to use the internal dtd that comes with DdlUtils. */
     private boolean _useInternalDtd = true;
+
+    /**
+     * Returns whether XML is validated upon reading it.
+     * 
+     * @return <code>true</code> if read XML is validated
+     */
+    public boolean isValidateXml()
+    {
+        return _validateXml;
+    }
+
+    /**
+     * Specifies whether XML shall be validated upon reading it.
+     * 
+     * @param validateXml <code>true</code> if read XML shall be validated
+     */
+    public void setValidateXml(boolean validateXml)
+    {
+        _validateXml = validateXml;
+    }
 
     /**
      * Returns whether the internal dtd that comes with DdlUtils is used.
@@ -79,6 +101,7 @@ public class DatabaseIO
         reader.getXMLIntrospector().getConfiguration().setAttributesForPrimitives(true);
         reader.getXMLIntrospector().getConfiguration().setWrapCollectionsInElement(false);
         reader.getXMLIntrospector().getConfiguration().setElementNameMapper(new HyphenatedNameMapper());
+        reader.setValidating(isValidateXml());
         if (isUseInternalDtd())
         {
             reader.setEntityResolver(new LocalEntityResolver());

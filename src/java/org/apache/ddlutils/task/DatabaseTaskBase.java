@@ -121,6 +121,16 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
+     * Returns the commands.
+     * 
+     * @return The commands
+     */
+    protected Iterator getCommands()
+    {
+        return _commands.iterator();
+    }
+    
+    /**
      * Creates the platform for the configured database.
      * 
      * @return The platform
@@ -144,7 +154,7 @@ public abstract class DatabaseTaskBase extends Task
      */
     protected void executeCommands(Database model) throws BuildException
     {
-        for (Iterator it = _commands.iterator(); it.hasNext();)
+        for (Iterator it = getCommands(); it.hasNext();)
         {
             Command cmd = (Command)it.next();
 

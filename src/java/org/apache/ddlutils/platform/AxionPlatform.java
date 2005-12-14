@@ -42,12 +42,15 @@ public class AxionPlatform extends PlatformImplBase
     {
         PlatformInfo info = new PlatformInfo();
 
+        info.setUseDelimitedIdentifiers(false);
+        info.setCommentsSupported(false);
         info.setRequiringNullAsDefaultValue(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
         info.addNativeTypeMapping(Types.BINARY,        "VARBINARY");
+        info.addNativeTypeMapping(Types.BIGINT,        "LONG");
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
         info.addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
         info.addNativeTypeMapping(Types.DISTINCT,      "VARBINARY");
@@ -62,7 +65,6 @@ public class AxionPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.SMALLINT,      "SHORT");
         info.addNativeTypeMapping(Types.STRUCT,        "VARBINARY");
         info.addNativeTypeMapping(Types.TINYINT,       "SHORT");
-        info.addNativeTypeMapping(Types.BIGINT,        "LONG");
         info.addNativeTypeMapping("DATALINK", "VARBINARY");
 
         setSqlBuilder(new AxionBuilder(info));

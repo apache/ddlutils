@@ -622,7 +622,7 @@ public interface Platform
      * 
      * @param connection The database connection
      * @param model      The database model to use
-     * @param dynaBean   The bean
+     * @param dynaBeans  The beans
      */
     public void insert(Connection connection, Database model, Collection dynaBeans) throws DynaSqlException;
 

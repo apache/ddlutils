@@ -38,8 +38,6 @@ public class AxionBuilder extends SqlBuilder
     public AxionBuilder(PlatformInfo info)
     {
         super(info);
-        info.setUseDelimitedIdentifiers(false);
-        info.setCommentsSupported(false);
     }
 
     /**

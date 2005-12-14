@@ -136,41 +136,55 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
         }
         catch (Exception ex)
         {
-            throw new BuildException(ex);
+            if (ex instanceof BuildException)
+            {
+                throw (BuildException)ex;
+            }
+            else
+            {
+                throw new BuildException(ex);
+            }
         }
     }
 
     /**
      * Reads a single data file.
      * 
-     * @param task       The parent task
-     * @param reader     The data reader
-     * @param schemaFile The schema file
+     * @param task     The parent task
+     * @param reader   The data reader
+     * @param dataFile The schema file
      */
-    private void readSingleDataFile(Task task, DataReader reader, File schemaFile)
+    private void readSingleDataFile(Task task, DataReader reader, File dataFile)
     {
-        if (!schemaFile.exists())
+        if (!dataFile.exists())
         {
-            task.log("Could not find data file "+schemaFile.getAbsolutePath(), Project.MSG_ERR);
+            task.log("Could not find data file "+dataFile.getAbsolutePath(), Project.MSG_ERR);
         }
-        else if (!schemaFile.isFile())
+        else if (!dataFile.isFile())
         {
-            task.log("Path "+schemaFile.getAbsolutePath()+" does not denote a data file", Project.MSG_ERR);
+            task.log("Path "+dataFile.getAbsolutePath()+" does not denote a data file", Project.MSG_ERR);
         }
-        else if (!schemaFile.canRead())
+        else if (!dataFile.canRead())
         {
-            task.log("Could not read data file "+schemaFile.getAbsolutePath(), Project.MSG_ERR);
+            task.log("Could not read data file "+dataFile.getAbsolutePath(), Project.MSG_ERR);
         }
         else
         {
             try
             {
-                reader.parse(schemaFile);
-                task.log("Read data file "+schemaFile.getAbsolutePath(), Project.MSG_INFO);
+                reader.parse(dataFile);
+                task.log("Read data file "+dataFile.getAbsolutePath(), Project.MSG_INFO);
             }
             catch (Exception ex)
             {
-                throw new BuildException("Could not read data file "+schemaFile.getAbsolutePath(), ex);
+                if (isFailOnError())
+                {
+                    throw new BuildException("Could not read data file "+dataFile.getAbsolutePath(), ex);
+                }
+                else
+                {
+                    task.log("Could not read data file "+dataFile.getAbsolutePath(), Project.MSG_ERR);
+                }
             }
         }
     }

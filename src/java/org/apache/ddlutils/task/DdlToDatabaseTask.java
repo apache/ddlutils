@@ -45,7 +45,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     /**
      * Specifies whether XML input files are validated against the internal or an external DTD.
      *
-     * @param isValidating <code>true</code> if input files are to be validated against the internal DTD
+     * @param useInternalDtd <code>true</code> if input files are to be validated against the internal DTD
      */
     public void setUseInternalDtd(boolean useInternalDtd)
     {

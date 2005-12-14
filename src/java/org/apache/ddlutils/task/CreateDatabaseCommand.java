@@ -82,7 +82,7 @@ public class CreateDatabaseCommand extends DatabaseCommand
         }
         catch (UnsupportedOperationException ex)
         {
-            task.log("Database platform "+getPlatform().getName()+" does not support database creation via JDBC", Project.MSG_ERR);
+            task.log("Database platform "+getPlatform().getName()+" does not support database creation via JDBC or there was an error while creating it: "+ex.getMessage(), Project.MSG_ERR);
         }
         catch (Exception ex)
         {
