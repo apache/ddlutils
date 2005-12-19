@@ -624,10 +624,8 @@ public class Table implements Serializable, Cloneable
             Table other = (Table)obj;
 
             // Note that this compares case sensitive
-            return new EqualsBuilder().append(_catalog,     other._catalog)
-                                      .append(_schema,      other._schema)
-                                      .append(_name,        other._name)
-                                      .append(_type,        other._type)
+            // TODO: For now we ignore catalog and schema (type should be irrelevant anyways)
+            return new EqualsBuilder().append(_name,        other._name)
                                       .append(_columns,     other._columns)
                                       .append(_foreignKeys, other._foreignKeys)
                                       .append(_indices,     other._indices)
@@ -644,10 +642,8 @@ public class Table implements Serializable, Cloneable
      */
     public int hashCode()
     {
-        return new HashCodeBuilder(17, 37).append(_catalog)
-                                          .append(_schema)
-                                          .append(_name)
-                                          .append(_type)
+        // TODO: For now we ignore catalog and schema (type should be irrelevant anyways)
+        return new HashCodeBuilder(17, 37).append(_name)
                                           .append(_columns)
                                           .append(_foreignKeys)
                                           .append(_indices)

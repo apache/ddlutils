@@ -18,9 +18,6 @@ package org.apache.ddlutils.model;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 /**
  * Provides compatibility with Torque-style xml with separate &lt;index&gt; and
  * &lt;unique&gt; tags, but adds no functionality.  All indexes are treated the
@@ -64,9 +61,8 @@ public class UniqueIndex extends NonUniqueIndex
         {
             UniqueIndex other = (UniqueIndex)obj;
 
-            return new EqualsBuilder().append(_name,    other._name)
-                                      .append(_columns, other._columns)
-                                      .isEquals();
+            // Note that we ignore the name here
+            return _columns.equals(other._columns);
         }
         else
         {
@@ -79,9 +75,7 @@ public class UniqueIndex extends NonUniqueIndex
      */
     public int hashCode()
     {
-        return new HashCodeBuilder(17, 37).append(_name)
-                                          .append(_columns)
-                                          .toHashCode();
+        return _columns.hashCode();
     }
 
     /**

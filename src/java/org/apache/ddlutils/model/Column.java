@@ -427,20 +427,26 @@ public class Column implements Cloneable, Serializable
     {
         if (obj instanceof Column)
         {
-            Column other = (Column)obj;
+            Column        other      = (Column)obj;
+            EqualsBuilder comparator = new EqualsBuilder();
 
             // Note that this compares case sensitive
-            return new EqualsBuilder().append(_name,          other._name)
-                                      .append(_primaryKey,    other._primaryKey)
-                                      .append(_required,      other._required)
-                                      .append(_autoIncrement, other._autoIncrement)
-                                      .append(_typeCode,      other._typeCode)
-                                      .append(_type,          other._type)
-                                      .append(_size,          other._size)
-                                      .append(_sizeAsInt,     other._sizeAsInt)
-                                      .append(_scale,         other._scale)
-                                      .append(_defaultValue,  other._defaultValue)
-                                      .isEquals();
+            comparator.append(_name,          other._name);
+            comparator.append(_primaryKey,    other._primaryKey);
+            comparator.append(_required,      other._required);
+            comparator.append(_autoIncrement, other._autoIncrement);
+            comparator.append(_typeCode,      other._typeCode);
+            comparator.append(_type,          other._type);
+            comparator.append(_scale,         other._scale);
+            comparator.append(_defaultValue,  other._defaultValue);
+
+            // comparing the size makes only sense for types where it is relevant
+            if (!TypeMap.isNumericType(_typeCode) && TypeMap.isNumericType(other._typeCode))
+            {
+                comparator.append(_size, other._size);
+            }
+
+            return comparator.isEquals();
         }
         else
         {
@@ -453,17 +459,22 @@ public class Column implements Cloneable, Serializable
      */
     public int hashCode()
     {
-        return new HashCodeBuilder(17, 37).append(_name)
-                                          .append(_primaryKey)
-                                          .append(_required)
-                                          .append(_autoIncrement)
-                                          .append(_typeCode)
-                                          .append(_type)
-                                          .append(_size)
-                                          .append(_sizeAsInt)
-                                          .append(_scale)
-                                          .append(_defaultValue)
-                                          .toHashCode();
+        HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+
+        builder.append(_name);
+        builder.append(_primaryKey);
+        builder.append(_required);
+        builder.append(_autoIncrement);
+        builder.append(_typeCode);
+        builder.append(_type);
+        builder.append(_scale);
+        builder.append(_defaultValue);
+        if (!TypeMap.isNumericType(_typeCode))
+        {
+            builder.append(_size);
+        }
+        
+        return builder.toHashCode();
     }
 
     /**

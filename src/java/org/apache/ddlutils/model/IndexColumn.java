@@ -40,6 +40,23 @@ public class IndexColumn implements Cloneable, Serializable
     // TODO: It might be useful if the referenced column is directly acessible here ?
 
     /**
+     * Creates a new index column object.
+     */
+    public IndexColumn()
+    {
+    }
+    
+    /**
+     * Creates a new index column object.
+     * 
+     * @param columnName The name of the corresponding table column
+     */
+    public IndexColumn(String columnName)
+    {
+        _name = columnName;
+    }
+    
+    /**
      * Returns the name of the column.
      * 
      * @return The name
