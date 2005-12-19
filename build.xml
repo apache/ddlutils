@@ -187,6 +187,25 @@
   </target>
 
   <!-- ================================================================== -->
+  <!-- Can be used to create the testdatabase if the platform supports it -->
+  <!-- ================================================================== -->
+  <target name="create-test-database"
+          description="Can be used to create the testdatabase if the platform supports it">
+    <property file="${jdbc.properties.file}"/> 
+
+    <taskdef name="ddl2Database"
+             classname="org.apache.ddlutils.task.DdlToDatabaseTask"
+             classpathref="compilation-classpath"/>
+    <ddl2Database>
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+      <createdatabase failonerror="true"/>
+    </ddl2Database>
+  </target> 
+
+  <!-- ================================================================== -->
   <!-- Runs the test cases                                                -->
   <!-- ================================================================== -->
   <target name="junit"
