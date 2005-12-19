@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * This is an iterator that is specifically targeted at traversing result sets.
@@ -223,13 +225,24 @@ public class DynaSqlIterator implements Iterator
         {
             try
             {
-                DynaBean bean = _dynaClass.newInstance();
+                DynaBean bean  = _dynaClass.newInstance();
+                Table    table = null;
+
+                if (bean instanceof SqlDynaBean)
+                {
+                    SqlDynaClass dynaClass = (SqlDynaClass)((SqlDynaBean)bean).getDynaClass();
+
+                    table = dynaClass.getTable();
+                }
 
                 for (Iterator it = _columnsToProperties.entrySet().iterator(); it.hasNext();)
                 {
-                    Map.Entry entry = (Map.Entry)it.next();
+                    Map.Entry entry      = (Map.Entry)it.next();
+                    String    columnName = (String)entry.getKey();
+                    String    propName   = (String)entry.getKey();
+                    Object    value      = getObjectFromResultSet(_resultSet, columnName, table);
 
-                    bean.set((String)entry.getValue(), _resultSet.getObject((String)entry.getKey()));
+                    bean.set(propName, value);
                 }
                 _needsAdvancing = true;
                 return bean;
@@ -242,6 +255,102 @@ public class DynaSqlIterator implements Iterator
         }
     }
 
+    /**
+     * Extracts the value for the specified column from the result set. If a table was specified,
+     * and it contains the column, then the jdbc type defined for the column is used for extracting
+     * the value, otherwise the object directly retrieved from the result set is returned.
+     * 
+     * @param resultSet  The result set
+     * @param columnName The name of the column
+     * @param table      The table
+     * @return The value
+     */
+    private Object getObjectFromResultSet(ResultSet resultSet, String columnName, Table table) throws SQLException
+    {
+        Column column = (table == null ? null : table.findColumn(columnName, true));
+        Object value = null;
+
+        if (column != null)
+        {
+            int jdbcType = column.getTypeCode();
+
+            // we're returning values according to the standard mapping as defined by the JDBC spec
+            switch (jdbcType)
+            {
+                case Types.CHAR:
+                case Types.VARCHAR:
+                case Types.LONGVARCHAR:
+                    value = resultSet.getString(columnName);
+                    break;
+                case Types.NUMERIC:
+                case Types.DECIMAL:
+                    value = resultSet.getBigDecimal(columnName);
+                    break;
+                case Types.BIT:
+                    value = new Boolean(resultSet.getBoolean(columnName));
+                    break;
+                case Types.TINYINT:
+                case Types.SMALLINT:
+                case Types.INTEGER:
+                    value = new Integer(resultSet.getInt(columnName));
+                    break;
+                case Types.BIGINT:
+                    value = new Long(resultSet.getLong(columnName));
+                    break;
+                case Types.REAL:
+                    value = new Float(resultSet.getFloat(columnName));
+                    break;
+                case Types.FLOAT:
+                case Types.DOUBLE:
+                    value = new Double(resultSet.getDouble(columnName));
+                    break;
+                case Types.BINARY:
+                case Types.VARBINARY:
+                case Types.LONGVARBINARY:
+                    value = resultSet.getBytes(columnName);
+                    break;
+                case Types.DATE:
+                    value = resultSet.getDate(columnName);
+                    break;
+                case Types.TIME:
+                    value = resultSet.getTime(columnName);
+                    break;
+                case Types.TIMESTAMP:
+                    value = resultSet.getTimestamp(columnName);
+                    break;
+                case Types.CLOB:
+                    value = resultSet.getClob(columnName);
+                    break;
+                case Types.BLOB:
+                    value = resultSet.getBlob(columnName);
+                    break;
+                case Types.ARRAY:
+                    value = resultSet.getArray(columnName);
+                    break;
+                case Types.REF:
+                    value = resultSet.getRef(columnName);
+                    break;
+                default:
+                    // special handling for Java 1.4/JDBC 3 types
+                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
+                        (jdbcType == Jdbc3Utils.determineBooleanTypeCode()))
+                    {
+                        value = new Boolean(resultSet.getBoolean(columnName));
+                    }
+                    else
+                    {
+                        value = resultSet.getObject(columnName);
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            value = _resultSet.getObject(columnName);
+        }
+        return value;
+    }
+    
     /**
      * Advances the result set if necessary.
      */
