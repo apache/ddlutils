@@ -194,7 +194,11 @@ public abstract class TestPlatformBase extends TestCase
      */
     protected Database parseDatabaseFromString(String dbDef)
     {
-        return new DatabaseIO().read(new StringReader(dbDef));
+        DatabaseIO dbIO = new DatabaseIO();
+        
+        dbIO.setUseInternalDtd(true);
+        dbIO.setValidateXml(false);
+        return dbIO.read(new StringReader(dbDef));
     }
 
     /**
