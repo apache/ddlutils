@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.dynabean.DynaClassCache;
@@ -496,12 +497,13 @@ public class Database implements Serializable, Cloneable
      */
     protected Object clone() throws CloneNotSupportedException
     {
-        Database result = new Database();
+        Database result = (Database)super.clone();
 
         result._name     = _name;
         result._idMethod = _idMethod;
         result._version  = _version;
         result._tables   = (ArrayList)_tables.clone();
+
         return result;
     }
 
@@ -514,8 +516,10 @@ public class Database implements Serializable, Cloneable
         {
             Database other = (Database)obj;
 
-            return _name.equals(other._name) &&
-                   _tables.equals(other._tables);
+            // Note that this compares case sensitive
+            return new EqualsBuilder().append(_name,   other._name)
+                                      .append(_tables, other._tables)
+                                      .isEquals();
         }
         else
         {
@@ -528,10 +532,9 @@ public class Database implements Serializable, Cloneable
      */
     public int hashCode()
     {
-        return new HashCodeBuilder(17, 37)
-               .append(_name)
-               .append(_tables)
-               .toHashCode();
+        return new HashCodeBuilder(17, 37).append(_name)
+                                          .append(_tables)
+                                          .toHashCode();
     }
 
     /**
@@ -539,6 +542,35 @@ public class Database implements Serializable, Cloneable
      */
     public String toString()
     {
-        return "Database " + _name + " [" + _tables.size() + " tables]";
+        StringBuffer result = new StringBuffer();
+
+        result.append("Database [name=");
+        result.append(getName());
+        result.append("; ");
+        result.append(getTableCount());
+        result.append(" tables]");
+
+        return result.toString();
+    }
+
+    /**
+     * Returns a verbose string representation of this database.
+     * 
+     * @return The string representation
+     */
+    public String toVerboseString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("Database [");
+        result.append(getName());
+        result.append("] tables:");
+        for (int idx = 0; idx < getTableCount(); idx++)
+        {
+            result.append(" ");
+            result.append(getTable(idx).toVerboseString());
+        }
+
+        return result.toString();
     }
 }

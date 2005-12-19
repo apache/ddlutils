@@ -18,6 +18,9 @@ package org.apache.ddlutils.model;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * Represents a column in the database model.
  * 
@@ -397,9 +400,9 @@ public class Column implements Cloneable, Serializable
     /**
      * {@inheritDoc}
      */
-    public Object clone() throws CloneNotSupportedException
+    protected Object clone() throws CloneNotSupportedException
     {
-        Column result = new Column();
+        Column result = (Column)super.clone();
 
         result._name            = _name;
         result._javaName        = _javaName;
@@ -413,7 +416,54 @@ public class Column implements Cloneable, Serializable
         result._scale           = _scale;
         result._size            = _size;
         result._sizeAsInt       = _sizeAsInt;
+
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof Column)
+        {
+            Column other = (Column)obj;
+
+            // Note that this compares case sensitive
+            return new EqualsBuilder().append(_name,          other._name)
+                                      .append(_primaryKey,    other._primaryKey)
+                                      .append(_required,      other._required)
+                                      .append(_autoIncrement, other._autoIncrement)
+                                      .append(_typeCode,      other._typeCode)
+                                      .append(_type,          other._type)
+                                      .append(_size,          other._size)
+                                      .append(_sizeAsInt,     other._sizeAsInt)
+                                      .append(_scale,         other._scale)
+                                      .append(_defaultValue,  other._defaultValue)
+                                      .isEquals();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37).append(_name)
+                                          .append(_primaryKey)
+                                          .append(_required)
+                                          .append(_autoIncrement)
+                                          .append(_typeCode)
+                                          .append(_type)
+                                          .append(_size)
+                                          .append(_sizeAsInt)
+                                          .append(_scale)
+                                          .append(_defaultValue)
+                                          .toHashCode();
     }
 
     /**

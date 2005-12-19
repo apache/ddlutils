@@ -97,4 +97,11 @@ public interface Index extends Cloneable, Serializable
      * @param idx The position of the index column to remove
      */
     public void removeColumn(int idx);
+
+    /**
+     * Returns a verbose string representation of this index.
+     * 
+     * @return The string representation
+     */
+    public String toVerboseString();
 }

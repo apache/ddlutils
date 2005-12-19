@@ -18,6 +18,9 @@ package org.apache.ddlutils.model;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * Represents an index definition for a table.
  * 
@@ -123,12 +126,77 @@ public class NonUniqueIndex implements Index
     /**
      * {@inheritDoc}
      */
-    public Object clone() throws CloneNotSupportedException
+    protected Object clone() throws CloneNotSupportedException
     {
-        NonUniqueIndex result = new NonUniqueIndex();
+        NonUniqueIndex result = (NonUniqueIndex)super.clone();
 
         result._name    = _name;
         result._columns = (ArrayList)_columns.clone();
+
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof NonUniqueIndex)
+        {
+            NonUniqueIndex other = (NonUniqueIndex)obj;
+
+            return new EqualsBuilder().append(_name,    other._name)
+                                      .append(_columns, other._columns)
+                                      .isEquals();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37).append(_name)
+                                          .append(_columns)
+                                          .toHashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("Index [name=");
+        result.append(getName());
+        result.append("; ");
+        result.append(getColumnCount());
+        result.append(" columns]");
+
+        return result.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toVerboseString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("Index [");
+        result.append(getName());
+        result.append("] columns:");
+        for (int idx = 0; idx < getColumnCount(); idx++)
+        {
+            result.append(" ");
+            result.append(getColumn(idx).toString());
+        }
+
+        return result.toString();
     }
 }

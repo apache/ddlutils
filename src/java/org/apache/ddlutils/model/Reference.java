@@ -1,5 +1,8 @@
 package org.apache.ddlutils.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
  * 
@@ -22,7 +25,7 @@ package org.apache.ddlutils.model;
  * @author Thomas Dudziak
  * @version $Revision$
  */
-public class Reference implements Cloneable, Comparable
+public class Reference implements Cloneable
 {
     /** The local column. */
     private Column _localColumn;
@@ -146,43 +149,43 @@ public class Reference implements Cloneable, Comparable
     /**
      * {@inheritDoc}
      */
-    public Object clone() throws CloneNotSupportedException
+    protected Object clone() throws CloneNotSupportedException
     {
-        return new Reference(getLocalColumn(), getForeignColumn());
-    }
+        Reference result = (Reference)super.clone();
 
-    /**
-     * {@inheritDoc}
-     */
-    public int compareTo(Object other)
-    {
-        Reference ref = (Reference)other;
+        result._localColumnName   = _localColumnName;
+        result._foreignColumnName = _foreignColumnName;
 
-        int result = getLocalColumnName().compareTo(ref.getLocalColumnName());
-
-        if (result == 0)
-        {
-            result = getForeignColumnName().compareTo(ref.getForeignColumnName());
-        }
         return result;
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean equals(Object other)
+    public boolean equals(Object obj)
     {
-        boolean result = (other != null) && getClass().equals(other.getClass());
-
-        if (result)
+        if (obj instanceof Reference)
         {
-            Reference ref = (Reference) other;
+            Reference other = (Reference)obj;
 
-            // TODO: Compare the columns, not their names
-            result = getLocalColumnName().equals(ref.getLocalColumnName()) &&
-                     getForeignColumnName().equals(ref.getForeignColumnName());
+            return new EqualsBuilder().append(_localColumnName,   other._localColumnName)
+                                      .append(_foreignColumnName, other._foreignColumnName)
+                                      .isEquals();
         }
-        return result;
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37).append(_localColumnName)
+                                          .append(_foreignColumnName)
+                                          .toHashCode();
     }
 
     /**
@@ -190,6 +193,12 @@ public class Reference implements Cloneable, Comparable
      */
     public String toString()
     {
-        return "Reference[" + getLocalColumnName() + " to " + getForeignColumnName() + "]";
+        StringBuffer result = new StringBuffer();
+
+        result.append(getLocalColumnName());
+        result.append(" -> ");
+        result.append(getForeignColumnName());
+
+        return result.toString();
     }
 }

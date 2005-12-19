@@ -18,6 +18,9 @@ package org.apache.ddlutils.model;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * Represents a column of an index in the database model.
  * 
@@ -34,7 +37,6 @@ public class IndexColumn implements Cloneable, Serializable
     /** The size of the column in the index. */
     protected String _size;
 
-    // TODO: Implement equals, hashCode and toString
     // TODO: It might be useful if the referenced column is directly acessible here ?
 
     /**
@@ -82,11 +84,56 @@ public class IndexColumn implements Cloneable, Serializable
      */
     public Object clone() throws CloneNotSupportedException
     {
-        IndexColumn result = new IndexColumn();
+        IndexColumn result = (IndexColumn)super.clone();
 
         result._name = _name;
         result._size = _size;
         return result;
     }
-}
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof IndexColumn)
+        {
+            IndexColumn other = (IndexColumn)obj;
+
+            // Note that this compares case sensitive
+            return new EqualsBuilder().append(_name, other._name)
+                                      .append(_size, other._size)
+                                      .isEquals();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37).append(_name)
+                                          .append(_size)
+                                          .toHashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("Index column [name=");
+        result.append(getName());
+        result.append("; size=");
+        result.append(getSize());
+        result.append("]");
+
+        return result.toString();
+    }
+}

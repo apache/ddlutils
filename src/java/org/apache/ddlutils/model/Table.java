@@ -23,6 +23,8 @@ import java.util.Collection;
 
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Represents a table in the database model.
@@ -597,9 +599,9 @@ public class Table implements Serializable, Cloneable
     /**
      * {@inheritDoc}
      */
-    public Object clone() throws CloneNotSupportedException
+    protected Object clone() throws CloneNotSupportedException
     {
-        Table result = new Table();
+        Table result = (Table)super.clone();
 
         result._catalog     = _catalog;
         result._schema      = _schema;
@@ -608,7 +610,48 @@ public class Table implements Serializable, Cloneable
         result._columns     = (ArrayList)_columns.clone();
         result._foreignKeys = (ArrayList)_foreignKeys.clone();
         result._indices     = (ArrayList)_indices.clone();
+
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof Table)
+        {
+            Table other = (Table)obj;
+
+            // Note that this compares case sensitive
+            return new EqualsBuilder().append(_catalog,     other._catalog)
+                                      .append(_schema,      other._schema)
+                                      .append(_name,        other._name)
+                                      .append(_type,        other._type)
+                                      .append(_columns,     other._columns)
+                                      .append(_foreignKeys, other._foreignKeys)
+                                      .append(_indices,     other._indices)
+                                      .isEquals();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37).append(_catalog)
+                                          .append(_schema)
+                                          .append(_name)
+                                          .append(_type)
+                                          .append(_columns)
+                                          .append(_foreignKeys)
+                                          .append(_indices)
+                                          .toHashCode();
     }
 
     /**
@@ -616,6 +659,53 @@ public class Table implements Serializable, Cloneable
      */
     public String toString()
     {
-        return "Table " + _name + " [" + _columns.size() + " columns]";
+        StringBuffer result = new StringBuffer();
+
+        result.append("Table [name=");
+        result.append(getName());
+        result.append("; ");
+        result.append(getColumnCount());
+        result.append(" columns]");
+
+        return result.toString();
+    }
+
+    /**
+     * Returns a verbose string representation of this table.
+     * 
+     * @return The string representation
+     */
+    public String toVerboseString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("Table [name=");
+        result.append(getName());
+        result.append("; catalog=");
+        result.append(getCatalog());
+        result.append("; schema=");
+        result.append(getCatalog());
+        result.append("; type=");
+        result.append(getType());
+        result.append("] columns:");
+        for (int idx = 0; idx < getColumnCount(); idx++)
+        {
+            result.append(" ");
+            result.append(getColumn(idx).toVerboseString());
+        }
+        result.append("; indices:");
+        for (int idx = 0; idx < getIndexCount(); idx++)
+        {
+            result.append(" ");
+            result.append(getIndex(idx).toVerboseString());
+        }
+        result.append("; foreign keys:");
+        for (int idx = 0; idx < getForeignKeyCount(); idx++)
+        {
+            result.append(" ");
+            result.append(getForeignKey(idx).toVerboseString());
+        }
+
+        return result.toString();
     }
 }

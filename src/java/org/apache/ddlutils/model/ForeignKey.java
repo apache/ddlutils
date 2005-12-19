@@ -16,9 +16,11 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
+
+import org.apache.commons.collections.set.ListOrderedSet;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Represents a database foreign key.
@@ -31,13 +33,13 @@ public class ForeignKey implements Cloneable
     //  TODO: Make the create/alter/drop functionality respect the name property
 
     /** The name of the foreign key, may be <code>null</code>. */
-    private String    _name;
+    private String         _name;
     /** The target table. */
-    private Table     _foreignTable;
+    private Table          _foreignTable;
     /** The name of the foreign table. */
-    private String    _foreignTableName;
+    private String         _foreignTableName;
     /** The references between local and remote columns. */
-    private ArrayList _references = new ArrayList();
+    private ListOrderedSet _references = new ListOrderedSet();
 
     /**
      * Creates a new foreign key object that has no name.
@@ -220,29 +222,54 @@ public class ForeignKey implements Cloneable
     /**
      * {@inheritDoc}
      */
-    public boolean equals(Object other)
+    protected Object clone() throws CloneNotSupportedException
     {
-        boolean result = (other != null) && getClass().equals(other.getClass());
+        ForeignKey result = (ForeignKey)super.clone();
 
-        if (result)
+        result._name             = _name;
+        result._foreignTableName = _foreignTableName;
+        result._references       = new ListOrderedSet();
+
+        for (Iterator it = _references.iterator(); it.hasNext();)
         {
-            ForeignKey fk = (ForeignKey) other;
-
-            result = _foreignTableName.equals(fk._foreignTableName) &&
-                     (_references.size() == fk._references.size());
-
-            if (result)
-            {
-                //check all references - need to ensure order is same for valid comparison
-                List copyThis = (List)_references.clone();
-                List copyThat = (List)fk._references.clone();
-
-                Collections.sort(copyThis);
-                Collections.sort(copyThat);
-                result = copyThis.equals(copyThat);
-            }
+            result._references.add(it.next());
         }
+
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof ForeignKey)
+        {
+            ForeignKey other = (ForeignKey)obj;
+
+            // Note that this compares case sensitive
+            // Note also that we can simply compare the references regardless of their order
+            // (which is irrelevant for fks) because they are contained in a set
+            return new EqualsBuilder().append(_name,             other._name)
+                                      .append(_foreignTableName, other._foreignTableName)
+                                      .append(_references,       other._references)
+                                      .isEquals();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37).append(_name)
+                                          .append(_foreignTableName)
+                                          .append(_references)
+                                          .toHashCode();
     }
 
     /**
@@ -250,19 +277,49 @@ public class ForeignKey implements Cloneable
      */
     public String toString()
     {
-        //TODO show name and references
-        return "ForeignKey[" + _foreignTableName + "]";
+        StringBuffer result = new StringBuffer();
+
+        result.append("Foreign key [");
+        if ((getName() != null) && (getName().length() > 0))
+        {
+            result.append("name=");
+            result.append(getName());
+            result.append("; ");
+        }
+        result.append("foreign table=");
+        result.append(getForeignTableName());
+        result.append("; ");
+        result.append(getReferenceCount());
+        result.append(" references]");
+
+        return result.toString();
     }
 
     /**
-     * {@inheritDoc}
+     * Returns a verbose string representation of this foreign key.
+     * 
+     * @return The string representation
      */
-    public Object clone() throws CloneNotSupportedException
+    public String toVerboseString()
     {
-        ForeignKey result = new ForeignKey(_name);
+        StringBuffer result = new StringBuffer();
 
-        result._foreignTableName = _foreignTableName;
-        result._references       = (ArrayList)_references.clone();
-        return result;
+        result.append("ForeignK ky [");
+        if ((getName() != null) && (getName().length() > 0))
+        {
+            result.append("name=");
+            result.append(getName());
+            result.append("; ");
+        }
+        result.append("foreign table=");
+        result.append(getForeignTableName());
+        result.append("] references:");
+        for (int idx = 0; idx < getReferenceCount(); idx++)
+        {
+            result.append(" ");
+            result.append(getReference(idx).toString());
+        }
+
+        return result.toString();
     }
 }
