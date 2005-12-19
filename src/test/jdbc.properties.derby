@@ -5,14 +5,21 @@
 
 # Properties starting with "datasource." will be fed into the datasource instance of the
 # class configured via the datasource.class property
+
+# Embedded mode
+
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=org.apache.derby.jdbc.EmbeddedDriver
+datasource.url=jdbc:derby:target/database/ddlutils
 
-# Use this one for a normal client-server model
-#datasource.driverClassName=org.apache.derby.jdbc.ClientDriver
-
-datasource.url=jdbc:derby:../database/ddlutils
-# The default username for Derby is app; for every other user the must be a corresponding schema defined
-# in the database; see http://db.apache.org/derby/faq.html#schema_exist for details
+# The default username for embedded Derby is app; for every other user the must be a corresponding
+# schema defined in the database; see http://db.apache.org/derby/faq.html#schema_exist for details
 datasource.username=app
 datasource.password=
+
+# Client/server mode
+
+#datasource.driverClassName=org.apache.derby.jdbc.ClientDriver
+#datasource.url=jdbc:derby://localhost/ddlutils
+#datasource.username=ddlutils
+#datasource.password=ddlutils
