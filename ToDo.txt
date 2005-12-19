@@ -29,3 +29,4 @@ List of things to be done for the next version of DdlUtils:
 * Add ability to specify the sorting direction of an index-column (ascending/descending) - this is at least supported in Derby
 * Rather than dropping the indices/foreign keys that are at the current table, it would be better to simply drop any
   of the constraints/triggers connected to a table (if that is possible)
+* Have a look at http://www.h2database.com/. The h2 is HyperSonic2, with a completely new codebase.
