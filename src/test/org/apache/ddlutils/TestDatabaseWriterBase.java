@@ -169,7 +169,8 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         {
             _model = parseDatabaseFromString(schemaXml);
 
-            getPlatform().createTables(_model, true, false);
+            getPlatform().getPlatformInfo().setCommentsSupported(false);
+            getPlatform().createTables(_model, false, false);
         }
         catch (Exception ex)
         {
@@ -182,7 +183,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      * 
      * @param dataXml The data xml
      */
-    protected void insertData(String dataXml) throws DynaSqlException
+    protected Database insertData(String dataXml) throws DynaSqlException
     {
         try
         {
@@ -191,6 +192,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             dataReader.setModel(_model);
             dataReader.setSink(new DataToDatabaseSink(getPlatform(), _model));
             dataReader.parse(new StringReader(dataXml));
+            return _model;
         }
         catch (Exception ex)
         {
