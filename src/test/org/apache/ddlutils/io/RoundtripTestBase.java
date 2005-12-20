@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestDatabaseWriterBase;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.UniqueIndex;
@@ -47,7 +48,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='BIT' default='FALSE'/>\n"+
+        "    <column name='VALUE' type='BIT' required='true' default='FALSE'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple BOOLEAN column. */
@@ -57,6 +58,15 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
         "    <column name='VALUE' type='BOOLEAN'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a BOOLEAN column with a default value. */
+    protected static final String TEST_BOOLEAN_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='BOOLEAN' required='true' default='TRUE'/>\n"+
         "  </table>\n"+
         "</database>";
 
@@ -73,7 +83,9 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
 
         for (int idx = 0; (idx < table.getColumnCount()) && (idx < columnValues.length); idx++)
         {
-            bean.set(table.getColumn(idx).getName(), columnValues[idx]);
+            Column column = table.getColumn(idx);
+
+            bean.set(column.getName(), columnValues[idx]);
         }
         getPlatform().insert(getModel(), bean);
     }
