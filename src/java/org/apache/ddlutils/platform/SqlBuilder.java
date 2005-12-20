@@ -35,6 +35,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 
 /**
  * This class is a collection of Strategy methods for creating the DDL required to create and drop 
@@ -83,6 +84,9 @@ public abstract class SqlBuilder
     /** The number formatter. */
     private NumberFormat _valueNumberFormat;
 
+    /** Helper object for dealing with default values. */
+    private DefaultValueHelper _defaultValueHelper = new DefaultValueHelper();
+
     //
     // Configuration
     //                
@@ -125,6 +129,16 @@ public abstract class SqlBuilder
     public void setWriter(Writer writer)
     {
         _writer = writer;
+    }
+
+    /**
+     * Returns the default value helper.
+     *
+     * @return The default value helper
+     */
+    protected DefaultValueHelper getDefaultValueHelper()
+    {
+        return _defaultValueHelper;
     }
 
     /** 
@@ -881,6 +895,77 @@ public abstract class SqlBuilder
     }
 
     /**
+     * Generates the string representation of the given value.
+     * 
+     * @param column The column
+     * @param value  The value
+     * @return The string representation
+     */
+    protected String getValueAsString(Column column, Object value)
+    {
+        if (value == null)
+        {
+            return "NULL";
+        }
+
+        StringBuffer result = new StringBuffer();
+
+        // TODO: Handle binary types (BINARY, VARBINARY, LONGVARBINARY, BLOB)
+        switch (column.getTypeCode())
+        {
+            // Note: TIMESTAMP (java.sql.Timestamp) is properly handled by its toString method
+            case Types.DATE:
+                result.append(getPlatformInfo().getValueQuoteToken());
+                if (!(value instanceof String) && (_valueDateFormat != null))
+                {
+                    // TODO: Can the format method handle java.sql.Date properly ?
+                    result.append(_valueDateFormat.format(value));
+                }
+                else
+                {
+                    result.append(value.toString());
+                }
+                result.append(getPlatformInfo().getValueQuoteToken());
+                break;
+            case Types.TIME:
+                result.append(getPlatformInfo().getValueQuoteToken());
+                if (!(value instanceof String) && (_valueTimeFormat != null))
+                {
+                    // TODO: Can the format method handle java.sql.Date properly ?
+                    result.append(_valueTimeFormat.format(value));
+                }
+                else
+                {
+                    result.append(value.toString());
+                }
+                result.append(getPlatformInfo().getValueQuoteToken());
+                break;
+            case Types.REAL:
+            case Types.NUMERIC:
+            case Types.FLOAT:
+            case Types.DOUBLE:
+            case Types.DECIMAL:
+                result.append(getPlatformInfo().getValueQuoteToken());
+                if (!(value instanceof String) && (_valueNumberFormat != null))
+                {
+                    result.append(_valueNumberFormat.format(value));
+                }
+                else
+                {
+                    result.append(value.toString());
+                }
+                result.append(getPlatformInfo().getValueQuoteToken());
+                break;
+            default:
+                result.append(getPlatformInfo().getValueQuoteToken());
+                result.append(value.toString());
+                result.append(getPlatformInfo().getValueQuoteToken());
+                break;
+        }
+        return result.toString();
+    }
+
+    /**
      * Generates the SQL for querying the id that was created in the last insertion
      * operation. This is obviously only useful for pk fields that are auto-incrementing.
      * A database that does not support this, will return <code>null</code>.
@@ -1028,9 +1113,7 @@ public abstract class SqlBuilder
         if (column.getDefaultValue() != null)
         {
             print(" DEFAULT ");
-            print(getPlatformInfo().getValueQuoteToken());
-            print(column.getDefaultValue());
-            print(getPlatformInfo().getValueQuoteToken());
+            writeColumnDefaultValue(table, column);
         }
         if (column.isRequired())
         {
@@ -1124,76 +1207,37 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Generates the string representation of the given value.
+     * Returns the native default value for the column.
      * 
      * @param column The column
-     * @param value  The value
-     * @return The string representation
+     * @return The native default value
      */
-    protected String getValueAsString(Column column, Object value)
+    protected String getNativeDefaultValue(Column column)
     {
-        if (value == null)
-        {
-            return "NULL";
-        }
-
-        StringBuffer result = new StringBuffer();
-
-        // TODO: Handle binary types (BINARY, VARBINARY, LONGVARBINARY, BLOB)
-        switch (column.getTypeCode())
-        {
-            // Note: TIMESTAMP (java.sql.Timestamp) is properly handled by its toString method
-            case Types.DATE:
-                result.append(getPlatformInfo().getValueQuoteToken());
-                if (!(value instanceof String) && (_valueDateFormat != null))
-                {
-                    // TODO: Can the format method handle java.sql.Date properly ?
-                    result.append(_valueDateFormat.format(value));
-                }
-                else
-                {
-                    result.append(value.toString());
-                }
-                result.append(getPlatformInfo().getValueQuoteToken());
-                break;
-            case Types.TIME:
-                result.append(getPlatformInfo().getValueQuoteToken());
-                if (!(value instanceof String) && (_valueTimeFormat != null))
-                {
-                    // TODO: Can the format method handle java.sql.Date properly ?
-                    result.append(_valueTimeFormat.format(value));
-                }
-                else
-                {
-                    result.append(value.toString());
-                }
-                result.append(getPlatformInfo().getValueQuoteToken());
-                break;
-            case Types.REAL:
-            case Types.NUMERIC:
-            case Types.FLOAT:
-            case Types.DOUBLE:
-            case Types.DECIMAL:
-                result.append(getPlatformInfo().getValueQuoteToken());
-                if (!(value instanceof String) && (_valueNumberFormat != null))
-                {
-                    result.append(_valueNumberFormat.format(value));
-                }
-                else
-                {
-                    result.append(value.toString());
-                }
-                result.append(getPlatformInfo().getValueQuoteToken());
-                break;
-            default:
-                result.append(getPlatformInfo().getValueQuoteToken());
-                result.append(value.toString());
-                result.append(getPlatformInfo().getValueQuoteToken());
-                break;
-        }
-        return result.toString();
+        return column.getDefaultValue();
     }
     
+    /**
+     * Prints the default value of the column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */ 
+    protected void writeColumnDefaultValue(Table table, Column column) throws IOException
+    {
+        boolean shouldUseQuotes = !TypeMap.isNumericType(column.getTypeCode());
+
+        if (shouldUseQuotes)
+        {
+            print(getPlatformInfo().getValueQuoteToken());
+        }
+        print(getNativeDefaultValue(column).toString());
+        if (shouldUseQuotes)
+        {
+            print(getPlatformInfo().getValueQuoteToken());
+        }
+    }
+
     /**
      * Prints that the column is an auto increment column.
      * 

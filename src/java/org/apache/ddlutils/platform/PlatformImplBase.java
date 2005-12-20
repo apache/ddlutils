@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,6 +36,8 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DynaSqlException;
@@ -826,51 +829,54 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     }
 
     /**
+     * Returns all properties where the column is not non-autoincrement and for which the bean
+     * either has a value or the column hasn't got a default value, for the given dyna class.
+     * 
+     * @param model     The database model
+     * @param dynaClass The dyna class
+     * @param bean      The bean
+     * @return The properties
+     */
+    private SqlDynaProperty[] getPropertiesForInsertion(Database model, SqlDynaClass dynaClass, final DynaBean bean)
+    {
+        SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
+
+        Collection result = CollectionUtils.select(Arrays.asList(properties), new Predicate() {
+            public boolean evaluate(Object input) {
+                SqlDynaProperty prop = (SqlDynaProperty)input;
+
+                return !prop.getColumn().isAutoIncrement() &&
+                       ((bean.get(prop.getName()) != null) || (prop.getColumn().getDefaultValue() == null));
+            }
+        });
+
+        return (SqlDynaProperty[])result.toArray(new SqlDynaProperty[result.size()]);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void insert(Connection connection, Database model, DynaBean dynaBean) throws DynaSqlException
     {
-        SqlDynaClass      dynaClass  = model.getDynaClassFor(dynaBean);
-        SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
+        SqlDynaClass      dynaClass       = model.getDynaClassFor(dynaBean);
+        SqlDynaProperty[] properties      = getPropertiesForInsertion(model, dynaClass, dynaBean);
+        Column[]          autoIncrColumns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumns();
 
-        if (properties.length == 0)
+        if ((properties.length == 0) && (autoIncrColumns.length == 0))
         {
-            _log.warn("Cannot insert instances of type " + dynaClass + " because it has no properties");
+            _log.warn("Cannot insert instances of type " + dynaClass + " because it has no usable properties");
             return;
         }
 
-        Column[] columns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumns();
-
-        if (columns.length > 0)
-        {
-            SqlDynaProperty[] newProperties = new SqlDynaProperty[properties.length - 1];
-            int               newIdx        = 0;
-
-            // We have to remove the auto-increment columns as some databases won't like
-            // it being present in the insert command
-
-            for (int propIdx = 0; propIdx < properties.length; propIdx++)
-            {
-                for (int autoIncrColumnIdx = 0; autoIncrColumnIdx < columns.length; autoIncrColumnIdx++)
-                {
-                    if (properties[propIdx].getColumn() != columns[autoIncrColumnIdx])
-                    {
-                        newProperties[newIdx++] = properties[propIdx];
-                    }
-                }
-            }
-            properties = newProperties;
-        }
-        
-        String            insertSql    = createInsertSql(model, dynaClass, properties, null);
-        String            queryIdSql   = columns.length > 0 ? createSelectLastInsertIdSql(model, dynaClass) : null;
-        PreparedStatement statement    = null;
+        String            insertSql  = createInsertSql(model, dynaClass, properties, null);
+        String            queryIdSql = autoIncrColumns.length > 0 ? createSelectLastInsertIdSql(model, dynaClass) : null;
+        PreparedStatement statement  = null;
 
         if (_log.isDebugEnabled())
         {
             _log.debug("About to execute SQL: " + insertSql);
         }
-        if ((columns.length > 0) && (queryIdSql == null))
+        if ((autoIncrColumns.length > 0) && (queryIdSql == null))
         {
             _log.warn("The database does not support querying for auto-generated pk values");
         }
@@ -921,11 +927,11 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
                 lastInsertedIds.next();
 
-                for (int idx = 0; idx < columns.length; idx++)
+                for (int idx = 0; idx < autoIncrColumns.length; idx++)
                 {
-                    Object value = lastInsertedIds.getObject(columns[idx].getName());
+                    Object value = lastInsertedIds.getObject(autoIncrColumns[idx].getName());
     
-                    PropertyUtils.setProperty(dynaBean, columns[idx].getName(), value);
+                    PropertyUtils.setProperty(dynaBean, autoIncrColumns[idx].getName(), value);
                 }
             }
             catch (NoSuchMethodException ex)
@@ -1003,35 +1009,12 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 }
 
                 dynaClass  = curDynaClass;
-                properties = dynaClass.getSqlDynaProperties();
+                properties = getPropertiesForInsertion(model, curDynaClass, dynaBean);
     
                 if (properties.length == 0)
                 {
-                    _log.warn("Cannot insert instances of type " + dynaClass + " because it has no properties");
+                    _log.warn("Cannot insert instances of type " + dynaClass + " because it has no usable properties");
                     continue;
-                }
-    
-                Column[] columns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumns();
-    
-                if (columns.length > 0)
-                {
-                    SqlDynaProperty[] newProperties = new SqlDynaProperty[properties.length - 1];
-                    int               newIdx        = 0;
-    
-                    // We have to remove the auto-increment columns as some databases won't like
-                    // it being present in the insert command
-    
-                    for (int propIdx = 0; propIdx < properties.length; propIdx++)
-                    {
-                        for (int autoIncrColumnIdx = 0; autoIncrColumnIdx < columns.length; autoIncrColumnIdx++)
-                        {
-                            if (properties[propIdx].getColumn() != columns[autoIncrColumnIdx])
-                            {
-                                newProperties[newIdx++] = properties[propIdx];
-                            }
-                        }
-                    }
-                    properties = newProperties;
                 }
 
                 String insertSql = createInsertSql(model, dynaClass, properties, null);
@@ -1451,8 +1434,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     protected void setObject(PreparedStatement statement, int sqlIndex, DynaBean dynaBean, SqlDynaProperty property) throws SQLException
     {
-        int    typeCode = property.getColumn().getTypeCode();
-        Object value    = dynaBean.get(property.getName());
+        int     typeCode = property.getColumn().getTypeCode();
+        Object  value    = dynaBean.get(property.getName());
 
         if (value == null)
         {
