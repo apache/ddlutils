@@ -267,7 +267,16 @@
   <!-- ================================================================== -->
   <target name="checkstyle"
           description="Checks the sourcecode via Checkstyle">
-    <taskdef resource="checkstyletask.properties"
+    <fail message="Due to licensing issues, DdlUtils is not distributed with Checkstyle. If you want to use this task, then please put the checkstyle jar into the lib subdirectory.">
+      <condition>
+        <not>
+          <available classpathref="compilation-classpath"
+                     resource="checkstyletask.properties"/>
+        </not>
+      </condition>
+    </fail>
+
+      <taskdef resource="checkstyletask.properties"
              classpathref="compilation-classpath"/>
 
     <checkstyle config="${src.check.dir}/ddlutils-checks.xml"
@@ -277,7 +286,7 @@
       <fileset dir="${src.test.dir}"
                includes="**/*.java"/>
 
-      <formatter type="plain"/>
+      <formatter type="plain" usefile="false"/>
       <!-- Location of cache-file (project specific) -->
       <property key="checkstyle.cache.file" file="${build.check.dir}/checkstyle/cachefile"/>
     </checkstyle>
