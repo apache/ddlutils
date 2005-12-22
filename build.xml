@@ -223,6 +223,15 @@
   </target>
 
   <!-- ================================================================== -->
+  <!-- Runs the test cases against AxionDB                                -->
+  <!-- ================================================================== -->
+  <target name="junit-axion"
+          description="Runs the test cases against axion">
+    <property name="jdbc.properties.file" value="/jdbc.properties.axion"/>
+    <antcall target="-junit-internal"/>
+  </target>
+
+  <!-- ================================================================== -->
   <!-- Runs the test cases against PostgreSQL                             -->
   <!-- ================================================================== -->
   <target name="junit-postgresql"
