@@ -62,7 +62,7 @@ public class TestAgainstAxionDb extends TestDatabaseWriterBase
     /**
      * Tests the database creation.
      */
-    public void _testCreation() throws Exception
+    public void testCreation() throws Exception
     {
         createDatabase(COLUMN_TEST_SCHEMA);
     }
