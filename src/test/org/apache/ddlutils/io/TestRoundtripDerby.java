@@ -178,7 +178,6 @@ public class TestRoundtripDerby extends RoundtripTestBase
         // Derby does not have a TINYINT type, so it gets mapped to SMALLINT
         // we therefore adjust the original model according to our expectations
         getModel().getTable(0).getColumn(1).setType("SMALLINT");
-        getModel().getTable(0).getColumn(1).setDefaultValue("-200");
 
         // Also we get a unique index for the PK
         addPrimaryKeyUniqueIndicesToModel();
@@ -228,7 +227,6 @@ public class TestRoundtripDerby extends RoundtripTestBase
         Database db = getPlatform().readModelFromDatabase();
 
         db.setName("roundtriptest");
-        getModel().getTable(0).getColumn(1).setDefaultValue("-32768");
 
         // Also we get a unique index for the PK
         addPrimaryKeyUniqueIndicesToModel();
@@ -278,7 +276,6 @@ public class TestRoundtripDerby extends RoundtripTestBase
         Database db = getPlatform().readModelFromDatabase();
 
         db.setName("roundtriptest");
-        getModel().getTable(0).getColumn(1).setDefaultValue("2147483647");
 
         // Also we get a unique index for the PK
         addPrimaryKeyUniqueIndicesToModel();
@@ -328,7 +325,6 @@ public class TestRoundtripDerby extends RoundtripTestBase
         Database db = getPlatform().readModelFromDatabase();
 
         db.setName("roundtriptest");
-        getModel().getTable(0).getColumn(1).setDefaultValue("-9223372036854775808");
 
         // Also we get a unique index for the PK
         addPrimaryKeyUniqueIndicesToModel();
@@ -378,7 +374,6 @@ public class TestRoundtripDerby extends RoundtripTestBase
         Database db = getPlatform().readModelFromDatabase();
 
         db.setName("roundtriptest");
-        getModel().getTable(0).getColumn(1).setDefaultValue("-1.0123456");
 
         // Also we get a unique index for the PK
         addPrimaryKeyUniqueIndicesToModel();
@@ -431,7 +426,6 @@ public class TestRoundtripDerby extends RoundtripTestBase
         Database db = getPlatform().readModelFromDatabase();
 
         db.setName("roundtriptest");
-        getModel().getTable(0).getColumn(1).setDefaultValue("1234567890.012345678901234");
 
         // DOUBLE PRECISION gets mapped back to DOUBLE (which is the same type really)
         getModel().getTable(0).getColumn(1).setType("DOUBLE");
@@ -484,7 +478,6 @@ public class TestRoundtripDerby extends RoundtripTestBase
         Database db = getPlatform().readModelFromDatabase();
 
         db.setName("roundtriptest");
-        getModel().getTable(0).getColumn(1).setDefaultValue("-9876543210.987654321098765");
 
         // Also we get a unique index for the PK
         addPrimaryKeyUniqueIndicesToModel();
