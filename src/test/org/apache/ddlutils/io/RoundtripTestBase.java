@@ -69,6 +69,132 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         "    <column name='VALUE' type='BOOLEAN' required='true' default='TRUE'/>\n"+
         "  </table>\n"+
         "</database>";
+    /** Test model with a simple TINYINT column. */
+    protected static final String TEST_TINYINT_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='TINYINT'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a TINYINT column with a default value. */
+    protected static final String TEST_TINYINT_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='TINYINT' required='true' default='-200'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple SMALLINT column. */
+    protected static final String TEST_SMALLINT_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='SMALLINT'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a SMALLINT column with a default value. */
+    protected static final String TEST_SMALLINT_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='SMALLINT' required='true' default='-32768'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple INTEGER column. */
+    protected static final String TEST_INTEGER_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='INTEGER'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a INTEGER column with a default value. */
+    protected static final String TEST_INTEGER_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='INTEGER' required='true' default='2147483647'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple BIGINT column. */
+    protected static final String TEST_BIGINT_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='BIGINT'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a BIGINT column with a default value. */
+    protected static final String TEST_BIGINT_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='BIGINT' required='true' default='-9223372036854775808'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple REAL column. */
+    protected static final String TEST_REAL_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='REAL'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a REAL column with a default value. */
+    protected static final String TEST_REAL_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='REAL' required='true' default='-1.0123456'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple FLOAT column. */
+    protected static final String TEST_FLOAT_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='FLOAT'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a FLOAT column with a default value. */
+    protected static final String TEST_FLOAT_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='FLOAT' required='true' default='1234567890.012345678901234'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple DOUBLE column. */
+    protected static final String TEST_DOUBLE_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='DOUBLE'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a DOUBLE column with a default value. */
+    protected static final String TEST_DOUBLE_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='DOUBLE' required='true' default='-9876543210.987654321098765'/>\n"+
+        "  </table>\n"+
+        "</database>";
 
     /**
      * Inserts a row into the designated table.
@@ -138,7 +264,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                      dynaBean.get(attrName));
     }
 
-    // boolean/bit columns
+    // simple boolean
     // boolean with default value
     // simple bit
     // bit with default value
