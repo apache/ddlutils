@@ -97,7 +97,7 @@ public class TestOracle9Platform extends TestPlatformBase
             "    \"COL_PK\"               VARCHAR2(32),\n"+
             "    \"COL_PK_AUTO_INCR\"     NUMBER(20,0),\n"+
             "    \"COL_NOT_NULL\"         RAW(100) NOT NULL,\n"+
-            "    \"COL_NOT_NULL_DEFAULT\" NUMBER(38) DEFAULT '-2.0' NOT NULL,\n"+
+            "    \"COL_NOT_NULL_DEFAULT\" NUMBER(38) DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
             "    \"COL_AUTO_INCR\"        NUMBER(38,0),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+

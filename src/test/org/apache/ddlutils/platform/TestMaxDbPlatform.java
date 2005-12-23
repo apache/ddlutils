@@ -91,7 +91,7 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "    \"COL_PK\"               VARCHAR(32),\n"+
             "    \"COL_PK_AUTO_INCR\"     INTEGER DEFAULT SERIAL(1),\n"+
             "    \"COL_NOT_NULL\"         LONG BYTE NOT NULL,\n"+
-            "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT '-2.0' NOT NULL,\n"+
+            "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
             "    \"COL_AUTO_INCR\"        FIXED(38,0) DEFAULT SERIAL(1),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+

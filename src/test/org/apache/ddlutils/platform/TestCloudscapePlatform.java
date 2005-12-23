@@ -91,7 +91,7 @@ public class TestCloudscapePlatform extends TestPlatformBase
             "    \"COL_PK\"               VARCHAR(32),\n"+
             "    \"COL_PK_AUTO_INCR\"     INTEGER GENERATED ALWAYS AS IDENTITY,\n"+
             "    \"COL_NOT_NULL\"         CHAR(100) FOR BIT DATA NOT NULL,\n"+
-            "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT '-2.0' NOT NULL,\n"+
+            "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
             "    \"COL_AUTO_INCR\"        BIGINT GENERATED ALWAYS AS IDENTITY,\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+

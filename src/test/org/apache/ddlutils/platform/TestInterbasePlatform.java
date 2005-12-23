@@ -98,7 +98,7 @@ public class TestInterbasePlatform extends TestPlatformBase
             "    \"COL_PK\"               VARCHAR(32),\n"+
             "    \"COL_PK_AUTO_INCR\"     INTEGER,\n"+
             "    \"COL_NOT_NULL\"         CHAR(100) CHARACTER SET OCTETS NOT NULL,\n"+
-            "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT '-2.0' NOT NULL,\n"+
+            "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
             "    \"COL_AUTO_INCR\"        DECIMAL(38,0),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
