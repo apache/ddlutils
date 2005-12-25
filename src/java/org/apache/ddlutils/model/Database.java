@@ -495,7 +495,7 @@ public class Database implements Serializable, Cloneable
     /**
      * {@inheritDoc}
      */
-    protected Object clone() throws CloneNotSupportedException
+    public Object clone() throws CloneNotSupportedException
     {
         Database result = (Database)super.clone();
 

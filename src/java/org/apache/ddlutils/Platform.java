@@ -682,41 +682,49 @@ public interface Platform
      * Reads the database model from the live database as specified by the data source set for
      * this platform.
      * 
+     * @param name The name of the resulting database; <code>null</code> when the default name (the catalog)
+     *             is desired which might be <code>null</code> itself though
      * @return The database model
      * @throws DynaSqlException If an error occurred during reading the model
      */
-    public Database readModelFromDatabase() throws DynaSqlException;
+    public Database readModelFromDatabase(String name) throws DynaSqlException;
 
     /**
      * Reads the database model from the live database as specified by the data source set for
      * this platform.
      * 
+     * @param name       The name of the resulting database; <code>null</code> when the default name (the catalog)
+     *                   is desired which might be <code>null</code> itself though
      * @param catalog    The catalog to access in the database; use <code>null</code> for the default value
      * @param schema     The schema to access in the database; use <code>null</code> for the default value
      * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
      * @return The database model
      * @throws DynaSqlException If an error occurred during reading the model
      */
-    public Database readModelFromDatabase(String catalog, String schema, String[] tableTypes) throws DynaSqlException;
+    public Database readModelFromDatabase(String name, String catalog, String schema, String[] tableTypes) throws DynaSqlException;
 
     /**
      * Reads the database model from the live database to which the given connection is pointing.
      * 
      * @param connection The connection to the database
+     * @param name       The name of the resulting database; <code>null</code> when the default name (the catalog)
+     *                   is desired which might be <code>null</code> itself though
      * @return The database model
      * @throws DynaSqlException If an error occurred during reading the model
      */
-    public Database readModelFromDatabase(Connection connection) throws DynaSqlException;
+    public Database readModelFromDatabase(Connection connection, String name) throws DynaSqlException;
 
     /**
      * Reads the database model from the live database to which the given connection is pointing.
      * 
      * @param connection The connection to the database
+     * @param name       The name of the resulting database; <code>null</code> when the default name (the catalog)
+     *                   is desired which might be <code>null</code> itself though
      * @param catalog    The catalog to access in the database; use <code>null</code> for the default value
      * @param schema     The schema to access in the database; use <code>null</code> for the default value
      * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
      * @return The database model
      * @throws DynaSqlException If an error occurred during reading the model
      */
-    public Database readModelFromDatabase(Connection connection, String catalog, String schema, String[] tableTypes) throws DynaSqlException;
+    public Database readModelFromDatabase(Connection connection, String name, String catalog, String schema, String[] tableTypes) throws DynaSqlException;
 }

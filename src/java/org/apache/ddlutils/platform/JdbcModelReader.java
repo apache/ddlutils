@@ -152,41 +152,48 @@ public class JdbcModelReader
      * Reads the database model from the given connection.
      * 
      * @param connection The connection
+     * @param name       The name of the resulting database; <code>null</code> when the default name (the catalog)
+     *                   is desired which might be <code>null</code> itself though
      * @return The database model
      */
-    public Database getDatabase(Connection connection) throws SQLException
+    public Database getDatabase(Connection connection, String name) throws SQLException
     {
-        return getDatabase(connection, null, null, null);
+        return getDatabase(connection, name, null, null, null);
     }
 
     /**
      * Reads the database model from the given connection.
      * 
      * @param connection The connection
+     * @param name       The name of the resulting database; <code>null</code> when the default name (the catalog)
+     *                   is desired which might be <code>null</code> itself though
      * @param catalog    The catalog to acess in the database; use <code>null</code> for the default value
      * @param schema     The schema to acess in the database; use <code>null</code> for the default value
      * @param tableTypes The table types to process; use <code>null</code> or an empty list for the default ones
      * @return The database model
      */
-    public Database getDatabase(Connection connection, String catalog, String schema, String[] tableTypes) throws SQLException
+    public Database getDatabase(Connection connection, String name, String catalog, String schema, String[] tableTypes) throws SQLException
     {
         Database db = new Database();
 
-        try 
+        if (name == null)
         {
-            db.setName(connection.getCatalog());
-            if (catalog == null)
+            try 
             {
-                catalog = db.getName();
+                db.setName(connection.getCatalog());
+                if (catalog == null)
+                {
+                    catalog = db.getName();
+                }
+            } 
+            catch(Exception e) 
+            {
+                _log.info("Cannot determine the catalog name from connection.");
             }
-        } 
-        catch(Exception e) 
+        }
+        else
         {
-            _log.info("Cannot determine the catalog name from connection.");
-            if (catalog != null)
-            {
-                db.setName(catalog);
-            }
+            db.setName(name);
         }
         for (Iterator it = getTables(connection, catalog, schema, tableTypes).iterator(); it.hasNext();)
         {

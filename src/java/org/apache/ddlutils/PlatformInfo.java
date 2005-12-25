@@ -84,6 +84,9 @@ public class PlatformInfo
     /** Contains non-default mappings from jdbc to native types. */
     private HashMap _nativeTypes = new HashMap();
 
+    /** Contains the jdbc types corresponding to the native types for non-default mappings. */
+    private HashMap _targetJdbcTypes = new HashMap();
+
     /** Contains those JDBC types whose corresponding native types have a null value as the default value. */
     private HashSet _typesWithNullDefault = new HashSet();
 
@@ -448,6 +451,20 @@ public class PlatformInfo
     }
 
     /**
+     * Adds a mapping from jdbc type to database-native type.
+     * 
+     * @param jdbcTypeCode       The jdbc type code as defined by {@link java.sql.Types}
+     * @param nativeType         The native type
+     * @param targetJdbcTypeCode The jdbc type code corresponding to the native type
+     *                           (e.g. when reading the model from the database)
+     */
+    public void addNativeTypeMapping(int jdbcTypeCode, String nativeType, int targetJdbcTypeCode)
+    {
+        addNativeTypeMapping(jdbcTypeCode, nativeType);
+        _targetJdbcTypes.put(new Integer(jdbcTypeCode), new Integer(targetJdbcTypeCode));
+    }
+
+    /**
      * Adds a mapping from jdbc type to database-native type. Note that this
      * method accesses the named constant in {@link java.sql.Types} via reflection
      * and is thus safe to use under JDK 1.2/1.3 even with constants defined
@@ -477,6 +494,38 @@ public class PlatformInfo
     }
 
     /**
+     * Adds a mapping from jdbc type to database-native type. Note that this
+     * method accesses the named constant in {@link java.sql.Types} via reflection
+     * and is thus safe to use under JDK 1.2/1.3 even with constants defined
+     * only in later Java versions - for these, the method simply will not add
+     * a mapping.
+     * 
+     * @param jdbcTypeName       The jdbc type name, one of the constants defined
+     *                           in {@link java.sql.Types}
+     * @param nativeType         The native type
+     * @param targetJdbcTypeName The jdbc type corresponding to the native type
+     *                           (e.g. when reading the model from the database)
+     */
+    public void addNativeTypeMapping(String jdbcTypeName, String nativeType, String targetJdbcTypeName)
+    {
+        try
+        {
+            Field sourceType = Types.class.getField(jdbcTypeName);
+            Field targetType = Types.class.getField(targetJdbcTypeName);
+
+            if ((sourceType != null) && (targetType != null))
+            {
+                addNativeTypeMapping(sourceType.getInt(null), nativeType, targetType.getInt(null));
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore -> won't be defined
+            _log.warn("Cannot add native type mapping for undefined jdbc type "+jdbcTypeName+", target jdbc type "+targetJdbcTypeName, ex);
+        }
+    }
+
+    /**
      * Returns the database-native type for the given type code.
      * 
      * @param typeCode The {@link java.sql.Types} type code
@@ -485,6 +534,23 @@ public class PlatformInfo
     public String getNativeType(int typeCode)
     {
         return (String)_nativeTypes.get(new Integer(typeCode));
+    }
+
+    /**
+     * Returns the jdbc type corresponding to the native type that is used for the given
+     * jdbc type. This is most often the same jdbc type, but can also be a different one.
+     * For instance, if a database has no native boolean type, then the source jdbc type
+     * would be <code>BIT</code> or <code>BOOLEAN</code>, and the target jdbc type might
+     * be <code>TINYINT</code> or <code>SMALLINT</code>.
+     * 
+     * @param typeCode The {@link java.sql.Types} type code
+     * @return The target jdbc type
+     */
+    public int getTargetJdbcType(int typeCode)
+    {
+        Integer targetJdbcType = (Integer)_targetJdbcTypes.get(new Integer(typeCode));
+
+        return targetJdbcType == null ? typeCode : targetJdbcType.intValue(); 
     }
 
     /**

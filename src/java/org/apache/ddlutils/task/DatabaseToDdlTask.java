@@ -157,7 +157,7 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
 
         try
         {
-            return getPlatform().readModelFromDatabase(_catalog, _schema, getTableTypes());
+            return getPlatform().readModelFromDatabase(null, _catalog, _schema, getTableTypes());
         }
         catch (Exception ex)
         {

@@ -24,22 +24,22 @@ public class DefaultValueHelper
      * @param targetTypeCode   The target type code
      * @return The converted default value 
      */
-    public Object convert(String defaultValue, int originalTypeCode, int targetTypeCode)
+    public String convert(String defaultValue, int originalTypeCode, int targetTypeCode)
     {
-        Object result = defaultValue;
+        String result = defaultValue;
 
         if (defaultValue != null)
         {
             switch (originalTypeCode)
             {
                 case Types.BIT:
-                    result = convertBoolean(defaultValue, targetTypeCode);
+                    result = convertBoolean(defaultValue, targetTypeCode).toString();
                     break;
                 default:
                     if (Jdbc3Utils.supportsJava14JdbcTypes() &&
                         (originalTypeCode == Jdbc3Utils.determineBooleanTypeCode()))
                     {
-                        result = convertBoolean(defaultValue, targetTypeCode);
+                        result = convertBoolean(defaultValue, targetTypeCode).toString();
                     }
                     break;
             }

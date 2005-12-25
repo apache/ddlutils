@@ -136,7 +136,7 @@ public abstract class SqlBuilder
      *
      * @return The default value helper
      */
-    protected DefaultValueHelper getDefaultValueHelper()
+    public DefaultValueHelper getDefaultValueHelper()
     {
         return _defaultValueHelper;
     }
@@ -416,7 +416,7 @@ public abstract class SqlBuilder
                 }
                 writeColumnAlterStmt(desiredTable, desiredColumn, true);
             }
-            else if (columnsDiffer(desiredColumn, currentColumn))
+            else if (columnsDiffer(currentColumn, desiredColumn))
             {
                 if (modifyColumns)
                 {
@@ -1266,17 +1266,16 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Helper method to determine if two column specifications represent
-     * different types.  Type, nullability, size, scale, default value,
-     * and precision radix are the attributes checked.  Currently default
-     * values are compared where null and empty string are considered equal.
-     * See comments in the method body for explanation.
+     * Compares the current column in the database with the desired one.
+     * Type, nullability, size, scale, default value, and precision radix are
+     * the attributes checked.  Currently default values are compared, and
+     * null and empty string are considered equal.
      *
-     * @param columnA First column to compare
-     * @param columnB Second column to compare
-     * @return <code>true</code> if the columns differ
+     * @param currentColumn The current column as it is in the database
+     * @param desiredColumn The desired column
+     * @return <code>true</code> if the column specifications differ
      */
-    protected boolean columnsDiffer(Column columnA, Column columnB)
+    protected boolean columnsDiffer(Column currentColumn, Column desiredColumn)
     {
         //The createColumn method leaves off the default clause if column.getDefaultValue()
         //is null.  mySQL interprets this as a default of "" or 0, and thus the columns
@@ -1290,14 +1289,16 @@ public abstract class SqlBuilder
         //A good way to get this would be to require a defaultValue="<NULL>" in the
         //schema xml if you really want null and not just unspecified.
 
-        String  desiredDefault = columnA.getDefaultValue();
-        String  currentDefault = columnB.getDefaultValue();
+        String  desiredDefault = desiredColumn.getDefaultValue();
+        String  currentDefault = currentColumn.getDefaultValue();
         boolean defaultsEqual  = (desiredDefault == null) || desiredDefault.equals(currentDefault);
-        boolean sizeMatters    = (columnA.getSize() != null);
+        boolean sizeMatters    = (desiredColumn.getSize() != null);
 
-        if ((columnA.getTypeCode() != columnB.getTypeCode()) ||
-            (columnA.isRequired() != columnB.isRequired()) ||
-            (sizeMatters && (!columnA.getSize().equals(columnB.getSize()))) ||
+        // We're comparing the jdbc type that corresponds to the native type for the
+        // desired type, in order to avoid repeated altering of a perfectly valid column
+        if ((getPlatformInfo().getTargetJdbcType(desiredColumn.getTypeCode()) != currentColumn.getTypeCode()) ||
+            (desiredColumn.isRequired() != currentColumn.isRequired()) ||
+            (sizeMatters && (!desiredColumn.getSize().equals(currentColumn.getSize()))) ||
             !defaultsEqual /*|| //determined these two to be hardly useful
             (columnA.getScale() != columnB.getScale()) ||
             (columnA.getPrecisionRadix() != columnB.getPrecisionRadix())*/ )

@@ -48,23 +48,23 @@ public class CloudscapePlatform extends PlatformImplBase
         info.setIndicesEmbedded(false);
         info.setMaxIdentifierLength(128);
         // BINARY and VARBINARY will also be handled by CloudscapeBuilder.getSqlType
-        info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
+        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                     Types.BLOB);
         info.addNativeTypeMapping(Types.BINARY,        "CHAR");
-        info.addNativeTypeMapping(Types.BIT,           "SMALLINT");
-        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB");
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",                 Types.SMALLINT);
+        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",                     Types.BLOB);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",         Types.DOUBLE);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",                     Types.BLOB);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
-        info.addNativeTypeMapping(Types.OTHER,         "BLOB");
-        info.addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA");
-        info.addNativeTypeMapping(Types.REF,           "LONG VARCHAR FOR BIT DATA");
-        info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+        info.addNativeTypeMapping(Types.OTHER,         "BLOB",                      Types.BLOB);
+        info.addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.REF,           "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "BLOB",                      Types.BLOB);
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",                  Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
-        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA");
+        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT",                  "SMALLINT");
+        info.addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA", "LONGVARBINARY");
 
         setSqlBuilder(new CloudscapeBuilder(info));
     }
