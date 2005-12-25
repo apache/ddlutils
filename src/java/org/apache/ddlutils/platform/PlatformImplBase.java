@@ -19,6 +19,7 @@ package org.apache.ddlutils.platform;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,6 +50,7 @@ import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.util.JdbcSupport;
 
 /**
@@ -1372,7 +1374,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     {
         try
         {
-            return getModelReader().getDatabase(connection, name);
+            Database model = getModelReader().getDatabase(connection, name);
+
+            postprocessModelFromDatabase(model);
+            return model;
         }
         catch (SQLException ex)
         {
@@ -1396,8 +1401,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         try
         {
             JdbcModelReader reader = getModelReader();
-            
-            return reader.getDatabase(connection, name, catalog, schema, tableTypes);
+            Database        model  = reader.getDatabase(connection, name, catalog, schema, tableTypes);
+
+            postprocessModelFromDatabase(model);
+            return model;
         }
         catch (SQLException ex)
         {
@@ -1405,6 +1412,38 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
     }
 
+    /**
+     * Allows the platform to postprocess the model just read from the database.
+     * 
+     * @param model The model
+     */
+    protected void postprocessModelFromDatabase(Database model)
+    {
+        // Default values for CHAR/VARCHAR/LONGVARCHAR columns have quotation marks
+        // around them which we'll remove now
+        for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+        {
+            Table table = model.getTable(tableIdx);
+
+            for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
+            {
+                Column column = table.getColumn(columnIdx);
+
+                if (TypeMap.isTextType(column.getTypeCode()))
+                {
+                    String defaultValue = column.getDefaultValue();
+
+                    if ((defaultValue != null) &&
+                        defaultValue.startsWith("'") && defaultValue.endsWith("'"))
+                    {
+                        defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
+                        column.setDefaultValue(defaultValue);
+                    }
+                }
+            }
+        }
+    }
+    
     /**
      * Derives the column values for the given dyna properties from the dyna bean.
      * 
@@ -1444,6 +1483,11 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         else if (value instanceof String)
         {
             statement.setString(sqlIndex, (String)value);
+        }
+        else if (value instanceof BigDecimal)
+        {
+            // Derby doesn't like BigDecimal's in setObject
+            statement.setBigDecimal(sqlIndex, (BigDecimal)value);
         }
         else
         {

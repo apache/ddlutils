@@ -54,7 +54,7 @@ public class MySqlPlatform extends PlatformImplBase
         info.setDelimiterToken("`");
         // the BINARY types are also handled by MySqlBuilder.getSqlType(Column)
         info.addNativeTypeMapping(Types.ARRAY,         "LONGBLOB");
-        info.addNativeTypeMapping(Types.BINARY,        "CHAR");
+        info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} BINARY");
         info.addNativeTypeMapping(Types.BIT,           "TINYINT(1)");
         info.addNativeTypeMapping(Types.BLOB,          "LONGBLOB");
         info.addNativeTypeMapping(Types.CLOB,          "LONGTEXT");
@@ -73,10 +73,13 @@ public class MySqlPlatform extends PlatformImplBase
         // that DATETIME (year to seconds) as of MySQL 5, we map the JDBC type here to DATETIME
         // TODO: Make this configurable
         info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
+        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} BINARY");
         info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)");
         info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
 
+        info.addDefaultSize(Types.BINARY,    254);
+        info.addDefaultSize(Types.VARBINARY, 254);
+        
         setSqlBuilder(new MySqlBuilder(info));
     }
 

@@ -17,7 +17,6 @@ package org.apache.ddlutils.platform;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
@@ -108,21 +107,6 @@ public class InterbaseBuilder extends SqlBuilder
             println(" !!");
             print("COMMIT");
             printEndOfStatement();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected String getSqlType(Column column)
-    {
-        switch (column.getTypeCode())
-        {
-            case Types.BINARY:
-            case Types.VARBINARY:
-                return super.getSqlType(column) + " CHARACTER SET OCTETS";
-            default:
-                return super.getSqlType(column);
         }
     }
 

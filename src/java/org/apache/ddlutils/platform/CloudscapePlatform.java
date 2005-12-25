@@ -49,7 +49,7 @@ public class CloudscapePlatform extends PlatformImplBase
         info.setMaxIdentifierLength(128);
         // BINARY and VARBINARY will also be handled by CloudscapeBuilder.getSqlType
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                     Types.BLOB);
-        info.addNativeTypeMapping(Types.BINARY,        "CHAR");
+        info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} FOR BIT DATA");
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",                 Types.SMALLINT);
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",                     Types.BLOB);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
@@ -62,10 +62,14 @@ public class CloudscapePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.REF,           "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",                  Types.SMALLINT);
-        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
+        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} FOR BIT DATA");
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT",                  "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA", "LONGVARBINARY");
 
+        info.addDefaultSize(Types.BINARY,    254);
+        info.addDefaultSize(Types.CHAR,      254);
+        info.addDefaultSize(Types.VARBINARY, 254);
+        info.addDefaultSize(Types.VARCHAR,   254);
         setSqlBuilder(new CloudscapeBuilder(info));
     }
 

@@ -93,6 +93,9 @@ public class PlatformInfo
     /** Contains those JDBC types whose corresponding native types are types that have a size on this platform. */
     private HashSet _typesWithSize = new HashSet();
 
+    /** Contains the default sizes for those JDBC types whose corresponding native types require a size. */
+    private HashMap _typesDefaultSizes = new HashMap();
+
     /** Contains those JDBC types whose corresponding native types are types that have precision and scale on this platform. */
     private HashSet _typesWithPrecisionAndScale = new HashSet();
 
@@ -553,6 +556,52 @@ public class PlatformInfo
         return targetJdbcType == null ? typeCode : targetJdbcType.intValue(); 
     }
 
+    /**
+     * Adds a default size for the given jdbc type.
+     * 
+     * @param jdbcTypeCode The jdbc type code
+     * @param defaultSize  The default size
+     */
+    public void addDefaultSize(int jdbcTypeCode, int defaultSize)
+    {
+        _typesDefaultSizes.put(new Integer(jdbcTypeCode), new Integer(defaultSize));
+    }
+
+    /**
+     * Returns the default size value for the given type, if any.
+     * 
+     * @param jdbcTypeCode The jdbc type code
+     * @return The default size or <code>null</code> if none is defined
+     */
+    public Integer getDefaultSize(int jdbcTypeCode)
+    {
+        return (Integer)_typesDefaultSizes.get(new Integer(jdbcTypeCode));
+    }
+    
+    /**
+     * Adds a default size for the given jdbc type.
+     * 
+     * @param jdbcTypeName The name of the jdbc type, one of the {@link Types} constants
+     * @param defaultSize  The default size
+     */
+    public void addDefaultSize(String jdbcTypeName, int defaultSize)
+    {
+        try
+        {
+            Field constant = Types.class.getField(jdbcTypeName);
+
+            if (constant != null)
+            {
+                addDefaultSize(constant.getInt(null), defaultSize);
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore -> won't be defined
+            _log.warn("Cannot add default size for undefined jdbc type "+jdbcTypeName, ex);
+        }
+    }
+    
     /**
      * Specifies whether the native type for the given sql type code (one of the
      * {@link java.sql.Types} constants) has a null default value on this platform.

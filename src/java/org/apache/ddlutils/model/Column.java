@@ -53,7 +53,7 @@ public class Column implements Cloneable, Serializable
     /** The size of the column for JDBC types that require/support this. */
     private Integer _sizeAsInt;
     /** The scale of the column for JDBC types that require/support this. */
-    private int _scale = 0;
+    private int _scale;
     /** The default value. */
     private String _defaultValue;
 

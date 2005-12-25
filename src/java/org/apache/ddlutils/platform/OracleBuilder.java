@@ -17,7 +17,6 @@ package org.apache.ddlutils.platform;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
@@ -107,35 +106,6 @@ public class OracleBuilder extends SqlBuilder
             println(" FROM dual;");
             print("END");
             printEndOfStatement();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected String getSqlType(Column column)
-    {
-        switch (column.getTypeCode())
-        {
-            // we need to always specify a size for these types
-            case Types.BINARY:
-            case Types.VARCHAR:
-                StringBuffer sqlType = new StringBuffer();
-
-                sqlType.append(getNativeType(column));
-                sqlType.append("(");
-                if (column.getSize() == null)
-                {
-                    sqlType.append("254");
-                }
-                else
-                {
-                    sqlType.append(column.getSize());
-                }
-                sqlType.append(")");
-                return sqlType.toString();
-            default:
-                return super.getSqlType(column);
         }
     }
 

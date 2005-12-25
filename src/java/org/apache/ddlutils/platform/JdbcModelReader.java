@@ -316,10 +316,18 @@ public class JdbcModelReader
                 col.setName(getValueAsString(columnData, "COLUMN_NAME", availableColumns, "UNKNOWN"));
                 col.setTypeCode(getValueAsInt(columnData, "DATA_TYPE", availableColumns, java.sql.Types.OTHER));
                 col.setPrecisionRadix(getValueAsInt(columnData, "NUM_PREC_RADIX", availableColumns, 10));
-                col.setScale(getValueAsInt(columnData, "DECIMAL_DIGITS", availableColumns, 0));
+
+                int scale = getValueAsInt(columnData, "DECIMAL_DIGITS", availableColumns, 0);
+
                 // we're setting the size after the precision and radix in case
                 // the database prefers to return them in the size value 
                 col.setSize(getValueAsString(columnData, "COLUMN_SIZE", availableColumns, (String)_defaultSizes.get(new Integer(col.getTypeCode()))));
+                if (scale != 0)
+                {
+                    // if there is a scale value, set it after the size (which probably did not contain
+                    // a scale specification)
+                    col.setScale(scale);
+                }
                 col.setRequired("NO".equalsIgnoreCase(getValueAsString(columnData, "IS_NULLABLE", availableColumns, "YES").trim()));
                 col.setDescription(getValueAsString(columnData, "REMARKS", availableColumns, null));                
                 if (primaryKeys.contains(col.getName()))

@@ -17,7 +17,6 @@ package org.apache.ddlutils.platform;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
@@ -40,34 +39,6 @@ public class Db2Builder extends SqlBuilder
     public Db2Builder(PlatformInfo info)
     {
         super(info);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected String getSqlType(Column column)
-    {
-        switch (column.getTypeCode())
-        {
-            case Types.BINARY:
-            case Types.VARBINARY:
-                StringBuffer sqlType = new StringBuffer();
-
-                sqlType.append(getNativeType(column));
-                sqlType.append(" (");
-                if (column.getSize() == null)
-                {
-                    sqlType.append("254");
-                }
-                else
-                {
-                    sqlType.append(column.getSize());
-                }
-                sqlType.append(") FOR BIT DATA");
-                return sqlType.toString();
-            default:
-                return super.getSqlType(column);
-        }
     }
     
     /**

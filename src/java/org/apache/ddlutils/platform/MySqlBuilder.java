@@ -17,7 +17,6 @@ package org.apache.ddlutils.platform;
  */
 
 import java.io.IOException;
-import java.sql.Types;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -53,34 +52,6 @@ public class MySqlBuilder extends SqlBuilder
         print("DROP TABLE IF EXISTS ");
         printIdentifier(getTableName(table));
         printEndOfStatement();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected String getSqlType(Column column)
-    {
-        switch (column.getTypeCode())
-        {
-            case Types.BINARY:
-            case Types.VARBINARY:
-                StringBuffer sqlType = new StringBuffer();
-
-                sqlType.append(getNativeType(column));
-                sqlType.append("(");
-                if (column.getSize() == null)
-                {
-                    sqlType.append("254");
-                }
-                else
-                {
-                    sqlType.append(column.getSize());
-                }
-                sqlType.append(") BINARY");
-                return sqlType.toString();
-            default:
-                return super.getSqlType(column);
-        }
     }
 
     /**

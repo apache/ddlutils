@@ -59,6 +59,8 @@ public abstract class SqlBuilder
 {
     /** The line separator for in between sql commands. */
     private static final String LINE_SEPERATOR = System.getProperty("line.separator", "\n");
+    /** The placeholder for the size value in the native type spec. */
+    protected static final String SIZE_PLACEHOLDER = "{0}";
 
     /** The Log to which logging calls will be made. */
     protected final Log _log = LogFactory.getLog(SqlBuilder.class);
@@ -1171,25 +1173,37 @@ public abstract class SqlBuilder
      */
     protected String getSqlType(Column column)
     {
-        StringBuffer sqlType = new StringBuffer(getNativeType(column));
+        String       nativeType = getNativeType(column);
+        int          sizePos    = nativeType.indexOf(SIZE_PLACEHOLDER);
+        StringBuffer sqlType    = new StringBuffer();
 
-        if (column.getSize() != null)
+        sqlType.append(sizePos >= 0 ? nativeType.substring(0, sizePos) : nativeType);
+
+        Object sizeSpec = column.getSize();
+        
+        if (sizeSpec == null)
+        {
+            sizeSpec = getPlatformInfo().getDefaultSize(column.getTypeCode());
+        }
+        if (sizeSpec != null)
         {
             if (getPlatformInfo().hasSize(column.getTypeCode()))
             {
                 sqlType.append("(");
-                sqlType.append(column.getSize());
+                sqlType.append(sizeSpec.toString());
                 sqlType.append(")");
             }
             else if (getPlatformInfo().hasPrecisionAndScale(column.getTypeCode()))
             {
                 sqlType.append("(");
-                sqlType.append(column.getSize());
+                sqlType.append(sizeSpec.toString());
                 sqlType.append(",");
                 sqlType.append(column.getScale());
                 sqlType.append(")");
             }
         }
+        sqlType.append(sizePos >= 0 ? nativeType.substring(sizePos + SIZE_PLACEHOLDER.length()) : "");
+
         return sqlType.toString();
     }
 

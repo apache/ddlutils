@@ -53,7 +53,7 @@ public class InterbasePlatform extends PlatformImplBase
         // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
         info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(38,0)");
-        info.addNativeTypeMapping(Types.BINARY,        "CHAR");
+        info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} CHARACTER SET OCTETS");
         info.addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
         info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB");
@@ -68,7 +68,7 @@ public class InterbasePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
         info.addNativeTypeMapping(Types.REF,           "BLOB");
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
-        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR");
+        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} CHARACTER SET OCTETS");
         info.addNativeTypeMapping("BOOLEAN",  "DECIMAL(1,0)");
         info.addNativeTypeMapping("DATALINK", "BLOB");
 
