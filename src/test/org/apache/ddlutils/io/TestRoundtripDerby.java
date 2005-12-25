@@ -1,5 +1,6 @@
 package org.apache.ddlutils.io;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -346,6 +347,232 @@ public class TestRoundtripDerby extends RoundtripTestBase
 
         assertEquals(new Double(-1e+150),                     beans.get(0), "VALUE");
         assertEquals(new Double(-9876543210.987654321098765), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple DECIMAL column.
+     */
+    public void testDecimal()
+    {
+        createDatabase(TEST_DECIMAL_MODEL);
+
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new BigDecimal("0") });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new BigDecimal("-123456789012345") });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("0"),                beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("-123456789012345"), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a DECIMAL column with a default value.
+     */
+    public void testDecimalWithDefault()
+    {
+        createDatabase(TEST_DECIMAL_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new BigDecimal("-1") });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("123456789012345"), beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("-1"),              beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple DECIMAL column with a scale.
+     */
+    public void testDecimalWithScale()
+    {
+        createDatabase(TEST_DECIMAL_MODEL_WITH_SCALE);
+
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new BigDecimal("0.0100000") });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new BigDecimal("-87654321.1234567") });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("0.0100000"),         beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("-87654321.1234567"), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a DECIMAL column with a scale and default value.
+     */
+    public void testDecimalWithScaleAndDefault()
+    {
+        createDatabase(TEST_DECIMAL_MODEL_WITH_SCALE_AND_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new BigDecimal("1.0000000") });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2) });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("1.0000000"),        beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("12345678.7654321"), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple NUMERIC column.
+     */
+    public void testNumeric()
+    {
+        createDatabase(TEST_NUMERIC_MODEL);
+
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new BigDecimal("543210987654321") });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new BigDecimal("-2") });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("543210987654321"), beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("-2"),              beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a NUMERIC column with a default value.
+     */
+    public void testNumericWithDefault()
+    {
+        createDatabase(TEST_NUMERIC_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new BigDecimal("100") });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("-123456789012345"), beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("100"),              beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple NUMERIC column with a scale.
+     */
+    public void testNumericWithScale()
+    {
+        createDatabase(TEST_NUMERIC_MODEL_WITH_SCALE);
+
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new BigDecimal("1234567.89012345") });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new BigDecimal("1.00000000") });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("1234567.89012345"), beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("1.00000000"),       beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a NUMERIC column with a scale and default value.
+     */
+    public void testNumericWithScaleAndDefault()
+    {
+        createDatabase(TEST_NUMERIC_MODEL_WITH_SCALE_AND_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new BigDecimal("1e-8") });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new BigDecimal("-1234567.87654321"), beans.get(0), "VALUE");
+        assertEquals(new BigDecimal("1e-8"),              beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple CHAR column.
+     */
+    public void testChar()
+    {
+        createDatabase(TEST_CHAR_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), null });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), "1234567890" });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)null,         beans.get(0), "VALUE");
+        assertEquals((Object)"1234567890", beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a CHAR column with a default value.
+     */
+    public void testCharWithDefault()
+    {
+        createDatabase(TEST_CHAR_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), "12345" });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)"some value     ", beans.get(0), "VALUE");
+        assertEquals((Object)"12345          ", beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple VARCHAR column.
+     */
+    public void testVarChar()
+    {
+        createDatabase(TEST_VARCHAR_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), "123456789012345678" });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), null });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)"123456789012345678", beans.get(0), "VALUE");
+        assertEquals((Object)null,                 beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a VARCHAR column with a default value.
+     */
+    public void testVarCharWithDefault()
+    {
+        createDatabase(TEST_VARCHAR_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), "1234567890123456789012345678901234567890123456789012345678901234"+
+                                                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                                                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                                                              "12345678901234567890123456789012345678901234567890123456789012"});
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)"some value", beans.get(0), "VALUE");
+        assertEquals((Object)("1234567890123456789012345678901234567890123456789012345678901234"+
+                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                              "12345678901234567890123456789012345678901234567890123456789012"), beans.get(1), "VALUE");
 
         assertEquals(getAdjustedModel(),
                      getPlatform().readModelFromDatabase("roundtriptest"));
