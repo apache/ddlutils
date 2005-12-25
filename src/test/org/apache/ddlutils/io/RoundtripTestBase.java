@@ -21,9 +21,11 @@ import java.util.List;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestDatabaseWriterBase;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.UniqueIndex;
+import org.apache.ddlutils.platform.DefaultValueHelper;
 
 /**
  * Base class for database roundtrip (creation & reconstruction from the database).
@@ -248,7 +250,61 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
             table.addIndex(index);
         }
     }
+
+    /**
+     * Specifies whether the platform has unique indices for pks in the model
+     * read back from the database.
+     * 
+     * @return <code>true</code> if there will be unique indices for pks in read-back models
+     */
+    protected abstract boolean hasPkUniqueIndices();
     
+    /**
+     * Returns the original model adjusted for type changes because of the native type mappings
+     * which when read back from the database will map to different types.
+     * 
+     * @return The adjusted model
+     */
+    protected Database getAdjustedModel()
+    {
+        try
+        {
+            Database model = (Database)getModel().clone();
+
+            for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+            {
+                Table table = model.getTable(tableIdx);
+
+                for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
+                {
+                    Column column     = table.getColumn(columnIdx);
+                    int    origType   = column.getTypeCode();
+                    int    targetType = getPlatformInfo().getTargetJdbcType(origType);
+
+                    if (targetType != origType)
+                    {
+                        column.setTypeCode(targetType);
+                        if (column.getDefaultValue() != null)
+                        {
+                            DefaultValueHelper helper = getPlatform().getSqlBuilder().getDefaultValueHelper();
+
+                            column.setDefaultValue(helper.convert(column.getDefaultValue(), origType, targetType));
+                        }
+                    }
+                }
+            }
+            if (hasPkUniqueIndices())
+            {
+                addPrimaryKeyUniqueIndicesToModel();
+            }
+            return model;
+        }
+        catch (CloneNotSupportedException ex)
+        {
+            throw new RuntimeException(ex);
+        }
+    }
+
     /**
      * Compares the attribute value of the given bean to the expected object.
      * 

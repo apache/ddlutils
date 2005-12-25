@@ -2,8 +2,6 @@ package org.apache.ddlutils.io;
 
 import java.util.List;
 
-import org.apache.ddlutils.model.Database;
-
 /**
  * Performs the roundtrip test against a derby database.
  * 
@@ -12,6 +10,14 @@ import org.apache.ddlutils.model.Database;
  */
 public class TestRoundtripDerby extends RoundtripTestBase
 {
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean hasPkUniqueIndices()
+    {
+        return true;
+    }
+
     /**
      * Tests a simple BIT column.
      */
@@ -26,18 +32,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(Boolean.TRUE,  beans.get(0), "VALUE");
         assertEquals(Boolean.FALSE, beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Derby does not have a boolean type, so it gets mapped to SMALLINT
-        // we therefore adjust the original model according to our expectations
-        getModel().getTable(0).getColumn(1).setType("SMALLINT");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -54,19 +50,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(Boolean.FALSE, beans.get(0), "VALUE");
         assertEquals(Boolean.TRUE,  beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Derby does not have a boolean type, so it gets mapped to SMALLINT
-        // we therefore adjust the original model according to our expectations
-        getModel().getTable(0).getColumn(1).setType("SMALLINT");
-        getModel().getTable(0).getColumn(1).setDefaultValue("0");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -83,18 +68,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(Boolean.FALSE, beans.get(0), "VALUE");
         assertEquals(Boolean.TRUE,  beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Derby does not have a boolean type, so it gets mapped to SMALLINT
-        // we therefore adjust the original model according to our expectations
-        getModel().getTable(0).getColumn(1).setType("SMALLINT");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -111,19 +86,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(Boolean.TRUE, beans.get(0), "VALUE");
         assertEquals(Boolean.TRUE, beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Derby does not have a boolean type, so it gets mapped to SMALLINT
-        // we therefore adjust the original model according to our expectations
-        getModel().getTable(0).getColumn(1).setType("SMALLINT");
-        getModel().getTable(0).getColumn(1).setDefaultValue("1");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -143,18 +107,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Integer(254),  beans.get(0), "VALUE");
         assertEquals(new Integer(-254), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Derby does not have a TINYINT type, so it gets mapped to SMALLINT
-        // we therefore adjust the original model according to our expectations
-        getModel().getTable(0).getColumn(1).setType("SMALLINT");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -171,18 +125,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Integer(128),  beans.get(0), "VALUE");
         assertEquals(new Integer(-200), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Derby does not have a TINYINT type, so it gets mapped to SMALLINT
-        // we therefore adjust the original model according to our expectations
-        getModel().getTable(0).getColumn(1).setType("SMALLINT");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -200,14 +144,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Integer(-32768), beans.get(0), "VALUE");
         assertEquals(new Integer(32767),  beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -224,14 +162,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Integer(256),    beans.get(0), "VALUE");
         assertEquals(new Integer(-32768), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -249,14 +181,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Integer(0),           beans.get(0), "VALUE");
         assertEquals(new Integer(-2147483648), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -273,14 +199,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Integer(2147483647), beans.get(0), "VALUE");
         assertEquals(new Integer(2147483646), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -298,14 +218,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Long(9223372036854775807l), beans.get(0), "VALUE");
         assertEquals(new Long(0l),                   beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -322,14 +236,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Long(-9223372036854775808l), beans.get(0), "VALUE");
         assertEquals(new Long(-1l),                   beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -347,14 +255,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Float(123456789.98765f), beans.get(0), "VALUE");
         assertEquals(new Float(0.0f),             beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -371,14 +273,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Float(1e+20f),      beans.get(0), "VALUE");
         assertEquals(new Float(-1.0123456f), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -396,17 +292,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Double(-1.0),            beans.get(0), "VALUE");
         assertEquals(new Double(Float.MIN_VALUE), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // DOUBLE PRECISION gets mapped back to DOUBLE (which is the same type really)
-        getModel().getTable(0).getColumn(1).setType("DOUBLE");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -423,17 +310,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Double(1234567890.012345678901234), beans.get(0), "VALUE");
         assertEquals(new Double(1e+150),                     beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // DOUBLE PRECISION gets mapped back to DOUBLE (which is the same type really)
-        getModel().getTable(0).getColumn(1).setType("DOUBLE");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -451,14 +329,8 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Double(Float.MAX_VALUE), beans.get(0), "VALUE");
         assertEquals(new Double(1.01),            beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -475,13 +347,7 @@ public class TestRoundtripDerby extends RoundtripTestBase
         assertEquals(new Double(-1e+150),                     beans.get(0), "VALUE");
         assertEquals(new Double(-9876543210.987654321098765), beans.get(1), "VALUE");
 
-        Database db = getPlatform().readModelFromDatabase();
-
-        db.setName("roundtriptest");
-
-        // Also we get a unique index for the PK
-        addPrimaryKeyUniqueIndicesToModel();
-        
-        assertEquals(getModel(), db);
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 }
