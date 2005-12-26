@@ -1429,7 +1429,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             {
                 Column column = table.getColumn(columnIdx);
 
-                if (TypeMap.isTextType(column.getTypeCode()))
+                if (TypeMap.isTextType(column.getTypeCode()) ||
+                    TypeMap.isDateTimeType(column.getTypeCode()))
                 {
                     String defaultValue = column.getDefaultValue();
 
@@ -1479,6 +1480,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         if (value == null)
         {
             statement.setNull(sqlIndex, typeCode);
+        }
+        else if (value instanceof byte[])
+        {
+            statement.setBytes(sqlIndex, (byte[])value);
         }
         else if (value instanceof String)
         {

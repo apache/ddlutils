@@ -16,6 +16,8 @@ package org.apache.ddlutils.dynabean;
  * limitations under the License.
  */
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -319,10 +321,28 @@ public class DynaSqlIterator implements Iterator
                     value = resultSet.getTimestamp(columnName);
                     break;
                 case Types.CLOB:
-                    value = resultSet.getClob(columnName);
+                    Clob clob = resultSet.getClob(columnName);
+
+                    if ((clob == null) || (clob.length() > Integer.MAX_VALUE))
+                    {
+                        value = clob;
+                    }
+                    else
+                    {
+                        value = clob.getSubString(1l, (int)clob.length());
+                    }
                     break;
                 case Types.BLOB:
-                    value = resultSet.getBlob(columnName);
+                    Blob blob = resultSet.getBlob(columnName);
+
+                    if ((blob == null) || (blob.length() > Integer.MAX_VALUE))
+                    {
+                        value = blob;
+                    }
+                    else
+                    {
+                        value = blob.getBytes(1l, (int)blob.length());
+                    }
                     break;
                 case Types.ARRAY:
                     value = resultSet.getArray(columnName);

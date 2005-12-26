@@ -17,6 +17,7 @@ package org.apache.ddlutils.model;
  */
 
 import java.io.Serializable;
+import java.sql.Types;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -436,12 +437,16 @@ public class Column implements Cloneable, Serializable
             comparator.append(_required,      other._required);
             comparator.append(_autoIncrement, other._autoIncrement);
             comparator.append(_typeCode,      other._typeCode);
-            comparator.append(_type,          other._type);
-            comparator.append(_scale,         other._scale);
             comparator.append(_defaultValue,  other._defaultValue);
 
             // comparing the size makes only sense for types where it is relevant
-            if (!TypeMap.isNumericType(_typeCode) && TypeMap.isNumericType(other._typeCode))
+            if ((_typeCode == Types.NUMERIC) || (_typeCode == Types.DECIMAL))
+            {
+                comparator.append(_scale, other._scale);
+                comparator.append(_scale, other._scale);
+            }
+            else if ((_typeCode == Types.CHAR) || (_typeCode == Types.VARCHAR) ||
+                     (_typeCode == Types.BINARY) || (_typeCode == Types.VARBINARY))
             {
                 comparator.append(_size, other._size);
             }
