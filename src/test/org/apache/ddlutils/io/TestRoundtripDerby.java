@@ -1,7 +1,13 @@
 package org.apache.ddlutils.io;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Performs the roundtrip test against a derby database.
@@ -573,6 +579,290 @@ public class TestRoundtripDerby extends RoundtripTestBase
                               "1234567890123456789012345678901234567890123456789012345678901234"+
                               "1234567890123456789012345678901234567890123456789012345678901234"+
                               "12345678901234567890123456789012345678901234567890123456789012"), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple LONGVARCHAR column.
+     */
+    public void testLongVarChar()
+    {
+        createDatabase(TEST_LONGVARCHAR_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), null });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), "some not too long text" });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)null,                     beans.get(0), "VALUE");
+        assertEquals((Object)"some not too long text", beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a LONGVARCHAR column with a default value.
+     */
+    public void testLongVarCharWithDefault()
+    {
+        createDatabase(TEST_LONGVARCHAR_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), "1234567890123456789012345678901234567890123456789012345678901234"+
+                                                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                                                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                                                              "1234567890123456789012345678901234567890123456789012345678901234"});
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)"some value", beans.get(0), "VALUE");
+        assertEquals((Object)("1234567890123456789012345678901234567890123456789012345678901234"+
+                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                              "1234567890123456789012345678901234567890123456789012345678901234"+
+                              "1234567890123456789012345678901234567890123456789012345678901234"), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple DATE column.
+     */
+    public void testDate()
+    {
+        // we would use Calendar but that might give Locale problems
+        createDatabase(TEST_DATE_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), null });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new Date(103, 12, 25) });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)null,          beans.get(0), "VALUE");
+        assertEquals(new Date(103, 12, 25), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a DATE column with a default value.
+     */
+    public void testDateWithDefault()
+    {
+        // we would use Calendar but that might give Locale problems
+        createDatabase(TEST_DATE_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new Date(105, 0, 1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2) });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new Date(105, 0, 1), beans.get(0), "VALUE");
+        assertEquals(new Date(100, 0, 1), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple TIME column.
+     */
+    public void testTime()
+    {
+        // we would use Calendar but that might give Locale problems
+        createDatabase(TEST_TIME_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new Time(03, 47, 15) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), null });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new Time(03, 47, 15), beans.get(0), "VALUE");
+        assertEquals((Object)null,         beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a TIME column with a default value.
+     */
+    public void testTimeWithDefault()
+    {
+        // we would use Calendar but that might give Locale problems
+        createDatabase(TEST_TIME_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new Time(23, 59, 59) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2) });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new Time(23, 59, 59), beans.get(0), "VALUE");
+        assertEquals(new Time(11, 27, 03), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple TIMESTAMP column.
+     */
+    public void testTimestamp()
+    {
+        // we would use Calendar but that might give Locale problems
+        // also we leave out the fractional part because databases differe
+        // in their support here
+        createDatabase(TEST_TIMESTAMP_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new Timestamp(70, 0, 1, 0, 0, 0, 0) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), new Timestamp(100, 10, 11, 10, 10, 10, 0)});
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new Timestamp(70, 0, 1, 0, 0, 0, 0),       beans.get(0), "VALUE");
+        assertEquals(new Timestamp(100, 10, 11, 10, 10, 10, 0), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a TIMESTAMP column with a default value.
+     */
+    public void testTimestampWithDefault()
+    {
+        // we would use Calendar but that might give Locale problems
+        // also we leave out the fractional part because databases differe
+        // in their support here
+        createDatabase(TEST_TIMESTAMP_MODEL_WITH_DEFAULT);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), new Timestamp(90, 9, 21, 20, 25, 39, 0) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2) });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(new Timestamp(90, 9, 21, 20, 25, 39, 0), beans.get(0), "VALUE");
+        assertEquals(new Timestamp(85, 5, 17, 16, 17, 18, 0), beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple BINARY column.
+     */
+    public void testBinary()
+    {
+        HashMap   value1 = new HashMap();
+        ArrayList value2 = new ArrayList();
+
+        value1.put("test", "some value");
+        value2.add("some other value");
+
+        BinaryObjectsHelper helper = new BinaryObjectsHelper();
+
+        createDatabase(TEST_BINARY_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), helper.serialize(value1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), helper.serialize(value2) });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(value1, beans.get(0), "VALUE");
+        assertEquals(value2, beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple VARBINARY column.
+     */
+    public void testVarBinary()
+    {
+        TreeSet value1 = new TreeSet();
+        String  value2 = "a value, nothing special";
+
+        value1.add("o look, a value !");
+
+        BinaryObjectsHelper helper = new BinaryObjectsHelper();
+
+        createDatabase(TEST_VARBINARY_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), helper.serialize(value1) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), helper.serialize(value2) });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(value1,         beans.get(0), "VALUE");
+        assertEquals((Object)value2, beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple LONGVARBINARY column.
+     */
+    public void testLongVarBinary()
+    {
+        HashMap value = new HashMap();
+
+        value.put("test1", "some value");
+        value.put(null, "some other value");
+
+        BinaryObjectsHelper helper = new BinaryObjectsHelper();
+
+        createDatabase(TEST_LONGVARBINARY_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), helper.serialize(value) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), null });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(value,        beans.get(0), "VALUE");
+        assertEquals((Object)null, beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple BLOB column.
+     */
+    public void testBlob()
+    {
+        HashMap value = new HashMap();
+
+        value.put("test1", "some value");
+        value.put(null, "some other value");
+
+        BinaryObjectsHelper helper = new BinaryObjectsHelper();
+
+        createDatabase(TEST_BLOB_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), helper.serialize(value) });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), null });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(value,        beans.get(0), "VALUE");
+        assertEquals((Object)null, beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Tests a simple CLOB column.
+     */
+    public void testClob()
+    {
+        String value = "1234567890123456789012345678901234567890123456789012345678901234"+
+                       "1234567890123456789012345678901234567890123456789012345678901234"+
+                       "1234567890123456789012345678901234567890123456789012345678901234"+
+                       "1234567890123456789012345678901234567890123456789012345678901234";
+
+        createDatabase(TEST_CLOB_MODEL);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), null });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), value });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals((Object)null,  beans.get(0), "VALUE");
+        assertEquals((Object)value, beans.get(1), "VALUE");
 
         assertEquals(getAdjustedModel(),
                      getPlatform().readModelFromDatabase("roundtriptest"));

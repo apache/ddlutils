@@ -16,14 +16,19 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
+import java.io.StringWriter;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestDatabaseWriterBase;
+import org.apache.ddlutils.dynabean.SqlDynaBean;
+import org.apache.ddlutils.dynabean.SqlDynaClass;
+import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.model.UniqueIndex;
 import org.apache.ddlutils.platform.DefaultValueHelper;
 
@@ -305,6 +310,123 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         "    <column name='VALUE' type='VARCHAR' required='true' default='some value'/>\n"+
         "  </table>\n"+
         "</database>";
+    /** Test model with a simple LONGVARCHAR column. */
+    protected static final String TEST_LONGVARCHAR_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='LONGVARCHAR'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a LONGVARCHAR column with a default value. */
+    protected static final String TEST_LONGVARCHAR_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='LONGVARCHAR' required='true' default='some value'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple DATE column. */
+    protected static final String TEST_DATE_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='DATE'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a DATE column with a default value. */
+    protected static final String TEST_DATE_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='DATE' required='true' default='2000-01-01'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple TIME column. */
+    protected static final String TEST_TIME_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='TIME'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a TIME column with a default value. */
+    protected static final String TEST_TIME_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='TIME' required='true' default='11:27:03'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple TIMESTAMP column. */
+    protected static final String TEST_TIMESTAMP_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='TIMESTAMP'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a TIMESTAMP column with a default value. */
+    protected static final String TEST_TIMESTAMP_MODEL_WITH_DEFAULT = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='TIMESTAMP' required='true' default='1985-06-17 16:17:18.0'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple BINARY column. */
+    protected static final String TEST_BINARY_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='BINARY'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple VARBINARY column. */
+    protected static final String TEST_VARBINARY_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='VARBINARY'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple LONGVARBINARY column. */
+    protected static final String TEST_LONGVARBINARY_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='LONGVARBINARY'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple BLOB column. */
+    protected static final String TEST_BLOB_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='BLOB'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple CLOB column. */
+    protected static final String TEST_CLOB_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='CLOB'/>\n"+
+        "  </table>\n"+
+        "</database>";
 
     /**
      * Inserts a row into the designated table.
@@ -402,6 +524,17 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                             column.setDefaultValue(helper.convert(column.getDefaultValue(), origType, targetType));
                         }
                     }
+                    // we also promote the default size if the column has no size
+                    // spec of its own
+                    if ((column.getSize() == null) && getPlatformInfo().hasSize(targetType))
+                    {
+                        Integer defaultSize = getPlatformInfo().getDefaultSize(targetType);
+
+                        if (defaultSize != null)
+                        {
+                            column.setSize(defaultSize.toString());
+                        }
+                    }
                 }
             }
             if (hasPkUniqueIndices())
@@ -417,7 +550,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     }
 
     /**
-     * Compares the attribute value of the given bean to the expected object.
+     * Compares the attribute value of the given bean with the expected object.
      * 
      * @param expected The expected object
      * @param bean     The bean
@@ -426,15 +559,39 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     protected void assertEquals(Object expected, Object bean, String attrName)
     {
         DynaBean dynaBean = (DynaBean)bean;
+        Object   value    = dynaBean.get(attrName);
 
-        assertEquals(expected,
-                     dynaBean.get(attrName));
+        if ((value instanceof byte[]) && !(expected instanceof byte[]) && (dynaBean instanceof SqlDynaBean))
+        {
+            SqlDynaClass dynaClass = (SqlDynaClass)((SqlDynaBean)dynaBean).getDynaClass();
+            Column       column    = ((SqlDynaProperty)dynaClass.getDynaProperty(attrName)).getColumn();
+
+            if (TypeMap.isBinaryType(column.getTypeCode()))
+            {
+                value = new BinaryObjectsHelper().deserialize((byte[])value);
+            }
+        }
+        assertEquals(expected, value);
     }
 
-    // char/varchar columns incl. different sizes
-    // time columns
-    // binary/varbinary & java_object etc. columns
-    // blob/clob columns
+    protected void assertEquals(Database expected, Database actual)
+    {
+        StringWriter writer = new StringWriter();
+        DatabaseIO   dbIo   = new DatabaseIO();
+
+        dbIo.write(expected, writer);
+
+        String expectedXml = writer.toString();
+        
+        writer = new StringWriter();
+        dbIo.write(actual, writer);
+
+        String actualXml = writer.toString();
+
+        assertEquals((Object)expected, (Object)actual);
+    }
+
+    // special columns (java_object, array, distinct, ...)
 
     // auto-increment
     // default values
