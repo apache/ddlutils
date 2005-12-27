@@ -19,6 +19,7 @@ package org.apache.ddlutils.model;
 import java.io.Serializable;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -199,6 +200,19 @@ public class Database implements Serializable, Cloneable
         if (table != null)
         {
             _tables.add(idx, table);
+        }
+    }
+
+    /**
+     * Adds the given tables.
+     * 
+     * @param tables The tables to add
+     */
+    public void addTables(Collection tables)
+    {
+        for (Iterator it = tables.iterator(); it.hasNext();)
+        {
+            addTable((Table)it.next());
         }
     }
 

@@ -214,6 +214,19 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
+     * Adds the given columns.
+     * 
+     * @param columns The columns
+     */
+    public void addColumns(Collection columns)
+    {
+        for (Iterator it = columns.iterator(); it.hasNext();)
+        {
+            addColumn((Column)it.next());
+        }
+    }
+
+    /**
      * Removes the given column.
      * 
      * @param column The column to remove
@@ -295,6 +308,19 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
+     * Adds the given foreign keys.
+     * 
+     * @param foreignKeys The foreign keys
+     */
+    public void addForeignKeys(Collection foreignKeys)
+    {
+        for (Iterator it = foreignKeys.iterator(); it.hasNext();)
+        {
+            addForeignKey((ForeignKey)it.next());
+        }
+    }
+
+    /**
      * Removes the given foreign key.
      * 
      * @param foreignKey The foreign key to remove
@@ -362,6 +388,19 @@ public class Table implements Serializable, Cloneable
         if (index != null)
         {
             _indices.add(idx, index);
+        }
+    }
+
+    /**
+     * Adds the given indices.
+     * 
+     * @param indices The indices
+     */
+    public void addIndices(Collection indices)
+    {
+        for (Iterator it = indices.iterator(); it.hasNext();)
+        {
+            addIndex((Index)it.next());
         }
     }
 
