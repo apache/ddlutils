@@ -18,6 +18,7 @@ package org.apache.ddlutils.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collection;
 
@@ -625,10 +626,10 @@ public class Table implements Serializable, Cloneable
 
             // Note that this compares case sensitive
             // TODO: For now we ignore catalog and schema (type should be irrelevant anyways)
-            return new EqualsBuilder().append(_name,        other._name)
-                                      .append(_columns,     other._columns)
-                                      .append(_foreignKeys, other._foreignKeys)
-                                      .append(_indices,     other._indices)
+            return new EqualsBuilder().append(_name,                     other._name)
+                                      .append(_columns,                  other._columns)
+                                      .append(new HashSet(_foreignKeys), new HashSet(other._foreignKeys))
+                                      .append(new HashSet(_indices),     new HashSet(other._indices))
                                       .isEquals();
         }
         else
@@ -645,8 +646,8 @@ public class Table implements Serializable, Cloneable
         // TODO: For now we ignore catalog and schema (type should be irrelevant anyways)
         return new HashCodeBuilder(17, 37).append(_name)
                                           .append(_columns)
-                                          .append(_foreignKeys)
-                                          .append(_indices)
+                                          .append(new HashSet(_foreignKeys))
+                                          .append(new HashSet(_indices))
                                           .toHashCode();
     }
 
