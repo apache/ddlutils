@@ -428,6 +428,96 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         "  </table>\n"+
         "</database>";
 
+    /** Test model with a nullable column. */
+    protected static final String TEST_NULL_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='INTEGER' required='false'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a not-nullable column. */
+    protected static final String TEST_NOT_NULL_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='VARCHAR' required='true'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a auto-increment INTEGER column. */
+    protected static final String TEST_AUTO_INCREMENT_INTEGER_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='INTEGER' required='true' autoIncrement='true'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a auto-increment DOUBLE column. */
+    protected static final String TEST_AUTO_INCREMENT_DOUBLE_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='DOUBLE' required='true' autoIncrement='true'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a auto-increment primary key column. */
+    protected static final String TEST_PRIMARY_KEY_AUTO_INCREMENT_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with a simple index. */
+    protected static final String TEST_INDEX_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='DOUBLE'/>\n"+
+        "    <index name='TEST_INDEX'>\n"+
+        "      <index-column name='VALUE'/>\n"+
+        "    </index>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with an unique index with two columns. */
+    protected static final String TEST_UNIQUE_INDEX_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE1' type='DOUBLE'/>\n"+
+        "    <column name='VALUE2' type='VARCHAR'/>\n"+
+        "    <unique name='TEST_INDEX'>\n"+
+        "      <unique-column name='VALUE2'/>\n"+
+        "      <unique-column name='VALUE1'/>\n"+
+        "    </unique>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with an index with two columns, one of which a pk field. */
+    protected static final String TEST_PRIMARY_KEY_INDEX_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP'>\n"+
+        "    <column name='PK_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='PK_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='DOUBLE'/>\n"+
+        "    <index name='TEST_INDEX'>\n"+
+        "      <index-column name='VALUE'/>\n"+
+        "      <index-column name='PK_1'/>\n"+
+        "    </index>\n"+
+        "  </table>\n"+
+        "</database>";
+
+
+    // TODO: special columns (java_object, array, distinct, ...)
+
+    // fks (incl. multiple columns, circular references)
+
     /**
      * Inserts a row into the designated table.
      * 
@@ -574,29 +664,34 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         assertEquals(expected, value);
     }
 
-    protected void assertEquals(Database expected, Database actual)
+    protected void assertEquals(Database expected, Database actual) throws RuntimeException
     {
-        StringWriter writer = new StringWriter();
-        DatabaseIO   dbIo   = new DatabaseIO();
+        try
+        {
+            assertEquals((Object)expected, (Object)actual);
+        }
+        catch (Throwable ex)
+        {
+            StringWriter writer = new StringWriter();
+            DatabaseIO   dbIo   = new DatabaseIO();
 
-        dbIo.write(expected, writer);
+            dbIo.write(expected, writer);
 
-        String expectedXml = writer.toString();
-        
-        writer = new StringWriter();
-        dbIo.write(actual, writer);
+            System.err.println("Expected model:\n"+writer.toString());
+            
+            writer = new StringWriter();
+            dbIo.write(actual, writer);
 
-        String actualXml = writer.toString();
+            System.err.println("Actual model:\n"+writer.toString());
 
-        assertEquals((Object)expected, (Object)actual);
+            if (ex instanceof Error)
+            {
+                throw (Error)ex;
+            }
+            else
+            {
+                throw new RuntimeException(ex);
+            }
+        }
     }
-
-    // special columns (java_object, array, distinct, ...)
-
-    // auto-increment
-    // default values
-    // null/not null
-    // pk (incl. pk with auto-increment)
-    // index/unique (incl. for pks)
-    // fks (incl. multiple columns, circular references)
 }
