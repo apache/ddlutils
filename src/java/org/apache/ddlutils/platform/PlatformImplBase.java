@@ -68,7 +68,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /** The sql builder for this platform. */
     private SqlBuilder _builder;
     /** The model reader for this platform. */
-    private JdbcModelReader _modelReader = new JdbcModelReader();
+    private JdbcModelReader _modelReader;
 
     /**
      * {@inheritDoc}
@@ -93,6 +93,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public JdbcModelReader getModelReader()
     {
+        if (_modelReader == null)
+        {
+            _modelReader = new JdbcModelReader(getPlatformInfo());
+        }
         return _modelReader;
     }
 
@@ -234,6 +238,31 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
 
         return errors;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void shutdownDatabase() throws DynaSqlException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            shutdownDatabase(connection);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void shutdownDatabase(Connection connection) throws DynaSqlException
+    {
+        // Per default do nothing as most databases don't need this
     }
 
     /**

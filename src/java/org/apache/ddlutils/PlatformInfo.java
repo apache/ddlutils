@@ -50,6 +50,9 @@ public class PlatformInfo
     /** Whether embedded foreign key constraints are explicitly named. */
     private boolean _embeddedForeignKeysNamed = false;
 
+    /** Whether identity specification is supported for non-primary key columns. */
+    private boolean _supportingNonPKIdentityColumns = true;
+
     /** Whether an ALTER TABLE is needed to drop indexes. */
     private boolean _useAlterTableForDrop = false;
 
@@ -98,6 +101,10 @@ public class PlatformInfo
 
     /** Contains those JDBC types whose corresponding native types are types that have precision and scale on this platform. */
     private HashSet _typesWithPrecisionAndScale = new HashSet();
+
+    /** Whether system indices (database-generated indices for primary and foreign keys) are returned when
+        reading a model from a database. */
+    private boolean _returningSystemIndices = true;
 
     /**
      * Creates a new platform info object.
@@ -230,6 +237,27 @@ public class PlatformInfo
     public void setEmbeddedForeignKeysNamed(boolean embeddedForeignKeysNamed)
     {
         _embeddedForeignKeysNamed = embeddedForeignKeysNamed;
+    }
+
+    /**
+     * Determines whether non-primary key columns can be auto-incrementing (IDENTITY columns).
+     *
+     * @return <code>true</code> if normal non-PK columns can be auto-incrementing
+     */
+    public boolean isSupportingNonPKIdentityColumns()
+    {
+        return _supportingNonPKIdentityColumns;
+    }
+
+    /**
+     * Specifies whether non-primary key columns can be auto-incrementing (IDENTITY columns).
+     *
+     * @param supportingNonPKIdentityColumns <code>true</code> if normal non-PK columns can
+     *                                       be auto-incrementing
+     */
+    public void setSupportingNonPKIdentityColumns(boolean supportingNonPKIdentityColumns)
+    {
+        _supportingNonPKIdentityColumns = supportingNonPKIdentityColumns;
     }
 
     /**
@@ -696,4 +724,27 @@ public class PlatformInfo
     {
         return _typesWithPrecisionAndScale.contains(new Integer(sqlTypeCode));
     }
+
+    /**
+     * Determines whether database-generated indices for primary and foreign keys are
+     * returned when reading a model from a database.
+     *
+     * @return <code>true</code> if system indices are read from a live database
+     */
+    public boolean isReturningSystemIndices()
+    {
+        return _returningSystemIndices;
+    }
+
+    /**
+     * Specifies whether database-generated indices for primary and foreign keys are
+     * returned when reading a model from a database.
+     *
+     * @param returningSystemIndices <code>true</code> if system indices are read from a live database
+     */
+    public void setReturningSystemIndices(boolean returningSystemIndices)
+    {
+        _returningSystemIndices = returningSystemIndices;
+    }
+
 }

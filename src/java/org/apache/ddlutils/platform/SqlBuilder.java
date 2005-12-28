@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -1130,6 +1131,10 @@ public abstract class SqlBuilder
         }
         if (column.isAutoIncrement())
         {
+            if (!getPlatformInfo().isSupportingNonPKIdentityColumns() && !column.isPrimaryKey())
+            {
+                throw new DynaSqlException("Column "+column.getName()+" in table "+table.getName()+" is auto-incrementing but not a primary key column, which is not supported by the platform");
+            }
             print(" ");
             writeColumnAutoIncrementStmt(table, column);
         }
@@ -1531,7 +1536,7 @@ public abstract class SqlBuilder
                 if (col == null)
                 {
                     //would get null pointer on next line anyway, so throw exception
-                    throw new RuntimeException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
+                    throw new DynaSqlException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
                 }
                 if (idx > 0)
                 {

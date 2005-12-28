@@ -30,6 +30,7 @@ import java.util.Map;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -63,20 +64,28 @@ public class JdbcModelReader
     /** The descriptors for the relevant columns in the index meta data. */
     private final List _columnsForIndex;
 
+    /** The platform specific settings. */
+    private PlatformInfo _platformInfo;
     /** Contains default column sizes (minimum sizes that a JDBC-compliant db must support). */
     private HashMap _defaultSizes = new HashMap();
     /** The default database catalog to read. */
-    private String _defaultCatalog = "%";
-    /** The sefault database schema(s) to read. */
+    private String _defaultCatalogPattern = "%";
+    /** The default database schema(s) to read. */
     private String _defaultSchemaPattern = "%";
+    /** The default pattern for reading all tables. */
+    private String _defaultTablePattern = "%";
     /** The table types to recognize per default. */
     private String[] _defaultTableTypes = { "TABLE" };
 
     /**
      * Creates a new model reader instance.
+     * 
+     * @param platformInfo The platform specific settings
      */
-    public JdbcModelReader()
+    public JdbcModelReader(PlatformInfo platformInfo)
     {
+        _platformInfo = platformInfo;
+
         _defaultSizes.put(new Integer(Types.CHAR),          "254");
         _defaultSizes.put(new Integer(Types.VARCHAR),       "254");
         _defaultSizes.put(new Integer(Types.LONGVARCHAR),   "254");
@@ -96,6 +105,16 @@ public class JdbcModelReader
         _columnsForPK     = initColumnsForPK();
         _columnsForFK     = initColumnsForFK();
         _columnsForIndex  = initColumnsForIndex();
+    }
+
+    /**
+     * Returns the platform specific settings.
+     *
+     * @return The platform settings
+     */
+    public PlatformInfo getPlatformInfo()
+    {
+        return _platformInfo;
     }
 
     /**
@@ -206,29 +225,29 @@ public class JdbcModelReader
     }
 
     /**
-     * Returns the catalog in the database to read per default.
+     * Returns the catalog(s) in the database to read per default.
      *
-     * @return The default catalog
+     * @return The default catalog(s)
      */
-    public String getDefaultCatalog()
+    public String getDefaultCatalogPattern()
     {
-        return _defaultCatalog;
+        return _defaultCatalogPattern;
     }
 
     /**
-     * Sets the catalog in the database to read per default.
+     * Sets the catalog(s) in the database to read per default.
      * 
-     * @param catalog The catalog
+     * @param catalogPattern The catalog(s)
      */
-    public void setDefaultCatalog(String catalog)
+    public void setDefaultCatalogPattern(String catalogPattern)
     {
-        _defaultCatalog = catalog;
+        _defaultCatalogPattern = catalogPattern;
     }
 
     /**
-     * Returns the schema in the database to read per default.
+     * Returns the schema(s) in the database to read per default.
      *
-     * @return The default schema
+     * @return The default schema(s)
      */
     public String getDefaultSchemaPattern()
     {
@@ -236,13 +255,33 @@ public class JdbcModelReader
     }
 
     /**
-     * Sets the schema in the database to read per default.
+     * Sets the schema(s) in the database to read per default.
      * 
-     * @param schemaPattern The schema
+     * @param schemaPattern The schema(s)
      */
     public void setDefaultSchemaPattern(String schemaPattern)
     {
         _defaultSchemaPattern = schemaPattern;
+    }
+
+    /**
+     * Returns the default pattern to read the relevant tables from the database.
+     *
+     * @return The table pattern
+     */
+    public String getDefaultTablePattern()
+    {
+        return _defaultTablePattern;
+    }
+
+    /**
+     * Sets the default pattern to read the relevant tables from the database.
+     *
+     * @param tablePattern The table pattern
+     */
+    public void setDefaultTablePattern(String tablePattern)
+    {
+        _defaultTablePattern = tablePattern;
     }
 
     /**
@@ -385,11 +424,11 @@ public class JdbcModelReader
             DatabaseMetaDataWrapper metaData = new DatabaseMetaDataWrapper();
 
             metaData.setMetaData(connection.getMetaData());
-            metaData.setCatalog(catalog == null ? getDefaultCatalog() : catalog);
+            metaData.setCatalog(catalog == null ? getDefaultCatalogPattern() : catalog);
             metaData.setSchemaPattern(schemaPattern == null ? getDefaultSchemaPattern() : schemaPattern);
             metaData.setTableTypes((tableTypes == null) || (tableTypes.length == 0) ? getDefaultTableTypes() : tableTypes);
             
-            tableData = metaData.getTables("%");
+            tableData = metaData.getTables(getDefaultTablePattern());
 
             List tables = new ArrayList();
 
@@ -446,8 +485,107 @@ public class JdbcModelReader
             {
                 table.findColumn((String)it.next(), true).setPrimaryKey(true);
             }
+
+            if (getPlatformInfo().isReturningSystemIndices())
+            {
+                removeSystemIndices(table);
+            }
         }
         return table;
+    }
+
+
+    /**
+     * Removes system indices (generated by the database for primary and foreign keys)
+     * from the table.
+     * 
+     * @param table The table
+     */
+    protected void removeSystemIndices(Table table)
+    {
+        Column[] pks         = table.getPrimaryKeyColumns();
+        List     columnNames = new ArrayList();
+
+        for (int columnIdx = 0; columnIdx < pks.length; columnIdx++)
+        {
+            columnNames.add(pks[columnIdx].getName());
+        }
+
+        // Derby returns a unique index for the pk which we don't want however
+        int indexIdx = findMatchingInternalIndex(table, columnNames, true);
+
+        if (indexIdx >= 0)
+        {
+            table.removeIndex(indexIdx);
+        }
+
+        // Likewise, Derby returns a non-unique index for every foreign key
+        for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey fk = table.getForeignKey(fkIdx);
+
+            columnNames.clear();
+            for (int columnIdx = 0; columnIdx < fk.getReferenceCount(); columnIdx++)
+            {
+                columnNames.add(fk.getReference(columnIdx).getLocalColumnName());
+            }
+            indexIdx = findMatchingInternalIndex(table, columnNames, false);
+            if (indexIdx >= 0)
+            {
+                table.removeIndex(indexIdx);
+            }
+        }
+    }
+
+
+    /**
+     * Tries to find an internal index that matches the given columns.
+     * 
+     * @param table              The table
+     * @param columnsToSearchFor The names of the columns that the index should be for
+     * @param unique             Whether to search for an unique index
+     * @return The position of the index or <code>-1</code> if no such index was found
+     */
+    protected int findMatchingInternalIndex(Table table, List columnsToSearchFor, boolean unique)
+    {
+        for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
+        {
+            Index index = table.getIndex(indexIdx);
+
+            if ((unique == index.isUnique()) && (index.getColumnCount() == columnsToSearchFor.size()))
+            {
+                boolean found = true;
+
+                for (int columnIdx = 0; found && (columnIdx < index.getColumnCount()); columnIdx++)
+                {
+                    if (!columnsToSearchFor.get(columnIdx).equals(index.getColumn(columnIdx).getName()))
+                    {
+                        found = false;
+                    }
+                }
+
+                // if the index seems to be internal, we immediately return it
+                if (found && mightBeInternalIndex(index))
+                {
+                    return indexIdx;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Guesses whether the index might be an internal database-generated index.
+     * Note that only indices with the correct columns are fed to this method.
+     * Redefine this method for specific platforms if there are better ways
+     * to determine internal indices.
+     * 
+     * @param index The index to check
+     * @return <code>true</code> if the index seems to be an internal one
+     */
+    protected boolean mightBeInternalIndex(Index index)
+    {
+        return true;
     }
 
     /**

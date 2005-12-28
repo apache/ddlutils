@@ -151,6 +151,22 @@ public interface Platform
     public int evaluateBatch(Connection connection, String sql, boolean continueOnError) throws DynaSqlException;
 
     /**
+     * Performs a shutdown at the database. This is necessary for some embedded databases which otherwise
+     * would be locked and thus would refuse other connections. Note that this does not change the database
+     * structure or data in it in any way.
+     */
+    public void shutdownDatabase() throws DynaSqlException;
+
+    /**
+     * Performs a shutdown at the database. This is necessary for some embedded databases which otherwise
+     * would be locked and thus would refuse other connections. Note that this does not change the database
+     * structure or data in it in any way.
+     * 
+     * @param connection The connection to the database
+     */
+    public void shutdownDatabase(Connection connection) throws DynaSqlException;
+
+    /**
      * Creates the database specified by the given parameters. Please note that this method does not
      * use a data source set via {@link #setDataSource(DataSource)} because it is not possible to
      * retrieve the connection information from it without establishing a connection.<br/>
