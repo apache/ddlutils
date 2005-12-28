@@ -395,7 +395,8 @@ public class JdbcModelReader
 
             while (tableData.next())
             {
-                Table table = readTable(metaData, tableData);
+                Map   values = readColumns(tableData, getColumnsForTable());
+                Table table  = readTable(metaData, values);
 
                 if (table != null)
                 {
@@ -416,13 +417,12 @@ public class JdbcModelReader
     /**
      * Reads the next table from the meta data.
      * 
-     * @param metaData      The database meta data
-     * @param tableMetaData The result set containing the table metadata
+     * @param metaData The database meta data
+     * @param values   The table metadata values as defined by {@link #getColumnsForTable()}
      * @return The table or <code>null</code> if the result set row did not contain a valid table
      */
-    protected Table readTable(DatabaseMetaDataWrapper metaData, ResultSet tableMetaData) throws SQLException
+    protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
-        Map    values    = readColumns(tableMetaData, getColumnsForTable());
         String tableName = (String)values.get("TABLE_NAME");
         Table  table     = null;
         
@@ -469,7 +469,9 @@ public class JdbcModelReader
 
             while (columnData.next())
             {
-                columns.add(readColumn(metaData, columnData));
+                Map values = readColumns(columnData, getColumnsForColumn());
+
+                columns.add(readColumn(metaData, values));
             }
             return columns;
         }
@@ -485,14 +487,13 @@ public class JdbcModelReader
     /**
      * Extracts a column definition from the result set.
      * 
-     * @param metaData   The database meta data
-     * @param columnData The column meta data result set
+     * @param metaData The database meta data
+     * @param values   The column meta data values as defined by {@link #getColumnsForColumn()}
      * @return The column
      */
-    protected Column readColumn(DatabaseMetaDataWrapper metaData, ResultSet columnData) throws SQLException
+    protected Column readColumn(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
         Column column = new Column();
-        Map    values = readColumns(columnData, getColumnsForColumn());
 
         column.setName((String)values.get("COLUMN_NAME"));
         column.setDefaultValue((String)values.get("COLUMN_DEF"));
@@ -537,7 +538,9 @@ public class JdbcModelReader
             pkData = metaData.getPrimaryKeys(tableName);
             while (pkData.next())
             {
-                pks.add(readPrimaryKeyName(metaData, pkData));
+                Map values = readColumns(pkData, getColumnsForPK());
+
+                pks.add(readPrimaryKeyName(metaData, values));
             }
         }
         finally
@@ -554,13 +557,11 @@ public class JdbcModelReader
      * Extracts a primary key name from the result set.
      *
      * @param metaData The database meta data
-     * @param pkData   The result set containing the meta data for the current pk definition
+     * @param values   The primary key meta data values as defined by {@link #getColumnsForPK()}
      * @return The primary key name
      */
-    protected String readPrimaryKeyName(DatabaseMetaDataWrapper metaData, ResultSet pkData) throws SQLException
+    protected String readPrimaryKeyName(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
-        Map values = readColumns(pkData, getColumnsForPK());
-
         return (String)values.get("COLUMN_NAME");
     }
 
@@ -582,7 +583,9 @@ public class JdbcModelReader
 
             while (fkData.next())
             {
-                readForeignKey(metaData, fkData, fks);
+                Map values = readColumns(fkData, getColumnsForFK());
+
+                readForeignKey(metaData, values, fks);
             }
         }
         finally
@@ -599,29 +602,40 @@ public class JdbcModelReader
      * Reads the next foreign key spec from the result set.
      *
      * @param metaData The database meta data
-     * @param fkData   The foreign key meta data
-     * @param lastFk   The foreign key that was read last
+     * @param values   The foreign key meta data as defined by {@link #getColumnsForFK()}
+     * @param knownFks The already read foreign keys for the current table
      */
-    protected void readForeignKey(DatabaseMetaDataWrapper metaData, ResultSet fkData, Map knownFks) throws SQLException
+    protected void readForeignKey(DatabaseMetaDataWrapper metaData, Map values, Map knownFks) throws SQLException
     {
-        Map        values      = readColumns(fkData, getColumnsForFK());
-        String     fkName      = (String)values.get("FK_NAME");
-        ForeignKey fk          = (ForeignKey)knownFks.get(fkName);
+        String     fkName = (String)values.get("FK_NAME");
+        ForeignKey fk     = (ForeignKey)knownFks.get(fkName);
 
         if (fk == null)
         {
             fk = new ForeignKey(fkName);
             fk.setForeignTableName((String)values.get("PKTABLE_NAME"));
+            knownFks.put(fkName, fk);
         }
 
         Reference ref      = new Reference();
-        short     position = ((Short)values.get("KEY_SEQ")).shortValue();
+        int       position = ((Short)values.get("KEY_SEQ")).intValue() - 1;
 
         ref.setForeignColumnName((String)values.get("PKCOLUMN_NAME"));
         ref.setLocalColumnName((String)values.get("FKCOLUMN_NAME"));
 
-        // TODO: use position
-        fk.addReference(ref);
+        if ((position < 0) || (position >= fk.getReferenceCount()))
+        {
+            while (fk.getReferenceCount() < position)
+            {
+                fk.addReference(null);
+            }
+            fk.addReference(ref);
+        }
+        else
+        {
+            fk.addReference(position, ref);
+            fk.removeReference(position + 1);
+        }
     }
 
     /**
@@ -642,7 +656,9 @@ public class JdbcModelReader
 
             while (indexData.next())
             {
-                readIndex(metaData, indexData, indices);
+                Map values = readColumns(indexData, getColumnsForIndex());
+
+                readIndex(metaData, values, indices);
             }
         }
         finally
@@ -659,14 +675,13 @@ public class JdbcModelReader
      * Reads the next index spec from the result set.
      * 
      * @param metaData     The database meta data
-     * @param indexData    The index meta data
-     * @param knownIndices The already known indices
+     * @param values       The index meta data as defined by {@link #getColumnsForIndex()}
+     * @param knownIndices The already read indices for the current table
      */
-    protected void readIndex(DatabaseMetaDataWrapper metaData, ResultSet indexData, Map knownIndices) throws SQLException
+    protected void readIndex(DatabaseMetaDataWrapper metaData, Map values, Map knownIndices) throws SQLException
     {
-        Map     values    = readColumns(indexData, getColumnsForIndex());
-        String  indexName = (String)values.get("INDEX_NAME");
-        Index   index     = (Index)knownIndices.get(indexName);
+        String indexName = (String)values.get("INDEX_NAME");
+        Index  index     = (Index)knownIndices.get(indexName);
 
         if ((index == null) && (indexName != null))
         {
@@ -684,11 +699,22 @@ public class JdbcModelReader
         }
 
         IndexColumn ic       = new IndexColumn();
-        short       position = ((Short)values.get("ORDINAL_POSITION")).shortValue();
+        int         position = ((Short)values.get("ORDINAL_POSITION")).intValue() - 1;
 
         ic.setName((String)values.get("COLUMN_NAME"));
-        // TODO: use position
-        index.addColumn(ic);
+        if ((position < 0) || (position >= index.getColumnCount()))
+        {
+            while (index.getColumnCount() < position)
+            {
+                index.addColumn(null);
+            }
+            index.addColumn(ic);
+        }
+        else
+        {
+            index.addColumn(position, ic);
+            index.removeColumn(position + 1);
+        }
     }
 
     /**

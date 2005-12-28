@@ -53,6 +53,7 @@ public class DerbyPlatform extends CloudscapePlatform
         super();
         // we override the builder
         setSqlBuilder(new DerbyBuilder(getSqlBuilder().getPlatformInfo()));
+        setModelReader(new DerbyModelReader());
     }
 
     /**
