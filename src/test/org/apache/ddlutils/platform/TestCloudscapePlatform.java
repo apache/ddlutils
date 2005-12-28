@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.CloudscapePlatform;
+import org.apache.ddlutils.platform.cloudscape.CloudscapePlatform;
 
 /**
  * Tests the Cloudscape platform.

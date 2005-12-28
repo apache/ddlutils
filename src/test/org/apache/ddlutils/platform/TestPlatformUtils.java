@@ -17,6 +17,20 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.PlatformUtils;
+import org.apache.ddlutils.platform.axion.AxionPlatform;
+import org.apache.ddlutils.platform.cloudscape.CloudscapePlatform;
+import org.apache.ddlutils.platform.db2.Db2Platform;
+import org.apache.ddlutils.platform.derby.DerbyPlatform;
+import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
+import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
+import org.apache.ddlutils.platform.interbase.InterbasePlatform;
+import org.apache.ddlutils.platform.maxdb.MaxDbPlatform;
+import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
+import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
+import org.apache.ddlutils.platform.mysql.MySqlPlatform;
+import org.apache.ddlutils.platform.oracle.Oracle8Platform;
+import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
+import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 import junit.framework.TestCase;
 

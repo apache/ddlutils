@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.DerbyPlatform;
+import org.apache.ddlutils.platform.derby.DerbyPlatform;
 
 /**
  * Tests the Derby platform.

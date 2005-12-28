@@ -17,7 +17,7 @@ package org.apache.ddlutils.io.derby;
  */
 
 import org.apache.ddlutils.io.DatatypesTestBase;
-import org.apache.ddlutils.platform.DerbyPlatform;
+import org.apache.ddlutils.platform.derby.DerbyPlatform;
 
 /**
  * Performs the roundtrip datatype tests against a derby database.

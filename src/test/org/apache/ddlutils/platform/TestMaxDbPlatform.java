@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.MaxDbPlatform;
+import org.apache.ddlutils.platform.maxdb.MaxDbPlatform;
 
 /**
  * Tests the MaxDB platform.

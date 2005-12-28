@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.MSSqlPlatform;
+import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
 
 /**
  * Tests the Microsoft SQL Server platform.

@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.Db2Platform;
+import org.apache.ddlutils.platform.db2.Db2Platform;
 
 /**
  * Tests the DB2 platform.

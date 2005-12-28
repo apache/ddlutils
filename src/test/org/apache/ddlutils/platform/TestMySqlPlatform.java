@@ -18,7 +18,7 @@ package org.apache.ddlutils.platform;
 
 import org.apache.ddlutils.TestPlatformBase;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.platform.MySqlPlatform;
+import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 
 /**
  * Tests the MySQL platform.

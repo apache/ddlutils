@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.PostgreSqlPlatform;
+import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
 
 /**
  * Tests the PostgreSQL platform.

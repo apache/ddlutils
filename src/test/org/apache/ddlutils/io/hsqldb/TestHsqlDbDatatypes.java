@@ -17,7 +17,7 @@ package org.apache.ddlutils.io.hsqldb;
  */
 
 import org.apache.ddlutils.io.DatatypesTestBase;
-import org.apache.ddlutils.platform.HsqlDbPlatform;
+import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 
 /**
  * Performs the roundtrip datatype tests against a hsqldb database.

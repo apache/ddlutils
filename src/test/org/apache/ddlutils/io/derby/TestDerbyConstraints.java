@@ -17,7 +17,7 @@ package org.apache.ddlutils.io.derby;
  */
 
 import org.apache.ddlutils.io.ConstraintsTestBase;
-import org.apache.ddlutils.platform.DerbyPlatform;
+import org.apache.ddlutils.platform.derby.DerbyPlatform;
 
 /**
  * Performs the roundtrip constraint tests against a Derby database.

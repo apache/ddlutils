@@ -17,7 +17,7 @@ package org.apache.ddlutils.io.postgresql;
  */
 
 import org.apache.ddlutils.io.ConstraintsTestBase;
-import org.apache.ddlutils.platform.PostgreSqlPlatform;
+import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
 
 /**
  * Performs the roundtrip constraint tests against a PostgreSql database.

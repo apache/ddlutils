@@ -17,7 +17,7 @@ package org.apache.ddlutils.io.hsqldb;
  */
 
 import org.apache.ddlutils.io.ConstraintsTestBase;
-import org.apache.ddlutils.platform.HsqlDbPlatform;
+import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 
 /**
  * Performs the roundtrip constraint tests against a HsqlDb database.

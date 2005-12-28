@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.Oracle8Platform;
+import org.apache.ddlutils.platform.oracle.Oracle8Platform;
 
 /**
  * Tests the Oracle 8 platform.

@@ -17,7 +17,7 @@ package org.apache.ddlutils.io;
  */
 
 import org.apache.ddlutils.TestDatabaseWriterBase;
-import org.apache.ddlutils.platform.AxionPlatform;
+import org.apache.ddlutils.platform.axion.AxionPlatform;
 
 /**
  * Performs tests against Axion.

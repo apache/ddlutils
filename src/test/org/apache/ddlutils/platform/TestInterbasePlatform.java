@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.InterbasePlatform;
+import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 
 /**
  * Tests the Interbase platform.

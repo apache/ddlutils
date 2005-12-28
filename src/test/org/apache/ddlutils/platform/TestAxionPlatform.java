@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.AxionPlatform;
+import org.apache.ddlutils.platform.axion.AxionPlatform;
 
 /**
  * Tests the Axion platform.

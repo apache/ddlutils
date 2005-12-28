@@ -17,7 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
-import org.apache.ddlutils.platform.SapDbPlatform;
+import org.apache.ddlutils.platform.sapdb.SapDbPlatform;
 
 /**
  * Tests the SapDB platform.

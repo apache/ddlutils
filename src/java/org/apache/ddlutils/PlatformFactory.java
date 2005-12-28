@@ -19,22 +19,22 @@ package org.apache.ddlutils;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
-import org.apache.ddlutils.platform.AxionPlatform;
-import org.apache.ddlutils.platform.CloudscapePlatform;
-import org.apache.ddlutils.platform.Db2Platform;
-import org.apache.ddlutils.platform.DerbyPlatform;
-import org.apache.ddlutils.platform.FirebirdPlatform;
-import org.apache.ddlutils.platform.HsqlDbPlatform;
-import org.apache.ddlutils.platform.InterbasePlatform;
-import org.apache.ddlutils.platform.MSSqlPlatform;
-import org.apache.ddlutils.platform.MaxDbPlatform;
-import org.apache.ddlutils.platform.MckoiPlatform;
-import org.apache.ddlutils.platform.MySqlPlatform;
-import org.apache.ddlutils.platform.Oracle8Platform;
-import org.apache.ddlutils.platform.Oracle9Platform;
-import org.apache.ddlutils.platform.PostgreSqlPlatform;
-import org.apache.ddlutils.platform.SapDbPlatform;
-import org.apache.ddlutils.platform.SybasePlatform;
+import org.apache.ddlutils.platform.axion.AxionPlatform;
+import org.apache.ddlutils.platform.cloudscape.CloudscapePlatform;
+import org.apache.ddlutils.platform.db2.Db2Platform;
+import org.apache.ddlutils.platform.derby.DerbyPlatform;
+import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
+import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
+import org.apache.ddlutils.platform.interbase.InterbasePlatform;
+import org.apache.ddlutils.platform.maxdb.MaxDbPlatform;
+import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
+import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
+import org.apache.ddlutils.platform.mysql.MySqlPlatform;
+import org.apache.ddlutils.platform.oracle.Oracle8Platform;
+import org.apache.ddlutils.platform.oracle.Oracle9Platform;
+import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
+import org.apache.ddlutils.platform.sapdb.SapDbPlatform;
+import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
  * A factory of {@link org.apache.ddlutils.Platform} instances based on a case
