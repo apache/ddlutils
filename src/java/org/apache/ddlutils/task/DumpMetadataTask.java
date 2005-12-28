@@ -55,6 +55,16 @@ public class DumpMetadataTask extends Task
     private BasicDataSource _dataSource;
     /** The file to write the dump to. */
     private File _outputFile = null;
+    /** The database catalog(s) to read. */
+    private String _catalogPattern = "%";
+    /** The database schema(s) to read. */
+    private String _schemaPattern = "%";
+    /** The pattern for reading all tables. */
+    private String _tablePattern = "%";
+    /** The pattern for reading all procedures. */
+    private String _procedurePattern = "%";
+    /** The pattern for reading all columns. */
+    private String _columnPattern = "%";
 
     /**
      * Adds the data source to use for accessing the database.
@@ -74,6 +84,56 @@ public class DumpMetadataTask extends Task
     public void setOutputFile(File outputFile)
     {
         _outputFile = outputFile;
+    }
+
+    /**
+     * Sets the catalog pattern.
+     *
+     * @param catalogPattern The catalog pattern
+     */
+    public void setCatalogPattern(String catalogPattern)
+    {
+        _catalogPattern = ((catalogPattern == null) || (catalogPattern.length() == 0) ? null : catalogPattern);
+    }
+
+    /**
+     * Sets the schema pattern.
+     *
+     * @param schemaPattern The schema pattern
+     */
+    public void setSchemaPattern(String schemaPattern)
+    {
+        _schemaPattern = ((schemaPattern == null) || (schemaPattern.length() == 0) ? null : schemaPattern);
+    }
+
+    /**
+     * Sets the table pattern.
+     *
+     * @param tablePattern The table pattern
+     */
+    public void setTablePattern(String tablePattern)
+    {
+        _tablePattern = ((tablePattern == null) || (tablePattern.length() == 0) ? null : tablePattern);
+    }
+
+    /**
+     * Sets the procedure pattern.
+     *
+     * @param procedurePattern The procedure pattern
+     */
+    public void setProcedurePattern(String procedurePattern)
+    {
+        _procedurePattern = ((procedurePattern == null) || (procedurePattern.length() == 0) ? null : procedurePattern);
+    }
+
+    /**
+     * Sets the column pattern.
+     *
+     * @param columnPattern The column pattern
+     */
+    public void setColumnPattern(String columnPattern)
+    {
+        _columnPattern = ((columnPattern == null) || (columnPattern.length() == 0) ? null : columnPattern);
     }
 
     /**
@@ -370,7 +430,7 @@ public class DumpMetadataTask extends Task
      */
     private void dumpTables(Element parent, DatabaseMetaData metaData, String[] tableTypes) throws SQLException
     {
-        ResultSet result     = metaData.getTables("%", "%", "%", tableTypes);
+        ResultSet result     = metaData.getTables(_catalogPattern, _schemaPattern, _tablePattern, tableTypes);
         Element   tablesElem = parent.addElement("tables");
         Set       columns    = getColumnsInResultSet(result);
 
@@ -396,11 +456,11 @@ public class DumpMetadataTask extends Task
             addStringAttribute(result, columns, "SELF_REFERENCING_COL_NAME", tableElem, "identifierColumn");
             addStringAttribute(result, columns, "REF_GENERATION", tableElem, "identifierGeneration");
 
-            dumpColumns(tableElem, metaData, "%", "%", tableName);
-            dumpPKs(tableElem, metaData, "%", "%", tableName);
-            dumpVersionColumns(tableElem, metaData, "%", "%", tableName);
-            dumpFKs(tableElem, metaData, "%", "%", tableName);
-            dumpIndices(tableElem, metaData, "%", "%", tableName);
+            dumpColumns(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
+            dumpPKs(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
+            dumpVersionColumns(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
+            dumpFKs(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
+            dumpIndices(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
         }
     }
 
@@ -414,7 +474,7 @@ public class DumpMetadataTask extends Task
      */
     private void dumpColumns(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
     {
-        ResultSet result  = metaData.getColumns(catalogName, schemaName, tableName, "%");
+        ResultSet result  = metaData.getColumns(catalogName, schemaName, tableName, _columnPattern);
         Set       columns = getColumnsInResultSet(result);
 
         while (result.next())
@@ -718,7 +778,7 @@ public class DumpMetadataTask extends Task
      */
     private void dumpProcedures(Element parent, DatabaseMetaData metaData) throws SQLException
     {
-        ResultSet result         = metaData.getProcedures("%", "%", "%");
+        ResultSet result         = metaData.getProcedures(_catalogPattern, _schemaPattern, _procedurePattern);
         Element   proceduresElem = parent.addElement("procedures");
         Set       columns        = getColumnsInResultSet(result);
 
@@ -770,7 +830,7 @@ public class DumpMetadataTask extends Task
      */
     private void dumpProcedure(Element procedureElem, DatabaseMetaData metaData, String catalogName, String schemaName, String procedureName) throws SQLException
     {
-        ResultSet result  = metaData.getProcedureColumns(catalogName, schemaName, procedureName, "%");
+        ResultSet result  = metaData.getProcedureColumns(catalogName, schemaName, procedureName, _columnPattern);
         Set       columns = getColumnsInResultSet(result);
 
         while (result.next())
