@@ -16,21 +16,21 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-import org.apache.ddlutils.platform.DerbyPlatform;
+import org.apache.ddlutils.platform.HsqlDbPlatform;
 
 /**
- * Performs the roundtrip datatype tests against a derby database.
+ * Performs the roundtrip datatype tests against a hsqldb database.
  * 
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class TestDerbyDatatypes extends DatatypesTestBase
+public class TestHsqlDbDatatypes extends DatatypesTestBase
 {
     /**
      * {@inheritDoc}
      */
     protected String getPlatformName()
     {
-        return DerbyPlatform.DATABASENAME;
+        return HsqlDbPlatform.DATABASENAME;
     }
 }

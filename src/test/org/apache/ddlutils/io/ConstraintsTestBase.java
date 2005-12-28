@@ -207,7 +207,11 @@ public abstract class ConstraintsTestBase extends RoundtripTestBase
      */
     public void testAutoIncrementIntegerColumn()
     {
-        performConstraintsTest(TEST_AUTO_INCREMENT_INTEGER_MODEL);
+        // only test this if the platform supports it
+        if (getPlatformInfo().isSupportingNonPKIdentityColumns())
+        {
+            performConstraintsTest(TEST_AUTO_INCREMENT_INTEGER_MODEL);
+        }
     }
 
     /**

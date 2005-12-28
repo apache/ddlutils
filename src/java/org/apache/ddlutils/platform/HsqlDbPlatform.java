@@ -16,9 +16,12 @@ package org.apache.ddlutils.platform;
  * limitations under the License.
  */
 
+import java.sql.Connection;
 import java.sql.Types;
 
+import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The platform implementation for the HsqlDb database.
@@ -46,20 +49,35 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
-        info.addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY");
-        info.addNativeTypeMapping(Types.BLOB,        "LONGVARBINARY");
-        info.addNativeTypeMapping(Types.CLOB,        "LONGVARCHAR");
-        info.addNativeTypeMapping(Types.DISTINCT,    "LONGVARBINARY");
-        info.addNativeTypeMapping(Types.FLOAT,       "DOUBLE");
+        info.setSupportingNonPKIdentityColumns(false);
+
+        info.addNativeTypeMapping(Types.BIT,         "BOOLEAN");
+        info.addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BLOB,        "LONGVARBINARY", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.CLOB,        "LONGVARCHAR",   Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DISTINCT,    "LONGVARBINARY", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.FLOAT,       "DOUBLE",        Types.DOUBLE);
         info.addNativeTypeMapping(Types.JAVA_OBJECT, "OBJECT");
-        info.addNativeTypeMapping(Types.NULL,        "LONGVARBINARY");
+        info.addNativeTypeMapping(Types.NULL,        "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.OTHER,       "OTHER");
-        info.addNativeTypeMapping(Types.REF,         "LONGVARBINARY");
-        info.addNativeTypeMapping(Types.STRUCT,      "LONGVARBINARY");
-        info.addNativeTypeMapping("BOOLEAN",  "BIT");
-        info.addNativeTypeMapping("DATALINK", "LONGVARBINARY");
+        info.addNativeTypeMapping(Types.REF,         "LONGVARBINARY", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,      "LONGVARBINARY", Types.LONGVARBINARY);
+        // JDBC's TINYINT requires a value range of -255 to 255, but HsqlDb's is only -128 to 127
+        info.addNativeTypeMapping(Types.TINYINT,     "SMALLINT",      Types.SMALLINT);
+        if (Jdbc3Utils.supportsJava14JdbcTypes())
+        {
+            // when using JDBC3, BIT will be back-mapped to BOOLEAN
+            info.addNativeTypeMapping("BIT", "BOOLEAN", "BOOLEAN");
+            info.addNativeTypeMapping("DATALINK", "LONGVARBINARY");
+        }
+
+        info.addDefaultSize(Types.CHAR,      Integer.MAX_VALUE);
+        info.addDefaultSize(Types.VARCHAR,   Integer.MAX_VALUE);
+        info.addDefaultSize(Types.BINARY,    Integer.MAX_VALUE);
+        info.addDefaultSize(Types.VARBINARY, Integer.MAX_VALUE);
 
         setSqlBuilder(new HsqlDbBuilder(info));
+        setModelReader(new HsqlDbModelReader(info));
     }
 
     /**
@@ -68,5 +86,25 @@ public class HsqlDbPlatform extends PlatformImplBase
     public String getName()
     {
         return DATABASENAME;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void shutdownDatabase(Connection connection) throws DynaSqlException
+    {
+        // TODO: Determine whether we're running in embedded mode (from the url ?)
+//        
+//        try
+//        {
+//            Statement stmt = connection.createStatement();
+//
+//            stmt.executeUpdate("SHUTDOWN");
+//            stmt.close();
+//        }
+//        catch (SQLException ex)
+//        {
+//            throw new DynaSqlException(ex);
+//        }
     }
 }

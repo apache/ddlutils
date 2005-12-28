@@ -19,7 +19,7 @@ package org.apache.ddlutils.io;
 import org.apache.ddlutils.platform.DerbyPlatform;
 
 /**
- * Performs the roundtrip constraint tests against a derby database.
+ * Performs the roundtrip constraint tests against a Derby database.
  * 
  * @author Thomas Dudziak
  * @version $Revision: 289996 $

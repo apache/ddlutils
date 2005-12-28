@@ -1,12 +1,21 @@
-# JDBC properties for PostgreSQL
+# JDBC properties for HsqlDb
 
 # Use this property if ddlutils does not recognize the platform from the settings
-#ddlutils.platform=PostgreSQL
+ddlutils.platform=HsqlDb
 
 # Properties starting with "datasource." will be fed into the datasource instance of the
 # class configured via the datasource.class property
 datasource.class=org.apache.commons.dbcp.BasicDataSource
-datasource.driverClassName=org.postgresql.Driver
-datasource.url=jdbc:postgresql://localhost/ddlutils
-datasource.username=root
+datasource.driverClassName=org.hsqldb.jdbcDriver
+
+# Embedded mode
+
+#datasource.url=jdbc:hsqldb:file:target/database/ddlutils_hsqldb
+#datasource.username=sa
 #datasource.password=
+
+# Server mode
+
+datasource.url=jdbc:hsqldb:hsql://localhost/xdb
+datasource.username=sa
+datasource.password=

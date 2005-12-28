@@ -1,5 +1,21 @@
 package org.apache.ddlutils.io;
 
+/*
+ * Copyright 1999-2005 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -50,7 +66,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='BOOLEAN' required='true' default='TRUE'/>\n"+
+        "    <column name='VALUE' type='BOOLEAN' required='true' default='true'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple TINYINT column. */
@@ -86,7 +102,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='SMALLINT' required='true' default='-32768'/>\n"+
+        "    <column name='VALUE' type='SMALLINT' required='true' default='-30000'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple INTEGER column. */
@@ -122,7 +138,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='BIGINT' required='true' default='-9223372036854775808'/>\n"+
+        "    <column name='VALUE' type='BIGINT' required='true' default='-9000000000000000000'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple REAL column. */
@@ -518,7 +534,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testSmallInt()
     {
-        performDataTypeTest(TEST_SMALLINT_MODEL, new Integer(-32768), new Integer(32767));
+        performDataTypeTest(TEST_SMALLINT_MODEL, new Integer(Short.MIN_VALUE), new Integer(Short.MAX_VALUE));
     }
 
     /**
@@ -526,7 +542,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testSmallIntWithDefault()
     {
-        performDataTypeTest(TEST_SMALLINT_MODEL_WITH_DEFAULT, new Integer(256), null, new Integer(-32768));
+        performDataTypeTest(TEST_SMALLINT_MODEL_WITH_DEFAULT, new Integer(256), null, new Integer(-30000));
     }
 
     /**
@@ -550,7 +566,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testBigInt()
     {
-        performDataTypeTest(TEST_BIGINT_MODEL, new Long(9223372036854775807l), new Long(0l));
+        performDataTypeTest(TEST_BIGINT_MODEL, new Long(Long.MAX_VALUE), new Long(0l));
     }
 
     /**
@@ -558,7 +574,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testBigIntWithDefault()
     {
-        performDataTypeTest(TEST_BIGINT_MODEL_WITH_DEFAULT, null, new Long(-1l), new Long(-9223372036854775808l));
+        performDataTypeTest(TEST_BIGINT_MODEL_WITH_DEFAULT, null, new Long(-1l), new Long(-9000000000000000000l));
     }
 
     /**
