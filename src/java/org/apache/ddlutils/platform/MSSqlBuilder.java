@@ -122,18 +122,6 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
-    {
-        /*
-         * requires primary key indication for autoincrement key columns
-         * I'm not sure why the default skips the pk statement if all are identity
-         */
-        return primaryKeyColumns.length > 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
     {
         print("DROP INDEX ");
@@ -159,7 +147,7 @@ public class MSSqlBuilder extends SqlBuilder
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
     {
-        String constraintName = foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName();
+        String constraintName = getForeignKeyName(table, foreignKey);
 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = ");
         printAlwaysSingleQuotedIdentifier(constraintName);

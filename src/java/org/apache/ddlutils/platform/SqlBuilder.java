@@ -1326,24 +1326,31 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Determines a unique name for the given foreign key.
+     * Returns the name to be used for the given foreign key. If the foreign key has no
+     * specified name, this method determines a unique name for it. The name will also
+     * be shortened to honor the maximum identifier length imposed by the platform.
      * 
-     * @param fk The foreign key
+     * @param table The table for whith the foreign key is defined
+     * @param fk    The foreign key
      * @return The name
      */
-    protected String getForeignKeyName(ForeignKey fk)
+    public String getForeignKeyName(Table table, ForeignKey fk)
     {
-        //table and local column should be sufficient - is it possible for one
-        //column to reference multiple tables
-        StringBuffer name = new StringBuffer();
+        String fkName = fk.getName();
 
-        for (int idx = 0; idx < fk.getReferenceCount(); idx++)
+        if ((fkName == null) || (fkName.length() == 0))
         {
-            name.append(fk.getReference(idx).getLocalColumnName());
-            name.append("_");
+            StringBuffer name = new StringBuffer();
+    
+            for (int idx = 0; idx < fk.getReferenceCount(); idx++)
+            {
+                name.append(fk.getReference(idx).getLocalColumnName());
+                name.append("_");
+            }
+            name.append(fk.getForeignTableName());
+            fkName = getConstraintName(null, table, "FK", name.toString());
         }
-        name.append(fk.getForeignTableName());
-        return name.toString();
+        return shortenName(fkName, getPlatformInfo().getMaxIdentifierLength());
     }
 
     /**
@@ -1416,15 +1423,15 @@ public abstract class SqlBuilder
 
     /**
      * Determines whether we should generate a primary key constraint for the given
-     * primary key columns. By default if there are no primary keys or the column(s) are 
-     * all auto increment (identity) columns then there is no need to generate a primary key 
-     * constraint.
+     * primary key columns.
      * 
      * @param primaryKeyColumns The pk columns
      * @return <code>true</code> if a pk statement should be generated for the columns
      */
     protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
     {
+        return true;
+/*
         for (int idx = 0; idx < primaryKeyColumns.length; idx++)
         {
             if (!primaryKeyColumns[idx].isAutoIncrement())
@@ -1433,6 +1440,7 @@ public abstract class SqlBuilder
             }
         }
         return false;
+*/
     }
 
     /**
@@ -1584,7 +1592,7 @@ public abstract class SqlBuilder
                 if (getPlatformInfo().isEmbeddedForeignKeysNamed())
                 {
                     print("CONSTRAINT ");
-                    printIdentifier(getConstraintName(null, table, "FK", Integer.toString(idx)));
+                    printIdentifier(getForeignKeyName(table, key));
                     print(" ");
                 }
                 print("FOREIGN KEY (");
@@ -1616,7 +1624,7 @@ public abstract class SqlBuilder
             writeTableAlterStmt(table);
 
             print("ADD CONSTRAINT ");
-            printIdentifier(key.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(key)) : key.getName());
+            printIdentifier(getForeignKeyName(table, key));
             print(" FOREIGN KEY (");
             writeLocalReferences(key);
             print(") REFERENCES ");
@@ -1673,7 +1681,7 @@ public abstract class SqlBuilder
     {
         writeTableAlterStmt(table);
         print("DROP CONSTRAINT ");
-        printIdentifier(foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName());
+        printIdentifier(getForeignKeyName(table, foreignKey));
         printEndOfStatement();
     }
 

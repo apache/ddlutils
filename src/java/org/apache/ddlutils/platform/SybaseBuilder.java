@@ -83,7 +83,7 @@ public class SybaseBuilder extends SqlBuilder
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
     {
-        String constraintName = foreignKey.getName() == null ? getConstraintName(null, table, "FK", getForeignKeyName(foreignKey)) : foreignKey.getName();
+        String constraintName = getForeignKeyName(table, foreignKey);
 
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = ");
         printAlwaysSingleQuotedIdentifier(constraintName);
