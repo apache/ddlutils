@@ -21,7 +21,9 @@ import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 
@@ -66,12 +68,28 @@ public class DerbyModelReader extends JdbcModelReader
     }
 
     /**
-     * Guesses whether the index might be an internal index, i.e. one created by Derby.
+     * {@inheritDoc}
+     */
+    protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
+    {
+        return isInternalIndex(index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    {
+        return isInternalIndex(index);
+    }
+
+    /**
+     * Determines whether the index is an internal index, i.e. one created by Derby.
      * 
      * @param index The index to check
      * @return <code>true</code> if the index seems to be an internal one
      */
-    protected boolean mightBeInternalIndex(Index index)
+    private boolean isInternalIndex(Index index)
     {
         String name = index.getName();
 

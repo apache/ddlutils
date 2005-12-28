@@ -1,4 +1,4 @@
-package org.apache.ddlutils.platform.hsqldb;
+package org.apache.ddlutils.platform.postgresql;
 
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
@@ -23,23 +23,24 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.JdbcModelReader;
 
 /**
- * Reads a database model from a HsqlDb database.
+ * Reads a database model from a PostgreSql database.
  *
  * @author Thomas Dudziak
  * @version $Revision: $
  */
-public class HsqlDbModelReader extends JdbcModelReader
+public class PostgreSqlModelReader extends JdbcModelReader
 {
     /**
-     * Creates a new model reader for HsqlDb databases.
+     * Creates a new model reader for PostgreSql databases.
      * 
      * @param platformInfo The platform specific settings
      */
-    public HsqlDbModelReader(PlatformInfo platformInfo)
+    public PostgreSqlModelReader(PlatformInfo platformInfo)
     {
         super(platformInfo);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
+        setDefaultTablePattern(null);
     }
 
     /**
@@ -47,9 +48,8 @@ public class HsqlDbModelReader extends JdbcModelReader
      */
     protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
     {
-        String name = index.getName();
-
-        return (name != null) && name.startsWith("SYS_IDX_");
+        // TODO Auto-generated method stub
+        return super.isInternalForeignKeyIndex(table, fk, index);
     }
 
     /**
@@ -57,8 +57,8 @@ public class HsqlDbModelReader extends JdbcModelReader
      */
     protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
     {
-        String name = index.getName();
-
-        return (name != null) && name.startsWith("SYS_PK_");
+        // PostgreSql uses the form "<tablename>_pkey"
+        return (table.getName() + "_pkey").equals(index.getName());
     }
+
 }

@@ -503,6 +503,21 @@ public class JdbcModelReader
      */
     protected void removeSystemIndices(Table table)
     {
+        removeInternalPrimaryKeyIndex(table);
+
+        for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+        {
+            removeInternalForeignKeyIndex(table, table.getForeignKey(fkIdx));
+        }
+    }
+
+    /**
+     * Tries to remove the internal index for the table's primary key.
+     * 
+     * @param table The table
+     */
+    protected void removeInternalPrimaryKeyIndex(Table table)
+    {
         Column[] pks         = table.getPrimaryKeyColumns();
         List     columnNames = new ArrayList();
 
@@ -511,81 +526,101 @@ public class JdbcModelReader
             columnNames.add(pks[columnIdx].getName());
         }
 
-        // Derby returns a unique index for the pk which we don't want however
-        int indexIdx = findMatchingInternalIndex(table, columnNames, true);
-
-        if (indexIdx >= 0)
-        {
-            table.removeIndex(indexIdx);
-        }
-
-        // Likewise, Derby returns a non-unique index for every foreign key
-        for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
-        {
-            ForeignKey fk = table.getForeignKey(fkIdx);
-
-            columnNames.clear();
-            for (int columnIdx = 0; columnIdx < fk.getReferenceCount(); columnIdx++)
-            {
-                columnNames.add(fk.getReference(columnIdx).getLocalColumnName());
-            }
-            indexIdx = findMatchingInternalIndex(table, columnNames, false);
-            if (indexIdx >= 0)
-            {
-                table.removeIndex(indexIdx);
-            }
-        }
-    }
-
-
-    /**
-     * Tries to find an internal index that matches the given columns.
-     * 
-     * @param table              The table
-     * @param columnsToSearchFor The names of the columns that the index should be for
-     * @param unique             Whether to search for an unique index
-     * @return The position of the index or <code>-1</code> if no such index was found
-     */
-    protected int findMatchingInternalIndex(Table table, List columnsToSearchFor, boolean unique)
-    {
         for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
         {
             Index index = table.getIndex(indexIdx);
 
-            if ((unique == index.isUnique()) && (index.getColumnCount() == columnsToSearchFor.size()))
+            if (index.isUnique() && matches(index, columnNames) && 
+                isInternalPrimaryKeyIndex(table, index))
             {
-                boolean found = true;
-
-                for (int columnIdx = 0; found && (columnIdx < index.getColumnCount()); columnIdx++)
-                {
-                    if (!columnsToSearchFor.get(columnIdx).equals(index.getColumn(columnIdx).getName()))
-                    {
-                        found = false;
-                    }
-                }
-
-                // if the index seems to be internal, we immediately return it
-                if (found && mightBeInternalIndex(index))
-                {
-                    return indexIdx;
-                }
+                table.removeIndex(indexIdx);
+                break;
             }
         }
-        return -1;
     }
 
     /**
-     * Guesses whether the index might be an internal database-generated index.
-     * Note that only indices with the correct columns are fed to this method.
+     * Tries to remove the internal index for the given foreign key.
+     * 
+     * @param table The table where the table is defined
+     * @param fk    The foreign key
+     */
+    protected void removeInternalForeignKeyIndex(Table table, ForeignKey fk)
+    {
+        List columnNames = new ArrayList();
+
+        for (int columnIdx = 0; columnIdx < fk.getReferenceCount(); columnIdx++)
+        {
+            columnNames.add(fk.getReference(columnIdx).getLocalColumnName());
+        }
+
+        for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
+        {
+            Index index = table.getIndex(indexIdx);
+
+            if (!index.isUnique() && matches(index, columnNames) && 
+                isInternalForeignKeyIndex(table, fk, index))
+            {
+                table.removeIndex(indexIdx);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Checks whether the given index matches the column list.
+     * 
+     * @param index              The index
+     * @param columnsToSearchFor The names of the columns that the index should be for
+     * @return <code>true</code> if the index matches the columns
+     */
+    protected boolean matches(Index index, List columnsToSearchFor)
+    {
+        if (index.getColumnCount() != columnsToSearchFor.size())
+        {
+            return false;
+        }
+        for (int columnIdx = 0; columnIdx < index.getColumnCount(); columnIdx++)
+        {
+            if (!columnsToSearchFor.get(columnIdx).equals(index.getColumn(columnIdx).getName()))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Tries to determine whether the index is the internal database-generated index
+     * for the given table's primary key.
+     * Note that only unique indices with the correct columns are fed to this method.
      * Redefine this method for specific platforms if there are better ways
      * to determine internal indices.
      * 
+     * @param table The table owning the index
      * @param index The index to check
-     * @return <code>true</code> if the index seems to be an internal one
+     * @return <code>true</code> if the index seems to be an internal primary key one
      */
-    protected boolean mightBeInternalIndex(Index index)
+    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
     {
-        return true;
+        return false;
+    }
+
+    /**
+     * Tries to determine whether the index is the internal database-generated index
+     * for the given foreign key.
+     * Note that only non-unique indices with the correct columns are fed to this method.
+     * Redefine this method for specific platforms if there are better ways
+     * to determine internal indices.
+     * 
+     * @param table The table owning the index and foreign key
+     * @param fk    The foreign key
+     * @param index The index to check
+     * @return <code>true</code> if the index seems to be an internal primary key one
+     */
+    protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
+    {
+        return false;
     }
 
     /**
