@@ -17,10 +17,16 @@ package org.apache.ddlutils.model;
  */
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * Represents a column in the database model.
@@ -57,8 +63,6 @@ public class Column implements Cloneable, Serializable
     private int _scale;
     /** The default value. */
     private String _defaultValue;
-
-    // TODO: Implement equals and hashcode
 
     /**
      * Returns the name of the column.
@@ -387,6 +391,59 @@ public class Column implements Cloneable, Serializable
     }
 
     /**
+     * Tries to parse the default value of the column and returns it as an object of the
+     * corresponding java type. If the value could not be parsed, then the original
+     * definition is returned.
+     * 
+     * @return The parsed default value
+     */
+    public Object getParsedDefaultValue()
+    {
+        if (_defaultValue != null)
+        {
+            try
+            {
+                switch (_typeCode)
+                {
+                    case Types.TINYINT:
+                    case Types.SMALLINT:
+                        return new Short(_defaultValue);
+                    case Types.INTEGER:
+                        return new Integer(_defaultValue);
+                    case Types.BIGINT:
+                        return new Long(_defaultValue);
+                    case Types.DECIMAL:
+                    case Types.NUMERIC:
+                        return new BigDecimal(_defaultValue);
+                    case Types.REAL:
+                        return new Float(_defaultValue);
+                    case Types.DOUBLE:
+                    case Types.FLOAT:
+                        return new Double(_defaultValue);
+                    case Types.DATE:
+                        return Date.valueOf(_defaultValue);
+                    case Types.TIME:
+                        return Time.valueOf(_defaultValue);
+                    case Types.TIMESTAMP:
+                        return Timestamp.valueOf(_defaultValue);
+                    case Types.BIT:
+                        return ConvertUtils.convert(_defaultValue, Boolean.class);
+                    default:
+                        if (Jdbc3Utils.supportsJava14JdbcTypes() &&
+                            (_typeCode == Jdbc3Utils.determineBooleanTypeCode()))
+                        {
+                            return ConvertUtils.convert(_defaultValue, Boolean.class);
+                        }
+                        break;
+                }
+            }
+            catch (NumberFormatException ex)
+            {}
+        }
+        return _defaultValue;
+    }
+
+    /**
      * Sets the default value of the column. Note that this expression will be used
      * within quotation marks when generating the column, and thus is subject to
      * the conversion rules of the target database.
@@ -432,12 +489,12 @@ public class Column implements Cloneable, Serializable
             EqualsBuilder comparator = new EqualsBuilder();
 
             // Note that this compares case sensitive
-            comparator.append(_name,          other._name);
-            comparator.append(_primaryKey,    other._primaryKey);
-            comparator.append(_required,      other._required);
-            comparator.append(_autoIncrement, other._autoIncrement);
-            comparator.append(_typeCode,      other._typeCode);
-            comparator.append(_defaultValue,  other._defaultValue);
+            comparator.append(_name,                   other._name);
+            comparator.append(_primaryKey,             other._primaryKey);
+            comparator.append(_required,               other._required);
+            comparator.append(_autoIncrement,          other._autoIncrement);
+            comparator.append(_typeCode,               other._typeCode);
+            comparator.append(getParsedDefaultValue(), other.getParsedDefaultValue());
 
             // comparing the size makes only sense for types where it is relevant
             if ((_typeCode == Types.NUMERIC) || (_typeCode == Types.DECIMAL))
@@ -473,7 +530,7 @@ public class Column implements Cloneable, Serializable
         builder.append(_typeCode);
         builder.append(_type);
         builder.append(_scale);
-        builder.append(_defaultValue);
+        builder.append(getParsedDefaultValue());
         if (!TypeMap.isNumericType(_typeCode))
         {
             builder.append(_size);
