@@ -18,14 +18,6 @@ import java.util.TreeSet;
 public class TestDerbyDatatypes extends RoundtripTestBase
 {
     /**
-     * {@inheritDoc}
-     */
-    protected boolean hasPkUniqueIndices()
-    {
-        return true;
-    }
-
-    /**
      * Performs a data type test.
      * 
      * @param modelXml The model as XML

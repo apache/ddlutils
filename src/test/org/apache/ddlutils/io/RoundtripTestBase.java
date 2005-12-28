@@ -26,10 +26,9 @@ import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
-import org.apache.ddlutils.model.UniqueIndex;
 import org.apache.ddlutils.platform.DefaultValueHelper;
 
 /**
@@ -512,11 +511,74 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         "    </index>\n"+
         "  </table>\n"+
         "</database>";
+    /** Test model with two tables and a simple foreign key relationship between them. */
+    protected static final String TEST_SIMPLE_FOREIGN_KEY_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP_1'>\n"+
+        "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "  </table>\n"+
+        "  <table name='ROUNDTRIP_2'>\n"+
+        "    <column name='PK' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE' type='INTEGER' required='true'/>\n"+
+        "    <foreign-key foreignTable='ROUNDTRIP_1'>\n"+
+        "      <reference local='VALUE' foreign='PK'/>\n"+
+        "    </foreign-key>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with two tables and overlapping foreign keys between them. */
+    protected static final String TEST_OVERLAPPING_FOREIGN_KEYS_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP_1'>\n"+
+        "    <column name='PK_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='PK_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "  </table>\n"+
+        "  <table name='ROUNDTRIP_2'>\n"+
+        "    <column name='PK' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE_1' type='INTEGER' required='true'/>\n"+
+        "    <column name='VALUE_2' type='INTEGER'/>\n"+
+        "    <column name='VALUE_3' type='VARCHAR'/>\n"+
+        "    <foreign-key name='FK_1' foreignTable='ROUNDTRIP_1'>\n"+
+        "      <reference local='VALUE_1' foreign='PK_1'/>\n"+
+        "      <reference local='VALUE_3' foreign='PK_2'/>\n"+
+        "    </foreign-key>\n"+
+        "    <foreign-key foreignTable='ROUNDTRIP_1'>\n"+
+        "      <reference local='VALUE_2' foreign='PK_1'/>\n"+
+        "      <reference local='VALUE_3' foreign='PK_2'/>\n"+
+        "    </foreign-key>\n"+
+        "  </table>\n"+
+        "</database>";
+    /** Test model with two tables and circular foreign key relationships between them. */
+    protected static final String TEST_CIRCULAR_FOREIGN_KEYS_MODEL = 
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='roundtriptest'>\n"+
+        "  <table name='ROUNDTRIP_1'>\n"+
+        "    <column name='PK_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='PK_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE_1' type='INTEGER'/>\n"+
+        "    <column name='VALUE_2' type='VARCHAR'/>\n"+
+        "    <foreign-key foreignTable='ROUNDTRIP_2'>\n"+
+        "      <reference local='VALUE_1' foreign='PK_1'/>\n"+
+        "      <reference local='VALUE_2' foreign='PK_2'/>\n"+
+        "    </foreign-key>\n"+
+        "  </table>\n"+
+        "  <table name='ROUNDTRIP_2'>\n"+
+        "    <column name='PK_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+        "    <column name='PK_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='VALUE_1' type='VARCHAR' required='true'/>\n"+
+        "    <column name='VALUE_2' type='INTEGER' required='true'/>\n"+
+        "    <foreign-key foreignTable='ROUNDTRIP_1'>\n"+
+        "      <reference local='VALUE_2' foreign='PK_1'/>\n"+
+        "      <reference local='VALUE_1' foreign='PK_2'/>\n"+
+        "    </foreign-key>\n"+
+        "  </table>\n"+
+        "</database>";
 
 
     // TODO: special columns (java_object, array, distinct, ...)
 
-    // fks (incl. multiple columns, circular references)
+    // fks (incl. multiple columns, multiple overlapping fks without names, circular references)
 
     /**
      * Inserts a row into the designated table.
@@ -553,32 +615,6 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                                    new Table[] { table });
     }
 
-    /**
-     * Adds unique indices for the pks to the model (for comparison).
-     */
-    protected void addPrimaryKeyUniqueIndicesToModel()
-    {
-        for (int tableIdx = 0; tableIdx < getModel().getTableCount(); tableIdx++)
-        {
-            Table       table = getModel().getTable(tableIdx);
-            UniqueIndex index = new UniqueIndex();
-    
-            for (int pkIdx = 0; pkIdx < table.getPrimaryKeyColumns().length; pkIdx++)
-            {
-                index.addColumn(new IndexColumn(table.getPrimaryKeyColumns()[pkIdx].getName()));
-            }
-            table.addIndex(index);
-        }
-    }
-
-    /**
-     * Specifies whether the platform has unique indices for pks in the model
-     * read back from the database.
-     * 
-     * @return <code>true</code> if there will be unique indices for pks in read-back models
-     */
-    protected abstract boolean hasPkUniqueIndices();
-    
     /**
      * Returns the original model adjusted for type changes because of the native type mappings
      * which when read back from the database will map to different types.
@@ -626,10 +662,16 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                         }
                     }
                 }
-            }
-            if (hasPkUniqueIndices())
-            {
-                addPrimaryKeyUniqueIndicesToModel();
+                // we also add the default names to foreign keys that are initially unnamed
+                for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+                {
+                    ForeignKey fk = table.getForeignKey(fkIdx);
+
+                    if (fk.getName() == null)
+                    {
+                        fk.setName(getPlatform().getSqlBuilder().getForeignKeyName(table, fk));
+                    }
+                }
             }
             return model;
         }
