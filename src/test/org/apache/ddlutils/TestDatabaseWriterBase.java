@@ -96,11 +96,11 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             throw new DynaSqlException(ex);
         }
 
-        _databaseName = new PlatformUtils().determineDatabaseType(_dataSource);
+        _databaseName = props.getProperty(PLATFORM_PROPERTY);
         if (_databaseName == null)
         {
-            // could not determine, perhaps the property has been set ?
-            _databaseName = props.getProperty(PLATFORM_PROPERTY);
+            // property not set, then try to determine
+            _databaseName = new PlatformUtils().determineDatabaseType(_dataSource);
             if (_databaseName == null)
             {
                 throw new DynaSqlException("Could not determine platform from datasource, please specify it in the jdbc.properties via the ddlutils.platform property");
@@ -150,10 +150,17 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected void tearDown() throws Exception
     {
-        if (_model != null)
+        try
         {
-            dropDatabase();
-            _model = null;
+            if (_model != null)
+            {
+                dropDatabase();
+                _model = null;
+            }
+        }
+        finally
+        {
+            getPlatform().shutdownDatabase();
         }
         super.tearDown();
     }
