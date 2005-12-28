@@ -1,4 +1,4 @@
-package org.apache.ddlutils.io;
+package org.apache.ddlutils.io.derby;
 
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
@@ -16,21 +16,22 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
-import org.apache.ddlutils.platform.HsqlDbPlatform;
+import org.apache.ddlutils.io.ConstraintsTestBase;
+import org.apache.ddlutils.platform.DerbyPlatform;
 
 /**
- * Performs the roundtrip datatype tests against a hsqldb database.
+ * Performs the roundtrip constraint tests against a Derby database.
  * 
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class TestHsqlDbDatatypes extends DatatypesTestBase
+public class TestDerbyConstraints extends ConstraintsTestBase
 {
     /**
      * {@inheritDoc}
      */
     protected String getPlatformName()
     {
-        return HsqlDbPlatform.DATABASENAME;
+        return DerbyPlatform.DATABASENAME;
     }
 }
