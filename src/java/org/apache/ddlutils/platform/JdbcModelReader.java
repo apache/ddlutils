@@ -76,6 +76,8 @@ public class JdbcModelReader
     private String _defaultTablePattern = "%";
     /** The table types to recognize per default. */
     private String[] _defaultTableTypes = { "TABLE" };
+    /** The active connection while reading a database model. */
+    private Connection _connection;
 
     /**
      * Creates a new model reader instance.
@@ -356,6 +358,17 @@ public class JdbcModelReader
     }
 
     /**
+     * Returns the active connection. Note that this is only set during a call to
+     * {@link #readTables(String, String, String[])}.
+     *
+     * @return The connection or <code>null</code> if there is no active connection
+     */
+    protected Connection getConnection()
+    {
+        return _connection;
+    }
+
+    /**
      * Reads the database model from the given connection.
      * 
      * @param connection The connection
@@ -402,20 +415,27 @@ public class JdbcModelReader
         {
             db.setName(name);
         }
-        db.addTables(readTables(connection, catalog, schema, tableTypes));
+        try
+        {
+            _connection = connection;
+            db.addTables(readTables(catalog, schema, tableTypes));
+        }
+        finally
+        {
+            _connection = null;
+        }
         return db;
     }
 
     /**
      * Reads the tables from the database metadata.
      * 
-     * @param connection    The connection
      * @param catalog       The catalog to acess in the database; use <code>null</code> for the default value
      * @param schemaPattern The schema(s) to acess in the database; use <code>null</code> for the default value
      * @param tableTypes    The table types to process; use <code>null</code> or an empty list for the default ones
      * @return The tables
      */
-    protected Collection readTables(Connection connection, String catalog, String schemaPattern, String[] tableTypes) throws SQLException
+    protected Collection readTables(String catalog, String schemaPattern, String[] tableTypes) throws SQLException
     {
         ResultSet tableData = null;
 
@@ -423,7 +443,7 @@ public class JdbcModelReader
         {
             DatabaseMetaDataWrapper metaData = new DatabaseMetaDataWrapper();
 
-            metaData.setMetaData(connection.getMetaData());
+            metaData.setMetaData(_connection.getMetaData());
             metaData.setCatalog(catalog == null ? getDefaultCatalogPattern() : catalog);
             metaData.setSchemaPattern(schemaPattern == null ? getDefaultSchemaPattern() : schemaPattern);
             metaData.setTableTypes((tableTypes == null) || (tableTypes.length == 0) ? getDefaultTableTypes() : tableTypes);
