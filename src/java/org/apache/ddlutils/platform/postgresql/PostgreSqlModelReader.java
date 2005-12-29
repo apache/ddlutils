@@ -24,6 +24,9 @@ import org.apache.ddlutils.platform.JdbcModelReader;
 
 /**
  * Reads a database model from a PostgreSql database.
+ * 
+ * TODO: Add default value parsing which are of the form '-9000000000000000000::bigint' or
+ *       '&apos;some value&apos;::character varying' or '&apos;2000-01-01&apos;::date'
  *
  * @author Thomas Dudziak
  * @version $Revision: $

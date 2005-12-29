@@ -87,11 +87,21 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected List getRows(String tableName)
     {
-        Table table = getModel().findTable(tableName);
+        Table        table = getModel().findTable(tableName, getPlatformInfo().isCaseSensitive());
+        StringBuffer query = new StringBuffer();
 
-        return getPlatform().fetch(getModel(),
-                                   "SELECT * FROM " + tableName,
-                                   new Table[] { table });
+        query.append("SELECT * FROM ");
+        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        query.append(table.getName());
+        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        
+        return getPlatform().fetch(getModel(), query.toString(), new Table[] { table });
     }
 
     /**
