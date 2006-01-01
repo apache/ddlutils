@@ -156,7 +156,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='REAL' required='true' default='-1.0123456'/>\n"+
+        "    <column name='VALUE' type='REAL' required='true' default='-1.01234'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple FLOAT column. */
@@ -174,7 +174,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='FLOAT' required='true' default='1234567890.012345678901234'/>\n"+
+        "    <column name='VALUE' type='FLOAT' required='true' default='12345678.9012345'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple DOUBLE column. */
@@ -192,7 +192,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='DOUBLE' required='true' default='-9876543210.987654321098765'/>\n"+
+        "    <column name='VALUE' type='DOUBLE' required='true' default='-987654321.098765'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple DECIMAL column. */
@@ -282,7 +282,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='ROUNDTRIP'>\n"+
         "    <column name='PK' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='VALUE' type='CHAR' size='15' required='true' default='some value'/>\n"+
+        "    <column name='VALUE' type='CHAR' size='15' required='true' default='some value     '/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple VARCHAR column. */
@@ -582,7 +582,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testReal()
     {
-        performDataTypeTest(TEST_REAL_MODEL, new Float(123456789.98765f), new Float(0.0f));
+        performDataTypeTest(TEST_REAL_MODEL, new Float(12345.6f), new Float(0.0f));
     }
 
     /**
@@ -590,7 +590,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testRealWithDefault()
     {
-        performDataTypeTest(TEST_REAL_MODEL_WITH_DEFAULT, new Float(1e+20f), null, new Float(-1.0123456f));
+        performDataTypeTest(TEST_REAL_MODEL_WITH_DEFAULT, new Float(1e+20f), null, new Float(-1.01234f));
     }
 
     /**
@@ -598,7 +598,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testFloat()
     {
-        performDataTypeTest(TEST_FLOAT_MODEL, new Double(-1.0), new Double(Float.MIN_VALUE));
+        performDataTypeTest(TEST_FLOAT_MODEL, new Double(-1.0), new Double(1e-45));
     }
 
     /**
@@ -606,7 +606,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testFloatWithDefault()
     {
-        performDataTypeTest(TEST_FLOAT_MODEL_WITH_DEFAULT, null, new Double(1e+150), new Double(1234567890.012345678901234));
+        performDataTypeTest(TEST_FLOAT_MODEL_WITH_DEFAULT, null, new Double(1e+150), new Double(12345678.9012345));
     }
 
     /**
@@ -614,7 +614,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testDouble()
     {
-        performDataTypeTest(TEST_DOUBLE_MODEL, new Double(Float.MAX_VALUE), new Double(1.01));
+        performDataTypeTest(TEST_DOUBLE_MODEL, new Double(1e+38), new Double(1.01));
     }
 
     /**
@@ -622,7 +622,7 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     public void testDoubleWithDefault()
     {
-        performDataTypeTest(TEST_DOUBLE_MODEL_WITH_DEFAULT, new Double(-1e+150), null, new Double(-9876543210.987654321098765));
+        performDataTypeTest(TEST_DOUBLE_MODEL_WITH_DEFAULT, new Double(-1e+150), null, new Double(-987654321.098765));
     }
 
     /**
