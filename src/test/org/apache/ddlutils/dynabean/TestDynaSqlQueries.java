@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestDatabaseWriterBase;
+import org.apache.ddlutils.platform.ModelBasedResultSetIterator;
 
 /**
  * Tests the sql querying.
@@ -51,7 +52,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable Id='3' Text='Text 3'/>"+
             "</data>");
 
-        DynaSqlIterator it   = (DynaSqlIterator)getPlatform().query(getModel(), "SELECT * FROM TestTable");
+        ModelBasedResultSetIterator it   = (ModelBasedResultSetIterator)getPlatform().query(getModel(), "SELECT * FROM TestTable");
         DynaBean        bean = null;
 
         assertTrue(it.hasNext());
@@ -164,7 +165,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable2 Id='3' Text='Text 3'/>"+
             "</data>");
 
-        DynaSqlIterator it   = (DynaSqlIterator)getPlatform().query(getModel(), "SELECT Id1, Text FROM TestTable1, TestTable2 WHERE Id2 = Id");
+        ModelBasedResultSetIterator it   = (ModelBasedResultSetIterator)getPlatform().query(getModel(), "SELECT Id1, Text FROM TestTable1, TestTable2 WHERE Id2 = Id");
         DynaBean        bean = null;
 
         assertTrue(it.hasNext());
