@@ -810,25 +810,15 @@ public class JdbcModelReader
             knownFks.put(fkName, fk);
         }
 
-        Reference ref      = new Reference();
-        int       position = ((Short)values.get("KEY_SEQ")).intValue() - 1;
+        Reference ref = new Reference();
 
         ref.setForeignColumnName((String)values.get("PKCOLUMN_NAME"));
         ref.setLocalColumnName((String)values.get("FKCOLUMN_NAME"));
-
-        if ((position < 0) || (position >= fk.getReferenceCount()))
+        if (values.containsKey("KEY_SEQ"))
         {
-            while (fk.getReferenceCount() < position)
-            {
-                fk.addReference(null);
-            }
-            fk.addReference(ref);
+            ref.setSequenceValue(((Short)values.get("KEY_SEQ")).intValue());
         }
-        else
-        {
-            fk.addReference(position, ref);
-            fk.removeReference(position + 1);
-        }
+        fk.addReference(ref);
     }
 
     /**
@@ -891,23 +881,14 @@ public class JdbcModelReader
             knownIndices.put(indexName, index);
         }
 
-        IndexColumn ic       = new IndexColumn();
-        int         position = ((Short)values.get("ORDINAL_POSITION")).intValue() - 1;
+        IndexColumn indexColumn = new IndexColumn();
 
-        ic.setName((String)values.get("COLUMN_NAME"));
-        if ((position < 0) || (position >= index.getColumnCount()))
+        indexColumn.setName((String)values.get("COLUMN_NAME"));
+        if (values.containsKey("ORDINAL_POSITION"))
         {
-            while (index.getColumnCount() < position)
-            {
-                index.addColumn(null);
-            }
-            index.addColumn(ic);
+            indexColumn.setOrdinalPosition(((Short)values.get("ORDINAL_POSITION")).intValue());
         }
-        else
-        {
-            index.addColumn(position, ic);
-            index.removeColumn(position + 1);
-        }
+        index.addColumn(indexColumn);
     }
 
     /**
