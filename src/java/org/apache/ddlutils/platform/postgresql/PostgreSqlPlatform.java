@@ -18,14 +18,17 @@ package org.apache.ddlutils.platform.postgresql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -60,8 +63,8 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.ARRAY,         "BYTEA",            Types.BINARY);
         info.addNativeTypeMapping(Types.BINARY,        "BYTEA",            Types.BINARY);
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
-        info.addNativeTypeMapping(Types.BLOB,          "BYTEA");
-        info.addNativeTypeMapping(Types.CLOB,          "TEXT");
+        info.addNativeTypeMapping(Types.BLOB,          "BYTEA",            Types.BINARY);
+        info.addNativeTypeMapping(Types.CLOB,          "TEXT",             Types.VARCHAR);
         info.addNativeTypeMapping(Types.DECIMAL,       "NUMERIC",          Types.NUMERIC);
         info.addNativeTypeMapping(Types.DISTINCT,      "BYTEA",            Types.BINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
@@ -203,5 +206,35 @@ public class PostgreSqlPlatform extends PlatformImplBase
         // With PostgreSQL, you create a database by executing "DROP DATABASE" in an existing database (usually 
         // the template1 database because it usually exists)
         createOrDropDatabase(jdbcDriverClassName, connectionUrl, username, password, null, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void setObject(PreparedStatement statement, int sqlIndex, DynaBean dynaBean, SqlDynaProperty property) throws SQLException
+    {
+        int     typeCode = property.getColumn().getTypeCode();
+        Object  value    = dynaBean.get(property.getName());
+
+        // PostgreSQL doesn't like setNull for BYTEA columns
+        if (value == null)
+        {
+            switch (typeCode)
+            {
+                case Types.BINARY:
+                case Types.VARBINARY:
+                case Types.LONGVARBINARY:
+                case Types.BLOB:
+                    statement.setBytes(sqlIndex, null);
+                    break;
+                default:
+                    statement.setNull(sqlIndex, typeCode);
+                    break;
+            }
+        }
+        else
+        {
+            super.setObject(statement, sqlIndex, dynaBean, property);
+        }
     }
 }
