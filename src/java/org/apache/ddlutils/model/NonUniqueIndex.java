@@ -92,18 +92,17 @@ public class NonUniqueIndex implements Index
     {
         if (column != null)
         {
-            _columns.add(column);
-        }
-    }
+            for (int idx = 0; idx < _columns.size(); idx++)
+            {
+                IndexColumn curColumn = getColumn(idx);
 
-    /**
-     * {@inheritDoc}
-     */
-    public void addColumn(int idx, IndexColumn column)
-    {
-        if (column != null)
-        {
-            _columns.add(idx, column);
+                if (curColumn.getOrdinalPosition() > column.getOrdinalPosition())
+                {
+                    _columns.add(idx, column);
+                    return;
+                }
+            }
+            _columns.add(column);
         }
     }
 

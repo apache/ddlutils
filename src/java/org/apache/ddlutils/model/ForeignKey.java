@@ -30,8 +30,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class ForeignKey implements Cloneable
 {
-    //  TODO: Make the create/alter/drop functionality respect the name property
-
     /** The name of the foreign key, may be <code>null</code>. */
     private String         _name;
     /** The target table. */
@@ -177,22 +175,17 @@ public class ForeignKey implements Cloneable
     {
         if (reference != null)
         {
-            _references.add(reference);
-        }
-    }
+            for (int idx = 0; idx < _references.size(); idx++)
+            {
+                Reference curRef = getReference(idx);
 
-    /**
-     * Adds a reference, ie. a mapping between a local column (in the table that owns this foreign key)
-     * and a remote column, at the specified place.
-     * 
-     * @param idx       The index to add the reference at
-     * @param reference The reference to add
-     */
-    public void addReference(int idx, Reference reference)
-    {
-        if (reference != null)
-        {
-            _references.add(idx, reference);
+                if (curRef.getSequenceValue() > reference.getSequenceValue())
+                {
+                    _references.add(idx, reference);
+                    return;
+                }
+            }
+            _references.add(reference);
         }
     }
 

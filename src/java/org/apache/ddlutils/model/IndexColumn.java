@@ -32,6 +32,8 @@ public class IndexColumn implements Cloneable, Serializable
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -5009366896427504739L;
 
+    /** The position within the owning index. */
+    private int    _ordinalPosition;
     /** The name of the column. */
     protected String _name;
     /** The size of the column in the index. */
@@ -55,7 +57,28 @@ public class IndexColumn implements Cloneable, Serializable
     {
         _name = columnName;
     }
-    
+
+    /**
+     * Returns the position within the owning index.
+     *
+     * @return The position
+     */
+    public int getOrdinalPosition()
+    {
+        return _ordinalPosition;
+    }
+
+    /**
+     * Sets the position within the owning index. Please note that you should not
+     * change the value once the column has been added to a index.
+     *
+     * @param position The position
+     */
+    public void setOrdinalPosition(int position)
+    {
+        _ordinalPosition = position;
+    }
+
     /**
      * Returns the name of the column.
      * 

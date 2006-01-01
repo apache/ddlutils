@@ -77,14 +77,6 @@ public interface Index extends Cloneable, Serializable
     public void addColumn(IndexColumn column);
 
     /**
-     * Adds a column that makes up this index at the specified position.
-     * 
-     * @param idx    The position to add the index colum at
-     * @param column The column to add
-     */
-    public void addColumn(int idx, IndexColumn column);
-
-    /**
      * Removes the given index column from this index.
      * 
      * @param column The column to remove

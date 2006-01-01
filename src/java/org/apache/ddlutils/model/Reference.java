@@ -1,8 +1,5 @@
 package org.apache.ddlutils.model;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
  * 
@@ -19,14 +16,24 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * limitations under the License.
  */
 
+import java.io.Serializable;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * Represents a reference between a column in the local table and a column in another table.
  * 
  * @author Thomas Dudziak
  * @version $Revision$
  */
-public class Reference implements Cloneable
+public class Reference implements Cloneable, Serializable
 {
+    /** Unique ID for serialization purposes. */
+    private static final long serialVersionUID = 6062467640266171664L;
+
+    /** The sequence value within the key. */
+    private int    _sequenceValue;
     /** The local column. */
     private Column _localColumn;
     /** The foreign column. */
@@ -52,6 +59,28 @@ public class Reference implements Cloneable
     {
         setLocalColumn(localColumn);
         setForeignColumn(foreignColumn);
+    }
+
+    /**
+     * Returns the sequence value within the owning key.
+     *
+     * @return The sequence value
+     */
+    public int getSequenceValue()
+    {
+        return _sequenceValue;
+    }
+
+    /**
+     * Sets the sequence value within the owning key. Please note
+     * that you should not change the value once the reference has
+     * been added to a key.
+     *
+     * @param sequenceValue The sequence value
+     */
+    public void setSequenceValue(int sequenceValue)
+    {
+        _sequenceValue = sequenceValue;
     }
 
     /**
