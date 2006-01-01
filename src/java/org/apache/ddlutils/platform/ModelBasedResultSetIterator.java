@@ -1,4 +1,4 @@
-package org.apache.ddlutils.dynabean;
+package org.apache.ddlutils.platform;
 
 /*
  * Copyright 1999-2005 The Apache Software Foundation.
@@ -16,14 +16,11 @@ package org.apache.ddlutils.dynabean;
  * limitations under the License.
  */
 
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -36,11 +33,11 @@ import org.apache.commons.beanutils.DynaClass;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.ddlutils.DynaSqlException;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.dynabean.SqlDynaBean;
+import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * This is an iterator that is specifically targeted at traversing result sets.
@@ -51,8 +48,10 @@ import org.apache.ddlutils.util.Jdbc3Utils;
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class DynaSqlIterator implements Iterator
+public class ModelBasedResultSetIterator implements Iterator
 {
+    /** The platform. */
+    private PlatformImplBase _platform;
     /** The base result set. */
     private ResultSet _resultSet;
     /** The dyna class to use for creating beans. */
@@ -69,7 +68,7 @@ public class DynaSqlIterator implements Iterator
     /**
      * Creates a new iterator.
      * 
-     * @param platformInfo       The platform info
+     * @param platform           The platform
      * @param model              The database model
      * @param resultSet          The result set
      * @param queryHints         The tables that were queried in the query that produced the given result set
@@ -77,16 +76,17 @@ public class DynaSqlIterator implements Iterator
      * @param cleanUpAfterFinish Whether to close the statement and connection after finishing
      *                           the iteration, upon on exception, or when this iterator is garbage collected
      */
-    public DynaSqlIterator(PlatformInfo platformInfo, Database model, ResultSet resultSet, Table[] queryHints, boolean cleanUpAfterFinish) throws DynaSqlException
+    public ModelBasedResultSetIterator(PlatformImplBase platform, Database model, ResultSet resultSet, Table[] queryHints, boolean cleanUpAfterFinish) throws DynaSqlException
     {
         if (resultSet != null)
         {
+            _platform           = platform;
             _resultSet          = resultSet;
             _cleanUpAfterFinish = cleanUpAfterFinish;
 
             try
             {
-                initFromMetaData(platformInfo, model, resultSet, queryHints);
+                initFromMetaData(model, queryHints);
             }
             catch (SQLException ex)
             {
@@ -103,17 +103,15 @@ public class DynaSqlIterator implements Iterator
     /**
      * Initializes this iterator from the resultset metadata.
      * 
-     * @param platformInfo The platform info
-     * @param model        The database model
-     * @param resultSet    The result set
-     * @param queryHints   The tables that were queried in the query that produced the given result set
+     * @param model      The database model
+     * @param queryHints The tables that were queried in the query that produced the given result set
      */
-    private void initFromMetaData(PlatformInfo platformInfo, Database model, ResultSet resultSet, Table[] queryHints) throws SQLException
+    private void initFromMetaData(Database model, Table[] queryHints) throws SQLException
     {
-        ResultSetMetaData metaData           = resultSet.getMetaData();
+        ResultSetMetaData metaData           = _resultSet.getMetaData();
         String            tableName          = null;
         boolean           singleKnownTable   = true;
-        boolean           caseSensitive      = platformInfo.isUseDelimitedIdentifiers();
+        boolean           caseSensitive      = _platform.getPlatformInfo().isUseDelimitedIdentifiers();
         Map               preparedQueryHints = prepareQueryHints(queryHints, caseSensitive);
 
         for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
@@ -242,7 +240,7 @@ public class DynaSqlIterator implements Iterator
                     Map.Entry entry      = (Map.Entry)it.next();
                     String    columnName = (String)entry.getKey();
                     String    propName   = (String)entry.getKey();
-                    Object    value      = getObjectFromResultSet(_resultSet, columnName, table);
+                    Object    value      = _platform.getObjectFromResultSet(_resultSet, columnName, table);
 
                     bean.set(propName, value);
                 }
@@ -255,120 +253,6 @@ public class DynaSqlIterator implements Iterator
                 throw new DynaSqlException("Exception while reading the row from the resultset", ex);
             }
         }
-    }
-
-    /**
-     * Extracts the value for the specified column from the result set. If a table was specified,
-     * and it contains the column, then the jdbc type defined for the column is used for extracting
-     * the value, otherwise the object directly retrieved from the result set is returned.
-     * 
-     * @param resultSet  The result set
-     * @param columnName The name of the column
-     * @param table      The table
-     * @return The value
-     */
-    private Object getObjectFromResultSet(ResultSet resultSet, String columnName, Table table) throws SQLException
-    {
-        Column column = (table == null ? null : table.findColumn(columnName, true));
-        Object value = null;
-
-        if (column != null)
-        {
-            int jdbcType = column.getTypeCode();
-
-            // we're returning values according to the standard mapping as defined by the JDBC spec
-            switch (jdbcType)
-            {
-                case Types.CHAR:
-                case Types.VARCHAR:
-                case Types.LONGVARCHAR:
-                    value = resultSet.getString(columnName);
-                    break;
-                case Types.NUMERIC:
-                case Types.DECIMAL:
-                    value = resultSet.getBigDecimal(columnName);
-                    break;
-                case Types.BIT:
-                    value = new Boolean(resultSet.getBoolean(columnName));
-                    break;
-                case Types.TINYINT:
-                case Types.SMALLINT:
-                case Types.INTEGER:
-                    value = new Integer(resultSet.getInt(columnName));
-                    break;
-                case Types.BIGINT:
-                    value = new Long(resultSet.getLong(columnName));
-                    break;
-                case Types.REAL:
-                    value = new Float(resultSet.getFloat(columnName));
-                    break;
-                case Types.FLOAT:
-                case Types.DOUBLE:
-                    value = new Double(resultSet.getDouble(columnName));
-                    break;
-                case Types.BINARY:
-                case Types.VARBINARY:
-                case Types.LONGVARBINARY:
-                    value = resultSet.getBytes(columnName);
-                    break;
-                case Types.DATE:
-                    value = resultSet.getDate(columnName);
-                    break;
-                case Types.TIME:
-                    value = resultSet.getTime(columnName);
-                    break;
-                case Types.TIMESTAMP:
-                    value = resultSet.getTimestamp(columnName);
-                    break;
-                case Types.CLOB:
-                    Clob clob = resultSet.getClob(columnName);
-
-                    if ((clob == null) || (clob.length() > Integer.MAX_VALUE))
-                    {
-                        value = clob;
-                    }
-                    else
-                    {
-                        value = clob.getSubString(1l, (int)clob.length());
-                    }
-                    break;
-                case Types.BLOB:
-                    Blob blob = resultSet.getBlob(columnName);
-
-                    if ((blob == null) || (blob.length() > Integer.MAX_VALUE))
-                    {
-                        value = blob;
-                    }
-                    else
-                    {
-                        value = blob.getBytes(1l, (int)blob.length());
-                    }
-                    break;
-                case Types.ARRAY:
-                    value = resultSet.getArray(columnName);
-                    break;
-                case Types.REF:
-                    value = resultSet.getRef(columnName);
-                    break;
-                default:
-                    // special handling for Java 1.4/JDBC 3 types
-                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-                        (jdbcType == Jdbc3Utils.determineBooleanTypeCode()))
-                    {
-                        value = new Boolean(resultSet.getBoolean(columnName));
-                    }
-                    else
-                    {
-                        value = resultSet.getObject(columnName);
-                    }
-                    break;
-            }
-        }
-        else
-        {
-            value = _resultSet.getObject(columnName);
-        }
-        return value;
     }
     
     /**

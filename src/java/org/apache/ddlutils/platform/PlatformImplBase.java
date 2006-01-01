@@ -20,12 +20,15 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,13 +47,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.dynabean.DynaSqlIterator;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
+import org.apache.ddlutils.util.Jdbc3Utils;
 import org.apache.ddlutils.util.JdbcSupport;
 
 /**
@@ -1523,12 +1526,151 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             // Derby doesn't like BigDecimal's in setObject
             statement.setBigDecimal(sqlIndex, (BigDecimal)value);
         }
+        else if (value instanceof Float)
+        {
+            statement.setFloat(sqlIndex, ((Float)value).floatValue());
+        }
+        else if (value instanceof Double)
+        {
+            statement.setDouble(sqlIndex, ((Double)value).doubleValue());
+        }
         else
         {
             statement.setObject(sqlIndex, value, typeCode);
         }
     }
 
+    /**
+     * Helper method esp. for the {@link ModelBasedResultSetIterator} class that retrieves
+     * the value for a column from the given result set. If a table was specified,
+     * and it contains the column, then the jdbc type defined for the column is used for extracting
+     * the value, otherwise the object directly retrieved from the result set is returned.<br/>
+     * The method is defined here rather than in the {@link ModelBasedResultSetIterator} class
+     * so that concrete platforms can modify its behavior.
+     * 
+     * @param resultSet  The result set
+     * @param columnName The name of the column
+     * @param table      The table
+     * @return The value
+     */
+    protected Object getObjectFromResultSet(ResultSet resultSet, String columnName, Table table) throws SQLException
+    {
+        Column column = (table == null ? null : table.findColumn(columnName, getPlatformInfo().isCaseSensitive()));
+        Object value  = null;
+
+        if (column != null)
+        {
+            int originalJdbcType = column.getTypeCode();
+            int targetJdbcType   = getPlatformInfo().getTargetJdbcType(originalJdbcType);
+            int jdbcType         = originalJdbcType;
+
+            // in general we're trying to retrieve the value using the original type
+            // but sometimes we also need the target type:
+            if ((originalJdbcType == Types.BLOB) && (targetJdbcType != Types.BLOB))
+            {
+                // we should not use the Blob interface if the database doesn't map to this type 
+                jdbcType = targetJdbcType;
+            }
+            if ((originalJdbcType == Types.CLOB) && (targetJdbcType != Types.CLOB))
+            {
+                // we should not use the Clob interface if the database doesn't map to this type 
+                jdbcType = targetJdbcType;
+            }
+            switch (jdbcType)
+            {
+                case Types.CHAR:
+                case Types.VARCHAR:
+                case Types.LONGVARCHAR:
+                    value = resultSet.getString(columnName);
+                    break;
+                case Types.NUMERIC:
+                case Types.DECIMAL:
+                    value = resultSet.getBigDecimal(columnName);
+                    break;
+                case Types.BIT:
+                    value = new Boolean(resultSet.getBoolean(columnName));
+                    break;
+                case Types.TINYINT:
+                case Types.SMALLINT:
+                case Types.INTEGER:
+                    value = new Integer(resultSet.getInt(columnName));
+                    break;
+                case Types.BIGINT:
+                    value = new Long(resultSet.getLong(columnName));
+                    break;
+                case Types.REAL:
+                    value = new Float(resultSet.getFloat(columnName));
+                    break;
+                case Types.FLOAT:
+                case Types.DOUBLE:
+                    value = new Double(resultSet.getDouble(columnName));
+                    break;
+                case Types.BINARY:
+                case Types.VARBINARY:
+                case Types.LONGVARBINARY:
+                    value = resultSet.getBytes(columnName);
+                    break;
+                case Types.DATE:
+                    value = resultSet.getDate(columnName);
+                    break;
+                case Types.TIME:
+                    value = resultSet.getTime(columnName);
+                    break;
+                case Types.TIMESTAMP:
+                    value = resultSet.getTimestamp(columnName);
+                    break;
+                case Types.CLOB:
+                    Clob clob = resultSet.getClob(columnName);
+
+                    if ((clob == null) || (clob.length() > Integer.MAX_VALUE))
+                    {
+                        value = clob;
+                    }
+                    else
+                    {
+                        value = clob.getSubString(1l, (int)clob.length());
+                    }
+                    break;
+                case Types.BLOB:
+                    Blob blob = resultSet.getBlob(columnName);
+
+                    if ((blob == null) || (blob.length() > Integer.MAX_VALUE))
+                    {
+                        value = blob;
+                    }
+                    else
+                    {
+                        value = blob.getBytes(1l, (int)blob.length());
+                    }
+                    break;
+                case Types.ARRAY:
+                    value = resultSet.getArray(columnName);
+                    break;
+                case Types.REF:
+                    value = resultSet.getRef(columnName);
+                    break;
+                default:
+                    // special handling for Java 1.4/JDBC 3 types
+                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
+                        (jdbcType == Jdbc3Utils.determineBooleanTypeCode()))
+                    {
+                        value = new Boolean(resultSet.getBoolean(columnName));
+                    }
+                    else
+                    {
+                        value = resultSet.getObject(columnName);
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            value = resultSet.getObject(columnName);
+        }
+        return value;
+    }
+
+    
     /**
      * Creates an iterator over the given result set.
      *
@@ -1538,8 +1680,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      *                   given result set (optional)
      * @return The iterator
      */
-    protected DynaSqlIterator createResultSetIterator(Database model, ResultSet resultSet, Table[] queryHints)
+    protected ModelBasedResultSetIterator createResultSetIterator(Database model, ResultSet resultSet, Table[] queryHints)
     {
-        return new DynaSqlIterator(getPlatformInfo(), model, resultSet, queryHints, true);
+        return new ModelBasedResultSetIterator(this, model, resultSet, queryHints, true);
     }
 }
