@@ -591,7 +591,7 @@ public abstract class SqlBuilder
         println("(");
 
         writeColumns(table);
-
+        
         if (getPlatformInfo().isPrimaryKeyEmbedded())
         {
             writeEmbeddedPrimaryKeysStmt(table);
@@ -1113,7 +1113,8 @@ public abstract class SqlBuilder
         print(" ");
         print(getSqlType(column));
 
-        if (column.getDefaultValue() != null)
+        if ((column.getDefaultValue() != null) ||
+            (getPlatformInfo().isIdentitySpecUsesDefaultValue() && column.isAutoIncrement()))
         {
             print(" DEFAULT ");
             writeColumnDefaultValue(table, column);
@@ -1129,7 +1130,7 @@ public abstract class SqlBuilder
             print(" ");
             writeColumnNullableStmt();
         }
-        if (column.isAutoIncrement())
+        if (column.isAutoIncrement() && !getPlatformInfo().isIdentitySpecUsesDefaultValue())
         {
             if (!getPlatformInfo().isSupportingNonPKIdentityColumns() && !column.isPrimaryKey())
             {
@@ -1398,8 +1399,7 @@ public abstract class SqlBuilder
 
         if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
         {
-            println(",");
-            printIndent();
+            printStartOfEmbeddedStatement();
             writePrimaryKeyStmt(table, primaryKeyColumns);
         }
     }
@@ -1489,7 +1489,13 @@ public abstract class SqlBuilder
     {
         for (int idx = 0; idx < table.getIndexCount(); idx++)
         {
-            writeExternalIndexCreateStmt(table, table.getIndex(idx));
+            Index index = table.getIndex(idx);
+
+            if (!index.isUnique() && !getPlatformInfo().isSupportingNonUniqueIndices())
+            {
+                throw new DynaSqlException("Platform does not support non-unique indices");
+            }
+            writeExternalIndexCreateStmt(table, index);
         }
     }
 
@@ -1500,7 +1506,17 @@ public abstract class SqlBuilder
      */
     protected void writeEmbeddedIndicesStmt(Table table) throws IOException 
     {
-        // TODO
+        for (int idx = 0; idx < table.getIndexCount(); idx++)
+        {
+            Index index = table.getIndex(idx);
+
+            if (!index.isUnique() && !getPlatformInfo().isSupportingNonUniqueIndices())
+            {
+                throw new DynaSqlException("Platform does not support non-unique indices");
+            }
+            printStartOfEmbeddedStatement();
+            writeEmbeddedIndexCreateStmt(table, index);
+        }
     }
 
     /**
@@ -1551,6 +1567,49 @@ public abstract class SqlBuilder
     }
 
     /**
+     * Writes the given embedded index of the table.
+     * 
+     * @param table The table
+     * @param index The index
+     */
+    protected void writeEmbeddedIndexCreateStmt(Table table, Index index) throws IOException
+    {
+        if ((index.getName() != null) && (index.getName().length() > 0))
+        {
+            print(" CONSTRAINT ");
+            printIdentifier(getIndexName(index));
+        }
+        if (index.isUnique())
+        {
+            print(" UNIQUE");
+        }
+        else
+        {
+            print(" INDEX ");
+        }
+        print(" (");
+
+        for (int idx = 0; idx < index.getColumnCount(); idx++)
+        {
+            IndexColumn idxColumn = index.getColumn(idx);
+            Column      col       = table.findColumn(idxColumn.getName());
+
+            if (col == null)
+            {
+                //would get null pointer on next line anyway, so throw exception
+                throw new DynaSqlException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
+            }
+            if (idx > 0)
+            {
+                print(", ");
+            }
+            printIdentifier(getColumnName(col));
+        }
+
+        print(")");
+    }
+
+    /**
      * Generates the statement to drop a non-embedded index from the database.
      *
      * @param table The table the index is on
@@ -1591,9 +1650,7 @@ public abstract class SqlBuilder
             }
             else
             {
-                println(",");
-                printIndent();
-                
+                printStartOfEmbeddedStatement();
                 if (getPlatformInfo().isEmbeddedForeignKeysNamed())
                 {
                     print("CONSTRAINT ");
@@ -1712,7 +1769,16 @@ public abstract class SqlBuilder
             println();
         }
     }
-    
+
+    /** 
+     * Prints the start of an embedded statement.
+     */
+    protected void printStartOfEmbeddedStatement() throws IOException
+    {
+        println(",");
+        printIndent();
+    }
+
     /** 
      * Prints the end of statement text, which is typically a semi colon followed by 
      * a carriage return.

@@ -44,6 +44,9 @@ public class PlatformInfo
     /** Whether foreign key constraints are embedded inside the create table statement. */
     private boolean _foreignKeysEmbedded = false;
 
+    /** Whether non-unique indices are supported. */
+    private boolean _supportingNonUniqueIndices = true;
+
     /** Whether indices are embedded inside the create table statement. */
     private boolean _indicesEmbedded = false;
 
@@ -52,6 +55,9 @@ public class PlatformInfo
 
     /** Whether identity specification is supported for non-primary key columns. */
     private boolean _supportingNonPKIdentityColumns = true;
+
+    /** Whether the auto-increment definition is done via the DEFAULT part of the column definition. */
+    private boolean _identitySpecUsesDefaultValue = false;
 
     /** Whether an ALTER TABLE is needed to drop indexes. */
     private boolean _useAlterTableForDrop = false;
@@ -198,6 +204,27 @@ public class PlatformInfo
     }
 
     /**
+     * Determines whether non-unique indices are supported.
+     *
+     * @return <code>true</code> if non-unique indices are supported
+     */
+    public boolean isSupportingNonUniqueIndices()
+    {
+        return _supportingNonUniqueIndices;
+    }
+
+    /**
+     * Specifies whether non-unique indices are supported.
+     *
+     * @param supportingNonUniqueIndices <code>true</code> if non-unique indices
+     *                                   are supported
+     */
+    public void setSupportingNonUniqueIndices(boolean supportingNonUniqueIndices)
+    {
+        _supportingNonUniqueIndices = supportingNonUniqueIndices;
+    }
+
+    /**
      * Determines whether the indices are embedded in the create table clause
      * or as seperate statements. Per default, indices are external.
      * 
@@ -258,6 +285,29 @@ public class PlatformInfo
     public void setSupportingNonPKIdentityColumns(boolean supportingNonPKIdentityColumns)
     {
         _supportingNonPKIdentityColumns = supportingNonPKIdentityColumns;
+    }
+
+    /**
+     * Determines whether the auto-increment specification uses the DEFAULT value of the
+     * column definition.
+     *
+     * @return <code>true</code> if the auto-increment spec is done via the DEFAULT value
+     */
+    public boolean isIdentitySpecUsesDefaultValue()
+    {
+        return _identitySpecUsesDefaultValue;
+    }
+
+    /**
+     * Specifies whether the auto-increment specification uses the DEFAULT value of the
+     * column definition.
+     *
+     * @param identitySpecUsesDefaultValue <code>true</code> if the auto-increment spec is
+     *                                     done via the DEFAULT value
+     */
+    public void setIdentitySpecUsesDefaultValue(boolean identitySpecUsesDefaultValue)
+    {
+        _identitySpecUsesDefaultValue = identitySpecUsesDefaultValue;
     }
 
     /**
