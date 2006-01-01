@@ -1,8 +1,5 @@
 List of things to be done for the next version of DdlUtils:
 
-* Fix Javadoc errors
-* Enhance doc:
-    - How to use DdlUtils in code
 * Separate generation of alter statements for an existing databases from the reading
   of the model from the existing database to allow for alter statement generation with two
   database models without having to connect to the database and thus allow for testing the
@@ -10,7 +7,6 @@ List of things to be done for the next version of DdlUtils:
 * Add unit tests for:
     - SQL generation (including alteration)
     - Roundtrip (database specific)
-* Replace usage of java.util.regex with some alternative that is Java 1.3 (1.2 ?) compatible
 * Add support for chosing the character set (ASCII, UNICODE) if the database supports it
   (perhaps a more generic configuration mechanism for overriding defaults)
 * Add the ability to configure the datatype mapping (ant task, API)
@@ -25,8 +21,12 @@ List of things to be done for the next version of DdlUtils:
   type at all
 * It would be helpful if the platform impl check the length of user-supplied identifiers (table names,
   column names, fk names, index names) before any SQL is send to the database
-* Add check for databases that only support one auto-increment field (eg. MySQL, HsqlDb, McKoi)
 * Add ability to specify the sorting direction of an index-column (ascending/descending) - this is at least supported in Derby
 * Rather than dropping the indices/foreign keys that are at the current table, it would be better to simply drop any
   of the constraints/triggers connected to a table (if that is possible)
-* Have a look at http://www.h2database.com/. The h2 is HyperSonic2, with a completely new codebase.
+* Add support for:
+  - One$DB (http://www.daffodildb.com/one-dollar-db.html)
+  - H2 (http://www.h2database.com)
+  - SQLite
+  - Caché
+  - Ingres
