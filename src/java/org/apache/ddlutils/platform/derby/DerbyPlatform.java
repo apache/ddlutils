@@ -81,7 +81,7 @@ public class DerbyPlatform extends CloudscapePlatform
                     Map.Entry entry = (Map.Entry)it.next();
 
                     // no need to specify create twice (and create=false wouldn't help anyway)
-                    if ("create".equalsIgnoreCase(entry.getKey().toString()))
+                    if (!"create".equalsIgnoreCase(entry.getKey().toString()))
                     {
                         creationUrl.append(";");
                         creationUrl.append(entry.getKey().toString());
