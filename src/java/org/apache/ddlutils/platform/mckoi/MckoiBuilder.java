@@ -55,11 +55,18 @@ public class MckoiBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
+    protected void writeColumnDefaultValue(Table table, Column column) throws IOException
     {
-        // we start at value 1 to avoid issues with jdbc
-        print("DEFAULT UNIQUEKEY(");
-        printIdentifier(getTableName(table));
-        print(") + 1");
+        if (column.isAutoIncrement())
+        {
+            // we start at value 1 to avoid issues with jdbc
+            print("UNIQUEKEY('");
+            print(getTableName(table));
+            print("') + 1");
+        }
+        else
+        {
+            super.writeColumnDefaultValue(table, column);
+        }
     }
 }
