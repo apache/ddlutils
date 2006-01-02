@@ -1,7 +1,7 @@
 package org.apache.ddlutils.task;
 
 /*
- * Copyright 1999-2005 The Apache Software Foundation.
+ * Copyright 1999-2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -470,6 +470,7 @@ public class DumpMetadataTask extends Task
      * @param tableElem   The XML element for the table
      * @param metaData    The database metadata
      * @param catalogName The catalog name
+     * @param schemaName  The schema name
      * @param tableName   The table name
      */
     private void dumpColumns(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
@@ -543,6 +544,7 @@ public class DumpMetadataTask extends Task
      * @param tableElem   The XML element for the table
      * @param metaData    The database metadata
      * @param catalogName The catalog name
+     * @param schemaName  The schema name
      * @param tableName   The table name
      */
     private void dumpPKs(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
@@ -573,6 +575,7 @@ public class DumpMetadataTask extends Task
      * @param tableElem   The XML element for the table
      * @param metaData    The database metadata
      * @param catalogName The catalog name
+     * @param schemaName  The schema name
      * @param tableName   The table name
      */
     private void dumpVersionColumns(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
@@ -621,6 +624,7 @@ public class DumpMetadataTask extends Task
      * @param tableElem   The XML element for the table
      * @param metaData    The database metadata
      * @param catalogName The catalog name
+     * @param schemaName  The schema name
      * @param tableName   The table name
      */
     private void dumpFKs(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
@@ -710,6 +714,7 @@ public class DumpMetadataTask extends Task
      * @param tableElem   The XML element for the table
      * @param metaData    The database metadata
      * @param catalogName The catalog name
+     * @param schemaName  The schema name
      * @param tableName   The table name
      */
     private void dumpIndices(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
@@ -823,10 +828,11 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the contents of the indicated procedure.
      * 
-     * @param procedureElem   The XML element for the procedure
-     * @param metaData    The database metadata
-     * @param catalogName The catalog name
-     * @param procedureName   The procedure name
+     * @param procedureElem The XML element for the procedure
+     * @param metaData      The database metadata
+     * @param catalogName   The catalog name
+     * @param schemaName    The schema name
+     * @param procedureName The procedure name
      */
     private void dumpProcedure(Element procedureElem, DatabaseMetaData metaData, String catalogName, String schemaName, String procedureName) throws SQLException
     {

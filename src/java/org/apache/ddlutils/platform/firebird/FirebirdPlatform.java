@@ -1,9 +1,7 @@
 package org.apache.ddlutils.platform.firebird;
 
-import org.apache.ddlutils.platform.interbase.InterbasePlatform;
-
 /*
- * Copyright 1999-2005 The Apache Software Foundation.
+ * Copyright 1999-2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,8 @@ import org.apache.ddlutils.platform.interbase.InterbasePlatform;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 
 /**
  * The platform implementation for the Firebird database.

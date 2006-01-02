@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform;
 
 /*
- * Copyright 1999-2005 The Apache Software Foundation.
+ * Copyright 1999-2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,49 +33,62 @@ import org.apache.ddlutils.model.Table;
  */
 public class TestPlatformImplBase extends TestPlatformBase 
 {
+    /** The tested model. */
+    private static final String TESTED_MODEL =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        "<database name='ddlutils'>\n"+
+        "  <table name='TestTable'>\n"+
+        "    <column name='id' autoIncrement='true' type='INTEGER' primaryKey='true'/>\n"+
+        "    <column name='name' type='VARCHAR' size='15'/>\n"+
+        "  </table>\n"+
+        "</database>";
 
-    String xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                 "<database name='ddlutils'>\n"+
-                 "  <table name='TestTable'>\n"+
-                 "    <column name='id' autoIncrement='true' type='INTEGER' primaryKey='true'/>\n"+
-                 "    <column name='name' type='VARCHAR' size='15'/>\n"+
-                 "  </table>\n"+
-                 "</database>";
-
+    /**
+     * {@inheritDoc}
+     */
     public void setUp()
     {
     }
 
     /**
-     * Test the toColumnValues method
+     * Test the toColumnValues method.
      */
     public void testToColumnValues()
     {
-        Database database = parseDatabaseFromString(xml);
+        Database         database = parseDatabaseFromString(TESTED_MODEL);
         PlatformImplBase platform = new PlatformBase();
-        Table table = database.getTable(0);
-        SqlDynaClass clz = SqlDynaClass.newInstance(table);
-        DynaBean db = new SqlDynaBean(SqlDynaClass.newInstance(table));
+        Table            table    = database.getTable(0);
+        SqlDynaClass     clz      = SqlDynaClass.newInstance(table);
+        DynaBean         db       = new SqlDynaBean(SqlDynaClass.newInstance(table));
+
         db.set("name", "name");
+
         Map map = platform.toColumnValues(clz.getSqlDynaProperties(), db);
 
-        assertEquals("name", map.get("name"));
-        assertEquals(true, map.containsKey("id"));
+        assertEquals("name",
+                     map.get("name"));
+        assertTrue(map.containsKey("id"));
     }
     
- 
+    /**
+     * The tested platform.
+     */
     public class PlatformBase extends PlatformImplBase 
     {
+        /**
+         * {@inheritDoc}
+         */
         public String getName() 
         {
             return null;
         }
     }
 
-
-    protected String getDatabaseName() {
+    /**
+     * {@inheritDoc}
+     */
+    protected String getDatabaseName()
+    {
         return null;
     }
-
-    
 }
