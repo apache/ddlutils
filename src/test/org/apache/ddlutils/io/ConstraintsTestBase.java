@@ -186,6 +186,10 @@ public abstract class ConstraintsTestBase extends RoundtripTestBase
             assertEquals(getAdjustedModel(),
                          getPlatform().readModelFromDatabase("roundtriptest"));
         }
+        else
+        {
+            fail("Platform " + getPlatformName() + " does not match " + getPlatform().getName());
+        }
     }
 
     /**
