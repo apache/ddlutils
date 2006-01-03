@@ -227,7 +227,14 @@
   <!-- ================================================================== -->
   <target name="junit-axion"
           description="Runs the test cases against axion">
-    <property name="jdbc.properties.file" value="/jdbc.properties.axion"/>
+  	<condition property="jdbc.properties.file" value="${test.profile.directory}/${profile}/jdbc.properties.axion">
+  		<isset property="profile"/>
+  	</condition>
+  	<condition property="jdbc.properties.file" value="/jdbc.properties.axion">
+  		<not>
+    		<isset property="jdbc.properties.file"/>
+  	    </not>
+  	</condition>
     <antcall target="-junit-internal"/>
   </target>
 
@@ -251,8 +258,10 @@
       <formatter type="plain"/>
       <classpath refid="compilation-classpath"/>
       <batchtest todir="${build.test.dir}">
-          <fileset dir="${src.test.dir}"
-                   includes="**/Test*.java"/>
+          <fileset dir="${src.test.dir}" includes="**/Test*.java">
+    	    <exclude name="**/TestDatabaseWriterBase.java"/>
+  	        <exclude name="**/TestPlatformBase.java"/>
+          </fileset>
       </batchtest>
     </junit>
   </target>
