@@ -188,7 +188,11 @@ public abstract class ConstraintsTestBase extends RoundtripTestBase
         }
         else
         {
-            fail("Platform " + getPlatformName() + " does not match " + getPlatform().getName());
+            // set this jvm property to true when you want failures when there is a platform mismatch.
+            if ("true".equals(System.getProperty("ddlutils.failcheckplatform")))
+            {
+                fail("Platform " + getPlatformName() + " does not match " + getPlatform().getName());
+            }
         }
     }
 
