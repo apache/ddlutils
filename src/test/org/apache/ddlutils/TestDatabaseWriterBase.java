@@ -16,6 +16,8 @@ package org.apache.ddlutils;
  * limitations under the License.
  */
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.Map;
@@ -72,7 +74,11 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
 
         try
         {
-            props.load(getClass().getResourceAsStream(propFile));
+            InputStream propStream = getClass().getResourceAsStream(propFile);
+            if (propStream == null) {
+                propStream = new FileInputStream(propFile);
+            }
+            props.load(propStream);
 
             String dataSourceClass = props.getProperty(DATASOURCE_PROPERTY_PREFIX + "class", BasicDataSource.class.getName());
 
