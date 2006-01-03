@@ -28,10 +28,13 @@ import java.util.TreeSet;
 /**
  * Performs roundtrip datatype tests.
  * 
+ * TODO: Change to a parameterized test in order to test in delimited and
+ *       in undelimited identifiers modes
+ * 
  * @author Thomas Dudziak
  * @version $Revision: $
  */
-public abstract class DatatypesTestBase extends RoundtripTestBase
+public class TestDatatypes extends RoundtripTestBase
 {
     /** Test model with a simple BIT column. */
     protected static final String TEST_BIT_MODEL = 
@@ -465,20 +468,17 @@ public abstract class DatatypesTestBase extends RoundtripTestBase
      */
     protected void performDataTypeTest(String modelXml, Object inserted1, Object inserted2, Object expected1, Object expected2)
     {
-        if (checkPlatform())
-        {
-            createDatabase(modelXml);
-            insertRow("ROUNDTRIP", new Object[] { new Integer(1), inserted1 });
-            insertRow("ROUNDTRIP", new Object[] { new Integer(2), inserted2 });
-    
-            List beans = getRows("ROUNDTRIP");
-    
-            assertEquals(expected1, beans.get(0), "VALUE");
-            assertEquals(expected2, beans.get(1), "VALUE");
-    
-            assertEquals(getAdjustedModel(),
-                         getPlatform().readModelFromDatabase("roundtriptest"));
-        }
+        createDatabase(modelXml);
+        insertRow("ROUNDTRIP", new Object[] { new Integer(1), inserted1 });
+        insertRow("ROUNDTRIP", new Object[] { new Integer(2), inserted2 });
+
+        List beans = getRows("ROUNDTRIP");
+
+        assertEquals(expected1, beans.get(0), "VALUE");
+        assertEquals(expected2, beans.get(1), "VALUE");
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**

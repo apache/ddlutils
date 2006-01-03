@@ -75,7 +75,9 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         try
         {
             InputStream propStream = getClass().getResourceAsStream(propFile);
-            if (propStream == null) {
+
+            if (propStream == null)
+            {
                 propStream = new FileInputStream(propFile);
             }
             props.load(propStream);

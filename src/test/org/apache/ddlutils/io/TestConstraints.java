@@ -19,10 +19,13 @@ package org.apache.ddlutils.io;
 /**
  * Performs the constraint tests.
  * 
+ * TODO: Change to a parameterized test in order to test in delimited and
+ *       in undelimited identifiers modes
+ * 
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public abstract class ConstraintsTestBase extends RoundtripTestBase
+public class TestConstraints extends RoundtripTestBase
 {
     /** Test model with a nullable column. */
     protected static final String TEST_NULL_MODEL = 
@@ -179,21 +182,10 @@ public abstract class ConstraintsTestBase extends RoundtripTestBase
      */
     protected void performConstraintsTest(String modelXml)
     {
-        if (checkPlatform())
-        {
-            createDatabase(modelXml);
-    
-            assertEquals(getAdjustedModel(),
-                         getPlatform().readModelFromDatabase("roundtriptest"));
-        }
-        else
-        {
-            // set this jvm property to true when you want failures when there is a platform mismatch.
-            if ("true".equals(System.getProperty("ddlutils.failcheckplatform")))
-            {
-                fail("Platform " + getPlatformName() + " does not match " + getPlatform().getName());
-            }
-        }
+        createDatabase(modelXml);
+
+        assertEquals(getAdjustedModel(),
+                     getPlatform().readModelFromDatabase("roundtriptest"));
     }
 
     /**

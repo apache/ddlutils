@@ -40,26 +40,6 @@ import org.apache.ddlutils.platform.DefaultValueHelper;
 public abstract class RoundtripTestBase extends TestDatabaseWriterBase
 {
     /**
-     * Returns the name of the platform for which the concrete test class is intended.
-     * This is used to run tests only for the databases that they are intended to be run
-     * against.
-     * 
-     * @return The platform name
-     */
-    protected abstract String getPlatformName();
-
-    /**
-     * Determines whether a concrete test sub class should be run against the configured
-     * platform.
-     * 
-     * @return <code>true</code> if the tests should be run against this platform
-     */
-    protected boolean checkPlatform()
-    {
-        return getPlatformName().equals(getPlatform().getName());
-    }
-    
-    /**
      * Inserts a row into the designated table.
      * 
      * @param tableName    The name of the table (case insensitive)
