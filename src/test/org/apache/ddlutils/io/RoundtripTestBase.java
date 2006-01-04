@@ -17,6 +17,7 @@ package org.apache.ddlutils.io;
  */
 
 import java.io.StringWriter;
+import java.sql.Types;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
@@ -128,6 +129,32 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                         if (defaultSize != null)
                         {
                             column.setSize(defaultSize.toString());
+                        }
+                    }
+                    // finally the platform might return a synthetic default value if the column
+                    // is a primary key column
+                    if (getPlatformInfo().isReturningDefaultValueForPrimaryKeys() &&
+                        (column.getDefaultValue() == null) && column.isPrimaryKey())
+                    {
+                        switch (column.getTypeCode())
+                        {
+                            case Types.TINYINT:
+                            case Types.SMALLINT:
+                            case Types.INTEGER:
+                            case Types.BIGINT:
+                                column.setDefaultValue("0");
+                                break;
+                            case Types.REAL:
+                            case Types.FLOAT:
+                            case Types.DOUBLE:
+                                column.setDefaultValue("0.0");
+                                break;
+                            case Types.BIT:
+                                column.setDefaultValue("false");
+                                break;
+                            default:
+                                column.setDefaultValue("");
+                                break;
                         }
                     }
                 }
