@@ -285,7 +285,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='CHAR' size='15' required='true' default='some value     '/>\n"+
+        "    <column name='value' type='CHAR' size='15' required='true' default='543210987654321'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple VARCHAR column. */
@@ -702,7 +702,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testCharWithDefault()
     {
-        performDataTypeTest(TEST_CHAR_MODEL_WITH_DEFAULT, null, "12345", "some value     ", "12345          ");
+        performDataTypeTest(TEST_CHAR_MODEL_WITH_DEFAULT, null, "123456789012345", "543210987654321", "123456789012345");
     }
 
     /**
