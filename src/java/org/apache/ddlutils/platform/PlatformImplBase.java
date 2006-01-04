@@ -664,7 +664,17 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             for (Iterator iter = parameters.iterator(); iter.hasNext(); paramIdx++)
             {
-                statement.setObject(paramIdx, iter.next());
+                Object arg = iter.next();
+
+                if (arg instanceof BigDecimal)
+                {
+                    // to avoid scale problems because setObject assumes a scale of 0
+                    statement.setBigDecimal(paramIdx, (BigDecimal)arg);
+                }
+                else
+                {
+                    statement.setObject(paramIdx, arg);
+                }
             }
             resultSet = statement.executeQuery();
             answer    = createResultSetIterator(model, resultSet, queryHints);
@@ -787,7 +797,17 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             for (Iterator iter = parameters.iterator(); iter.hasNext(); paramIdx++)
             {
-                statement.setObject(paramIdx, iter.next());
+                Object arg = iter.next();
+
+                if (arg instanceof BigDecimal)
+                {
+                    // to avoid scale problems because setObject assumes a scale of 0
+                    statement.setBigDecimal(paramIdx, (BigDecimal)arg);
+                }
+                else
+                {
+                    statement.setObject(paramIdx, arg);
+                }
             }
             resultSet = statement.executeQuery();
 
@@ -1523,7 +1543,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
         else if (value instanceof BigDecimal)
         {
-            // Derby doesn't like BigDecimal's in setObject
+            // setObject assumes a scale of 0, so we rather use the typed setter
             statement.setBigDecimal(sqlIndex, (BigDecimal)value);
         }
         else if (value instanceof Float)
