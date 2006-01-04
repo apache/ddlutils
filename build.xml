@@ -239,6 +239,22 @@
   </target>
 
   <!-- ================================================================== -->
+  <!-- Runs the test cases against AxionDB                                -->
+  <!-- ================================================================== -->
+  <target name="junit-mysql"
+          description="Runs the test cases against mysql">
+  	<condition property="jdbc.properties.file" value="${test.profile.directory}/${profile}/jdbc.properties.mysql">
+  		<isset property="profile"/>
+  	</condition>
+  	<condition property="jdbc.properties.file" value="/jdbc.properties.mysql">
+  		<not>
+    		<isset property="jdbc.properties.file"/>
+  	    </not>
+  	</condition>
+    <antcall target="-junit-internal"/>
+  </target>
+
+  <!-- ================================================================== -->
   <!-- Runs the test cases against PostgreSQL                             -->
   <!-- ================================================================== -->
   <target name="junit-postgresql"
