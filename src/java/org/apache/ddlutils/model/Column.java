@@ -499,7 +499,7 @@ public class Column implements Cloneable, Serializable
             // comparing the size makes only sense for types where it is relevant
             if ((_typeCode == Types.NUMERIC) || (_typeCode == Types.DECIMAL))
             {
-                comparator.append(_scale, other._scale);
+                comparator.append(_size,  other._size);
                 comparator.append(_scale, other._scale);
             }
             else if ((_typeCode == Types.CHAR) || (_typeCode == Types.VARCHAR) ||
