@@ -115,8 +115,8 @@ public class PlatformInfo
         reading a model from a database. */
     private boolean _returningSystemIndices = true;
 
-    /** Whether the database returns a synthetic default value for primary key columns. */ 
-    private boolean _returningDefaultValueForPrimaryKeys = false;
+    /** Whether the database returns a synthetic default value for non-identity required columns. */ 
+    private boolean _returningDefaultValueForRequired = false;
     
     /**
      * Creates a new platform info object.
@@ -826,25 +826,26 @@ public class PlatformInfo
 
     /**
      * Determines whether the platform returns synthetic default values (e.g. 0 for numeric
-     * columns etc.) for primary key columns when reading a model from a database.
+     * columns etc.) for non-identity required columns when reading a model from a database.
      *
-     * @return <code>true</code> if synthetic default values are returned for pk columns
+     * @return <code>true</code> if synthetic default values are returned for non-identity 
+     *         required columns
      */
-    public boolean isReturningDefaultValueForPrimaryKeys()
+    public boolean isReturningDefaultValueForRequired()
     {
-        return _returningDefaultValueForPrimaryKeys;
+        return _returningDefaultValueForRequired;
     }
 
     /**
      * Specifies whether the platform returns synthetic default values (e.g. 0 for numeric
-     * columns etc.) for primary key columns when reading a model from a database.
+     * columns etc.) for non-identity required columns when reading a model from a database.
      *
      * @param returningDefaultValue <code>true</code> if synthetic default values are returned for
-     *                              pk columns
+     *                              non-identity required columns
      */
-    public void setReturningDefaultValueForPrimaryKeys(boolean returningDefaultValue)
+    public void setReturningDefaultValueForRequired(boolean returningDefaultValue)
     {
-        _returningDefaultValueForPrimaryKeys = returningDefaultValue;
+        _returningDefaultValueForRequired = returningDefaultValue;
     }
 
 }

@@ -133,8 +133,8 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                     }
                     // finally the platform might return a synthetic default value if the column
                     // is a primary key column
-                    if (getPlatformInfo().isReturningDefaultValueForPrimaryKeys() &&
-                        (column.getDefaultValue() == null) && column.isPrimaryKey())
+                    if (getPlatformInfo().isReturningDefaultValueForRequired() &&
+                        (column.getDefaultValue() == null) && column.isRequired() && !column.isAutoIncrement())
                     {
                         switch (column.getTypeCode())
                         {
