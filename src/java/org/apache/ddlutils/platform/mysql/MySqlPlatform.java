@@ -80,10 +80,10 @@ public class MySqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)");
         info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
 
+        info.addDefaultSize(Types.CHAR,      254);
+        info.addDefaultSize(Types.VARCHAR,   254);
         info.addDefaultSize(Types.BINARY,    254);
         info.addDefaultSize(Types.VARBINARY, 254);
-        // VARCHAR needs a size specified. It's best to sepecify one in your model
-        info.addDefaultSize(Types.VARCHAR, 50);
         
         setSqlBuilder(new MySqlBuilder(info));
         setModelReader(new MySqlModelReader(info));
