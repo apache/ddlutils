@@ -51,86 +51,96 @@ public class MySqlModelReader extends JdbcModelReader
         setDefaultTablePattern(null);
     }
 
-    
-    
     /**
-     * @see org.apache.ddlutils.platform.JdbcModelReader#readTable(org.apache.ddlutils.platform.DatabaseMetaDataWrapper, java.util.Map)
+     * {@inheritDoc}
      * @todo This needs some more work, since table names can be case sensitive or lowercase
      *       depending on the platform (really cute).
      *       See http://dev.mysql.com/doc/refman/4.1/en/name-case-sensitivity.html for more info.
      */
-    protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException {
+    protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+    {
         Table table =  super.readTable(metaData, values);
-        List indexes = new ArrayList();
-        // this could be optimized, we need to check if an index can be named PRIMARY without
-        // being a primary key. Taking the safe path for now.
-        for (int i = 0; i < table.getIndexCount(); i++)
-        {
-            Index index = table.getIndex(i);
-            if ("PRIMARY".equals(index.getName()))
-            {
-                for (int c = 0; c < index.getColumnCount(); c++)
-                {
-                    String columnName = index.getColumn(c).getName();
-                    Column column  = table.findColumn(columnName);
-                    if (column.isPrimaryKey())
-                    {
-                        indexes.add(index);
-                    }
-                }
-            }
-            else
-            {
-                for (int f = 0; f < table.getForeignKeyCount(); f++)
-                {
-                    ForeignKey fk = table.getForeignKey(f);
-                    if (fk.getName().equals(index.getName()))
-                    {
-                        indexes.add(index);
-                    }
-                }
-            }
-        }
-        for (int i = 0; i < indexes.size(); i++)
-        {
-            table.removeIndex((Index) indexes.get(i));
-        }
+//        List indexes = new ArrayList();
+//        // this could be optimized, we need to check if an index can be named PRIMARY without
+//        // being a primary key. Taking the safe path for now.
+//        for (int i = 0; i < table.getIndexCount(); i++)
+//        {
+//            Index index = table.getIndex(i);
+//            if ("PRIMARY".equals(index.getName()))
+//            {
+//                for (int c = 0; c < index.getColumnCount(); c++)
+//                {
+//                    String columnName = index.getColumn(c).getName();
+//                    Column column  = table.findColumn(columnName);
+//                    if (column.isPrimaryKey())
+//                    {
+//                        indexes.add(index);
+//                    }
+//                }
+//            }
+//            else
+//            {
+//                for (int f = 0; f < table.getForeignKeyCount(); f++)
+//                {
+//                    ForeignKey fk = table.getForeignKey(f);
+//                    if (fk.getName().equals(index.getName()))
+//                    {
+//                        indexes.add(index);
+//                    }
+//                }
+//            }
+//        }
+//        for (int i = 0; i < indexes.size(); i++)
+//        {
+//            table.removeIndex((Index) indexes.get(i));
+//        }
         return table;
     }
 
-
-
     /**
-     * @see org.apache.ddlutils.platform.JdbcModelReader#readColumn(org.apache.ddlutils.platform.DatabaseMetaDataWrapper, java.util.Map)
+     * {@inheritDoc}
      */
     protected Column readColumn(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
         Column column = super.readColumn(metaData, values);
 
-        if ("".equals(column.getDescription()))
+        if (column.getTypeCode() == Types.BIT)
         {
-            column.setDescription(null);
+            // MySql
         }
-        if ("".equals(column.getParsedDefaultValue()))
-        {
-            column.setDefaultValue(null);
-        }
-        if ("auto_increment".equals(column.getDescription()))
-        {
-            column.setAutoIncrement(true);
-        }
-        switch (column.getTypeCode())
-        {
-            case Types.INTEGER:
-                if ("0".equals(column.getDefaultValue()))
-                {
-                    column.setDefaultValue(null);
-                }
-            case Types.DOUBLE:
-                column.setSize(null);
-                break;
-        }
+//        if ("".equals(column.getDescription()))
+//        {
+//            column.setDescription(null);
+//        }
+//        if ("".equals(column.getParsedDefaultValue()))
+//        {
+//            column.setDefaultValue(null);
+//        }
+//        if ("auto_increment".equals(column.getDescription()))
+//        {
+//            column.setAutoIncrement(true);
+//        }
+//        switch (column.getTypeCode())
+//        {
+//            case Types.INTEGER:
+//                if ("0".equals(column.getDefaultValue()))
+//                {
+//                    column.setDefaultValue(null);
+//                }
+//            case Types.DOUBLE:
+//                column.setSize(null);
+//                break;
+//        }
         return column;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    {
+        // MySql defines a unique index "PRIMARY" for primary keys
+        return "PRIMARY".equals(index.getName());
     }
 
 

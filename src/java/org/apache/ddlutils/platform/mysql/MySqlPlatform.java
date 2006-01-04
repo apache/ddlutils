@@ -46,38 +46,41 @@ public class MySqlPlatform extends PlatformImplBase
         PlatformInfo info = new PlatformInfo();
 
         info.setMaxIdentifierLength(64);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setRequiringNullAsDefaultValue(true);
+        info.setSupportingDefaultValuesForLongTypes(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
         // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
         info.setSupportingNonPKIdentityColumns(false);
+        // MySql returns synthetic default values for pk columns
+        info.setReturningDefaultValueForPrimaryKeys(true);
         info.setCommentPrefix("#");
         // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
         info.setDelimiterToken("`");
-        // the BINARY types are also handled by MySqlBuilder.getSqlType(Column)
-        info.addNativeTypeMapping(Types.ARRAY,         "LONGBLOB");
-        info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} BINARY");
+
+        info.addNativeTypeMapping(Types.ARRAY,         "LONGBLOB",          Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "TINYINT(1)");
-        info.addNativeTypeMapping(Types.BLOB,          "LONGBLOB");
-        info.addNativeTypeMapping(Types.CLOB,          "LONGTEXT");
-        info.addNativeTypeMapping(Types.DISTINCT,      "LONGBLOB");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE");
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "LONGBLOB");
+        info.addNativeTypeMapping(Types.BLOB,          "LONGBLOB",          Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.CLOB,          "LONGTEXT",          Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DISTINCT,      "LONGBLOB",          Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE",            Types.DOUBLE);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "LONGBLOB",          Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "MEDIUMBLOB");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "MEDIUMTEXT");
-        info.addNativeTypeMapping(Types.NULL,          "MEDIUMBLOB");
-        info.addNativeTypeMapping(Types.NUMERIC,       "DECIMAL");
-        info.addNativeTypeMapping(Types.OTHER,         "LONGBLOB");
+        info.addNativeTypeMapping(Types.NULL,          "MEDIUMBLOB",        Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.NUMERIC,       "DECIMAL",           Types.DECIMAL);
+        info.addNativeTypeMapping(Types.OTHER,         "LONGBLOB",          Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
-        info.addNativeTypeMapping(Types.REF,           "MEDIUMBLOB");
-        info.addNativeTypeMapping(Types.STRUCT,        "LONGBLOB");
+        info.addNativeTypeMapping(Types.REF,           "MEDIUMBLOB",        Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "LONGBLOB",          Types.LONGVARBINARY);
         // Since TIMESTAMP is not a stable datatype yet, and does not support a higher precision
         // that DATETIME (year to seconds) as of MySQL 5, we map the JDBC type here to DATETIME
         // TODO: Make this configurable
         info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} BINARY");
-        info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)");
+        // In MySql, TINYINT has only a range of -128 to 127
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",          Types.SMALLINT);
+        info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)", "BIT");
         info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
 
         info.addDefaultSize(Types.CHAR,      254);
