@@ -50,6 +50,8 @@ public class MySqlPlatform extends PlatformImplBase
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
+        // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
+        info.setSupportingNonPKIdentityColumns(false);
         info.setCommentPrefix("#");
         // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
         info.setDelimiterToken("`");
@@ -80,8 +82,11 @@ public class MySqlPlatform extends PlatformImplBase
 
         info.addDefaultSize(Types.BINARY,    254);
         info.addDefaultSize(Types.VARBINARY, 254);
+        // VARCHAR needs a size specified. It's best to sepecify one in your model
+        info.addDefaultSize(Types.VARCHAR, 50);
         
         setSqlBuilder(new MySqlBuilder(info));
+        setModelReader(new MySqlModelReader(info));
     }
 
     /**

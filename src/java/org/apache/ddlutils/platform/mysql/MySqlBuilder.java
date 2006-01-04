@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -110,5 +111,20 @@ public class MySqlBuilder extends SqlBuilder
         super.writeTableCreationStmtEnding(table, parameters);
     }
 
+    /**
+     * @see org.apache.ddlutils.platform.SqlBuilder#writeExternalForeignKeyDropStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey)
+     */
+    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
+    {
+        writeTableAlterStmt(table);
+        print("DROP FOREIGN KEY ");
+        String foreignKeyName = foreignKey.getName();
+        if (foreignKeyName == null)
+        {
+            foreignKeyName = getConstraintName(null, table, "FK", getForeignKeyName(table, foreignKey));
+        }
+        printIdentifier(foreignKeyName);
+        printEndOfStatement();
+    }    
 
 }
