@@ -112,18 +112,13 @@ public class MySqlBuilder extends SqlBuilder
     }
 
     /**
-     * @see org.apache.ddlutils.platform.SqlBuilder#writeExternalForeignKeyDropStmt(org.apache.ddlutils.model.Table, org.apache.ddlutils.model.ForeignKey)
+     * {@inheritDoc}
      */
     protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
     {
         writeTableAlterStmt(table);
         print("DROP FOREIGN KEY ");
-        String foreignKeyName = foreignKey.getName();
-        if (foreignKeyName == null)
-        {
-            foreignKeyName = getConstraintName(null, table, "FK", getForeignKeyName(table, foreignKey));
-        }
-        printIdentifier(foreignKeyName);
+        printIdentifier(getForeignKeyName(table, foreignKey));
         printEndOfStatement();
     }    
 
