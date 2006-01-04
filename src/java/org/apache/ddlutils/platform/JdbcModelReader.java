@@ -18,7 +18,9 @@ package org.apache.ddlutils.platform;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -909,5 +911,59 @@ public class JdbcModelReader
             values.put(descriptor.getName(), descriptor.readColumn(resultSet));
         }
         return values;
+    }
+
+    /**
+     * Helper method that determines the auto increment status for the given columns via the
+     * {@link ResultSetMetaData#isAutoIncrement(int)} method.
+     * 
+     * @param table          The table
+     * @param columnsToCheck The columns to check (e.g. the primary key columns)
+     */
+    protected void determineAutoIncrementFromResultSetMetaData(Table table, Column[] columnsToCheck) throws SQLException
+    {
+        StringBuffer query = new StringBuffer();
+    
+        query.append("SELECT ");
+        for (int idx = 0; idx < columnsToCheck.length; idx++)
+        {
+            if (idx > 0)
+            {
+                query.append(",");
+            }
+            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+            query.append(columnsToCheck[idx].getName());
+            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+        }
+        query.append(" FROM ");
+        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        query.append(table.getName());
+        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        query.append(" WHERE 1 = 0");
+        
+        Statement         stmt       = getConnection().createStatement();
+        ResultSet         rs         = stmt.executeQuery(query.toString());
+        ResultSetMetaData rsMetaData = rs.getMetaData();
+    
+        for (int idx = 0; idx < columnsToCheck.length; idx++)
+        {
+            if (rsMetaData.isAutoIncrement(idx + 1))
+            {
+                columnsToCheck[idx].setAutoIncrement(true);
+            }
+        }
+        stmt.close();
     }
 }

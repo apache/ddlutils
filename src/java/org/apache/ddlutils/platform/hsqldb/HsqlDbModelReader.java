@@ -16,14 +16,10 @@ package org.apache.ddlutils.platform.hsqldb;
  * limitations under the License.
  */
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -62,50 +58,7 @@ public class HsqlDbModelReader extends JdbcModelReader
         // into the database metadata
         // Since Hsqldb only allows IDENTITY for primary key columns, we restrict
         // our search to those columns
-        Column[]     pks   = table.getPrimaryKeyColumns();
-        StringBuffer query = new StringBuffer();
-
-        query.append("SELECT ");
-        for (int idx = 0; idx < pks.length; idx++)
-        {
-            if (idx > 0)
-            {
-                query.append(",");
-            }
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
-            {
-                query.append("\"");
-            }
-            query.append(pks[idx].getName());
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
-            {
-                query.append("\"");
-            }
-        }
-        query.append(" FROM ");
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
-        {
-            query.append("\"");
-        }
-        query.append(table.getName());
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
-        {
-            query.append("\"");
-        }
-        query.append(" WHERE 1 = 0");
-        
-        Statement         stmt       = getConnection().createStatement();
-        ResultSet         rs         = stmt.executeQuery(query.toString());
-        ResultSetMetaData rsMetaData = rs.getMetaData();
-
-        for (int idx = 0; idx < pks.length; idx++)
-        {
-            if (rsMetaData.isAutoIncrement(idx + 1))
-            {
-                pks[idx].setAutoIncrement(true);
-            }
-        }
-        stmt.close();
+        determineAutoIncrementFromResultSetMetaData(table, table.getPrimaryKeyColumns());
         
         return table;
     }
