@@ -38,6 +38,9 @@ public class PlatformInfo
     /** Whether the database requires the explicit stating of NULL as the default value. */
     private boolean _requiringNullAsDefaultValue = false;
 
+    /** Whether default values can be defined for LONGVARCHAR/LONGVARBINARY columns. */
+    private boolean _supportingDefaultValuesForLongTypes = true;
+
     /** Whether primary key constraints are embedded inside the create table statement. */
     private boolean _primaryKeyEmbedded = true;
     
@@ -112,6 +115,9 @@ public class PlatformInfo
         reading a model from a database. */
     private boolean _returningSystemIndices = true;
 
+    /** Whether the database returns a synthetic default value for primary key columns. */ 
+    private boolean _returningDefaultValueForPrimaryKeys = false;
+    
     /**
      * Creates a new platform info object.
      */
@@ -155,6 +161,26 @@ public class PlatformInfo
     public void setRequiringNullAsDefaultValue(boolean requiresNullAsDefaultValue)
     {
         _requiringNullAsDefaultValue = requiresNullAsDefaultValue;
+    }
+
+    /**
+     * Determines whether default values can be specified for LONGVARCHAR/LONGVARBINARY columns.
+     *
+     * @return <code>true</code> if default values are allowed
+     */
+    public boolean isSupportingDefaultValuesForLongTypes()
+    {
+        return _supportingDefaultValuesForLongTypes;
+    }
+
+    /**
+     * Specifies whether default values can be specified for LONGVARCHAR/LONGVARBINARY columns.
+     *
+     * @param isSupported <code>true</code> if default values are supported
+     */
+    public void setSupportingDefaultValuesForLongTypes(boolean isSupported)
+    {
+        _supportingDefaultValuesForLongTypes = isSupported;
     }
 
     /**
@@ -790,11 +816,35 @@ public class PlatformInfo
      * Specifies whether database-generated indices for primary and foreign keys are
      * returned when reading a model from a database.
      *
-     * @param returningSystemIndices <code>true</code> if system indices are read from a live database
+     * @param returningSystemIndices <code>true</code> if system indices are read from
+     *                               a live database
      */
     public void setReturningSystemIndices(boolean returningSystemIndices)
     {
         _returningSystemIndices = returningSystemIndices;
+    }
+
+    /**
+     * Determines whether the platform returns synthetic default values (e.g. 0 for numeric
+     * columns etc.) for primary key columns when reading a model from a database.
+     *
+     * @return <code>true</code> if synthetic default values are returned for pk columns
+     */
+    public boolean isReturningDefaultValueForPrimaryKeys()
+    {
+        return _returningDefaultValueForPrimaryKeys;
+    }
+
+    /**
+     * Specifies whether the platform returns synthetic default values (e.g. 0 for numeric
+     * columns etc.) for primary key columns when reading a model from a database.
+     *
+     * @param returningDefaultValue <code>true</code> if synthetic default values are returned for
+     *                              pk columns
+     */
+    public void setReturningDefaultValueForPrimaryKeys(boolean returningDefaultValue)
+    {
+        _returningDefaultValueForPrimaryKeys = returningDefaultValue;
     }
 
 }

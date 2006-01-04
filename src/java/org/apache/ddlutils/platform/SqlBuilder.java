@@ -1116,6 +1116,11 @@ public abstract class SqlBuilder
         if ((column.getDefaultValue() != null) ||
             (getPlatformInfo().isIdentitySpecUsesDefaultValue() && column.isAutoIncrement()))
         {
+            if (!getPlatformInfo().isSupportingDefaultValuesForLongTypes() && 
+                ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
+            {
+                throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
+            }
             print(" DEFAULT ");
             writeColumnDefaultValue(table, column);
         }
