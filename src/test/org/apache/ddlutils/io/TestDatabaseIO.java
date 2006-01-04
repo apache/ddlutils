@@ -79,7 +79,8 @@ public class TestDatabaseIO extends TestCase
             "            type='INTEGER'\n" +
             "            primaryKey='true'\n" +
             "            required='true'\n" +
-            "            description='The primary key'/>\n" +
+            "            description='The primary key'\n" +
+            "            javaName='javaId'/>\n" +
             "  </table>\n" +
             "</database>");
 
@@ -116,11 +117,11 @@ public class TestDatabaseIO extends TestCase
         assertNull(column.getDefaultValue());
         assertEquals("The primary key",
                      column.getDescription());
-
+        assertEquals("javaId", column.getJavaName());
         assertEquals(
             "  <database name=\"test\">\n" +
             "    <table name=\"SomeTable\" description=\"Some table\">\n" +
-            "      <column name=\"ID\" primaryKey=\"true\" required=\"true\" type=\"INTEGER\" autoIncrement=\"false\" description=\"The primary key\"/>\n" +
+            "      <column name=\"ID\" primaryKey=\"true\" required=\"true\" type=\"INTEGER\" autoIncrement=\"false\" description=\"The primary key\" javaName=\"javaId\"/>\n" +
             "    </table>\n" +
             "  </database>\n",
             writeModel(model));

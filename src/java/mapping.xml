@@ -31,6 +31,7 @@
       <attribute name="default"       property="defaultValue"/>
       <attribute name="autoIncrement" property="autoIncrement"/>
       <attribute name="description"   property="description"/>
+      <attribute name="javaName"      property="javaName"/>
     </element>
   </class>
 
