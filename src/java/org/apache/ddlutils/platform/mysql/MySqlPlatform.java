@@ -54,7 +54,7 @@ public class MySqlPlatform extends PlatformImplBase
         // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
         info.setSupportingNonPKIdentityColumns(false);
         // MySql returns synthetic default values for pk columns
-        info.setReturningDefaultValueForPrimaryKeys(true);
+        info.setReturningDefaultValueForRequired(true);
         info.setCommentPrefix("#");
         // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
         info.setDelimiterToken("`");

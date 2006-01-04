@@ -17,13 +17,9 @@ package org.apache.ddlutils.platform.mysql;
  */
 
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -60,78 +56,10 @@ public class MySqlModelReader extends JdbcModelReader
     protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
         Table table =  super.readTable(metaData, values);
-//        List indexes = new ArrayList();
-//        // this could be optimized, we need to check if an index can be named PRIMARY without
-//        // being a primary key. Taking the safe path for now.
-//        for (int i = 0; i < table.getIndexCount(); i++)
-//        {
-//            Index index = table.getIndex(i);
-//            if ("PRIMARY".equals(index.getName()))
-//            {
-//                for (int c = 0; c < index.getColumnCount(); c++)
-//                {
-//                    String columnName = index.getColumn(c).getName();
-//                    Column column  = table.findColumn(columnName);
-//                    if (column.isPrimaryKey())
-//                    {
-//                        indexes.add(index);
-//                    }
-//                }
-//            }
-//            else
-//            {
-//                for (int f = 0; f < table.getForeignKeyCount(); f++)
-//                {
-//                    ForeignKey fk = table.getForeignKey(f);
-//                    if (fk.getName().equals(index.getName()))
-//                    {
-//                        indexes.add(index);
-//                    }
-//                }
-//            }
-//        }
-//        for (int i = 0; i < indexes.size(); i++)
-//        {
-//            table.removeIndex((Index) indexes.get(i));
-//        }
+
+        determineAutoIncrementFromResultSetMetaData(table, table.getPrimaryKeyColumns());
+        
         return table;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected Column readColumn(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
-    {
-        Column column = super.readColumn(metaData, values);
-
-        if (column.getTypeCode() == Types.BIT)
-        {
-            // MySql
-        }
-//        if ("".equals(column.getDescription()))
-//        {
-//            column.setDescription(null);
-//        }
-//        if ("".equals(column.getParsedDefaultValue()))
-//        {
-//            column.setDefaultValue(null);
-//        }
-//        if ("auto_increment".equals(column.getDescription()))
-//        {
-//            column.setAutoIncrement(true);
-//        }
-//        switch (column.getTypeCode())
-//        {
-//            case Types.INTEGER:
-//                if ("0".equals(column.getDefaultValue()))
-//                {
-//                    column.setDefaultValue(null);
-//                }
-//            case Types.DOUBLE:
-//                column.setSize(null);
-//                break;
-//        }
-        return column;
     }
 
     /**
@@ -143,5 +71,12 @@ public class MySqlModelReader extends JdbcModelReader
         return "PRIMARY".equals(index.getName());
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
+    {
+        // MySql defines a non-unique index of the same name as the fk
+        return new MySqlBuilder(getPlatformInfo()).getForeignKeyName(table, fk).equals(index.getName());
+    }
 }
