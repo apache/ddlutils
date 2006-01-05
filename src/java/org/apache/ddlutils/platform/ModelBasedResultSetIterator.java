@@ -239,7 +239,7 @@ public class ModelBasedResultSetIterator implements Iterator
                 {
                     Map.Entry entry      = (Map.Entry)it.next();
                     String    columnName = (String)entry.getKey();
-                    String    propName   = (String)entry.getKey();
+                    String    propName   = (String)entry.getValue();
                     Object    value      = _platform.getObjectFromResultSet(_resultSet, columnName, table);
 
                     bean.set(propName, value);
