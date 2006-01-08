@@ -302,19 +302,21 @@ public class ModelBasedResultSetIterator implements Iterator
     {
         if (_cleanUpAfterFinish && (_resultSet != null))
         {
+            Connection conn = null;
             try
             {
-                Statement  stmt = _resultSet.getStatement();
-                Connection conn = stmt.getConnection();
+                Statement stmt = _resultSet.getStatement();
+
+                conn = stmt.getConnection();
 
                 // also closes the resultset
-                stmt.close();
-                conn.close();
+                _platform.closeStatement(stmt);
             }
             catch (SQLException ex)
             {
                 // we ignore it
             }
+            _platform.returnConnection(conn);
             _resultSet = null;
         }
     }

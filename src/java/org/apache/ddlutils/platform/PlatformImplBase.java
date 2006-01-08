@@ -1416,7 +1416,16 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */    
     public Database readModelFromDatabase(String name) throws DynaSqlException
     {
-        return readModelFromDatabase(borrowConnection(), name);
+        Connection connection = borrowConnection();
+
+        try
+        {
+            return readModelFromDatabase(connection, name);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
     }
 
     /**
