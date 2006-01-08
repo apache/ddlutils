@@ -72,6 +72,9 @@ public class PlatformInfo
     /** Whether identifiers are case sensitive or not. */
     private boolean _caseSensitive = false;
 
+    /** Whether delimited identifiers are supported or not. */
+    private boolean _supportingDelimitedIdentifiers = true;
+
     /** Whether delimited identifiers are used or not. */
     private boolean _useDelimitedIdentifiers = true;
 
@@ -396,6 +399,26 @@ public class PlatformInfo
     public void setCaseSensitive(boolean caseSensitive)
     {
         _caseSensitive = caseSensitive;
+    }
+
+    /**
+     * Determines whether delimited identifiers are supported.
+     *
+     * @return <code>true</code> if delimited identifiers are supported
+     */
+    public boolean isSupportingDelimitedIdentifiers()
+    {
+        return _supportingDelimitedIdentifiers;
+    }
+
+    /**
+     * Specifies whether delimited identifiers are supported.
+     *
+     * @param areSupported <code>true</code> if delimited identifiers are supported
+     */
+    public void setSupportingDelimitedIdentifiers(boolean areSupported)
+    {
+        _supportingDelimitedIdentifiers = areSupported;
     }
 
     /**

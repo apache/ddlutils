@@ -43,6 +43,7 @@ public class AxionPlatform extends PlatformImplBase
     {
         PlatformInfo info = new PlatformInfo();
 
+        info.setSupportingDelimitedIdentifiers(false);
         info.setUseDelimitedIdentifiers(false);
         info.setCommentsSupported(false);
         info.setRequiringNullAsDefaultValue(false);
