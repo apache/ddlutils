@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 /**
  * Performs roundtrip datatype tests.
  * 
@@ -425,6 +427,16 @@ public class TestDatatypes extends RoundtripTestBase
         "</database>";
 
     // TODO: special columns (java_object, array, distinct, ...)
+
+    /**
+     * Parameterized test case pattern.
+     * 
+     * @return The tests
+     */
+    public static Test suite() throws Exception
+    {
+        return getTests(TestDatatypes.class);
+    }
 
     /**
      * Performs a data type test.

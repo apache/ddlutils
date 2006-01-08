@@ -1,5 +1,7 @@
 package org.apache.ddlutils.io;
 
+import junit.framework.Test;
+
 /*
  * Copyright 1999-2006 The Apache Software Foundation.
  * 
@@ -175,6 +177,16 @@ public class TestConstraints extends RoundtripTestBase
         "  </table>\n"+
         "</database>";
 
+    /**
+     * Parameterized test case pattern.
+     * 
+     * @return The tests
+     */
+    public static Test suite() throws Exception
+    {
+        return getTests(TestConstraints.class);
+    }
+    
     /**
      * Tests a nullable column.
      * 

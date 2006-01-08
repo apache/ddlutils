@@ -17,10 +17,17 @@ package org.apache.ddlutils.io;
  */
 
 import java.io.StringWriter;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.Types;
 import java.util.List;
 
+import junit.framework.TestSuite;
+
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.PlatformFactory;
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.TestDatabaseWriterBase;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
@@ -28,6 +35,9 @@ import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
+import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DefaultValueHelper;
@@ -40,6 +50,84 @@ import org.apache.ddlutils.platform.DefaultValueHelper;
  */
 public abstract class RoundtripTestBase extends TestDatabaseWriterBase
 {
+    /**
+     * Creates the test suite for the given test class which must be a sub class of
+     * {@link RoundtripTestBase}. If the platform supports it, it will be tested
+     * with both delimited and undelimited identifiers.
+     * 
+     * @param testedClass The tested class
+     * @return The tests
+     */
+    protected static TestSuite getTests(Class testedClass)
+    {
+        if (!RoundtripTestBase.class.isAssignableFrom(testedClass) ||
+            Modifier.isAbstract(testedClass.getModifiers()))
+        {
+            throw new DdlUtilsException("Cannot create parameterized tests for class "+testedClass.getName());
+        }
+
+        TestSuite suite = new TestSuite();
+
+        try
+        {
+            Method[]          methods = testedClass.getMethods();
+            PlatformInfo      info    = null;
+            RoundtripTestBase newTest;
+    
+            for (int idx = 0; (methods != null) && (idx < methods.length); idx++)
+            {
+                if (methods[idx].getName().startsWith("test") &&
+                    ((methods[idx].getParameterTypes() == null) || (methods[idx].getParameterTypes().length == 0)))
+                {
+                    newTest = (RoundtripTestBase)testedClass.newInstance();
+                    newTest.setName(methods[idx].getName());
+                    newTest.setUseDelimitedIdentifiers(false);
+                    suite.addTest(newTest);
+
+                    if (info == null)
+                    {
+                        info = PlatformFactory.createNewPlatformInstance(newTest.getDatabaseName()).getPlatformInfo();
+                    }
+                    if (info.isSupportingDelimitedIdentifiers())
+                    {
+                        newTest = (RoundtripTestBase)testedClass.newInstance();
+                        newTest.setName(methods[idx].getName());
+                        newTest.setUseDelimitedIdentifiers(true);
+                        suite.addTest(newTest);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        
+        return suite;
+    }
+
+    /** Whether to use delimited identifiers for the test. */
+    private boolean _useDelimitedIdentifiers;
+    
+    /**
+     * Specifies whether the test shall use delimited identifirs
+     * 
+     * @param useDelimitedIdentifiers Whether to use delimited identifiers
+     */
+    protected void setUseDelimitedIdentifiers(boolean useDelimitedIdentifiers)
+    {
+        _useDelimitedIdentifiers = useDelimitedIdentifiers;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    protected void setUp() throws Exception
+    {
+        super.setUp();
+        getPlatformInfo().setUseDelimitedIdentifiers(_useDelimitedIdentifiers);
+    }
+
     /**
      * Inserts a row into the designated table.
      * 
@@ -203,17 +291,27 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     }
 
     /**
-     * Compares the two given database models, and if they are not equal, writes both of them
+     * Asserts that the two given database models are equal, and if not, writes both of them
      * in XML form to <code>stderr</code>.
      * 
      * @param expected The expected model
      * @param actual   The actual model
      */
-    protected void assertEquals(Database expected, Database actual) throws RuntimeException
+    protected void assertEquals(Database expected, Database actual)
     {
         try
         {
-            assertEquals((Object)expected, (Object)actual);
+            assertEquals("Model names do not match",
+                         expected.getName(),
+                         actual.getName());
+            assertEquals("Not the same number of tables",
+                         expected.getTableCount(),
+                         actual.getTableCount());
+            for (int tableIdx = 0; tableIdx < actual.getTableCount(); tableIdx++)
+            {
+                assertEquals(expected.getTable(tableIdx),
+                             actual.getTable(tableIdx));
+            }
         }
         catch (Throwable ex)
         {
@@ -235,8 +333,234 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
             }
             else
             {
-                throw new RuntimeException(ex);
+                throw new DdlUtilsException(ex);
             }
         }
+    }
+
+    /**
+     * Asserts that the two given database tables are equal.
+     * 
+     * @param expected The expected table
+     * @param actual   The actual table
+     */
+    protected void assertEquals(Table expected, Table actual)
+    {
+        if (_useDelimitedIdentifiers)
+        {
+            assertEquals("Table names do not match",
+                         expected.getName(),
+                         actual.getName());
+        }
+        else
+        {
+            assertEquals("Table names do not match (ignoring case)",
+                         expected.getName().toUpperCase(),
+                         actual.getName().toUpperCase());
+        }
+        assertEquals("Not the same number of columns in table "+actual.getName(),
+                     expected.getColumnCount(),
+                     actual.getColumnCount());
+        for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
+        {
+            assertEquals(expected.getColumn(columnIdx),
+                         actual.getColumn(columnIdx));
+        }
+        assertEquals("Not the same number of foreign keys in table "+actual.getName(),
+                     expected.getForeignKeyCount(),
+                     actual.getForeignKeyCount());
+        for (int fkIdx = 0; fkIdx < actual.getForeignKeyCount(); fkIdx++)
+        {
+            assertEquals(expected.getForeignKey(fkIdx),
+                         actual.getForeignKey(fkIdx));
+        }
+        assertEquals("Not the same number of indices in table "+actual.getName(),
+                     expected.getIndexCount(),
+                     actual.getIndexCount());
+        for (int indexIdx = 0; indexIdx < actual.getIndexCount(); indexIdx++)
+        {
+            assertEquals(expected.getIndex(indexIdx),
+                         actual.getIndex(indexIdx));
+        }
+    }
+
+    /**
+     * Asserts that the two given columns are equal.
+     * 
+     * @param expected The expected column
+     * @param actual   The actual column
+     */
+    protected void assertEquals(Column expected, Column actual)
+    {
+        if (_useDelimitedIdentifiers)
+        {
+            assertEquals("Column names do not match",
+                         expected.getName(),
+                         actual.getName());
+        }
+        else
+        {
+            assertEquals("Column names do not match (ignoring case)",
+                         expected.getName().toUpperCase(),
+                         actual.getName().toUpperCase());
+        }
+        assertEquals("Primary key status not the same for column "+actual.getName(),
+                     expected.isPrimaryKey(),
+                     actual.isPrimaryKey());
+        assertEquals("Required status not the same for column "+actual.getName(),
+                     expected.isRequired(),
+                     actual.isRequired());
+        assertEquals("Auto-increment status not the same for column "+actual.getName(),
+                     expected.isAutoIncrement(),
+                     actual.isAutoIncrement());
+        assertEquals("Type code not the same for column "+actual.getName(),
+                     expected.getTypeCode(),
+                     actual.getTypeCode());
+        assertEquals("Parsed default values do not match for column "+actual.getName(),
+                     expected.getParsedDefaultValue(),
+                     actual.getParsedDefaultValue());
+
+        // comparing the size makes only sense for types where it is relevant
+        if ((expected.getTypeCode() == Types.NUMERIC) ||
+            (expected.getTypeCode() == Types.DECIMAL))
+        {
+            assertEquals("Precision not the same for column "+actual.getName(),
+                         expected.getSize(),
+                         actual.getSize());
+            assertEquals("Scale not the same for column "+actual.getName(),
+                         expected.getScale(),
+                         actual.getScale());
+        }
+        else if ((expected.getTypeCode() == Types.CHAR) ||
+                 (expected.getTypeCode() == Types.VARCHAR) ||
+                 (expected.getTypeCode() == Types.BINARY) ||
+                 (expected.getTypeCode() == Types.VARBINARY))
+        {
+            assertEquals("Size not the same for column "+actual.getName(),
+                         expected.getSize(),
+                         actual.getSize());
+        }
+    }
+
+    /**
+     * Asserts that the two given foreign keys are equal.
+     * 
+     * @param expected The expected foreign key
+     * @param actual   The actual foreign key
+     */
+    protected void assertEquals(ForeignKey expected, ForeignKey actual)
+    {
+        if (_useDelimitedIdentifiers)
+        {
+            assertEquals("Foreign key names do not match",
+                         expected.getName(),
+                         actual.getName());
+            assertEquals("Referenced table names do not match",
+                         expected.getForeignTableName(),
+                         actual.getForeignTableName());
+        }
+        else
+        {
+            assertEquals("Foreign key names do not match (ignoring case)",
+                         expected.getName().toUpperCase(),
+                         actual.getName().toUpperCase());
+            assertEquals("Referenced table names do not match (ignoring case)",
+                         expected.getForeignTableName().toUpperCase(),
+                         actual.getForeignTableName().toUpperCase());
+        }
+        assertEquals("Not the same number of references in foreign key "+actual.getName(),
+                     expected.getReferenceCount(),
+                     actual.getReferenceCount());
+        for (int refIdx = 0; refIdx < actual.getReferenceCount(); refIdx++)
+        {
+            assertEquals(expected.getReference(refIdx),
+                         actual.getReference(refIdx));
+        }
+    }
+
+    /**
+     * Asserts that the two given references are equal.
+     * 
+     * @param expected The expected reference
+     * @param actual   The actual reference
+     */
+    protected void assertEquals(Reference expected, Reference actual)
+    {
+        if (_useDelimitedIdentifiers)
+        {
+            assertEquals("Local column names do not match",
+                         expected.getLocalColumnName(),
+                         actual.getLocalColumnName());
+            assertEquals("Foreign column names do not match",
+                         expected.getForeignColumnName(),
+                         actual.getForeignColumnName());
+        }
+        else
+        {
+            assertEquals("Local column names do not match (ignoring case)",
+                         expected.getLocalColumnName().toUpperCase(),
+                         actual.getLocalColumnName().toUpperCase());
+            assertEquals("Foreign column names do not match (ignoring case)",
+                         expected.getForeignColumnName().toUpperCase(),
+                         actual.getForeignColumnName().toUpperCase());
+        }
+    }
+
+    /**
+     * Asserts that the two given indices are equal.
+     * 
+     * @param expected The expected index
+     * @param actual   The actual index
+     */
+    protected void assertEquals(Index expected, Index actual)
+    {
+        if (_useDelimitedIdentifiers)
+        {
+            assertEquals("Index names do not match",
+                         expected.getName(),
+                         actual.getName());
+        }
+        else
+        {
+            assertEquals("Index names do not match (ignoring case)",
+                         expected.getName().toUpperCase(),
+                         actual.getName().toUpperCase());
+        }
+        assertEquals("Unique status not the same for index "+actual.getName(),
+                     expected.isUnique(),
+                     actual.isUnique());
+        assertEquals("Not the same number of columns in index "+actual.getName(),
+                     expected.getColumnCount(),
+                     actual.getColumnCount());
+        for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
+        {
+            assertEquals(expected.getColumn(columnIdx),
+                         actual.getColumn(columnIdx));
+        }
+    }
+
+    /**
+     * Asserts that the two given index columns are equal.
+     * 
+     * @param expected The expected index column
+     * @param actual   The actual index column
+     */
+    protected void assertEquals(IndexColumn expected, IndexColumn actual)
+    {
+        if (_useDelimitedIdentifiers)
+        {
+            assertEquals("Index column names do not match",
+                         expected.getName(),
+                         actual.getName());
+        }
+        else
+        {
+            assertEquals("Index column names do not match (ignoring case)",
+                         expected.getName().toUpperCase(),
+                         actual.getName().toUpperCase());
+        }
+        assertEquals("Size not the same for index column "+actual.getName(),
+                     expected.getSize(),
+                     actual.getSize());
     }
 }
