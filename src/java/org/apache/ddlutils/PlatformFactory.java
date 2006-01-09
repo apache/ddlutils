@@ -30,6 +30,7 @@ import org.apache.ddlutils.platform.maxdb.MaxDbPlatform;
 import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
 import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
+import org.apache.ddlutils.platform.mysql.MySql50Platform;
 import org.apache.ddlutils.platform.oracle.Oracle8Platform;
 import org.apache.ddlutils.platform.oracle.Oracle9Platform;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
@@ -188,6 +189,7 @@ public class PlatformFactory
         addPlatform(_platforms, MckoiPlatform.DATABASENAME,      MckoiPlatform.class);
         addPlatform(_platforms, MSSqlPlatform.DATABASENAME,      MSSqlPlatform.class);
         addPlatform(_platforms, MySqlPlatform.DATABASENAME,      MySqlPlatform.class);
+        addPlatform(_platforms, MySql50Platform.DATABASENAME,    MySql50Platform.class);
         addPlatform(_platforms, Oracle8Platform.DATABASENAME,    Oracle8Platform.class);
         addPlatform(_platforms, Oracle9Platform.DATABASENAME,    Oracle9Platform.class);
         addPlatform(_platforms, PostgreSqlPlatform.DATABASENAME, PostgreSqlPlatform.class);

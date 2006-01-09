@@ -1,0 +1,17 @@
+# JDBC properties for Mysql
+# Note: Properties starting with "datasource." will be fed into the datasource instance of the
+# class configured via the datasource.class property
+
+# Use this property if ddlutils does not recognize the platform from the settings
+ddlutils.platform=MySQL50
+
+#
+# Using the plain DBCP datasource
+#
+
+datasource.class=org.apache.commons.dbcp.BasicDataSource
+datasource.driverClassName=com.mysql.jdbc.Driver
+datasource.url=jdbc:mysql://10.21.21.33:3307/ddlutils
+datasource.username=root
+datasource.password=ddlutils
+datasource.maxConnections=200
