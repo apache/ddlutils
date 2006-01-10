@@ -36,7 +36,6 @@ public class TestMySql50Platform extends TestPlatformBase
     {
         return MySql50Platform.DATABASENAME;
     }
-
     /**
      * Tests the column types.
      */
@@ -48,12 +47,12 @@ public class TestMySql50Platform extends TestPlatformBase
             "(\n"+
             "    `COL_ARRAY`           LONGBLOB,\n"+
             "    `COL_BIGINT`          BIGINT,\n"+
-            "    `COL_BINARY`          CHAR(254) BINARY,\n"+
+            "    `COL_BINARY`          BINARY(254) NULL,\n"+
             "    `COL_BIT`             TINYINT(1),\n"+
-            "    `COL_BLOB`            LONGBLOB,\n"+
+            "    `COL_BLOB`            LONGBLOB NULL,\n"+
             "    `COL_BOOLEAN`         TINYINT(1),\n"+
-            "    `COL_CHAR`            CHAR(15),\n"+
-            "    `COL_CLOB`            LONGTEXT,\n"+
+            "    `COL_CHAR`            CHAR(15) NULL,\n"+
+            "    `COL_CLOB`            LONGTEXT NULL,\n"+
             "    `COL_DATALINK`        MEDIUMBLOB,\n"+
             "    `COL_DATE`            DATE,\n"+
             "    `COL_DECIMAL`         DECIMAL(15,3),\n"+
@@ -63,8 +62,8 @@ public class TestMySql50Platform extends TestPlatformBase
             "    `COL_FLOAT`           DOUBLE,\n"+
             "    `COL_INTEGER`         INTEGER,\n"+
             "    `COL_JAVA_OBJECT`     LONGBLOB,\n"+
-            "    `COL_LONGVARBINARY`   MEDIUMBLOB,\n"+
-            "    `COL_LONGVARCHAR`     MEDIUMTEXT,\n"+
+            "    `COL_LONGVARBINARY`   MEDIUMBLOB NULL,\n"+
+            "    `COL_LONGVARCHAR`     MEDIUMTEXT NULL,\n"+
             "    `COL_NULL`            MEDIUMBLOB,\n"+
             "    `COL_NUMERIC`         DECIMAL(15,0),\n"+
             "    `COL_OTHER`           LONGBLOB,\n"+
@@ -74,9 +73,9 @@ public class TestMySql50Platform extends TestPlatformBase
             "    `COL_STRUCT`          LONGBLOB,\n"+
             "    `COL_TIME`            TIME,\n"+
             "    `COL_TIMESTAMP`       DATETIME,\n"+
-            "    `COL_TINYINT`         TINYINT,\n"+
-            "    `COL_VARBINARY`       VARCHAR(15) BINARY,\n"+
-            "    `COL_VARCHAR`         VARCHAR(15)\n"+
+            "    `COL_TINYINT`         SMALLINT,\n"+
+            "    `COL_VARBINARY`       VARBINARY(15) NULL,\n"+
+            "    `COL_VARCHAR`         VARCHAR(15) NULL\n"+
             ");\n",
             createTestDatabase(COLUMN_TEST_SCHEMA));
     }
@@ -86,19 +85,26 @@ public class TestMySql50Platform extends TestPlatformBase
      */
     public void testColumnConstraints() throws Exception
     {
+        Database           testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        testDb.findTable("constraints").findColumn("COL_AUTO_INCR").setAutoIncrement(false);
+        testDb.findTable("constraints").findColumn("COL_PK_AUTO_INCR").setAutoIncrement(false);
+
+        getPlatformInfo().setCommentsSupported(false);
+        getPlatform().getSqlBuilder().createTables(testDb, true);
+
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE IF EXISTS `constraints`;\n" +
             "CREATE TABLE `constraints`\n"+
             "(\n"+
-            "    `COL_PK`               VARCHAR(32),\n"+
-            "    `COL_PK_AUTO_INCR`     INTEGER AUTO_INCREMENT,\n"+
-            "    `COL_NOT_NULL`         CHAR(100) BINARY NOT NULL,\n"+
+            "    `COL_PK`               VARCHAR(32) NULL,\n"+
+            "    `COL_PK_AUTO_INCR`     INTEGER,\n"+
+            "    `COL_NOT_NULL`         BINARY(100) NOT NULL,\n"+
             "    `COL_NOT_NULL_DEFAULT` DOUBLE DEFAULT -2.0 NOT NULL,\n"+
-            "    `COL_DEFAULT`          CHAR(4) DEFAULT 'test',\n"+
-            "    `COL_AUTO_INCR`        BIGINT AUTO_INCREMENT,\n"+
+            "    `COL_DEFAULT`          CHAR(4) DEFAULT 'test' NULL,\n"+
+            "    `COL_AUTO_INCR`        BIGINT,\n"+
             "    PRIMARY KEY (`COL_PK`, `COL_PK_AUTO_INCR`)\n"+
             ");\n",
-            createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
+            getBuilderOutput());
     }
 
     /**
@@ -107,8 +113,8 @@ public class TestMySql50Platform extends TestPlatformBase
     public void testTableConstraints() throws Exception
     {
         assertEqualsIgnoringWhitespaces(
-            "ALTER TABLE `table3` DROP CONSTRAINT `testfk`;\n"+
-            "ALTER TABLE `table2` DROP CONSTRAINT `table2_FK_COL_FK_1_COL_FK_2_table1`;\n"+
+            "ALTER TABLE `table3` DROP FOREIGN KEY `testfk`;\n"+
+            "ALTER TABLE `table2` DROP FOREIGN KEY `table2_FK_COL_FK_1_COL_FK_2_table1`;\n"+
             "DROP TABLE IF EXISTS `table3`;\n"+
             "DROP TABLE IF EXISTS `table2`;\n"+
             "DROP TABLE IF EXISTS `table1`;\n"+
@@ -116,9 +122,9 @@ public class TestMySql50Platform extends TestPlatformBase
             "(\n"+
             "    `COL_PK_1`    VARCHAR(32) NOT NULL,\n"+
             "    `COL_PK_2`    INTEGER,\n"+
-            "    `COL_INDEX_1` CHAR(100) BINARY NOT NULL,\n"+
+            "    `COL_INDEX_1` BINARY(100) NOT NULL,\n"+
             "    `COL_INDEX_2` DOUBLE NOT NULL,\n"+
-            "    `COL_INDEX_3` CHAR(4),\n"+
+            "    `COL_INDEX_3` CHAR(4) NULL,\n"+
             "    PRIMARY KEY (`COL_PK_1`, `COL_PK_2`)\n"+
             ");\n"+
             "CREATE INDEX `testindex1` ON `table1` (`COL_INDEX_2`);\n"+
@@ -132,7 +138,7 @@ public class TestMySql50Platform extends TestPlatformBase
             ");\n"+
             "CREATE TABLE `table3`\n"+
             "(\n"+
-            "    `COL_PK` VARCHAR(16),\n"+
+            "    `COL_PK` VARCHAR(16) NULL,\n"+
             "    `COL_FK` INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (`COL_PK`)\n"+
             ");\n"+
@@ -147,6 +153,8 @@ public class TestMySql50Platform extends TestPlatformBase
     public void testCreationParameters1() throws Exception
     {
         Database           testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        testDb.findTable("constraints").findColumn("COL_AUTO_INCR").setAutoIncrement(false);
+        testDb.findTable("constraints").findColumn("COL_PK_AUTO_INCR").setAutoIncrement(false);
         CreationParameters params = new CreationParameters();
 
         params.addParameter(testDb.getTable(0),
@@ -163,12 +171,12 @@ public class TestMySql50Platform extends TestPlatformBase
             "DROP TABLE IF EXISTS `constraints`;\n" +
             "CREATE TABLE `constraints`\n"+
             "(\n"+
-            "    `COL_PK`               VARCHAR(32),\n"+
-            "    `COL_PK_AUTO_INCR`     INTEGER AUTO_INCREMENT,\n"+
-            "    `COL_NOT_NULL`         CHAR(100) BINARY NOT NULL,\n"+
+            "    `COL_PK`               VARCHAR(32) NULL,\n"+
+            "    `COL_PK_AUTO_INCR`     INTEGER,\n"+
+            "    `COL_NOT_NULL`         BINARY(100) NOT NULL,\n"+
             "    `COL_NOT_NULL_DEFAULT` DOUBLE DEFAULT -2.0 NOT NULL,\n"+
-            "    `COL_DEFAULT`          CHAR(4) DEFAULT 'test',\n"+
-            "    `COL_AUTO_INCR`        BIGINT AUTO_INCREMENT,\n"+
+            "    `COL_DEFAULT`          CHAR(4) DEFAULT 'test' NULL,\n"+
+            "    `COL_AUTO_INCR`        BIGINT,\n"+
             "    PRIMARY KEY (`COL_PK`, `COL_PK_AUTO_INCR`)\n"+
             ") ENGINE=INNODB ROW_FORMAT=COMPRESSED;\n",
             getBuilderOutput());
