@@ -282,7 +282,9 @@ public abstract class SqlBuilder
             Table table = database.getTable(idx);
 
             writeTableComment(table);
-            createTable(database, table, (params == null ? null : params.getParametersFor(table)));
+            createTable(database,
+                        table,
+                        params == null ? null : params.getParametersFor(table));
         }
 
         // we're writing the external foreignkeys last to ensure that all referenced tables are already defined
@@ -344,7 +346,9 @@ public abstract class SqlBuilder
                 {
                     _log.info("Creating table " + desiredTable.getName());
                 }
-                createTable(desiredModel, desiredTable, params.getParametersFor(desiredTable));
+                createTable(desiredModel,
+                            desiredTable,
+                            params == null ? null : params.getParametersFor(desiredTable));
                 // we're deferring foreignkey generation
                 newTables.add(desiredTable);
             }
