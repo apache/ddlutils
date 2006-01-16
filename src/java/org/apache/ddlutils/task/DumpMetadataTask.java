@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
@@ -430,9 +431,20 @@ public class DumpMetadataTask extends Task
      */
     private void dumpTables(Element parent, DatabaseMetaData metaData, String[] tableTypes) throws SQLException
     {
-        ResultSet result     = metaData.getTables(_catalogPattern, _schemaPattern, _tablePattern, tableTypes);
-        Element   tablesElem = parent.addElement("tables");
-        Set       columns    = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getTables(_catalogPattern, _schemaPattern, _tablePattern, tableTypes);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the tables: "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Element tablesElem = parent.addElement("tables");
+        Set     columns    = getColumnsInResultSet(result);
 
         while (result.next())
         {
@@ -475,8 +487,19 @@ public class DumpMetadataTask extends Task
      */
     private void dumpColumns(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
     {
-        ResultSet result  = metaData.getColumns(catalogName, schemaName, tableName, _columnPattern);
-        Set       columns = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getColumns(catalogName, schemaName, tableName, _columnPattern);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the columns for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Set columns = getColumnsInResultSet(result);
 
         while (result.next())
         {
@@ -549,8 +572,19 @@ public class DumpMetadataTask extends Task
      */
     private void dumpPKs(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
     {
-        ResultSet result  = metaData.getPrimaryKeys(catalogName, schemaName, tableName);
-        Set       columns = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getPrimaryKeys(catalogName, schemaName, tableName);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the primary key columns for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Set columns = getColumnsInResultSet(result);
 
         while (result.next())
         {
@@ -580,8 +614,19 @@ public class DumpMetadataTask extends Task
      */
     private void dumpVersionColumns(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
     {
-        ResultSet result  = metaData.getVersionColumns(catalogName, schemaName, tableName);
-        Set       columns = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getVersionColumns(catalogName, schemaName, tableName);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the versioned columns for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Set columns = getColumnsInResultSet(result);
 
         while (result.next())
         {
@@ -629,8 +674,19 @@ public class DumpMetadataTask extends Task
      */
     private void dumpFKs(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
     {
-        ResultSet result  = metaData.getImportedKeys(catalogName, schemaName, tableName);
-        Set       columns = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getImportedKeys(catalogName, schemaName, tableName);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the foreign keys for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Set columns = getColumnsInResultSet(result);
 
         while (result.next())
         {
@@ -719,8 +775,19 @@ public class DumpMetadataTask extends Task
      */
     private void dumpIndices(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
     {
-        ResultSet result  = metaData.getIndexInfo(catalogName, schemaName, tableName, false, false);
-        Set       columns = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getIndexInfo(catalogName, schemaName, tableName, false, false);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the indices for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Set columns = getColumnsInResultSet(result);
 
         while (result.next())
         {
@@ -783,9 +850,20 @@ public class DumpMetadataTask extends Task
      */
     private void dumpProcedures(Element parent, DatabaseMetaData metaData) throws SQLException
     {
-        ResultSet result         = metaData.getProcedures(_catalogPattern, _schemaPattern, _procedurePattern);
-        Element   proceduresElem = parent.addElement("procedures");
-        Set       columns        = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getProcedures(_catalogPattern, _schemaPattern, _procedurePattern);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the procedures: "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Element proceduresElem = parent.addElement("procedures");
+        Set     columns        = getColumnsInResultSet(result);
 
         while (result.next())
         {
@@ -836,8 +914,19 @@ public class DumpMetadataTask extends Task
      */
     private void dumpProcedure(Element procedureElem, DatabaseMetaData metaData, String catalogName, String schemaName, String procedureName) throws SQLException
     {
-        ResultSet result  = metaData.getProcedureColumns(catalogName, schemaName, procedureName, _columnPattern);
-        Set       columns = getColumnsInResultSet(result);
+        ResultSet result = null;
+
+        try
+        {
+            result = metaData.getProcedureColumns(catalogName, schemaName, procedureName, _columnPattern);
+        }
+        catch (SQLException ex)
+        {
+            log("Could not determine the columns for procedure '"+procedureName+"': "+ex.getMessage(), Project.MSG_ERR);
+            return;
+        }
+
+        Set columns = getColumnsInResultSet(result);
 
         while (result.next())
         {
