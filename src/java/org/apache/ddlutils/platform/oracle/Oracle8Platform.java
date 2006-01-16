@@ -87,6 +87,7 @@ public class Oracle8Platform extends PlatformImplBase
         info.addDefaultSize(Types.VARCHAR, 254);
 
         setSqlBuilder(new OracleBuilder(info));
+        setModelReader(new OracleModelReader(info));
     }
 
     /**
