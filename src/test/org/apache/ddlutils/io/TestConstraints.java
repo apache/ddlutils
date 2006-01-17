@@ -35,7 +35,7 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='INTEGER' required='false'/>\n"+
+        "    <column name='avalue' type='INTEGER' required='false'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a not-nullable column. */
@@ -44,7 +44,7 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='VARCHAR' required='true'/>\n"+
+        "    <column name='avalue' type='VARCHAR' required='true'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a auto-increment INTEGER column. */
@@ -53,7 +53,7 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='INTEGER' required='true' autoIncrement='true'/>\n"+
+        "    <column name='avalue' type='INTEGER' required='true' autoIncrement='true'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a auto-increment DOUBLE column. */
@@ -62,7 +62,7 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DOUBLE' required='true' autoIncrement='true'/>\n"+
+        "    <column name='avalue' type='DOUBLE' required='true' autoIncrement='true'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a auto-increment primary key column. */
@@ -79,9 +79,9 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DOUBLE'/>\n"+
+        "    <column name='avalue' type='DOUBLE'/>\n"+
         "    <index name='TEST_INDEX'>\n"+
-        "      <index-column name='value'/>\n"+
+        "      <index-column name='avalue'/>\n"+
         "    </index>\n"+
         "  </table>\n"+
         "</database>";
@@ -106,9 +106,9 @@ public class TestConstraints extends RoundtripTestBase
         "  <table name='roundtrip'>\n"+
         "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
         "    <column name='pk_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DOUBLE'/>\n"+
+        "    <column name='avalue' type='DOUBLE'/>\n"+
         "    <index name='test_index'>\n"+
-        "      <index-column name='value'/>\n"+
+        "      <index-column name='avalue'/>\n"+
         "      <index-column name='pk_1'/>\n"+
         "    </index>\n"+
         "  </table>\n"+
@@ -122,9 +122,9 @@ public class TestConstraints extends RoundtripTestBase
         "  </table>\n"+
         "  <table name='roundtrip_2'>\n"+
         "    <column name='pk' type='VARCHAR' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='INTEGER' required='true'/>\n"+
+        "    <column name='avalue' type='INTEGER' required='true'/>\n"+
         "    <foreign-key foreignTable='roundtrip_1'>\n"+
-        "      <reference local='value' foreign='pk'/>\n"+
+        "      <reference local='avalue' foreign='pk'/>\n"+
         "    </foreign-key>\n"+
         "  </table>\n"+
         "</database>";

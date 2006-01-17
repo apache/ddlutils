@@ -44,7 +44,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BIT'/>\n"+
+        "    <column name='avalue' type='BIT'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a BIT column with a default value. */
@@ -53,7 +53,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BIT' required='true' default='FALSE'/>\n"+
+        "    <column name='avalue' type='BIT' required='true' default='FALSE'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple BOOLEAN column. */
@@ -62,7 +62,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BOOLEAN'/>\n"+
+        "    <column name='avalue' type='BOOLEAN'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a BOOLEAN column with a default value. */
@@ -71,7 +71,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BOOLEAN' required='true' default='true'/>\n"+
+        "    <column name='avalue' type='BOOLEAN' required='true' default='true'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple TINYINT column. */
@@ -80,7 +80,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='TINYINT'/>\n"+
+        "    <column name='avalue' type='TINYINT'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a TINYINT column with a default value. */
@@ -89,7 +89,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='TINYINT' required='true' default='-200'/>\n"+
+        "    <column name='avalue' type='TINYINT' required='true' default='-200'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple SMALLINT column. */
@@ -98,7 +98,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='SMALLINT'/>\n"+
+        "    <column name='avalue' type='SMALLINT'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a SMALLINT column with a default value. */
@@ -107,7 +107,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='SMALLINT' required='true' default='-30000'/>\n"+
+        "    <column name='avalue' type='SMALLINT' required='true' default='-30000'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple INTEGER column. */
@@ -116,7 +116,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='INTEGER'/>\n"+
+        "    <column name='avalue' type='INTEGER'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a INTEGER column with a default value. */
@@ -125,7 +125,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='INTEGER' required='true' default='2147483647'/>\n"+
+        "    <column name='avalue' type='INTEGER' required='true' default='2147483647'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple BIGINT column. */
@@ -134,7 +134,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BIGINT'/>\n"+
+        "    <column name='avalue' type='BIGINT'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a BIGINT column with a default value. */
@@ -143,7 +143,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BIGINT' required='true' default='-9000000000000000000'/>\n"+
+        "    <column name='avalue' type='BIGINT' required='true' default='-9000000000000000000'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple REAL column. */
@@ -152,7 +152,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='REAL'/>\n"+
+        "    <column name='avalue' type='REAL'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a REAL column with a default value. */
@@ -161,7 +161,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='REAL' required='true' default='-1.01234'/>\n"+
+        "    <column name='avalue' type='REAL' required='true' default='-1.01234'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple FLOAT column. */
@@ -170,7 +170,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='FLOAT'/>\n"+
+        "    <column name='avalue' type='FLOAT'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a FLOAT column with a default value. */
@@ -179,7 +179,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='FLOAT' required='true' default='12345678.9012345'/>\n"+
+        "    <column name='avalue' type='FLOAT' required='true' default='12345678.9012345'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple DOUBLE column. */
@@ -188,7 +188,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DOUBLE'/>\n"+
+        "    <column name='avalue' type='DOUBLE'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a DOUBLE column with a default value. */
@@ -197,7 +197,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DOUBLE' required='true' default='-987654321.098765'/>\n"+
+        "    <column name='avalue' type='DOUBLE' required='true' default='-987654321.098765'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple DECIMAL column. */
@@ -206,7 +206,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DECIMAL' size='15'/>\n"+
+        "    <column name='avalue' type='DECIMAL' size='15'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a DECIMAL column with a default value. */
@@ -215,7 +215,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DECIMAL' size='15' required='true' default='123456789012345'/>\n"+
+        "    <column name='avalue' type='DECIMAL' size='15' required='true' default='123456789012345'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple DECIMAL column with a scale. */
@@ -224,7 +224,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DECIMAL' size='15,7'/>\n"+
+        "    <column name='avalue' type='DECIMAL' size='15,7'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a DECIMAL column with a scale and default value. */
@@ -233,7 +233,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DECIMAL' size='15,7' required='true' default='12345678.7654321'/>\n"+
+        "    <column name='avalue' type='DECIMAL' size='15,7' required='true' default='12345678.7654321'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple NUMERIC column. */
@@ -242,7 +242,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='NUMERIC' size='15'/>\n"+
+        "    <column name='avalue' type='NUMERIC' size='15'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a NUMERIC column with a default value. */
@@ -251,7 +251,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='NUMERIC' size='15' required='true' default='-123456789012345'/>\n"+
+        "    <column name='avalue' type='NUMERIC' size='15' required='true' default='-123456789012345'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple NUMERIC column with a scale. */
@@ -260,7 +260,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='NUMERIC' size='15,8'/>\n"+
+        "    <column name='avalue' type='NUMERIC' size='15,8'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a NUMERIC column with a scale and default value. */
@@ -269,7 +269,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='NUMERIC' size='15,8' required='true' default='-1234567.87654321'/>\n"+
+        "    <column name='avalue' type='NUMERIC' size='15,8' required='true' default='-1234567.87654321'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple CHAR column. */
@@ -278,7 +278,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='CHAR' size='10'/>\n"+
+        "    <column name='avalue' type='CHAR' size='10'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a CHAR column with a default value. */
@@ -287,7 +287,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='CHAR' size='15' required='true' default='543210987654321'/>\n"+
+        "    <column name='avalue' type='CHAR' size='15' required='true' default='543210987654321'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple VARCHAR column. */
@@ -296,7 +296,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='VARCHAR' size='20'/>\n"+
+        "    <column name='avalue' type='VARCHAR' size='20'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a VARCHAR column with a default value. */
@@ -305,7 +305,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='VARCHAR' required='true' default='some value'/>\n"+
+        "    <column name='avalue' type='VARCHAR' size='256' required='true' default='some value'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple LONGVARCHAR column. */
@@ -314,7 +314,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='LONGVARCHAR'/>\n"+
+        "    <column name='avalue' type='LONGVARCHAR'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a LONGVARCHAR column with a default value. */
@@ -323,7 +323,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='LONGVARCHAR' required='true' default='some value'/>\n"+
+        "    <column name='avalue' type='LONGVARCHAR' required='true' default='some value'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple DATE column. */
@@ -332,7 +332,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DATE'/>\n"+
+        "    <column name='avalue' type='DATE'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a DATE column with a default value. */
@@ -341,7 +341,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='DATE' required='true' default='2000-01-01'/>\n"+
+        "    <column name='avalue' type='DATE' required='true' default='2000-01-01'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple TIME column. */
@@ -350,7 +350,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='TIME'/>\n"+
+        "    <column name='avalue' type='TIME'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a TIME column with a default value. */
@@ -359,7 +359,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='TIME' required='true' default='11:27:03'/>\n"+
+        "    <column name='avalue' type='TIME' required='true' default='11:27:03'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple TIMESTAMP column. */
@@ -368,7 +368,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='TIMESTAMP'/>\n"+
+        "    <column name='avalue' type='TIMESTAMP'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a TIMESTAMP column with a default value. */
@@ -377,7 +377,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='TIMESTAMP' required='true' default='1985-06-17 16:17:18.0'/>\n"+
+        "    <column name='avalue' type='TIMESTAMP' required='true' default='1985-06-17 16:17:18.0'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple BINARY column. */
@@ -386,7 +386,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BINARY'/>\n"+
+        "    <column name='avalue' type='BINARY'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple VARBINARY column. */
@@ -395,7 +395,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='VARBINARY'/>\n"+
+        "    <column name='avalue' type='VARBINARY'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple LONGVARBINARY column. */
@@ -404,7 +404,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='LONGVARBINARY'/>\n"+
+        "    <column name='avalue' type='LONGVARBINARY'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple BLOB column. */
@@ -413,7 +413,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='BLOB'/>\n"+
+        "    <column name='avalue' type='BLOB'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple CLOB column. */
@@ -422,7 +422,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value' type='CLOB'/>\n"+
+        "    <column name='avalue' type='CLOB'/>\n"+
         "  </table>\n"+
         "</database>";
 
@@ -486,8 +486,8 @@ public class TestDatatypes extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        assertEquals(expected1, beans.get(0), "value");
-        assertEquals(expected2, beans.get(1), "value");
+        assertEquals(expected1, beans.get(0), "avalue");
+        assertEquals(expected2, beans.get(1), "avalue");
 
         assertEquals(getAdjustedModel(),
                      getPlatform().readModelFromDatabase("roundtriptest"));
