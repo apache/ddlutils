@@ -69,6 +69,10 @@ public class DumpMetadataTask extends Task
     private String _columnPattern = "%";
     /** The tables types to read; <code>null</code> or an empty list means that we shall read every type. */
     private String[] _tableTypes = null;
+    /** Whether to read tables. */
+    private boolean _dumpTables = true;
+    /** Whether to read procedures. */
+    private boolean _dumpProcedures = true;
 
     /**
      * Adds the data source to use for accessing the database.
@@ -167,6 +171,26 @@ public class DumpMetadataTask extends Task
     }
 
     /**
+     * Specifies whether procedures shall be read from the database.
+     *
+     * @param readProcedures <code>true</code> if procedures shall be read
+     */
+    public void setDumpProcedures(boolean readProcedures)
+    {
+        _dumpProcedures = readProcedures;
+    }
+
+    /**
+     * Specifies whether tables shall be read from the database.
+     *
+     * @param readTables <code>true</code> if tables shall be read
+     */
+    public void setDumpTables(boolean readTables)
+    {
+        _dumpTables = readTables;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void execute() throws BuildException
@@ -246,7 +270,14 @@ public class DumpMetadataTask extends Task
             }
         }
         dumpCatalogsAndSchemas(element, metaData);
-        dumpProcedures(element, metaData);
+        if (_dumpTables)
+        {
+            dumpTables(element, metaData);
+        }
+        if (_dumpProcedures)
+        {
+            dumpProcedures(element, metaData);
+        }
     }
 
     /**
@@ -400,33 +431,6 @@ public class DumpMetadataTask extends Task
      */
     private void dumpCatalogsAndSchemas(Element parent, DatabaseMetaData metaData) throws SQLException
     {
-        String[] tableTypes = _tableTypes;
-
-        if ((tableTypes == null) || (tableTypes.length == 0))
-        {
-            // First we need the list of supported table types
-            ArrayList tableTypeList = new ArrayList();
-
-            ResultSet result  = metaData.getTableTypes();
-
-            try
-            {
-                while (result.next())
-                {
-                    tableTypeList.add(getString(result, "TABLE_TYPE"));
-                }
-            }
-            finally
-            {
-                if (result != null)
-                {
-                    result.close();
-                }
-            }
-    
-            tableTypes = (String[])tableTypeList.toArray(new String[tableTypeList.size()]);
-        }
-
         // Next we determine and dump the catalogs
         Element   catalogsElem = parent.addElement("catalogs");
         ResultSet result       = metaData.getCatalogs();
@@ -479,20 +483,43 @@ public class DumpMetadataTask extends Task
                 result.close();
             }
         }
-
-        dumpTables(parent, metaData, tableTypes);
     }
 
     /**
      * Dumps all tables.
      * 
-     * @param parent     The parent element
-     * @param metaData   The database metadata
-     * @param tableTypes The table types
+     * @param parent   The parent element
+     * @param metaData The database metadata
      */
-    private void dumpTables(Element parent, DatabaseMetaData metaData, String[] tableTypes) throws SQLException
+    private void dumpTables(Element parent, DatabaseMetaData metaData) throws SQLException
     {
-        ResultSet result = null;
+        String[]  tableTypes = _tableTypes;
+        ResultSet result     = null;
+
+        if ((tableTypes == null) || (tableTypes.length == 0))
+        {
+            // First we need the list of supported table types
+            ArrayList tableTypeList = new ArrayList();
+
+            result = metaData.getTableTypes();
+
+            try
+            {
+                while (result.next())
+                {
+                    tableTypeList.add(getString(result, "TABLE_TYPE"));
+                }
+            }
+            finally
+            {
+                if (result != null)
+                {
+                    result.close();
+                }
+            }
+    
+            tableTypes = (String[])tableTypeList.toArray(new String[tableTypeList.size()]);
+        }
 
         try
         {
@@ -518,12 +545,12 @@ public class DumpMetadataTask extends Task
                     continue;
                 }
 
-                log("Reading table "+tableName, Project.MSG_INFO);
-
                 Element tableElem = tablesElem.addElement("table");
                 String  catalog   = getString(result, "TABLE_CAT");
                 String  schema    = getString(result, "TABLE_SCHEM");
     
+                log("Reading table " + ((schema != null) && (schema.length() > 0) ? schema + "." : "") + tableName, Project.MSG_INFO);
+
                 tableElem.addAttribute("name", tableName);
                 if (catalog != null)
                 {
@@ -1007,13 +1034,21 @@ public class DumpMetadataTask extends Task
                     continue;
                 }
 
-                log("Reading procedure "+procedureName, Project.MSG_INFO);
-
                 Element procedureElem = proceduresElem.addElement("procedure");
+                String  catalog       = getString(result, "PROCEDURE_CAT");
+                String  schema        = getString(result, "PROCEDURE_SCHEM");
     
+                log("Reading procedure " + ((schema != null) && (schema.length() > 0) ? schema + "." : "") + procedureName, Project.MSG_INFO);
+
                 procedureElem.addAttribute("name", procedureName);
-                addStringAttribute(result, columns, "PROCEDURE_CAT", procedureElem, "catalog");
-                addStringAttribute(result, columns, "PROCEDURE_SCHEM", procedureElem, "schema");
+                if (catalog != null)
+                {
+                    procedureElem.addAttribute("catalog", catalog);
+                }
+                if (schema != null)
+                {
+                    procedureElem.addAttribute("schema", schema);
+                }
                 addStringAttribute(result, columns, "REMARKS", procedureElem, "remarks");
                 if (columns.contains("PROCEDURE_TYPE"))
                 {
