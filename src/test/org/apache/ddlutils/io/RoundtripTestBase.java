@@ -377,7 +377,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
             for (int i = 0; i < actual.getForeignKeyCount(); i++)
             {
                 fk_actual = actual.getForeignKey(i);
-                if (fk_actual.getName().equals(fk_expected.getName()))
+                if (fk_actual.getName().equalsIgnoreCase(fk_expected.getName()))
                 {
                     break;
                 }
