@@ -14,4 +14,3 @@ datasource.driverClassName=com.mysql.jdbc.Driver
 datasource.url=jdbc:mysql://10.21.21.33:3307/ddlutils
 datasource.username=root
 datasource.password=ddlutils
-datasource.maxConnections=200
