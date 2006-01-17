@@ -1,0 +1,28 @@
+# JDBC properties for FireBird
+# Note: Properties starting with "datasource." will be fed into the datasource instance of the
+# class configured via the datasource.class property
+
+# Use this property if ddlutils does not recognize the platform from the settings
+#ddlutils.platform=Firebird
+
+#
+# Using the plain DBCP datasource
+#
+
+datasource.class=org.apache.commons.dbcp.BasicDataSource
+datasource.driverClassName=org.firebirdsql.jdbc.FBDriver
+datasource.url=jdbc:firebirdsql://10.21.21.33:3050/c:/data/firebird/DDLUTILS
+datasource.username=SYSDBA
+datasource.password=masterkey
+# For some schema updates, firebird allows only 1 connection to the database, else it will fail
+# the update..
+# See http://www.firebirdsql.org/index.php?op=faq#q0003.dat for more information
+datasource.maxConnections=1
+datasource.maxActive=1
+datasource.maxIdle=0
+datasource.testOnBorrow=true
+datasource.testOnReturn=true
+datasource.testWhileIdle=true
+
+
+

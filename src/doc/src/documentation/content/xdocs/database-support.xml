@@ -852,6 +852,10 @@
           <td>Comment format</td>
           <td>A block between <code>/*</code> and <code>*/</code></td>
         </tr>
+        <tr>
+          <td>Maximum key size</td>
+          <td>256</td>
+        </tr>
       </table>
       <table>
         <tr>
