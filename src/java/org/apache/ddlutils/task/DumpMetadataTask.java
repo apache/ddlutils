@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -66,6 +67,8 @@ public class DumpMetadataTask extends Task
     private String _procedurePattern = "%";
     /** The pattern for reading all columns. */
     private String _columnPattern = "%";
+    /** The tables types to read; <code>null</code> or an empty list means that we shall read every type. */
+    private String[] _tableTypes = null;
 
     /**
      * Adds the data source to use for accessing the database.
@@ -135,6 +138,32 @@ public class DumpMetadataTask extends Task
     public void setColumnPattern(String columnPattern)
     {
         _columnPattern = ((columnPattern == null) || (columnPattern.length() == 0) ? null : columnPattern);
+    }
+
+    /**
+     * Sets the table types as a comma-separated list.
+     *
+     * @param tableTypes The table types
+     */
+    public void setTableTypes(String tableTypes)
+    {
+        ArrayList types = new ArrayList();
+
+        if (tableTypes != null)
+        {
+            StringTokenizer tokenizer = new StringTokenizer(tableTypes, ",");
+
+            while (tokenizer.hasMoreTokens())
+            {
+                String token = tokenizer.nextToken().trim();
+
+                if (token.length() > 0)
+                {
+                    types.add(token);
+                }
+            }
+        }
+        _tableTypes = (String[])types.toArray(new String[types.size()]);
     }
 
     /**
@@ -371,53 +400,85 @@ public class DumpMetadataTask extends Task
      */
     private void dumpCatalogsAndSchemas(Element parent, DatabaseMetaData metaData) throws SQLException
     {
-        ArrayList tableTypeList = new ArrayList();
+        String[] tableTypes = _tableTypes;
 
-        // First we need the list of supported table types
-        ResultSet result  = metaData.getTableTypes();
-
-        while (result.next())
+        if ((tableTypes == null) || (tableTypes.length == 0))
         {
-            tableTypeList.add(getString(result, "TABLE_TYPE"));
-        }
-        result.close();
+            // First we need the list of supported table types
+            ArrayList tableTypeList = new ArrayList();
 
-        String[] tableTypes   = (String[])tableTypeList.toArray(new String[tableTypeList.size()]);
-        Element  catalogsElem = parent.addElement("catalogs");
+            ResultSet result  = metaData.getTableTypes();
+
+            try
+            {
+                while (result.next())
+                {
+                    tableTypeList.add(getString(result, "TABLE_TYPE"));
+                }
+            }
+            finally
+            {
+                if (result != null)
+                {
+                    result.close();
+                }
+            }
+    
+            tableTypes = (String[])tableTypeList.toArray(new String[tableTypeList.size()]);
+        }
 
         // Next we determine and dump the catalogs
-        result  = metaData.getCatalogs();
+        Element   catalogsElem = parent.addElement("catalogs");
+        ResultSet result       = metaData.getCatalogs();
 
-        while (result.next())
+        try
         {
-            String catalogName = getString(result, "TABLE_CAT");
-
-            if ((catalogName != null) && (catalogName.length() > 0))
+            while (result.next())
             {
-                Element catalogElem = catalogsElem.addElement("catalog");
-
-                catalogElem.addAttribute("name", catalogName);
+                String catalogName = getString(result, "TABLE_CAT");
+    
+                if ((catalogName != null) && (catalogName.length() > 0))
+                {
+                    Element catalogElem = catalogsElem.addElement("catalog");
+    
+                    catalogElem.addAttribute("name", catalogName);
+                }
             }
         }
-        result.close();
+        finally
+        {
+            if (result != null)
+            {
+                result.close();
+            }
+        }
 
         Element schemasElem = parent.addElement("schemas");
 
         // We also dump the schemas (some dbs only support one of the two)
         result = metaData.getSchemas();
 
-        while (result.next())
+        try
         {
-            String schemaName = getString(result, "TABLE_SCHEM");
-
-            if ((schemaName != null) && (schemaName.length() > 0))
+            while (result.next())
             {
-                Element schemaElem = schemasElem.addElement("schema");
-
-                schemaElem.addAttribute("name", schemaName);
+                String schemaName = getString(result, "TABLE_SCHEM");
+    
+                if ((schemaName != null) && (schemaName.length() > 0))
+                {
+                    Element schemaElem = schemasElem.addElement("schema");
+    
+                    schemaElem.addAttribute("name", schemaName);
+                }
             }
         }
-        result.close();
+        finally
+        {
+            if (result != null)
+            {
+                result.close();
+            }
+        }
 
         dumpTables(parent, metaData, tableTypes);
     }
@@ -446,33 +507,53 @@ public class DumpMetadataTask extends Task
         Element tablesElem = parent.addElement("tables");
         Set     columns    = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            String tableName = getString(result, "TABLE_NAME");
-
-            if ((tableName == null) || (tableName.length() == 0))
+            while (result.next())
             {
-                continue;
+                String tableName = getString(result, "TABLE_NAME");
+    
+                if ((tableName == null) || (tableName.length() == 0))
+                {
+                    continue;
+                }
+
+                log("Reading table "+tableName, Project.MSG_INFO);
+
+                Element tableElem = tablesElem.addElement("table");
+                String  catalog   = getString(result, "TABLE_CAT");
+                String  schema    = getString(result, "TABLE_SCHEM");
+    
+                tableElem.addAttribute("name", tableName);
+                if (catalog != null)
+                {
+                    tableElem.addAttribute("catalog", catalog);
+                }
+                if (schema != null)
+                {
+                    tableElem.addAttribute("schema", schema);
+                }
+                addStringAttribute(result, columns, "TABLE_TYPE", tableElem, "type");
+                addStringAttribute(result, columns, "REMARKS", tableElem, "remarks");
+                addStringAttribute(result, columns, "TYPE_NAME", tableElem, "typeName");
+                addStringAttribute(result, columns, "TYPE_CAT", tableElem, "typeCatalog");
+                addStringAttribute(result, columns, "TYPE_SCHEM", tableElem, "typeSchema");
+                addStringAttribute(result, columns, "SELF_REFERENCING_COL_NAME", tableElem, "identifierColumn");
+                addStringAttribute(result, columns, "REF_GENERATION", tableElem, "identifierGeneration");
+    
+                dumpColumns(tableElem, metaData, catalog, schema, tableName);
+                dumpPKs(tableElem, metaData, catalog, schema, tableName);
+                dumpVersionColumns(tableElem, metaData, catalog, schema, tableName);
+                dumpFKs(tableElem, metaData, catalog, schema, tableName);
+                dumpIndices(tableElem, metaData, catalog, schema, tableName);
             }
-
-            Element tableElem = tablesElem.addElement("table");
-
-            tableElem.addAttribute("name", tableName);
-            addStringAttribute(result, columns, "TABLE_CAT", tableElem, "catalog");
-            addStringAttribute(result, columns, "TABLE_SCHEM", tableElem, "schema");
-            addStringAttribute(result, columns, "TABLE_TYPE", tableElem, "type");
-            addStringAttribute(result, columns, "REMARKS", tableElem, "remarks");
-            addStringAttribute(result, columns, "TYPE_NAME", tableElem, "typeName");
-            addStringAttribute(result, columns, "TYPE_CAT", tableElem, "typeCatalog");
-            addStringAttribute(result, columns, "TYPE_SCHEM", tableElem, "typeSchema");
-            addStringAttribute(result, columns, "SELF_REFERENCING_COL_NAME", tableElem, "identifierColumn");
-            addStringAttribute(result, columns, "REF_GENERATION", tableElem, "identifierGeneration");
-
-            dumpColumns(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
-            dumpPKs(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
-            dumpVersionColumns(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
-            dumpFKs(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
-            dumpIndices(tableElem, metaData, _catalogPattern, _schemaPattern, tableName);
+        }
+        finally
+        {
+            if (result != null)
+            {
+                result.close();
+            }
         }
     }
 
@@ -501,63 +582,73 @@ public class DumpMetadataTask extends Task
 
         Set columns = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            String columnName = getString(result, "COLUMN_NAME");
-
-            if ((columnName == null) || (columnName.length() == 0))
+            while (result.next())
             {
-                continue;
+                String columnName = getString(result, "COLUMN_NAME");
+    
+                if ((columnName == null) || (columnName.length() == 0))
+                {
+                    continue;
+                }
+    
+                Element columnElem = tableElem.addElement("column");
+    
+                columnElem.addAttribute("name", columnName);
+                addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
+                addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
+                addIntAttribute(result, columns, "COLUMN_SIZE", columnElem, "size");
+                addIntAttribute(result, columns, "DECIMAL_DIGITS", columnElem, "digits");
+                addIntAttribute(result, columns, "NUM_PREC_RADIX", columnElem, "precision");
+                if (columns.contains("NULLABLE"))
+                {
+                    switch (result.getInt("NULLABLE"))
+                    {
+                        case DatabaseMetaData.columnNoNulls:
+                            columnElem.addAttribute("nullable", "false");
+                            break;
+                        case DatabaseMetaData.columnNullable:
+                            columnElem.addAttribute("nullable", "true");
+                            break;
+                        default:
+                            columnElem.addAttribute("nullable", "unknown");
+                            break;
+                    }
+                }
+                addStringAttribute(result, columns, "REMARKS", columnElem, "remarks");
+                addStringAttribute(result, columns, "COLUMN_DEF", columnElem, "defaultValue");
+                addIntAttribute(result, columns, "CHAR_OCTET_LENGTH", columnElem, "maxByteLength");
+                addIntAttribute(result, columns, "ORDINAL_POSITION", columnElem, "index");
+                if (columns.contains("IS_NULLABLE"))
+                {
+                    String value = getString(result, "IS_NULLABLE");
+    
+                    if ("no".equalsIgnoreCase(value))
+                    {
+                        columnElem.addAttribute("isNullable", "false");
+                    }
+                    else if ("yes".equalsIgnoreCase(value))
+                    {
+                        columnElem.addAttribute("isNullable", "true");
+                    }
+                    else
+                    {
+                        columnElem.addAttribute("isNullable", "unknown");
+                    }
+                }
+                addStringAttribute(result, columns, "SCOPE_CATLOG", columnElem, "refCatalog");
+                addStringAttribute(result, columns, "SCOPE_SCHEMA", columnElem, "refSchema");
+                addStringAttribute(result, columns, "SCOPE_TABLE", columnElem, "refTable");
+                addShortAttribute(result, columns, "SOURCE_DATA_TYPE", columnElem, "sourceTypeCode");
             }
-
-            Element columnElem = tableElem.addElement("column");
-
-            columnElem.addAttribute("name", columnName);
-            addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
-            addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
-            addIntAttribute(result, columns, "COLUMN_SIZE", columnElem, "size");
-            addIntAttribute(result, columns, "DECIMAL_DIGITS", columnElem, "digits");
-            addIntAttribute(result, columns, "NUM_PREC_RADIX", columnElem, "precision");
-            if (columns.contains("NULLABLE"))
+        }
+        finally
+        {
+            if (result != null)
             {
-                switch (result.getInt("NULLABLE"))
-                {
-                    case DatabaseMetaData.columnNoNulls:
-                        columnElem.addAttribute("nullable", "false");
-                        break;
-                    case DatabaseMetaData.columnNullable:
-                        columnElem.addAttribute("nullable", "true");
-                        break;
-                    default:
-                        columnElem.addAttribute("nullable", "unknown");
-                        break;
-                }
+                result.close();
             }
-            addStringAttribute(result, columns, "REMARKS", columnElem, "remarks");
-            addStringAttribute(result, columns, "COLUMN_DEF", columnElem, "defaultValue");
-            addIntAttribute(result, columns, "CHAR_OCTET_LENGTH", columnElem, "maxByteLength");
-            addIntAttribute(result, columns, "ORDINAL_POSITION", columnElem, "index");
-            if (columns.contains("IS_NULLABLE"))
-            {
-                String value = getString(result, "IS_NULLABLE");
-
-                if ("no".equalsIgnoreCase(value))
-                {
-                    columnElem.addAttribute("isNullable", "false");
-                }
-                else if ("yes".equalsIgnoreCase(value))
-                {
-                    columnElem.addAttribute("isNullable", "true");
-                }
-                else
-                {
-                    columnElem.addAttribute("isNullable", "unknown");
-                }
-            }
-            addStringAttribute(result, columns, "SCOPE_CATLOG", columnElem, "refCatalog");
-            addStringAttribute(result, columns, "SCOPE_SCHEMA", columnElem, "refSchema");
-            addStringAttribute(result, columns, "SCOPE_TABLE", columnElem, "refTable");
-            addShortAttribute(result, columns, "SOURCE_DATA_TYPE", columnElem, "sourceTypeCode");
         }
     }
 
@@ -586,20 +677,30 @@ public class DumpMetadataTask extends Task
 
         Set columns = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            String columnName = getString(result, "COLUMN_NAME");
-
-            if ((columnName == null) || (columnName.length() == 0))
+            while (result.next())
             {
-                continue;
+                String columnName = getString(result, "COLUMN_NAME");
+    
+                if ((columnName == null) || (columnName.length() == 0))
+                {
+                    continue;
+                }
+    
+                Element pkElem = tableElem.addElement("primaryKey");
+    
+                pkElem.addAttribute("column", columnName);
+                addStringAttribute(result, columns, "PK_NAME", pkElem, "name");
+                addShortAttribute(result, columns, "KEY_SEQ", pkElem, "sequenceNumberInPK");
             }
-
-            Element pkElem = tableElem.addElement("primaryKey");
-
-            pkElem.addAttribute("column", columnName);
-            addStringAttribute(result, columns, "PK_NAME", pkElem, "name");
-            addShortAttribute(result, columns, "KEY_SEQ", pkElem, "sequenceNumberInPK");
+        }
+        finally
+        {
+            if (result != null)
+            {
+                result.close();
+            }
         }
     }
 
@@ -628,37 +729,47 @@ public class DumpMetadataTask extends Task
 
         Set columns = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            String columnName = getString(result, "COLUMN_NAME");
-
-            if ((columnName == null) || (columnName.length() == 0))
+            while (result.next())
             {
-                continue;
-            }
-
-            Element columnElem = tableElem.addElement("versionedColumn");
-
-            columnElem.addAttribute("column", columnName);
-            addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
-            addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
-            addIntAttribute(result, columns, "BUFFER_LENGTH", columnElem, "size");
-            addIntAttribute(result, columns, "COLUMN_SIZE", columnElem, "precision");
-            addShortAttribute(result, columns, "DECIMAL_DIGITS", columnElem, "scale");
-            if (columns.contains("PSEUDO_COLUMN"))
-            {
-                switch (result.getShort("PSEUDO_COLUMN"))
+                String columnName = getString(result, "COLUMN_NAME");
+    
+                if ((columnName == null) || (columnName.length() == 0))
                 {
-                    case DatabaseMetaData.versionColumnPseudo:
-                        columnElem.addAttribute("columnType", "pseudo column");
-                        break;
-                    case DatabaseMetaData.versionColumnNotPseudo:
-                        columnElem.addAttribute("columnType", "real column");
-                        break;
-                    default:
-                        columnElem.addAttribute("columnType", "unknown");
-                        break;
+                    continue;
                 }
+    
+                Element columnElem = tableElem.addElement("versionedColumn");
+    
+                columnElem.addAttribute("column", columnName);
+                addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
+                addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
+                addIntAttribute(result, columns, "BUFFER_LENGTH", columnElem, "size");
+                addIntAttribute(result, columns, "COLUMN_SIZE", columnElem, "precision");
+                addShortAttribute(result, columns, "DECIMAL_DIGITS", columnElem, "scale");
+                if (columns.contains("PSEUDO_COLUMN"))
+                {
+                    switch (result.getShort("PSEUDO_COLUMN"))
+                    {
+                        case DatabaseMetaData.versionColumnPseudo:
+                            columnElem.addAttribute("columnType", "pseudo column");
+                            break;
+                        case DatabaseMetaData.versionColumnNotPseudo:
+                            columnElem.addAttribute("columnType", "real column");
+                            break;
+                        default:
+                            columnElem.addAttribute("columnType", "unknown");
+                            break;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            if (result != null)
+            {
+                result.close();
             }
         }
     }
@@ -688,78 +799,88 @@ public class DumpMetadataTask extends Task
 
         Set columns = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            Element fkElem = tableElem.addElement("foreignKey");
-
-            addStringAttribute(result, columns, "FK_NAME", fkElem, "name");
-            addStringAttribute(result, columns, "PK_NAME", fkElem, "primaryKeyName");
-            addStringAttribute(result, columns, "PKCOLUMN_NAME", fkElem, "column");
-            addStringAttribute(result, columns, "FKTABLE_CAT", fkElem, "foreignCatalog");
-            addStringAttribute(result, columns, "FKTABLE_SCHEM", fkElem, "foreignSchema");
-            addStringAttribute(result, columns, "FKTABLE_NAME", fkElem, "foreignTable");
-            addStringAttribute(result, columns, "FKCOLUMN_NAME", fkElem, "foreignColumn");
-            addShortAttribute(result, columns, "KEY_SEQ", fkElem, "sequenceNumberInFK");
-            if (columns.contains("UPDATE_RULE"))
+            while (result.next())
             {
-                switch (result.getShort("UPDATE_RULE"))
+                Element fkElem = tableElem.addElement("foreignKey");
+    
+                addStringAttribute(result, columns, "FK_NAME", fkElem, "name");
+                addStringAttribute(result, columns, "PK_NAME", fkElem, "primaryKeyName");
+                addStringAttribute(result, columns, "PKCOLUMN_NAME", fkElem, "column");
+                addStringAttribute(result, columns, "FKTABLE_CAT", fkElem, "foreignCatalog");
+                addStringAttribute(result, columns, "FKTABLE_SCHEM", fkElem, "foreignSchema");
+                addStringAttribute(result, columns, "FKTABLE_NAME", fkElem, "foreignTable");
+                addStringAttribute(result, columns, "FKCOLUMN_NAME", fkElem, "foreignColumn");
+                addShortAttribute(result, columns, "KEY_SEQ", fkElem, "sequenceNumberInFK");
+                if (columns.contains("UPDATE_RULE"))
                 {
-                    case DatabaseMetaData.importedKeyNoAction:
-                        fkElem.addAttribute("updateRule", "no action");
-                        break;
-                    case DatabaseMetaData.importedKeyCascade:
-                        fkElem.addAttribute("updateRule", "cascade PK change");
-                        break;
-                    case DatabaseMetaData.importedKeySetNull:
-                        fkElem.addAttribute("updateRule", "set FK to NULL");
-                        break;
-                    case DatabaseMetaData.importedKeySetDefault:
-                        fkElem.addAttribute("updateRule", "set FK to default");
-                        break;
-                    default:
-                        fkElem.addAttribute("updateRule", "unknown");
-                        break;
+                    switch (result.getShort("UPDATE_RULE"))
+                    {
+                        case DatabaseMetaData.importedKeyNoAction:
+                            fkElem.addAttribute("updateRule", "no action");
+                            break;
+                        case DatabaseMetaData.importedKeyCascade:
+                            fkElem.addAttribute("updateRule", "cascade PK change");
+                            break;
+                        case DatabaseMetaData.importedKeySetNull:
+                            fkElem.addAttribute("updateRule", "set FK to NULL");
+                            break;
+                        case DatabaseMetaData.importedKeySetDefault:
+                            fkElem.addAttribute("updateRule", "set FK to default");
+                            break;
+                        default:
+                            fkElem.addAttribute("updateRule", "unknown");
+                            break;
+                    }
+                }
+                if (columns.contains("DELETE_RULE"))
+                {
+                    switch (result.getShort("DELETE_RULE"))
+                    {
+                        case DatabaseMetaData.importedKeyNoAction:
+                        case DatabaseMetaData.importedKeyRestrict:
+                            fkElem.addAttribute("deleteRule", "no action");
+                            break;
+                        case DatabaseMetaData.importedKeyCascade:
+                            fkElem.addAttribute("deleteRule", "cascade PK change");
+                            break;
+                        case DatabaseMetaData.importedKeySetNull:
+                            fkElem.addAttribute("deleteRule", "set FK to NULL");
+                            break;
+                        case DatabaseMetaData.importedKeySetDefault:
+                            fkElem.addAttribute("deleteRule", "set FK to default");
+                            break;
+                        default:
+                            fkElem.addAttribute("deleteRule", "unknown");
+                            break;
+                    }
+                }
+                if (columns.contains("DEFERRABILITY"))
+                {
+                    switch (result.getShort("DEFERRABILITY"))
+                    {
+                        case DatabaseMetaData.importedKeyInitiallyDeferred:
+                            fkElem.addAttribute("deferrability", "initially deferred");
+                            break;
+                        case DatabaseMetaData.importedKeyInitiallyImmediate:
+                            fkElem.addAttribute("deferrability", "immediately deferred");
+                            break;
+                        case DatabaseMetaData.importedKeyNotDeferrable:
+                            fkElem.addAttribute("deferrability", "not deferred");
+                            break;
+                        default:
+                            fkElem.addAttribute("deferrability", "unknown");
+                            break;
+                    }
                 }
             }
-            if (columns.contains("DELETE_RULE"))
+        }
+        finally
+        {
+            if (result != null)
             {
-                switch (result.getShort("DELETE_RULE"))
-                {
-                    case DatabaseMetaData.importedKeyNoAction:
-                    case DatabaseMetaData.importedKeyRestrict:
-                        fkElem.addAttribute("deleteRule", "no action");
-                        break;
-                    case DatabaseMetaData.importedKeyCascade:
-                        fkElem.addAttribute("deleteRule", "cascade PK change");
-                        break;
-                    case DatabaseMetaData.importedKeySetNull:
-                        fkElem.addAttribute("deleteRule", "set FK to NULL");
-                        break;
-                    case DatabaseMetaData.importedKeySetDefault:
-                        fkElem.addAttribute("deleteRule", "set FK to default");
-                        break;
-                    default:
-                        fkElem.addAttribute("deleteRule", "unknown");
-                        break;
-                }
-            }
-            if (columns.contains("DEFERRABILITY"))
-            {
-                switch (result.getShort("DEFERRABILITY"))
-                {
-                    case DatabaseMetaData.importedKeyInitiallyDeferred:
-                        fkElem.addAttribute("deferrability", "initially deferred");
-                        break;
-                    case DatabaseMetaData.importedKeyInitiallyImmediate:
-                        fkElem.addAttribute("deferrability", "immediately deferred");
-                        break;
-                    case DatabaseMetaData.importedKeyNotDeferrable:
-                        fkElem.addAttribute("deferrability", "not deferred");
-                        break;
-                    default:
-                        fkElem.addAttribute("deferrability", "unknown");
-                        break;
-                }
+                result.close();
             }
         }
     }
@@ -789,56 +910,66 @@ public class DumpMetadataTask extends Task
 
         Set columns = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            Element indexElem = tableElem.addElement("index");
-
-            addStringAttribute(result, columns, "INDEX_NAME", indexElem, "name");
-            addBooleanAttribute(result, columns, "NON_UNIQUE", indexElem, "nonUnique");
-            addStringAttribute(result, columns, "INDEX_QUALIFIER", indexElem, "indexCatalog");
-            if (columns.contains("TYPE"))
+            while (result.next())
             {
-                switch (result.getShort("TYPE"))
+                Element indexElem = tableElem.addElement("index");
+    
+                addStringAttribute(result, columns, "INDEX_NAME", indexElem, "name");
+                addBooleanAttribute(result, columns, "NON_UNIQUE", indexElem, "nonUnique");
+                addStringAttribute(result, columns, "INDEX_QUALIFIER", indexElem, "indexCatalog");
+                if (columns.contains("TYPE"))
                 {
-                    case DatabaseMetaData.tableIndexStatistic:
-                        indexElem.addAttribute("type", "table statistics");
-                        break;
-                    case DatabaseMetaData.tableIndexClustered:
-                        indexElem.addAttribute("type", "clustered");
-                        break;
-                    case DatabaseMetaData.tableIndexHashed:
-                        indexElem.addAttribute("type", "hashed");
-                        break;
-                    case DatabaseMetaData.tableIndexOther:
-                        indexElem.addAttribute("type", "other");
-                        break;
-                    default:
-                        indexElem.addAttribute("type", "unknown");
-                        break;
+                    switch (result.getShort("TYPE"))
+                    {
+                        case DatabaseMetaData.tableIndexStatistic:
+                            indexElem.addAttribute("type", "table statistics");
+                            break;
+                        case DatabaseMetaData.tableIndexClustered:
+                            indexElem.addAttribute("type", "clustered");
+                            break;
+                        case DatabaseMetaData.tableIndexHashed:
+                            indexElem.addAttribute("type", "hashed");
+                            break;
+                        case DatabaseMetaData.tableIndexOther:
+                            indexElem.addAttribute("type", "other");
+                            break;
+                        default:
+                            indexElem.addAttribute("type", "unknown");
+                            break;
+                    }
                 }
+                addStringAttribute(result, columns, "COLUMN_NAME", indexElem, "column");
+                addShortAttribute(result, columns, "ORDINAL_POSITION", indexElem, "sequenceNumberInIndex");
+                if (columns.contains("ASC_OR_DESC"))
+                {
+                    String value = getString(result, "ASC_OR_DESC");
+    
+                    if ("A".equalsIgnoreCase(value))
+                    {
+                        indexElem.addAttribute("sortOrder", "ascending");
+                    }
+                    else if ("D".equalsIgnoreCase(value))
+                    {
+                        indexElem.addAttribute("sortOrder", "descending");
+                    }
+                    else
+                    {
+                        indexElem.addAttribute("sortOrder", "unknown");
+                    }
+                }
+                addIntAttribute(result, columns, "CARDINALITY", indexElem, "cardinality");
+                addIntAttribute(result, columns, "PAGES", indexElem, "pages");
+                addStringAttribute(result, columns, "FILTER_CONDITION", indexElem, "filter");
             }
-            addStringAttribute(result, columns, "COLUMN_NAME", indexElem, "column");
-            addShortAttribute(result, columns, "ORDINAL_POSITION", indexElem, "sequenceNumberInIndex");
-            if (columns.contains("ASC_OR_DESC"))
+        }
+        finally
+        {
+            if (result != null)
             {
-                String value = getString(result, "ASC_OR_DESC");
-
-                if ("A".equalsIgnoreCase(value))
-                {
-                    indexElem.addAttribute("sortOrder", "ascending");
-                }
-                else if ("D".equalsIgnoreCase(value))
-                {
-                    indexElem.addAttribute("sortOrder", "descending");
-                }
-                else
-                {
-                    indexElem.addAttribute("sortOrder", "unknown");
-                }
+                result.close();
             }
-            addIntAttribute(result, columns, "CARDINALITY", indexElem, "cardinality");
-            addIntAttribute(result, columns, "PAGES", indexElem, "pages");
-            addStringAttribute(result, columns, "FILTER_CONDITION", indexElem, "filter");
         }
     }
 
@@ -865,41 +996,53 @@ public class DumpMetadataTask extends Task
         Element proceduresElem = parent.addElement("procedures");
         Set     columns        = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            String procedureName = getString(result, "PROCEDURE_NAME");
-
-            if ((procedureName == null) || (procedureName.length() == 0))
+            while (result.next())
             {
-                continue;
-            }
-
-            Element procedureElem = proceduresElem.addElement("procedure");
-
-            procedureElem.addAttribute("name", procedureName);
-            addStringAttribute(result, columns, "PROCEDURE_CAT", procedureElem, "catalog");
-            addStringAttribute(result, columns, "PROCEDURE_SCHEM", procedureElem, "schema");
-            addStringAttribute(result, columns, "REMARKS", procedureElem, "remarks");
-            if (columns.contains("PROCEDURE_TYPE"))
-            {
-                switch (result.getShort("PROCEDURE_TYPE"))
+                String procedureName = getString(result, "PROCEDURE_NAME");
+    
+                if ((procedureName == null) || (procedureName.length() == 0))
                 {
-                    case DatabaseMetaData.procedureReturnsResult:
-                        procedureElem.addAttribute("type", "returns result");
-                        break;
-                    case DatabaseMetaData.procedureNoResult:
-                        procedureElem.addAttribute("type", "doesn't return result");
-                        break;
-                    case DatabaseMetaData.procedureResultUnknown:
-                        procedureElem.addAttribute("type", "may return result");
-                        break;
-                    default:
-                        procedureElem.addAttribute("type", "unknown");
-                        break;
+                    continue;
                 }
-            }
 
-            dumpProcedure(procedureElem, metaData, "%", "%", procedureName);
+                log("Reading procedure "+procedureName, Project.MSG_INFO);
+
+                Element procedureElem = proceduresElem.addElement("procedure");
+    
+                procedureElem.addAttribute("name", procedureName);
+                addStringAttribute(result, columns, "PROCEDURE_CAT", procedureElem, "catalog");
+                addStringAttribute(result, columns, "PROCEDURE_SCHEM", procedureElem, "schema");
+                addStringAttribute(result, columns, "REMARKS", procedureElem, "remarks");
+                if (columns.contains("PROCEDURE_TYPE"))
+                {
+                    switch (result.getShort("PROCEDURE_TYPE"))
+                    {
+                        case DatabaseMetaData.procedureReturnsResult:
+                            procedureElem.addAttribute("type", "returns result");
+                            break;
+                        case DatabaseMetaData.procedureNoResult:
+                            procedureElem.addAttribute("type", "doesn't return result");
+                            break;
+                        case DatabaseMetaData.procedureResultUnknown:
+                            procedureElem.addAttribute("type", "may return result");
+                            break;
+                        default:
+                            procedureElem.addAttribute("type", "unknown");
+                            break;
+                    }
+                }
+    
+                dumpProcedure(procedureElem, metaData, "%", "%", procedureName);
+            }
+        }
+        finally
+        {
+            if (result != null)
+            {
+                result.close();
+            }
         }
     }
 
@@ -928,65 +1071,75 @@ public class DumpMetadataTask extends Task
 
         Set columns = getColumnsInResultSet(result);
 
-        while (result.next())
+        try
         {
-            String columnName = getString(result, "COLUMN_NAME");
-
-            if ((columnName == null) || (columnName.length() == 0))
+            while (result.next())
             {
-                continue;
-            }
-
-            Element columnElem = procedureElem.addElement("column");
-
-            columnElem.addAttribute("name", columnName);
-            if (columns.contains("COLUMN_TYPE"))
-            {
-                switch (result.getShort("COLUMN_TYPE"))
+                String columnName = getString(result, "COLUMN_NAME");
+    
+                if ((columnName == null) || (columnName.length() == 0))
                 {
-                    case DatabaseMetaData.procedureColumnIn:
-                        columnElem.addAttribute("type", "in parameter");
-                        break;
-                    case DatabaseMetaData.procedureColumnInOut:
-                        columnElem.addAttribute("type", "in/out parameter");
-                        break;
-                    case DatabaseMetaData.procedureColumnOut:
-                        columnElem.addAttribute("type", "out parameter");
-                        break;
-                    case DatabaseMetaData.procedureColumnReturn:
-                        columnElem.addAttribute("type", "return value");
-                        break;
-                    case DatabaseMetaData.procedureColumnResult:
-                        columnElem.addAttribute("type", "result column in ResultSet");
-                        break;
-                    default:
-                        columnElem.addAttribute("type", "unknown");
-                        break;
+                    continue;
                 }
-            }
-
-            addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
-            addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
-            addIntAttribute(result, columns, "LENGTH", columnElem, "length");
-            addIntAttribute(result, columns, "PRECISION", columnElem, "precision");
-            addShortAttribute(result, columns, "SCALE", columnElem, "short");
-            addShortAttribute(result, columns, "RADIX", columnElem, "radix");
-            if (columns.contains("NULLABLE"))
-            {
-                switch (result.getInt("NULLABLE"))
+    
+                Element columnElem = procedureElem.addElement("column");
+    
+                columnElem.addAttribute("name", columnName);
+                if (columns.contains("COLUMN_TYPE"))
                 {
-                    case DatabaseMetaData.procedureNoNulls:
-                        columnElem.addAttribute("nullable", "false");
-                        break;
-                    case DatabaseMetaData.procedureNullable:
-                        columnElem.addAttribute("nullable", "true");
-                        break;
-                    default:
-                        columnElem.addAttribute("nullable", "unknown");
-                        break;
+                    switch (result.getShort("COLUMN_TYPE"))
+                    {
+                        case DatabaseMetaData.procedureColumnIn:
+                            columnElem.addAttribute("type", "in parameter");
+                            break;
+                        case DatabaseMetaData.procedureColumnInOut:
+                            columnElem.addAttribute("type", "in/out parameter");
+                            break;
+                        case DatabaseMetaData.procedureColumnOut:
+                            columnElem.addAttribute("type", "out parameter");
+                            break;
+                        case DatabaseMetaData.procedureColumnReturn:
+                            columnElem.addAttribute("type", "return value");
+                            break;
+                        case DatabaseMetaData.procedureColumnResult:
+                            columnElem.addAttribute("type", "result column in ResultSet");
+                            break;
+                        default:
+                            columnElem.addAttribute("type", "unknown");
+                            break;
+                    }
                 }
+    
+                addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
+                addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
+                addIntAttribute(result, columns, "LENGTH", columnElem, "length");
+                addIntAttribute(result, columns, "PRECISION", columnElem, "precision");
+                addShortAttribute(result, columns, "SCALE", columnElem, "short");
+                addShortAttribute(result, columns, "RADIX", columnElem, "radix");
+                if (columns.contains("NULLABLE"))
+                {
+                    switch (result.getInt("NULLABLE"))
+                    {
+                        case DatabaseMetaData.procedureNoNulls:
+                            columnElem.addAttribute("nullable", "false");
+                            break;
+                        case DatabaseMetaData.procedureNullable:
+                            columnElem.addAttribute("nullable", "true");
+                            break;
+                        default:
+                            columnElem.addAttribute("nullable", "unknown");
+                            break;
+                    }
+                }
+                addStringAttribute(result, columns, "REMARKS", columnElem, "remarks");
             }
-            addStringAttribute(result, columns, "REMARKS", columnElem, "remarks");
+        }
+        finally
+        {
+            if (result != null)
+            {
+                result.close();
+            }
         }
     }
 
