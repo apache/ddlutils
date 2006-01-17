@@ -49,9 +49,9 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     public static final String PLATFORM_PROPERTY = "ddlutils.platform";
 
     /** The data source to test against. */
-    private DataSource _dataSource;
+    private static DataSource _dataSource;
     /** The database name. */
-    private String _databaseName;
+    private static String _databaseName;
     /** The database model. */
     private Database _model;
 
@@ -69,6 +69,10 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     private void init()
     {
+        if (_dataSource != null)
+        {
+            return;
+        }
         Properties props    = new Properties();
         String     propFile = System.getProperty(JDBC_PROPERTIES_PROPERTY);
 
