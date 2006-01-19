@@ -953,17 +953,27 @@ public class JdbcModelReader
         }
         query.append(" WHERE 1 = 0");
         
-        Statement         stmt       = getConnection().createStatement();
-        ResultSet         rs         = stmt.executeQuery(query.toString());
-        ResultSetMetaData rsMetaData = rs.getMetaData();
-    
-        for (int idx = 0; idx < columnsToCheck.length; idx++)
+        Statement         stmt       = null;
+        try
         {
-            if (rsMetaData.isAutoIncrement(idx + 1))
+            stmt = getConnection().createStatement();
+            ResultSet         rs         = stmt.executeQuery(query.toString());
+            ResultSetMetaData rsMetaData = rs.getMetaData();
+        
+            for (int idx = 0; idx < columnsToCheck.length; idx++)
             {
-                columnsToCheck[idx].setAutoIncrement(true);
+                if (rsMetaData.isAutoIncrement(idx + 1))
+                {
+                    columnsToCheck[idx].setAutoIncrement(true);
+                }
             }
         }
-        stmt.close();
+        finally
+        {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+        }
     }
 }
