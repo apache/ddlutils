@@ -922,6 +922,10 @@ public class JdbcModelReader
      */
     protected void determineAutoIncrementFromResultSetMetaData(Table table, Column[] columnsToCheck) throws SQLException
     {
+        if (columnsToCheck == null || columnsToCheck.length == 0)
+        {
+            return;
+        }
         StringBuffer query = new StringBuffer();
     
         query.append("SELECT ");
