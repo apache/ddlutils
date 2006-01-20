@@ -39,6 +39,8 @@
         datatypes which are inherently database specific. An example of such a file is:
       </p>
       <source><![CDATA[
+<?xml version="1.0"?>      
+ <database>
   <table name="author">
     <column name="author_id"
             type="INTEGER"
@@ -81,7 +83,9 @@
       <index-column name="isbn"/>
     </index>
 
-  </table>]]></source>
+  </table>
+ </database>]]>
+ </source>
     </section>
     <section id="Learning_more">
       <title>Learning more</title>
