@@ -207,12 +207,7 @@ public abstract class JdbcSupport
         {
             try
             {
-                Connection conn = statement.getConnection();
-
-                if ((conn != null) && !conn.isClosed())
-                {
-                    statement.close();
-                }
+                statement.close();
             }
             catch (Exception e)
             {
