@@ -31,7 +31,7 @@
         Lets see examples for how to use them:
       </p>
       <source><![CDATA[
-<path id="runtime.classpath">
+<path id="runtime-classpath">
   <fileset dir="lib">
     <include name="**/*.jar"/>
     <include name="**/*.zip"/>
