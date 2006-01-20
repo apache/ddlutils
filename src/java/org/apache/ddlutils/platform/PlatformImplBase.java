@@ -747,10 +747,12 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
         catch (SQLException ex)
         {
-            // any other exception comes from the iterator which closes the resources automatically
+            throw new DynaSqlException("Error while fetching data from the database", ex);
+        } 
+        finally 
+        {
             closeStatement(statement);
             returnConnection(connection);
-            throw new DynaSqlException("Error while fetching data from the database", ex);
         }
         return result;
     }
