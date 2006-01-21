@@ -69,10 +69,13 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     private void init()
     {
+        // the data source won't change during the tests, hence
+        // it is static and needs to be initialized only once
         if (_dataSource != null)
         {
             return;
         }
+
         Properties props    = new Properties();
         String     propFile = System.getProperty(JDBC_PROPERTIES_PROPERTY);
 

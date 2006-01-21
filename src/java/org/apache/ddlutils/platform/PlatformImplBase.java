@@ -751,6 +751,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         } 
         finally 
         {
+            // the iterator should return the connection automatically
+            // so this is usuallynot necessary (but just in case)
             closeStatement(statement);
             returnConnection(connection);
         }

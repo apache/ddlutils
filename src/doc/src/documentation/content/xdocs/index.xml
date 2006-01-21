@@ -40,7 +40,7 @@
       </p>
       <source><![CDATA[
 <?xml version="1.0"?>      
- <database>
+ <database name="testdb">
   <table name="author">
     <column name="author_id"
             type="INTEGER"

@@ -370,19 +370,22 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                      expected.getForeignKeyCount(),
                      actual.getForeignKeyCount());
         // order is not assumed with the way foreignkeys are returned.
-        for (int fkIdx = 0; fkIdx < actual.getForeignKeyCount(); fkIdx++)
+        for (int expectedFkIdx = 0; expectedFkIdx < expected.getForeignKeyCount(); expectedFkIdx++)
         {
-            ForeignKey fk_expected = expected.getForeignKey(fkIdx);
-            ForeignKey fk_actual = null;
-            for (int i = 0; i < actual.getForeignKeyCount(); i++)
+            ForeignKey expectedFk   = expected.getForeignKey(expectedFkIdx);
+            String     expectedName = expectedFk.getName();
+
+            for (int actualFkIdx = 0; actualFkIdx < actual.getForeignKeyCount(); actualFkIdx++)
             {
-                fk_actual = actual.getForeignKey(i);
-                if (fk_actual.getName().equalsIgnoreCase(fk_expected.getName()))
+                ForeignKey actualFk   = actual.getForeignKey(actualFkIdx);
+                String     actualName = actualFk.getName();
+
+                if ((_useDelimitedIdentifiers  && expectedName.equals(actualName)) ||
+                    (!_useDelimitedIdentifiers && expectedName.equalsIgnoreCase(actualName)))
                 {
-                    break;
+                    assertEquals(expectedFk, actualFk);
                 }
             }
-            assertEquals(fk_expected, fk_actual);
         }
         assertEquals("Not the same number of indices in table "+actual.getName(),
                      expected.getIndexCount(),
