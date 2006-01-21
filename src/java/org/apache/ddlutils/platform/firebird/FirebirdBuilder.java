@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform.firebird;
 
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
+ * Copyright 2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import org.apache.ddlutils.platform.SqlBuilder;
  */
 public class FirebirdBuilder extends SqlBuilder
 {
+    /** Denotes the string used via SET TERM for delimiting commands that need to be executed in one go. */
+    public static final String TERM_COMMAND = "--TERM--";
+
     /**
      * Creates a new builder instance.
      * 
@@ -59,7 +62,7 @@ public class FirebirdBuilder extends SqlBuilder
             print("CREATE GENERATOR ");
             printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
             printEndOfStatement();
-            print("--TERM--");
+            print(TERM_COMMAND);
             printEndOfStatement();
             print("CREATE TRIGGER ");
             printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
@@ -76,7 +79,8 @@ public class FirebirdBuilder extends SqlBuilder
             printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
             println(", 1);");
             println("END;");
-            print("--TERM--;");
+            print(TERM_COMMAND);
+            print(";");
         }
     }
 
@@ -107,7 +111,7 @@ public class FirebirdBuilder extends SqlBuilder
 
     /**
      * {@inheritDoc}
-     * @todo : we are kinf of stuck here, since last insert id needs the database name..
+     * @todo : we are kind of stuck here, since last insert id needs the database name..
      */
     public String getSelectLastInsertId(Table table)
     {
@@ -142,9 +146,12 @@ public class FirebirdBuilder extends SqlBuilder
     protected String getNativeDefaultValue(Column column)
     {
         String defaultValue = column.getDefaultValue();
-        if (column.getTypeCode() == Types.BIT || column.getTypeCode() == Types.BOOLEAN)
+
+        if ((column.getTypeCode() == Types.BIT) || (column.getTypeCode() == Types.BOOLEAN))
         {
-            defaultValue = getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
+            defaultValue = getDefaultValueHelper().convert(column.getDefaultValue(),
+                                                           column.getTypeCode(),
+                                                           Types.SMALLINT).toString();
         }
         return defaultValue;
     }

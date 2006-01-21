@@ -1,5 +1,7 @@
+package org.apache.ddlutils.platform.firebird;
+
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
+ * Copyright 2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.ddlutils.platform.firebird;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -32,31 +32,36 @@ import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 
 /**
- * The Jdbc Model Reader for FireBird.
+ * The Jdbc Model Reader for Firebird.
  *
  * @author <a href="mailto:martin@mvdb.net">Martin van den Bemt</a>
  * @version $Revision: $
  */
-public class FirebirdModelReader extends JdbcModelReader {
-
+public class FirebirdModelReader extends JdbcModelReader
+{
     /**
-     * @param platformInfo the platformInfo
+     * Creates a new model reader for Firebird databases.
+     * 
+     * @param platformInfo The platform specific settings
      */
-    public FirebirdModelReader(PlatformInfo platformInfo) {
+    public FirebirdModelReader(PlatformInfo platformInfo)
+    {
         super(platformInfo);
     }
 
     /**
-     * (@inheritDoc)
+     * {@inheritDoc}
      */
-    protected void readIndex(DatabaseMetaDataWrapper metaData, Map values, Map knownIndices) throws SQLException {
+    protected void readIndex(DatabaseMetaDataWrapper metaData, Map values, Map knownIndices) throws SQLException
+    {
         super.readIndex(metaData, values, knownIndices);
+
         Iterator indexNames = knownIndices.keySet().iterator();
-//        printIdentifier(getConstraintName(null, table, "PK", null));
         
         while (indexNames.hasNext())
         {
-            String indexName = (String) indexNames.next();
+            String indexName = (String)indexNames.next();
+
             if (indexName.indexOf("PRIMARY") != -1)
             {
                 // we have hit a primary key, remove it..
@@ -64,6 +69,7 @@ public class FirebirdModelReader extends JdbcModelReader {
             }
         }
     }
+
     /**
      * {@inheritDoc}
      * @todo This needs some more work, since table names can be case sensitive or lowercase
@@ -72,7 +78,7 @@ public class FirebirdModelReader extends JdbcModelReader {
      */
     protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
-        Table table =  super.readTable(metaData, values);
+        Table table = super.readTable(metaData, values);
 
         determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
         // fix the indexes.
@@ -90,21 +96,21 @@ public class FirebirdModelReader extends JdbcModelReader {
      */
     protected void determineAutoIncrementFromResultSetMetaData(Table table, Column[] columnsToCheck) throws SQLException
     {
-        StringBuffer query = new StringBuffer();
-
-        String prefix = ("gen_"+table.getName()+"_").toUpperCase();
+        StringBuffer query  = new StringBuffer();
+        String       prefix = ("gen_"+table.getName()+"_").toUpperCase();
 
         query.append("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME STARTING WITH '");
         query.append(prefix);
         query.append("'");
-        Statement         stmt       = getConnection().createStatement();
-        ResultSet         rs         = stmt.executeQuery(query.toString());
-    
+
+        Statement stmt = getConnection().createStatement();
+        ResultSet rs   = stmt.executeQuery(query.toString());
 
         while(rs.next())
         {
             String generatorName = rs.getString(1).substring(prefix.length()).trim();
-            Column column = table.findColumn(generatorName, false);
+            Column column        = table.findColumn(generatorName, false);
+
             if (column != null)
             {
                 column.setAutoIncrement(true);
@@ -121,23 +127,20 @@ public class FirebirdModelReader extends JdbcModelReader {
      */
     private void fixIndexes(Table table)
     {
-        if (table.getIndexCount() == 0 || table.getForeignKeyCount() == 0)
+        // we don't do anything when there are no indexes or foreignkeys.
+        if ((table.getIndexCount() > 0) && (table.getForeignKeyCount() > 0))
         {
-            // we don't do anything when there are no indexes or foreignkeys.
-            return;
-        }
-        for (int i = 0; i < table.getForeignKeyCount(); i++)
-        {
-            ForeignKey fk = table.getForeignKey(i);
-            Index index = table.findIndex(fk.getName());
-            if (index != null)
+            for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
             {
-                // remove it from the indexes..
-                table.removeIndex(index);
+                ForeignKey fk    = table.getForeignKey(idx);
+                Index      index = table.findIndex(fk.getName());
+
+                if (index != null)
+                {
+                    // remove it from the indexes..
+                    table.removeIndex(index);
+                }
             }
         }
-        // filter
     }
-    
-
 }

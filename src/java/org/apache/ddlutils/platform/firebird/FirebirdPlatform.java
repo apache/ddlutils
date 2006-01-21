@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform.firebird;
 
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
+ * Copyright 2005-2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -40,16 +39,20 @@ import org.apache.ddlutils.platform.PlatformImplBase;
  */
 public class FirebirdPlatform extends PlatformImplBase
 {
-    /** The log for this platform. */
-    private final Log _log = LogFactory.getLog(getClass());
     /** Database name of this platform. */
     public static final String DATABASENAME     = "Firebird";
     /** The standard Firebird jdbc driver. */
     public static final String JDBC_DRIVER      = "org.firebirdsql.jdbc.FBDriver";
     /** The subprotocol used by the standard Firebird driver. */
     public static final String JDBC_SUBPROTOCOL = "firebirdsql";
+    /** The log for this platform. */
+    private final Log _log = LogFactory.getLog(getClass());
 
-    public FirebirdPlatform() {
+    /**
+     * Creates a new Firebird platform instance.
+     */
+    public FirebirdPlatform()
+    {
         PlatformInfo info = new PlatformInfo();
 
         info.setMaxIdentifierLength(31);
@@ -62,39 +65,44 @@ public class FirebirdPlatform extends PlatformImplBase
         info.setSupportingDelimitedIdentifiers(false);
 
         // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
-        info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
-        info.addNativeTypeMapping(Types.BINARY,        "BLOB", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.BIT,           "SMALLINT", Types.BIT);
+        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BINARY,        "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT", Types.LONGVARCHAR);
-        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.BLOB,          "BLOB", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BLOB,          "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.LONGVARBINARY, "BLOB", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",   Types.DOUBLE);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.LONGVARBINARY, "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT");
-        info.addNativeTypeMapping(Types.NULL,          "BLOB");
-        info.addNativeTypeMapping(Types.OTHER,         "BLOB");
+        info.addNativeTypeMapping(Types.NULL,          "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.OTHER,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        info.addNativeTypeMapping(Types.REF,           "BLOB");
-        info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
-        info.addNativeTypeMapping(Types.VARBINARY,     "BLOB", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.BOOLEAN, "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "BLOB");
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",           Types.SMALLINT);
+        info.addNativeTypeMapping(Types.REF,           "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.VARBINARY,     "BLOB",               Types.LONGVARBINARY);
+        
+        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
+        info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
-        /**
+        /*
          * This value is set to 128, to give multiple column index a chance
          * to stay below the maximum key size of 256.
          * If you use different encodings, you most likely need to decrease this value.
          */
+        // TODO: Why should we care - after all this is a database problem and not a
+        //       DdlUtils one ? This value should be the one specified by JDBC which is 254
+        //       Also, do we really need to specify a default size for SMALLINT ?
         info.addDefaultSize(Types.VARCHAR, 128);
-        info.addDefaultSize(Types.CHAR, 128);
+        info.addDefaultSize(Types.CHAR,    128);
         info.addDefaultSize(Types.SMALLINT, 5);
 
         setSqlBuilder(new FirebirdBuilder(info));
         setModelReader(new FirebirdModelReader(info));
     }
+
     /**
      * {@inheritDoc}
      */
@@ -102,69 +110,76 @@ public class FirebirdPlatform extends PlatformImplBase
     {
         return DATABASENAME;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void createTables(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DynaSqlException
-    {
-        String sql = getCreateTablesSql(model, dropTablesFirst, continueOnError);
-        runBatch(connection, sql, continueOnError);
-    }
 
     /**
-     * Runbatch is a replacement for evaluateBatch.
-     * Especially the <code>SET TERM !!;</code> blocks need to be executed in one go.
+     * Firebird-specific replacement for
+     * {@link org.apache.ddlutils.platform.PlatformImplBase#evaluateBatch(Connection, String, boolean)}
+     * that executes blocks delimited by the term {@link FirebirdBuilder#TERM_COMMAND}
+     * (defined in the database via <code>SET TERM !!;</code>), in one go.
      *
-     * @param connection the connection to use
-     * @param sql the sql to process
-     * @param continueOnError needs to continue when an error occurs.
+     * @param connection      The connection to use
+     * @param sql             The sql to process
+     * @param continueOnError Whether to continue when an error occurs
+     * @return The number of errors
      */
-    public int runBatch(Connection connection, String sql, boolean continueOnError) throws DynaSqlException
+    public int evaluateBatch(Connection connection, String sql, boolean continueOnError) throws DynaSqlException
     {
-        int errors       = 0;
         Statement statement    = null;
-        int commandCount = 0;
+        int       commandCount = 0;
+        int       errors       = 0;
 
-        try {
+        try
+        {
             statement = connection.createStatement();
+
             StringTokenizer tokenizer = new StringTokenizer(sql, ";");
+            StringBuffer    command   = new StringBuffer();
     
             while (tokenizer.hasMoreTokens())
             {
-                String command = tokenizer.nextToken().trim();
-                if (command.equals("--TERM--"))
+                String token = tokenizer.nextToken().trim();
+
+                command.setLength(0);
+
+                if (token.equals(FirebirdBuilder.TERM_COMMAND))
                 {
-                    command = "";
-                    while(tokenizer.hasMoreTokens())
+                    while (tokenizer.hasMoreTokens())
                     {
-                        String termSql = tokenizer.nextToken().trim();  
-                        if(termSql.equals("--TERM--"))
+                        token = tokenizer.nextToken().trim();  
+
+                        if (token.length() > 0)
                         {
-                            break;
-                        }
-                        if (termSql.length() > 0)
-                        {
-                            command+=termSql+";";
+                            if (token.equals(FirebirdBuilder.TERM_COMMAND))
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                command.append(token);
+                                command.append(";");
+                            }
                         }
                         
                     }
+                }
+                else
+                {
+                    command.append(token);
                 }
                 if (command.length() == 0)
                 {
                     continue;
                 }
                 
-                System.err.println("SQL Command :\n" + command);
                 commandCount++;
                 
                 if (_log.isDebugEnabled())
                 {
-                    _log.debug("About to execute SQL " + command);
+                    _log.debug("About to execute SQL " + command.toString());
                 }
                 try
                 {
-                    int results = statement.executeUpdate(command);
+                    int results = statement.executeUpdate(command.toString());
 
                     if (_log.isDebugEnabled())
                     {
@@ -175,7 +190,7 @@ public class FirebirdPlatform extends PlatformImplBase
                 {
                     if (continueOnError)
                     {
-                        System.err.println("SQL Command " + command + " failed with " + ex.getMessage());
+                        _log.error("SQL Command " + command.toString() + " failed", ex);
                         errors++;
                     }
                     else
@@ -194,7 +209,10 @@ public class FirebirdPlatform extends PlatformImplBase
                 }
                 connection.clearWarnings();
             }
-            _log.info("Executed "+ commandCount + " SQL command(s) with " + errors + " error(s)");
+            if (_log.isInfoEnabled())
+            {
+                _log.info("Executed "+ commandCount + " SQL command(s) with " + errors + " error(s)");
+            }
         }
         catch (SQLException ex)
         {

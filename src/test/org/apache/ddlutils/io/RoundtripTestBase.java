@@ -110,7 +110,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     private boolean _useDelimitedIdentifiers;
     
     /**
-     * Specifies whether the test shall use delimited identifirs
+     * Specifies whether the test shall use delimited identifiers.
      * 
      * @param useDelimitedIdentifiers Whether to use delimited identifiers
      */

@@ -1,9 +1,7 @@
 package org.apache.ddlutils.io;
 
-import junit.framework.Test;
-
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
+ * Copyright 2005-2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,8 @@ import junit.framework.Test;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import junit.framework.Test;
 
 /**
  * Performs the constraint tests.

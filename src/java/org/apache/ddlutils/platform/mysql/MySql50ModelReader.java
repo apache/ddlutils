@@ -24,7 +24,7 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 
 /**
- * Reads a database model from a MySql50 database.
+ * Reads a database model from a MySql 5 database.
  *
  * @author Martin van den Bemt
  * @version $Revision: $
@@ -32,7 +32,7 @@ import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 public class MySql50ModelReader extends MySqlModelReader
 {
     /**
-     * Creates a new model reader for PostgreSql databases.
+     * Creates a new model reader for MySql 5 databases.
      * 
      * @param platformInfo The platform specific settings
      */
@@ -42,11 +42,12 @@ public class MySql50ModelReader extends MySqlModelReader
     }
 
     /**
-     * (@inheritDoc)
+     * {@inheritDoc}
      */
     protected Column readColumn(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
         Column column = super.readColumn(metaData, values);
+
         // make sure the defaultvalue is null when an empty is returned.
         if ("".equals(column.getDefaultValue()))
         {
