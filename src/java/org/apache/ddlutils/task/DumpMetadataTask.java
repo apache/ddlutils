@@ -293,8 +293,10 @@ public class DumpMetadataTask extends Task
         {
             addProperty(parent, getPropertyName(propGetter.getName()), propGetter.invoke(obj, null));
         }
-        catch (Exception ex)
-        {}
+        catch (Throwable ex)
+        {
+            log("Could not dump property "+propGetter.getName()+" because of "+ex.getMessage(), Project.MSG_WARN);
+        }
     }
 
     /**
