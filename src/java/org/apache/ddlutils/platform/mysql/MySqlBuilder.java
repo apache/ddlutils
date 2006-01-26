@@ -76,10 +76,18 @@ public class MySqlBuilder extends SqlBuilder
 
     /**
      * {@inheritDoc}
+     * Normally mysql will return the LAST_INSERT_ID as the column name for the inserted id.
+     * Since ddlutils expects the real column name of the field that is autoincrementing, the
+     * column has an alias of that column name.
      */
     public String getSelectLastInsertId(Table table)
     {
-        return "SELECT LAST_INSERT_ID()";
+        String autoIncrementKeyName = "";
+        if (table.getAutoIncrementColumns().length > 0)
+        {
+            autoIncrementKeyName = table.getAutoIncrementColumns()[0].getName();
+        }
+        return "SELECT LAST_INSERT_ID() " + autoIncrementKeyName;
     }
 
     /**
