@@ -1455,7 +1455,16 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public Database readModelFromDatabase(String name, String catalog, String schema, String[] tableTypes) throws DynaSqlException
     {
-        return readModelFromDatabase(borrowConnection(), name, catalog, schema, tableTypes);
+        Connection connection = borrowConnection();
+
+        try
+        {
+            return readModelFromDatabase(connection, name, catalog, schema, tableTypes);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
     }
 
     /**
@@ -1546,13 +1555,33 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             statement.setNull(sqlIndex, typeCode);
         }
+        else if (value instanceof String)
+        {
+            statement.setString(sqlIndex, (String)value);
+        }
         else if (value instanceof byte[])
         {
             statement.setBytes(sqlIndex, (byte[])value);
         }
-        else if (value instanceof String)
+        else if (value instanceof Boolean)
         {
-            statement.setString(sqlIndex, (String)value);
+            statement.setBoolean(sqlIndex, ((Boolean)value).booleanValue());
+        }
+        else if (value instanceof Byte)
+        {
+            statement.setByte(sqlIndex, ((Byte)value).byteValue());
+        }
+        else if (value instanceof Short)
+        {
+            statement.setShort(sqlIndex, ((Short)value).shortValue());
+        }
+        else if (value instanceof Integer)
+        {
+            statement.setInt(sqlIndex, ((Integer)value).intValue());
+        }
+        else if (value instanceof Long)
+        {
+            statement.setLong(sqlIndex, ((Long)value).longValue());
         }
         else if (value instanceof BigDecimal)
         {
