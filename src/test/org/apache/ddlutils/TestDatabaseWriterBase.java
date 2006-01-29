@@ -45,9 +45,13 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     public static final String JDBC_PROPERTIES_PROPERTY = "jdbc.properties.file";
     /** The prefix for properties of the datasource. */
     public static final String DATASOURCE_PROPERTY_PREFIX = "datasource.";
+    /** The prefix for properties for ddlutils. */
+    public static final String DDLUTILS_PROPERTY_PREFIX = "ddlutils.";
     /** The property for specifying the platform. */
-    public static final String PLATFORM_PROPERTY = "ddlutils.platform";
+    public static final String PLATFORM_PROPERTY = DDLUTILS_PROPERTY_PREFIX + "platform";
 
+    /** The test properties as defined by an external properties file. */
+    private static Properties _testProps;
     /** The data source to test against. */
     private static DataSource _dataSource;
     /** The database name. */
@@ -65,6 +69,42 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
 
     /**
+     * Returns the test properties.
+     * 
+     * @return The properties
+     */
+    protected Properties getTestProperties()
+    {
+    	if (_testProps == null)
+    	{
+    		String propFile = System.getProperty(JDBC_PROPERTIES_PROPERTY);
+	
+	        if (propFile == null)
+	        {
+	        	throw new RuntimeException("Please specify the properties file via the jdbc.properties.file environment variable");
+	        }
+	        try
+	        {
+	            InputStream propStream = getClass().getResourceAsStream(propFile);
+	
+	            if (propStream == null)
+	            {
+	                propStream = new FileInputStream(propFile);
+	            }
+	            Properties props = new Properties();
+
+	            props.load(propStream);
+	            _testProps = props;
+	        }
+	        catch (Exception ex)
+	        {
+	        	throw new RuntimeException(ex);
+	        }
+    	}
+    	return _testProps;
+    }
+    
+    /**
      * Initializes the test datasource and the platform.
      */
     private void init()
@@ -76,19 +116,10 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             return;
         }
 
-        Properties props    = new Properties();
-        String     propFile = System.getProperty(JDBC_PROPERTIES_PROPERTY);
+        Properties props = getTestProperties();
 
         try
         {
-            InputStream propStream = getClass().getResourceAsStream(propFile);
-
-            if (propStream == null)
-            {
-                propStream = new FileInputStream(propFile);
-            }
-            props.load(propStream);
-
             String dataSourceClass = props.getProperty(DATASOURCE_PROPERTY_PREFIX + "class", BasicDataSource.class.getName());
 
             _dataSource = (DataSource)Class.forName(dataSourceClass).newInstance();
@@ -238,6 +269,20 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         }
     }
 
+    /**
+     * Reads the database model from the database.
+     * 
+     * @return The model
+     */
+    protected Database readModelFromDatabase(String databaseName)
+    {
+    	Properties props   = getTestProperties();
+        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
+        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+
+    	return getPlatform().readModelFromDatabase(databaseName, catalog, schema, null);
+    }
+    
     /**
      * Determines the value of the bean's property that has the given name. Depending on the
      * case-setting of the current builder, the case of teh name is considered or not. 
