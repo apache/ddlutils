@@ -197,7 +197,7 @@ public class TestConstraints extends RoundtripTestBase
         createDatabase(modelXml);
 
         assertEquals(getAdjustedModel(),
-                     getPlatform().readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"));
     }
 
     /**

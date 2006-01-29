@@ -377,7 +377,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='TIMESTAMP' required='true' default='1985-06-17 16:17:18.0'/>\n"+
+        "    <column name='avalue' type='TIMESTAMP' required='true' default='1985-06-17 16:17:18'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple BINARY column. */
@@ -490,7 +490,7 @@ public class TestDatatypes extends RoundtripTestBase
         assertEquals(expected2, beans.get(1), "avalue");
 
         assertEquals(getAdjustedModel(),
-                     getPlatform().readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -618,7 +618,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testFloatWithDefault()
     {
-        performDataTypeTest(TEST_FLOAT_MODEL_WITH_DEFAULT, null, new Double(1e+150), new Double(12345678.9012345));
+        performDataTypeTest(TEST_FLOAT_MODEL_WITH_DEFAULT, null, new Double(1e+100), new Double(12345678.9012345));
     }
 
     /**
@@ -634,7 +634,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testDoubleWithDefault()
     {
-        performDataTypeTest(TEST_DOUBLE_MODEL_WITH_DEFAULT, new Double(-1e+150), null, new Double(-987654321.098765));
+        performDataTypeTest(TEST_DOUBLE_MODEL_WITH_DEFAULT, new Double(-1e+100), null, new Double(-987654321.098765));
     }
 
     /**
@@ -658,7 +658,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testDecimalWithScale()
     {
-        performDataTypeTest(TEST_DECIMAL_MODEL_WITH_SCALE, new BigDecimal("0.0100000"), new BigDecimal("-87654321.1234567"));
+        performDataTypeTest(TEST_DECIMAL_MODEL_WITH_SCALE, new BigDecimal("0.0100001"), new BigDecimal("-87654321.1234567"));
     }
 
     /**
@@ -666,7 +666,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testDecimalWithScaleAndDefault()
     {
-        performDataTypeTest(TEST_DECIMAL_MODEL_WITH_SCALE_AND_DEFAULT, new BigDecimal("1.0000000"), null, new BigDecimal("12345678.7654321"));
+        performDataTypeTest(TEST_DECIMAL_MODEL_WITH_SCALE_AND_DEFAULT, new BigDecimal("1.0000001"), null, new BigDecimal("12345678.7654321"));
     }
 
     /**
@@ -690,7 +690,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testNumericWithScale()
     {
-        performDataTypeTest(TEST_NUMERIC_MODEL_WITH_SCALE, new BigDecimal("1234567.89012345"), new BigDecimal("1.00000000"));
+        performDataTypeTest(TEST_NUMERIC_MODEL_WITH_SCALE, new BigDecimal("1234567.89012345"), new BigDecimal("1.00000001"));
     }
 
     /**

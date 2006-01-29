@@ -301,10 +301,10 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         try
         {
-            assertEquals("Model names do not match",
+            assertEquals("Model names do not match.",
                          expected.getName(),
                          actual.getName());
-            assertEquals("Not the same number of tables",
+            assertEquals("Not the same number of tables.",
                          expected.getTableCount(),
                          actual.getTableCount());
             for (int tableIdx = 0; tableIdx < actual.getTableCount(); tableIdx++)
@@ -348,17 +348,17 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         if (_useDelimitedIdentifiers)
         {
-            assertEquals("Table names do not match",
+            assertEquals("Table names do not match.",
                          expected.getName(),
                          actual.getName());
         }
         else
         {
-            assertEquals("Table names do not match (ignoring case)",
+            assertEquals("Table names do not match (ignoring case).",
                          expected.getName().toUpperCase(),
                          actual.getName().toUpperCase());
         }
-        assertEquals("Not the same number of columns in table "+actual.getName(),
+        assertEquals("Not the same number of columns in table "+actual.getName()+".",
                      expected.getColumnCount(),
                      actual.getColumnCount());
         for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
@@ -366,7 +366,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
             assertEquals(expected.getColumn(columnIdx),
                          actual.getColumn(columnIdx));
         }
-        assertEquals("Not the same number of foreign keys in table "+actual.getName(),
+        assertEquals("Not the same number of foreign keys in table "+actual.getName()+".",
                      expected.getForeignKeyCount(),
                      actual.getForeignKeyCount());
         // order is not assumed with the way foreignkeys are returned.
@@ -387,7 +387,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                 }
             }
         }
-        assertEquals("Not the same number of indices in table "+actual.getName(),
+        assertEquals("Not the same number of indices in table "+actual.getName()+".",
                      expected.getIndexCount(),
                      actual.getIndexCount());
         for (int indexIdx = 0; indexIdx < actual.getIndexCount(); indexIdx++)
@@ -407,29 +407,29 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         if (_useDelimitedIdentifiers)
         {
-            assertEquals("Column names do not match",
+            assertEquals("Column names do not match.",
                          expected.getName(),
                          actual.getName());
         }
         else
         {
-            assertEquals("Column names do not match (ignoring case)",
+            assertEquals("Column names do not match (ignoring case).",
                          expected.getName().toUpperCase(),
                          actual.getName().toUpperCase());
         }
-        assertEquals("Primary key status not the same for column "+actual.getName(),
+        assertEquals("Primary key status not the same for column "+actual.getName()+".",
                      expected.isPrimaryKey(),
                      actual.isPrimaryKey());
-        assertEquals("Required status not the same for column "+actual.getName(),
+        assertEquals("Required status not the same for column "+actual.getName()+".",
                      expected.isRequired(),
                      actual.isRequired());
-        assertEquals("Auto-increment status not the same for column "+actual.getName(),
+        assertEquals("Auto-increment status not the same for column "+actual.getName()+".",
                      expected.isAutoIncrement(),
                      actual.isAutoIncrement());
-        assertEquals("Type code not the same for column "+actual.getName(),
+        assertEquals("Type code not the same for column "+actual.getName()+".",
                      expected.getTypeCode(),
                      actual.getTypeCode());
-        assertEquals("Parsed default values do not match for column "+actual.getName(),
+        assertEquals("Parsed default values do not match for column "+actual.getName()+".",
                      expected.getParsedDefaultValue(),
                      actual.getParsedDefaultValue());
 
@@ -437,10 +437,10 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         if ((expected.getTypeCode() == Types.NUMERIC) ||
             (expected.getTypeCode() == Types.DECIMAL))
         {
-            assertEquals("Precision not the same for column "+actual.getName(),
+            assertEquals("Precision not the same for column "+actual.getName()+".",
                          expected.getSize(),
                          actual.getSize());
-            assertEquals("Scale not the same for column "+actual.getName(),
+            assertEquals("Scale not the same for column "+actual.getName()+".",
                          expected.getScale(),
                          actual.getScale());
         }
@@ -449,7 +449,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                  (expected.getTypeCode() == Types.BINARY) ||
                  (expected.getTypeCode() == Types.VARBINARY))
         {
-            assertEquals("Size not the same for column "+actual.getName(),
+            assertEquals("Size not the same for column "+actual.getName()+".",
                          expected.getSize(),
                          actual.getSize());
         }
@@ -465,23 +465,23 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         if (_useDelimitedIdentifiers)
         {
-            assertEquals("Foreign key names do not match",
+            assertEquals("Foreign key names do not match.",
                          expected.getName(),
                          actual.getName());
-            assertEquals("Referenced table names do not match",
+            assertEquals("Referenced table names do not match.",
                          expected.getForeignTableName(),
                          actual.getForeignTableName());
         }
         else
         {
-            assertEquals("Foreign key names do not match (ignoring case)",
+            assertEquals("Foreign key names do not match (ignoring case).",
                          expected.getName().toUpperCase(),
                          actual.getName().toUpperCase());
-            assertEquals("Referenced table names do not match (ignoring case)",
+            assertEquals("Referenced table names do not match (ignoring case).",
                          expected.getForeignTableName().toUpperCase(),
                          actual.getForeignTableName().toUpperCase());
         }
-        assertEquals("Not the same number of references in foreign key "+actual.getName(),
+        assertEquals("Not the same number of references in foreign key "+actual.getName()+".",
                      expected.getReferenceCount(),
                      actual.getReferenceCount());
         for (int refIdx = 0; refIdx < actual.getReferenceCount(); refIdx++)
@@ -501,19 +501,19 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         if (_useDelimitedIdentifiers)
         {
-            assertEquals("Local column names do not match",
+            assertEquals("Local column names do not match.",
                          expected.getLocalColumnName(),
                          actual.getLocalColumnName());
-            assertEquals("Foreign column names do not match",
+            assertEquals("Foreign column names do not match.",
                          expected.getForeignColumnName(),
                          actual.getForeignColumnName());
         }
         else
         {
-            assertEquals("Local column names do not match (ignoring case)",
+            assertEquals("Local column names do not match (ignoring case).",
                          expected.getLocalColumnName().toUpperCase(),
                          actual.getLocalColumnName().toUpperCase());
-            assertEquals("Foreign column names do not match (ignoring case)",
+            assertEquals("Foreign column names do not match (ignoring case).",
                          expected.getForeignColumnName().toUpperCase(),
                          actual.getForeignColumnName().toUpperCase());
         }
@@ -529,20 +529,20 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         if (_useDelimitedIdentifiers)
         {
-            assertEquals("Index names do not match",
+            assertEquals("Index names do not match.",
                          expected.getName(),
                          actual.getName());
         }
         else
         {
-            assertEquals("Index names do not match (ignoring case)",
+            assertEquals("Index names do not match (ignoring case).",
                          expected.getName().toUpperCase(),
                          actual.getName().toUpperCase());
         }
-        assertEquals("Unique status not the same for index "+actual.getName(),
+        assertEquals("Unique status not the same for index "+actual.getName()+".",
                      expected.isUnique(),
                      actual.isUnique());
-        assertEquals("Not the same number of columns in index "+actual.getName(),
+        assertEquals("Not the same number of columns in index "+actual.getName()+".",
                      expected.getColumnCount(),
                      actual.getColumnCount());
         for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
@@ -562,17 +562,17 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         if (_useDelimitedIdentifiers)
         {
-            assertEquals("Index column names do not match",
+            assertEquals("Index column names do not match.",
                          expected.getName(),
                          actual.getName());
         }
         else
         {
-            assertEquals("Index column names do not match (ignoring case)",
+            assertEquals("Index column names do not match (ignoring case).",
                          expected.getName().toUpperCase(),
                          actual.getName().toUpperCase());
         }
-        assertEquals("Size not the same for index column "+actual.getName(),
+        assertEquals("Size not the same for index column "+actual.getName()+".",
                      expected.getSize(),
                      actual.getSize());
     }
