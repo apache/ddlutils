@@ -17,6 +17,7 @@ package org.apache.ddlutils.platform;
  */
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -223,7 +224,7 @@ public class JdbcModelReader
         result.add(new MetaDataColumnDescriptor("NON_UNIQUE",       Types.BIT, Boolean.TRUE));
         result.add(new MetaDataColumnDescriptor("ORDINAL_POSITION", Types.TINYINT, new Short((short)0)));
         result.add(new MetaDataColumnDescriptor("COLUMN_NAME",      Types.VARCHAR));
-        
+        result.add(new MetaDataColumnDescriptor("TYPE",             Types.TINYINT));
 
         return result;
     }
@@ -865,32 +866,44 @@ public class JdbcModelReader
      */
     protected void readIndex(DatabaseMetaDataWrapper metaData, Map values, Map knownIndices) throws SQLException
     {
+        Short indexType = (Short)values.get("TYPE");
+
+        // we're ignoring statistic indices
+        if ((indexType != null) && (indexType.shortValue() == DatabaseMetaData.tableIndexStatistic))
+        {
+        	return;
+        }
+        
         String indexName = (String)values.get("INDEX_NAME");
-        Index  index     = (Index)knownIndices.get(indexName);
 
-        if ((index == null) && (indexName != null))
+        if (indexName != null)
         {
-            if (((Boolean)values.get("NON_UNIQUE")).booleanValue())
-            {
-                index = new NonUniqueIndex();
-            }
-            else
-            {
-                index = new UniqueIndex();
-            }
+	        Index index = (Index)knownIndices.get(indexName);
+	
+	        if (index == null)
+	        {
+	            if (((Boolean)values.get("NON_UNIQUE")).booleanValue())
+	            {
+	                index = new NonUniqueIndex();
+	            }
+	            else
+	            {
+	                index = new UniqueIndex();
+	            }
 
-            index.setName(indexName);
-            knownIndices.put(indexName, index);
+	            index.setName(indexName);
+	            knownIndices.put(indexName, index);
+	        }
+	
+	        IndexColumn indexColumn = new IndexColumn();
+	
+	        indexColumn.setName((String)values.get("COLUMN_NAME"));
+	        if (values.containsKey("ORDINAL_POSITION"))
+	        {
+	            indexColumn.setOrdinalPosition(((Short)values.get("ORDINAL_POSITION")).intValue());
+	        }
+	        index.addColumn(indexColumn);
         }
-
-        IndexColumn indexColumn = new IndexColumn();
-
-        indexColumn.setName((String)values.get("COLUMN_NAME"));
-        if (values.containsKey("ORDINAL_POSITION"))
-        {
-            indexColumn.setOrdinalPosition(((Short)values.get("ORDINAL_POSITION")).intValue());
-        }
-        index.addColumn(indexColumn);
     }
 
     /**
@@ -957,10 +970,12 @@ public class JdbcModelReader
         }
         query.append(" WHERE 1 = 0");
         
-        Statement         stmt       = null;
+        Statement stmt = null;
+
         try
         {
             stmt = getConnection().createStatement();
+
             ResultSet         rs         = stmt.executeQuery(query.toString());
             ResultSetMetaData rsMetaData = rs.getMetaData();
         
