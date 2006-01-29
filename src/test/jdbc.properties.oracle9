@@ -14,3 +14,7 @@ datasource.driverClassName=oracle.jdbc.driver.OracleDriver
 datasource.url=jdbc:oracle:thin:@localhost:1521:ddlutilstest
 datasource.username=ddlutils
 datasource.password=ddlutils
+
+# For oracle, we should limit the schema to the one of the user
+# Note that Oracle requires this to be uppercase, even when using delimited identifiers
+ddlutils.schema=DDLUTILS
