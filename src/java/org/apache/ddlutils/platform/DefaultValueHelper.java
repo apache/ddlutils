@@ -16,6 +16,9 @@ package org.apache.ddlutils.platform;
  * limitations under the License.
  */
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 
 import org.apache.commons.beanutils.ConversionException;
@@ -51,6 +54,31 @@ public class DefaultValueHelper
                 case Types.BIT:
                     result = convertBoolean(defaultValue, targetTypeCode).toString();
                     break;
+                case Types.DATE:
+                	if (targetTypeCode == Types.TIMESTAMP)
+                	{
+                		try
+                		{
+                			Date date = Date.valueOf(result);
+
+                			return new Timestamp(date.getTime()).toString();
+                		}
+                		catch (IllegalArgumentException ex)
+                		{}
+                	}
+                	break;
+                case Types.TIME:
+                	if (targetTypeCode == Types.TIMESTAMP)
+                	{
+                		try
+                		{
+                			Time time = Time.valueOf(result);
+
+                			return new Timestamp(time.getTime()).toString();
+                		}
+                		catch (IllegalArgumentException ex)
+                		{}
+                	}
                 default:
                     if (Jdbc3Utils.supportsJava14JdbcTypes() &&
                         (originalTypeCode == Jdbc3Utils.determineBooleanTypeCode()))
