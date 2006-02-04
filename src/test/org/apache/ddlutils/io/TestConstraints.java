@@ -21,9 +21,6 @@ import junit.framework.Test;
 /**
  * Performs the constraint tests.
  * 
- * TODO: Change to a parameterized test in order to test in delimited and
- *       in undelimited identifiers modes
- * 
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
