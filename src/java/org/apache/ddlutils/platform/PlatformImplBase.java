@@ -385,14 +385,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Database desiredDb, boolean continueOnError) throws DynaSqlException
-    {
-        alterTables(desiredDb, false, false, continueOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void alterTables(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         Connection connection = borrowConnection();
@@ -422,14 +414,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             returnConnection(connection);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void alterTables(Database desiredDb, CreationParameters params, boolean continueOnError) throws DynaSqlException
-    {
-        alterTables(desiredDb, params, false, false, continueOnError);
     }
 
     /**
@@ -469,14 +453,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Connection connection, Database desiredDb, boolean continueOnError) throws DynaSqlException
-    {
-        alterTables(connection, desiredDb, false, false, continueOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void alterTables(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
     {
         String sql = getAlterTablesSql(connection, desiredModel, doDrops, modifyColumns, continueOnError);
@@ -505,14 +481,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             // won't happen because we're using a string writer
         }
         return sql;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void alterTables(Connection connection, Database desiredDb, CreationParameters params, boolean continueOnError) throws DynaSqlException
-    {
-        alterTables(connection, desiredDb, params, false, false, continueOnError);
     }
 
     /**
