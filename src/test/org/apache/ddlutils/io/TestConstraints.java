@@ -16,6 +16,8 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.model.Database;
+
 import junit.framework.Test;
 
 /**
@@ -185,16 +187,30 @@ public class TestConstraints extends RoundtripTestBase
     }
     
     /**
-     * Tests a nullable column.
+     * Tests a nullable column. Basically we're creating the test database
+     * and then read it back and compare the original with the read one.
+     * In addition we can also check that DdlUtils does not try to alter the new
+     * database when using the <code>alterTables</code>/<code>getAlterTablesSql</code>
+     * methods of the {@link org.apache.ddlutils.Platform} with the read-back model.
      * 
-     * @param modelXml The model to be tested in XML form
+     * @param modelXml        The model to be tested in XML form
+     * @param checkAlteration Whether to also check the alter tables sql
      */
-    protected void performConstraintsTest(String modelXml)
+    protected void performConstraintsTest(String modelXml, boolean checkAlteration)
     {
         createDatabase(modelXml);
 
+        Database modelFromDb = readModelFromDatabase("roundtriptest");
+        
         assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
+        		     modelFromDb);
+
+        if (checkAlteration)
+        {
+	        String alterTablesSql = getAlterTablesSql(modelFromDb).trim();
+	
+	        assertTrue(alterTablesSql.length() == 0);
+        }
     }
 
     /**
@@ -202,7 +218,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testNullableColumn()
     {
-        performConstraintsTest(TEST_NULL_MODEL);
+        performConstraintsTest(TEST_NULL_MODEL, true);
     }
 
     /**
@@ -210,7 +226,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testNotNullableColumn()
     {
-        performConstraintsTest(TEST_NOT_NULL_MODEL);
+        performConstraintsTest(TEST_NOT_NULL_MODEL, true);
     }
 
     /**
@@ -221,7 +237,8 @@ public class TestConstraints extends RoundtripTestBase
         // only test this if the platform supports it
         if (getPlatformInfo().isSupportingNonPKIdentityColumns())
         {
-            performConstraintsTest(TEST_AUTO_INCREMENT_INTEGER_MODEL);
+            performConstraintsTest(TEST_AUTO_INCREMENT_INTEGER_MODEL,
+            		               getPlatformInfo().getCanReadAutoIncrementStatus());
         }
     }
 
@@ -230,7 +247,8 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testPrimaryKeyAutoIncrementColumn()
     {
-        performConstraintsTest(TEST_PRIMARY_KEY_AUTO_INCREMENT_MODEL);
+        performConstraintsTest(TEST_PRIMARY_KEY_AUTO_INCREMENT_MODEL,
+	                           getPlatformInfo().getCanReadAutoIncrementStatus());
     }
 
     /**
@@ -240,7 +258,7 @@ public class TestConstraints extends RoundtripTestBase
     {
         if (getPlatformInfo().isSupportingNonUniqueIndices())
         {
-            performConstraintsTest(TEST_INDEX_MODEL);
+            performConstraintsTest(TEST_INDEX_MODEL, true);
         }
     }
 
@@ -249,7 +267,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testUniqueIndex()
     {
-        performConstraintsTest(TEST_UNIQUE_INDEX_MODEL);
+        performConstraintsTest(TEST_UNIQUE_INDEX_MODEL, true);
     }
 
     /**
@@ -259,7 +277,7 @@ public class TestConstraints extends RoundtripTestBase
     {
         if (getPlatformInfo().isSupportingNonUniqueIndices())
         {
-            performConstraintsTest(TEST_PRIMARY_KEY_INDEX_MODEL);
+            performConstraintsTest(TEST_PRIMARY_KEY_INDEX_MODEL, true);
         }
     }
 
@@ -268,7 +286,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testSimpleForeignKey()
     {
-        performConstraintsTest(TEST_SIMPLE_FOREIGN_KEY_MODEL);
+        performConstraintsTest(TEST_SIMPLE_FOREIGN_KEY_MODEL, true);
     }
 
     /**
@@ -276,7 +294,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testOverlappingForeignKeys()
     {
-        performConstraintsTest(TEST_OVERLAPPING_FOREIGN_KEYS_MODEL);
+        performConstraintsTest(TEST_OVERLAPPING_FOREIGN_KEYS_MODEL, true);
     }
 
     /**
@@ -284,6 +302,6 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testCircularForeignKeys()
     {
-        performConstraintsTest(TEST_CIRCULAR_FOREIGN_KEYS_MODEL);
+        performConstraintsTest(TEST_CIRCULAR_FOREIGN_KEYS_MODEL, true);
     }
 }

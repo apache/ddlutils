@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.apache.ddlutils.model.Database;
+
 import junit.framework.Test;
 
 /**
@@ -467,7 +469,10 @@ public class TestDatatypes extends RoundtripTestBase
     }
 
     /**
-     * Performs a data type test.
+     * Performs a data type test. In short, we're testing creation of a database, insertion of values
+     * into it, and reading the model back. In addition we also check that DdlUtils does not try to
+     * alter the new database when using the <code>alterTables</code>/<code>getAlterTablesSql</code>
+     * methods of the {@link org.apache.ddlutils.Platform} with the read-back model.
      * 
      * @param modelXml  The model as XML
      * @param inserted1 The non-pk value to insert for the first row 
@@ -486,8 +491,14 @@ public class TestDatatypes extends RoundtripTestBase
         assertEquals(expected1, beans.get(0), "avalue");
         assertEquals(expected2, beans.get(1), "avalue");
 
+        Database modelFromDb = readModelFromDatabase("roundtriptest");
+        
         assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
+                     modelFromDb);
+
+        String alterTablesSql = getAlterTablesSql(modelFromDb).trim();
+
+        assertTrue(alterTablesSql.length() == 0);
     }
 
     /**

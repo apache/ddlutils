@@ -284,6 +284,20 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
     
     /**
+     * Reads the database model from the database.
+     * 
+     * @return The model
+     */
+    protected String getAlterTablesSql(Database desiredModel)
+    {
+    	Properties props   = getTestProperties();
+        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
+        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+
+        return getPlatform().getAlterTablesSql(catalog, schema, null, desiredModel, true, true, true);
+    }
+
+    /**
      * Determines the value of the bean's property that has the given name. Depending on the
      * case-setting of the current builder, the case of teh name is considered or not. 
      * 

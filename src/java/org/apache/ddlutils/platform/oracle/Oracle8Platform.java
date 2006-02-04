@@ -58,6 +58,7 @@ public class Oracle8Platform extends PlatformImplBase
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
+        info.setCanReadAutoIncrementStatus(false);
 
         // Note that the back-mappings are partially done by the model reader, not the driver
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",             Types.BLOB);

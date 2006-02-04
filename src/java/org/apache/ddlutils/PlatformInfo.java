@@ -121,6 +121,9 @@ public class PlatformInfo
     /** Whether the database returns a synthetic default value for non-identity required columns. */ 
     private boolean _returningDefaultValueForRequired = false;
     
+    /** Whether the platform is able to determine auto increment status from an existing database. */ 
+    private boolean _canReadAutoIncrementStatus = true;
+
     /**
      * Creates a new platform info object.
      */
@@ -871,4 +874,27 @@ public class PlatformInfo
         _returningDefaultValueForRequired = returningDefaultValue;
     }
 
+    /**
+     * Determines whether the platform is able to read the auto-increment status for columns
+     * from an existing database.
+     * 
+     * @return <code>true</code> if the auto-increment status can be determined from an existing
+     *         database
+     */
+	public boolean getCanReadAutoIncrementStatus()
+	{
+		return _canReadAutoIncrementStatus;
+	}
+
+    /**
+     * Specifies whether the platform is able to read the auto-increment status for columns
+     * from an existing database.
+     * 
+     * @param canReadAutoIncrementStatus <code>true</code> if the auto-increment status can be
+     *                                   determined from an existing database
+     */
+	public void setCanReadAutoIncrementStatus(boolean canReadAutoIncrementStatus)
+	{
+		_canReadAutoIncrementStatus = canReadAutoIncrementStatus;
+	}
 }
