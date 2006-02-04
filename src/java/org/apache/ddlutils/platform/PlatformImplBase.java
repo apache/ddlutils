@@ -516,7 +516,141 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         return sql;
     }
 
-    /**
+	/**
+     * {@inheritDoc}
+     */
+	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	{
+        Connection connection = borrowConnection();
+
+        try
+        {
+            alterTables(connection, catalog, schema, tableTypes, desiredModel, doDrops, modifyColumns, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	{
+        Connection connection = borrowConnection();
+
+        try
+        {
+            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, doDrops, modifyColumns, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	{
+        Connection connection = borrowConnection();
+
+        try
+        {
+            alterTables(connection, catalog, schema, tableTypes, desiredModel, params, doDrops, modifyColumns, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+    public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params, doDrops, modifyColumns, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    {
+        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, doDrops, modifyColumns, continueOnError);
+
+        evaluateBatch(connection, sql, continueOnError);
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	{
+        String   sql          = null;
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+        try
+        {
+            StringWriter buffer = new StringWriter();
+
+            getSqlBuilder().setWriter(buffer);
+            getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
+            sql = buffer.toString();
+        }
+        catch (IOException ex)
+        {
+            // won't happen because we're using a string writer
+        }
+        return sql;
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	{
+        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params, doDrops, modifyColumns, continueOnError);
+
+        evaluateBatch(connection, sql, continueOnError);
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	{
+        String   sql          = null;
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+        try
+        {
+            StringWriter buffer = new StringWriter();
+
+            getSqlBuilder().setWriter(buffer);
+            getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
+            sql = buffer.toString();
+        }
+        catch (IOException ex)
+        {
+            // won't happen because we're using a string writer
+        }
+        return sql;
+	}
+
+	/**
      * {@inheritDoc}
      */
     public void dropTables(Database model, boolean continueOnError) throws DynaSqlException

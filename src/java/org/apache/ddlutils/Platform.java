@@ -307,6 +307,78 @@ public interface Platform
     /**
      * Alters the database schema so that it match the given model.
      *
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Returns the SQL for altering the database schema so that it match the given model.
+     *
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     * @return The SQL statements
+     */
+    public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model.
+     *
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Returns the SQL for altering the database schema so that it match the given model.
+     *
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     * @return The SQL statements
+     */
+    public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model.
+     *
      * @param connection      A connection to the existing database that shall be modified
      * @param desiredDb       The desired database schema
      * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
@@ -355,6 +427,82 @@ public interface Platform
      * @return The SQL statements
      */
     public String getAlterTablesSql(Connection connection, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model.
+     *
+     * @param connection      A connection to the existing database that shall be modified
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Returns the SQL for altering the database schema so that it match the given model.
+     *
+     * @param connection      A connection to the existing database that shall be modified
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     * @return The SQL statements
+     */
+    public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Alters the database schema so that it match the given model.
+     *
+     * @param connection      A connection to the existing database that shall be modified
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     */
+    public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
+
+    /**
+     * Returns the SQL for altering the database schema so that it match the given model.
+     *
+     * @param connection      A connection to the existing database that shall be modified
+     * @param catalog         The catalog in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param schema          The schema in the existing database to read (can be a pattern);
+     *                        use <code>null</code> for the platform-specific default value
+     * @param tableTypes      The table types to read from the existing database;
+     *                        use <code>null</code> or an empty array for the platform-specific default value
+     * @param desiredDb       The desired database schema
+     * @param params          The parameters used in the creation
+     * @param doDrops         Whether columns, tables and indexes should be dropped if not in the
+     *                        new schema
+     * @param modifyColumns   Whether columns should be altered for datatype, size as required
+     * @param continueOnError Whether to continue with the next sql statement when an error occurred
+     * @return The SQL statements
+     */
+    public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException;
 
     /**
      * Drops the tables defined in the given database.
