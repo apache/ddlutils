@@ -49,11 +49,11 @@ import org.apache.oro.text.regex.Perl5Matcher;
  */
 public class Oracle8ModelReader extends JdbcModelReader
 {
-	/** The regular expression pattern for the Oracle concersion of ISO dates. */
+	/** The regular expression pattern for the Oracle conversion of ISO dates. */
 	private Pattern _oracleIsoDatePattern;
-	/** The regular expression pattern for the Oracle concersion of ISO times. */
+	/** The regular expression pattern for the Oracle conversion of ISO times. */
 	private Pattern _oracleIsoTimePattern;
-	/** The regular expression pattern for the Oracle concersion of ISO timestamps. */
+	/** The regular expression pattern for the Oracle conversion of ISO timestamps. */
 	private Pattern _oracleIsoTimestampPattern;
 
 	/**
