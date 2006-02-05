@@ -50,6 +50,9 @@
   <taskdef classname="org.apache.ddlutils.task.DumpMetadataTask"
            name="dumpMetadata"
            classpathref="project-classpath" />
+  <taskdef classname="org.apache.ddlutils.task.DatabaseToDdlTask"
+           name="databaseToDdl"
+           classpathref="project-classpath" />
 	
   <target name="dump-metadata"
           description="Dumps the metadata using the connection properties from the file specified via the jdbc.properties.file environment variable">
@@ -67,5 +70,18 @@
                 username="${datasource.username}"
                 password="${datasource.password}"/> 
     </dumpMetadata> 
-  </target> 
+  </target>
+  <target name="dump-model"
+          description="Dumps the database model using the connection properties from the file specified via the jdbc.properties.file environment variable">
+    <databaseToDdl databasetype="${ddlutils.platform}"
+                   tabletypes="${tabletypes}"
+                   catalog="${catalogpattern}"
+                   schema="${schemapattern}">
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+      <writeschematofile outputfile="${outputfile}"/> 
+    </databaseToDdl> 
+  </target>
 </project>
