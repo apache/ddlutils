@@ -431,6 +431,9 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
 	                     expected.isAutoIncrement(),
 	                     actual.isAutoIncrement());
         }
+        assertEquals("Type not the same for column "+actual.getName()+".",
+                     expected.getType(),
+                     actual.getType());
         assertEquals("Type code not the same for column "+actual.getName()+".",
                      expected.getTypeCode(),
                      actual.getTypeCode());
