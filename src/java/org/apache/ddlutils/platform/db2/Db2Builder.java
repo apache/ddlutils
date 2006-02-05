@@ -17,11 +17,13 @@ package org.apache.ddlutils.platform.db2;
  */
 
 import java.io.IOException;
+import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The SQL Builder for DB2.
@@ -41,7 +43,24 @@ public class Db2Builder extends SqlBuilder
     {
         super(info);
     }
-    
+
+
+    /**
+     * {@inheritDoc}
+     */
+    protected String getNativeDefaultValue(Column column)
+    {
+        if ((column.getTypeCode() == Types.BIT) ||
+            (Jdbc3Utils.supportsJava14JdbcTypes() && (column.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode())))
+        {
+            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
+        }
+        else
+        {
+            return super.getNativeDefaultValue(column);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
