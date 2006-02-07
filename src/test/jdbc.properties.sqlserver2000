@@ -1,0 +1,25 @@
+# JDBC properties for Microsoft Sql Server 2000
+
+# Use this property if ddlutils does not recognize the platform from the settings
+#ddlutils.platform=MsSql
+
+# Properties starting with "datasource." will be fed into the datasource instance of the
+# class configured via the datasource.class property
+
+datasource.class=org.apache.commons.dbcp.BasicDataSource
+
+# This is the Sql Server 2005 driver which is recommended for Sql Server 2000 too
+# Note that this new driver supports the new shorter subprotocol
+datasource.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver
+datasource.url=jdbc:sqlserver://localhost;databaseName=ddlutils;selectMethod=cursor
+
+# This is the older Sql Server 2000 driver
+#datasource.driverClassName=com.microsoft.jdbc.sqlserver.SQLServerDriver
+#datasource.url=jdbc:microsoft:sqlserver://localhost;databaseName=ddlutils;selectMethod=cursor
+
+datasource.username=ddlutils
+datasource.password=ddlutils
+
+# Sql Server supports both catalogs and schemas, so we should define them both
+ddlutils.catalog=ddlutils
+ddlutils.schema=ddlutils
