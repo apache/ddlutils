@@ -498,7 +498,8 @@ public class TestDatatypes extends RoundtripTestBase
 
         String alterTablesSql = getAlterTablesSql(modelFromDb).trim();
 
-        assertTrue(alterTablesSql.length() == 0);
+        assertEquals("",
+        		     alterTablesSql);
     }
 
     /**
