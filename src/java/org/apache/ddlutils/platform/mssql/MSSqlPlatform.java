@@ -30,11 +30,17 @@ import org.apache.ddlutils.platform.PlatformImplBase;
 public class MSSqlPlatform extends PlatformImplBase
 {
     /** Database name of this platform. */
-    public static final String DATABASENAME     = "MsSql";
+    public static final String DATABASENAME         = "MsSql";
     /** The standard SQLServer jdbc driver. */
-    public static final String JDBC_DRIVER      = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
-    /** The subprotocol used by the standard SQLServer driver. */
-    public static final String JDBC_SUBPROTOCOL = "microsoft:sqlserver";
+    public static final String JDBC_DRIVER          = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
+    /** The new SQLServer 2005 jdbc driver which can also be used for SQL Server 2000. */
+    public static final String JDBC_DRIVER_NEW      = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    /** The subprotocol used by the standard SQL Server driver. */
+    public static final String JDBC_SUBPROTOCOL     = "microsoft:sqlserver";
+    /** The subprotocol recommended for the newer SQL Server 2005 driver. */
+    public static final String JDBC_SUBPROTOCOL_NEW = "sqlserver";
+    /** The subprotocol internally returned by the newer SQL Server 2005 driver. */
+    public static final String JDBC_SUBPROTOCOL_INTERNAL = "sqljdbc";
 
     /**
      * Creates a new platform instance.
@@ -51,27 +57,29 @@ public class MSSqlPlatform extends PlatformImplBase
         //info.setCommentPrefix("#");
 
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE");
+        // BIGINT will be mapped back to BIGINT by the model reader 
         info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
-        info.addNativeTypeMapping(Types.BLOB,          "IMAGE");
-        info.addNativeTypeMapping(Types.CLOB,          "TEXT");
-        info.addNativeTypeMapping(Types.DATE,          "DATETIME");
+        info.addNativeTypeMapping(Types.BLOB,          "IMAGE",         Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.CLOB,          "TEXT",          Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DATE,          "DATETIME",      Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE");
-        info.addNativeTypeMapping(Types.DOUBLE,        "FLOAT");
+        info.addNativeTypeMapping(Types.DOUBLE,        "FLOAT",         Types.FLOAT);
         info.addNativeTypeMapping(Types.INTEGER,       "INT");
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE");
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE",         Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
-        info.addNativeTypeMapping(Types.NULL,          "IMAGE");
-        info.addNativeTypeMapping(Types.OTHER,         "IMAGE");
-        info.addNativeTypeMapping(Types.REF,           "IMAGE");
-        info.addNativeTypeMapping(Types.STRUCT,        "IMAGE");
-        info.addNativeTypeMapping(Types.TIME,          "DATETIME");
+        info.addNativeTypeMapping(Types.NULL,          "IMAGE",         Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.OTHER,         "IMAGE",         Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.REF,           "IMAGE",         Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "IMAGE",         Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.TIME,          "DATETIME",      Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        info.addNativeTypeMapping("BOOLEAN",  "BIT");
-        info.addNativeTypeMapping("DATALINK", "IMAGE");
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",      Types.SMALLINT);
+        info.addNativeTypeMapping("BOOLEAN",  "BIT",   "BIT");
+        info.addNativeTypeMapping("DATALINK", "IMAGE", "LONGVARBINARY");
 
         setSqlBuilder(new MSSqlBuilder(info));
+        setModelReader(new MSSqlModelReader(info));
     }
 
     /**

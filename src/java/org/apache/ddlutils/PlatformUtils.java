@@ -150,6 +150,8 @@ public class PlatformUtils
         jdbcSubProtocolToPlatform.put(SapDbPlatform.JDBC_SUBPROTOCOL,                           MaxDbPlatform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(MckoiPlatform.JDBC_SUBPROTOCOL,                           MckoiPlatform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(MSSqlPlatform.JDBC_SUBPROTOCOL,                           MSSqlPlatform.DATABASENAME);
+        jdbcSubProtocolToPlatform.put(MSSqlPlatform.JDBC_SUBPROTOCOL_NEW,                       MSSqlPlatform.DATABASENAME);
+        jdbcSubProtocolToPlatform.put(MSSqlPlatform.JDBC_SUBPROTOCOL_INTERNAL,                  MSSqlPlatform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(PlatformUtils.JDBC_SUBPROTOCOL_DATADIRECT_SQLSERVER,      MSSqlPlatform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(PlatformUtils.JDBC_SUBPROTOCOL_INET_SQLSERVER,            MSSqlPlatform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(PlatformUtils.JDBC_SUBPROTOCOL_INET_SQLSERVER6,           MSSqlPlatform.DATABASENAME);
@@ -193,6 +195,7 @@ public class PlatformUtils
         jdbcDriverToPlatform.put(SapDbPlatform.JDBC_DRIVER,                       MaxDbPlatform.DATABASENAME);
         jdbcDriverToPlatform.put(MckoiPlatform.JDBC_DRIVER,                       MckoiPlatform.DATABASENAME);
         jdbcDriverToPlatform.put(MSSqlPlatform.JDBC_DRIVER,                       MSSqlPlatform.DATABASENAME);
+        jdbcDriverToPlatform.put(MSSqlPlatform.JDBC_DRIVER_NEW,                   MSSqlPlatform.DATABASENAME);
         jdbcDriverToPlatform.put(PlatformUtils.JDBC_DRIVER_DATADIRECT_SQLSERVER,  MSSqlPlatform.DATABASENAME);
         jdbcDriverToPlatform.put(PlatformUtils.JDBC_DRIVER_INET_SQLSERVER,        MSSqlPlatform.DATABASENAME);
         jdbcDriverToPlatform.put(PlatformUtils.JDBC_DRIVER_JSQLCONNECT_SQLSERVER, MSSqlPlatform.DATABASENAME);

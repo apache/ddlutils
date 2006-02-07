@@ -17,6 +17,9 @@ package org.apache.ddlutils.platform.mssql;
  */
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
@@ -26,6 +29,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The SQL Builder for the Microsoft SQL Server.
@@ -60,8 +64,24 @@ public class MSSqlBuilder extends SqlBuilder
      */
     protected void alterTable(Database currentModel, Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
     {
-        writeQuotationOnStatement();
+    	// we only want to generate the quotation start statement if there is something to write
+    	// thus we write the alteration commands into a temporary writer
+    	// and only if something was written, write the quotation start statement and the
+    	// alteration commands to the original writer
+    	Writer       originalWriter = getWriter();
+    	StringWriter tempWriter     = new StringWriter();
+
+    	setWriter(tempWriter);
         super.alterTable(currentModel, currentTable, desiredModel, desiredTable, doDrops, modifyColumns);
+        setWriter(originalWriter);
+
+        String alterationCommands = tempWriter.toString();
+
+        if (alterationCommands.trim().length() > 0)
+        {
+        	writeQuotationOnStatement();
+        	getWriter().write(alterationCommands);
+        }
     }
 
     /**
@@ -110,6 +130,23 @@ public class MSSqlBuilder extends SqlBuilder
     {
         writeQuotationOnStatement();
         super.dropExternalForeignKeys(table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected String getNativeDefaultValue(Column column)
+    {
+    	// Sql Server wants BIT default values as 0 or 1
+        if ((column.getTypeCode() == Types.BIT) ||
+            (Jdbc3Utils.supportsJava14JdbcTypes() && (column.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode())))
+        {
+            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
+        }
+        else
+        {
+            return super.getNativeDefaultValue(column);
+        }
     }
 
     /**
