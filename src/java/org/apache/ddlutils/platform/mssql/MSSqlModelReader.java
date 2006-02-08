@@ -82,8 +82,8 @@ public class MSSqlModelReader extends JdbcModelReader
 	{
 		// Sql Server generates an index "[pk name in uppercase]__[table name]__[hex number]"
 		// TODO: test with multiple pks
-		StringBuilder pkIndexName = new StringBuilder();
-		Column[]      pks         = table.getPrimaryKeyColumns();
+		StringBuffer pkIndexName = new StringBuffer();
+		Column[]     pks         = table.getPrimaryKeyColumns();
 
 		if (pks.length > 0)
 		{
