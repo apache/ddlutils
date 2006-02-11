@@ -212,18 +212,52 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
 
     /**
-     * Creates a new database model from the given XML database schema.
+     * Creates a new database from the given XML database schema.
      * 
      * @param schemaXml The XML database schema
+     * @return The parsed database model
      */
-    protected void createDatabase(String schemaXml) throws DynaSqlException
+    protected Database createDatabase(String schemaXml) throws DynaSqlException
+    {
+    	Database model = parseDatabaseFromString(schemaXml);
+
+    	createDatabase(model);
+    	return model;
+    }
+
+    /**
+     * Creates a new database from the given model.
+     * 
+     * @param model The model
+     */
+    protected void createDatabase(Database model) throws DynaSqlException
     {
         try
         {
-            _model = parseDatabaseFromString(schemaXml);
+            _model = model;
 
             getPlatform().getPlatformInfo().setCommentsSupported(false);
             getPlatform().createTables(_model, false, false);
+        }
+        catch (Exception ex)
+        {
+            throw new DynaSqlException(ex);
+        }
+    }
+
+    /**
+     * Alters the database to match the given model.
+     * 
+     * @param model The model
+     */
+    protected void alterDatabase(Database model) throws DynaSqlException
+    {
+        try
+        {
+            _model = model;
+
+            getPlatform().getPlatformInfo().setCommentsSupported(false);
+            getPlatform().alterTables(_model, true, true, false);
         }
         catch (Exception ex)
         {
