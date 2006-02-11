@@ -75,32 +75,48 @@ public class MSSqlModelReader extends JdbcModelReader
         }
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+	protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+	{
+        Table table = super.readTable(metaData, values);
+
+        // Sql Server does not return the auto-increment status via the database metadata
+        determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+        return table;
+	}
+
     /**
      * {@inheritDoc}
      */
 	protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
 	{
-		// Sql Server generates an index "[pk name in uppercase]__[table name]__[hex number]"
-		// TODO: test with multiple pks
-		StringBuffer pkIndexName = new StringBuffer();
-		Column[]     pks         = table.getPrimaryKeyColumns();
+		// Sql Server generates an index "PK__[table name]__[hex number]"
+		StringBuilder pkIndexName = new StringBuilder();
+		Column[]      pks         = table.getPrimaryKeyColumns();
 
 		if (pks.length > 0)
 		{
-			for (int idx = 0; idx < pks.length; idx++)
-			{
-				pkIndexName.append(pks[idx].getName());
-			}
-			pkIndexName.append("__");
+			pkIndexName.append("PK__");
 			pkIndexName.append(table.getName());
 			pkIndexName.append("__");
 
-			return index.getName().toUpperCase().startsWith(pkIndexName.toString().toUpperCase());
+			if (index.getName().toUpperCase().startsWith(pkIndexName.toString().toUpperCase()))
+			{
+				// if its an index for the pk, then its columns have to be the pk columns
+				for (int idx = 0; idx < pks.length; idx++)
+				{
+					if (!pks[idx].getName().equals(index.getColumn(idx).getName()))
+					{
+						return false;
+					}
+				}
+				return true;
+			}
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 
     /**

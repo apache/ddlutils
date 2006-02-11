@@ -78,6 +78,11 @@ public class MSSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "BIT",   "BIT");
         info.addNativeTypeMapping("DATALINK", "IMAGE", "LONGVARBINARY");
 
+        info.addDefaultSize(Types.CHAR,       254);
+        info.addDefaultSize(Types.VARCHAR,    254);
+        info.addDefaultSize(Types.BINARY,     254);
+        info.addDefaultSize(Types.VARBINARY,  254);
+
         setSqlBuilder(new MSSqlBuilder(info));
         setModelReader(new MSSqlModelReader(info));
     }
