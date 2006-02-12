@@ -94,8 +94,8 @@ public class MSSqlModelReader extends JdbcModelReader
 	protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
 	{
 		// Sql Server generates an index "PK__[table name]__[hex number]"
-		StringBuilder pkIndexName = new StringBuilder();
-		Column[]      pks         = table.getPrimaryKeyColumns();
+		StringBuffer pkIndexName = new StringBuffer();
+		Column[]     pks         = table.getPrimaryKeyColumns();
 
 		if (pks.length > 0)
 		{
@@ -153,6 +153,15 @@ public class MSSqlModelReader extends JdbcModelReader
 				if (timestamp != null)
 				{
 					defaultValue = timestamp.toString();
+				}
+			}
+			else if (column.getTypeCode() == Types.DECIMAL)
+			{
+				// For some reason, Sql Server 2005 always returns DECIMAL default values with a dot
+				// even if the scale is 0, so we remove the dot
+				if ((column.getScale() == 0) && defaultValue.endsWith("."))
+				{
+					defaultValue = defaultValue.substring(0, defaultValue.length() - 1);
 				}
 			}
 			column.setDefaultValue(defaultValue);
