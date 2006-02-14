@@ -41,6 +41,8 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     private ArrayList _fileSets = new ArrayList();
     /** Whether XML input files are validated against the internal or an external DTD. */
     private boolean _useInternalDtd = true;
+    /** Whether XML input files are validated at all. */
+    private boolean _validateXml = false;
 
     /**
      * Specifies whether XML input files are validated against the internal or an external DTD.
@@ -50,6 +52,16 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     public void setUseInternalDtd(boolean useInternalDtd)
     {
         _useInternalDtd = useInternalDtd;
+    }
+
+    /**
+     * Specifies whether XML input files are validated at all.
+     *
+     * @param validateXml <code>true</code> if input files are to be validated
+     */
+    public void setValidateXml(boolean validateXml)
+    {
+        _validateXml = validateXml;
     }
 
     /**
@@ -150,6 +162,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
         DatabaseIO reader = new DatabaseIO();
         Database   model  = null;
 
+        reader.setValidateXml(_validateXml);
         reader.setUseInternalDtd(_useInternalDtd);
         if ((_singleSchemaFile != null) && !_fileSets.isEmpty())
         {
