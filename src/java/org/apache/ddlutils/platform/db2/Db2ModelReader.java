@@ -90,8 +90,11 @@ public class Db2ModelReader extends JdbcModelReader
 
         Table table = super.readTable(metaData, values);
 
-        // Db2 does not return the auto-increment status via the database metadata
-        determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+        if (table != null)
+        {
+            // Db2 does not return the auto-increment status via the database metadata
+            determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+        }
         return table;
 	}
 

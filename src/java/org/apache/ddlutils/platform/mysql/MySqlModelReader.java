@@ -55,10 +55,12 @@ public class MySqlModelReader extends JdbcModelReader
      */
     protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
-        Table table =  super.readTable(metaData, values);
+        Table table = super.readTable(metaData, values);
 
-        determineAutoIncrementFromResultSetMetaData(table, table.getPrimaryKeyColumns());
-        
+        if (table != null)
+        {
+            determineAutoIncrementFromResultSetMetaData(table, table.getPrimaryKeyColumns());
+        }
         return table;
     }
 

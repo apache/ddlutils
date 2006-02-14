@@ -53,12 +53,15 @@ public class HsqlDbModelReader extends JdbcModelReader
     {
         Table table = super.readTable(metaData, values);
 
-        // For at least version 1.7.2 we have to determine the auto-increment columns
-        // from a result set meta data because the database does not put this info
-        // into the database metadata
-        // Since Hsqldb only allows IDENTITY for primary key columns, we restrict
-        // our search to those columns
-        determineAutoIncrementFromResultSetMetaData(table, table.getPrimaryKeyColumns());
+        if (table != null)
+        {
+            // For at least version 1.7.2 we have to determine the auto-increment columns
+            // from a result set meta data because the database does not put this info
+            // into the database metadata
+            // Since Hsqldb only allows IDENTITY for primary key columns, we restrict
+            // our search to those columns
+            determineAutoIncrementFromResultSetMetaData(table, table.getPrimaryKeyColumns());
+        }
         
         return table;
     }

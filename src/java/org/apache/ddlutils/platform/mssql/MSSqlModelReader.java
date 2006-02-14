@@ -83,8 +83,11 @@ public class MSSqlModelReader extends JdbcModelReader
 	{
         Table table = super.readTable(metaData, values);
 
-        // Sql Server does not return the auto-increment status via the database metadata
-        determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+        if (table != null)
+        {
+            // Sql Server does not return the auto-increment status via the database metadata
+            determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+        }
         return table;
 	}
 

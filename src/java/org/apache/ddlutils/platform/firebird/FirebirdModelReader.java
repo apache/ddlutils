@@ -80,9 +80,12 @@ public class FirebirdModelReader extends JdbcModelReader
     {
         Table table = super.readTable(metaData, values);
 
-        determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
-        // fix the indexes.
-        fixIndexes(table);
+        if (table != null)
+        {
+            determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+            // fix the indexes.
+            fixIndexes(table);
+        }
 
         return table;
     }

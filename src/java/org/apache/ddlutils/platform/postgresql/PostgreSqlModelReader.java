@@ -57,30 +57,33 @@ public class PostgreSqlModelReader extends JdbcModelReader
     {
         Table table = super.readTable(metaData, values);
 
-        // PostgreSQL also returns unique indics for non-pk auto-increment columns
-        // which are of the form "[table]_[column]_key"
-        HashMap uniquesByName = new HashMap();
-
-        for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
+        if (table != null)
         {
-            Index index = table.getIndex(indexIdx);
-
-            if (index.isUnique() && (index.getName() != null))
+            // PostgreSQL also returns unique indics for non-pk auto-increment columns
+            // which are of the form "[table]_[column]_key"
+            HashMap uniquesByName = new HashMap();
+    
+            for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
             {
-                uniquesByName.put(index.getName(), index);
-            }
-        }
-        for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
-        {
-            Column column = table.getColumn(columnIdx);
-            if (column.isAutoIncrement() && !column.isPrimaryKey())
-            {
-                String indexName = table.getName() + "_" + column.getName() + "_key";
-
-                if (uniquesByName.containsKey(indexName))
+                Index index = table.getIndex(indexIdx);
+    
+                if (index.isUnique() && (index.getName() != null))
                 {
-                    table.removeIndex((Index)uniquesByName.get(indexName));
-                    uniquesByName.remove(indexName);
+                    uniquesByName.put(index.getName(), index);
+                }
+            }
+            for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
+            {
+                Column column = table.getColumn(columnIdx);
+                if (column.isAutoIncrement() && !column.isPrimaryKey())
+                {
+                    String indexName = table.getName() + "_" + column.getName() + "_key";
+    
+                    if (uniquesByName.containsKey(indexName))
+                    {
+                        table.removeIndex((Index)uniquesByName.get(indexName));
+                        uniquesByName.remove(indexName);
+                    }
                 }
             }
         }
