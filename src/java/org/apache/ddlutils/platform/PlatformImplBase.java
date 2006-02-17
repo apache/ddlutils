@@ -1281,6 +1281,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         Table   table        = model.findTable(dynaClass.getTableName());
         HashMap columnValues = toColumnValues(properties, bean);
 
+        columnValues.putAll(toColumnValues(primaryKeys, bean));
+
         return _builder.getUpdateSql(table, columnValues, bean == null);
     }
 
@@ -1333,7 +1335,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             {
                 setObject(statement, sqlIndex++, dynaBean, properties[idx]);
             }
-            for (int idx = 0; idx < properties.length; idx++)
+            for (int idx = 0; idx < primaryKeys.length; idx++)
             {
                 setObject(statement, sqlIndex++, dynaBean, primaryKeys[idx]);
             }

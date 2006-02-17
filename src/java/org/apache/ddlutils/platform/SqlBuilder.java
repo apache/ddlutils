@@ -791,8 +791,9 @@ public abstract class SqlBuilder
      * update statement usable in a prepared statement is build.
      * 
      * @param table           The table
-     * @param columnValues    Contains the primary key values to identify the object to update
-     *                        and the values for the columns to update
+     * @param columnValues    Contains the values for the columns to update, and should also
+     *                        contain the primary key values to identify the object to update
+     *                        in case <code>genPlaceholders</code> is <code>false</code> 
      * @param genPlaceholders Whether to generate value placeholders for a
      *                        prepared statement (both for the pk values and the object values)
      * @return The update sql
