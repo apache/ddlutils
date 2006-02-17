@@ -17,9 +17,11 @@ package org.apache.ddlutils.platform.mysql;
  */
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -62,6 +64,23 @@ public class MySqlModelReader extends JdbcModelReader
             determineAutoIncrementFromResultSetMetaData(table, table.getPrimaryKeyColumns());
         }
         return table;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Column readColumn(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+    {
+        Column column = super.readColumn(metaData, values);
+
+        // MySQL converts illegal date/time/timestamp values to "0000-00-00 00:00:00", but this
+        // is an illegal ISO value, so we replace it with NULL
+        if ((column.getTypeCode() == Types.TIMESTAMP) && 
+            "0000-00-00 00:00:00".equals(column.getDefaultValue()))
+        {
+            column.setDefaultValue(null);
+        }
+        return column;
     }
 
     /**
