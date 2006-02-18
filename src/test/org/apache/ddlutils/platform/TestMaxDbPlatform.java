@@ -138,4 +138,20 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
     }
+
+    /**
+     * Tests the proper escaping of character sequences where MaxDb requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "DROP TABLE \"escapedcharacters\" CASCADE;\n"+
+            "CREATE TABLE \"escapedcharacters\"\n"+
+            "(\n"+
+            "    \"COL_PK\"   INTEGER,\n"+
+            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
+            "    PRIMARY KEY (\"COL_PK\")\n"+
+            ");\n",
+            createTestDatabase(TestSapDbPlatform.COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+    }
 }

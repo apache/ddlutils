@@ -40,6 +40,7 @@ public class SapDbBuilder extends SqlBuilder
     public SapDbBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**

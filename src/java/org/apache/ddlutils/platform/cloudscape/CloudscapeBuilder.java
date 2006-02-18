@@ -39,6 +39,7 @@ public class CloudscapeBuilder extends SqlBuilder
     public CloudscapeBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**

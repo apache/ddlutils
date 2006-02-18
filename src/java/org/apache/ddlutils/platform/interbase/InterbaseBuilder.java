@@ -42,6 +42,7 @@ public class InterbaseBuilder extends SqlBuilder
     public InterbaseBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**

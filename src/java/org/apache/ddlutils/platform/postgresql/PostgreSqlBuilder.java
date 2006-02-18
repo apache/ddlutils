@@ -42,6 +42,15 @@ public class PostgreSqlBuilder extends SqlBuilder
     public PostgreSqlBuilder(PlatformInfo info)
     {
         super(info);
+        // we need to handle the backslash first otherwise the other
+        // already escaped sequences would be affected
+        addEscapedCharSequence("\\", "\\\\");
+        addEscapedCharSequence("'",  "\\'");
+        addEscapedCharSequence("\b", "\\b");
+        addEscapedCharSequence("\f", "\\f");
+        addEscapedCharSequence("\n", "\\n");
+        addEscapedCharSequence("\r", "\\r");
+        addEscapedCharSequence("\t", "\\t");
     }
 
     /**

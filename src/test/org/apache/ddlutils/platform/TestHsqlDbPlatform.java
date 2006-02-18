@@ -28,6 +28,28 @@ import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
  */
 public class TestHsqlDbPlatform extends TestPlatformBase
 {
+    /** The database schema for testing column constraints. This is an version adapted for HsqlDb. */
+    public static final String COLUMN_CONSTRAINT_TEST_SCHEMA =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+        "<database name='columnconstraintstest'>\n" +
+        "  <table name='constraints'>\n" +
+        "    <column name='COL_PK' type='VARCHAR' size='32' primaryKey='true'/>\n" +
+        "    <column name='COL_PK_AUTO_INCR' type='INTEGER' primaryKey='true' autoIncrement='true'/>\n" +
+        "    <column name='COL_NOT_NULL' type='BINARY' size='100' required='true'/>\n" +
+        "    <column name='COL_NOT_NULL_DEFAULT' type='DOUBLE' required='true' default='-2.0'/>\n" +
+        "    <column name='COL_DEFAULT' type='CHAR' size='4' default='test'/>\n" +
+        "  </table>\n" +
+        "</database>";
+    /** The database schema for testing escaping of character sequences. */
+    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+        "<database name='escapetest'>\n" +
+        "  <table name='escapedcharacters'>\n" +
+        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +
+        "  </table>\n" +
+        "</database>";
+
     /**
      * {@inheritDoc}
      */
@@ -47,10 +69,10 @@ public class TestHsqlDbPlatform extends TestPlatformBase
             "(\n" + //
             "    \"COL_ARRAY\"           LONGVARBINARY,\n"+
             "    \"COL_BIGINT\"          BIGINT,\n"+
-            "    \"COL_BINARY\"          BINARY,\n"+
-            "    \"COL_BIT\"             BIT,\n"+
+            "    \"COL_BINARY\"          BINARY("+Integer.MAX_VALUE+"),\n"+
+            "    \"COL_BIT\"             BOOLEAN,\n"+
             "    \"COL_BLOB\"            LONGVARBINARY,\n"+
-            "    \"COL_BOOLEAN\"         BIT,\n"+
+            "    \"COL_BOOLEAN\"         BOOLEAN,\n"+
             "    \"COL_CHAR\"            CHAR(15),\n"+
             "    \"COL_CLOB\"            LONGVARCHAR,\n"+
             "    \"COL_DATALINK\"        LONGVARBINARY,\n"+
@@ -73,7 +95,7 @@ public class TestHsqlDbPlatform extends TestPlatformBase
             "    \"COL_STRUCT\"          LONGVARBINARY,\n"+
             "    \"COL_TIME\"            TIME,\n"+
             "    \"COL_TIMESTAMP\"       TIMESTAMP,\n"+
-            "    \"COL_TINYINT\"         TINYINT,\n"+
+            "    \"COL_TINYINT\"         SMALLINT,\n"+
             "    \"COL_VARBINARY\"       VARBINARY(15),\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
             ");\n",
@@ -85,8 +107,6 @@ public class TestHsqlDbPlatform extends TestPlatformBase
      */
     public void testColumnConstraints() throws Exception
     {
-        // Note that this is not valid in Hsqldb as it supports only one IDENTITY column per table
-        // and a IDENTITY column also needs to be a primary key column (which COL_AUTO_INCR isn't)
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE \"constraints\" IF EXISTS;\n" +
             "CREATE TABLE \"constraints\"\n"+
@@ -96,7 +116,6 @@ public class TestHsqlDbPlatform extends TestPlatformBase
             "    \"COL_NOT_NULL\"         BINARY(100) NOT NULL,\n"+
             "    \"COL_NOT_NULL_DEFAULT\" DOUBLE DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
-            "    \"COL_AUTO_INCR\"        BIGINT IDENTITY,\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
             createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
@@ -140,5 +159,21 @@ public class TestHsqlDbPlatform extends TestPlatformBase
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_FK_1_COL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+    }
+
+    /**
+     * Tests the proper escaping of character sequences where HsqlDb requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "DROP TABLE \"escapedcharacters\" IF EXISTS;\n"+
+            "CREATE TABLE \"escapedcharacters\"\n"+
+            "(\n"+
+            "    \"COL_PK\"   INTEGER,\n"+
+            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
+            "    PRIMARY KEY (\"COL_PK\")\n"+
+            ");\n",
+            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
     }
 }

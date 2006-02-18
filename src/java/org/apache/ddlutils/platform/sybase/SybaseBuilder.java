@@ -42,6 +42,7 @@ public class SybaseBuilder extends SqlBuilder
     public SybaseBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**

@@ -39,6 +39,7 @@ public class HsqlDbBuilder extends SqlBuilder
     public HsqlDbBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**

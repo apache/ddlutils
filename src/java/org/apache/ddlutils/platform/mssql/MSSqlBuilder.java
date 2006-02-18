@@ -48,6 +48,7 @@ public class MSSqlBuilder extends SqlBuilder
     public MSSqlBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**

@@ -27,6 +27,16 @@ import org.apache.ddlutils.platform.sybase.SybasePlatform;
  */
 public class TestSybasePlatform extends TestPlatformBase
 {
+    /** The database schema for testing escaping of character sequences. */
+    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+        "<database name='escapetest'>\n" +
+        "  <table name='escapedcharacters'>\n" +
+        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +
+        "  </table>\n" +
+        "</database>";
+
     /**
      * {@inheritDoc}
      */
@@ -170,5 +180,27 @@ public class TestSybasePlatform extends TestPlatformBase
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_F_OL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+    }
+
+    /**
+     * Tests the proper escaping of character sequences where Cloudscape requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "SET quoted_identifier on;\n"+
+            "SET quoted_identifier on;\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'escapedcharacters')\n"+
+            "BEGIN\n"+
+            "    DROP TABLE \"escapedcharacters\"\n"+
+            "END;\n"+
+            "SET quoted_identifier on;\n"+
+            "CREATE TABLE \"escapedcharacters\"\n"+
+            "(\n"+
+            "    \"COL_PK\"   INT,\n"+
+            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
+            "    PRIMARY KEY (\"COL_PK\")\n"+
+            ");\n",
+            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
     }
 }

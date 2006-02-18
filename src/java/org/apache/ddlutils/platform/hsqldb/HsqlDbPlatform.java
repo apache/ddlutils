@@ -22,7 +22,6 @@ import java.sql.Types;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.platform.PlatformImplBase;
-import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The platform implementation for the HsqlDb database.
@@ -65,12 +64,10 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,      "LONGVARBINARY", Types.LONGVARBINARY);
         // JDBC's TINYINT requires a value range of -255 to 255, but HsqlDb's is only -128 to 127
         info.addNativeTypeMapping(Types.TINYINT,     "SMALLINT",      Types.SMALLINT);
-        if (Jdbc3Utils.supportsJava14JdbcTypes())
-        {
-            // when using JDBC3, BIT will be back-mapped to BOOLEAN
-            info.addNativeTypeMapping("BIT", "BOOLEAN", "BOOLEAN");
-            info.addNativeTypeMapping("DATALINK", "LONGVARBINARY");
-        }
+
+        // when using JDBC3, BIT will be back-mapped to BOOLEAN
+        info.addNativeTypeMapping("BIT",      "BOOLEAN",       "BOOLEAN");
+        info.addNativeTypeMapping("DATALINK", "LONGVARBINARY", "LONGVARBINARY");
 
         info.addDefaultSize(Types.CHAR,      Integer.MAX_VALUE);
         info.addDefaultSize(Types.VARCHAR,   Integer.MAX_VALUE);

@@ -40,6 +40,10 @@ public class MckoiBuilder extends SqlBuilder
     public MckoiBuilder(PlatformInfo info)
     {
         super(info);
+        // we need to handle the backslash first otherwise the other
+        // already escaped sequence would be affected
+        addEscapedCharSequence("\\", "\\\\");
+        addEscapedCharSequence("'",  "\\'");
     }
 
     /**

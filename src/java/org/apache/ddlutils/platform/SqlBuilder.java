@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DynaSqlException;
@@ -89,6 +91,9 @@ public abstract class SqlBuilder
 
     /** Helper object for dealing with default values. */
     private DefaultValueHelper _defaultValueHelper = new DefaultValueHelper();
+
+    /** The character sequences that need escaping. */
+    private Map _charSequencesToEscape = new ListOrderedMap();
 
     //
     // Configuration
@@ -238,6 +243,17 @@ public abstract class SqlBuilder
         _valueNumberFormat = null;
     }
 
+    /**
+     * Adds a char sequence that needs escaping, and its escaped version.
+     * 
+     * @param charSequence   The char sequence
+     * @param escapedVersion The escaped version
+     */
+    protected void addEscapedCharSequence(String charSequence, String escapedVersion)
+    {
+        _charSequencesToEscape.put(charSequence, escapedVersion);
+    }
+    
     //
     // public interface
     //
@@ -966,7 +982,7 @@ public abstract class SqlBuilder
                 break;
             default:
                 result.append(getPlatformInfo().getValueQuoteToken());
-                result.append(value.toString());
+                result.append(escapeStringValue(value.toString()));
                 result.append(getPlatformInfo().getValueQuoteToken());
                 break;
         }
@@ -1246,6 +1262,25 @@ public abstract class SqlBuilder
     {
         return column.getDefaultValue();
     }
+
+    /**
+     * Escapes the necessary characters in given string value.
+     * 
+     * @param value The value
+     * @return The corresponding string with the special characters properly escaped
+     */
+    protected String escapeStringValue(String value)
+    {
+        String result = value;
+
+        for (Iterator it = _charSequencesToEscape.entrySet().iterator(); it.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry)it.next();
+
+            result = StringUtils.replace(result, (String)entry.getKey(), (String)entry.getValue());
+        }
+        return result;
+    }
     
     /**
      * Prints the default value of the column.
@@ -1259,12 +1294,14 @@ public abstract class SqlBuilder
 
         if (shouldUseQuotes)
         {
+            // characters are only escaped when within a string literal 
+            print(getPlatformInfo().getValueQuoteToken());
+            print(escapeStringValue(getNativeDefaultValue(column).toString()));
             print(getPlatformInfo().getValueQuoteToken());
         }
-        print(getNativeDefaultValue(column).toString());
-        if (shouldUseQuotes)
+        else
         {
-            print(getPlatformInfo().getValueQuoteToken());
+            print(getNativeDefaultValue(column).toString());
         }
     }
 

@@ -27,6 +27,16 @@ import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
  */
 public class TestFirebirdPlatform extends TestPlatformBase
 {
+    /** The database schema for testing escaping of character sequences. */
+    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+        "<database name='escapetest'>\n" +
+        "  <table name='escapedcharacters'>\n" +
+        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +
+        "  </table>\n" +
+        "</database>";
+
     /**
      * {@inheritDoc}
      */
@@ -42,15 +52,14 @@ public class TestFirebirdPlatform extends TestPlatformBase
     {
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE \"coltype\";\n"+
-            "COMMIT;\n"+
             "CREATE TABLE \"coltype\"\n"+
             "(\n"+
             "    \"COL_ARRAY\"           BLOB ,\n"+
-            "    \"COL_BIGINT\"          DECIMAL(38,0),\n"+
-            "    \"COL_BINARY\"          CHAR CHARACTER SET OCTETS,\n"+
-            "    \"COL_BIT\"             DECIMAL(1,0),\n"+
+            "    \"COL_BIGINT\"          BIGINT,\n"+
+            "    \"COL_BINARY\"          BLOB,\n"+
+            "    \"COL_BIT\"             SMALLINT,\n"+
             "    \"COL_BLOB\"            BLOB ,\n"+
-            "    \"COL_BOOLEAN\"         DECIMAL(1,0),\n"+
+            "    \"COL_BOOLEAN\"         SMALLINT,\n"+
             "    \"COL_CHAR\"            CHAR(15),\n"+
             "    \"COL_CLOB\"            BLOB SUB_TYPE TEXT,\n"+
             "    \"COL_DATALINK\"        BLOB,\n"+
@@ -74,10 +83,9 @@ public class TestFirebirdPlatform extends TestPlatformBase
             "    \"COL_TIME\"            TIME,\n"+
             "    \"COL_TIMESTAMP\"       TIMESTAMP,\n"+
             "    \"COL_TINYINT\"         SMALLINT,\n"+
-            "    \"COL_VARBINARY\"       VARCHAR(15) CHARACTER SET OCTETS,\n"+
+            "    \"COL_VARBINARY\"       BLOB(15),\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
-            ");\n"+
-            "COMMIT;\n",
+            ");\n",
             createTestDatabase(COLUMN_TEST_SCHEMA));
     }
 
@@ -87,45 +95,37 @@ public class TestFirebirdPlatform extends TestPlatformBase
     public void testColumnConstraints() throws Exception
     {
         assertEqualsIgnoringWhitespaces(
-            "DELETE FROM RDB$GENERATOR WHERE RDB$GENERATOR_NAME = \"gen_constraints_OL_PK_AUTO_INCR\";\n" +
-            "COMMIT;\n"+
-            "DELETE FROM RDB$GENERATOR WHERE RDB$GENERATOR_NAME = \"gen_constraints_COL_AUTO_INCR\";\n" +
-            "COMMIT;\n"+
             "DROP TABLE \"constraints\";\n"+
-            "COMMIT;\n"+
+            "DROP GENERATOR \"gen_constraints_OL_PK_AUTO_INCR\";\n" +
+            "DROP GENERATOR \"gen_constraints_COL_AUTO_INCR\";\n" +
             "CREATE TABLE \"constraints\"\n"+
             "(\n"+
             "    \"COL_PK\"               VARCHAR(32),\n"+
             "    \"COL_PK_AUTO_INCR\"     INTEGER,\n"+
-            "    \"COL_NOT_NULL\"         CHAR(100) CHARACTER SET OCTETS NOT NULL,\n"+
+            "    \"COL_NOT_NULL\"         BLOB(100) NOT NULL,\n"+
             "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
-            "    \"COL_AUTO_INCR\"        DECIMAL(38,0),\n"+
+            "    \"COL_AUTO_INCR\"        BIGINT,\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n"+
-            "COMMIT;\n"+
             "CREATE GENERATOR \"gen_constraints_OL_PK_AUTO_INCR\";\n" +
-            "COMMIT;\n"+
-            "SET TERM !! ;\n"+
+            "--TERM--;\n"+
             "CREATE TRIGGER \"trg_constraints_OL_PK_AUTO_INCR\" FOR \"constraints\"\n"+
             "ACTIVE BEFORE INSERT POSITION 0 AS\n"+
             "BEGIN\n"+
             "  IF (NEW.\"COL_PK_AUTO_INCR\" IS NULL) THEN\n"+
             "    NEW.\"COL_PK_AUTO_INCR\" = GEN_ID(\"gen_constraints_OL_PK_AUTO_INCR\", 1);\n"+
-            "END !!\n"+
-            "SET TERM ; !!\n"+
-            "COMMIT;\n"+
+            "END;\n"+
+            "--TERM--;\n"+
             "CREATE GENERATOR \"gen_constraints_COL_AUTO_INCR\";\n" +
-            "COMMIT;\n"+
-            "SET TERM !! ;\n"+
+            "--TERM--;\n"+
             "CREATE TRIGGER \"trg_constraints_COL_AUTO_INCR\" FOR \"constraints\"\n"+
             "ACTIVE BEFORE INSERT POSITION 0 AS\n"+
             "BEGIN\n"+
             "  IF (NEW.\"COL_AUTO_INCR\" IS NULL) THEN\n"+
             "    NEW.\"COL_AUTO_INCR\" = GEN_ID(\"gen_constraints_COL_AUTO_INCR\", 1);\n"+
-            "END !!\n"+
-            "SET TERM ; !!\n"+
-            "COMMIT;\n",
+            "END;\n"+
+            "--TERM--;\n",
             createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
     }
 
@@ -136,27 +136,21 @@ public class TestFirebirdPlatform extends TestPlatformBase
     {
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"table3\" DROP CONSTRAINT \"testfk\";\n"+
-            "COMMIT;\n"+
             "ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_F_COL_FK_2_table1\";\n"+
-            "COMMIT;\n"+
             "DROP TABLE \"table3\";\n"+
-            "COMMIT;\n"+
             "DROP TABLE \"table2\";\n"+
-            "COMMIT;\n"+
             "DROP TABLE \"table1\";\n"+
-            "COMMIT;\n"+
             "CREATE TABLE \"table1\"\n"+
             "(\n"+
             "    \"COL_PK_1\"    VARCHAR(32) NOT NULL,\n"+
             "    \"COL_PK_2\"    INTEGER,\n"+
-            "    \"COL_INDEX_1\" CHAR(100) CHARACTER SET OCTETS NOT NULL,\n"+
+            "    \"COL_INDEX_1\" BLOB(100) NOT NULL,\n"+
             "    \"COL_INDEX_2\" DOUBLE PRECISION NOT NULL,\n"+
             "    \"COL_INDEX_3\" CHAR(4),\n"+
             "    PRIMARY KEY (\"COL_PK_1\", \"COL_PK_2\")\n"+
             ");\n"+
             "CREATE INDEX \"testindex1\" ON \"table1\" (\"COL_INDEX_2\");\n"+
             "CREATE UNIQUE INDEX \"testindex2\" ON \"table1\" (\"COL_INDEX_3\", \"COL_INDEX_1\");\n"+
-            "COMMIT;\n"+
             "CREATE TABLE \"table2\"\n"+
             "(\n"+
             "    \"COL_PK\"   INTEGER,\n"+
@@ -164,18 +158,30 @@ public class TestFirebirdPlatform extends TestPlatformBase
             "    \"COL_FK_2\" VARCHAR(32) NOT NULL,\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n"+
-            "COMMIT;\n"+
             "CREATE TABLE \"table3\"\n"+
             "(\n"+
             "    \"COL_PK\" VARCHAR(16),\n"+
             "    \"COL_FK\" INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n"+
-            "COMMIT;\n"+
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_F_COL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
-            "COMMIT;\n"+
-            "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n"+
-            "COMMIT;\n",
+            "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+    }
+
+    /**
+     * Tests the proper escaping of character sequences where Firebird requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "DROP TABLE \"escapedcharacters\";\n"+
+            "CREATE TABLE \"escapedcharacters\"\n"+
+            "(\n"+
+            "    \"COL_PK\"   INTEGER,\n"+
+            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
+            "    PRIMARY KEY (\"COL_PK\")\n"+
+            ");\n",
+            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
     }
 }

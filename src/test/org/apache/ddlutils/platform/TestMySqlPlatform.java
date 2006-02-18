@@ -28,6 +28,16 @@ import org.apache.ddlutils.platform.mysql.MySqlPlatform;
  */
 public class TestMySqlPlatform extends TestPlatformBase
 {
+    /** The database schema for testing escaping of character sequences. */
+    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+        "<database name='escapetest'>\n" +
+        "  <table name='escapedcharacters'>\n" +
+        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='_ &#39; \" &#10; &#13; &#09; \\ &#37;'/>\n" +
+        "  </table>\n" +
+        "</database>";
+
     /**
      * {@inheritDoc}
      */
@@ -85,7 +95,8 @@ public class TestMySqlPlatform extends TestPlatformBase
      */
     public void testColumnConstraints() throws Exception
     {
-        Database           testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        Database testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+
         testDb.findTable("constraints").findColumn("COL_AUTO_INCR").setAutoIncrement(false);
         testDb.findTable("constraints").findColumn("COL_PK_AUTO_INCR").setAutoIncrement(false);
 
@@ -152,9 +163,11 @@ public class TestMySqlPlatform extends TestPlatformBase
      */
     public void testCreationParameters1() throws Exception
     {
-        Database           testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        Database testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+
         testDb.findTable("constraints").findColumn("COL_AUTO_INCR").setAutoIncrement(false);
         testDb.findTable("constraints").findColumn("COL_PK_AUTO_INCR").setAutoIncrement(false);
+
         CreationParameters params = new CreationParameters();
 
         params.addParameter(testDb.getTable(0),
@@ -180,5 +193,21 @@ public class TestMySqlPlatform extends TestPlatformBase
             "    PRIMARY KEY (`COL_PK`, `COL_PK_AUTO_INCR`)\n"+
             ") ENGINE=INNODB ROW_FORMAT=COMPRESSED;\n",
             getBuilderOutput());
+    }
+
+    /**
+     * Tests the proper escaping of character sequences where MySQL requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "DROP TABLE IF EXISTS `escapedcharacters`;\n"+
+            "CREATE TABLE `escapedcharacters`\n"+
+            "(\n"+
+            "    `COL_PK`   INTEGER,\n"+
+            "    `COL_TEXT` VARCHAR(128) DEFAULT '\\_ \\\' \\\" \\n \\r \\t \\\\ \\%' NULL,\n"+
+            "    PRIMARY KEY (`COL_PK`)\n"+
+            ");\n",
+            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
     }
 }

@@ -181,4 +181,20 @@ public class TestMySql50Platform extends TestPlatformBase
             ") ENGINE=INNODB ROW_FORMAT=COMPRESSED;\n",
             getBuilderOutput());
     }
+
+    /**
+     * Tests the proper escaping of character sequences where MySQL requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "DROP TABLE IF EXISTS `escapedcharacters`;\n"+
+            "CREATE TABLE `escapedcharacters`\n"+
+            "(\n"+
+            "    `COL_PK`   INTEGER,\n"+
+            "    `COL_TEXT` VARCHAR(128) DEFAULT '\\_ \\\' \\\" \\n \\r \\t \\\\ \\%' NULL,\n"+
+            "    PRIMARY KEY (`COL_PK`)\n"+
+            ");\n",
+            createTestDatabase(TestMySqlPlatform.COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+    }
 }

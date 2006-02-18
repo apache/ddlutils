@@ -39,6 +39,7 @@ public class AxionBuilder extends SqlBuilder
     public AxionBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**

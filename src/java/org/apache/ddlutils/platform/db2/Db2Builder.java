@@ -42,8 +42,8 @@ public class Db2Builder extends SqlBuilder
     public Db2Builder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
-
 
     /**
      * {@inheritDoc}

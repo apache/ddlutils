@@ -27,6 +27,16 @@ import org.apache.ddlutils.platform.db2.Db2Platform;
  */
 public class TestDB2Platform extends TestPlatformBase
 {
+    /** The database schema for testing escaping of character sequences. */
+    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+        "<database name='escapetest'>\n" +
+        "  <table name='escapedcharacters'>\n" +
+        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +
+        "  </table>\n" +
+        "</database>";
+
     /**
      * {@inheritDoc}
      */
@@ -58,13 +68,13 @@ public class TestDB2Platform extends TestPlatformBase
             "    \"COL_DECIM_NOSCALE\" DECIMAL(15,0),\n"+       // only 18 characters allowed for identifiers
             "    \"COL_DISTINCT\"      DISTINCT,\n"+
             "    \"COL_DOUBLE\"        DOUBLE,\n"+
-            "    \"COL_FLOAT\"         REAL,\n"+
+            "    \"COL_FLOAT\"         DOUBLE,\n"+
             "    \"COL_INTEGER\"       INTEGER,\n"+
             "    \"COL_JAVA_OBJECT\"   BLOB,\n"+
             "    \"COL_LONGVARBINARY\" LONG VARCHAR FOR BIT DATA,\n"+
             "    \"COL_LONGVARCHAR\"   LONG VARCHAR,\n"+
             "    \"COL_NULL\"          LONG VARCHAR FOR BIT DATA,\n"+
-            "    \"COL_NUMERIC\"       NUMERIC(15,0),\n"+
+            "    \"COL_NUMERIC\"       DECIMAL(15,0),\n"+
             "    \"COL_OTHER\"         BLOB,\n"+
             "    \"COL_REAL\"          REAL,\n"+
             "    \"COL_REF\"           REF,\n"+
@@ -139,5 +149,21 @@ public class TestDB2Platform extends TestPlatformBase
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+    }
+
+    /**
+     * Tests the proper escaping of character sequences where Db2 requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "DROP TABLE \"escapedcharacters\";\n"+
+            "CREATE TABLE \"escapedcharacters\"\n"+
+            "(\n"+
+            "    \"COL_PK\"   INTEGER,\n"+
+            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
+            "    PRIMARY KEY (\"COL_PK\")\n"+
+            ");\n",
+            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
     }
 }

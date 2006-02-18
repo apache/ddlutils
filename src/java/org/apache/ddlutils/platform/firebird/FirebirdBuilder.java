@@ -45,6 +45,7 @@ public class FirebirdBuilder extends SqlBuilder
     public FirebirdBuilder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
     }
 
     /**
@@ -80,7 +81,7 @@ public class FirebirdBuilder extends SqlBuilder
             println(", 1);");
             println("END;");
             print(TERM_COMMAND);
-            print(";");
+            printEndOfStatement();
         }
     }
 

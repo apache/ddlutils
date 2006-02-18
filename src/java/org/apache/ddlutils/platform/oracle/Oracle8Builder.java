@@ -58,6 +58,7 @@ public class Oracle8Builder extends SqlBuilder
     public Oracle8Builder(PlatformInfo info)
     {
         super(info);
+        addEscapedCharSequence("'", "''");
 
         PatternCompiler compiler = new Perl5Compiler();
 
@@ -149,11 +150,12 @@ public class Oracle8Builder extends SqlBuilder
         if (shouldUseQuotes)
         {
             print(getPlatformInfo().getValueQuoteToken());
-        }
-        print(getNativeDefaultValue(column).toString());
-        if (shouldUseQuotes)
-        {
+            print(escapeStringValue(nativeDefault));
             print(getPlatformInfo().getValueQuoteToken());
+        }
+        else
+        {
+            print(nativeDefault);
         }
 	}
 

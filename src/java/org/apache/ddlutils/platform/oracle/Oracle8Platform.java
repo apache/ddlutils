@@ -87,8 +87,8 @@ public class Oracle8Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.VARBINARY,     "RAW");
         info.addNativeTypeMapping(Types.VARCHAR,       "VARCHAR2");
 
-        info.addNativeTypeMapping("BOOLEAN",  "NUMBER(1,0)", "BIT");
-        info.addNativeTypeMapping("DATALINK", "BLOB",        "BLOB");
+        info.addNativeTypeMapping("BOOLEAN",  "NUMBER(1)", "BIT");
+        info.addNativeTypeMapping("DATALINK", "BLOB",      "BLOB");
 
         info.addDefaultSize(Types.CHAR,       254);
         info.addDefaultSize(Types.VARCHAR,    254);

@@ -27,6 +27,16 @@ import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
  */
 public class TestMSSqlPlatform extends TestPlatformBase
 {
+    /** The database schema for testing escaping of character sequences. */
+    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
+        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+        "<database name='escapetest'>\n" +
+        "  <table name='escapedcharacters'>\n" +
+        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +
+        "  </table>\n" +
+        "</database>";
+
     /**
      * {@inheritDoc}
      */
@@ -72,7 +82,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "(\n"+
             "    \"COL_ARRAY\"           IMAGE,\n"+
             "    \"COL_BIGINT\"          DECIMAL(19,0),\n"+
-            "    \"COL_BINARY\"          BINARY,\n"+
+            "    \"COL_BINARY\"          BINARY(254),\n"+
             "    \"COL_BIT\"             BIT,\n"+
             "    \"COL_BLOB\"            IMAGE,\n"+
             "    \"COL_BOOLEAN\"         BIT,\n"+
@@ -271,5 +281,47 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_FK_1_COL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+    }
+
+    /**
+     * Tests the proper escaping of character sequences where Cloudscape requires it.
+     */
+    public void testCharacterEscaping() throws Exception
+    {
+        assertEqualsIgnoringWhitespaces(
+            "SET quoted_identifier on;\n"+
+            "SET quoted_identifier on;\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'escapedcharacters')\n"+
+            "BEGIN\n"+
+            "     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)\n"+
+            "     DECLARE refcursor CURSOR FOR\n"+
+            "     select reftables.name tablename, cons.name constraintname\n"+
+            "      from sysobjects tables,\n"+
+            "           sysobjects reftables,\n"+
+            "           sysobjects cons,\n"+
+            "           sysreferences ref\n"+
+            "       where tables.id = ref.rkeyid\n"+
+            "         and cons.id = ref.constid\n"+
+            "         and reftables.id = ref.fkeyid\n"+
+            "         and tables.name = 'escapedcharacters'\n"+
+            "     OPEN refcursor\n"+
+            "     FETCH NEXT from refcursor into @reftable, @constraintname\n"+
+            "     while @@FETCH_STATUS = 0\n"+
+            "     BEGIN\n"+
+            "       exec ('alter table '+@reftable+' drop constraint '+@constraintname)\n"+
+            "       FETCH NEXT from refcursor into @reftable, @constraintname\n"+
+            "     END\n"+
+            "     CLOSE refcursor\n"+
+            "     DEALLOCATE refcursor\n"+
+            "     DROP TABLE \"escapedcharacters\"\n"+
+            "END;\n"+
+            "SET quoted_identifier on;\n"+
+            "CREATE TABLE \"escapedcharacters\"\n"+
+            "(\n"+
+            "    \"COL_PK\"   INT,\n"+
+            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
+            "    PRIMARY KEY (\"COL_PK\")\n"+
+            ");\n",
+            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
     }
 }
