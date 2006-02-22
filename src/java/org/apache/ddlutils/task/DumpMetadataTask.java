@@ -1218,7 +1218,29 @@ public class DumpMetadataTask extends Task
 
         if (columns.contains(columnName))
         {
-            value = String.valueOf(result.getInt(columnName));
+        	try
+        	{
+                value = String.valueOf(result.getInt(columnName));
+        	}
+        	catch (SQLException ex)
+        	{
+        		// A few databases do not comply with the jdbc spec and return a string (or null),
+        		// so lets try this just in case
+        		value = result.getString(columnName);
+
+        		if (value != null)
+        		{
+	        		try
+	        		{
+	        			Integer.parseInt(value);
+	        		}
+	        		catch (NumberFormatException parseEx)
+	        		{
+	        			// its no int returned as a string, so lets re-throw the original exception
+	        			throw ex;
+	        		}
+        		}
+        	}
             element.addAttribute(attrName, value);
         }
         return value;
@@ -1240,7 +1262,29 @@ public class DumpMetadataTask extends Task
 
         if (columns.contains(columnName))
         {
-            value = String.valueOf(result.getShort(columnName));
+        	try
+        	{
+                value = String.valueOf(result.getShort(columnName));
+        	}
+        	catch (SQLException ex)
+        	{
+        		// A few databases do not comply with the jdbc spec and return a string (or null),
+        		// so lets try strings this just in case
+        		value = result.getString(columnName);
+
+        		if (value != null)
+        		{
+	        		try
+	        		{
+	        			Short.parseShort(value);
+	        		}
+	        		catch (NumberFormatException parseEx)
+	        		{
+	        			// its no short returned as a string, so lets re-throw the original exception
+	        			throw ex;
+	        		}
+        		}
+        	}
             element.addAttribute(attrName, value);
         }
         return value;
