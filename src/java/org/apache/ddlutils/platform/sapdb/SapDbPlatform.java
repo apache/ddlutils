@@ -51,32 +51,41 @@ public class SapDbPlatform extends PlatformImplBase
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
 
-        info.addNativeTypeMapping(Types.ARRAY,         "LONG BYTE");
+        // BIGINT is also handled by the model reader
+        // Unfortunately there is no way to distinguish between REAL, and FLOAT/DOUBLE when
+        // reading back via JDBC, because they all have the same size of 8
+        info.addNativeTypeMapping(Types.ARRAY,         "LONG BYTE", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIGINT,        "FIXED(38,0)");
-        info.addNativeTypeMapping(Types.BINARY,        "LONG BYTE");
+        info.addNativeTypeMapping(Types.BINARY,        "CHAR{0} BYTE");
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
-        info.addNativeTypeMapping(Types.BLOB,          "LONG BYTE");
-        info.addNativeTypeMapping(Types.CLOB,          "LONG");
-        info.addNativeTypeMapping(Types.DISTINCT,      "LONG BYTE");
-        info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "LONG BYTE");
+        info.addNativeTypeMapping(Types.BLOB,          "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.CLOB,          "LONG",      Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DECIMAL,       "FIXED");
+        info.addNativeTypeMapping(Types.DISTINCT,      "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.DOUBLE,        "FLOAT(38)", Types.FLOAT);
+        info.addNativeTypeMapping(Types.FLOAT,         "FLOAT(38)");
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "LONG BYTE", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG BYTE");
-        info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
-        info.addNativeTypeMapping(Types.NULL,          "LONG BYTE");
-        info.addNativeTypeMapping(Types.NUMERIC,       "DECIMAL");
-        info.addNativeTypeMapping(Types.OTHER,         "LONG BYTE");
-        info.addNativeTypeMapping(Types.REF,           "LONG BYTE");
-        info.addNativeTypeMapping(Types.STRUCT,        "LONG BYTE");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        info.addNativeTypeMapping(Types.VARBINARY,     "LONG BYTE");
-        info.addNativeTypeMapping("DATALINK", "LONG BYTE");
+        info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG");
+        info.addNativeTypeMapping(Types.NULL,          "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.NUMERIC,       "FIXED",     Types.DECIMAL);
+        info.addNativeTypeMapping(Types.OTHER,         "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.REAL,          "FLOAT(16)", Types.FLOAT);
+        info.addNativeTypeMapping(Types.REF,           "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",  Types.SMALLINT);
+        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR{0} BYTE");
 
-        // no support for specifying the size for these types
-        info.setHasSize(Types.BINARY, false);
-        info.setHasSize(Types.VARBINARY, false);
+        info.addNativeTypeMapping("BOOLEAN",  "BOOLEAN",   "BIT");
+        info.addNativeTypeMapping("DATALINK", "LONG BYTE", "LONGVARBINARY");
+
+        info.addDefaultSize(Types.CHAR,      254);
+        info.addDefaultSize(Types.VARCHAR,   254);
+        info.addDefaultSize(Types.BINARY,    254);
+        info.addDefaultSize(Types.VARBINARY, 254);
 
         setSqlBuilder(new SapDbBuilder(info));
+        setModelReader(new SapDbModelReader(info));
     }
 
     /**
