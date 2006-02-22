@@ -360,6 +360,19 @@ public class Column implements Cloneable, Serializable
     }
 
     /**
+     * Sets both the size and scale.
+     * 
+     * @param size  The size
+     * @param scale The scale
+     */
+    public void setSizeAndScale(int size, int scale)
+    {
+        _size      = String.valueOf(size);
+        _sizeAsInt = new Integer(size);
+        _scale     = scale;
+    }
+    
+    /**
      * Returns the precision radix of the column.
      * 
      * @return The precision radix
