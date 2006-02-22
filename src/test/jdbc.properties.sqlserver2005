@@ -1,0 +1,19 @@
+# JDBC properties for Microsoft Sql Server 2005
+
+# Use this property if ddlutils does not recognize the platform from the settings
+#ddlutils.platform=MsSql
+
+# Properties starting with "datasource." will be fed into the datasource instance of the
+# class configured via the datasource.class property
+
+datasource.class=org.apache.commons.dbcp.BasicDataSource
+
+datasource.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver
+datasource.url=jdbc:sqlserver://localhost;databaseName=ddlutils;selectMethod=cursor
+
+datasource.username=ddlutils
+datasource.password=ddlutils
+
+# Sql Server supports both catalogs and schemas, so we should define them both
+ddlutils.catalog=ddlutils
+ddlutils.schema=dbo
