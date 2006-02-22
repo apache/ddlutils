@@ -205,7 +205,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='DECIMAL' size='15'/>\n"+
+        "    <column name='avalue' type='DECIMAL' size='13'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a DECIMAL column with a default value. */
@@ -241,7 +241,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='NUMERIC' size='15'/>\n"+
+        "    <column name='avalue' type='NUMERIC' size='12'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a NUMERIC column with a default value. */
@@ -627,7 +627,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testFloatWithDefault()
     {
-        performDataTypeTest(TEST_FLOAT_MODEL_WITH_DEFAULT, null, new Double(1e+100), new Double(12345678.9012345));
+        performDataTypeTest(TEST_FLOAT_MODEL_WITH_DEFAULT, null, new Double(1e+25), new Double(12345678.9012345));
     }
 
     /**
@@ -643,7 +643,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testDoubleWithDefault()
     {
-        performDataTypeTest(TEST_DOUBLE_MODEL_WITH_DEFAULT, new Double(-1e+100), null, new Double(-987654321.098765));
+        performDataTypeTest(TEST_DOUBLE_MODEL_WITH_DEFAULT, new Double(-1e+25), null, new Double(-987654321.098765));
     }
 
     /**
@@ -651,7 +651,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testDecimal()
     {
-        performDataTypeTest(TEST_DECIMAL_MODEL, new BigDecimal("0"), new BigDecimal("-123456789012345"));
+        performDataTypeTest(TEST_DECIMAL_MODEL, new BigDecimal("0"), new BigDecimal("-1234567890123"));
     }
 
     /**
@@ -683,7 +683,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testNumeric()
     {
-        performDataTypeTest(TEST_NUMERIC_MODEL, new BigDecimal("543210987654321"), new BigDecimal("-2"));
+        performDataTypeTest(TEST_NUMERIC_MODEL, new BigDecimal("210987654321"), new BigDecimal("-2"));
     }
 
     /**
