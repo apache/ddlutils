@@ -37,7 +37,7 @@ import org.apache.ddlutils.platform.JdbcModelReader;
 public class MySqlModelReader extends JdbcModelReader
 {
     /**
-     * Creates a new model reader for PostgreSql databases.
+     * Creates a new model reader for MySql databases.
      * 
      * @param platformInfo The platform specific settings
      */
