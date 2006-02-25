@@ -1,0 +1,19 @@
+# JDBC properties for Sybase 12.5 ASE
+
+# Use this property if ddlutils does not recognize the platform from the settings
+#ddlutils.platform=Sybase
+
+# Properties starting with "datasource." will be fed into the datasource instance of the
+# class configured via the datasource.class property
+
+datasource.class=org.apache.commons.dbcp.BasicDataSource
+
+# This is the JConnect 6 driver
+datasource.driverClassName=com.sybase.jdbc3.jdbc.SybDriver
+datasource.url=jdbc:sybase:Tds:127.0.0.1:5000/ddlutils
+datasource.username=ddlutils
+datasource.password=ddlutils
+
+# Sybase supports both catalogs and schemas, so we should define them both
+ddlutils.catalog=ddlutils
+ddlutils.schema=ddlutils
