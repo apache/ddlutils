@@ -211,7 +211,7 @@ public abstract class JdbcSupport
             }
             catch (Exception e)
             {
-                _log.warn("Ignoring exception closing statement", e);
+                _log.debug("Ignoring exception that occurred while closing statement", e);
             }
         }
     }

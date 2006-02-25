@@ -16,9 +16,24 @@ package org.apache.ddlutils.platform.sybase;
  * limitations under the License.
  */
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -38,6 +53,9 @@ public class SybasePlatform extends PlatformImplBase
     /** The subprotocol used by the standard Sybase driver. */
     public static final String JDBC_SUBPROTOCOL = "sybase:Tds";
 
+    /** The maximum size that text and binary columns can have. */
+    public static final long MAX_TEXT_SIZE = 2147483647;
+    
     /**
      * Creates a new platform instance.
      */
@@ -45,7 +63,7 @@ public class SybasePlatform extends PlatformImplBase
     {
         PlatformInfo info = new PlatformInfo();
 
-        info.setMaxIdentifierLength(30);
+        info.setMaxIdentifierLength(28);
         info.setRequiringNullAsDefaultValue(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
@@ -54,13 +72,15 @@ public class SybasePlatform extends PlatformImplBase
         info.setCommentSuffix("*/");
 
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE");
+        // we're not using the native BIT type because it is rather limited (cannot be NULL, cannot be indexed)
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
         info.addNativeTypeMapping(Types.BLOB,          "IMAGE");
         info.addNativeTypeMapping(Types.CLOB,          "TEXT");
-        info.addNativeTypeMapping(Types.DATE,          "DATETIME");
+        info.addNativeTypeMapping(Types.DATE,          "DATETIME",         Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE");
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION", Types.DOUBLE);
         info.addNativeTypeMapping(Types.INTEGER,       "INT");
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE");
         info.addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
@@ -69,13 +89,19 @@ public class SybasePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.OTHER,         "IMAGE");
         info.addNativeTypeMapping(Types.REF,           "IMAGE");
         info.addNativeTypeMapping(Types.STRUCT,        "IMAGE");
-        info.addNativeTypeMapping(Types.TIME,          "DATETIME");
-        info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
-        info.addNativeTypeMapping("BOOLEAN",  "BIT");
+        info.addNativeTypeMapping(Types.TIME,          "DATETIME",         Types.TIMESTAMP);
+        info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME",         Types.TIMESTAMP);
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
+        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "IMAGE");
 
+        info.addDefaultSize(Types.BINARY,    254);
+        info.addDefaultSize(Types.VARBINARY, 254);
+        info.addDefaultSize(Types.CHAR,      254);
+        info.addDefaultSize(Types.VARCHAR,   254);
+
         setSqlBuilder(new SybaseBuilder(info));
+        setModelReader(new SybaseModelReader(info));
     }
 
     /**
@@ -85,4 +111,136 @@ public class SybasePlatform extends PlatformImplBase
     {
         return DATABASENAME;
     }
+
+    /**
+     * Sets the text size which is the maximum amount of bytes that Sybase returns in a SELECT statement
+     * for binary/text columns (e.g. blob, longvarchar etc.).
+     * 
+     * @param size The size to set
+     */
+    private void setTextSize(long size)
+    {
+    	Connection connection = borrowConnection();
+    	Statement  stmt       = null;
+
+    	try
+    	{
+    		stmt = connection.createStatement();
+
+    		stmt.execute("SET textsize "+size);
+    	}
+    	catch (SQLException ex)
+    	{
+    		throw new DynaSqlException(ex);
+    	}
+    	finally
+    	{
+    		closeStatement(stmt);
+    		returnConnection(connection);
+    	}
+    }
+
+    
+	/**
+     * {@inheritDoc}
+     */
+	protected Object extractColumnValue(ResultSet resultSet, String columnName, int jdbcType) throws SQLException
+	{
+		if (jdbcType == Types.LONGVARBINARY)
+		{
+			InputStream stream = resultSet.getBinaryStream(columnName);
+
+			if (stream == null)
+			{
+				return null;
+			}
+			else
+			{
+				byte[] buf    = new byte[65536];
+				byte[] result = new byte[0];
+				int    len;
+	
+				try
+				{
+					do
+					{
+						len = stream.read(buf);
+						if (len > 0)
+						{
+							byte[] newResult = new byte[result.length + len];
+	
+							System.arraycopy(result, 0, newResult, 0, result.length);
+							System.arraycopy(buf, 0, newResult, result.length, len);
+							result = newResult;
+						}
+					}
+					while (len > 0);
+					stream.close();
+					return result;
+				}
+				catch (IOException ex)
+				{
+					throw new DynaSqlException("Error while extracting the value of column " + columnName + " of type " +
+							                   TypeMap.getJdbcTypeName(jdbcType) + " from a result set", ex);
+				}
+			}
+		}
+		else
+		{
+			return super.extractColumnValue(resultSet, columnName, jdbcType);
+		}
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	protected void setStatementParameterValue(PreparedStatement statement, int sqlIndex, int typeCode, Object value) throws SQLException
+	{
+		if ((value instanceof byte[]) && (typeCode == Types.LONGVARBINARY))
+		{
+			byte[] data = (byte[])value;
+
+			statement.setBinaryStream(sqlIndex, new ByteArrayInputStream(data), data.length);
+		}
+		else
+		{
+			super.setStatementParameterValue(statement, sqlIndex, typeCode, value);
+		}
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public List fetch(Database model, String sql, Collection parameters, Table[] queryHints, int start, int end) throws DynaSqlException
+	{
+		setTextSize(MAX_TEXT_SIZE);
+		return super.fetch(model, sql, parameters, queryHints, start, end);
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+	public List fetch(Database model, String sql, Table[] queryHints, int start, int end) throws DynaSqlException
+	{
+		setTextSize(MAX_TEXT_SIZE);
+		return super.fetch(model, sql, queryHints, start, end);
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+	public Iterator query(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException
+	{
+		setTextSize(MAX_TEXT_SIZE);
+		return super.query(model, sql, parameters, queryHints);
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+	public Iterator query(Database model, String sql, Table[] queryHints) throws DynaSqlException
+	{
+		setTextSize(MAX_TEXT_SIZE);
+		return super.query(model, sql, queryHints);
+	}
 }

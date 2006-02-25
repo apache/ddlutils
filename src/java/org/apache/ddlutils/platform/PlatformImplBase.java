@@ -854,7 +854,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         finally 
         {
             // the iterator should return the connection automatically
-            // so this is usuallynot necessary (but just in case)
+            // so this is usually not necessary (but just in case)
             closeStatement(statement);
             returnConnection(connection);
         }
@@ -1655,7 +1655,23 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         int     typeCode = property.getColumn().getTypeCode();
         Object  value    = dynaBean.get(property.getName());
 
-        if (value == null)
+        setStatementParameterValue(statement, sqlIndex, typeCode, value);
+    }
+
+	/**
+	 * This is the core method to set the parameter of a prepared statement to a given value.
+	 * The primary purpose of this method is to call the appropriate method on the statement,
+	 * and to give database-specific implementations the ability to change this behavior.
+	 * 
+	 * @param statement The statement
+	 * @param sqlIndex  The parameter index
+	 * @param typeCode  The JDBC type code
+	 * @param value     The value
+	 * @throws SQLException If an error occurred while setting the parameter value
+	 */
+	protected void setStatementParameterValue(PreparedStatement statement, int sqlIndex, int typeCode, Object value) throws SQLException
+	{
+		if (value == null)
         {
             statement.setNull(sqlIndex, typeCode);
         }
@@ -1704,7 +1720,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             statement.setObject(sqlIndex, value, typeCode);
         }
-    }
+	}
 
     /**
      * Helper method esp. for the {@link ModelBasedResultSetIterator} class that retrieves
@@ -1742,92 +1758,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 // we should not use the Clob interface if the database doesn't map to this type 
                 jdbcType = targetJdbcType;
             }
-            switch (jdbcType)
-            {
-                case Types.CHAR:
-                case Types.VARCHAR:
-                case Types.LONGVARCHAR:
-                    value = resultSet.getString(columnName);
-                    break;
-                case Types.NUMERIC:
-                case Types.DECIMAL:
-                    value = resultSet.getBigDecimal(columnName);
-                    break;
-                case Types.BIT:
-                    value = new Boolean(resultSet.getBoolean(columnName));
-                    break;
-                case Types.TINYINT:
-                case Types.SMALLINT:
-                case Types.INTEGER:
-                    value = new Integer(resultSet.getInt(columnName));
-                    break;
-                case Types.BIGINT:
-                    value = new Long(resultSet.getLong(columnName));
-                    break;
-                case Types.REAL:
-                    value = new Float(resultSet.getFloat(columnName));
-                    break;
-                case Types.FLOAT:
-                case Types.DOUBLE:
-                    value = new Double(resultSet.getDouble(columnName));
-                    break;
-                case Types.BINARY:
-                case Types.VARBINARY:
-                case Types.LONGVARBINARY:
-                    value = resultSet.getBytes(columnName);
-                    break;
-                case Types.DATE:
-                    value = resultSet.getDate(columnName);
-                    break;
-                case Types.TIME:
-                    value = resultSet.getTime(columnName);
-                    break;
-                case Types.TIMESTAMP:
-                    value = resultSet.getTimestamp(columnName);
-                    break;
-                case Types.CLOB:
-                    Clob clob = resultSet.getClob(columnName);
-
-                    if ((clob == null) || (clob.length() > Integer.MAX_VALUE))
-                    {
-                        value = clob;
-                    }
-                    else
-                    {
-                        value = clob.getSubString(1l, (int)clob.length());
-                    }
-                    break;
-                case Types.BLOB:
-                    Blob blob = resultSet.getBlob(columnName);
-
-                    if ((blob == null) || (blob.length() > Integer.MAX_VALUE))
-                    {
-                        value = blob;
-                    }
-                    else
-                    {
-                        value = blob.getBytes(1l, (int)blob.length());
-                    }
-                    break;
-                case Types.ARRAY:
-                    value = resultSet.getArray(columnName);
-                    break;
-                case Types.REF:
-                    value = resultSet.getRef(columnName);
-                    break;
-                default:
-                    // special handling for Java 1.4/JDBC 3 types
-                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-                        (jdbcType == Jdbc3Utils.determineBooleanTypeCode()))
-                    {
-                        value = new Boolean(resultSet.getBoolean(columnName));
-                    }
-                    else
-                    {
-                        value = resultSet.getObject(columnName);
-                    }
-                    break;
-            }
+            value = extractColumnValue(resultSet, columnName, jdbcType);
         }
         else
         {
@@ -1835,6 +1766,110 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
         return value;
     }
+
+	/**
+	 * This is the core method to retrieve a value for a column from a result set. Its  primary
+	 * purpose is to call the appropriate method on the result set, and to provide an extension
+	 * point where database-specific implementations can change this behavior.
+	 * 
+	 * @param resultSet  The result set to extract the value from
+	 * @param columnName The name of the column
+	 * @param jdbcType   The jdbc type to extract
+	 * @return The value
+	 * @throws SQLException If an error occurred while accessing the result set
+	 */
+	protected Object extractColumnValue(ResultSet resultSet, String columnName, int jdbcType) throws SQLException
+	{
+		Object value;
+
+		switch (jdbcType)
+		{
+		    case Types.CHAR:
+		    case Types.VARCHAR:
+		    case Types.LONGVARCHAR:
+		        value = resultSet.getString(columnName);
+		        break;
+		    case Types.NUMERIC:
+		    case Types.DECIMAL:
+		        value = resultSet.getBigDecimal(columnName);
+		        break;
+		    case Types.BIT:
+		        value = new Boolean(resultSet.getBoolean(columnName));
+		        break;
+		    case Types.TINYINT:
+		    case Types.SMALLINT:
+		    case Types.INTEGER:
+		        value = new Integer(resultSet.getInt(columnName));
+		        break;
+		    case Types.BIGINT:
+		        value = new Long(resultSet.getLong(columnName));
+		        break;
+		    case Types.REAL:
+		        value = new Float(resultSet.getFloat(columnName));
+		        break;
+		    case Types.FLOAT:
+		    case Types.DOUBLE:
+		        value = new Double(resultSet.getDouble(columnName));
+		        break;
+		    case Types.BINARY:
+		    case Types.VARBINARY:
+		    case Types.LONGVARBINARY:
+		        value = resultSet.getBytes(columnName);
+		        break;
+		    case Types.DATE:
+		        value = resultSet.getDate(columnName);
+		        break;
+		    case Types.TIME:
+		        value = resultSet.getTime(columnName);
+		        break;
+		    case Types.TIMESTAMP:
+		        value = resultSet.getTimestamp(columnName);
+		        break;
+		    case Types.CLOB:
+		        Clob clob = resultSet.getClob(columnName);
+
+		        if ((clob == null) || (clob.length() > Integer.MAX_VALUE))
+		        {
+		            value = clob;
+		        }
+		        else
+		        {
+		            value = clob.getSubString(1l, (int)clob.length());
+		        }
+		        break;
+		    case Types.BLOB:
+		        Blob blob = resultSet.getBlob(columnName);
+
+		        if ((blob == null) || (blob.length() > Integer.MAX_VALUE))
+		        {
+		            value = blob;
+		        }
+		        else
+		        {
+		            value = blob.getBytes(1l, (int)blob.length());
+		        }
+		        break;
+		    case Types.ARRAY:
+		        value = resultSet.getArray(columnName);
+		        break;
+		    case Types.REF:
+		        value = resultSet.getRef(columnName);
+		        break;
+		    default:
+		        // special handling for Java 1.4/JDBC 3 types
+		        if (Jdbc3Utils.supportsJava14JdbcTypes() &&
+		            (jdbcType == Jdbc3Utils.determineBooleanTypeCode()))
+		        {
+		            value = new Boolean(resultSet.getBoolean(columnName));
+		        }
+		        else
+		        {
+		            value = resultSet.getObject(columnName);
+		        }
+		        break;
+		}
+		return value;
+	}
 
     
     /**

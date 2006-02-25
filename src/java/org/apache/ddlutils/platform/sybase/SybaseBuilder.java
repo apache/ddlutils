@@ -17,13 +17,19 @@ package org.apache.ddlutils.platform.sybase;
  */
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.sql.Types;
 import java.util.Map;
 
+import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The SQL Builder for Sybase.
@@ -54,13 +60,77 @@ public class SybaseBuilder extends SqlBuilder
         super.createTable(database, table, parameters);
     }
 
-    /**
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void writeColumn(Table table, Column column) throws IOException
+	{
+        printIdentifier(getColumnName(column));
+        print(" ");
+        print(getSqlType(column));
+
+        if (column.getDefaultValue() != null)
+        {
+            if (!getPlatformInfo().isSupportingDefaultValuesForLongTypes() && 
+                ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
+            {
+                throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
+            }
+            print(" DEFAULT ");
+            writeColumnDefaultValue(table, column);
+        }
+        // Sybase does not like NOT NULL and IDENTITY together
+        if (column.isRequired() && !column.isAutoIncrement())
+        {
+            print(" ");
+            writeColumnNotNullableStmt();
+        }
+        if (column.isAutoIncrement())
+        {
+            print(" ");
+            writeColumnAutoIncrementStmt(table, column);
+        }
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+    protected String getNativeDefaultValue(Column column)
+    {
+        if ((column.getTypeCode() == Types.BIT) ||
+            (Jdbc3Utils.supportsJava14JdbcTypes() && (column.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode())))
+        {
+            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
+        }
+        else
+        {
+            return super.getNativeDefaultValue(column);
+        }
+    }
+
+	/**
      * {@inheritDoc}
      */
     protected void alterTable(Database currentModel, Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
     {
-        writeQuotationOnStatement();
+    	// we only want to generate the quotation start statement if there is something to write
+    	// thus we write the alteration commands into a temporary writer
+    	// and only if something was written, write the quotation start statement and the
+    	// alteration commands to the original writer
+    	Writer       originalWriter = getWriter();
+    	StringWriter tempWriter     = new StringWriter();
+
+    	setWriter(tempWriter);
         super.alterTable(currentModel, currentTable, desiredModel, desiredTable, doDrops, modifyColumns);
+        setWriter(originalWriter);
+
+        String alterationCommands = tempWriter.toString();
+
+        if (alterationCommands.trim().length() > 0)
+        {
+        	writeQuotationOnStatement();
+        	getWriter().write(alterationCommands);
+        }
     }
 
     /**
@@ -116,47 +186,6 @@ public class SybaseBuilder extends SqlBuilder
         {
             print("SET quoted_identifier on");
             printEndOfStatement();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getDeleteSql(Table table, Map pkValues, boolean genPlaceholders)
-    {
-        return getQuotationOnStatement() + super.getDeleteSql(table, pkValues, genPlaceholders);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getInsertSql(Table table, Map columnValues, boolean genPlaceholders)
-    {
-        return getQuotationOnStatement() + super.getInsertSql(table, columnValues, genPlaceholders);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getUpdateSql(Table table, Map columnValues, boolean genPlaceholders)
-    {
-        return getQuotationOnStatement() + super.getUpdateSql(table, columnValues, genPlaceholders);
-    }
-
-    /**
-     * Returns the statement that turns on the ability to write delimited identifiers.
-     * 
-     * @return The quotation-on statement
-     */
-    private String getQuotationOnStatement()
-    {
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
-        {
-            return "SET quoted_identifier on" + getPlatformInfo().getSqlCommandDelimiter() + "\n";
-        }
-        else
-        {
-            return "";
         }
     }
 

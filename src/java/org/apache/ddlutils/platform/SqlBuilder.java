@@ -1121,7 +1121,7 @@ public abstract class SqlBuilder
         return shortenName(column.getName(), getPlatformInfo().getMaxIdentifierLength());
     }
 
-    /** 
+    /**
      * Outputs the DDL for the specified column.
      * 
      * @param table  The table containing the column
@@ -1301,7 +1301,12 @@ public abstract class SqlBuilder
         }
         else
         {
-            print(getNativeDefaultValue(column).toString());
+        	Object nativeDefault = getNativeDefaultValue(column);
+
+        	if (nativeDefault != null)
+        	{
+        		print(nativeDefault.toString());
+        	}
         }
     }
 
