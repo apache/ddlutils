@@ -74,26 +74,27 @@ public class SybasePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE");
         // we're not using the native BIT type because it is rather limited (cannot be NULL, cannot be indexed)
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",         Types.SMALLINT);
+        // BIGINT is mapped back in the model reader
         info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
-        info.addNativeTypeMapping(Types.BLOB,          "IMAGE");
-        info.addNativeTypeMapping(Types.CLOB,          "TEXT");
+        info.addNativeTypeMapping(Types.BLOB,          "IMAGE",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.CLOB,          "TEXT",             Types.LONGVARCHAR);
         info.addNativeTypeMapping(Types.DATE,          "DATETIME",         Types.TIMESTAMP);
-        info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE");
+        info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION", Types.DOUBLE);
         info.addNativeTypeMapping(Types.INTEGER,       "INT");
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE");
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "IMAGE");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT");
-        info.addNativeTypeMapping(Types.NULL,          "IMAGE");
-        info.addNativeTypeMapping(Types.OTHER,         "IMAGE");
-        info.addNativeTypeMapping(Types.REF,           "IMAGE");
-        info.addNativeTypeMapping(Types.STRUCT,        "IMAGE");
+        info.addNativeTypeMapping(Types.NULL,          "IMAGE",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.OTHER,         "IMAGE",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.REF,           "IMAGE",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "IMAGE",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.TIME,          "DATETIME",         Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME",         Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "IMAGE");
+        info.addNativeTypeMapping("DATALINK", "IMAGE",    "LONGVARBINARY");
 
         info.addDefaultSize(Types.BINARY,    254);
         info.addDefaultSize(Types.VARBINARY, 254);
@@ -196,11 +197,22 @@ public class SybasePlatform extends PlatformImplBase
      */
 	protected void setStatementParameterValue(PreparedStatement statement, int sqlIndex, int typeCode, Object value) throws SQLException
 	{
-		if ((value instanceof byte[]) && (typeCode == Types.LONGVARBINARY))
+		if ((value instanceof byte[]) && ((typeCode == Types.LONGVARBINARY) || (typeCode == Types.BLOB)))
 		{
 			byte[] data = (byte[])value;
 
 			statement.setBinaryStream(sqlIndex, new ByteArrayInputStream(data), data.length);
+		}
+		else if (typeCode == Types.BLOB)
+		{
+			// Sybase doesn't like the BLOB type, but works without problems with LONGVARBINARY
+			// even when using the Blob class
+			super.setStatementParameterValue(statement, sqlIndex, Types.LONGVARBINARY, value);
+		}
+		else if (typeCode == Types.CLOB)
+		{
+			// Same for CLOB and LONGVARCHAR
+			super.setStatementParameterValue(statement, sqlIndex, Types.LONGVARCHAR, value);
 		}
 		else
 		{

@@ -58,6 +58,9 @@ public class SybaseModelReader extends JdbcModelReader
     public SybaseModelReader(PlatformInfo platformInfo)
     {
         super(platformInfo);
+        setDefaultCatalogPattern(null);
+        setDefaultSchemaPattern(null);
+        setDefaultTablePattern("%");
 
         PatternCompiler compiler = new Perl5Compiler();
 
@@ -71,6 +74,21 @@ public class SybaseModelReader extends JdbcModelReader
         	throw new DdlUtilsException(ex);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+	protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+	{
+        Table table = super.readTable(metaData, values);
+
+        if (table != null)
+        {
+            // Sybase does not return the auto-increment status via the database metadata
+            determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+        }
+        return table;
+	}
 
 	/**
      * {@inheritDoc}
