@@ -176,22 +176,12 @@ public class Db2ModelReader extends JdbcModelReader
     		try
     		{
     			Long.parseLong(index.getName().substring(3));
+    			return true;
     		}
     		catch (NumberFormatException ex)
     		{
-    			return false;
+    			// we ignore it
     		}
-
-    		Column[] pks = table.getPrimaryKeyColumns();
-
-    		for (int idx = 0; idx < pks.length; idx++)
-    		{
-    			if (!index.getColumn(idx).getName().equals(pks[idx].getName()))
-    			{
-    				return false;
-    			}
-    		}
-    		return true;
     	}
 		return false;
     }

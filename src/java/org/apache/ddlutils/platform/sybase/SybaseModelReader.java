@@ -170,22 +170,12 @@ public class SybaseModelReader extends JdbcModelReader
 		    		try
 		    		{
 		    			Long.parseLong(id);
+		    			return true;
 		    		}
 		    		catch (NumberFormatException ex)
 		    		{
-		    			return false;
+		    			// we ignore it
 		    		}
-
-		    		Column[] pks = table.getPrimaryKeyColumns();
-
-		    		for (int idx = 0; idx < pks.length; idx++)
-		    		{
-		    			if (!index.getColumn(idx).getName().equals(pks[idx].getName()))
-		    			{
-		    				return false;
-		    			}
-		    		}
-		    		return true;
 	    		}
 	    	}
     	}

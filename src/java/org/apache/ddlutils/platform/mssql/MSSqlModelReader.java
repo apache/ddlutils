@@ -98,28 +98,12 @@ public class MSSqlModelReader extends JdbcModelReader
 	{
 		// Sql Server generates an index "PK__[table name]__[hex number]"
 		StringBuffer pkIndexName = new StringBuffer();
-		Column[]     pks         = table.getPrimaryKeyColumns();
 
-		if (pks.length > 0)
-		{
-			pkIndexName.append("PK__");
-			pkIndexName.append(table.getName());
-			pkIndexName.append("__");
+		pkIndexName.append("PK__");
+		pkIndexName.append(table.getName());
+		pkIndexName.append("__");
 
-			if (index.getName().toUpperCase().startsWith(pkIndexName.toString().toUpperCase()))
-			{
-				// if its an index for the pk, then its columns have to be the pk columns
-				for (int idx = 0; idx < pks.length; idx++)
-				{
-					if (!pks[idx].getName().equals(index.getColumn(idx).getName()))
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-		return false;
+		return index.getName().toUpperCase().startsWith(pkIndexName.toString().toUpperCase());
 	}
 
     /**
