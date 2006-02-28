@@ -159,6 +159,8 @@ public class JdbcModelReader
         // has problems otherwise (it seemingly requires a LONG column to be the first to be read)
         // See also DDLUTILS-29
         result.add(new MetaDataColumnDescriptor("COLUMN_DEF",     Types.VARCHAR));
+        // we're also reading the table name so that a model reader impl can filter manually
+        result.add(new MetaDataColumnDescriptor("TABLE_NAME",     Types.VARCHAR));
         result.add(new MetaDataColumnDescriptor("COLUMN_NAME",    Types.VARCHAR));
         result.add(new MetaDataColumnDescriptor("DATA_TYPE",      Types.INTEGER, new Integer(java.sql.Types.OTHER)));
         result.add(new MetaDataColumnDescriptor("NUM_PREC_RADIX", Types.INTEGER, new Integer(10)));
@@ -183,6 +185,8 @@ public class JdbcModelReader
         List result = new ArrayList();
 
         result.add(new MetaDataColumnDescriptor("COLUMN_NAME", Types.VARCHAR));
+        // we're also reading the table name so that a model reader impl can filter manually
+        result.add(new MetaDataColumnDescriptor("TABLE_NAME",  Types.VARCHAR));
 
         return result;
     }
@@ -200,6 +204,8 @@ public class JdbcModelReader
         List result = new ArrayList();
 
         result.add(new MetaDataColumnDescriptor("PKTABLE_NAME",  Types.VARCHAR));
+        // we're also reading the table name so that a model reader impl can filter manually
+        result.add(new MetaDataColumnDescriptor("FKTABLE_NAME",  Types.VARCHAR));
         result.add(new MetaDataColumnDescriptor("KEY_SEQ",       Types.TINYINT, new Short((short)0)));
         result.add(new MetaDataColumnDescriptor("FK_NAME",       Types.VARCHAR));
         result.add(new MetaDataColumnDescriptor("PKCOLUMN_NAME", Types.VARCHAR));
@@ -221,6 +227,8 @@ public class JdbcModelReader
         List result = new ArrayList();
 
         result.add(new MetaDataColumnDescriptor("INDEX_NAME",       Types.VARCHAR));
+        // we're also reading the table name so that a model reader impl can filter manually
+        result.add(new MetaDataColumnDescriptor("TABLE_NAME",       Types.VARCHAR));
         result.add(new MetaDataColumnDescriptor("NON_UNIQUE",       Types.BIT, Boolean.TRUE));
         result.add(new MetaDataColumnDescriptor("ORDINAL_POSITION", Types.TINYINT, new Short((short)0)));
         result.add(new MetaDataColumnDescriptor("COLUMN_NAME",      Types.VARCHAR));
@@ -653,7 +661,7 @@ public class JdbcModelReader
      * @param tableName The name of the table
      * @return The columns
      */
-    private Collection readColumns(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
+    protected Collection readColumns(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
     {
         ResultSet columnData = null;
 
