@@ -62,9 +62,8 @@ public class FirebirdPlatform extends PlatformImplBase
         info.setIndicesEmbedded(false);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
-        info.setSupportingDelimitedIdentifiers(false);
+        //info.setSupportingDelimitedIdentifiers(false);
 
-        // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BINARY,        "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",           Types.SMALLINT);
@@ -78,6 +77,7 @@ public class FirebirdPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT");
         info.addNativeTypeMapping(Types.NULL,          "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.OTHER,         "BLOB",               Types.LONGVARBINARY);
+        // This is back-mapped to REAL in the model reader
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.REF,           "BLOB",               Types.LONGVARBINARY);
@@ -87,17 +87,8 @@ public class FirebirdPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
-        /*
-         * This value is set to 128, to give multiple column index a chance
-         * to stay below the maximum key size of 256.
-         * If you use different encodings, you most likely need to decrease this value.
-         */
-        // TODO: Why should we care - after all this is a database problem and not a
-        //       DdlUtils one ? This value should be the one specified by JDBC which is 254
-        //       Also, do we really need to specify a default size for SMALLINT ?
-        info.addDefaultSize(Types.VARCHAR, 128);
-        info.addDefaultSize(Types.CHAR,    128);
-        info.addDefaultSize(Types.SMALLINT, 5);
+        info.addDefaultSize(Types.VARCHAR, 254);
+        info.addDefaultSize(Types.CHAR,    254);
 
         setSqlBuilder(new FirebirdBuilder(info));
         setModelReader(new FirebirdModelReader(info));

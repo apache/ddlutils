@@ -30,6 +30,7 @@ import org.apache.ddlutils.platform.SqlBuilder;
  * The SQL Builder for the FireBird database.
  * 
  * @author Martin van den Bemt
+ * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class FirebirdBuilder extends SqlBuilder
@@ -61,7 +62,7 @@ public class FirebirdBuilder extends SqlBuilder
         for (int idx = 0; idx < columns.length; idx++)
         {
             print("CREATE GENERATOR ");
-            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
+            printIdentifier(getGeneratorName(table, columns[idx]));
             printEndOfStatement();
             print(TERM_COMMAND);
             printEndOfStatement();
@@ -85,6 +86,18 @@ public class FirebirdBuilder extends SqlBuilder
         }
     }
 
+    /**
+     * Determines the name of the generator for an auto-increment column.
+     * 
+     * @param table  The table
+     * @param column The auto-increment column
+     * @return The generator name
+     */
+    protected String getGeneratorName(Table table, Column column)
+    {
+    	return getConstraintName("gen", table, column.getName(), null);
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -155,6 +168,18 @@ public class FirebirdBuilder extends SqlBuilder
                                                            Types.SMALLINT).toString();
         }
         return defaultValue;
+    }
+
+    /**
+     * 
+     * {@inheritDoc}
+     */
+    public void createExternalForeignKeys(Database database) throws IOException
+    {
+        for (int idx = 0; idx < database.getTableCount(); idx++)
+        {
+            createExternalForeignKeys(database, database.getTable(idx));
+        }
     }
 
 }
