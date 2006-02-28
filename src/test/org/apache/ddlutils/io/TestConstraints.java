@@ -91,7 +91,7 @@ public class TestConstraints extends RoundtripTestBase
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
         "    <column name='value_1' type='DOUBLE'/>\n"+
-        "    <column name='value_2' type='VARCHAR'/>\n"+
+        "    <column name='value_2' type='VARCHAR' size='32'/>\n"+
         "    <unique name='test_index'>\n"+
         "      <unique-column name='value_2'/>\n"+
         "      <unique-column name='value_1'/>\n"+
@@ -104,7 +104,7 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
         "    <column name='avalue' type='DOUBLE'/>\n"+
         "    <index name='test_index'>\n"+
         "      <index-column name='avalue'/>\n"+
@@ -120,7 +120,7 @@ public class TestConstraints extends RoundtripTestBase
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
         "  </table>\n"+
         "  <table name='roundtrip_2'>\n"+
-        "    <column name='pk' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
         "    <column name='avalue' type='INTEGER' required='true'/>\n"+
         "    <foreign-key foreignTable='roundtrip_1'>\n"+
         "      <reference local='avalue' foreign='pk'/>\n"+
@@ -133,13 +133,13 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip_1'>\n"+
         "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
         "  </table>\n"+
         "  <table name='roundtrip_2'>\n"+
-        "    <column name='pk' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
         "    <column name='value_1' type='INTEGER' required='true'/>\n"+
         "    <column name='value_2' type='INTEGER'/>\n"+
-        "    <column name='value_3' type='VARCHAR'/>\n"+
+        "    <column name='value_3' type='VARCHAR' size='32'/>\n"+
         "    <foreign-key name='fk_1' foreignTable='roundtrip_1'>\n"+
         "      <reference local='value_1' foreign='pk_1'/>\n"+
         "      <reference local='value_3' foreign='pk_2'/>\n"+
@@ -156,9 +156,9 @@ public class TestConstraints extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip_1'>\n"+
         "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
         "    <column name='value_1' type='INTEGER'/>\n"+
-        "    <column name='value_2' type='VARCHAR'/>\n"+
+        "    <column name='value_2' type='VARCHAR' size='32'/>\n"+
         "    <foreign-key foreignTable='roundtrip_2'>\n"+
         "      <reference local='value_1' foreign='pk_1'/>\n"+
         "      <reference local='value_2' foreign='pk_2'/>\n"+
@@ -166,8 +166,8 @@ public class TestConstraints extends RoundtripTestBase
         "  </table>\n"+
         "  <table name='roundtrip_2'>\n"+
         "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
-        "    <column name='value_1' type='VARCHAR' required='true'/>\n"+
+        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+        "    <column name='value_1' type='VARCHAR' size='32' required='true'/>\n"+
         "    <column name='value_2' type='INTEGER' required='true'/>\n"+
         "    <foreign-key foreignTable='roundtrip_1'>\n"+
         "      <reference local='value_2' foreign='pk_1'/>\n"+
