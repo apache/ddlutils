@@ -210,7 +210,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 {
                     if (continueOnError)
                     {
-                        System.err.println("SQL Command " + command + " failed with " + ex.getMessage());
+                        _log.warn("SQL Command " + command + " failed with ", ex);
                         errors++;
                     }
                     else

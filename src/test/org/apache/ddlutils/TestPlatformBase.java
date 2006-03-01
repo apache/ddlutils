@@ -23,6 +23,8 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.xml.sax.SAXException;
@@ -124,10 +126,22 @@ public abstract class TestPlatformBase extends TestCase
         "  </table>\n" +
         "</database>";
 
+    /** The log for the tests. */
+    private final Log _log = LogFactory.getLog(getClass());
     /** The tested platform. */
     private Platform _platform;
     /** The writer that the builder of the platform writes to. */
     private StringWriter _writer;
+
+    /**
+     * Returns the log.
+     * 
+     * @return The log
+     */
+    protected Log getLog()
+    {
+        return _log;
+    }
 
     /**
      * {@inheritDoc}

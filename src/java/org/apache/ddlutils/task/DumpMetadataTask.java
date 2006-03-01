@@ -197,7 +197,7 @@ public class DumpMetadataTask extends Task
     {
         if (_dataSource == null)
         {
-            System.out.println("No data source specified, so there is nothing to do.");
+            log("No data source specified, so there is nothing to do.", Project.MSG_INFO);
             return;
         }
 

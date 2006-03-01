@@ -24,6 +24,8 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -41,6 +43,9 @@ import org.apache.ddlutils.model.Table;
  */
 public class TestDatabaseIO extends TestCase
 {
+    /** The log for the tests. */
+    private final Log _log = LogFactory.getLog(TestDatabaseIO.class);
+
     /**
      * Reads the database model from the given string.
      * 
@@ -1255,8 +1260,8 @@ public class TestDatabaseIO extends TestCase
                 "<database name='db' >\n" +
                 "  <index name='NotATable'/>\n" +
                 "</database>");
-        
-        System.out.println("Table : " + Arrays.asList(database.getTables()));
+
+        _log.debug("Table : " + Arrays.asList(database.getTables()));
         assertEquals(0, database.getTableCount());
     }
 

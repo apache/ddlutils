@@ -320,12 +320,12 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
 
             dbIo.write(expected, writer);
 
-            System.err.println("Expected model:\n"+writer.toString());
+            getLog().error("Expected model:\n" + writer.toString());
             
             writer = new StringWriter();
             dbIo.write(actual, writer);
 
-            System.err.println("Actual model:\n"+writer.toString());
+            getLog().error("Actual model:\n" + writer.toString());
 
             if (ex instanceof Error)
             {
