@@ -254,7 +254,7 @@ public class PlatformUtils
         }
         catch (SQLException ex)
         {
-            throw new DynaSqlException("Error while reading the database metadata", ex);
+            throw new DynaSqlException("Error while reading the database metadata: " + ex.getMessage(), ex);
         }
         finally
         {

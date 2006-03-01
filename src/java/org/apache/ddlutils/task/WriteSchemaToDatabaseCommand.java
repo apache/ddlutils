@@ -96,11 +96,32 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
         {
             if (isAlterDatabase())
             {
-                platform.alterTables(model, params, _doDrops, true, true);
+                if ((getCatalogPattern() != null) || (getSchemaPattern() != null))
+                {
+                    platform.alterTables(getCatalogPattern(),
+                                         getSchemaPattern(),
+                                         null,
+                                         model,
+                                         params,
+                                         _doDrops,
+                                         true,
+                                         true);
+                }
+                else
+                {
+                    platform.alterTables(model,
+                                         params,
+                                         _doDrops,
+                                         true,
+                                         true);
+                }
             }
             else
             {
-                platform.createTables(model, params, _doDrops, true);
+                platform.createTables(model,
+                                      params,
+                                      _doDrops,
+                                      true);
             }
 
             task.log("Written schema to database", Project.MSG_INFO);

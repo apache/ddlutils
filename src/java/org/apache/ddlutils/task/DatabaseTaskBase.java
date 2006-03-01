@@ -57,7 +57,10 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void setDatabaseType(String type)
     {
-        _platformConf.setDatabaseType(type);
+        if ((type != null) && (type.length() > 0))
+        {
+            _platformConf.setDatabaseType(type);
+        }
     }
 
     /**
@@ -78,6 +81,26 @@ public abstract class DatabaseTaskBase extends Task
     public void addConfiguredDatabase(BasicDataSource dataSource)
     {
         _platformConf.setDataSource(dataSource);
+    }
+
+    /**
+     * Sets the catalog pattern.
+     * 
+     * @param catalogPattern The catalog pattern
+     */
+    public void setCatalogPattern(String catalogPattern)
+    {
+        _platformConf.setCatalogPattern(catalogPattern);
+    }
+    
+    /**
+     * Sets the schema pattern.
+     * 
+     * @param schemaPattern The schema pattern
+     */
+    public void setSchemaPattern(String schemaPattern)
+    {
+        _platformConf.setSchemaPattern(schemaPattern);
     }
 
     /**

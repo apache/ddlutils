@@ -54,6 +54,26 @@ public abstract class DatabaseCommand implements Command
     }
 
     /**
+     * Returns the catalog pattern if any.
+     * 
+     * @return The catalog pattern
+     */
+    public String getCatalogPattern()
+    {
+        return _platformConf.getCatalogPattern();
+    }
+
+    /**
+     * Returns the schema pattern if any.
+     * 
+     * @return The schema pattern
+     */
+    public String getSchemaPattern()
+    {
+        return _platformConf.getSchemaPattern();
+    }
+
+    /**
      * Sets the platform configuration.
      * 
      * @param platformConf The platform configuration

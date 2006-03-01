@@ -36,6 +36,10 @@ public class PlatformConfiguration
     private BasicDataSource _dataSource;
     /** Whether to use delimited SQL identifiers. */
     private boolean _useDelimitedSqlIdentifiers = true;
+    /** The catalog pattern. */
+    private String _catalogPattern;
+    /** The schema pattern. */
+    private String _schemaPattern;
 
     /**
      * Returns the database type.
@@ -75,6 +79,46 @@ public class PlatformConfiguration
     public void setDataSource(BasicDataSource dataSource)
     {
         _dataSource = dataSource;
+    }
+
+    /**
+     * Returns the catalog pattern if any.
+     * 
+     * @return The catalog pattern
+     */
+    public String getCatalogPattern()
+    {
+        return _catalogPattern;
+    }
+
+    /**
+     * Sets the catalog pattern.
+     * 
+     * @param catalogPattern The catalog pattern
+     */
+    public void setCatalogPattern(String catalogPattern)
+    {
+        _catalogPattern = catalogPattern;
+    }
+
+    /**
+     * Returns the schema pattern if any.
+     * 
+     * @return The schema pattern
+     */
+    public String getSchemaPattern()
+    {
+        return _schemaPattern;
+    }
+
+    /**
+     * Sets the schema pattern.
+     * 
+     * @param schemaPattern The schema pattern
+     */
+    public void setSchemaPattern(String schemaPattern)
+    {
+        _schemaPattern = schemaPattern;
     }
 
     /**
