@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="writeSchemaSqlToFile"
+	     name="DdlUtils"
+	     basedir=".">
+  <!-- Allow values set at the commandline or in the environment to override the defaults -->
+  <property environment="env"/>
+  <!-- Load the jdbc properties as specified by the jdbc.properties.file variable-->
+  <property file="${jdbc.properties.file}"/>
+  <!-- Load the build properties -->
+  <property file="build.properties"/>
+
+  <!-- These properties can be overriden on the commandline using -D --> 
+  <property name="schemafiles" value="testmodel.xml"/>
+  <property name="catalogpattern" value=""/>
+  <property name="schemapattern" value=""/>
+  <property name="sqloutputfile" value="schema.sql"/>
+  <property name="platform" value=""/>
+  <property name="alterdatabase" value="true"/>
+  
+  <!-- The classpath used for running the tasks -->
+  <path id="project-classpath">
+    <fileset dir="${lib.dir}">
+        <include name="**/*.jar"/>
+        <include name="**/*.zip"/>
+    </fileset>
+    <pathelement path="${build.java.dir}"/>
+  </path>
+
+  <taskdef classname="org.apache.ddlutils.task.DdlToDatabaseTask"
+           name="ddlToDatabase"
+           classpathref="project-classpath"/>
+  <taskdef classname="org.apache.ddlutils.task.DatabaseToDdlTask"
+           name="databaseToDdl"
+           classpathref="project-classpath"/>
+	
+  <target name="writeSchemaToDb">
+    <ddlToDatabase validatexml="false" 
+                   usedelimitedsqlidentifiers="false"
+                   catalogpattern="${catalogpattern}"
+                   schemapattern="${schemapattern}"
+                   databasetype="${platform}" >
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+      <fileset dir=".">
+        <include name="${schemafiles}"/> 
+      </fileset> 
+
+      <writeschematodatabase alterdatabase="${alterdatabase}"
+                             dodrops="true"
+                             failonerror="false"/> 
+    </ddlToDatabase> 
+  </target>
+
+  <target name="writeSchemaSqlToFile">
+    <ddlToDatabase validatexml="false" 
+                   usedelimitedsqlidentifiers="false"
+                   catalogpattern="${catalogpattern}"
+                   schemapattern="${schemapattern}"
+                   databasetype="${platform}" >
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+      <fileset dir=".">
+        <include name="${schemafiles}"/> 
+      </fileset> 
+
+      <writeschemasqltofile alterdatabase="${alterdatabase}"
+                            dodrops="true"
+                            failonerror="false"
+                            outputfile="${sqloutputfile}"/> 
+    </ddlToDatabase> 
+  </target>
+</project>
