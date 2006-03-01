@@ -24,7 +24,7 @@ import org.apache.ddlutils.platform.PlatformImplBase;
 /**
  * The platform for Oracle 8.
  * 
- * TODO: We might support the {@link org.apache.ddlutils.Platform#createDatabase(String, String, String, String, String, Map)}
+ * TODO: We might support the {@link org.apache.ddlutils.Platform#createDatabase(String, String, String, String, Map)}
  *       functionality via "CREATE SCHEMA"/"CREATE USER" or "CREATE TABLESPACE" ?
  *
  * @author James Strachan

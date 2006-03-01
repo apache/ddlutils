@@ -1,11 +1,5 @@
 package org.apache.ddlutils.platform.oracle;
 
-import java.io.IOException;
-
-import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.model.Column;
-import org.apache.ddlutils.model.Table;
-
 /*
  * Copyright 2006 The Apache Software Foundation.
  * 
@@ -22,8 +16,17 @@ import org.apache.ddlutils.model.Table;
  * limitations under the License.
  */
 
+import java.io.IOException;
+
+import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Table;
+
 /**
  * The SQL builder for Oracle 10.
+ * 
+ * @author Thomas Dudziak
+ * @version $Revision: $
  */
 public class Oracle10Builder extends Oracle8Builder
 {

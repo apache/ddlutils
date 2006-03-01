@@ -304,8 +304,9 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
 
     /**
-     * Reads the database model from the database.
+     * Reads the database model from a live database.
      * 
+     * @param databaseName The name of the resulting database
      * @return The model
      */
     protected Database readModelFromDatabase(String databaseName)
@@ -318,9 +319,10 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
     
     /**
-     * Reads the database model from the database.
+     * Returns the SQL for altering the live database so that it matches the given model.
      * 
-     * @return The model
+     * @param desiredModel The desired model
+     * @return The alteration SQL
      */
     protected String getAlterTablesSql(Database desiredModel)
     {

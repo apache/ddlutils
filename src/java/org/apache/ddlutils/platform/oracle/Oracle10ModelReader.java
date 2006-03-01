@@ -25,6 +25,12 @@ import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 
+/**
+ * Reads a database model from an Oracle 10 database.
+ *
+ * @author Thomas Dudziak
+ * @version $Revision: $
+ */
 public class Oracle10ModelReader extends Oracle8ModelReader
 {
     /**
