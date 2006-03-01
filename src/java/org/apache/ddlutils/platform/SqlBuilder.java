@@ -1364,16 +1364,14 @@ public abstract class SqlBuilder
         String  desiredDefault = desiredColumn.getDefaultValue();
         String  currentDefault = currentColumn.getDefaultValue();
         boolean defaultsEqual  = (desiredDefault == null) || desiredDefault.equals(currentDefault);
-        boolean sizeMatters    = (desiredColumn.getSize() != null);
+        boolean sizeMatters    = getPlatformInfo().hasSize(currentColumn.getTypeCode());
 
         // We're comparing the jdbc type that corresponds to the native type for the
         // desired type, in order to avoid repeated altering of a perfectly valid column
         if ((getPlatformInfo().getTargetJdbcType(desiredColumn.getTypeCode()) != currentColumn.getTypeCode()) ||
             (desiredColumn.isRequired() != currentColumn.isRequired()) ||
-            (sizeMatters && (!desiredColumn.getSize().equals(currentColumn.getSize()))) ||
-            !defaultsEqual /*|| //determined these two to be hardly useful
-            (columnA.getScale() != columnB.getScale()) ||
-            (columnA.getPrecisionRadix() != columnB.getPrecisionRadix())*/ )
+            (sizeMatters && !StringUtils.equals(desiredColumn.getSize(), currentColumn.getSize())) ||
+            !defaultsEqual)
         {
             return true;
         }
