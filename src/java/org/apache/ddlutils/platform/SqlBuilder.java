@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -37,6 +38,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 
@@ -429,7 +431,7 @@ public abstract class SqlBuilder
         for (int columnIdx = 0; columnIdx < desiredTable.getColumnCount(); columnIdx++)
         {
             Column desiredColumn = desiredTable.getColumn(columnIdx);
-            Column currentColumn = currentTable.findColumn(desiredColumn.getName());
+            Column currentColumn = currentTable.findColumn(desiredColumn.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
 
             if (null == currentColumn)
             {
@@ -468,7 +470,7 @@ public abstract class SqlBuilder
         for (int fkIdx = 0; fkIdx < desiredTable.getForeignKeyCount(); fkIdx++)
         {
             ForeignKey desiredFk = desiredTable.getForeignKey(fkIdx);
-            ForeignKey currentFk = currentTable.findForeignKey(desiredFk);
+            ForeignKey currentFk = findCorrespondingForeignKey(currentTable, desiredFk);
 
             if (currentFk == null)
             {
@@ -485,7 +487,7 @@ public abstract class SqlBuilder
         for (int indexIdx = 0; indexIdx < desiredTable.getIndexCount(); indexIdx++)
         {
             Index desiredIndex = desiredTable.getIndex(indexIdx);
-            Index currentIndex = currentTable.findIndex(desiredIndex.getName());
+            Index currentIndex = currentTable.findIndex(desiredIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
 
             if (currentIndex == null)
             {
@@ -501,7 +503,7 @@ public abstract class SqlBuilder
         for (int fkIdx = 0; fkIdx < currentTable.getForeignKeyCount(); fkIdx++)
         {
             ForeignKey currentFk = currentTable.getForeignKey(fkIdx);
-            ForeignKey desiredFk = desiredTable.findForeignKey(currentFk);
+            ForeignKey desiredFk = findCorrespondingForeignKey(desiredTable, currentFk);
 
             if (desiredFk == null)
             {
@@ -521,7 +523,7 @@ public abstract class SqlBuilder
         for (int columnIdx = 0; columnIdx < currentTable.getColumnCount(); columnIdx++)
         {
             Column currentColumn = currentTable.getColumn(columnIdx);
-            Column desiredColumn = desiredTable.findColumn(currentColumn.getName());
+            Column desiredColumn = desiredTable.findColumn(currentColumn.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
 
             if (desiredColumn == null)
             {
@@ -550,7 +552,7 @@ public abstract class SqlBuilder
         for (int indexIdx = 0; indexIdx < currentTable.getIndexCount(); indexIdx++)
         {
             Index currentIndex = currentTable.getIndex(indexIdx);
-            Index desiredIndex = desiredTable.findIndex(currentIndex.getName());
+            Index desiredIndex = desiredTable.findIndex(currentIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
 
             if (desiredIndex == null)
             {
@@ -582,8 +584,80 @@ public abstract class SqlBuilder
             }
         }
 
+    }
+
+    /**
+     * Searches in the given table for a corresponding foreign key. If the given key
+     * has no name, then a foreign key to the same table with the same columns in the
+     * same order is searched. If the given key has a name, then the a corresponding
+     * key also needs to have the same name, or no name at all, but not a different one. 
+     * 
+     * @param table The table to search in
+     * @param fk    The original foreign key
+     * @return The corresponding foreign key if found
+     */
+    protected ForeignKey findCorrespondingForeignKey(Table table, ForeignKey fk)
+    {
+        boolean     caseMatters = getPlatformInfo().isUseDelimitedIdentifiers();
+        boolean     checkFkName = (fk.getName() != null) && (fk.getName().length() > 0);
+        Reference[] refs        = fk.getReferences();
+        ArrayList   curRefs     = new ArrayList();
+
+        for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey curFk          = table.getForeignKey(fkIdx);
+            boolean    checkCurFkName = checkFkName &&
+                                        (curFk.getName() != null) && (curFk.getName().length() > 0);
+
+            if ((!checkCurFkName || areEqual(fk.getName(), curFk.getName(), caseMatters)) &&
+                areEqual(fk.getForeignTableName(), curFk.getForeignTableName(), caseMatters))
+            {
+                curRefs.clear();
+                CollectionUtils.addAll(curRefs, curFk.getReferences());
+
+                // the order is not fixed, so we have to take this long way
+                if (curRefs.size() == refs.length)
+                {
+                    for (int refIdx = 0; refIdx < refs.length; refIdx++)
+                    {
+                        boolean found = false;
+
+                        for (int curRefIdx = 0; !found && (curRefIdx < curRefs.size()); curRefIdx++)
+                        {
+                            Reference curRef = (Reference)curRefs.get(curRefIdx);
+
+                            if ((caseMatters  && refs[refIdx].equals(curRef)) ||
+                                (!caseMatters && refs[refIdx].equalsIgnoreCase(curRef)))
+                            {
+                                curRefs.remove(curRefIdx);
+                                found = true;
+                            }
+                        }
+                    }
+                    if (curRefs.isEmpty())
+                    {
+                        return curFk;
+                    }
+                }
+            }
+        }
+        return null;
     } 
-    
+
+    /**
+     * Compares the two strings.
+     * 
+     * @param string1     The first string
+     * @param string2     The second string
+     * @param caseMatters Whether case matters in the comparison
+     * @return <code>true</code> if the string are equal
+     */
+    protected boolean areEqual(String string1, String string2, boolean caseMatters)
+    {
+        return (caseMatters  && string1.equals(string2)) ||
+               (!caseMatters && string1.equalsIgnoreCase(string2));
+    }
+
     /** 
      * Outputs the DDL to create the table along with any non-external constraints as well
      * as with external primary keys and indices (but not foreign keys).
@@ -1364,7 +1438,8 @@ public abstract class SqlBuilder
         String  desiredDefault = desiredColumn.getDefaultValue();
         String  currentDefault = currentColumn.getDefaultValue();
         boolean defaultsEqual  = (desiredDefault == null) || desiredDefault.equals(currentDefault);
-        boolean sizeMatters    = getPlatformInfo().hasSize(currentColumn.getTypeCode());
+        boolean sizeMatters    = getPlatformInfo().hasSize(currentColumn.getTypeCode()) &&
+                                 (desiredColumn.getSize() != null);
 
         // We're comparing the jdbc type that corresponds to the native type for the
         // desired type, in order to avoid repeated altering of a perfectly valid column

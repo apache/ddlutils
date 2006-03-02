@@ -16,6 +16,7 @@ package org.apache.ddlutils.model;
  * limitations under the License.
  */
 
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.collections.set.ListOrderedSet;
@@ -247,6 +248,48 @@ public class ForeignKey implements Cloneable
                                       .append(_foreignTableName, other._foreignTableName)
                                       .append(_references,       other._references)
                                       .isEquals();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Compares this foreign key to the given one while ignoring the case of identifiers.
+     * 
+     * @param otherFk The other foreign key
+     */
+    public boolean equalsIgnoreCase(ForeignKey otherFk)
+    {
+        if (_name.equalsIgnoreCase(otherFk._name) &&
+            _foreignTableName.equalsIgnoreCase(otherFk._foreignTableName))
+        {
+            HashSet otherRefs = new HashSet();
+    
+            otherRefs.addAll(otherFk._references);
+            for (Iterator it = _references.iterator(); it.hasNext();)
+            {
+                Reference curLocalRef = (Reference)it.next();
+                boolean   found       = false;
+
+                for (Iterator otherIt = otherRefs.iterator(); otherIt.hasNext();)
+                {
+                    Reference curOtherRef = (Reference)otherIt.next();
+
+                    if (curLocalRef.equalsIgnoreCase(curOtherRef))
+                    {
+                        otherIt.remove();
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    return false;
+                }
+            }
+            return otherRefs.isEmpty();
         }
         else
         {

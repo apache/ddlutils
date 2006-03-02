@@ -208,6 +208,18 @@ public class Reference implements Cloneable, Serializable
     }
 
     /**
+     * Compares this reference to the given one while ignoring the case of identifiers.
+     * 
+     * @param otherRef The other reference
+     */
+    public boolean equalsIgnoreCase(Reference otherRef)
+    {
+        return (otherRef != null) &&
+               _localColumnName.equalsIgnoreCase(otherRef._localColumnName) &&
+               _foreignColumnName.equalsIgnoreCase(otherRef._foreignColumnName);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public int hashCode()

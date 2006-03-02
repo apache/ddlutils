@@ -604,6 +604,28 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
+     * Finds the foreign key in this table that is equal to the supplied foreign key.
+     * 
+     * @param key           The foreign key to search for
+     * @param caseSensitive Whether case matters for the names
+     * @return The found foreign key
+     */
+    public ForeignKey findForeignKey(ForeignKey key, boolean caseSensitive)
+    {
+        for (int idx = 0; idx < getForeignKeyCount(); idx++)
+        {
+            ForeignKey fk = getForeignKey(idx);
+
+            if ((caseSensitive  && fk.equals(key)) ||
+                (!caseSensitive && fk.equalsIgnoreCase(key)))
+            {
+                return fk;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the primary key columns of this table.
      * 
      * @return The primary key columns
