@@ -140,7 +140,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
             }
             else
             {
-                task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
+                task.log(ex.getMessage() == null ? ex.toString() : ex.getMessage(), Project.MSG_ERR);
             }
         }
         finally
