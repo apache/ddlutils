@@ -90,7 +90,10 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void setCatalogPattern(String catalogPattern)
     {
-        _platformConf.setCatalogPattern(catalogPattern);
+        if ((catalogPattern != null) && (catalogPattern.length() > 0))
+        {
+            _platformConf.setCatalogPattern(catalogPattern);
+        }
     }
     
     /**
@@ -100,7 +103,10 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void setSchemaPattern(String schemaPattern)
     {
-        _platformConf.setSchemaPattern(schemaPattern);
+        if ((schemaPattern != null) && (schemaPattern.length() > 0))
+        {
+            _platformConf.setSchemaPattern(schemaPattern);
+        }
     }
 
     /**
