@@ -77,6 +77,8 @@ public class JdbcModelReader
     private String _defaultSchemaPattern = "%";
     /** The default pattern for reading all tables. */
     private String _defaultTablePattern = "%";
+    /** The default pattern for reading all columns. */
+    private String _defaultColumnPattern;
     /** The table types to recognize per default. */
     private String[] _defaultTableTypes = { "TABLE" };
     /** The active connection while reading a database model. */
@@ -295,6 +297,26 @@ public class JdbcModelReader
     public void setDefaultTablePattern(String tablePattern)
     {
         _defaultTablePattern = tablePattern;
+    }
+
+    /**
+     * Returns the default pattern to read the relevant columns from the database.
+     *
+     * @return The column pattern
+     */
+    public String getDefaultColumnPattern()
+    {
+        return _defaultColumnPattern;
+    }
+
+    /**
+     * Sets the default pattern to read the relevant columns from the database.
+     *
+     * @param columnPattern The column pattern
+     */
+    public void setDefaultColumnPattern(String columnPattern)
+    {
+        _defaultColumnPattern = columnPattern;
     }
 
     /**
@@ -667,7 +689,7 @@ public class JdbcModelReader
 
         try
         {
-            columnData = metaData.getColumns(tableName, null);
+            columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
 
             List columns = new ArrayList();
 
