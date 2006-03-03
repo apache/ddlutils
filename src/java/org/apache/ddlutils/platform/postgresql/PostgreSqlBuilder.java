@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -71,6 +72,16 @@ public class PostgreSqlBuilder extends SqlBuilder
             printIdentifier(getConstraintName(null, table, columns[idx].getName(), "seq"));
             printEndOfStatement();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    {
+        print("DROP INDEX ");
+        printIdentifier(getIndexName(index));
+        printEndOfStatement();
     }
 
     /**
