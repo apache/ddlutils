@@ -428,6 +428,69 @@ public abstract class SqlBuilder
      */
     protected void alterTable(Database currentModel, Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
     {
+        // we need to do this in the following order:
+        // - drop foreign keys (so that columns might be removed)
+        // - drop indices (same reason)
+        // - drop/alter/add columns
+        // - add indices
+        // - add foreign keys
+
+        // Drop foreign keys
+        for (int fkIdx = 0; fkIdx < currentTable.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey currentFk = currentTable.getForeignKey(fkIdx);
+            ForeignKey desiredFk = findCorrespondingForeignKey(desiredTable, currentFk);
+
+            if (desiredFk == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info((doDrops ? "" : "Not ") + "Dropping foreign key " + currentTable.getName() + "." + currentFk);
+                }
+                if (doDrops)
+                {
+                    writeExternalForeignKeyDropStmt(currentTable, currentFk);
+                }
+            }
+        }
+
+        // Drop indexes
+        for (int indexIdx = 0; indexIdx < currentTable.getIndexCount(); indexIdx++)
+        {
+            Index currentIndex = currentTable.getIndex(indexIdx);
+            Index desiredIndex = desiredTable.findIndex(currentIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
+
+            if (desiredIndex == null)
+            {
+                // make sure this isn't the primary key index
+                boolean  isPk = true;
+
+                for (int columnIdx = 0; columnIdx < currentIndex.getColumnCount(); columnIdx++)
+                {
+                    IndexColumn indexColumn = currentIndex.getColumn(columnIdx);
+                    Column      column      = currentTable.findColumn(indexColumn.getName());
+
+                    if ((column != null) && !column.isPrimaryKey())
+                    {
+                        isPk = false;
+                        break;
+                    }
+                }
+                if (!isPk)
+                {
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info((doDrops ? "" : "Not ") + "Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
+                    }
+                    if (doDrops)
+                    {
+                        writeExternalIndexDropStmt(currentTable, currentIndex);
+                    }
+                }
+            }
+        }
+
+        // Add/alter columns
         for (int columnIdx = 0; columnIdx < desiredTable.getColumnCount(); columnIdx++)
         {
             Column desiredColumn = desiredTable.getColumn(columnIdx);
@@ -466,60 +529,7 @@ public abstract class SqlBuilder
             }
         }
 
-        // add fk constraints
-        for (int fkIdx = 0; fkIdx < desiredTable.getForeignKeyCount(); fkIdx++)
-        {
-            ForeignKey desiredFk = desiredTable.getForeignKey(fkIdx);
-            ForeignKey currentFk = findCorrespondingForeignKey(currentTable, desiredFk);
-
-            if (currentFk == null)
-            {
-                if (_log.isInfoEnabled())
-                {
-                    _log.info("Creating foreign key " + desiredTable.getName() + "." + desiredFk);
-                }
-                writeExternalForeignKeyCreateStmt(desiredModel, desiredTable, desiredFk);
-            }
-        }
-
-        // TODO: should we check the index fields for differences?
-        //create new indexes
-        for (int indexIdx = 0; indexIdx < desiredTable.getIndexCount(); indexIdx++)
-        {
-            Index desiredIndex = desiredTable.getIndex(indexIdx);
-            Index currentIndex = currentTable.findIndex(desiredIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
-
-            if (currentIndex == null)
-            {
-                if (_log.isInfoEnabled())
-                {
-                    _log.info("Creating index " + desiredTable.getName() + "." + desiredIndex.getName());
-                }
-                writeExternalIndexCreateStmt(desiredTable, desiredIndex);
-            }
-        }
-
-        // drop fk constraints
-        for (int fkIdx = 0; fkIdx < currentTable.getForeignKeyCount(); fkIdx++)
-        {
-            ForeignKey currentFk = currentTable.getForeignKey(fkIdx);
-            ForeignKey desiredFk = findCorrespondingForeignKey(desiredTable, currentFk);
-
-            if (desiredFk == null)
-            {
-                if (_log.isInfoEnabled())
-                {
-                    _log.info((doDrops ? "" : "Not ") + "Dropping foreign key " + currentTable.getName() + "." + currentFk);
-                }
-                if (doDrops)
-                {
-                    writeExternalForeignKeyDropStmt(currentTable, currentFk);
-                }
-            }
-        }
-
-
-        //Drop columns
+        // Drop columns
         for (int columnIdx = 0; columnIdx < currentTable.getColumnCount(); columnIdx++)
         {
             Column currentColumn = currentTable.getColumn(columnIdx);
@@ -548,39 +558,36 @@ public abstract class SqlBuilder
             }
         }
 
-        //Drop indexes
-        for (int indexIdx = 0; indexIdx < currentTable.getIndexCount(); indexIdx++)
+        // Add foreign keys
+        for (int fkIdx = 0; fkIdx < desiredTable.getForeignKeyCount(); fkIdx++)
         {
-            Index currentIndex = currentTable.getIndex(indexIdx);
-            Index desiredIndex = desiredTable.findIndex(currentIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
+            ForeignKey desiredFk = desiredTable.getForeignKey(fkIdx);
+            ForeignKey currentFk = findCorrespondingForeignKey(currentTable, desiredFk);
 
-            if (desiredIndex == null)
+            if (currentFk == null)
             {
-                // make sure this isn't the primary key index
-                boolean  isPk = true;
-
-                for (int columnIdx = 0; columnIdx < currentIndex.getColumnCount(); columnIdx++)
+                if (_log.isInfoEnabled())
                 {
-                    IndexColumn indexColumn = currentIndex.getColumn(columnIdx);
-                    Column      column      = currentTable.findColumn(indexColumn.getName());
+                    _log.info("Creating foreign key " + desiredTable.getName() + "." + desiredFk);
+                }
+                writeExternalForeignKeyCreateStmt(desiredModel, desiredTable, desiredFk);
+            }
+        }
 
-                    if ((column != null) && !column.isPrimaryKey())
-                    {
-                        isPk = false;
-                        break;
-                    }
-                }
-                if (!isPk)
+        // TODO: we should check the index fields for differences
+        // Add indexes
+        for (int indexIdx = 0; indexIdx < desiredTable.getIndexCount(); indexIdx++)
+        {
+            Index desiredIndex = desiredTable.getIndex(indexIdx);
+            Index currentIndex = currentTable.findIndex(desiredIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
+
+            if (currentIndex == null)
+            {
+                if (_log.isInfoEnabled())
                 {
-                    if (_log.isInfoEnabled())
-                    {
-                        _log.info((doDrops ? "" : "Not ") + "Dropping non-primary index " + currentTable.getName() + "." + currentIndex.getName());
-                    }
-                    if (doDrops)
-                    {
-                        writeExternalIndexDropStmt(currentTable, currentIndex);
-                    }
+                    _log.info("Creating index " + desiredTable.getName() + "." + desiredIndex.getName());
                 }
+                writeExternalIndexCreateStmt(desiredTable, desiredIndex);
             }
         }
 
