@@ -25,6 +25,7 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The SQL Builder for the FireBird database.
@@ -152,22 +153,19 @@ public class FirebirdBuilder extends SqlBuilder
     }
 
     /**
-     * Returns the native default value for the column.
-     * 
-     * @param column The column
-     * @return The native default value
+     * {@inheritDoc}
      */
     protected String getNativeDefaultValue(Column column)
     {
-        String defaultValue = column.getDefaultValue();
-
-        if ((column.getTypeCode() == Types.BIT) || (column.getTypeCode() == Types.BOOLEAN))
+        if ((column.getTypeCode() == Types.BIT) ||
+            (Jdbc3Utils.supportsJava14JdbcTypes() && (column.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode())))
         {
-            defaultValue = getDefaultValueHelper().convert(column.getDefaultValue(),
-                                                           column.getTypeCode(),
-                                                           Types.SMALLINT).toString();
+            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
         }
-        return defaultValue;
+        else
+        {
+            return super.getNativeDefaultValue(column);
+        }
     }
 
     /**
