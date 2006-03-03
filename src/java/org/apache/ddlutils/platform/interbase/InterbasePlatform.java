@@ -53,27 +53,28 @@ public class InterbasePlatform extends PlatformImplBase
 
         // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
-        info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(38,0)");
+        info.addNativeTypeMapping(Types.BIGINT,        "NUMERIC(18,0)");
         info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} CHARACTER SET OCTETS");
-        info.addNativeTypeMapping(Types.BIT,           "DECIMAL(1,0)");
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB");
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION");
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION", Types.DOUBLE);
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
         info.addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT");
         info.addNativeTypeMapping(Types.NULL,          "BLOB");
         info.addNativeTypeMapping(Types.OTHER,         "BLOB");
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT");
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.REF,           "BLOB");
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} CHARACTER SET OCTETS");
-        info.addNativeTypeMapping("BOOLEAN",  "DECIMAL(1,0)");
+        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "BLOB");
 
         setSqlBuilder(new InterbaseBuilder(info));
+        setModelReader(new InterbaseModelReader(info));
     }
 
     /**

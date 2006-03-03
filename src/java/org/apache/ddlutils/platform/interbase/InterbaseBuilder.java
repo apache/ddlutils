@@ -17,6 +17,7 @@ package org.apache.ddlutils.platform.interbase;
  */
 
 import java.io.IOException;
+import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
@@ -25,6 +26,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The SQL Builder for the Interbase database.
@@ -109,6 +111,22 @@ public class InterbaseBuilder extends SqlBuilder
             println(" !!");
             print("COMMIT");
             printEndOfStatement();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected String getNativeDefaultValue(Column column)
+    {
+        if ((column.getTypeCode() == Types.BIT) ||
+            (Jdbc3Utils.supportsJava14JdbcTypes() && (column.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode())))
+        {
+            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
+        }
+        else
+        {
+            return super.getNativeDefaultValue(column);
         }
     }
 

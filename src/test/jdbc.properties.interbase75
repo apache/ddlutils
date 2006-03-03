@@ -1,0 +1,17 @@
+# JDBC properties for Interbase 7.5
+# Note: Properties starting with "datasource." will be fed into the datasource instance of the
+# class configured via the datasource.class property
+
+# Use this property if ddlutils does not recognize the platform from the settings
+#ddlutils.platform=Interbase
+
+#
+# Using the plain DBCP datasource
+#
+
+datasource.class=org.apache.commons.dbcp.BasicDataSource
+datasource.driverClassName=interbase.interclient.Driver
+datasource.url=jdbc:interbase://localhost/C:/Programme/Borland/InterBase/data/ddlutils.db
+datasource.username=SYSDBA
+datasource.password=masterkey
+
