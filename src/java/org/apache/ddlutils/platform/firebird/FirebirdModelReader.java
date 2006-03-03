@@ -89,7 +89,7 @@ public class FirebirdModelReader extends JdbcModelReader
         		// Jaybird has a problem when delimited identifiers are used as
         		// it is not able to find the columns for the table
         		// So we have to filter manually below
-        		columnData = metaData.getColumns(getDefaultTablePattern(), null);
+        		columnData = metaData.getColumns(getDefaultTablePattern(), getDefaultColumnPattern());
 
         		while (columnData.next())
                 {
@@ -103,7 +103,7 @@ public class FirebirdModelReader extends JdbcModelReader
         	}
         	else
         	{
-        		columnData = metaData.getColumns(tableName, null);
+        		columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
 
         		while (columnData.next())
                 {
