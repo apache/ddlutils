@@ -81,7 +81,7 @@ public class PlatformInfo
     // other ddl properties
 
     /** Whether comments are supported. */
-    private boolean _commentsSupported = true;
+    private boolean _sqlCommentsSupported = true;
 
     /** Whether delimited identifiers are supported or not. */
     private boolean _delimitedIdentifiersSupported = true;
@@ -424,23 +424,23 @@ public class PlatformInfo
     // other ddl properties
 
     /**
-     * Determines whether the database supports comments.
+     * Determines whether the database supports SQL comments.
      *
      * @return <code>true</code> if comments are supported
      */
-    public boolean isCommentsSupported()
+    public boolean isSqlCommentsSupported()
     {
-        return _commentsSupported;
+        return _sqlCommentsSupported;
     }
 
     /**
-     * Specifies whether comments are supported by the database.
+     * Specifies whether SQL comments are supported by the database.
      * 
      * @param commentsSupported <code>true</code> if comments are supported
      */
-    public void setCommentsSupported(boolean commentsSupported)
+    public void setSqlCommentsSupported(boolean commentsSupported)
     {
-        _commentsSupported = commentsSupported;
+        _sqlCommentsSupported = commentsSupported;
     }
 
     /**

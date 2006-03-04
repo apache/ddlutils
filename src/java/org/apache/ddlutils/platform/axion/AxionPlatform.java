@@ -44,7 +44,7 @@ public class AxionPlatform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setDelimitedIdentifiersSupported(false);
-        info.setCommentsSupported(false);
+        info.setSqlCommentsSupported(false);
         info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);

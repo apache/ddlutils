@@ -259,6 +259,7 @@ public class ForeignKey implements Cloneable
      * Compares this foreign key to the given one while ignoring the case of identifiers.
      * 
      * @param otherFk The other foreign key
+     * @return <code>true</code> if this foreign key is equal (ignoring case) to the given one
      */
     public boolean equalsIgnoreCase(ForeignKey otherFk)
     {

@@ -211,6 +211,7 @@ public class Reference implements Cloneable, Serializable
      * Compares this reference to the given one while ignoring the case of identifiers.
      * 
      * @param otherRef The other reference
+     * @return <code>true</code> if this reference is equal (ignoring case) to the given one
      */
     public boolean equalsIgnoreCase(Reference otherRef)
     {

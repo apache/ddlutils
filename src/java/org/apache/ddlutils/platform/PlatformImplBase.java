@@ -44,6 +44,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
@@ -74,6 +75,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     private SqlBuilder _builder;
     /** The model reader for this platform. */
     private JdbcModelReader _modelReader;
+    /** Whether SQL comments are generated or not. */
+    private boolean _sqlCommentsOn = true;
     /** Whether delimited identifiers are used or not. */
     private boolean _delimitedIdentifierModeOn = false;
 
@@ -128,6 +131,26 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
+    public boolean isSqlCommentsOn()
+    {
+        return _sqlCommentsOn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setSqlCommentsOn(boolean sqlCommentsOn)
+    {
+        if (!getPlatformInfo().isSqlCommentsSupported() && sqlCommentsOn)
+        {
+            throw new DdlUtilsException("Platform " + getName() + " does not support SQL comments");
+        }
+        _sqlCommentsOn = sqlCommentsOn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isDelimitedIdentifierModeOn()
     {
         return _delimitedIdentifierModeOn;
@@ -138,6 +161,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void setDelimitedIdentifierModeOn(boolean delimitedIdentifierModeOn)
     {
+        if (!getPlatformInfo().isDelimitedIdentifiersSupported() && delimitedIdentifierModeOn)
+        {
+            throw new DdlUtilsException("Platform " + getName() + " does not support delimited identifier");
+        }
         _delimitedIdentifierModeOn = delimitedIdentifierModeOn;
     }
 

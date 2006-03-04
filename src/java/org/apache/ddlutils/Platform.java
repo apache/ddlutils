@@ -110,6 +110,8 @@ public interface Platform
      */
     public void setPassword(String password);
 
+    // runtime properties
+
     /**
      * Determines whether delimited identifiers are used or normal SQL92 identifiers
      * (which may only contain alphanumerical characters and the underscore, must start
@@ -121,12 +123,28 @@ public interface Platform
     public boolean isDelimitedIdentifierModeOn();
 
     /**
-     * Determines whether delimited identifiers are used or normal SQL92 identifiers.
+     * Specifies whether delimited identifiers are used or normal SQL92 identifiers.
      *
      * @param delimitedIdentifierModeOn <code>true</code> if delimited identifiers shall be used
      */
     public void setDelimitedIdentifierModeOn(boolean delimitedIdentifierModeOn);
 
+    /**
+     * Determines whether SQL comments are generated. 
+     * 
+     * @return <code>true</code> if SQL comments shall be generated
+     */
+    public boolean isSqlCommentsOn();
+
+    /**
+     * Specifies whether SQL comments shall be generated.
+     * 
+     * @param sqlCommentsOn <code>true</code> if SQL comments shall be generated
+     */
+    public void setSqlCommentsOn(boolean sqlCommentsOn);
+
+    // functionality
+    
     /**
      * Returns a (new) JDBC connection from the data source.
      * 

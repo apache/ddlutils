@@ -236,7 +236,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         {
             _model = model;
 
-            getPlatform().getPlatformInfo().setCommentsSupported(false);
+            getPlatform().setSqlCommentsOn(false);
             getPlatform().createTables(_model, false, false);
         }
         catch (Exception ex)
@@ -256,7 +256,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         {
             _model = model;
 
-            getPlatform().getPlatformInfo().setCommentsSupported(false);
+            getPlatform().setSqlCommentsOn(false);
             getPlatform().alterTables(_model, true, true, false);
         }
         catch (Exception ex)

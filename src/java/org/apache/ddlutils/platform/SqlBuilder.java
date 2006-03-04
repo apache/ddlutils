@@ -1897,7 +1897,7 @@ public abstract class SqlBuilder
      */
     protected void printComment(String text) throws IOException
     {
-        if (getPlatformInfo().isCommentsSupported())
+        if (getPlatform().isSqlCommentsOn())
         {
             print(getPlatformInfo().getCommentPrefix());
             // Some databases insist on a space after the prefix

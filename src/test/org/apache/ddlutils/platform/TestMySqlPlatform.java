@@ -100,7 +100,7 @@ public class TestMySqlPlatform extends TestPlatformBase
         testDb.findTable("constraints").findColumn("COL_AUTO_INCR").setAutoIncrement(false);
         testDb.findTable("constraints").findColumn("COL_PK_AUTO_INCR").setAutoIncrement(false);
 
-        getPlatformInfo().setCommentsSupported(false);
+        getPlatform().setSqlCommentsOn(false);
         getPlatform().getSqlBuilder().createTables(testDb, true);
 
         assertEqualsIgnoringWhitespaces(
@@ -177,7 +177,7 @@ public class TestMySqlPlatform extends TestPlatformBase
                             "ENGINE",
                             "INNODB");
 
-        getPlatformInfo().setCommentsSupported(false);
+        getPlatform().setSqlCommentsOn(false);
         getPlatform().getSqlBuilder().createTables(testDb, params, true);
 
         assertEqualsIgnoringWhitespaces(

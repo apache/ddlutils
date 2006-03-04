@@ -226,7 +226,7 @@ public abstract class TestPlatformBase extends TestCase
         Database testDb = parseDatabaseFromString(schema);
 
         // we're turning the comment creation off to make testing easier
-        getPlatformInfo().setCommentsSupported(false);
+        getPlatform().setSqlCommentsOn(false);
         getPlatform().getSqlBuilder().createTables(testDb);
         return getBuilderOutput();
     }
