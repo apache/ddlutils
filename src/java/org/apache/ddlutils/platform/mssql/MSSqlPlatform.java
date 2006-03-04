@@ -47,10 +47,10 @@ public class MSSqlPlatform extends PlatformImplBase
      */
     public MSSqlPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(128);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -78,13 +78,13 @@ public class MSSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "BIT",   "BIT");
         info.addNativeTypeMapping("DATALINK", "IMAGE", "LONGVARBINARY");
 
-        info.addDefaultSize(Types.CHAR,       254);
-        info.addDefaultSize(Types.VARCHAR,    254);
-        info.addDefaultSize(Types.BINARY,     254);
-        info.addDefaultSize(Types.VARBINARY,  254);
+        info.setDefaultSize(Types.CHAR,       254);
+        info.setDefaultSize(Types.VARCHAR,    254);
+        info.setDefaultSize(Types.BINARY,     254);
+        info.setDefaultSize(Types.VARBINARY,  254);
 
-        setSqlBuilder(new MSSqlBuilder(info));
-        setModelReader(new MSSqlModelReader(info));
+        setSqlBuilder(new MSSqlBuilder(this));
+        setModelReader(new MSSqlModelReader(this));
     }
 
     /**

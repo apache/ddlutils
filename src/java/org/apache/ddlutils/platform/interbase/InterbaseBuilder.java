@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.sql.Types;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -39,11 +39,11 @@ public class InterbaseBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public InterbaseBuilder(PlatformInfo info)
+    public InterbaseBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
     }
 

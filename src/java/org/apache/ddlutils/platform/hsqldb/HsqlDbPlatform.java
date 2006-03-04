@@ -43,13 +43,13 @@ public class HsqlDbPlatform extends PlatformImplBase
      */
     public HsqlDbPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
-        info.setSupportingNonPKIdentityColumns(false);
+        info.setNonPKIdentityColumnsSupported(false);
 
         info.addNativeTypeMapping(Types.BIT,         "BOOLEAN");
         info.addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY", Types.LONGVARBINARY);
@@ -69,13 +69,13 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BIT",      "BOOLEAN",       "BOOLEAN");
         info.addNativeTypeMapping("DATALINK", "LONGVARBINARY", "LONGVARBINARY");
 
-        info.addDefaultSize(Types.CHAR,      Integer.MAX_VALUE);
-        info.addDefaultSize(Types.VARCHAR,   Integer.MAX_VALUE);
-        info.addDefaultSize(Types.BINARY,    Integer.MAX_VALUE);
-        info.addDefaultSize(Types.VARBINARY, Integer.MAX_VALUE);
+        info.setDefaultSize(Types.CHAR,      Integer.MAX_VALUE);
+        info.setDefaultSize(Types.VARCHAR,   Integer.MAX_VALUE);
+        info.setDefaultSize(Types.BINARY,    Integer.MAX_VALUE);
+        info.setDefaultSize(Types.VARBINARY, Integer.MAX_VALUE);
 
-        setSqlBuilder(new HsqlDbBuilder(info));
-        setModelReader(new HsqlDbModelReader(info));
+        setSqlBuilder(new HsqlDbBuilder(this));
+        setModelReader(new HsqlDbModelReader(this));
     }
 
     /**

@@ -235,10 +235,10 @@ public class TestConstraints extends RoundtripTestBase
     public void testAutoIncrementIntegerColumn()
     {
         // only test this if the platform supports it
-        if (getPlatformInfo().isSupportingNonPKIdentityColumns())
+        if (getPlatformInfo().isNonPKIdentityColumnsSupported())
         {
             performConstraintsTest(TEST_AUTO_INCREMENT_INTEGER_MODEL,
-            		               getPlatformInfo().getCanReadAutoIncrementStatus());
+            		               getPlatformInfo().getAutoIncrementStatusReadingSupported());
         }
     }
 
@@ -248,7 +248,7 @@ public class TestConstraints extends RoundtripTestBase
     public void testPrimaryKeyAutoIncrementColumn()
     {
         performConstraintsTest(TEST_PRIMARY_KEY_AUTO_INCREMENT_MODEL,
-	                           getPlatformInfo().getCanReadAutoIncrementStatus());
+	                           getPlatformInfo().getAutoIncrementStatusReadingSupported());
     }
 
     /**
@@ -256,7 +256,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testIndex()
     {
-        if (getPlatformInfo().isSupportingNonUniqueIndices())
+        if (getPlatformInfo().isNonUniqueIndicesSupported())
         {
             performConstraintsTest(TEST_INDEX_MODEL, true);
         }
@@ -275,7 +275,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testPrimaryKeyIndex()
     {
-        if (getPlatformInfo().isSupportingNonUniqueIndices())
+        if (getPlatformInfo().isNonUniqueIndicesSupported())
         {
             performConstraintsTest(TEST_PRIMARY_KEY_INDEX_MODEL, true);
         }

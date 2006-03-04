@@ -61,10 +61,10 @@ public class SybasePlatform extends PlatformImplBase
      */
     public SybasePlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(28);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -96,13 +96,13 @@ public class SybasePlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "IMAGE",    "LONGVARBINARY");
 
-        info.addDefaultSize(Types.BINARY,    254);
-        info.addDefaultSize(Types.VARBINARY, 254);
-        info.addDefaultSize(Types.CHAR,      254);
-        info.addDefaultSize(Types.VARCHAR,   254);
+        info.setDefaultSize(Types.BINARY,    254);
+        info.setDefaultSize(Types.VARBINARY, 254);
+        info.setDefaultSize(Types.CHAR,      254);
+        info.setDefaultSize(Types.VARCHAR,   254);
 
-        setSqlBuilder(new SybaseBuilder(info));
-        setModelReader(new SybaseModelReader(info));
+        setSqlBuilder(new SybaseBuilder(this));
+        setModelReader(new SybaseModelReader(this));
     }
 
     /**

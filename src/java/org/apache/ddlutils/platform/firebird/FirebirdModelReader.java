@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
@@ -48,11 +48,11 @@ public class FirebirdModelReader extends JdbcModelReader
     /**
      * Creates a new model reader for Firebird databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public FirebirdModelReader(PlatformInfo platformInfo)
+    public FirebirdModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");
@@ -84,7 +84,7 @@ public class FirebirdModelReader extends JdbcModelReader
         {
             List columns = new ArrayList();
 
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            if (getPlatform().isDelimitedIdentifierModeOn())
         	{
         		// Jaybird has a problem when delimited identifiers are used as
         		// it is not able to find the columns for the table
@@ -147,7 +147,7 @@ public class FirebirdModelReader extends JdbcModelReader
     {
     	// Since for long table and column names, the generator name will be shortened
     	// we have to determine for each column whether there is a generator for it
-    	FirebirdBuilder builder = new FirebirdBuilder(getPlatformInfo());
+    	FirebirdBuilder builder = (FirebirdBuilder)getPlatform().getSqlBuilder();
     	Column[]        columns = table.getColumns();
     	HashMap         names   = new HashMap();
         String          name;
@@ -155,7 +155,7 @@ public class FirebirdModelReader extends JdbcModelReader
     	for (int idx = 0; idx < columns.length; idx++)
     	{
     	    name = builder.getGeneratorName(table, columns[idx]);
-            if (!getPlatformInfo().isUseDelimitedIdentifiers())
+            if (!getPlatform().isDelimitedIdentifierModeOn())
             {
                 name = name.toUpperCase();
             }
@@ -195,7 +195,7 @@ public class FirebirdModelReader extends JdbcModelReader
 
         try
         {
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            if (getPlatform().isDelimitedIdentifierModeOn())
         	{
         		// Jaybird has a problem when delimited identifiers are used as
         		// it is not able to find the primary key info for the table
@@ -242,7 +242,7 @@ public class FirebirdModelReader extends JdbcModelReader
 
         try
         {
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            if (getPlatform().isDelimitedIdentifierModeOn())
         	{
         		// Jaybird has a problem when delimited identifiers are used as
         		// it is not able to find the foreign key info for the table
@@ -296,7 +296,7 @@ public class FirebirdModelReader extends JdbcModelReader
         PreparedStatement stmt      = getConnection().prepareStatement(query.toString());
         ResultSet         indexData = null;
 
-        stmt.setString(1, getPlatformInfo().isUseDelimitedIdentifiers() ? tableName : tableName.toUpperCase());
+        stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
 
         try 
         {

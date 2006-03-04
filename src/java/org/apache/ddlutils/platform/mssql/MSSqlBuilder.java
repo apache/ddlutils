@@ -22,7 +22,7 @@ import java.io.Writer;
 import java.sql.Types;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -43,11 +43,11 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public MSSqlBuilder(PlatformInfo info)
+    public MSSqlBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
     }
 
@@ -204,7 +204,7 @@ public class MSSqlBuilder extends SqlBuilder
      */
     private void writeQuotationOnStatement() throws IOException
     {
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             print("SET quoted_identifier on");
             printEndOfStatement();
@@ -242,7 +242,7 @@ public class MSSqlBuilder extends SqlBuilder
      */
     private String getQuotationOnStatement()
     {
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             return "SET quoted_identifier on" + getPlatformInfo().getSqlCommandDelimiter() + "\n";
         }

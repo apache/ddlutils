@@ -43,18 +43,18 @@ public class MySqlPlatform extends PlatformImplBase
      */
     public MySqlPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(64);
-        info.setRequiringNullAsDefaultValue(true);
-        info.setSupportingDefaultValuesForLongTypes(false);
+        info.setNullAsDefaultValueRequired(true);
+        info.setDefaultValuesForLongTypesSupported(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
         // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
-        info.setSupportingNonPKIdentityColumns(false);
+        info.setNonPKIdentityColumnsSupported(false);
         // MySql returns synthetic default values for pk columns
-        info.setReturningDefaultValueForRequired(true);
+        info.setSyntheticDefaultValueForRequiredReturned(true);
         info.setCommentPrefix("#");
         // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
         info.setDelimiterToken("`");
@@ -83,13 +83,13 @@ public class MySqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)", "BIT");
         info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
 
-        info.addDefaultSize(Types.CHAR,      254);
-        info.addDefaultSize(Types.VARCHAR,   254);
-        info.addDefaultSize(Types.BINARY,    254);
-        info.addDefaultSize(Types.VARBINARY, 254);
+        info.setDefaultSize(Types.CHAR,      254);
+        info.setDefaultSize(Types.VARCHAR,   254);
+        info.setDefaultSize(Types.BINARY,    254);
+        info.setDefaultSize(Types.VARBINARY, 254);
         
-        setSqlBuilder(new MySqlBuilder(info));
-        setModelReader(new MySqlModelReader(info));
+        setSqlBuilder(new MySqlBuilder(this));
+        setModelReader(new MySqlModelReader(this));
     }
 
     /**

@@ -179,7 +179,7 @@ public class PlatformConfiguration
             throw new BuildException("Database type "+_databaseType+" is not supported.");
         }
         platform.setDataSource(_dataSource);
-        platform.getPlatformInfo().setUseDelimitedIdentifiers(isUseDelimitedSqlIdentifiers());
+        platform.setDelimitedIdentifierModeOn(isUseDelimitedSqlIdentifiers());
 
         return platform;
     }

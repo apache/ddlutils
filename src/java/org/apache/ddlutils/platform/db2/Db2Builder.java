@@ -19,7 +19,7 @@ package org.apache.ddlutils.platform.db2;
 import java.io.IOException;
 import java.sql.Types;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
@@ -37,11 +37,11 @@ public class Db2Builder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public Db2Builder(PlatformInfo info)
+    public Db2Builder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
     }
 

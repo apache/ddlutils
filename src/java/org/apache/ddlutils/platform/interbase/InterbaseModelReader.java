@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -42,11 +42,11 @@ public class InterbaseModelReader extends JdbcModelReader
     /**
      * Creates a new model reader for Interbase databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public InterbaseModelReader(PlatformInfo platformInfo)
+    public InterbaseModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");
@@ -64,7 +64,7 @@ public class InterbaseModelReader extends JdbcModelReader
         {
             List columns = new ArrayList();
 
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            if (getPlatform().isDelimitedIdentifierModeOn())
             {
                 // Jaybird has a problem when delimited identifiers are used as
                 // it is not able to find the columns for the table
@@ -128,7 +128,7 @@ public class InterbaseModelReader extends JdbcModelReader
 
         try
         {
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            if (getPlatform().isDelimitedIdentifierModeOn())
             {
                 // Jaybird has a problem when delimited identifiers are used as
                 // it is not able to find the primary key info for the table

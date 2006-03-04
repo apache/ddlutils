@@ -41,12 +41,11 @@ public class AxionPlatform extends PlatformImplBase
      */
     public AxionPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
-        info.setSupportingDelimitedIdentifiers(false);
-        info.setUseDelimitedIdentifiers(false);
+        info.setDelimitedIdentifiersSupported(false);
         info.setCommentsSupported(false);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -69,7 +68,7 @@ public class AxionPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.TINYINT,       "SHORT");
         info.addNativeTypeMapping("DATALINK", "VARBINARY");
 
-        setSqlBuilder(new AxionBuilder(info));
+        setSqlBuilder(new AxionBuilder(this));
     }
 
     /**

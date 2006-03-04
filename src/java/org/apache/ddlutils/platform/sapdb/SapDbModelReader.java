@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
@@ -36,11 +36,11 @@ public class SapDbModelReader extends JdbcModelReader
     /**
      * Creates a new model reader for SapDb databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public SapDbModelReader(PlatformInfo platformInfo)
+    public SapDbModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");

@@ -51,12 +51,12 @@ public class PostgreSqlPlatform extends PlatformImplBase
      */
     public PostgreSqlPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         // this is the default length though it might be changed when building PostgreSQL
         // in file src/include/postgres_ext.h
         info.setMaxIdentifierLength(31);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -85,8 +85,8 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.setHasSize(Types.BINARY, false);
         info.setHasSize(Types.VARBINARY, false);
 
-        setSqlBuilder(new PostgreSqlBuilder(info));
-        setModelReader(new PostgreSqlModelReader(info));
+        setSqlBuilder(new PostgreSqlBuilder(this));
+        setModelReader(new PostgreSqlModelReader(this));
     }
 
     /**

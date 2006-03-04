@@ -51,14 +51,14 @@ public class Oracle8Platform extends PlatformImplBase
      */
     public Oracle8Platform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(30);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
-        info.setCanReadAutoIncrementStatus(false);
+        info.setAutoIncrementStatusReadingSupported(false);
 
         // Note that the back-mappings are partially done by the model reader, not the driver
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",             Types.BLOB);
@@ -90,13 +90,13 @@ public class Oracle8Platform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "NUMBER(1)", "BIT");
         info.addNativeTypeMapping("DATALINK", "BLOB",      "BLOB");
 
-        info.addDefaultSize(Types.CHAR,       254);
-        info.addDefaultSize(Types.VARCHAR,    254);
-        info.addDefaultSize(Types.BINARY,     254);
-        info.addDefaultSize(Types.VARBINARY,  254);
+        info.setDefaultSize(Types.CHAR,       254);
+        info.setDefaultSize(Types.VARCHAR,    254);
+        info.setDefaultSize(Types.BINARY,     254);
+        info.setDefaultSize(Types.VARBINARY,  254);
 
-        setSqlBuilder(new Oracle8Builder(info));
-        setModelReader(new Oracle8ModelReader(info));
+        setSqlBuilder(new Oracle8Builder(this));
+        setModelReader(new Oracle8ModelReader(this));
     }
 
     /**

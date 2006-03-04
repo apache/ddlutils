@@ -21,7 +21,7 @@ import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -53,11 +53,11 @@ public class Oracle8Builder extends SqlBuilder
 	/**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public Oracle8Builder(PlatformInfo info)
+    public Oracle8Builder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
 
         PatternCompiler compiler = new Perl5Compiler();

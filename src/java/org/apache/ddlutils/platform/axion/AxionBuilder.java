@@ -18,7 +18,7 @@ package org.apache.ddlutils.platform.axion;
 
 import java.io.IOException;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -34,11 +34,11 @@ public class AxionBuilder extends SqlBuilder
     /**
      * Creates a new axion sql builder.
      * 
-     * @param info The plaftform information
+     * @param platform The plaftform this builder belongs to
      */
-    public AxionBuilder(PlatformInfo info)
+    public AxionBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
     }
 

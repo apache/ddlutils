@@ -111,7 +111,7 @@ public class ModelBasedResultSetIterator implements Iterator
         ResultSetMetaData metaData           = _resultSet.getMetaData();
         String            tableName          = null;
         boolean           singleKnownTable   = true;
-        boolean           caseSensitive      = _platform.getPlatformInfo().isUseDelimitedIdentifiers();
+        boolean           caseSensitive      = _platform.isDelimitedIdentifierModeOn();
         Map               preparedQueryHints = prepareQueryHints(queryHints, caseSensitive);
 
         for (int idx = 1; idx <= metaData.getColumnCount(); idx++)

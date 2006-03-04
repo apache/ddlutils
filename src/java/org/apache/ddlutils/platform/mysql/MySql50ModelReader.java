@@ -19,7 +19,7 @@ package org.apache.ddlutils.platform.mysql;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 
@@ -34,11 +34,11 @@ public class MySql50ModelReader extends MySqlModelReader
     /**
      * Creates a new model reader for MySql 5 databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public MySql50ModelReader(PlatformInfo platformInfo)
+    public MySql50ModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
     }
 
     /**

@@ -32,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -70,30 +71,22 @@ public abstract class SqlBuilder
     /** The Log to which logging calls will be made. */
     protected final Log _log = LogFactory.getLog(SqlBuilder.class);
     
+    /** The platform that this builder belongs to. */
+    private Platform _platform;
     /** The current Writer used to output the SQL to. */
     private Writer _writer;
-    
     /** The indentation used to indent commands. */
     private String _indent = "    ";
-
-    /** The platform info. */
-    private PlatformInfo _info;
-
     /** An optional locale specification for number and date formatting. */
     private String _valueLocale;
-
     /** The date formatter. */
     private DateFormat _valueDateFormat;
-
     /** The date time formatter. */
     private DateFormat _valueTimeFormat;
-
     /** The number formatter. */
     private NumberFormat _valueNumberFormat;
-
     /** Helper object for dealing with default values. */
     private DefaultValueHelper _defaultValueHelper = new DefaultValueHelper();
-
     /** The character sequences that need escaping. */
     private Map _charSequencesToEscape = new ListOrderedMap();
 
@@ -104,11 +97,21 @@ public abstract class SqlBuilder
     /**
      * Creates a new sql builder.
      * 
-     * @param info The plaftform information
+     * @param platform The plaftform this builder belongs to
      */
-    public SqlBuilder(PlatformInfo info)
+    public SqlBuilder(Platform platform)
     {
-        _info = info;
+        _platform = platform;
+    }
+
+    /**
+     * Returns the platform object.
+     * 
+     * @return The platform
+     */
+    public Platform getPlatform()
+    {
+        return _platform;
     }
 
     /**
@@ -118,7 +121,7 @@ public abstract class SqlBuilder
      */
     public PlatformInfo getPlatformInfo()
     {
-        return _info;
+        return _platform.getPlatformInfo();
     }
 
     /**
@@ -458,7 +461,8 @@ public abstract class SqlBuilder
         for (int indexIdx = 0; indexIdx < currentTable.getIndexCount(); indexIdx++)
         {
             Index currentIndex = currentTable.getIndex(indexIdx);
-            Index desiredIndex = desiredTable.findIndex(currentIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
+            Index desiredIndex = desiredTable.findIndex(currentIndex.getName(),
+                                                        getPlatform().isDelimitedIdentifierModeOn());
 
             if (desiredIndex == null)
             {
@@ -494,7 +498,8 @@ public abstract class SqlBuilder
         for (int columnIdx = 0; columnIdx < desiredTable.getColumnCount(); columnIdx++)
         {
             Column desiredColumn = desiredTable.getColumn(columnIdx);
-            Column currentColumn = currentTable.findColumn(desiredColumn.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
+            Column currentColumn = currentTable.findColumn(desiredColumn.getName(),
+                                                           getPlatform().isDelimitedIdentifierModeOn());
 
             if (null == currentColumn)
             {
@@ -533,7 +538,8 @@ public abstract class SqlBuilder
         for (int columnIdx = 0; columnIdx < currentTable.getColumnCount(); columnIdx++)
         {
             Column currentColumn = currentTable.getColumn(columnIdx);
-            Column desiredColumn = desiredTable.findColumn(currentColumn.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
+            Column desiredColumn = desiredTable.findColumn(currentColumn.getName(),
+                                                           getPlatform().isDelimitedIdentifierModeOn());
 
             if (desiredColumn == null)
             {
@@ -579,7 +585,8 @@ public abstract class SqlBuilder
         for (int indexIdx = 0; indexIdx < desiredTable.getIndexCount(); indexIdx++)
         {
             Index desiredIndex = desiredTable.getIndex(indexIdx);
-            Index currentIndex = currentTable.findIndex(desiredIndex.getName(), getPlatformInfo().isUseDelimitedIdentifiers());
+            Index currentIndex = currentTable.findIndex(desiredIndex.getName(),
+                                                        getPlatform().isDelimitedIdentifierModeOn());
 
             if (currentIndex == null)
             {
@@ -605,7 +612,7 @@ public abstract class SqlBuilder
      */
     protected ForeignKey findCorrespondingForeignKey(Table table, ForeignKey fk)
     {
-        boolean     caseMatters = getPlatformInfo().isUseDelimitedIdentifiers();
+        boolean     caseMatters = getPlatform().isDelimitedIdentifierModeOn();
         boolean     checkFkName = (fk.getName() != null) && (fk.getName().length() > 0);
         Reference[] refs        = fk.getReferences();
         ArrayList   curRefs     = new ArrayList();
@@ -1216,9 +1223,9 @@ public abstract class SqlBuilder
         print(getSqlType(column));
 
         if ((column.getDefaultValue() != null) ||
-            (getPlatformInfo().isIdentitySpecUsesDefaultValue() && column.isAutoIncrement()))
+            (getPlatformInfo().isDefaultValueUsedForIdentitySpec() && column.isAutoIncrement()))
         {
-            if (!getPlatformInfo().isSupportingDefaultValuesForLongTypes() && 
+            if (!getPlatformInfo().isDefaultValuesForLongTypesSupported() && 
                 ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
             {
                 throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
@@ -1231,15 +1238,15 @@ public abstract class SqlBuilder
             print(" ");
             writeColumnNotNullableStmt();
         }
-        else if (getPlatformInfo().isRequiringNullAsDefaultValue() &&
+        else if (getPlatformInfo().isNullAsDefaultValueRequired() &&
                  getPlatformInfo().hasNullDefault(column.getTypeCode()))
         {
             print(" ");
             writeColumnNullableStmt();
         }
-        if (column.isAutoIncrement() && !getPlatformInfo().isIdentitySpecUsesDefaultValue())
+        if (column.isAutoIncrement() && !getPlatformInfo().isDefaultValueUsedForIdentitySpec())
         {
-            if (!getPlatformInfo().isSupportingNonPKIdentityColumns() && !column.isPrimaryKey())
+            if (!getPlatformInfo().isNonPKIdentityColumnsSupported() && !column.isPrimaryKey())
             {
                 throw new DynaSqlException("Column "+column.getName()+" in table "+table.getName()+" is auto-incrementing but not a primary key column, which is not supported by the platform");
             }
@@ -1623,7 +1630,7 @@ public abstract class SqlBuilder
         {
             Index index = table.getIndex(idx);
 
-            if (!index.isUnique() && !getPlatformInfo().isSupportingNonUniqueIndices())
+            if (!index.isUnique() && !getPlatformInfo().isNonUniqueIndicesSupported())
             {
                 throw new DynaSqlException("Platform does not support non-unique indices");
             }
@@ -1642,7 +1649,7 @@ public abstract class SqlBuilder
         {
             Index index = table.getIndex(idx);
 
-            if (!index.isUnique() && !getPlatformInfo().isSupportingNonUniqueIndices())
+            if (!index.isUnique() && !getPlatformInfo().isNonUniqueIndicesSupported())
             {
                 throw new DynaSqlException("Platform does not support non-unique indices");
             }
@@ -1749,13 +1756,13 @@ public abstract class SqlBuilder
      */
     public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
     {
-        if (getPlatformInfo().isUseAlterTableForDrop())
+        if (getPlatformInfo().isAlterTableForDropUsed())
         {
             writeTableAlterStmt(table);
         }
         print("DROP INDEX ");
         printIdentifier(getIndexName(index));
-        if (!getPlatformInfo().isUseAlterTableForDrop())
+        if (!getPlatformInfo().isAlterTableForDropUsed())
         {
             print(" ON ");
             print(getTableName(table));
@@ -1948,7 +1955,7 @@ public abstract class SqlBuilder
      */
     protected String getDelimitedIdentifier(String identifier)
     {
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             return getPlatformInfo().getDelimiterToken() + identifier + getPlatformInfo().getDelimiterToken();
         }

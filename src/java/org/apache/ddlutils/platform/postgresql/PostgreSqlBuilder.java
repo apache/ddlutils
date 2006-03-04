@@ -19,7 +19,7 @@ package org.apache.ddlutils.platform.postgresql;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
@@ -38,11 +38,11 @@ public class PostgreSqlBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public PostgreSqlBuilder(PlatformInfo info)
+    public PostgreSqlBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         // we need to handle the backslash first otherwise the other
         // already escaped sequences would be affected
         addEscapedCharSequence("\\", "\\\\");

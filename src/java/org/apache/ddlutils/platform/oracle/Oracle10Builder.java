@@ -18,7 +18,7 @@ package org.apache.ddlutils.platform.oracle;
 
 import java.io.IOException;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
@@ -33,11 +33,11 @@ public class Oracle10Builder extends Oracle8Builder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public Oracle10Builder(PlatformInfo info)
+    public Oracle10Builder(Platform platform)
     {
-        super(info);
+        super(platform);
     }
 
     /**

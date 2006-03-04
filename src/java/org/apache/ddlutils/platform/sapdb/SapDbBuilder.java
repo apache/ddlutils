@@ -18,7 +18,7 @@ package org.apache.ddlutils.platform.sapdb;
 
 import java.io.IOException;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
@@ -35,11 +35,11 @@ public class SapDbBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public SapDbBuilder(PlatformInfo info)
+    public SapDbBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
     }
 

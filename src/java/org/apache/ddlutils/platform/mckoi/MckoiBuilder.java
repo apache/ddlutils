@@ -18,7 +18,7 @@ package org.apache.ddlutils.platform.mckoi;
 
 import java.io.IOException;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
@@ -35,11 +35,11 @@ public class MckoiBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public MckoiBuilder(PlatformInfo info)
+    public MckoiBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         // we need to handle the backslash first otherwise the other
         // already escaped sequence would be affected
         addEscapedCharSequence("\\", "\\\\");

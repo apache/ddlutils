@@ -24,7 +24,7 @@ import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -53,11 +53,11 @@ public class SybaseModelReader extends JdbcModelReader
 	/**
      * Creates a new model reader for Sybase databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public SybaseModelReader(PlatformInfo platformInfo)
+    public SybaseModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");
@@ -130,7 +130,7 @@ public class SybaseModelReader extends JdbcModelReader
 	 */
 	protected void readIndex(DatabaseMetaDataWrapper metaData, Map values, Map knownIndices) throws SQLException
 	{
-		if (getPlatformInfo().isUseDelimitedIdentifiers())
+		if (getPlatform().isDelimitedIdentifierModeOn())
 		{
 	        String indexName = (String)values.get("INDEX_NAME");
 

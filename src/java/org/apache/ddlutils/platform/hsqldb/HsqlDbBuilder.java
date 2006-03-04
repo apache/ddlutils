@@ -18,7 +18,7 @@ package org.apache.ddlutils.platform.hsqldb;
 
 import java.io.IOException;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -34,11 +34,11 @@ public class HsqlDbBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public HsqlDbBuilder(PlatformInfo info)
+    public HsqlDbBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
     }
 

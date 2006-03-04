@@ -19,7 +19,7 @@ package org.apache.ddlutils.platform.hsqldb;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -37,11 +37,11 @@ public class HsqlDbModelReader extends JdbcModelReader
     /**
      * Creates a new model reader for HsqlDb databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public HsqlDbModelReader(PlatformInfo platformInfo)
+    public HsqlDbModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
     }

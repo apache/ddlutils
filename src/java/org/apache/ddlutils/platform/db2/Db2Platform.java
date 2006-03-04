@@ -49,10 +49,10 @@ public class Db2Platform extends PlatformImplBase
      */
     public Db2Platform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(18);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -72,13 +72,13 @@ public class Db2Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} FOR BIT DATA");
         info.addNativeTypeMapping("BOOLEAN", "SMALLINT", "SMALLINT");
 
-        info.addDefaultSize(Types.CHAR,      254);
-        info.addDefaultSize(Types.VARCHAR,   254);
-        info.addDefaultSize(Types.BINARY,    254);
-        info.addDefaultSize(Types.VARBINARY, 254);
+        info.setDefaultSize(Types.CHAR,      254);
+        info.setDefaultSize(Types.VARCHAR,   254);
+        info.setDefaultSize(Types.BINARY,    254);
+        info.setDefaultSize(Types.VARBINARY, 254);
 
-        setSqlBuilder(new Db2Builder(info));
-        setModelReader(new Db2ModelReader(info));
+        setSqlBuilder(new Db2Builder(this));
+        setModelReader(new Db2ModelReader(this));
     }
 
     /**

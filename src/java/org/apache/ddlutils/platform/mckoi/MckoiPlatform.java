@@ -47,14 +47,14 @@ public class MckoiPlatform extends PlatformImplBase
      */
     public MckoiPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
-        info.setSupportingNonUniqueIndices(false);
+        info.setNonUniqueIndicesSupported(false);
         info.setIndicesEmbedded(true);
-        info.setIdentitySpecUsesDefaultValue(true);
+        info.setDefaultValueUsedForIdentitySpec(true);
 
         info.addNativeTypeMapping(Types.ARRAY,    "BLOB",   Types.BLOB);
         info.addNativeTypeMapping(Types.DISTINCT, "BLOB",   Types.BLOB);
@@ -66,13 +66,13 @@ public class MckoiPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BIT",      "BOOLEAN", "BOOLEAN");
         info.addNativeTypeMapping("DATALINK", "BLOB",    "BLOB");
 
-        info.addDefaultSize(Types.CHAR,      1024);
-        info.addDefaultSize(Types.VARCHAR,   1024);
-        info.addDefaultSize(Types.BINARY,    1024);
-        info.addDefaultSize(Types.VARBINARY, 1024);
+        info.setDefaultSize(Types.CHAR,      1024);
+        info.setDefaultSize(Types.VARCHAR,   1024);
+        info.setDefaultSize(Types.BINARY,    1024);
+        info.setDefaultSize(Types.VARBINARY, 1024);
         
-        setSqlBuilder(new MckoiBuilder(info));
-        setModelReader(new MckoiModelReader(info));
+        setSqlBuilder(new MckoiBuilder(this));
+        setModelReader(new MckoiModelReader(this));
     }
 
     /**

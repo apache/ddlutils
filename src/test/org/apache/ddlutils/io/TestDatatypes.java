@@ -760,7 +760,7 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testLongVarCharWithDefault()
     {
-        if (getPlatformInfo().isSupportingDefaultValuesForLongTypes())
+        if (getPlatformInfo().isDefaultValuesForLongTypesSupported())
         {
             String value = "1234567890123456789012345678901234567890123456789012345678901234"+
                            "1234567890123456789012345678901234567890123456789012345678901234"+

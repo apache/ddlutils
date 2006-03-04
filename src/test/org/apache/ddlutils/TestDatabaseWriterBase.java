@@ -343,7 +343,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected Object getPropertyValue(DynaBean bean, String propName)
     {
-        if (getPlatform().getPlatformInfo().isCaseSensitive())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             return bean.get(propName);
         }

@@ -108,7 +108,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
         }
 
         Platform           platform        = getPlatform();
-        boolean            isCaseSensitive = platform.getPlatformInfo().isUseDelimitedIdentifiers();
+        boolean            isCaseSensitive = platform.isDelimitedIdentifierModeOn();
         CreationParameters params          = getFilteredParameters(model, platform.getName(), isCaseSensitive);
         Connection         connection      = null;
 

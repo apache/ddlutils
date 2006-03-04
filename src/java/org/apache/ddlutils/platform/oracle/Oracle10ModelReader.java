@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 
@@ -36,11 +36,11 @@ public class Oracle10ModelReader extends Oracle8ModelReader
     /**
      * Creates a new model reader for Oracle 10 databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public Oracle10ModelReader(PlatformInfo platformInfo)
+    public Oracle10ModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
     }
 
     /**

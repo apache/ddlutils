@@ -24,7 +24,7 @@ import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -53,11 +53,11 @@ public class MSSqlModelReader extends JdbcModelReader
 	/**
      * Creates a new model reader for Microsoft Sql Server databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public MSSqlModelReader(PlatformInfo platformInfo)
+    public MSSqlModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");

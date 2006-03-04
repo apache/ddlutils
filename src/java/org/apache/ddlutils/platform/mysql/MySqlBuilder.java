@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
@@ -39,11 +39,11 @@ public class MySqlBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public MySqlBuilder(PlatformInfo info)
+    public MySqlBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         // we need to handle the backslash first otherwise the other
         // already escaped sequences would be affected
         addEscapedCharSequence("\\",     "\\\\");

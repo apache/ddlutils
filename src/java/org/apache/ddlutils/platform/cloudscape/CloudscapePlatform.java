@@ -41,9 +41,9 @@ public class CloudscapePlatform extends PlatformImplBase
      */
     public CloudscapePlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -67,11 +67,12 @@ public class CloudscapePlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT",                  "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA", "LONGVARBINARY");
 
-        info.addDefaultSize(Types.BINARY,    254);
-        info.addDefaultSize(Types.CHAR,      254);
-        info.addDefaultSize(Types.VARBINARY, 254);
-        info.addDefaultSize(Types.VARCHAR,   254);
-        setSqlBuilder(new CloudscapeBuilder(info));
+        info.setDefaultSize(Types.BINARY,    254);
+        info.setDefaultSize(Types.CHAR,      254);
+        info.setDefaultSize(Types.VARBINARY, 254);
+        info.setDefaultSize(Types.VARCHAR,   254);
+
+        setSqlBuilder(new CloudscapeBuilder(this));
     }
 
     /**

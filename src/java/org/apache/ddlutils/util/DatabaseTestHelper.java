@@ -18,16 +18,17 @@ package org.apache.ddlutils.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+
+import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
+
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
-import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 /**
  * Class that provides utility stuff for cpmaring data in databases.
@@ -75,10 +76,10 @@ public class DatabaseTestHelper extends Assert
             Table    table  = model.getTable(idx);
             Column[] pkCols = table.getPrimaryKeyColumns();
 
-            for (Iterator it = origDbPlatform.query(model, buildQueryString(origDbPlatform.getPlatformInfo(), table, null, null), new Table[] { table }); it.hasNext();)
+            for (Iterator it = origDbPlatform.query(model, buildQueryString(origDbPlatform, table, null, null), new Table[] { table }); it.hasNext();)
             {
                 DynaBean   obj    = (DynaBean)it.next();
-                Collection result = testedDbPlatform.fetch(model, buildQueryString(origDbPlatform.getPlatformInfo(), table, pkCols, obj), new Table[] { table });
+                Collection result = testedDbPlatform.fetch(model, buildQueryString(origDbPlatform, table, pkCols, obj), new Table[] { table });
 
                 if (result.isEmpty())
                 {
@@ -144,25 +145,25 @@ public class DatabaseTestHelper extends Assert
     /**
      * Helper method for build a SELECT statement.
      * 
-     * @param targetPlatformInfo The platform info for the queried database
-     * @param table              The queried table
-     * @param whereCols          The optional columns that make up the WHERE clause
-     * @param whereValues        The optional column value that make up the WHERE clause
+     * @param targetPlatform The platform for the queried database
+     * @param table          The queried table
+     * @param whereCols      The optional columns that make up the WHERE clause
+     * @param whereValues    The optional column value that make up the WHERE clause
      * @return The query string
      */
-    private String buildQueryString(PlatformInfo targetPlatformInfo, Table table, Column[] whereCols, DynaBean whereValues)
+    private String buildQueryString(Platform targetPlatform, Table table, Column[] whereCols, DynaBean whereValues)
     {
         StringBuffer result = new StringBuffer();
 
         result.append("SELECT * FROM ");
-        if (targetPlatformInfo.isUseDelimitedIdentifiers())
+        if (targetPlatform.isDelimitedIdentifierModeOn())
         {
-            result.append(targetPlatformInfo.getDelimiterToken());
+            result.append(targetPlatform.getPlatformInfo().getDelimiterToken());
         }
         result.append(table.getName());
-        if (targetPlatformInfo.isUseDelimitedIdentifiers())
+        if (targetPlatform.isDelimitedIdentifierModeOn())
         {
-            result.append(targetPlatformInfo.getDelimiterToken());
+            result.append(targetPlatform.getPlatformInfo().getDelimiterToken());
         }
         if ((whereCols != null) && (whereCols.length > 0))
         {
@@ -175,14 +176,14 @@ public class DatabaseTestHelper extends Assert
                 {
                     result.append(" AND ");
                 }
-                if (targetPlatformInfo.isUseDelimitedIdentifiers())
+                if (targetPlatform.isDelimitedIdentifierModeOn())
                 {
-                    result.append(targetPlatformInfo.getDelimiterToken());
+                    result.append(targetPlatform.getPlatformInfo().getDelimiterToken());
                 }
                 result.append(whereCols[idx].getName());
-                if (targetPlatformInfo.isUseDelimitedIdentifiers())
+                if (targetPlatform.isDelimitedIdentifierModeOn())
                 {
-                    result.append(targetPlatformInfo.getDelimiterToken());
+                    result.append(targetPlatform.getPlatformInfo().getDelimiterToken());
                 }
                 result.append(" = ");
                 if (value == null)
@@ -193,12 +194,12 @@ public class DatabaseTestHelper extends Assert
                 {
                     if (!whereCols[idx].isOfNumericType())
                     {
-                        result.append(targetPlatformInfo.getValueQuoteToken());
+                        result.append(targetPlatform.getPlatformInfo().getValueQuoteToken());
                     }
                     result.append(value.toString());
                     if (!whereCols[idx].isOfNumericType())
                     {
-                        result.append(targetPlatformInfo.getValueQuoteToken());
+                        result.append(targetPlatform.getPlatformInfo().getValueQuoteToken());
                     }
                 }
             }

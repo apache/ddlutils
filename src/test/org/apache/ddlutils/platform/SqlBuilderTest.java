@@ -19,7 +19,7 @@ package org.apache.ddlutils.platform;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.TestPlatformBase;
 import org.apache.ddlutils.model.Database;
 
@@ -53,7 +53,7 @@ public class SqlBuilderTest extends TestPlatformBase
      */
     public void testUpdateSql()
     {
-        SqlBuilder sqlBuilder = new SqlBuilderImpl(new PlatformInfo());
+        SqlBuilder sqlBuilder = new SqlBuilderImpl(getPlatform());
         Database   database   = parseDatabaseFromString(TEST_MODEL);
         Map        map        = new HashMap();
 
@@ -82,11 +82,11 @@ public class SqlBuilderTest extends TestPlatformBase
         /**
          * Creates a new instance.
          * 
-         * @param info The platform info
+         * @param platform The plaftform this builder belongs to
          */
-        public SqlBuilderImpl(PlatformInfo info)
+        public SqlBuilderImpl(Platform platform)
         {
-            super(info);
+            super(platform);
         }
     }
 }

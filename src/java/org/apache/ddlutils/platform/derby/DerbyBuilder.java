@@ -19,7 +19,7 @@ package org.apache.ddlutils.platform.derby;
 import java.io.IOException;
 import java.sql.Types;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.cloudscape.CloudscapeBuilder;
@@ -36,11 +36,11 @@ public class DerbyBuilder extends CloudscapeBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public DerbyBuilder(PlatformInfo info)
+    public DerbyBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
     }
 
     /**

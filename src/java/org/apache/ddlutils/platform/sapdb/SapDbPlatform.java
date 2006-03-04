@@ -41,10 +41,10 @@ public class SapDbPlatform extends PlatformImplBase
      */
     public SapDbPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(32);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -79,13 +79,13 @@ public class SapDbPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "BOOLEAN",   "BIT");
         info.addNativeTypeMapping("DATALINK", "LONG BYTE", "LONGVARBINARY");
 
-        info.addDefaultSize(Types.CHAR,      254);
-        info.addDefaultSize(Types.VARCHAR,   254);
-        info.addDefaultSize(Types.BINARY,    254);
-        info.addDefaultSize(Types.VARBINARY, 254);
+        info.setDefaultSize(Types.CHAR,      254);
+        info.setDefaultSize(Types.VARCHAR,   254);
+        info.setDefaultSize(Types.BINARY,    254);
+        info.setDefaultSize(Types.VARBINARY, 254);
 
-        setSqlBuilder(new SapDbBuilder(info));
-        setModelReader(new SapDbModelReader(info));
+        setSqlBuilder(new SapDbBuilder(this));
+        setModelReader(new SapDbModelReader(this));
     }
 
     /**

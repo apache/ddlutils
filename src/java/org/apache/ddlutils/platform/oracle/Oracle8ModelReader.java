@@ -30,7 +30,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
@@ -59,11 +59,11 @@ public class Oracle8ModelReader extends JdbcModelReader
 	/**
      * Creates a new model reader for Oracle 8 databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public Oracle8ModelReader(PlatformInfo platformInfo)
+    public Oracle8ModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");
@@ -218,7 +218,7 @@ public class Oracle8ModelReader extends JdbcModelReader
         try
         {
     		stmt = getConnection().prepareStatement(query.toString());
-    		stmt.setString(1, getPlatformInfo().isUseDelimitedIdentifiers() ? tableName : tableName.toUpperCase());
+    		stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
     		stmt.setString(2, "N");
     		stmt.setString(3, "TABLE");
     		if (metaData.getSchemaPattern() != null)

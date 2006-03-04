@@ -43,19 +43,19 @@ public class MySql50Platform extends PlatformImplBase
      */
     public MySql50Platform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(64);
-        info.setRequiringNullAsDefaultValue(true);
-        info.setSupportingDefaultValuesForLongTypes(false);
+        info.setNullAsDefaultValueRequired(true);
+        info.setDefaultValuesForLongTypesSupported(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
         // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
-        info.setSupportingNonPKIdentityColumns(false);
+        info.setNonPKIdentityColumnsSupported(false);
         // MySql 5.0 returns an empty string for default values for pk columns
         // which is different from the mysql 4 behaviour
-        info.setReturningDefaultValueForRequired(false);
+        info.setSyntheticDefaultValueForRequiredReturned(false);
         info.setCommentPrefix("#");
         // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
         info.setDelimiterToken("`");
@@ -84,13 +84,13 @@ public class MySql50Platform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)", "BIT");
         info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
 
-        info.addDefaultSize(Types.CHAR,      254);
-        info.addDefaultSize(Types.VARCHAR,   254);
-        info.addDefaultSize(Types.BINARY,    254);
-        info.addDefaultSize(Types.VARBINARY, 254);
+        info.setDefaultSize(Types.CHAR,      254);
+        info.setDefaultSize(Types.VARCHAR,   254);
+        info.setDefaultSize(Types.BINARY,    254);
+        info.setDefaultSize(Types.VARBINARY, 254);
         
-        setSqlBuilder(new MySqlBuilder(info));
-        setModelReader(new MySql50ModelReader(info));
+        setSqlBuilder(new MySqlBuilder(this));
+        setModelReader(new MySql50ModelReader(this));
     }
 
     /**

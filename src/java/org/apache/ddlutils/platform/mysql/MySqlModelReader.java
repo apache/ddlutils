@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
@@ -39,11 +39,11 @@ public class MySqlModelReader extends JdbcModelReader
     /**
      * Creates a new model reader for MySql databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public MySqlModelReader(PlatformInfo platformInfo)
+    public MySqlModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern(null);
@@ -98,6 +98,6 @@ public class MySqlModelReader extends JdbcModelReader
     protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
     {
         // MySql defines a non-unique index of the same name as the fk
-        return new MySqlBuilder(getPlatformInfo()).getForeignKeyName(table, fk).equals(index.getName());
+        return getPlatform().getSqlBuilder().getForeignKeyName(table, fk).equals(index.getName());
     }
 }

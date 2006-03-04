@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -67,8 +68,8 @@ public class JdbcModelReader
     /** The descriptors for the relevant columns in the index meta data. */
     private final List _columnsForIndex;
 
-    /** The platform specific settings. */
-    private PlatformInfo _platformInfo;
+    /** The platform that this model reader belongs to. */
+    private Platform _platform;
     /** Contains default column sizes (minimum sizes that a JDBC-compliant db must support). */
     private HashMap _defaultSizes = new HashMap();
     /** The default database catalog to read. */
@@ -87,11 +88,11 @@ public class JdbcModelReader
     /**
      * Creates a new model reader instance.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The plaftform this builder belongs to
      */
-    public JdbcModelReader(PlatformInfo platformInfo)
+    public JdbcModelReader(Platform platform)
     {
-        _platformInfo = platformInfo;
+        _platform = platform;
 
         _defaultSizes.put(new Integer(Types.CHAR),          "254");
         _defaultSizes.put(new Integer(Types.VARCHAR),       "254");
@@ -115,13 +116,23 @@ public class JdbcModelReader
     }
 
     /**
+     * Returns the platform that this model reader belongs to.
+     * 
+     * @return The platform
+     */
+    public Platform getPlatform()
+    {
+        return _platform;
+    }
+    
+    /**
      * Returns the platform specific settings.
      *
      * @return The platform settings
      */
     public PlatformInfo getPlatformInfo()
     {
-        return _platformInfo;
+        return _platform.getPlatformInfo();
     }
 
     /**
@@ -539,7 +550,7 @@ public class JdbcModelReader
                 table.findColumn((String)it.next(), true).setPrimaryKey(true);
             }
 
-            if (getPlatformInfo().isReturningSystemIndices())
+            if (getPlatformInfo().isSystemIndicesReturned())
             {
                 removeSystemIndices(table);
             }
@@ -978,23 +989,23 @@ public class JdbcModelReader
             {
                 query.append(",");
             }
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            if (getPlatform().isDelimitedIdentifierModeOn())
             {
                 query.append(getPlatformInfo().getDelimiterToken());
             }
             query.append(columnsToCheck[idx].getName());
-            if (getPlatformInfo().isUseDelimitedIdentifiers())
+            if (getPlatform().isDelimitedIdentifierModeOn())
             {
                 query.append(getPlatformInfo().getDelimiterToken());
             }
         }
         query.append(" FROM ");
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             query.append(getPlatformInfo().getDelimiterToken());
         }
         query.append(table.getName());
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             query.append(getPlatformInfo().getDelimiterToken());
         }

@@ -35,57 +35,69 @@ public class PlatformInfo
     /** The Log to which logging calls will be made. */
     private final Log _log = LogFactory.getLog(PlatformInfo.class);
 
+    // properties influencing the definition of columns
+    
     /** Whether the database requires the explicit stating of NULL as the default value. */
-    private boolean _requiringNullAsDefaultValue = false;
+    private boolean _nullAsDefaultValueRequired = false;
 
     /** Whether default values can be defined for LONGVARCHAR/LONGVARBINARY columns. */
-    private boolean _supportingDefaultValuesForLongTypes = true;
+    private boolean _defaultValuesForLongTypesSupported = true;
 
+    // properties influencing the specification of table constraints
+    
     /** Whether primary key constraints are embedded inside the create table statement. */
     private boolean _primaryKeyEmbedded = true;
     
     /** Whether foreign key constraints are embedded inside the create table statement. */
     private boolean _foreignKeysEmbedded = false;
 
+    /** Whether embedded foreign key constraints are explicitly named. */
+    private boolean _embeddedForeignKeysNamed = false;
+
     /** Whether non-unique indices are supported. */
-    private boolean _supportingNonUniqueIndices = true;
+    private boolean _nonUniqueIndicesSupported = true;
 
     /** Whether indices are embedded inside the create table statement. */
     private boolean _indicesEmbedded = false;
 
-    /** Whether embedded foreign key constraints are explicitly named. */
-    private boolean _embeddedForeignKeysNamed = false;
-
     /** Whether identity specification is supported for non-primary key columns. */
-    private boolean _supportingNonPKIdentityColumns = true;
+    private boolean _nonPKIdentityColumnsSupported = true;
 
     /** Whether the auto-increment definition is done via the DEFAULT part of the column definition. */
-    private boolean _identitySpecUsesDefaultValue = false;
+    private boolean _defaultValueUsedForIdentitySpec = false;
 
+    // properties influencing the reading of models from live databases
+    
+    /** Whether system indices (database-generated indices for primary and foreign keys) are returned when
+        reading a model from a database. */
+    private boolean _systemIndicesReturned = true;
+
+    /** Whether the database returns a synthetic default value for non-identity required columns. */ 
+    private boolean _syntheticDefaultValueForRequiredReturned = false;
+    
+    /** Whether the platform is able to determine auto increment status from an existing database. */ 
+    private boolean _autoIncrementStatusReadingSupported = true;
+
+    // other ddl properties
+
+    /** Whether comments are supported. */
+    private boolean _commentsSupported = true;
+
+    /** Whether delimited identifiers are supported or not. */
+    private boolean _delimitedIdentifiersSupported = true;
+    
     /** Whether an ALTER TABLE is needed to drop indexes. */
-    private boolean _useAlterTableForDrop = false;
+    private boolean _alterTableForDropUsed = false;
 
     /** Specifies the maximum length that an identifier (name of a table, column, constraint etc.)
         can have for this database; use -1 if there is no limit. */
     private int _maxIdentifierLength = -1;
-
-    /** Whether identifiers are case sensitive or not. */
-    private boolean _caseSensitive = false;
-
-    /** Whether delimited identifiers are supported or not. */
-    private boolean _supportingDelimitedIdentifiers = true;
-
-    /** Whether delimited identifiers are used or not. */
-    private boolean _useDelimitedIdentifiers = true;
 
     /** The string used for delimiting SQL identifiers, eg. table names, column names etc. */
     private String _delimiterToken = "\"";
 
     /** The string used for escaping values when generating textual SQL statements. */
     private String _valueQuoteToken = "'";
-
-    /** Whether comments are supported. */
-    private boolean _commentsSupported = true;
 
     /** The string that starts a comment. */
     private String _commentPrefix = "--";
@@ -114,16 +126,6 @@ public class PlatformInfo
     /** Contains those JDBC types whose corresponding native types are types that have precision and scale on this platform. */
     private HashSet _typesWithPrecisionAndScale = new HashSet();
 
-    /** Whether system indices (database-generated indices for primary and foreign keys) are returned when
-        reading a model from a database. */
-    private boolean _returningSystemIndices = true;
-
-    /** Whether the database returns a synthetic default value for non-identity required columns. */ 
-    private boolean _returningDefaultValueForRequired = false;
-    
-    /** Whether the platform is able to determine auto increment status from an existing database. */ 
-    private boolean _canReadAutoIncrementStatus = true;
-
     /**
      * Creates a new platform info object.
      */
@@ -147,15 +149,17 @@ public class PlatformInfo
         _typesWithPrecisionAndScale.add(new Integer(Types.NUMERIC));
     }
 
+    // properties influencing the definition of columns
+
     /**
      * Determines whether a NULL needs to be explicitly stated when the column
      * has no specified default value. Default is false.
      * 
      * @return <code>true</code> if NULL must be written for empty default values
      */
-    public boolean isRequiringNullAsDefaultValue()
+    public boolean isNullAsDefaultValueRequired()
     {
-        return _requiringNullAsDefaultValue;
+        return _nullAsDefaultValueRequired;
     }
     /**
      * Specifies whether a NULL needs to be explicitly stated when the column
@@ -164,9 +168,9 @@ public class PlatformInfo
      * @param requiresNullAsDefaultValue Whether NULL must be written for empty
      *                                   default values
      */
-    public void setRequiringNullAsDefaultValue(boolean requiresNullAsDefaultValue)
+    public void setNullAsDefaultValueRequired(boolean requiresNullAsDefaultValue)
     {
-        _requiringNullAsDefaultValue = requiresNullAsDefaultValue;
+        _nullAsDefaultValueRequired = requiresNullAsDefaultValue;
     }
 
     /**
@@ -174,9 +178,9 @@ public class PlatformInfo
      *
      * @return <code>true</code> if default values are allowed
      */
-    public boolean isSupportingDefaultValuesForLongTypes()
+    public boolean isDefaultValuesForLongTypesSupported()
     {
-        return _supportingDefaultValuesForLongTypes;
+        return _defaultValuesForLongTypesSupported;
     }
 
     /**
@@ -184,10 +188,12 @@ public class PlatformInfo
      *
      * @param isSupported <code>true</code> if default values are supported
      */
-    public void setSupportingDefaultValuesForLongTypes(boolean isSupported)
+    public void setDefaultValuesForLongTypesSupported(boolean isSupported)
     {
-        _supportingDefaultValuesForLongTypes = isSupported;
+        _defaultValuesForLongTypesSupported = isSupported;
     }
+
+    // properties influencing the specification of table constraints
 
     /**
      * Determines whether primary key constraints are embedded in the create 
@@ -236,13 +242,33 @@ public class PlatformInfo
     }
 
     /**
+     * Returns whether embedded foreign key constraints should have a name.
+     * 
+     * @return <code>true</code> if embedded fks have name
+     */
+    public boolean isEmbeddedForeignKeysNamed()
+    {
+        return _embeddedForeignKeysNamed;
+    }
+
+    /**
+     * Specifies whether embedded foreign key constraints should be named.
+     * 
+     * @param embeddedForeignKeysNamed Whether embedded fks shall have a name
+     */
+    public void setEmbeddedForeignKeysNamed(boolean embeddedForeignKeysNamed)
+    {
+        _embeddedForeignKeysNamed = embeddedForeignKeysNamed;
+    }
+
+    /**
      * Determines whether non-unique indices are supported.
      *
      * @return <code>true</code> if non-unique indices are supported
      */
-    public boolean isSupportingNonUniqueIndices()
+    public boolean isNonUniqueIndicesSupported()
     {
-        return _supportingNonUniqueIndices;
+        return _nonUniqueIndicesSupported;
     }
 
     /**
@@ -251,9 +277,9 @@ public class PlatformInfo
      * @param supportingNonUniqueIndices <code>true</code> if non-unique indices
      *                                   are supported
      */
-    public void setSupportingNonUniqueIndices(boolean supportingNonUniqueIndices)
+    public void setNonUniqueIndicesSupported(boolean supportingNonUniqueIndices)
     {
-        _supportingNonUniqueIndices = supportingNonUniqueIndices;
+        _nonUniqueIndicesSupported = supportingNonUniqueIndices;
     }
 
     /**
@@ -279,33 +305,13 @@ public class PlatformInfo
     }
 
     /**
-     * Returns whether embedded foreign key constraints should have a name.
-     * 
-     * @return <code>true</code> if embedded fks have name
-     */
-    public boolean isEmbeddedForeignKeysNamed()
-    {
-        return _embeddedForeignKeysNamed;
-    }
-
-    /**
-     * Specifies whether embedded foreign key constraints should be named.
-     * 
-     * @param embeddedForeignKeysNamed Whether embedded fks shall have a name
-     */
-    public void setEmbeddedForeignKeysNamed(boolean embeddedForeignKeysNamed)
-    {
-        _embeddedForeignKeysNamed = embeddedForeignKeysNamed;
-    }
-
-    /**
      * Determines whether non-primary key columns can be auto-incrementing (IDENTITY columns).
      *
      * @return <code>true</code> if normal non-PK columns can be auto-incrementing
      */
-    public boolean isSupportingNonPKIdentityColumns()
+    public boolean isNonPKIdentityColumnsSupported()
     {
-        return _supportingNonPKIdentityColumns;
+        return _nonPKIdentityColumnsSupported;
     }
 
     /**
@@ -314,9 +320,9 @@ public class PlatformInfo
      * @param supportingNonPKIdentityColumns <code>true</code> if normal non-PK columns can
      *                                       be auto-incrementing
      */
-    public void setSupportingNonPKIdentityColumns(boolean supportingNonPKIdentityColumns)
+    public void setNonPKIdentityColumnsSupported(boolean supportingNonPKIdentityColumns)
     {
-        _supportingNonPKIdentityColumns = supportingNonPKIdentityColumns;
+        _nonPKIdentityColumnsSupported = supportingNonPKIdentityColumns;
     }
 
     /**
@@ -325,9 +331,9 @@ public class PlatformInfo
      *
      * @return <code>true</code> if the auto-increment spec is done via the DEFAULT value
      */
-    public boolean isIdentitySpecUsesDefaultValue()
+    public boolean isDefaultValueUsedForIdentitySpec()
     {
-        return _identitySpecUsesDefaultValue;
+        return _defaultValueUsedForIdentitySpec;
     }
 
     /**
@@ -337,9 +343,124 @@ public class PlatformInfo
      * @param identitySpecUsesDefaultValue <code>true</code> if the auto-increment spec is
      *                                     done via the DEFAULT value
      */
-    public void setIdentitySpecUsesDefaultValue(boolean identitySpecUsesDefaultValue)
+    public void setDefaultValueUsedForIdentitySpec(boolean identitySpecUsesDefaultValue)
     {
-        _identitySpecUsesDefaultValue = identitySpecUsesDefaultValue;
+        _defaultValueUsedForIdentitySpec = identitySpecUsesDefaultValue;
+    }
+
+    // properties influencing the reading of models from live databases
+
+    /**
+     * Determines whether database-generated indices for primary and foreign keys are
+     * returned when reading a model from a database.
+     *
+     * @return <code>true</code> if system indices are read from a live database
+     */
+    public boolean isSystemIndicesReturned()
+    {
+        return _systemIndicesReturned;
+    }
+
+    /**
+     * Specifies whether database-generated indices for primary and foreign keys are
+     * returned when reading a model from a database.
+     *
+     * @param returningSystemIndices <code>true</code> if system indices are read from
+     *                               a live database
+     */
+    public void setSystemIndicesReturned(boolean returningSystemIndices)
+    {
+        _systemIndicesReturned = returningSystemIndices;
+    }
+
+    /**
+     * Determines whether the platform returns synthetic default values (e.g. 0 for numeric
+     * columns etc.) for non-identity required columns when reading a model from a database.
+     *
+     * @return <code>true</code> if synthetic default values are returned for non-identity 
+     *         required columns
+     */
+    public boolean isSyntheticDefaultValueForRequiredReturned()
+    {
+        return _syntheticDefaultValueForRequiredReturned;
+    }
+
+    /**
+     * Specifies whether the platform returns synthetic default values (e.g. 0 for numeric
+     * columns etc.) for non-identity required columns when reading a model from a database.
+     *
+     * @param returningDefaultValue <code>true</code> if synthetic default values are returned for
+     *                              non-identity required columns
+     */
+    public void setSyntheticDefaultValueForRequiredReturned(boolean returningDefaultValue)
+    {
+        _syntheticDefaultValueForRequiredReturned = returningDefaultValue;
+    }
+
+    /**
+     * Determines whether the platform is able to read the auto-increment status for columns
+     * from an existing database.
+     * 
+     * @return <code>true</code> if the auto-increment status can be determined from an existing
+     *         database
+     */
+    public boolean getAutoIncrementStatusReadingSupported()
+    {
+        return _autoIncrementStatusReadingSupported;
+    }
+
+    /**
+     * Specifies whether the platform is able to read the auto-increment status for columns
+     * from an existing database.
+     * 
+     * @param canReadAutoIncrementStatus <code>true</code> if the auto-increment status can be
+     *                                   determined from an existing database
+     */
+    public void setAutoIncrementStatusReadingSupported(boolean canReadAutoIncrementStatus)
+    {
+        _autoIncrementStatusReadingSupported = canReadAutoIncrementStatus;
+    }
+
+    // other ddl properties
+
+    /**
+     * Determines whether the database supports comments.
+     *
+     * @return <code>true</code> if comments are supported
+     */
+    public boolean isCommentsSupported()
+    {
+        return _commentsSupported;
+    }
+
+    /**
+     * Specifies whether comments are supported by the database.
+     * 
+     * @param commentsSupported <code>true</code> if comments are supported
+     */
+    public void setCommentsSupported(boolean commentsSupported)
+    {
+        _commentsSupported = commentsSupported;
+    }
+
+    /**
+     * Determines whether delimited identifiers are supported.
+     *
+     * @return <code>true</code> if delimited identifiers are supported
+     */
+    public boolean isDelimitedIdentifiersSupported()
+    {
+        return _delimitedIdentifiersSupported;
+    }
+
+    /**
+     * Specifies whether delimited identifiers are supported.
+     *
+     * @param areSupported <code>true</code> if delimited identifiers are supported
+     */
+    public void setDelimitedIdentifiersSupported(boolean areSupported)
+    {
+        _delimitedIdentifiersSupported = areSupported;
     }
 
     /**
@@ -348,9 +469,9 @@ public class PlatformInfo
      * 
      * @return <code>true</code> if ALTER TABLE is required
      */
-    public boolean isUseAlterTableForDrop()
+    public boolean isAlterTableForDropUsed()
     {
-        return _useAlterTableForDrop;
+        return _alterTableForDropUsed;
     }
 
     /**
@@ -359,9 +480,9 @@ public class PlatformInfo
      * 
      * @param useAlterTableForDrop Whether ALTER TABLE will be used
      */
-    public void setUseAlterTableForDrop(boolean useAlterTableForDrop)
+    public void setAlterTableForDropUsed(boolean useAlterTableForDrop)
     {
-        _useAlterTableForDrop = useAlterTableForDrop;
+        _alterTableForDropUsed = useAlterTableForDrop;
     }
 
     /**
@@ -382,69 +503,6 @@ public class PlatformInfo
     public void setMaxIdentifierLength(int maxIdentifierLength)
     {
         _maxIdentifierLength = maxIdentifierLength;
-    }
-
-    /**
-     * Determines whether the database has case sensitive identifiers.
-     *
-     * @return <code>true</code> if case of the the identifiers is important
-     */
-    public boolean isCaseSensitive()
-    {
-        return _caseSensitive;
-    }
-
-    /**
-     * Specifies whether the database has case sensitive identifiers.
-     *
-     * @param caseSensitive <code>true</code> if case of the the identifiers is important
-     */
-    public void setCaseSensitive(boolean caseSensitive)
-    {
-        _caseSensitive = caseSensitive;
-    }
-
-    /**
-     * Determines whether delimited identifiers are supported.
-     *
-     * @return <code>true</code> if delimited identifiers are supported
-     */
-    public boolean isSupportingDelimitedIdentifiers()
-    {
-        return _supportingDelimitedIdentifiers;
-    }
-
-    /**
-     * Specifies whether delimited identifiers are supported.
-     *
-     * @param areSupported <code>true</code> if delimited identifiers are supported
-     */
-    public void setSupportingDelimitedIdentifiers(boolean areSupported)
-    {
-        _supportingDelimitedIdentifiers = areSupported;
-    }
-
-    /**
-     * Determines whether delimited identifiers are used or normal SQL92 identifiers
-     * (which may only contain alphanumerical characters and the underscore, must start
-     * with a letter and cannot be a reserved keyword).
-     * Per default, delimited identifiers are used
-     *
-     * @return <code>true</code> if delimited identifiers are used
-     */
-    public boolean isUseDelimitedIdentifiers()
-    {
-        return _useDelimitedIdentifiers;
-    }
-
-    /**
-     * Determines whether delimited identifiers are used or normal SQL92 identifiers.
-     *
-     * @param useDelimitedIdentifiers <code>true</code> if delimited identifiers are used
-     */
-    public void setUseDelimitedIdentifiers(boolean useDelimitedIdentifiers)
-    {
-        _useDelimitedIdentifiers = useDelimitedIdentifiers;
     }
 
     /**
@@ -489,26 +547,6 @@ public class PlatformInfo
     public void setValueQuoteToken(String valueQuoteChar)
     {
         _valueQuoteToken = valueQuoteChar;
-    }
-
-    /**
-     * Determines whether the database supports comments.
-     *
-     * @return <code>true</code> if comments are supported
-     */
-    public boolean isCommentsSupported()
-    {
-        return _commentsSupported;
-    }
-
-    /**
-     * Specifies whether comments are supported by the database.
-     * 
-     * @param commentsSupported <code>true</code> if comments are supported
-     */
-    public void setCommentsSupported(boolean commentsSupported)
-    {
-        _commentsSupported = commentsSupported;
     }
 
     /**
@@ -570,6 +608,34 @@ public class PlatformInfo
     public void setSqlCommandDelimiter(String sqlCommandDelimiter)
     {
         _sqlCommandDelimiter = sqlCommandDelimiter;
+    }
+
+    /**
+     * Returns the database-native type for the given type code.
+     * 
+     * @param typeCode The {@link java.sql.Types} type code
+     * @return The native type or <code>null</code> if there isn't one defined
+     */
+    public String getNativeType(int typeCode)
+    {
+        return (String)_nativeTypes.get(new Integer(typeCode));
+    }
+
+    /**
+     * Returns the jdbc type corresponding to the native type that is used for the given
+     * jdbc type. This is most often the same jdbc type, but can also be a different one.
+     * For instance, if a database has no native boolean type, then the source jdbc type
+     * would be <code>BIT</code> or <code>BOOLEAN</code>, and the target jdbc type might
+     * be <code>TINYINT</code> or <code>SMALLINT</code>.
+     * 
+     * @param typeCode The {@link java.sql.Types} type code
+     * @return The target jdbc type
+     */
+    public int getTargetJdbcType(int typeCode)
+    {
+        Integer targetJdbcType = (Integer)_targetJdbcTypes.get(new Integer(typeCode));
+
+        return targetJdbcType == null ? typeCode : targetJdbcType.intValue(); 
     }
 
     /**
@@ -659,77 +725,15 @@ public class PlatformInfo
     }
 
     /**
-     * Returns the database-native type for the given type code.
+     * Determines whether the native type for the given sql type code (one of the
+     * {@link java.sql.Types} constants) has a null default value on this platform.
      * 
-     * @param typeCode The {@link java.sql.Types} type code
-     * @return The native type or <code>null</code> if there isn't one defined
+     * @param sqlTypeCode The sql type code
+     * @return <code>true</code> if the native type has a null default value
      */
-    public String getNativeType(int typeCode)
+    public boolean hasNullDefault(int sqlTypeCode)
     {
-        return (String)_nativeTypes.get(new Integer(typeCode));
-    }
-
-    /**
-     * Returns the jdbc type corresponding to the native type that is used for the given
-     * jdbc type. This is most often the same jdbc type, but can also be a different one.
-     * For instance, if a database has no native boolean type, then the source jdbc type
-     * would be <code>BIT</code> or <code>BOOLEAN</code>, and the target jdbc type might
-     * be <code>TINYINT</code> or <code>SMALLINT</code>.
-     * 
-     * @param typeCode The {@link java.sql.Types} type code
-     * @return The target jdbc type
-     */
-    public int getTargetJdbcType(int typeCode)
-    {
-        Integer targetJdbcType = (Integer)_targetJdbcTypes.get(new Integer(typeCode));
-
-        return targetJdbcType == null ? typeCode : targetJdbcType.intValue(); 
-    }
-
-    /**
-     * Adds a default size for the given jdbc type.
-     * 
-     * @param jdbcTypeCode The jdbc type code
-     * @param defaultSize  The default size
-     */
-    public void addDefaultSize(int jdbcTypeCode, int defaultSize)
-    {
-        _typesDefaultSizes.put(new Integer(jdbcTypeCode), new Integer(defaultSize));
-    }
-
-    /**
-     * Returns the default size value for the given type, if any.
-     * 
-     * @param jdbcTypeCode The jdbc type code
-     * @return The default size or <code>null</code> if none is defined
-     */
-    public Integer getDefaultSize(int jdbcTypeCode)
-    {
-        return (Integer)_typesDefaultSizes.get(new Integer(jdbcTypeCode));
-    }
-    
-    /**
-     * Adds a default size for the given jdbc type.
-     * 
-     * @param jdbcTypeName The name of the jdbc type, one of the {@link Types} constants
-     * @param defaultSize  The default size
-     */
-    public void addDefaultSize(String jdbcTypeName, int defaultSize)
-    {
-        try
-        {
-            Field constant = Types.class.getField(jdbcTypeName);
-
-            if (constant != null)
-            {
-                addDefaultSize(constant.getInt(null), defaultSize);
-            }
-        }
-        catch (Exception ex)
-        {
-            // ignore -> won't be defined
-            _log.warn("Cannot add default size for undefined jdbc type "+jdbcTypeName, ex);
-        }
+        return _typesWithNullDefault.contains(new Integer(sqlTypeCode));
     }
     
     /**
@@ -753,14 +757,14 @@ public class PlatformInfo
 
     /**
      * Determines whether the native type for the given sql type code (one of the
-     * {@link java.sql.Types} constants) has a null default value on this platform.
+     * {@link java.sql.Types} constants) has a size specification on this platform.
      * 
      * @param sqlTypeCode The sql type code
-     * @return <code>true</code> if the native type has a null default value
+     * @return <code>true</code> if the native type has a size specification
      */
-    public boolean hasNullDefault(int sqlTypeCode)
+    public boolean hasSize(int sqlTypeCode)
     {
-        return _typesWithNullDefault.contains(new Integer(sqlTypeCode));
+        return _typesWithSize.contains(new Integer(sqlTypeCode));
     }
 
     /**
@@ -783,15 +787,62 @@ public class PlatformInfo
     }
 
     /**
+     * Returns the default size value for the given type, if any.
+     * 
+     * @param jdbcTypeCode The jdbc type code
+     * @return The default size or <code>null</code> if none is defined
+     */
+    public Integer getDefaultSize(int jdbcTypeCode)
+    {
+        return (Integer)_typesDefaultSizes.get(new Integer(jdbcTypeCode));
+    }
+
+    /**
+     * Adds a default size for the given jdbc type.
+     * 
+     * @param jdbcTypeCode The jdbc type code
+     * @param defaultSize  The default size
+     */
+    public void setDefaultSize(int jdbcTypeCode, int defaultSize)
+    {
+        _typesDefaultSizes.put(new Integer(jdbcTypeCode), new Integer(defaultSize));
+    }
+    
+    /**
+     * Adds a default size for the given jdbc type.
+     * 
+     * @param jdbcTypeName The name of the jdbc type, one of the {@link Types} constants
+     * @param defaultSize  The default size
+     */
+    public void setDefaultSize(String jdbcTypeName, int defaultSize)
+    {
+        try
+        {
+            Field constant = Types.class.getField(jdbcTypeName);
+
+            if (constant != null)
+            {
+                setDefaultSize(constant.getInt(null), defaultSize);
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore -> won't be defined
+            _log.warn("Cannot add default size for undefined jdbc type "+jdbcTypeName, ex);
+        }
+    }
+
+    /**
      * Determines whether the native type for the given sql type code (one of the
-     * {@link java.sql.Types} constants) has a size specification on this platform.
+     * {@link java.sql.Types} constants) has precision and scale specifications on
+     * this platform.
      * 
      * @param sqlTypeCode The sql type code
-     * @return <code>true</code> if the native type has a size specification
+     * @return <code>true</code> if the native type has precision and scale specifications
      */
-    public boolean hasSize(int sqlTypeCode)
+    public boolean hasPrecisionAndScale(int sqlTypeCode)
     {
-        return _typesWithSize.contains(new Integer(sqlTypeCode));
+        return _typesWithPrecisionAndScale.contains(new Integer(sqlTypeCode));
     }
 
     /**
@@ -813,88 +864,4 @@ public class PlatformInfo
             _typesWithPrecisionAndScale.remove(new Integer(sqlTypeCode));
         }
     }
-
-    /**
-     * Determines whether the native type for the given sql type code (one of the
-     * {@link java.sql.Types} constants) has precision and scale specifications on
-     * this platform.
-     * 
-     * @param sqlTypeCode The sql type code
-     * @return <code>true</code> if the native type has precision and scale specifications
-     */
-    public boolean hasPrecisionAndScale(int sqlTypeCode)
-    {
-        return _typesWithPrecisionAndScale.contains(new Integer(sqlTypeCode));
-    }
-
-    /**
-     * Determines whether database-generated indices for primary and foreign keys are
-     * returned when reading a model from a database.
-     *
-     * @return <code>true</code> if system indices are read from a live database
-     */
-    public boolean isReturningSystemIndices()
-    {
-        return _returningSystemIndices;
-    }
-
-    /**
-     * Specifies whether database-generated indices for primary and foreign keys are
-     * returned when reading a model from a database.
-     *
-     * @param returningSystemIndices <code>true</code> if system indices are read from
-     *                               a live database
-     */
-    public void setReturningSystemIndices(boolean returningSystemIndices)
-    {
-        _returningSystemIndices = returningSystemIndices;
-    }
-
-    /**
-     * Determines whether the platform returns synthetic default values (e.g. 0 for numeric
-     * columns etc.) for non-identity required columns when reading a model from a database.
-     *
-     * @return <code>true</code> if synthetic default values are returned for non-identity 
-     *         required columns
-     */
-    public boolean isReturningDefaultValueForRequired()
-    {
-        return _returningDefaultValueForRequired;
-    }
-
-    /**
-     * Specifies whether the platform returns synthetic default values (e.g. 0 for numeric
-     * columns etc.) for non-identity required columns when reading a model from a database.
-     *
-     * @param returningDefaultValue <code>true</code> if synthetic default values are returned for
-     *                              non-identity required columns
-     */
-    public void setReturningDefaultValueForRequired(boolean returningDefaultValue)
-    {
-        _returningDefaultValueForRequired = returningDefaultValue;
-    }
-
-    /**
-     * Determines whether the platform is able to read the auto-increment status for columns
-     * from an existing database.
-     * 
-     * @return <code>true</code> if the auto-increment status can be determined from an existing
-     *         database
-     */
-	public boolean getCanReadAutoIncrementStatus()
-	{
-		return _canReadAutoIncrementStatus;
-	}
-
-    /**
-     * Specifies whether the platform is able to read the auto-increment status for columns
-     * from an existing database.
-     * 
-     * @param canReadAutoIncrementStatus <code>true</code> if the auto-increment status can be
-     *                                   determined from an existing database
-     */
-	public void setCanReadAutoIncrementStatus(boolean canReadAutoIncrementStatus)
-	{
-		_canReadAutoIncrementStatus = canReadAutoIncrementStatus;
-	}
 }

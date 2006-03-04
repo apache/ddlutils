@@ -68,10 +68,14 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /** The log for this platform. */
     private final Log _log = LogFactory.getLog(getClass());
 
+    /** The platform info. */
+    private PlatformInfo _info = new PlatformInfo();
     /** The sql builder for this platform. */
     private SqlBuilder _builder;
     /** The model reader for this platform. */
     private JdbcModelReader _modelReader;
+    /** Whether delimited identifiers are used or not. */
+    private boolean _delimitedIdentifierModeOn = false;
 
     /**
      * {@inheritDoc}
@@ -98,7 +102,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     {
         if (_modelReader == null)
         {
-            _modelReader = new JdbcModelReader(getPlatformInfo());
+            _modelReader = new JdbcModelReader(this);
         }
         return _modelReader;
     }
@@ -118,7 +122,23 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public PlatformInfo getPlatformInfo()
     {
-        return _builder.getPlatformInfo();
+        return _info;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isDelimitedIdentifierModeOn()
+    {
+        return _delimitedIdentifierModeOn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDelimitedIdentifierModeOn(boolean delimitedIdentifierModeOn)
+    {
+        _delimitedIdentifierModeOn = delimitedIdentifierModeOn;
     }
 
     /**
@@ -1743,7 +1763,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     protected Object getObjectFromResultSet(ResultSet resultSet, String columnName, Table table) throws SQLException
     {
-        Column column = (table == null ? null : table.findColumn(columnName, getPlatformInfo().isCaseSensitive()));
+        Column column = (table == null ? null : table.findColumn(columnName, isDelimitedIdentifierModeOn()));
         Object value  = null;
 
         if (column != null)

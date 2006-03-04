@@ -111,6 +111,23 @@ public interface Platform
     public void setPassword(String password);
 
     /**
+     * Determines whether delimited identifiers are used or normal SQL92 identifiers
+     * (which may only contain alphanumerical characters and the underscore, must start
+     * with a letter and cannot be a reserved keyword).
+     * Per default, delimited identifiers are not used
+     *
+     * @return <code>true</code> if delimited identifiers are used
+     */
+    public boolean isDelimitedIdentifierModeOn();
+
+    /**
+     * Determines whether delimited identifiers are used or normal SQL92 identifiers.
+     *
+     * @param delimitedIdentifierModeOn <code>true</code> if delimited identifiers shall be used
+     */
+    public void setDelimitedIdentifierModeOn(boolean delimitedIdentifierModeOn);
+
+    /**
      * Returns a (new) JDBC connection from the data source.
      * 
      * @return The connection

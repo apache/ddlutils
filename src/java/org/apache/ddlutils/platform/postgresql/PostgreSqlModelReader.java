@@ -21,7 +21,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
@@ -40,11 +40,11 @@ public class PostgreSqlModelReader extends JdbcModelReader
     /**
      * Creates a new model reader for PostgreSql databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public PostgreSqlModelReader(PlatformInfo platformInfo)
+    public PostgreSqlModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
         setDefaultTablePattern(null);

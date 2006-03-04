@@ -41,10 +41,10 @@ public class InterbasePlatform extends PlatformImplBase
      */
     public InterbasePlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(31);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -73,8 +73,8 @@ public class InterbasePlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "BLOB");
 
-        setSqlBuilder(new InterbaseBuilder(info));
-        setModelReader(new InterbaseModelReader(info));
+        setSqlBuilder(new InterbaseBuilder(this));
+        setModelReader(new InterbaseModelReader(this));
     }
 
     /**

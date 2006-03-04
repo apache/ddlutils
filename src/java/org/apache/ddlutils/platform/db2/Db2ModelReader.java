@@ -21,7 +21,7 @@ import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -52,11 +52,11 @@ public class Db2ModelReader extends JdbcModelReader
 	/**
      * Creates a new model reader for Db2 databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public Db2ModelReader(PlatformInfo platformInfo)
+    public Db2ModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
 

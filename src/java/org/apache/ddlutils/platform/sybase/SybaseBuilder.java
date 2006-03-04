@@ -23,7 +23,7 @@ import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.DynaSqlException;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -43,11 +43,11 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * Creates a new builder instance.
      * 
-     * @param info The platform info
+     * @param platform The plaftform this builder belongs to
      */
-    public SybaseBuilder(PlatformInfo info)
+    public SybaseBuilder(Platform platform)
     {
-        super(info);
+        super(platform);
         addEscapedCharSequence("'", "''");
     }
 
@@ -71,7 +71,7 @@ public class SybaseBuilder extends SqlBuilder
 
         if (column.getDefaultValue() != null)
         {
-            if (!getPlatformInfo().isSupportingDefaultValuesForLongTypes() && 
+            if (!getPlatformInfo().isDefaultValuesForLongTypesSupported() && 
                 ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
             {
                 throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
@@ -182,7 +182,7 @@ public class SybaseBuilder extends SqlBuilder
      */
     private void writeQuotationOnStatement() throws IOException
     {
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             print("SET quoted_identifier on");
             printEndOfStatement();

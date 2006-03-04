@@ -34,8 +34,8 @@ public class Oracle10Platform extends Oracle9Platform
     public Oracle10Platform()
     {
         super();
-        setSqlBuilder(new Oracle10Builder(getPlatformInfo()));
-        setModelReader(new Oracle10ModelReader(getPlatformInfo()));
+        setSqlBuilder(new Oracle10Builder(this));
+        setModelReader(new Oracle10ModelReader(this));
     }
 
     /**

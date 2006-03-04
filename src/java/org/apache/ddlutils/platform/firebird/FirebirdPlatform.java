@@ -53,10 +53,10 @@ public class FirebirdPlatform extends PlatformImplBase
      */
     public FirebirdPlatform()
     {
-        PlatformInfo info = new PlatformInfo();
+        PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(31);
-        info.setRequiringNullAsDefaultValue(false);
+        info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
@@ -87,11 +87,11 @@ public class FirebirdPlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
-        info.addDefaultSize(Types.VARCHAR, 254);
-        info.addDefaultSize(Types.CHAR,    254);
+        info.setDefaultSize(Types.VARCHAR, 254);
+        info.setDefaultSize(Types.CHAR,    254);
 
-        setSqlBuilder(new FirebirdBuilder(info));
-        setModelReader(new FirebirdModelReader(info));
+        setSqlBuilder(new FirebirdBuilder(this));
+        setModelReader(new FirebirdModelReader(this));
     }
 
     /**

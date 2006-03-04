@@ -87,7 +87,7 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
         }
 
         Platform           platform        = getPlatform();
-        boolean            isCaseSensitive = platform.getPlatformInfo().isUseDelimitedIdentifiers();
+        boolean            isCaseSensitive = platform.isDelimitedIdentifierModeOn();
         CreationParameters params          = getFilteredParameters(model, platform.getName(), isCaseSensitive);
 
         // we're disabling the comment generation as it is not interesting in this case anyway

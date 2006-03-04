@@ -88,7 +88,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                     {
                         info = PlatformFactory.createNewPlatformInstance(newTest.getDatabaseName()).getPlatformInfo();
                     }
-                    if (info.isSupportingDelimitedIdentifiers())
+                    if (info.isDelimitedIdentifiersSupported())
                     {
                         newTest = (RoundtripTestBase)testedClass.newInstance();
                         newTest.setName(methods[idx].getName());
@@ -125,7 +125,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     protected void setUp() throws Exception
     {
         super.setUp();
-        getPlatformInfo().setUseDelimitedIdentifiers(_useDelimitedIdentifiers);
+        getPlatform().setDelimitedIdentifierModeOn(_useDelimitedIdentifiers);
     }
 
     /**
@@ -156,16 +156,16 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected List getRows(String tableName)
     {
-        Table        table = getModel().findTable(tableName, getPlatformInfo().isCaseSensitive());
+        Table        table = getModel().findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
         StringBuffer query = new StringBuffer();
 
         query.append("SELECT * FROM ");
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             query.append(getPlatformInfo().getDelimiterToken());
         }
         query.append(table.getName());
-        if (getPlatformInfo().isUseDelimitedIdentifiers())
+        if (getPlatform().isDelimitedIdentifierModeOn())
         {
             query.append(getPlatformInfo().getDelimiterToken());
         }
@@ -221,7 +221,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                     }
                     // finally the platform might return a synthetic default value if the column
                     // is a primary key column
-                    if (getPlatformInfo().isReturningDefaultValueForRequired() &&
+                    if (getPlatformInfo().isSyntheticDefaultValueForRequiredReturned() &&
                         (column.getDefaultValue() == null) && column.isRequired() && !column.isAutoIncrement())
                     {
                         switch (column.getTypeCode())
@@ -423,7 +423,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         assertEquals("Required status not the same for column "+actual.getName()+".",
                      expected.isRequired(),
                      actual.isRequired());
-        if (getPlatformInfo().getCanReadAutoIncrementStatus())
+        if (getPlatformInfo().getAutoIncrementStatusReadingSupported())
         {
         	// we're only comparing this if the platform can actually read the
         	// auto-increment status back from an existing database

@@ -17,13 +17,13 @@ package org.apache.ddlutils.platform.mckoi;
  */
 
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
@@ -40,11 +40,11 @@ public class MckoiModelReader extends JdbcModelReader
     /**
      * Creates a new model reader for Mckoi databases.
      * 
-     * @param platformInfo The platform specific settings
+     * @param platform The platform that this model reader belongs to
      */
-    public MckoiModelReader(PlatformInfo platformInfo)
+    public MckoiModelReader(Platform platform)
     {
-        super(platformInfo);
+        super(platform);
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
     }
