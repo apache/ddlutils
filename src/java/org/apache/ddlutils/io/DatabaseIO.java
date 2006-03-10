@@ -198,6 +198,27 @@ public class DatabaseIO
     }
 
     /**
+     * Reads the database model from the given input source.
+     *
+     * @param source The input source
+     * @return The database model
+     */
+    public Database read(InputSource source) throws DdlUtilsException
+    {
+        Database model = null;
+
+        try
+        {
+            model = (Database)getReader().parse(source);
+        }
+        catch (Exception ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        model.initialize();
+        return model;
+    }
+    /**
      * Writes the database model to the specified file.
      * 
      * @param model    The database model
