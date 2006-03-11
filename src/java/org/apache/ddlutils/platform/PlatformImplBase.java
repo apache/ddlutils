@@ -66,6 +66,9 @@ import org.apache.ddlutils.util.JdbcSupport;
  */
 public abstract class PlatformImplBase extends JdbcSupport implements Platform
 {
+    /** The default name for models read from the database, if no name as given.*/
+    protected static final String MODEL_DEFAULT_NAME = "default";
+
     /** The log for this platform. */
     private final Log _log = LogFactory.getLog(getClass());
 
@@ -1635,6 +1638,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             Database        model  = reader.getDatabase(connection, name, catalog, schema, tableTypes);
 
             postprocessModelFromDatabase(model);
+            if ((model.getName() == null) || (model.getName().length() == 0))
+            {
+                model.setName(MODEL_DEFAULT_NAME);
+            }
             return model;
         }
         catch (SQLException ex)

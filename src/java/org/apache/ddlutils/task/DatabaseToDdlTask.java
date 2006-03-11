@@ -37,6 +37,8 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     private String _catalog;
     /** The table types to recognize when reading the model from the database. */
     private String _tableTypes;
+    /** The name of the model read from the database. */
+    private String _modelName;
 
     /**
      * Sets the database schema to access.
@@ -66,6 +68,17 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     public void setTableTypes(String tableTypes)
     {
         _tableTypes = tableTypes;
+    }
+
+    /**
+     * Sets the name that the model read from the database shall have.
+     * Use <code>null</code> or an empty string for the default name.
+     * 
+     * @param modelName The model name
+     */
+    public void setModelName(String modelName)
+    {
+        _modelName = modelName;
     }
 
     /**
@@ -157,7 +170,7 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
 
         try
         {
-            return getPlatform().readModelFromDatabase(null, _catalog, _schema, getTableTypes());
+            return getPlatform().readModelFromDatabase(_modelName, _catalog, _schema, getTableTypes());
         }
         catch (Exception ex)
         {
