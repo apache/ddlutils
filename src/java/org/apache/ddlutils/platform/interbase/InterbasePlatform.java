@@ -66,9 +66,9 @@ public class InterbasePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.NULL,          "BLOB");
         info.addNativeTypeMapping(Types.OTHER,         "BLOB");
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.REF,           "BLOB");
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} CHARACTER SET OCTETS");
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "BLOB");

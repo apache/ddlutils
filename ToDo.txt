@@ -1,18 +1,9 @@
 List of things to be done for the next version of DdlUtils:
 
-* Separate generation of alter statements for an existing databases from the reading
-  of the model from the existing database to allow for alter statement generation with two
-  database models without having to connect to the database and thus allow for testing the
-  alter statement generation without an actual live database
-* Add unit tests for:
-    - SQL generation (including alteration)
-    - Roundtrip (database specific)
 * Add support for chosing the character set (ASCII, UNICODE) if the database supports it
   (perhaps a more generic configuration mechanism for overriding defaults)
 * Add the ability to configure the datatype mapping (ant task, API)
-* Replace System.out/System.err writes with logging statements
 * Extract interfaces from the model classes and inroduce a factory for creating the concrete model objects
-* Add functionality and ant tasks to dump data from the database
 * Add integration with DbUnit to allow DbUnit to use the schema and data files
 * Add notion of jdbc types not directly supported by the database which are mapped to some large binary type,
   and add warnings when they are used (-> logging)

@@ -60,6 +60,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
+
         info.addNativeTypeMapping(Types.ARRAY,         "BYTEA",            Types.BINARY);
         info.addNativeTypeMapping(Types.BINARY,        "BYTEA",            Types.BINARY);
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
@@ -79,7 +80,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "BYTEA",            Types.BINARY);
         info.addNativeTypeMapping("BOOLEAN",  "BOOLEAN", "BIT");
-        info.addNativeTypeMapping("DATALINK", "BYTEA");
+        info.addNativeTypeMapping("DATALINK", "BYTEA",   "BINARY");
 
         // no support for specifying the size for these types
         info.setHasSize(Types.BINARY, false);

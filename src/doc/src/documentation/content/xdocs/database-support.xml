@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-15"?>
 <!--
-  Copyright 2002-2004 The Apache Software Foundation
+  Copyright 2002-2006 The Apache Software Foundation
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@
     <p>
       Here is a short summary of the information about the JDBC data types:
     </p>
+    <p>&nbsp;</p>
     <table>
       <tr>
         <th>JDBC data type</th>
@@ -199,65 +200,92 @@
         <td></td>
       </tr>
     </table>
-    <note>
-      This is currently somewhat incomplete, especially in regard to which versions of the
-      individual databases are supported resp. tested.
-    </note>
+    <p>&nbsp;</p>
     <section>
       <title>Axion</title>
       <p>
         Info about the datatypes supported by <a href="ext:axion">Axion</a> can be found
         <a href="ext:axion/datatypes">here</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>unlimited</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue"><code>IDENTITY</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">unlimited</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Axion</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
-          <td>LONG (Axion CVS head has support for BIGINT)</td>
-          <td></td>
+          <td>LONG</td>
+          <td>Axion CVS head has support for a BIGINT type</td>
         </tr>
         <tr>
           <td>BINARY</td>
@@ -292,7 +320,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>VARBINARY</em></td>
-          <td>Not natively supported by Axion</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -302,12 +330,12 @@
         <tr>
           <td>DECIMAL</td>
           <td>NUMBER</td>
-          <td><code>scale</code> is currently fixed to 2 (though a different one can be specified)</td>
+          <td><code>scale</code> is currently fixed to 2 in Axion (though a different one can be specified)</td>
         </tr>
         <tr>
           <td>DISTINCT</td>
           <td><em>VARBINARY</em></td>
-          <td>Not natively supported by Axion</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -342,7 +370,7 @@
         <tr>
           <td>NULL</td>
           <td><em>VARBINARY</em></td>
-          <td>Not natively supported by Axion</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -352,7 +380,7 @@
         <tr>
           <td>OTHER</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Axion</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -362,7 +390,7 @@
         <tr>
           <td>REF</td>
           <td><em>VARBINARY</em></td>
-          <td>Not natively supported by Axion</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -372,7 +400,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>VARBINARY</em></td>
-          <td>Not natively supported by Axion</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -400,6 +428,7 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>Cloudscape/Derby</title>
@@ -413,50 +442,85 @@
         contributed to Apache in 2004. The SQL syntax and datatypes supported by Derby are described in
         the Datatypes section in the <a href="ext:derby/manual">Reference Manual</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>128</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue">Cloudscape: <code>GENERATED ALWAYS AS IDENTITY</code><br/>
+              Derby: <code>GENERATED BY DEFAULT AS IDENTITY</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">128</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
@@ -470,8 +534,8 @@
         </tr>
         <tr>
           <td>BIT</td>
-          <td>CHAR FOR BIT DATA</td>
-          <td>Cloudscape has no native boolean type</td>
+          <td>SMALLINT</td>
+          <td>Cloudscape/Derby have no native boolean type</td>
         </tr>
         <tr>
           <td>BLOB</td>
@@ -480,8 +544,8 @@
         </tr>
         <tr>
           <td>BOOLEAN</td>
-          <td>CHAR FOR BIT DATA</td>
-          <td>Cloudscape has no native boolean type</td>
+          <td>SMALLINT</td>
+          <td>Cloudscape/Derby have no native boolean type</td>
         </tr>
         <tr>
           <td>CHAR</td>
@@ -496,7 +560,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>LONG VARCHAR FOR BIT DATA</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -511,7 +575,7 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -531,7 +595,7 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
@@ -546,7 +610,7 @@
         <tr>
           <td>NULL</td>
           <td><em>LONG VARCHAR FOR BIT DATA</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -556,7 +620,7 @@
         <tr>
           <td>OTHER</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -566,7 +630,7 @@
         <tr>
           <td>REF</td>
           <td><em>LONG VARCHAR FOR BIT DATA</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -576,7 +640,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Cloudscape</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -604,6 +668,7 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>DB 2</title>
@@ -613,50 +678,84 @@
         <a href="ext:db2/manual">DB2 SQL Reference V7</a>. Some specifics related to the JDBC driver and
         suggested typemappings can also be found <a href="ext:db2/jdbc-mappings">here</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>18</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue"><code>GENERATED BY DEFAULT AS IDENTITY</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">18</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by DB2</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
@@ -720,7 +819,7 @@
         </tr>
         <tr>
           <td>FLOAT</td>
-          <td>REAL</td>
+          <td>DOUBLE</td>
           <td></td>
         </tr>
         <tr>
@@ -731,7 +830,7 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by DB2</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
@@ -746,17 +845,17 @@
         <tr>
           <td>NULL</td>
           <td><em>LONG VARCHAR FOR BIT DATA</em></td>
-          <td>Not natively supported by DB2</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
-          <td>NUMERIC</td>
+          <td>DECIMAL</td>
           <td></td>
         </tr>
         <tr>
           <td>OTHER</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by DB2</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -776,7 +875,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by DB2</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -804,84 +903,106 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
-      <title>Firebird/Interbase</title>
+      <title>Firebird</title>
       <p>
-        DdlUtils supports <a href="ext:interbase">Interbase</a> version <strong>6.0</strong> and its
-        open-sourced version, <a href="ext:firebird">Firebird</a>. Sadly, for neither version there is
-        free documentation available, but rather you have to use the documentation that comes with the
-        Interbase database or, in the case of Firebird, you have to buy a book.
+        DdlUtils supports <a href="ext:firebird">Firebird</a>, version <strong>1</strong> and above.
       </p>
-      <note>
-        For this reason, DdlUtils does not officially support the Interbase versions 7 and newer because
-        these versions are not open source, and thus require a commercial version to develop against.
-        If you happen to run a Interbase database server of version 7 or newer, you could help us adding
-        support for these versions.
-      </note>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>31</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>A block between <code>/*</code> and <code>*/</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum key size</td>
-          <td>256</td>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue">Using an on-insert <code>TRIGGER</code> and a <code>GEN_ID</code> <code>GENERATOR</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">31</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Text block enclosed in <code>/*</code> and <code>*/</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>BLOB</em></td>
-          <td></td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
-          <td>DECIMAL(38,0)</td>
+          <td>BIGINT</td>
           <td></td>
         </tr>
         <tr>
           <td>BINARY</td>
-          <td>CHAR(n) CHARACTER SET OCTETS</td>
+          <td>BLOB</td>
           <td></td>
         </tr>
         <tr>
           <td>BIT</td>
-          <td>DECIMAL(1,0)</td>
-          <td></td>
+          <td>SMALLINT</td>
+          <td>Firebird has no native boolean type</td>
         </tr>
         <tr>
           <td>BLOB</td>
@@ -890,8 +1011,8 @@
         </tr>
         <tr>
           <td>BOOLEAN</td>
-          <td>DECIMAL(1,0)</td>
-          <td></td>
+          <td>SMALLINT</td>
+          <td>Firebird has no native boolean type</td>
         </tr>
         <tr>
           <td>CHAR</td>
@@ -906,7 +1027,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Interbase/Firebird</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -921,7 +1042,7 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Interbase/Firebird</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -941,7 +1062,7 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Interbase/Firebird</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
@@ -956,7 +1077,7 @@
         <tr>
           <td>NULL</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Interbase/Firebird</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -966,7 +1087,7 @@
         <tr>
           <td>OTHER</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Interbase/Firebird</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -976,7 +1097,7 @@
         <tr>
           <td>REF</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Interbase/Firebird</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -985,8 +1106,476 @@
         </tr>
         <tr>
           <td>STRUCT</td>
-          <td><em>BYTEA</em></td>
-          <td>Not natively supported by Interbase/Firebird</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>TIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td>TIMESTAMP</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>BLOB</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td></td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+    </section>
+    <section>
+      <title>HsqlDB</title>
+      <p>
+        Support for the <a href="ext:hsqldb">HSQLDB</a> database is based upon the version <strong>1.7.2</strong>.
+        SQL Documentation for HSQLDB can be found in the distribution, and for the newest version
+        <a href="ext:hsqldb/sql-syntax">here</a>.
+      </p>
+      <p>&nbsp;</p>
+      <table>
+        <tr>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue"><code>IDENTITY</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">unlimited</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+      <table>
+        <tr>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td>BIGINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>BINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>BOOLEAN</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>LONGVARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>BOOLEAN</td>
+          <td>BOOLEAN is supported natively by Hsqldb only since version 1.7.2</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td>The size is optional because per default Hsqldb does not enforce it</td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td><em>LONGVARCHAR</em></td>
+          <td>Not natively supported</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>DECIMAL</td>
+          <td>Precision and scale are ignored by Hsqldb, as it uses unlimited precision and scale</td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>LONGVARBINARY </em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>DOUBLE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>DOUBLE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INTEGER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td>OBJECT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>LONGVARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>LONGVARCHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMERIC</td>
+          <td>Precision and scale are ignored by Hsqldb, as it uses unlimited precision and scale</td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td>OTHER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>REAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>LONGVARBINARY</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>TIME</td>
+          <td>TIME</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TIMESTAMP</td>
+          <td>TIMESTAMP</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>TINYINT</td>
+          <td>SMALLINT</td>
+          <td>JDBC's TINYINT requires a value range of -255 to 255, but HsqlDb's is only -128 to 127</td>
+        </tr>
+        <tr>
+          <td>VARBINARY</td>
+          <td>VARBINARY</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>VARCHAR</td>
+          <td>VARCHAR</td>
+          <td>The size is optional because per default Hsqldb does not enforce it</td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+    </section>
+    <section>
+      <title>Interbase</title>
+      <p>
+        DdlUtils supports <a href="ext:interbase">Interbase</a> version <strong>7.0</strong> and above.
+      </p>
+      <p>&nbsp;</p>
+      <table>
+        <tr>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue">Using an on-insert <code>TRIGGER</code> and a <code>GEN_ID</code> <code>GENERATOR</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">31</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Text block enclosed in <code>/*</code> and <code>*/</code></td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+      <table>
+        <tr>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
+        </tr>
+        <tr>
+          <td>ARRAY</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>BIGINT</td>
+          <td>NUMERIC(18,0)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BINARY</td>
+          <td>CHAR(n) CHARACTER SET OCTETS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BIT</td>
+          <td>SMALLINT</td>
+          <td>Interbase has no native boolean type</td>
+        </tr>
+        <tr>
+          <td>BLOB</td>
+          <td>BLOB</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>BOOLEAN</td>
+          <td>SMALLINT</td>
+          <td>Interbase has no native boolean type</td>
+        </tr>
+        <tr>
+          <td>CHAR</td>
+          <td>CHAR</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>CLOB</td>
+          <td>BLOB SUB_TYPE TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DATALINK</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>DATE</td>
+          <td>DATE</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DECIMAL</td>
+          <td>DECIMAL</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>DISTINCT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>DOUBLE</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>FLOAT</td>
+          <td>DOUBLE PRECISION</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>INTEGER</td>
+          <td>INTEGER</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>JAVA_OBJECT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>LONGVARBINARY</td>
+          <td>BLOB</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>LONGVARCHAR</td>
+          <td>BLOB SUB_TYPE TEXT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>NULL</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>NUMERIC</td>
+          <td>NUMERIC</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>OTHER</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>REAL</td>
+          <td>FLOAT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>REF</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
+        </tr>
+        <tr>
+          <td>SMALLINT</td>
+          <td>SMALLINT</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>STRUCT</td>
+          <td><em>BLOB</em></td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -1014,207 +1603,7 @@
           <td></td>
         </tr>
       </table>
-    </section>
-    <section>
-      <title>HsqlDB</title>
-      <p>
-        Support for the <a href="ext:hsqldb">HSQLDB</a> database is based upon the version <strong>1.7.0</strong>.
-        SQL Documentation for HSQLDB can be found in the distribution, and for the newest version
-        <a href="ext:hsqldb/sql-syntax">here</a>.
-      </p>
-      <table>
-        <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
-        </tr>
-        <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
-        </tr>
-        <tr>
-          <td>Maximum identifier length</td>
-          <td>unlimited</td>
-        </tr>
-        <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
-        </tr>
-        <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
-        </tr>
-      </table>
-      <table>
-        <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
-        </tr>
-        <tr>
-          <td>ARRAY</td>
-          <td><em>LONGVARBINARY</em></td>
-          <td>Not natively supported by Hsqldb</td>
-        </tr>
-        <tr>
-          <td>BIGINT</td>
-          <td>BIGINT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>BINARY</td>
-          <td>BINARY</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>BIT</td>
-          <td>BIT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>BLOB</td>
-          <td>LONGVARBINARY</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>BOOLEAN</td>
-          <td><em>BIT</em></td>
-          <td>BOOLEAN is supported natively by Hsqldb only since version 1.7.2</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>CHAR</td>
-          <td>CHAR</td>
-          <td>The size is optional because per default Hsqldb does not enforce it</td>
-        </tr>
-        <tr>
-          <td>CLOB</td>
-          <td><em>LONGVARCHAR</em></td>
-          <td>Not natively supported by Hsqldb</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>DATALINK</td>
-          <td><em>LONGVARBINARY</em></td>
-          <td>Not natively supported by Hsqldb</td>
-        </tr>
-        <tr>
-          <td>DATE</td>
-          <td>DATE</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>DECIMAL</td>
-          <td>DECIMAL</td>
-          <td>Precision and scale are ignored by Hsqldb, as Hsqldb uses unlimited precision and scale</td>
-        </tr>
-        <tr>
-          <td>DISTINCT</td>
-          <td><em>LONGVARBINARY </em></td>
-          <td>Not natively supported by Hsqldb</td>
-        </tr>
-        <tr>
-          <td>DOUBLE</td>
-          <td>DOUBLE</td>
-          <td>Precision and scale are ignored by Hsqldb</td>
-        </tr>
-        <tr>
-          <td>FLOAT</td>
-          <td>DOUBLE</td>
-          <td>Though Hsqldb supports FLOAT, it is recommended to use DOUBLE</td>
-        </tr>
-        <tr>
-          <td>INTEGER</td>
-          <td>INTEGER</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>JAVA_OBJECT</td>
-          <td>OBJECT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>LONGVARBINARY</td>
-          <td>LONGVARBINARY</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>LONGVARCHAR</td>
-          <td>LONGVARCHAR</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>NULL</td>
-          <td><em>LONGVARBINARY</em></td>
-          <td>Not natively supported by Hsqldb</td>
-        </tr>
-        <tr>
-          <td>NUMERIC</td>
-          <td>NUMERIC</td>
-          <td>Precision and scale are ignored by Hsqldb, as Hsqldb uses unlimited precision and scale</td>
-        </tr>
-        <tr>
-          <td>OTHER</td>
-          <td>OTHER</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>REAL</td>
-          <td>REAL</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>REF</td>
-          <td><em>LONGVARBINARY</em></td>
-          <td>Not natively supported by Hsqldb</td>
-        </tr>
-        <tr>
-          <td>SMALLINT</td>
-          <td>SMALLINT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>STRUCT</td>
-          <td><em>LONGVARBINARY</em></td>
-          <td>Not natively supported by Hsqldb</td>
-        </tr>
-        <tr>
-          <td>TIME</td>
-          <td>TIME</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>TIMESTAMP</td>
-          <td>TIMESTAMP</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>TINYINT</td>
-          <td>TINYINT</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>VARBINARY</td>
-          <td>VARBINARY</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>VARCHAR</td>
-          <td>VARCHAR</td>
-          <td>The size is optional because per default Hsqldb does not enforce it</td>
-        </tr>
-      </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>MaxDB/SapDB</title>
@@ -1225,59 +1614,93 @@
         <a href="ext:sapdb/manual">Reference manual</a>. Likewise, documentation for MaxDB is contained in
         the <a href="ext:maxdb/manual">MaxDB documentation</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>32</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>A block between <code>/*</code> and <code>*/</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue"><code>DEFAULT SERIAL(1)</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">32</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Text block enclosed in <code>/*</code> and <code>*/</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
           <td><em>FIXED(38,0)</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BINARY</td>
-          <td>LONG BYTE</td>
+          <td>CHAR(n) BYTE</td>
           <td></td>
         </tr>
         <tr>
@@ -1308,7 +1731,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -1317,22 +1740,22 @@
         </tr>
         <tr>
           <td>DECIMAL</td>
-          <td>DECIMAL</td>
+          <td>FIXED</td>
           <td></td>
         </tr>
         <tr>
           <td>DISTINCT</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
-          <td>DOUBLE PRECISION</td>
+          <td>FLOAT(38)</td>
           <td></td>
         </tr>
         <tr>
           <td>FLOAT</td>
-          <td>DOUBLE PRECISION</td>
+          <td>FLOAT(38)</td>
           <td></td>
         </tr>
         <tr>
@@ -1343,7 +1766,7 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
@@ -1352,33 +1775,33 @@
         </tr>
         <tr>
           <td>LONGVARCHAR</td>
-          <td>LONG VARCHAR</td>
+          <td>LONG</td>
           <td></td>
         </tr>
         <tr>
           <td>NULL</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
-          <td>DECIMAL</td>
+          <td>FIXED</td>
           <td></td>
         </tr>
         <tr>
           <td>OTHER</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
-          <td>REAL</td>
+          <td>FLOAT(16)</td>
           <td></td>
         </tr>
         <tr>
           <td>REF</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -1388,7 +1811,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>LONG BYTE</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -1397,8 +1820,8 @@
         </tr>
         <tr>
           <td>TIMESTAMP</td>
-          <td><em>TIMESTAMP</em></td>
-          <td>Not natively supported by SapDB/MaxDB</td>
+          <td>TIMESTAMP</td>
+          <td></td>
         </tr>
         <tr>
           <td>TINYINT</td>
@@ -1407,7 +1830,7 @@
         </tr>
         <tr>
           <td>VARBINARY</td>
-          <td>LONG BYTE</td>
+          <td>VARCHAR(n) BYTE</td>
           <td></td>
         </tr>
         <tr>
@@ -1416,6 +1839,7 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>Mckoi</title>
@@ -1424,50 +1848,84 @@
         Details on the supported SQL and datatypes can be found in Chapter 2 of the
         <a href="ext:mckoi/manual">Database Manual</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>unlimited</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue">Via <code>UNIQUEKEY()</code> as the default value</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">unlimited</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by McKoi</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
@@ -1507,7 +1965,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by McKoi</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -1522,7 +1980,7 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by McKoi</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -1557,7 +2015,7 @@
         <tr>
           <td>NULL</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by McKoi</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -1567,7 +2025,7 @@
         <tr>
           <td>OTHER</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by McKoi</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -1577,7 +2035,7 @@
         <tr>
           <td>REF</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by McKoi</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -1587,7 +2045,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by McKoi</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -1615,6 +2073,7 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>MySQL</title>
@@ -1623,50 +2082,84 @@
         the major versions (3, 4, 5) differ in their datatype support. The supported SQL syntax and datatypes
         can be found in the <a href="ext:mysql/manual">MySQL Reference Manual</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>64</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>#</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue"><code>AUTO_INCREMENT</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">no</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">64</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>`</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>#</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>LONGBLOB</em></td>
-          <td>Not natively supported by MySQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
@@ -1675,13 +2168,13 @@
         </tr>
         <tr>
           <td>BINARY</td>
-          <td>CHAR(n) BINARY</td>
-          <td><em>n</em> specifies the number of bytes, with 1 &lt;= n &lt;= 255</td>
+          <td>BINARY</td>
+          <td></td>
         </tr>
         <tr>
           <td>BIT</td>
           <td>TINYINT(1)</td>
-          <td></td>
+          <td>MySQL has no native boolean type</td>
         </tr>
         <tr>
           <td>BLOB</td>
@@ -1691,7 +2184,7 @@
         <tr>
           <td>BOOLEAN</td>
           <td>TINYINT(1)</td>
-          <td></td>
+          <td>MySQL has no native boolean type</td>
         </tr>
         <tr>
           <td>CHAR</td>
@@ -1706,7 +2199,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>MEDIUMBLOB</em></td>
-          <td>Not natively supported by MySQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -1721,7 +2214,7 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>LONGBLOB</em></td>
-          <td>Not natively supported by MySQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -1741,7 +2234,7 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>LONGBLOB</em></td>
-          <td>Not natively supported by MySQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
@@ -1756,7 +2249,7 @@
         <tr>
           <td>NULL</td>
           <td><em>MEDIUMBLOB</em></td>
-          <td>Not natively supported by MySQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -1766,12 +2259,13 @@
         <tr>
           <td>OTHER</td>
           <td><em>LONGBLOB</em></td>
-          <td>Not natively supported by MySQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
           <td>FLOAT</td>
-          <td>MySQL has a REAL datatype that is per default mapped to DOUBLE, though it might be mapped to FLOAT via configuration of the server.</td>
+          <td>MySQL has a REAL datatype that is per default an alias for DOUBLE, though it might be mapped to FLOAT
+              via configuration of the server. Therefore, DdlUtils explicitly uses FLOAT.</td>
         </tr>
         <tr>
           <td>REF</td>
@@ -1786,7 +2280,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>LONGBLOB</em></td>
-          <td>Not natively supported by MySQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -1795,18 +2289,19 @@
         </tr>
         <tr>
           <td>TIMESTAMP</td>
-          <td>TIMESTAMP</td>
-          <td></td>
+          <td>DATETIME</td>
+          <td>TIMESTAMP is not a stable MySQL datatype yet, and it does not support a higher precision
+              than DATETIME (year to seconds) as of MySQL 5, DdlUtils maps the JDBC type to DATETIME instead.</td>
         </tr>
         <tr>
           <td>TINYINT</td>
-          <td>TINYINT</td>
+          <td>SMALLINT</td>
           <td></td>
         </tr>
         <tr>
           <td>VARBINARY</td>
-          <td>VARCHAR(n) BINARY</td>
-          <td><em>n</em> specifies the number of bytes, with 1 &lt;= n &lt;= 255</td>
+          <td>VARBINARY</td>
+          <td></td>
         </tr>
         <tr>
           <td>VARCHAR</td>
@@ -1814,74 +2309,117 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>Oracle</title>
       <p>
-        Support for the <a href="ext:oracle">Oracle database</a> is based upon the version <strong>8.1.7</strong>.
+        DdlUtils has support for the <a href="ext:oracle">Oracle database</a> for versions <strong>8.1.7</strong>
+        and above. There are different platforms for the major versions <strong>8</strong>, <strong>9</strong>,
+        and <strong>10</strong>.<br/>
         Info about the datatypes and SQL elements supported in this version can be found in the
         <strong>Oracle8i SQL Reference</strong>. You can access this documentation from the
         <a href="ext:oracle/otn">Oracle Technology Network</a>. Registration to this area is free.
       </p>
+      <p>
+        Currently there is one limitation with Oracle: DdlUtils can not read back the auto increment status
+        from a live database. This is due to the fact that Oracle does not provide a native auto increment
+        mechanism (rather, auto increment is provided via triggers and sequences).
+      </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>30</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue">Via an on-insert <code>TRIGGER</code> and a <code>SEQUENCE</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">30</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
-          <td>NUMBER(38,0)</td>
+          <td>NUMBER(38)</td>
           <td></td>
         </tr>
         <tr>
           <td>BINARY</td>
           <td>RAW</td>
-          <td>Oracle requires the specification of the size for <code>RAW</code> columns. If no size was specified, then 254 is used.</td>
+          <td>Oracle requires the specification of the size for <code>RAW</code> columns.
+              If no size was specified, then 254 is used.</td>
         </tr>
         <tr>
           <td>BIT</td>
-          <td>NUMBER(1,0)</td>
-          <td></td>
+          <td>NUMBER(1)</td>
+          <td>Oracle has no native boolean type.</td>
         </tr>
         <tr>
           <td>BLOB</td>
@@ -1890,8 +2428,8 @@
         </tr>
         <tr>
           <td>BOOLEAN</td>
-          <td>NUMBER(1,0)</td>
-          <td></td>
+          <td>NUMBER(1)</td>
+          <td>Oracle has no native boolean type.</td>
         </tr>
         <tr>
           <td>CHAR</td>
@@ -1906,7 +2444,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -1921,42 +2459,42 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
-          <td>NUMBER(38)</td>
+          <td>DOUBLE PRECISION</td>
           <td></td>
         </tr>
         <tr>
           <td>FLOAT</td>
-          <td>NUMBER(38)</td>
+          <td>FLOAT</td>
           <td></td>
         </tr>
         <tr>
           <td>INTEGER</td>
-          <td>NUMBER(20,0)</td>
+          <td>INTEGER</td>
           <td></td>
         </tr>
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARCHAR</td>
           <td><em>CLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NULL</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -1966,27 +2504,27 @@
         <tr>
           <td>OTHER</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
-          <td>NUMBER(18)</td>
+          <td>REAL</td>
           <td></td>
         </tr>
         <tr>
           <td>REF</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
-          <td>NUMBER(5,0)</td>
+          <td>NUMBER(5)</td>
           <td></td>
         </tr>
         <tr>
           <td>STRUCT</td>
           <td><em>BLOB</em></td>
-          <td>Not natively supported by Oracle</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -1995,18 +2533,19 @@
         </tr>
         <tr>
           <td>TIMESTAMP</td>
-          <td><em>DATE</em></td>
-          <td>Only natively supported in Oracle 9 and above</td>
+          <td>DATE in the Oracle8 platform,<br/>TIMESTAMP in the Oracle9 and Oracle10 platforms</td>
+          <td>The TIMESTAMP native type is only supported in Oracle 9 and above.</td>
         </tr>
         <tr>
           <td>TINYINT</td>
-          <td>NUMBER(3,0)</td>
+          <td>NUMBER(3)</td>
           <td></td>
         </tr>
         <tr>
           <td>VARBINARY</td>
           <td>RAW</td>
-          <td>Oracle requires the specification of the size for <code>RAW</code> columns. If no size was specified, then 254 is used.</td>
+          <td>Oracle requires the specification of the size for <code>RAW</code> columns.
+              If no size was specified, then 254 is used.</td>
         </tr>
         <tr>
           <td>VARCHAR</td>
@@ -2014,6 +2553,7 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>PostgreSQL</title>
@@ -2021,50 +2561,84 @@
         DdlUtils supports <a href="ext:postgresql">PostgreSQL</a> version <strong>7.2.8</strong> and newer. SQL syntax
         details and supported datatypes are described in the <a href="ext:postgresql/manual">Manual</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>31</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue">Via a <code>SEQUENCE</code> and <code>UNIQUE DEFAULT nextval()</code> </td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">31</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>BYTEA</em></td>
-          <td>PostgreSQL can work with arrays directly, but this is currently not directly supported in DdlUtils</td>
+          <td>PostgreSQL can work with arrays directly, but this is currently not supported by DdlUtils</td>
         </tr>
         <tr>
           <td>BIGINT</td>
@@ -2104,7 +2678,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>BYTEA</em></td>
-          <td>Not natively supported by PostgreSQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -2119,7 +2693,7 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>BYTEA</em></td>
-          <td>Not natively supported by PostgreSQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -2139,7 +2713,7 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>BYTEA</em></td>
-          <td>Not natively supported by PostgreSQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
@@ -2154,7 +2728,7 @@
         <tr>
           <td>NULL</td>
           <td><em>BYTEA</em></td>
-          <td>Not natively supported by PostgreSQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -2164,7 +2738,7 @@
         <tr>
           <td>OTHER</td>
           <td><em>BYTEA</em></td>
-          <td>Not natively supported by PostgreSQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -2174,7 +2748,7 @@
         <tr>
           <td>REF</td>
           <td><em>BYTEA</em></td>
-          <td>Not natively supported by PostgreSQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -2184,7 +2758,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>BYTEA</em></td>
-          <td>Not natively supported by PostgreSQL</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -2212,6 +2786,7 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>SQL Server</title>
@@ -2221,50 +2796,89 @@
         have to resort to the documentation accompanying the database. Information for version 2000 can be found
         <a href="ext:sqlserver/manual-2000">here</a>.
       </p>
+      <p>
+        If possible, you should use the newest driver available. The older JDBC drivers (for SQL Server 2000 and
+        older) provided my Microsoft, are known to be buggy and slow. The new SQL Server 2005 driver is preferred
+        and can also work with SQL Server 2000.
+      </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables </td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>128</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>Single line starting with <code>--</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue"><code>IDENTITY (1,1)</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">128</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Single line starting with <code>--</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
@@ -2304,7 +2918,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -2319,7 +2933,7 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
@@ -2339,22 +2953,22 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
-          <td>BYTEA</td>
+          <td>IMAGE</td>
           <td></td>
         </tr>
         <tr>
           <td>LONGVARCHAR</td>
-          <td>IMAGE</td>
+          <td>TEXT</td>
           <td></td>
         </tr>
         <tr>
           <td>NULL</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -2364,7 +2978,7 @@
         <tr>
           <td>OTHER</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -2374,7 +2988,7 @@
         <tr>
           <td>REF</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -2384,7 +2998,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by SQL Server</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -2395,7 +3009,7 @@
           <td>TIMESTAMP</td>
           <td><em>DATETIME</em></td>
           <td>The native <code>TIMESTAMP</code> type of SQL Server serves a different purpose: it provides a counter
-              that automatically increments upon each insertion or update of the table</td>
+              that automatically increments upon each insertion or update of the table.</td>
         </tr>
         <tr>
           <td>TINYINT</td>
@@ -2413,6 +3027,7 @@
           <td></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
     </section>
     <section>
       <title>Sybase</title>
@@ -2421,58 +3036,91 @@
         <strong>10.0</strong> on, and <a href="ext:sybase/ase">Adaptive Server Enterprise</a> from version
         <strong>11.5</strong> on. The Sybase documentation can be found in the
         <a href="ext:sybase/manual-archive">Archive</a> in the <em>Transact-SQL User's Guide</em> document
-        for the respective version. The newest version (<strong>12.5</strong>)
-        is found <a href="ext:sybase/manual">here</a>.
+        for the respective version. The manual for the newest version is found <a href="ext:sybase/manual">here</a>.
       </p>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <td>DdlUtils explicitly specifies <code>NULL</code> as default value</td>
-          <td>no</td>
+          <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses primary key definitions embedded in the table definition</td>
-          <td>yes</td>
+          <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses foreign key definitions embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database requires <code>NULL</code> when no default value is specified</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>DdlUtils uses indices embedded in the table definition</td>
-          <td>no</td>
+          <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>DdlUtils uses ALTER TABLE statements for dropping tables</td>
-          <td>no</td>
+          <td class="platformPropName">Primary key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">yes</td>
         </tr>
         <tr>
-          <td>Maximum identifier length</td>
-          <td>30</td>
+          <td class="platformPropName">Foreign key definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Quote character</td>
-          <td>Single quote char <code>'</code></td>
+          <td class="platformPropName">Index definitions are embedded in the table definition</td>
+          <td class="platformPropValue">no</td>
         </tr>
         <tr>
-          <td>Comment format</td>
-          <td>A block between <code>/*</code> and <code>*/</code></td>
+          <td class="platformPropName">The database supports non-unique indices</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">IDENTITY specification</td>
+          <td class="platformPropValue"><code>IDENTITY</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">The IDENTITY (auto-increment) specification is supported for non-primary key columns</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">SQL comments are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimited identifiers are supported</td>
+          <td class="platformPropValue">yes</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Maximum identifier length</td>
+          <td class="platformPropValue">28</td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Delimiter token</td>
+          <td class="platformPropValue">Double quote char <code>"</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Quote character</td>
+          <td class="platformPropValue">Single quote char <code>'</code></td>
+        </tr>
+        <tr>
+          <td class="platformPropName">Comment format</td>
+          <td class="platformPropValue">Text block enclosed in <code>/*</code> and <code>*/</code></td>
         </tr>
       </table>
+      <p>&nbsp;</p>
       <table>
         <tr>
-          <th>JDBC Type</th>
-          <th>Database Type</th>
-          <th>Additional comments</th>
+          <th class="typeMappingJdbcType">JDBC Type</th>
+          <th class="typeMappingNativeType">Database Type</th>
+          <th class="typeMappingComments">Additional comments</th>
         </tr>
         <tr>
           <td>ARRAY</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BIGINT</td>
           <td><em>DECIMAL(19,0)</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>BINARY</td>
@@ -2481,8 +3129,8 @@
         </tr>
         <tr>
           <td>BIT</td>
-          <td>BIT</td>
-          <td></td>
+          <td>SMALLINT</td>
+          <td>The native BIT type is rather limited (cannot be NULL, cannot be indexed)</td>
         </tr>
         <tr>
           <td>BLOB</td>
@@ -2491,8 +3139,8 @@
         </tr>
         <tr>
           <td>BOOLEAN</td>
-          <td>BIT</td>
-          <td></td>
+          <td>SMALLINT</td>
+          <td>The native BIT type is rather limited (cannot be NULL, cannot be indexed)</td>
         </tr>
         <tr>
           <td>CHAR</td>
@@ -2507,7 +3155,7 @@
         <tr>
           <td>DATALINK</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DATE</td>
@@ -2522,16 +3170,16 @@
         <tr>
           <td>DISTINCT</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>DOUBLE</td>
-          <td>FLOAT</td>
+          <td>DOUBLE PRECISION</td>
           <td></td>
         </tr>
         <tr>
           <td>FLOAT</td>
-          <td>FLOAT</td>
+          <td>DOUBLE PRECISION</td>
           <td></td>
         </tr>
         <tr>
@@ -2542,22 +3190,22 @@
         <tr>
           <td>JAVA_OBJECT</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>LONGVARBINARY</td>
-          <td>BYTEA</td>
+          <td>IMAGE</td>
           <td></td>
         </tr>
         <tr>
           <td>LONGVARCHAR</td>
-          <td>IMAGE</td>
+          <td>TEXT</td>
           <td></td>
         </tr>
         <tr>
           <td>NULL</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>NUMERIC</td>
@@ -2567,7 +3215,7 @@
         <tr>
           <td>OTHER</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>REAL</td>
@@ -2577,7 +3225,7 @@
         <tr>
           <td>REF</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>SMALLINT</td>
@@ -2587,7 +3235,7 @@
         <tr>
           <td>STRUCT</td>
           <td><em>IMAGE</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TIME</td>
@@ -2597,7 +3245,7 @@
         <tr>
           <td>TIMESTAMP</td>
           <td><em>DATETIME</em></td>
-          <td>Not natively supported by Sybase</td>
+          <td>Not natively supported</td>
         </tr>
         <tr>
           <td>TINYINT</td>

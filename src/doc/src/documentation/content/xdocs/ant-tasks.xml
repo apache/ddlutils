@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-15"?>
 <!--
-  Copyright 2002-2005 The Apache Software Foundation
+  Copyright 2002-2006 The Apache Software Foundation
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@
            classname="org.apache.ddlutils.task.DatabaseToDdlTask">
     <classpath refid="runtime-classpath"/>
   </taskdef>
-  <databaseToDdl>
+  <databaseToDdl modelName="MyModel">
     <database url="jdbc:derby:ddlutils"
               driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
               username=""
@@ -121,10 +121,23 @@
       <table>
         <tr>
           <th>Attribute</th>
-          <th>Required ?</th>
-          <th>Possible values</th>
-          <th>Default value</th>
+          <th>Required?</th>
+          <th>Possible&nbsp;values</th>
+          <th>Default&nbsp;value</th>
           <th>Meaning</th>
+        </tr>
+        <tr>
+          <td>databaseType</td>
+          <td>no</td>
+          <td>axion, cloudscape, db2, derby, firebird, hsqldb, interbase, maxdb, mckoi, mssql,
+              mysql, mysql5, oracle, oracle9, oracle10, postgresql, sapdb, sybase</td>
+          <td></td>
+          <td>
+            The database type. You should only need to specify this if DdlUtils is not able to
+            derive the setting from the name of the used jdbc driver or the jdbc connection url.
+            If you need to specify this, please post your jdbc driver and connection url combo
+            to the user mailing list so that DdlUtils can be enhanced to support this combo.
+          </td>
         </tr>
         <tr>
           <td>schemaFile</td>
@@ -137,25 +150,10 @@
           </td>
         </tr>
         <tr>
-          <td>databaseType</td>
-          <td>no</td>
-          <td>
-            axion, cloudscape, db2, derby, firebird, hsqldb, interbase, maxdb, mckoi, mssql,
-            mysql, oracle, oracle9, postgresql, sapdb, sybase
-          </td>
-          <td></td>
-          <td>
-            The database type. You should only need to specify this if DdlUtils is not able to
-            derive the setting from the name of the used jdbc driver or the jdbc connection url.
-            If you need to specify this, please post your jdbc driver and connection url combo
-            to the user mailing list so that DdlUtils can be enhanced to support this combo.
-          </td>
-        </tr>
-        <tr>
           <td>useDelimitedSqlIdentifiers</td>
           <td>no</td>
-          <td>true,false</td>
-          <td>true</td>
+          <td>true, false</td>
+          <td>false</td>
           <td>
             Whether DdlUtils shall use delimited (quoted) identifiers (table names, column names etc.)
             In most databases, undelimited identifiers will be converted to uppercase by the database,
@@ -164,6 +162,26 @@
             words can be used as such identifiers.<br/>
             The limitations do not exist for delimited identifiers. However case of the identifier will be
             important in every SQL command executed against the database.
+          </td>
+        </tr>
+        <tr>
+          <td>useInternalDtd</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>true</td>
+          <td>
+            Whether DdlUtils shall use the embedded DTD for validating the schema XML (if it matches
+            <code>http://db.apache.org/torque/dtd/database.dtd</code>). This is useful for instance
+            for environments where no web access is possible.
+          </td>
+        </tr>
+        <tr>
+          <td>validateXml</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>false</td>
+          <td>
+            Whether DdlUtils shall validate the schema XML against the DTD.
           </td>
         </tr>
       </table>
@@ -202,15 +220,15 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
             <td>failOnError</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>Specifies whether the execution shall stop if an error has occurred while the task runs.</td>
           </tr>
@@ -223,9 +241,9 @@
           <table>
             <tr>
               <th>Attribute</th>
-              <th>Required ?</th>
-              <th>Possible values</th>
-              <th>Default value</th>
+              <th>Required?</th>
+              <th>Possible&nbsp;values</th>
+              <th>Default&nbsp;value</th>
               <th>Meaning</th>
             </tr>
             <tr>
@@ -237,23 +255,23 @@
                   for the parameters supported by the individual platforms.</td>
             </tr>
             <tr>
-              <td>value</td>
-              <td>no</td>
-              <td></td>
-              <td></td>
-              <td>The parameter value. If none is given, <code>null</code> is used.</td>
-            </tr>
-            <tr>
               <td>platforms</td>
               <td>no</td>
               <td></td>
               <td></td>
               <td>
                 Comma-separated list of platforms where the parameter shall be processed (see
-                <code>databaseType</code> attribute above for the possible values). For every platform
+                <code>databaseType</code> attribute above for the Possible&nbsp;values). For every platform
                 not in this list, the parameter is ignored. If none is given, then the parameter
                 is processed for every platform.
               </td>
+            </tr>
+            <tr>
+              <td>value</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>The parameter value. If none is given, <code>null</code> is used.</td>
             </tr>
           </table>
         </section>
@@ -270,15 +288,15 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
             <td>failOnError</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
@@ -294,15 +312,15 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
             <td>failOnError</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
@@ -324,15 +342,15 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
             <td>alterDatabase</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>Specifies whether DdlUtils shall alter existing tables rather than dropping them and
                 creating them new.</td>
@@ -340,7 +358,7 @@
           <tr>
             <td>doDrops</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>
               Whether tables and external constraints can be dropped if necessary. Note that this is also
@@ -353,7 +371,7 @@
           <tr>
             <td>failOnError</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
@@ -370,9 +388,9 @@
           <table>
             <tr>
               <th>Attribute</th>
-              <th>Required ?</th>
-              <th>Possible values</th>
-              <th>Default value</th>
+              <th>Required?</th>
+              <th>Possible&nbsp;values</th>
+              <th>Default&nbsp;value</th>
               <th>Meaning</th>
             </tr>
             <tr>
@@ -382,6 +400,18 @@
               <td></td>
               <td>Specifies the name of the parameter. See <a href="site:documentation/database-support">here</a>
                   for the parameters supported by the individual platforms.</td>
+            </tr>
+            <tr>
+              <td>platforms</td>
+              <td>no</td>
+              <td></td>
+              <td></td>
+              <td>
+                Comma-separated list of platforms where the parameter shall be processed (see
+                <code>databaseType</code> attribute above for the Possible&nbsp;values). For every platform
+                not in this list, the parameter is ignored. If none is given, then the parameter
+                is processed for every platform.
+              </td>
             </tr>
             <tr>
               <td>table</td>
@@ -404,18 +434,6 @@
               <td></td>
               <td>The parameter value. If none is given, <code>null</code> is used.</td>
             </tr>
-            <tr>
-              <td>platforms</td>
-              <td>no</td>
-              <td></td>
-              <td></td>
-              <td>
-                Comma-separated list of platforms where the parameter shall be processed (see
-                <code>databaseType</code> attribute above for the possible values). For every platform
-                not in this list, the parameter is ignored. If none is given, then the parameter
-                is processed for every platform.
-              </td>
-            </tr>
           </table>
         </section>
       </section>
@@ -430,29 +448,29 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
             <td>alterDatabase</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
           <tr>
             <td>doDrops</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
           <tr>
             <td>failOnError</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
@@ -490,17 +508,19 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
-            <td>failOnError</td>
+            <td>batchSize</td>
             <td>no</td>
-            <td>true,false</td>
-            <td>true</td>
-            <td>See above.</td>
+            <td></td>
+            <td>1</td>
+            <td>The maximum number of insert statements to combine in one batch. The number typically
+                depends on the JDBC driver and the amount of available memory.<br/>
+                This value is only used if <code>useBatchMode</code> is <code>true</code>.</td>
           </tr>
           <tr>
             <td>dataFile</td>
@@ -508,6 +528,24 @@
             <td></td>
             <td></td>
             <td>The name of the single XML file that contains the data to insert into the database.</td>
+          </tr>
+          <tr>
+            <td>failOnError</td>
+            <td>no</td>
+            <td>true, false</td>
+            <td>true</td>
+            <td>See above.</td>
+          </tr>
+          <tr>
+            <td>useBatchMode</td>
+            <td>no</td>
+            <td>true, false</td>
+            <td>false</td>
+            <td>Whether DdlUtils shall use batch-mode for inserting the data. In this mode, insert statements
+                for the same table are bundled together and executed as one statement which can be a lot
+                faster than single insert statements. To achieve the highest performance, you should group
+                the data in the XML file according to the tables because a batch insert only works for one
+                table which means when the table changes the batch is executed and a new one will be started.</td>
           </tr>
         </table>
         <section>
@@ -528,9 +566,9 @@
           <table>
             <tr>
               <th>Attribute</th>
-              <th>Required ?</th>
-              <th>Possible values</th>
-              <th>Default value</th>
+              <th>Required?</th>
+              <th>Possible&nbsp;values</th>
+              <th>Default&nbsp;value</th>
               <th>Meaning</th>
             </tr>
             <tr>
@@ -583,9 +621,9 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
@@ -598,7 +636,7 @@
           <tr>
             <td>failOnError</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
@@ -632,16 +670,16 @@
       <table>
         <tr>
           <th>Attribute</th>
-          <th>Required ?</th>
-          <th>Possible values</th>
-          <th>Default value</th>
+          <th>Required?</th>
+          <th>Possible&nbsp;values</th>
+          <th>Default&nbsp;value</th>
           <th>Meaning</th>
         </tr>
         <tr>
           <td>catalog</td>
           <td>no</td>
           <td></td>
-          <td>%</td>
+          <td>depends on the database</td>
           <td>
             Specifies the catalog(s) to access. This is only necessary for some databases.
             The pattern is that of
@@ -653,7 +691,7 @@
           <td>databaseType</td>
           <td>no</td>
           <td>axion, cloudscape, db2, derby, firebird, hsqldb, interbase, maxdb, mckoi, mssql,
-              mysql, oracle, oracle9, postgresql, sapdb, sybase</td>
+              mysql, mysql5, oracle, oracle9, oracle10, postgresql, sapdb, sybase</td>
           <td></td>
           <td>
             The database type. You should only need to specify this if DdlUtils is not able to
@@ -663,10 +701,22 @@
           </td>
         </tr>
         <tr>
+          <td>modelName</td>
+          <td>no</td>
+          <td></td>
+          <td></td>
+          <td>
+            Specifies the name of the model, e.g. the value of the name attribute in the XML if
+            the <code>writeSchemaToFile</code> sub-task is used. If none is given, DdlUtils
+            will use the schema name as returned by the database, or <code>"default"</code> if
+            the database returned no schema name.
+          </td>
+        </tr>
+        <tr>
           <td>schema</td>
           <td>no</td>
           <td></td>
-          <td>%</td>
+          <td>depends on the database</td>
           <td>
             Specifies the table schema(s) to access. This is only necessary for some databases.
             The pattern is that of
@@ -689,8 +739,8 @@
         <tr>
           <td>useDelimitedSqlIdentifiers</td>
           <td>no</td>
-          <td>true,false</td>
-          <td>true</td>
+          <td>true, false</td>
+          <td>false</td>
           <td>
             Whether DdlUtils shall use delimited (quoted) identifiers (table names, column names etc.)
             In most databases, undelimited identifiers will be converted to uppercase by the database,
@@ -732,9 +782,9 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
@@ -756,29 +806,29 @@
         <table>
           <tr>
             <th>Attribute</th>
-            <th>Required ?</th>
-            <th>Possible values</th>
-            <th>Default value</th>
+            <th>Required?</th>
+            <th>Possible&nbsp;values</th>
+            <th>Default&nbsp;value</th>
             <th>Meaning</th>
           </tr>
           <tr>
             <td>alterDatabase</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
           <tr>
             <td>doDrops</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>
           <tr>
             <td>failOnError</td>
             <td>no</td>
-            <td>true,false</td>
+            <td>true, false</td>
             <td>true</td>
             <td>See above.</td>
           </tr>

@@ -218,6 +218,22 @@ which will be used to configure the chosen Forrest skin.
 .warningmessage {font-size : 90%;}
 .infomessage {font-size : 90%;}
 .errormessage {font-size : 90%;}
+
+    td.platformPropName {
+      width : 50%;
+    }
+    td.platformPropValue {
+      width : 50%;
+    }
+    th.typeMappingJdbcType {
+      width : 25%;
+    }
+    th.typeMappingNativeType {
+      width : 25%;
+    }
+    th.typeMappingComments {
+      width : 50%;
+    }
   </extra-css>
 
   <colors>

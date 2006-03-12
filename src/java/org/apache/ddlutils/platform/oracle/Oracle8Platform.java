@@ -43,7 +43,7 @@ public class Oracle8Platform extends PlatformImplBase
     public static final String JDBC_SUBPROTOCOL_THIN     = "oracle:thin";
     /** The thin subprotocol used by the standard Oracle driver. */
     public static final String JDBC_SUBPROTOCOL_OCI8     = "oracle:oci8";
-    /** The thin subprotocol used by the standard Oracle driver. */
+    /** The old thin subprotocol used by the standard Oracle driver. */
     public static final String JDBC_SUBPROTOCOL_THIN_OLD = "oracle:dnldthin";
 
     /**
@@ -70,14 +70,12 @@ public class Oracle8Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",             Types.BLOB);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         info.addNativeTypeMapping(Types.FLOAT,         "FLOAT",            Types.DOUBLE);
-        info.addNativeTypeMapping(Types.INTEGER,       "INTEGER");
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",             Types.BLOB);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "BLOB",             Types.BLOB);
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "CLOB",             Types.CLOB);
         info.addNativeTypeMapping(Types.NULL,          "BLOB",             Types.BLOB);
         info.addNativeTypeMapping(Types.NUMERIC,       "NUMBER",           Types.DECIMAL);
         info.addNativeTypeMapping(Types.OTHER,         "BLOB",             Types.BLOB);
-        info.addNativeTypeMapping(Types.REAL,          "REAL");
         info.addNativeTypeMapping(Types.REF,           "BLOB",             Types.BLOB);
         info.addNativeTypeMapping(Types.SMALLINT,      "NUMBER(5)");
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",             Types.BLOB);

@@ -164,7 +164,9 @@ See http://forrest.apache.org/docs/linking.html for more info
       <svn-up href="http://svnup.tigris.org"/>
       <tortoisesvn href="http://tortoisesvn.tigris.org"/>
     </tigris>
-    <torque href="http://db.apache.org/torque"/>
+    <torque href="http://db.apache.org/torque/">
+      <dtd href="dtd/database.dtd"/>
+    </torque>
   </external-refs>
 
 </site>

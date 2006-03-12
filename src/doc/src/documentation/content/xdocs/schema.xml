@@ -22,6 +22,7 @@
   <body> 
     <section>
       <title>The schema used by DdlUtils</title>
+      <p>The <a href="ext:torque/dtd">DTD</a>.</p>
       <note>Coming soon</note>
     </section>
   </body>

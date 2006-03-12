@@ -33,7 +33,7 @@
       <p>
         Using the appropriate methods on these classes, you can build the
         database model manually, or you read it from XML or from the database
-        (see the next paragraphs for details). More into about the classes
+        (see the next paragraphs for details). More info about the classes
         can be found in the <a href="ext:ddlutils/javadoc/model">javadoc</a>.
       </p>
     </section>
@@ -90,7 +90,7 @@ public Database readDatabase(DataSource dataSource)
 {
     Platform platform = PlatformFactory.createNewPlatformInstance(dataSource);
 
-    return platform.readModelFromDatabase();
+    return platform.readModelFromDatabase("model");
 }]]></source>
     </section>
     <section>
@@ -134,6 +134,11 @@ public void changeDatabase(DataSource dataSource,
         platform.createTables(targetModel, true, false);
     }
 }]]></source>
+      <note>
+        Databases like Oracle allow for more than one separate schema in one database. To cater
+        for these databases, there are variants of these methods where you can specify the 
+        catalog and schema.
+      </note>
     </section>
     <section>
       <title>Inserting data into a database</title>

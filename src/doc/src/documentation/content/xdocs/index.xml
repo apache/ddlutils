@@ -39,8 +39,9 @@
         datatypes which are inherently database specific. An example of such a file is:
       </p>
       <source><![CDATA[
-<?xml version="1.0"?>      
- <database name="testdb">
+<?xml version="1.0"?>
+<!DOCTYPE database SYSTEM "http://db.apache.org/torque/dtd/database.dtd">
+<database name="testdb">
   <table name="author">
     <column name="author_id"
             type="INTEGER"
@@ -82,9 +83,8 @@
     <index name="book_isbn">
       <index-column name="isbn"/>
     </index>
-
   </table>
- </database>]]>
+</database>]]>
  </source>
     </section>
     <section id="Learning_more">

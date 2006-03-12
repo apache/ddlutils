@@ -62,7 +62,6 @@ public class FirebirdPlatform extends PlatformImplBase
         info.setIndicesEmbedded(false);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
-        //info.setSupportingDelimitedIdentifiers(false);
 
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BINARY,        "BLOB",               Types.LONGVARBINARY);
@@ -79,9 +78,9 @@ public class FirebirdPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.OTHER,         "BLOB",               Types.LONGVARBINARY);
         // This is back-mapped to REAL in the model reader
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.REF,           "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "BLOB",               Types.LONGVARBINARY);
         
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");

@@ -51,7 +51,6 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.setIndicesEmbedded(false);
         info.setNonPKIdentityColumnsSupported(false);
 
-        info.addNativeTypeMapping(Types.BIT,         "BOOLEAN");
         info.addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BLOB,        "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.CLOB,        "LONGVARCHAR",   Types.LONGVARCHAR);
@@ -59,13 +58,11 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.FLOAT,       "DOUBLE",        Types.DOUBLE);
         info.addNativeTypeMapping(Types.JAVA_OBJECT, "OBJECT");
         info.addNativeTypeMapping(Types.NULL,        "LONGVARBINARY", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.OTHER,       "OTHER");
         info.addNativeTypeMapping(Types.REF,         "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.STRUCT,      "LONGVARBINARY", Types.LONGVARBINARY);
         // JDBC's TINYINT requires a value range of -255 to 255, but HsqlDb's is only -128 to 127
         info.addNativeTypeMapping(Types.TINYINT,     "SMALLINT",      Types.SMALLINT);
 
-        // when using JDBC3, BIT will be back-mapped to BOOLEAN
         info.addNativeTypeMapping("BIT",      "BOOLEAN",       "BOOLEAN");
         info.addNativeTypeMapping("DATALINK", "LONGVARBINARY", "LONGVARBINARY");
 
