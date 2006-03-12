@@ -37,6 +37,7 @@
   <property name="procedurepattern" value=""/>
   <property name="dumptables" value="true"/>
   <property name="dumpprocedures" value="true"/>
+  <property name="modelname" value=""/>
   
   <!-- The classpath used for running the dump task -->
   <path id="project-classpath">
@@ -76,7 +77,8 @@
     <databaseToDdl databasetype="${ddlutils.platform}"
                    tabletypes="${tabletypes}"
                    catalog="${catalogpattern}"
-                   schema="${schemapattern}">
+                   schema="${schemapattern}"
+                   modelname="${modelname}">
       <database driverclassname="${datasource.driverClassName}"
                 url="${datasource.url}"
                 username="${datasource.username}"
