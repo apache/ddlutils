@@ -35,7 +35,7 @@ public class PlatformConfiguration
     /** The data source to use for accessing the database. */
     private BasicDataSource _dataSource;
     /** Whether to use delimited SQL identifiers. */
-    private boolean _useDelimitedSqlIdentifiers = true;
+    private boolean _useDelimitedSqlIdentifiers;
     /** The catalog pattern. */
     private String _catalogPattern;
     /** The schema pattern. */
