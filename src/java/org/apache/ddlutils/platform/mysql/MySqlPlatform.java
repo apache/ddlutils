@@ -75,13 +75,13 @@ public class MySqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.REF,           "MEDIUMBLOB",        Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.STRUCT,        "LONGBLOB",          Types.LONGVARBINARY);
         // Since TIMESTAMP is not a stable datatype yet, and does not support a higher precision
-        // that DATETIME (year to seconds) as of MySQL 5, we map the JDBC type here to DATETIME
+        // than DATETIME (year to seconds) as of MySQL 5, we map the JDBC type here to DATETIME
         // TODO: Make this configurable
         info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
         // In MySql, TINYINT has only a range of -128 to 127
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",          Types.SMALLINT);
         info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)", "BIT");
-        info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
+        info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB", "LONGVARBINARY");
 
         info.setDefaultSize(Types.CHAR,      254);
         info.setDefaultSize(Types.VARCHAR,   254);

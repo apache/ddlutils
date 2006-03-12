@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform.mysql;
 
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
+ * Copyright 2005-2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,80 +16,32 @@ package org.apache.ddlutils.platform.mysql;
  * limitations under the License.
  */
 
-import java.sql.Types;
-
 import org.apache.ddlutils.PlatformInfo;
-import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
- * The platform implementation for MySQL 5.0.x.
+ * The platform implementation for MySQL 5 and above.
  * 
  * @author Martin van den Bemt
  * @version $Revision: 231306 $
  */
-public class MySql50Platform extends PlatformImplBase
+public class MySql50Platform extends MySqlPlatform
 {
     /** Database name of this platform. */
-    public static final String DATABASENAME     = "MySQL50";
-    /** The standard MySQL jdbc driver. */
-    public static final String JDBC_DRIVER      = "com.mysql.jdbc.Driver";
-    /** The old MySQL jdbc driver. */
-    public static final String JDBC_DRIVER_OLD  = "org.gjt.mm.mysql.Driver";
-    /** The subprotocol used by the standard MySQL driver. */
-    public static final String JDBC_SUBPROTOCOL = "mysql";
+    public static final String DATABASENAME = "MySQL5";
 
     /**
      * Creates a new platform instance.
      */
     public MySql50Platform()
     {
+        super();
+
         PlatformInfo info = getPlatformInfo();
 
-        info.setMaxIdentifierLength(64);
-        info.setNullAsDefaultValueRequired(true);
-        info.setDefaultValuesForLongTypesSupported(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
-        // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
-        info.setNonPKIdentityColumnsSupported(false);
         // MySql 5.0 returns an empty string for default values for pk columns
-        // which is different from the mysql 4 behaviour
+        // which is different from the MySql 4 behaviour
         info.setSyntheticDefaultValueForRequiredReturned(false);
-        info.setCommentPrefix("#");
-        // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
-        info.setDelimiterToken("`");
 
-        info.addNativeTypeMapping(Types.ARRAY,         "LONGBLOB",          Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.BIT,           "TINYINT(1)");
-        info.addNativeTypeMapping(Types.BLOB,          "LONGBLOB",          Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.CLOB,          "LONGTEXT",          Types.LONGVARCHAR);
-        info.addNativeTypeMapping(Types.DISTINCT,      "LONGBLOB",          Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE",            Types.DOUBLE);
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "LONGBLOB",          Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.LONGVARBINARY, "MEDIUMBLOB");
-        info.addNativeTypeMapping(Types.LONGVARCHAR,   "MEDIUMTEXT");
-        info.addNativeTypeMapping(Types.NULL,          "MEDIUMBLOB",        Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.NUMERIC,       "DECIMAL",           Types.DECIMAL);
-        info.addNativeTypeMapping(Types.OTHER,         "LONGBLOB",          Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.REAL,          "FLOAT");
-        info.addNativeTypeMapping(Types.REF,           "MEDIUMBLOB",        Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.STRUCT,        "LONGBLOB",          Types.LONGVARBINARY);
-        // Since TIMESTAMP is not a stable datatype yet, and does not support a higher precision
-        // that DATETIME (year to seconds) as of MySQL 5, we map the JDBC type here to DATETIME
-        // TODO: Make this configurable
-        info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
-        // In MySql, TINYINT has only a range of -128 to 127
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",          Types.SMALLINT);
-        info.addNativeTypeMapping("BOOLEAN",  "TINYINT(1)", "BIT");
-        info.addNativeTypeMapping("DATALINK", "MEDIUMBLOB");
-
-        info.setDefaultSize(Types.CHAR,      254);
-        info.setDefaultSize(Types.VARCHAR,   254);
-        info.setDefaultSize(Types.BINARY,    254);
-        info.setDefaultSize(Types.VARBINARY, 254);
-        
-        setSqlBuilder(new MySqlBuilder(this));
         setModelReader(new MySql50ModelReader(this));
     }
 
