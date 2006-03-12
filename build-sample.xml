@@ -33,6 +33,19 @@
            name="databaseToDdl"
            classpathref="project-classpath"/>
 	
+  <target name="createDb">
+    <ddlToDatabase usedelimitedsqlidentifiers="false"
+                   catalogpattern="${catalogpattern}"
+                   schemapattern="${schemapattern}"
+                   databasetype="${platform}" >
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+      <createdatabase failonerror="false"/> 
+    </ddlToDatabase> 
+  </target>
+
   <target name="writeSchemaToDb">
     <ddlToDatabase validatexml="false" 
                    usedelimitedsqlidentifiers="false"
