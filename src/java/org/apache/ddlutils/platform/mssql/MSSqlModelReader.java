@@ -17,10 +17,12 @@ package org.apache.ddlutils.platform.mssql;
  */
 
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
@@ -87,6 +89,22 @@ public class MSSqlModelReader extends JdbcModelReader
         {
             // Sql Server does not return the auto-increment status via the database metadata
             determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+
+            // TODO: Replace this manual filtering using named pks once they are available
+            //       This is then probably of interest to every platform
+            for (int idx = 0; idx < table.getIndexCount();)
+            {
+                Index index = table.getIndex(idx);
+
+                if (index.isUnique() && existsPKWithName(metaData, table, index.getName()))
+                {
+                    table.removeIndex(idx);
+                }
+                else
+                {
+                    idx++;
+                }
+            }
         }
         return table;
 	}
@@ -106,6 +124,37 @@ public class MSSqlModelReader extends JdbcModelReader
 		return index.getName().toUpperCase().startsWith(pkIndexName.toString().toUpperCase());
 	}
 
+    /**
+     * Determines whether there is a pk for the table with the given name.
+     * 
+     * @param metaData The database metadata
+     * @param table    The table
+     * @param name     The pk name
+     * @return <code>true</code> if there is such a pk
+     */
+    private boolean existsPKWithName(DatabaseMetaDataWrapper metaData, Table table, String name)
+    {
+        try
+        {
+            ResultSet pks   = metaData.getPrimaryKeys(table.getName());
+            boolean   found = false;
+    
+            while (pks.next() && !found)
+            {
+                if (name.equals(pks.getString("PK_NAME")))
+                {
+                    found = true;
+                }
+            }
+            pks.close();
+            return found;
+        }
+        catch (SQLException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */
