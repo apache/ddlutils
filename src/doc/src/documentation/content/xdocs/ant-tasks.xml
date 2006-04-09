@@ -67,7 +67,7 @@
       </p>
       <p>
         Required for this to work is that both DdlUtils and the JDBC driver are available
-        in the path specified by <code>runtime.classpath</code>. In the above snippet, this path
+        in the path specified by <code>runtime-classpath</code>. In the above snippet, this path
         contains all JARs and ZIPs in sub-directory <code>lib</code>.
       </p>
       <note>
@@ -79,7 +79,7 @@
         The opposite direction is achieved via the <code>DatabaseToDdlTask</code> task:
       </p>
       <source><![CDATA[
-<path id="runtime.classpath">
+<path id="runtime-classpath">
   <fileset dir="lib">
     <include name="**/*.jar"/>
     <include name="**/*.zip"/>
