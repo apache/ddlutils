@@ -47,6 +47,8 @@ import org.apache.oro.text.regex.Perl5Matcher;
  */
 public class MSSqlModelReader extends JdbcModelReader
 {
+    /** Known system tables that Sql Server creates (e.g. automatic maintenance). */
+    private static final String[] KNOWN_SYSTEM_TABLES = { "dtproperties" };
 	/** The regular expression pattern for the ISO dates. */
 	private Pattern _isoDatePattern;
 	/** The regular expression pattern for the ISO times. */
@@ -83,6 +85,16 @@ public class MSSqlModelReader extends JdbcModelReader
      */
 	protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
 	{
+        String tableName = (String)values.get("TABLE_NAME");
+
+        for (int idx = 0; idx < KNOWN_SYSTEM_TABLES.length; idx++)
+        {
+            if (KNOWN_SYSTEM_TABLES[idx].equals(tableName))
+            {
+                return null;
+            }
+        }
+
         Table table = super.readTable(metaData, values);
 
         if (table != null)
