@@ -239,15 +239,20 @@ public class ForeignKey implements Cloneable
     {
         if (obj instanceof ForeignKey)
         {
-            ForeignKey other = (ForeignKey)obj;
+            ForeignKey otherFk = (ForeignKey)obj;
 
             // Note that this compares case sensitive
             // Note also that we can simply compare the references regardless of their order
             // (which is irrelevant for fks) because they are contained in a set
-            return new EqualsBuilder().append(_name,             other._name)
-                                      .append(_foreignTableName, other._foreignTableName)
-                                      .append(_references,       other._references)
-                                      .isEquals();
+            EqualsBuilder builder = new EqualsBuilder();
+
+            if ((_name != null) && (_name.length() > 0) && (otherFk._name != null) && (otherFk._name.length() > 0))
+            {
+                builder.append(_name, otherFk._name);
+            }
+            return builder.append(_foreignTableName, otherFk._foreignTableName)
+                          .append(_references,       otherFk._references)
+                          .isEquals();
         }
         else
         {
@@ -263,11 +268,14 @@ public class ForeignKey implements Cloneable
      */
     public boolean equalsIgnoreCase(ForeignKey otherFk)
     {
-        if (_name.equalsIgnoreCase(otherFk._name) &&
+        boolean checkName = (_name != null) && (_name.length() > 0) &&
+                            (otherFk._name != null) && (otherFk._name.length() > 0);
+
+        if ((!checkName || _name.equalsIgnoreCase(otherFk._name)) &&
             _foreignTableName.equalsIgnoreCase(otherFk._foreignTableName))
         {
             HashSet otherRefs = new HashSet();
-    
+
             otherRefs.addAll(otherFk._references);
             for (Iterator it = _references.iterator(); it.hasNext();)
             {

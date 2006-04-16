@@ -13,7 +13,6 @@
 
         <module name="JavadocType">
             <property name="versionFormat" value="${checkstyle.version.pattern}"/>
-            <property name="authorFormat" value="${checkstyle.author.pattern}"/>
         </module>
 
         <module name="JavadocMethod">

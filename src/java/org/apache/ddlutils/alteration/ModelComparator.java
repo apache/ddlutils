@@ -1,0 +1,379 @@
+package org.apache.ddlutils.alteration;
+
+/*
+ * Copyright 2006 The Apache Software Foundation.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.ForeignKey;
+import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.Table;
+
+/**
+ * Compares two database models and creates change objects that express how to
+ * adapt the first model so that it becomes the second one. Neither of the models
+ * are changed in the process, however, it is also assumed that the models do not
+ * change in between.
+ * 
+ * @version $Revision: $
+ */
+public class ModelComparator
+{
+    /** The log for this comparator. */
+    private final Log _log = LogFactory.getLog(ModelComparator.class);
+
+    /** Whether comparison is case sensitive. */
+    private boolean _caseSensitive;
+
+    /**
+     * Creates a new model comparator object.
+     * 
+     * @param caseSensitive Whether comparison is case sensitive
+     */
+    public ModelComparator(boolean caseSensitive)
+    {
+        _caseSensitive = caseSensitive;
+    }
+
+    /**
+     * Compares the two models and returns the changes necessary to create the second
+     * model from the first one.
+     *  
+     * @param sourceModel The source model
+     * @param targetModel The target model
+     * @return The changes
+     */
+    public List compare(Database sourceModel, Database targetModel)
+    {
+        ArrayList changes = new ArrayList();
+
+        for (int tableIdx = 0; tableIdx < targetModel.getTableCount(); tableIdx++)
+        {
+            Table targetTable = targetModel.getTable(tableIdx);
+            Table sourceTable = sourceModel.findTable(targetTable.getName(), _caseSensitive);
+
+            if (sourceTable == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Table " + targetTable.getName() + " needs to be added");
+                }
+                changes.add(new AddTableChange(targetTable));
+                for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
+                {
+                    changes.add(new AddForeignKeyChange(sourceTable, targetTable.getForeignKey(fkIdx)));
+                }
+            }
+            else
+            {
+                changes.addAll(compareTables(sourceModel, sourceTable, targetModel, targetTable));
+            }
+        }
+
+        for (int tableIdx = 0; tableIdx < sourceModel.getTableCount(); tableIdx++)
+        {
+            Table sourceTable = sourceModel.getTable(tableIdx);
+            Table targetTable = targetModel.findTable(sourceTable.getName(), _caseSensitive);
+
+            if ((targetTable == null) && (sourceTable.getName() != null) && (sourceTable.getName().length() > 0))
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Table " + sourceTable.getName() + " needs to be removed");
+                }
+                changes.add(new RemoveTableChange(sourceTable));
+                // we assume that the target model is sound, ie. that there are no longer any foreign
+                // keys to this table in the target model; thus we already have removeFK changes for
+                // these from the compareTables method and we only need to create changes for the fks
+                // originating from this table
+                for (int fkIdx = 0; fkIdx < sourceTable.getForeignKeyCount(); fkIdx++)
+                {
+                    changes.add(new RemoveForeignKeyChange(sourceTable, sourceTable.getForeignKey(fkIdx)));
+                }
+            }
+        }
+        return changes;
+    }
+
+    /**
+     * Compares the two tables and returns the changes necessary to create the second
+     * table from the first one.
+     *  
+     * @param sourceModel The source model which contains the source table
+     * @param sourceTable The source table
+     * @param targetModel The target model which contains the target table
+     * @param targetTable The target table
+     * @return The changes
+     */
+    public List compareTables(Database sourceModel,
+                              Table    sourceTable,
+                              Database targetModel,
+                              Table    targetTable)
+    {
+        ArrayList changes = new ArrayList();
+
+        for (int fkIdx = 0; fkIdx < sourceTable.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey sourceFk = sourceTable.getForeignKey(fkIdx);
+            ForeignKey targetFk = findCorrespondingForeignKey(targetTable, sourceFk);
+
+            if (targetFk == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Foreign key " + sourceFk + " needs to be removed from table " + sourceTable.getName());
+                }
+                changes.add(new RemoveForeignKeyChange(sourceTable, sourceFk));
+            }
+        }
+
+        for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey targetFk = targetTable.getForeignKey(fkIdx);
+            ForeignKey sourceFk = findCorrespondingForeignKey(sourceTable, targetFk);
+
+            if (sourceFk == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Foreign key " + targetFk + " needs to be created for table " + sourceTable.getName());
+                }
+                changes.add(new AddForeignKeyChange(sourceTable, targetFk));
+            }
+        }
+
+        for (int indexIdx = 0; indexIdx < sourceTable.getIndexCount(); indexIdx++)
+        {
+            Index sourceIndex = sourceTable.getIndex(indexIdx);
+            Index targetIndex = findCorrespondingIndex(targetTable, sourceIndex);
+
+            if (targetIndex == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Index " + sourceIndex.getName() + " needs to be removed from table " + sourceTable.getName());
+                }
+                changes.add(new RemoveIndexChange(sourceTable, sourceIndex));
+            }
+        }
+        for (int indexIdx = 0; indexIdx < targetTable.getIndexCount(); indexIdx++)
+        {
+            Index targetIndex = targetTable.getIndex(indexIdx);
+            Index sourceIndex = findCorrespondingIndex(sourceTable, targetIndex);
+
+            if (sourceIndex == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Index " + targetIndex.getName() + " needs to be created for table " + sourceTable.getName());
+                }
+                changes.add(new AddIndexChange(sourceTable, targetIndex));
+            }
+        }
+
+        for (int columnIdx = 0; columnIdx < targetTable.getColumnCount(); columnIdx++)
+        {
+            Column targetColumn = targetTable.getColumn(columnIdx);
+            Column sourceColumn = sourceTable.findColumn(targetColumn.getName(), _caseSensitive);
+
+            if (sourceColumn == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Column " + targetColumn.getName() + " needs to be created for table " + sourceTable.getName());
+                }
+                changes.add(new AddColumnChange(sourceTable, targetColumn));
+            }
+            else
+            {
+                changes.addAll(compareColumns(sourceTable, sourceColumn, targetTable, targetColumn));
+            }
+        }
+
+        Column[] sourcePK = sourceTable.getPrimaryKeyColumns();
+        Column[] targetPK = targetTable.getPrimaryKeyColumns();
+
+        if ((sourcePK.length == 0) && (targetPK.length > 0))
+        {
+            if (_log.isInfoEnabled())
+            {
+                _log.info("A primary key needs to be added to the table " + sourceTable.getName());
+            }
+            changes.add(new AddPrimaryKeyChange(sourceTable, targetPK));
+        }
+        else if ((targetPK.length == 0) && (sourcePK.length > 0))
+        {
+            if (_log.isInfoEnabled())
+            {
+                _log.info("The primary key needs to be removed from the table " + sourceTable.getName());
+            }
+            changes.add(new RemovePrimaryKeyChange(sourceTable, sourcePK));
+        }
+        else if ((sourcePK.length > 0) && (targetPK.length > 0))
+        {
+            boolean changePK = false;
+
+            if (sourcePK.length != targetPK.length)
+            {
+                changePK = true;
+            }
+            else
+            {
+                for (int pkColumnIdx = 0; (pkColumnIdx < sourcePK.length) && !changePK; pkColumnIdx++)
+                {
+                    if ((_caseSensitive  && !sourcePK[pkColumnIdx].getName().equals(targetPK[pkColumnIdx].getName())) ||
+                        (!_caseSensitive && !sourcePK[pkColumnIdx].getName().equalsIgnoreCase(targetPK[pkColumnIdx].getName())))
+                    {
+                        changePK = true;
+                    }
+                }
+            }
+            if (changePK)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("The primary key of table " + sourceTable.getName() + " needs to be changed");
+                }
+                changes.add(new PrimaryKeyChange(sourceTable, sourcePK, targetPK));
+            }
+        }
+        
+        for (int columnIdx = 0; columnIdx < sourceTable.getColumnCount(); columnIdx++)
+        {
+            Column sourceColumn = sourceTable.getColumn(columnIdx);
+            Column targetColumn = targetTable.findColumn(sourceColumn.getName(), _caseSensitive);
+
+            if (targetColumn == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Column " + sourceColumn.getName() + " needs to be removed from table " + sourceTable.getName());
+                }
+                changes.add(new RemoveColumnChange(sourceTable, sourceColumn));
+            }
+        }
+
+        return changes;
+    }
+
+    /**
+     * Compares the two columns and returns the changes necessary to create the second
+     * column from the first one.
+     *  
+     * @param sourceTable  The source table which contains the source column
+     * @param sourceColumn The source column
+     * @param targetTable  The target table which contains the target column
+     * @param targetColumn The target column
+     * @return The changes
+     */
+    public List compareColumns(Table  sourceTable,
+                               Column sourceColumn,
+                               Table  targetTable,
+                               Column targetColumn)
+    {
+        ArrayList changes = new ArrayList();
+
+        if (sourceColumn.getTypeCode() != targetColumn.getTypeCode())
+        {
+            changes.add(new ColumnDataTypeChange(sourceTable, sourceColumn, targetColumn.getTypeCode()));
+        }
+
+        // the concrete platform decides whether the size matters for a given data type
+        // so when the size differs we create a change object and the platform can filter
+        // it later if the size is not relevant
+        if ((sourceColumn.getSizeAsInt() != targetColumn.getSizeAsInt()) ||
+            (sourceColumn.getScale()     != targetColumn.getScale()))
+        {
+            changes.add(new ColumnSizeChange(sourceTable, sourceColumn, targetColumn.getSizeAsInt(), targetColumn.getScale()));
+        }
+
+        Object sourceDefaultValue = sourceColumn.getParsedDefaultValue();
+        Object targetDefaultValue = targetColumn.getParsedDefaultValue();
+
+        if (((sourceDefaultValue == null) && (targetDefaultValue != null)) ||
+            ((sourceDefaultValue != null) && !sourceDefaultValue.equals(targetDefaultValue)))
+        {
+            changes.add(new ColumnDefaultValueChange(sourceTable, sourceColumn, targetColumn.getDefaultValue()));
+        }
+
+        if (sourceColumn.isRequired() != targetColumn.isRequired())
+        {
+            changes.add(new ColumnRequiredChange(sourceTable, sourceColumn));
+        }
+        if (sourceColumn.isAutoIncrement() != targetColumn.isAutoIncrement())
+        {
+            changes.add(new ColumnAutoIncrementChange(sourceTable, sourceColumn));
+        }
+
+        return changes;
+    }
+
+    /**
+     * Searches in the given table for a corresponding foreign key. If the given key
+     * has no name, then a foreign key to the same table with the same columns (but not
+     * necessarily in the same order) is searched. If the given key has a name, then the
+     * corresponding key also needs to have the same name, or no name at all, but not a
+     * different one. 
+     * 
+     * @param table The table to search in
+     * @param fk    The original foreign key
+     * @return The corresponding foreign key if found
+     */
+    private ForeignKey findCorrespondingForeignKey(Table table, ForeignKey fk)
+    {
+        for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+        {
+            ForeignKey curFk = table.getForeignKey(fkIdx);
+
+            if ((_caseSensitive  && fk.equals(curFk)) ||
+                (!_caseSensitive && fk.equalsIgnoreCase(curFk)))
+            {
+                return curFk;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Searches in the given table for a corresponding index. If the given index
+     * has no name, then a index to the same table with the same columns in the
+     * same order is searched. If the given index has a name, then the a corresponding
+     * index also needs to have the same name, or no name at all, but not a different one. 
+     * 
+     * @param table The table to search in
+     * @param index The original index
+     * @return The corresponding index if found
+     */
+    private Index findCorrespondingIndex(Table table, Index index)
+    {
+        for (int indexIdx = 0; indexIdx < table.getForeignKeyCount(); indexIdx++)
+        {
+            Index curIndex = table.getIndex(indexIdx);
+
+            if ((_caseSensitive  && index.equals(curIndex)) ||
+                (!_caseSensitive && index.equalsIgnoreCase(curIndex)))
+            {
+                return curIndex;
+            }
+        }
+        return null;
+    }
+}

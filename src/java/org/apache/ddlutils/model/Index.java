@@ -91,6 +91,14 @@ public interface Index extends Cloneable, Serializable
     public void removeColumn(int idx);
 
     /**
+     * Compares this index to the given one while ignoring the case of identifiers.
+     * 
+     * @param otherIndex The other index
+     * @return <code>true</code> if this index is equal (ignoring case) to the given one
+     */
+    public boolean equalsIgnoreCase(Index otherIndex);
+
+    /**
      * Returns a verbose string representation of this index.
      * 
      * @return The string representation

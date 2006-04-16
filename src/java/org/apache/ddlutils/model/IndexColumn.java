@@ -140,7 +140,6 @@ public class IndexColumn implements Cloneable, Serializable
         {
             IndexColumn other = (IndexColumn)obj;
 
-            // Note that this compares case sensitive
             return new EqualsBuilder().append(_name, other._name)
                                       .append(_size, other._size)
                                       .isEquals();
@@ -149,6 +148,16 @@ public class IndexColumn implements Cloneable, Serializable
         {
             return false;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equalsIgnoreCase(IndexColumn other)
+    {
+        return new EqualsBuilder().append(_name.toUpperCase(), other._name.toUpperCase())
+                                  .append(_size, other._size)
+                                  .isEquals();
     }
 
     /**

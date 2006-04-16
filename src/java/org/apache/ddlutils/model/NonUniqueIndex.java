@@ -157,6 +157,34 @@ public class NonUniqueIndex implements Index
     /**
      * {@inheritDoc}
      */
+    public boolean equalsIgnoreCase(Index other)
+    {
+        if (other instanceof NonUniqueIndex)
+        {
+            NonUniqueIndex otherIndex = (NonUniqueIndex)other;
+
+            boolean checkName = (_name != null) && (_name.length() > 0) &&
+                                (otherIndex._name != null) && (otherIndex._name.length() > 0);
+
+            if ((!checkName || _name.equalsIgnoreCase(otherIndex._name)) &&
+                (getColumnCount() == otherIndex.getColumnCount()))
+            {
+                for (int idx = 0; idx < getColumnCount(); idx++)
+                {
+                    if (!getColumn(idx).equalsIgnoreCase(otherIndex.getColumn(idx)))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public int hashCode()
     {
         return new HashCodeBuilder(17, 37).append(_name)

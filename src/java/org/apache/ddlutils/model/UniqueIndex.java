@@ -73,6 +73,34 @@ public class UniqueIndex extends NonUniqueIndex
     /**
      * {@inheritDoc}
      */
+    public boolean equalsIgnoreCase(Index other)
+    {
+        if (other instanceof UniqueIndex)
+        {
+            UniqueIndex otherIndex = (UniqueIndex)other;
+
+            boolean checkName = (_name != null) && (_name.length() > 0) &&
+                                (otherIndex._name != null) && (otherIndex._name.length() > 0);
+
+            if ((!checkName || _name.equalsIgnoreCase(otherIndex._name)) &&
+                (getColumnCount() == otherIndex.getColumnCount()))
+            {
+                for (int idx = 0; idx < getColumnCount(); idx++)
+                {
+                    if (!getColumn(idx).equalsIgnoreCase(otherIndex.getColumn(idx)))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public int hashCode()
     {
         return _columns.hashCode();
