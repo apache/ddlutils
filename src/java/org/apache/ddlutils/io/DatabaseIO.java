@@ -90,6 +90,17 @@ public class DatabaseIO
     }
 
     /**
+     * Returns the commons-betwixt mapping file as an {@link org.xml.sax.InputSource} object.
+     * Per default, this will be classpath resource under the path <code>/mapping.xml</code>.
+     *  
+     * @return The input source for the mapping
+     */
+    protected InputSource getBetwixtMapping()
+    {
+        return new InputSource(getClass().getResourceAsStream("/mapping.xml"));
+    }
+    
+    /**
      * Returns a new bean reader configured to read database models.
      * 
      * @return The reader
@@ -106,7 +117,7 @@ public class DatabaseIO
         {
             reader.setEntityResolver(new LocalEntityResolver());
         }
-        reader.registerMultiMapping(new InputSource(getClass().getResourceAsStream("/mapping.xml")));
+        reader.registerMultiMapping(getBetwixtMapping());
 
         return reader;
     }
@@ -121,7 +132,7 @@ public class DatabaseIO
     {
         BeanWriter writer = new BeanWriter(output);
 
-        writer.getXMLIntrospector().register(new InputSource(getClass().getResourceAsStream("/mapping.xml")));
+        writer.getXMLIntrospector().register(getBetwixtMapping());
         writer.getXMLIntrospector().getConfiguration().setAttributesForPrimitives(true);
         writer.getXMLIntrospector().getConfiguration().setWrapCollectionsInElement(false);
         writer.getXMLIntrospector().getConfiguration().setElementNameMapper(new HyphenatedNameMapper());
