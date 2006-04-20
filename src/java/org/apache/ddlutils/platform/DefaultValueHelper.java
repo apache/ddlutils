@@ -79,6 +79,7 @@ public class DefaultValueHelper
                 		catch (IllegalArgumentException ex)
                 		{}
                 	}
+                    break;
                 default:
                     if (Jdbc3Utils.supportsJava14JdbcTypes() &&
                         (originalTypeCode == Jdbc3Utils.determineBooleanTypeCode()))
