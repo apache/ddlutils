@@ -26,9 +26,11 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <!-- TODO: There is no 0.8 version of betwixt at the moment so this will fail
+                 But this is better than specifying 0.7 which will not work with DdlUtils -->
       <groupId>commons-betwixt</groupId>
       <artifactId>commons-betwixt</artifactId>
-      <version>0.7</version>
+      <version>0.8</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
