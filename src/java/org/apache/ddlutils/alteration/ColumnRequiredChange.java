@@ -25,10 +25,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnRequiredChange
+public class ColumnRequiredChange extends TableChangeImplBase
 {
-    /** The table of the column. */
-    private Table _table;
     /** The column. */
     private Column _column;
 
@@ -40,7 +38,7 @@ public class ColumnRequiredChange
      */
     public ColumnRequiredChange(Table table, Column column)
     {
-        _table  = table;
+        super(table);
         _column = column;
     }
 
@@ -52,15 +50,5 @@ public class ColumnRequiredChange
     public Column getColumn()
     {
         return _column;
-    }
-
-    /**
-     * Returns the table of the column.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

@@ -24,7 +24,7 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class AddTableChange
+public class AddTableChange implements ModelChange
 {
     /** The new table. */
     private Table _newTable;

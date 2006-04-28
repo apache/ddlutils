@@ -16,39 +16,19 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
-import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
- * Represents the change of the auto-increment constraint of a column. Since it is a boolean value,
- * this means the required constraint will simply be toggled.
+ * Represents a change to a table or sub-element of a table (e.g. a column).
  * 
  * @version $Revision: $
  */
-public class ColumnAutoIncrementChange extends TableChangeImplBase
+public interface TableChange extends ModelChange
 {
-    /** The column. */
-    private Column _column;
-
     /**
-     * Creates a new change object.
+     * Returns the affected table from the original model.
      * 
-     * @param table  The table of the column
-     * @param column The column
+     * @return The affected table
      */
-    public ColumnAutoIncrementChange(Table table, Column column)
-    {
-        super(table);
-        _column = column;
-    }
-
-    /**
-     * Returns the column.
-     *
-     * @return The column
-     */
-    public Column getColumn()
-    {
-        return _column;
-    }
+    public Table getChangedTable();
 }

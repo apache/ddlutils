@@ -23,11 +23,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class RemoveTableChange
+public class RemoveTableChange extends TableChangeImplBase
 {
-    /** The table. */
-    private Table _table;
-
     /**
      * Creates a new change object.
      * 
@@ -35,16 +32,6 @@ public class RemoveTableChange
      */
     public RemoveTableChange(Table table)
     {
-        _table = table;
-    }
-
-    /**
-     * Returns the table.
-     * 
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
+        super(table);
     }
 }

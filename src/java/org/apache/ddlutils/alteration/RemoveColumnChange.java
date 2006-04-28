@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class RemoveColumnChange
+public class RemoveColumnChange extends TableChangeImplBase
 {
-    /** The table to remove the column from. */
-    private Table _table;
     /** The column. */
     private Column _column;
 
@@ -39,7 +37,7 @@ public class RemoveColumnChange
      */
     public RemoveColumnChange(Table table, Column column)
     {
-        _table  = table;
+        super(table);
         _column = column;
     }
 
@@ -51,15 +49,5 @@ public class RemoveColumnChange
     public Column getColumn()
     {
         return _column;
-    }
-
-    /**
-     * Returns the table to remove the column from.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

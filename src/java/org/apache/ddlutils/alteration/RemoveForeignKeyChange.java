@@ -20,14 +20,14 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 
 /**
- * Represents the removal of a foreign key from a table.
+ * Represents the removal of a foreign key from a table. Note that for
+ * simplicity and because it fits the model, this change actually implements
+ * table change for the table that the foreign key originates.
  * 
  * @version $Revision: $
  */
-public class RemoveForeignKeyChange
+public class RemoveForeignKeyChange extends TableChangeImplBase
 {
-    /** The table to add the foreign key to. */
-    private Table _table;
     /** The foreign key. */
     private ForeignKey _foreignKey;
 
@@ -39,7 +39,7 @@ public class RemoveForeignKeyChange
      */
     public RemoveForeignKeyChange(Table table, ForeignKey foreignKey)
     {
-        _table      = table;
+        super(table);
         _foreignKey = foreignKey;
     }
 
@@ -51,15 +51,5 @@ public class RemoveForeignKeyChange
     public ForeignKey getForeignKey()
     {
         return _foreignKey;
-    }
-
-    /**
-     * Returns the table where the foreign key is to be removed.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

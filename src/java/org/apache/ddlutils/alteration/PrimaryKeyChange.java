@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class PrimaryKeyChange
+public class PrimaryKeyChange extends TableChangeImplBase
 {
-    /** The table to where the primary key is defined. */
-    private Table _table;
     /** The columns making up the original primary key. */
     private Column[] _oldPrimaryKeyColumns;
     /** The columns making up the new primary key. */
@@ -42,7 +40,7 @@ public class PrimaryKeyChange
      */
     public PrimaryKeyChange(Table table, Column[] oldPrimaryKeyColumns, Column[] newPrimaryKeyColumns)
     {
-        _table                = table;
+        super(table);
         _oldPrimaryKeyColumns = oldPrimaryKeyColumns;
         _newPrimaryKeyColumns = newPrimaryKeyColumns;
     }
@@ -65,15 +63,5 @@ public class PrimaryKeyChange
     public Column[] getNewPrimaryKeyColumns()
     {
         return _newPrimaryKeyColumns;
-    }
-
-    /**
-     * Returns the table whose primary key is to be changed.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

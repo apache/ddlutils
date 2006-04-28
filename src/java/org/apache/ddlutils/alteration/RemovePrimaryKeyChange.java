@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class RemovePrimaryKeyChange
+public class RemovePrimaryKeyChange extends TableChangeImplBase
 {
-    /** The table to remove the primary key from. */
-    private Table    _table;
     /** The columns making up the primary key. */
     private Column[] _primaryKeyColumns;
 
@@ -39,7 +37,7 @@ public class RemovePrimaryKeyChange
      */
     public RemovePrimaryKeyChange(Table table, Column[] primaryKeyColumns)
     {
-        _table             = table;
+        super(table);
         _primaryKeyColumns = primaryKeyColumns;
     }
 
@@ -51,15 +49,5 @@ public class RemovePrimaryKeyChange
     public Column[] getPrimaryKeyColumns()
     {
         return _primaryKeyColumns;
-    }
-
-    /**
-     * Returns the table to remove the primary key from.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

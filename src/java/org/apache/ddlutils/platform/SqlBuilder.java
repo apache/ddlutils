@@ -22,11 +22,15 @@ import java.sql.Types;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -34,6 +38,23 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddForeignKeyChange;
+import org.apache.ddlutils.alteration.AddIndexChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.AddTableChange;
+import org.apache.ddlutils.alteration.ColumnAutoIncrementChange;
+import org.apache.ddlutils.alteration.ColumnDataTypeChange;
+import org.apache.ddlutils.alteration.ColumnDefaultValueChange;
+import org.apache.ddlutils.alteration.ColumnRequiredChange;
+import org.apache.ddlutils.alteration.ColumnSizeChange;
+import org.apache.ddlutils.alteration.ModelComparator;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemoveForeignKeyChange;
+import org.apache.ddlutils.alteration.RemoveIndexChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveTableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -42,6 +63,8 @@ import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
+import org.apache.ddlutils.util.CallbackClosure;
+import org.apache.ddlutils.util.MultiInstanceofPredicate;
 
 /**
  * This class is a collection of Strategy methods for creating the DDL required to create and drop 
@@ -310,6 +333,209 @@ public abstract class SqlBuilder
 
         // we're writing the external foreignkeys last to ensure that all referenced tables are already defined
         createExternalForeignKeys(database);
+    }
+
+    /**
+     * Generates the DDL to modify an existing database so the schema matches
+     * the specified database schema by using drops, modifications and additions.
+     * Database-specific implementations can change aspect of this algorithm by
+     * redefining the individual methods that compromise it.
+     *
+     * @param currentModel  The current database schema
+     * @param desiredModel  The desired database schema
+     */
+    public void alterDatabase2(Database currentModel, Database desiredModel) throws IOException
+    {
+        ModelComparator comparator = new ModelComparator(getPlatform().isDelimitedIdentifierModeOn());
+        List            changes    = comparator.compare(currentModel, desiredModel);
+
+        processChanges(currentModel, desiredModel, changes);
+    }
+
+    /**
+     * Calls the given closure for all changes that are of one of the given types, and
+     * then removes them from the changes collection.
+     * 
+     * @param changes     The changes
+     * @param changeTypes The types to search for
+     * @param closure     The closure to invoke
+     */
+    protected void applyForSelectedChanges(Collection changes, Class[] changeTypes, final Closure closure)
+    {
+        final Predicate predicate = new MultiInstanceofPredicate(changeTypes);
+
+        // basically we filter the changes for all objects where the above predicate
+        // returns true, and for these filtered objects we invoke the given closure
+        CollectionUtils.filter(changes,
+                               new Predicate()
+                               {
+                                   public boolean evaluate(Object obj)
+                                   {
+                                       if (predicate.evaluate(obj))
+                                       {
+                                           closure.execute(obj);
+                                           return false;
+                                       }
+                                       else
+                                       {
+                                           return true;
+                                       }
+                                   }
+                               });
+    }
+    
+    /**
+     * Processes the changes. The default argument performs several passes:
+     * <ol>
+     * <li>{@link org.apache.ddlutils.alteration.RemoveForeignKeyChange} and
+     *     {@link org.apache.ddlutils.alteration.RemoveIndexChange} come first
+     *     to allow for e.g. subsequent primary key changes or column removal.</li>
+     * <li>{@link org.apache.ddlutils.alteration.RemoveTableChange}
+     *     comes after the removal of foreign keys and indices.</li> 
+     * <li>These are all handled together:<br/>
+     *     {@link org.apache.ddlutils.alteration.RemovePrimaryKeyChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.AddPrimaryKeyChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.PrimaryKeyChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.RemoveColumnChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.AddColumnChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.ColumnAutoIncrementChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.ColumnDefaultValueChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.ColumnRequiredChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.ColumnDataTypeChange}<br/>
+     *     {@link org.apache.ddlutils.alteration.ColumnSizeChange}<br/>
+     *     The reason for this is that the default algorithm rebuilds the table for these
+     *     changes and thus their order is irrelevant.</li>
+     * <li>{@link org.apache.ddlutils.alteration.AddTableChange}<br/>
+     *     needs to come after the table removal (so that tables of the same name are
+     *     removed) and before the addition of foreign keys etc.</li>
+     * <li>{@link org.apache.ddlutils.alteration.AddForeignKeyChange} and
+     *     {@link org.apache.ddlutils.alteration.AddIndexChange} come last
+     *     after table/column/primary key additions or changes.</li>
+     * </ol>
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param changes      The changes
+     */
+    protected void processChanges(Database currentModel, Database desiredModel, List changes) throws IOException
+    {
+        CallbackClosure callbackClosure = new CallbackClosure(this, "processChange");
+
+        // 1st pass: removing external constraints and indices
+        applyForSelectedChanges(changes,
+                                new Class[] { RemoveForeignKeyChange.class,
+                                              RemoveIndexChange.class },
+                                callbackClosure);
+
+        // 2nd pass: removing tables
+        applyForSelectedChanges(changes,
+                                new Class[] { RemoveTableChange.class },
+                                callbackClosure);
+
+        // 3rd pass: changing the structure of tables
+        Predicate predicate = new MultiInstanceofPredicate(new Class[] { RemovePrimaryKeyChange.class,
+                                                                         AddPrimaryKeyChange.class,
+                                                                         PrimaryKeyChange.class,
+                                                                         RemoveColumnChange.class,
+                                                                         AddColumnChange.class,
+                                                                         ColumnAutoIncrementChange.class,
+                                                                         ColumnDefaultValueChange.class,
+                                                                         ColumnRequiredChange.class,
+                                                                         ColumnDataTypeChange.class,
+                                                                         ColumnSizeChange.class });
+
+        processTableStructureChanges(CollectionUtils.select(changes, predicate));
+
+        // 4th pass: adding tables
+        applyForSelectedChanges(changes,
+                                new Class[] { AddTableChange.class },
+                                callbackClosure);
+        // 5th pass: adding external constraints and indices
+        applyForSelectedChanges(changes,
+                                new Class[] { AddForeignKeyChange.class,
+                                              AddIndexChange.class },
+                                callbackClosure);
+    }
+
+    /**
+     * Processes the change representing the removal of a foreign key.
+     * 
+     * @param change The change object
+     */
+    protected void processChange(RemoveForeignKeyChange change)
+    {
+        // TODO: ALTER TABLE DROP FOREIGN KEY
+    }
+
+    /**
+     * Processes the change representing the removal of an index.
+     * 
+     * @param change The change object
+     */
+    protected void processChange(RemoveIndexChange change)
+    {
+        // TODO: DROP INDEX
+    }
+
+    /**
+     * Processes the change representing the removal of a table.
+     * 
+     * @param change The change object
+     */
+    protected void processChange(RemoveTableChange change)
+    {
+        // TODO: DROP TABLE
+    }
+
+    /**
+     * Processes the change representing the addition of a table.
+     * 
+     * @param change The change object
+     */
+    protected void processChange(AddTableChange change)
+    {
+        // TODO: CREATE TABLE
+    }
+
+    /**
+     * Processes the change representing the addition of a foreign key.
+     * 
+     * @param change The change object
+     */
+    protected void processChange(AddForeignKeyChange change)
+    {
+        // TODO: ALTER TABLE ADD FOREIGN KEY
+    }
+
+    /**
+     * Processes the change representing the addition of an index.
+     * 
+     * @param change The change object
+     */
+    protected void processChange(AddIndexChange change)
+    {
+        // TODO: CREATE INDEX
+    }
+
+    /**
+     * Processes the changes to the structure of tables.
+     * 
+     * @param changes The change objects
+     */
+    protected void processTableStructureChanges(Collection changes)
+    {
+        // TODO:
+        // * sort the changes according to the affected tables and columns
+        // * for each affected table ...
+        // It might be possible to use the target table directly instead of the
+        // changes, even for datatype changes where we have to create casts in
+        // the INSERT statement (simply compare the native datatypes and create
+        // casts as needed)
+        // Subclasses would then filter through the change collection before (or
+        // after ? -> auto-increment) calling this method in order to use db-specific
+        // statements where possible which might reduce in the number of changes
+        // tables; we however have to take the thus processed changes into account
+        // when creating tables new (i.e. no need for casts when datatype changes)
     }
 
     /**

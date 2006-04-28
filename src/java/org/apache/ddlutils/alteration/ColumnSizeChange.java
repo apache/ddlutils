@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnSizeChange
+public class ColumnSizeChange extends TableChangeImplBase
 {
-    /** The table of the column. */
-    private Table _table;
     /** The column. */
     private Column _column;
     /** The new size. */
@@ -45,7 +43,7 @@ public class ColumnSizeChange
      */
     public ColumnSizeChange(Table table, Column column, int newSize, int newScale)
     {
-        _table    = table;
+        super(table);
         _column   = column;
         _newSize  = newSize;
         _newScale = newScale;
@@ -79,15 +77,5 @@ public class ColumnSizeChange
     public int getNewScale()
     {
         return _newScale;
-    }
-
-    /**
-     * Returns the table of the column.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

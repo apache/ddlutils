@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class AddPrimaryKeyChange
+public class AddPrimaryKeyChange extends TableChangeImplBase
 {
-    /** The table to add the primary key to. */
-    private Table    _table;
     /** The columns making up the primary key. */
     private Column[] _primaryKeyColumns;
 
@@ -39,7 +37,7 @@ public class AddPrimaryKeyChange
      */
     public AddPrimaryKeyChange(Table table, Column[] primaryKeyColumns)
     {
-        _table             = table;
+        super(table);
         _primaryKeyColumns = primaryKeyColumns;
     }
 
@@ -51,15 +49,5 @@ public class AddPrimaryKeyChange
     public Column[] getPrimaryKeyColumns()
     {
         return _primaryKeyColumns;
-    }
-
-    /**
-     * Returns the table to add the primary key to.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

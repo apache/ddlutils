@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnDataTypeChange
+public class ColumnDataTypeChange extends TableChangeImplBase
 {
-    /** The table of the column. */
-    private Table _table;
     /** The column. */
     private Column _column;
     /** The JDBC type code of the new type. */
@@ -42,7 +40,7 @@ public class ColumnDataTypeChange
      */
     public ColumnDataTypeChange(Table table, Column column, int newTypeCode)
     {
-        _table       = table;
+        super(table);
         _column      = column;
         _newTypeCode = newTypeCode;
     }
@@ -65,15 +63,5 @@ public class ColumnDataTypeChange
     public int getNewTypeCode()
     {
         return _newTypeCode;
-    }
-
-    /**
-     * Returns the table of the column.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

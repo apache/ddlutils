@@ -117,7 +117,7 @@ public class TestModelComparator extends TestCase
         RemoveTableChange change = (RemoveTableChange)changes.get(0);
 
         assertEquals("TableA",
-                     change.getTable().getName());
+                     change.getChangedTable().getName());
     }
 
     /**
@@ -153,7 +153,7 @@ public class TestModelComparator extends TestCase
         assertEquals("TABLEA",
                      change1.getNewTable().getName());
         assertEquals("TableA",
-                     change2.getTable().getName());
+                     change2.getChangedTable().getName());
     }
 
     /**

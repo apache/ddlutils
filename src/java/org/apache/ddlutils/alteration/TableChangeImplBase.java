@@ -16,40 +16,35 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
-import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 
 /**
- * Represents the addition of a foreign key to a table. Note that for
- * simplicity and because it fits the model, this change actually implements
- * table change for the table that the new foreign key will originate.
+ * Base class for change implementations.
  * 
  * @version $Revision: $
  */
-public class AddForeignKeyChange extends TableChangeImplBase
+public abstract class TableChangeImplBase implements TableChange
 {
-    /** The new foreign key. */
-    private ForeignKey _newForeignKey;
+    /** The affected table. */
+    private Table _table;
 
     /**
      * Creates a new change object.
      * 
-     * @param table         The table to add the foreign key to
-     * @param newForeignKey The new foreign key
+     * @param table The table
      */
-    public AddForeignKeyChange(Table table, ForeignKey newForeignKey)
+    public TableChangeImplBase(Table table)
     {
-        super(table);
-        _newForeignKey = newForeignKey;
+        _table = table;
     }
 
     /**
-     * Returns the new foreign key.
-     *
-     * @return The new foreign key
+     * Returns the affected table.
+     * 
+     * @return The table
      */
-    public ForeignKey getNewForeignKey()
+    public Table getChangedTable()
     {
-        return _newForeignKey;
+        return _table;
     }
 }

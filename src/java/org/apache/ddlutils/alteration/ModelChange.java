@@ -16,38 +16,11 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
-import org.apache.ddlutils.model.Index;
-import org.apache.ddlutils.model.Table;
-
 /**
- * Represents the addition of an index to a table.
+ * Marker interface for changes to a database model element.
  * 
  * @version $Revision: $
  */
-public class AddIndexChange extends TableChangeImplBase
+public interface ModelChange
 {
-    /** The new index. */
-    private Index _newIndex;
-
-    /**
-     * Creates a new change object.
-     * 
-     * @param table    The table to add the index to
-     * @param newIndex The new index
-     */
-    public AddIndexChange(Table table, Index newIndex)
-    {
-        super(table);
-        _newIndex = newIndex;
-    }
-
-    /**
-     * Returns the new index.
-     *
-     * @return The new index
-     */
-    public Index getNewIndex()
-    {
-        return _newIndex;
-    }
 }

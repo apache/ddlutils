@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class AddColumnChange
+public class AddColumnChange extends TableChangeImplBase
 {
-    /** The table to add the column to. */
-    private Table _table;
     /** The new column. */
     private Column _newColumn;
 
@@ -39,7 +37,7 @@ public class AddColumnChange
      */
     public AddColumnChange(Table table, Column newColumn)
     {
-        _table     = table;
+        super(table);
         _newColumn = newColumn;
     }
 
@@ -51,15 +49,5 @@ public class AddColumnChange
     public Column getNewColumn()
     {
         return _newColumn;
-    }
-
-    /**
-     * Returns the table to add the column to.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

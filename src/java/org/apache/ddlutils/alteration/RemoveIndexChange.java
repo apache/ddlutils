@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class RemoveIndexChange
+public class RemoveIndexChange extends TableChangeImplBase
 {
-    /** The table to add the index to. */
-    private Table _table;
     /** The index to be removed. */
     private Index _index;
 
@@ -39,7 +37,7 @@ public class RemoveIndexChange
      */
     public RemoveIndexChange(Table table, Index index)
     {
-        _table = table;
+        super(table);
         _index = index;
     }
 
@@ -51,15 +49,5 @@ public class RemoveIndexChange
     public Index getIndex()
     {
         return _index;
-    }
-
-    /**
-     * Returns the table where the index is to be removed from.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }

@@ -24,10 +24,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnDefaultValueChange
+public class ColumnDefaultValueChange extends TableChangeImplBase
 {
-    /** The table of the column. */
-    private Table _table;
     /** The column. */
     private Column _column;
     /** The new default value. */
@@ -42,7 +40,7 @@ public class ColumnDefaultValueChange
      */
     public ColumnDefaultValueChange(Table table, Column column, String newDefaultValue)
     {
-        _table           = table;
+        super(table);
         _column          = column;
         _newDefaultValue = newDefaultValue;
     }
@@ -65,15 +63,5 @@ public class ColumnDefaultValueChange
     public String getNewDefaultValue()
     {
         return _newDefaultValue;
-    }
-
-    /**
-     * Returns the table of the column.
-     *
-     * @return The table
-     */
-    public Table getTable()
-    {
-        return _table;
     }
 }
