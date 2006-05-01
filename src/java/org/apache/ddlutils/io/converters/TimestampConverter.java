@@ -33,7 +33,18 @@ public class TimestampConverter implements SqlTypeConverter
      */
     public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException
     {
-        return sqlTypeCode == Types.TIMESTAMP ? Timestamp.valueOf(textRep) : (Object)textRep;
+        if (textRep == null)
+        {
+            return null;
+        }
+        else if (sqlTypeCode == Types.TIMESTAMP)
+        {
+            return Timestamp.valueOf(textRep);
+        }
+        else
+        {
+            return textRep;
+        }
     }
 
     /**
@@ -41,6 +52,6 @@ public class TimestampConverter implements SqlTypeConverter
      */
     public String convertToString(Object obj, int sqlTypeCode) throws ConversionException
     {
-        return (obj == null ? null : ((Timestamp)obj).toString());
+        return obj == null ? null : ((Timestamp)obj).toString();
     }
 }
