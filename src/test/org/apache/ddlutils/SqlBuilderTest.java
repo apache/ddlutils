@@ -1,4 +1,4 @@
-package org.apache.ddlutils.platform;
+package org.apache.ddlutils;
 
 /*
  * Copyright 1999-2006 The Apache Software Foundation.
@@ -20,16 +20,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.TestPlatformBase;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.platform.TestPlatform;
 
 /**
- * Test the SqlBuilder (abstract) class.
+ * Test the base SqlBuilder class.
  * 
  * @author Martin van den Bemt
  * @version $Revision: $
  */
-public class SqlBuilderTest extends TestPlatformBase
+public class SqlBuilderTest extends TestBase
 {
     /** The tested model. */
     private static final String TEST_MODEL =
@@ -53,9 +54,10 @@ public class SqlBuilderTest extends TestPlatformBase
      */
     public void testUpdateSql()
     {
-        SqlBuilder sqlBuilder = new SqlBuilderImpl(getPlatform());
-        Database   database   = parseDatabaseFromString(TEST_MODEL);
-        Map        map        = new HashMap();
+        TestPlatform platform   = new TestPlatform();
+        SqlBuilder   sqlBuilder = platform.getSqlBuilder();
+        Database     database   = parseDatabaseFromString(TEST_MODEL);
+        Map          map        = new HashMap();
 
         map.put("name", "ddlutils");
         map.put("id", new Integer(0));

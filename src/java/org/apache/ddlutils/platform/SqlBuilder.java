@@ -35,6 +35,7 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
@@ -48,6 +49,7 @@ import org.apache.ddlutils.alteration.ColumnDataTypeChange;
 import org.apache.ddlutils.alteration.ColumnDefaultValueChange;
 import org.apache.ddlutils.alteration.ColumnRequiredChange;
 import org.apache.ddlutils.alteration.ColumnSizeChange;
+import org.apache.ddlutils.alteration.ModelChange;
 import org.apache.ddlutils.alteration.ModelComparator;
 import org.apache.ddlutils.alteration.PrimaryKeyChange;
 import org.apache.ddlutils.alteration.RemoveColumnChange;
@@ -55,6 +57,7 @@ import org.apache.ddlutils.alteration.RemoveForeignKeyChange;
 import org.apache.ddlutils.alteration.RemoveIndexChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.RemoveTableChange;
+import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -87,7 +90,7 @@ import org.apache.ddlutils.util.MultiInstanceofPredicate;
 public abstract class SqlBuilder
 {
     /** The line separator for in between sql commands. */
-    private static final String LINE_SEPERATOR = System.getProperty("line.separator", "\n");
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
     /** The placeholder for the size value in the native type spec. */
     protected static final String SIZE_PLACEHOLDER = "{0}";
 
@@ -419,7 +422,10 @@ public abstract class SqlBuilder
      */
     protected void processChanges(Database currentModel, Database desiredModel, List changes) throws IOException
     {
-        CallbackClosure callbackClosure = new CallbackClosure(this, "processChange");
+        CallbackClosure callbackClosure = new CallbackClosure(this,
+                                                              "processChange",
+                                                              new Class[] { Database.class, Database.class, null },
+                                                              new Object[] { currentModel, desiredModel, null });
 
         // 1st pass: removing external constraints and indices
         applyForSelectedChanges(changes,
@@ -444,7 +450,9 @@ public abstract class SqlBuilder
                                                                          ColumnDataTypeChange.class,
                                                                          ColumnSizeChange.class });
 
-        processTableStructureChanges(CollectionUtils.select(changes, predicate));
+        processTableStructureChanges(currentModel,
+                                     desiredModel,
+                                     CollectionUtils.select(changes, predicate));
 
         // 4th pass: adding tables
         applyForSelectedChanges(changes,
@@ -458,84 +466,322 @@ public abstract class SqlBuilder
     }
 
     /**
+     * This is a fall-through callback which generates a warning because a specific
+     * change type wasn't handled.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database    currentModel,
+                                 Database    desiredModel,
+                                 ModelChange change) throws IOException
+    {
+        _log.warn("Change of type " + change.getClass() + " was not handled");
+    }
+
+    /**
      * Processes the change representing the removal of a foreign key.
      * 
-     * @param change The change object
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
      */
-    protected void processChange(RemoveForeignKeyChange change)
+    protected void processChange(Database               currentModel,
+                                 Database               desiredModel,
+                                 RemoveForeignKeyChange change) throws IOException
     {
-        // TODO: ALTER TABLE DROP FOREIGN KEY
+        writeExternalForeignKeyDropStmt(change.getChangedTable(), change.getForeignKey());
     }
 
     /**
      * Processes the change representing the removal of an index.
      * 
-     * @param change The change object
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
      */
-    protected void processChange(RemoveIndexChange change)
+    protected void processChange(Database          currentModel,
+                                 Database          desiredModel,
+                                 RemoveIndexChange change) throws IOException
     {
-        // TODO: DROP INDEX
+        writeExternalIndexDropStmt(change.getChangedTable(), change.getIndex());
     }
 
     /**
      * Processes the change representing the removal of a table.
      * 
-     * @param change The change object
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
      */
-    protected void processChange(RemoveTableChange change)
+    protected void processChange(Database          currentModel,
+                                 Database          desiredModel,
+                                 RemoveTableChange change) throws IOException
     {
-        // TODO: DROP TABLE
+        dropTable(change.getChangedTable());
     }
 
     /**
      * Processes the change representing the addition of a table.
      * 
-     * @param change The change object
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
      */
-    protected void processChange(AddTableChange change)
+    protected void processChange(Database       currentModel,
+                                 Database       desiredModel,
+                                 AddTableChange change) throws IOException
     {
-        // TODO: CREATE TABLE
+        // TODO: where to get the parameters from ?
+        writeTableCreationStmt(desiredModel, change.getNewTable(), null);
+        writeTableCreationStmtEnding(change.getNewTable(), null);
+
+        if (!getPlatformInfo().isPrimaryKeyEmbedded())
+        {
+            writeExternalPrimaryKeysCreateStmt(change.getNewTable(),
+                                               change.getNewTable().getPrimaryKeyColumns());
+        }
+        if (!getPlatformInfo().isIndicesEmbedded())
+        {
+            writeExternalIndicesCreateStmt(change.getNewTable());
+        }
     }
 
     /**
      * Processes the change representing the addition of a foreign key.
      * 
-     * @param change The change object
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
      */
-    protected void processChange(AddForeignKeyChange change)
+    protected void processChange(Database            currentModel,
+                                 Database            desiredModel,
+                                 AddForeignKeyChange change) throws IOException
     {
-        // TODO: ALTER TABLE ADD FOREIGN KEY
+        writeExternalForeignKeyCreateStmt(desiredModel,
+                                          change.getChangedTable(),
+                                          change.getNewForeignKey());
     }
 
     /**
      * Processes the change representing the addition of an index.
      * 
-     * @param change The change object
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
      */
-    protected void processChange(AddIndexChange change)
+    protected void processChange(Database       currentModel,
+                                 Database       desiredModel,
+                                 AddIndexChange change) throws IOException
     {
-        // TODO: CREATE INDEX
+        writeExternalIndexCreateStmt(change.getChangedTable(), change.getNewIndex());
     }
 
     /**
      * Processes the changes to the structure of tables.
      * 
-     * @param changes The change objects
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param changes      The change objects
      */
-    protected void processTableStructureChanges(Collection changes)
+    protected void processTableStructureChanges(Database   currentModel,
+                                                Database   desiredModel,
+                                                Collection changes) throws IOException
     {
-        // TODO:
-        // * sort the changes according to the affected tables and columns
-        // * for each affected table ...
-        // It might be possible to use the target table directly instead of the
-        // changes, even for datatype changes where we have to create casts in
-        // the INSERT statement (simply compare the native datatypes and create
-        // casts as needed)
-        // Subclasses would then filter through the change collection before (or
-        // after ? -> auto-increment) calling this method in order to use db-specific
-        // statements where possible which might reduce in the number of changes
-        // tables; we however have to take the thus processed changes into account
-        // when creating tables new (i.e. no need for casts when datatype changes)
+        ListOrderedMap changesPerTable = new ListOrderedMap();
+        boolean        caseSensitive   = getPlatform().isDelimitedIdentifierModeOn();
+
+        // we first sort the changes for the tables
+        // however since the changes might contain source or target tables
+        // we use the names rather than the table objects
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+            String      name   = change.getChangedTable().getName();
+
+            if (!caseSensitive)
+            {
+                name = name.toUpperCase();
+            }
+
+            List changesForTable = (ArrayList)changesPerTable.get(name);
+
+            if (changesForTable == null)
+            {
+                changesForTable = new ArrayList();
+                changesPerTable.put(name, changesForTable);
+            }
+            changesForTable.add(change);
+        }
+        for (Iterator tableChangeIt = changesPerTable.entrySet().iterator(); tableChangeIt.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry)tableChangeIt.next();
+
+            processTableStructureChanges(currentModel,
+                                         desiredModel,
+                                         (String)entry.getKey(),
+                                         (List)entry.getValue());
+        }
+    }
+
+    /**
+     * Processes the changes to the structure of a single table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param tableName    The name of the changed table
+     * @param changes      The change objects for this table
+     */
+    protected void processTableStructureChanges(Database currentModel,
+                                                Database desiredModel,
+                                                String   tableName,
+                                                List     changes) throws IOException
+    {
+        // we might be able to simplify if there is only one change
+        if (changes.size() == 1)
+        {
+            TableChange change = (TableChange)changes.get(0);
+
+            if (change instanceof AddPrimaryKeyChange)
+            {
+                processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
+                return;
+            }
+            // TODO: Once named primary keys are supported, the removal can be handled
+            //       here as well (at least for named primary keys)
+        }
+
+        // TODO: where to get the parameters from ?
+        Table sourceTable = currentModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        Table targetTable = desiredModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        Table tempTable   = createTemporaryTable(desiredModel, targetTable, null);
+
+        writeCopyDataStatement(sourceTable, tempTable);
+        dropTable(sourceTable);
+        createTable(desiredModel, targetTable);
+        writeCopyDataStatement(tempTable, targetTable);
+        dropTable(tempTable);
+    }
+
+    /**
+     * Creates a temporary table that corresponds to the given table.
+     * Database-specific implementations may redefine this method if e.g. the
+     * database directly supports temporary tables. The default implementation
+     * simply appends an underscore to the table name and uses that as the
+     * table name.  
+     * 
+     * @param targetModel The target database
+     * @param targetTable The target table
+     * @param parameters  Table creation parameters
+     * @return The temporary table
+     */
+    protected Table createTemporaryTable(Database targetModel, Table targetTable, Map parameters) throws IOException
+    {
+        Table tempTable = new Table();
+
+        tempTable.setCatalog(targetTable.getCatalog());
+        tempTable.setSchema(targetTable.getSchema());
+        tempTable.setName(targetTable.getName() + "_");
+        tempTable.setType(targetTable.getType());
+        for (int idx = 0; idx < targetTable.getColumnCount(); idx++)
+        {
+            try
+            {
+                tempTable.addColumn((Column)targetTable.getColumn(idx).clone());
+            }
+            catch (CloneNotSupportedException ex)
+            {
+                throw new DdlUtilsException(ex);
+            }
+        }
+
+        writeTableCreationStmt(targetModel, tempTable, parameters);
+        writeTableCreationStmtEnding(tempTable, parameters);
+        return tempTable;
+    }
+
+    /**
+     * Writes a statement that copies the data from the source to the target table. Note
+     * that this copies only those columns that are in both tables.
+     * Database-specific implementations might redefine this method though they usually
+     * it suffices to redefine the {@link #writeCastExpression(Column, Column)} method.
+     * 
+     * @param sourceTable The source table
+     * @param targetTable The target table
+     */
+    protected void writeCopyDataStatement(Table sourceTable, Table targetTable) throws IOException
+    {
+        ListOrderedMap columns = new ListOrderedMap();
+
+        for (int idx = 0; idx < sourceTable.getColumnCount(); idx++)
+        {
+            Column sourceColumn = sourceTable.getColumn(idx);
+            Column targetColumn = targetTable.findColumn(sourceColumn.getName(),
+                                                         getPlatform().isDelimitedIdentifierModeOn());
+
+
+            if (targetColumn != null)
+            {
+                columns.put(sourceColumn, targetColumn);
+            }
+        }
+
+        print("INSERT INTO ");
+        printlnIdentifier(getTableName(targetTable));
+        print(" (");
+        for (Iterator columnIt = columns.keySet().iterator(); columnIt.hasNext();)
+        {
+            printIdentifier(getColumnName((Column)columnIt.next()));
+            if (columnIt.hasNext())
+            {
+                print(",");
+            }
+        }
+        print(") SELECT ");
+        for (Iterator columnsIt = columns.entrySet().iterator(); columnsIt.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry)columnsIt.next();
+
+            writeCastExpression((Column)entry.getKey(),
+                                (Column)entry.getValue());
+            if (columnsIt.hasNext())
+            {
+                print(",");
+            }
+        }
+        print(" FROM ");
+        printlnIdentifier(getTableName(sourceTable));
+        printEndOfStatement();
+    }
+
+    /**
+     * Writes a cast expression that converts the value of the source column to the data type
+     * of the target column. Per default, simply the name of the source column is written
+     * thereby assuming that any casts happen implicitly.
+     * 
+     * @param sourceColumn The source column
+     * @param targetColumn The target column
+     */
+    protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
+    {
+        printIdentifier(getColumnName(sourceColumn));
+    }
+    
+    /**
+     * Processes the addition of a primary key to a table. Note that in the default
+     * implementation, this method is called only if this is the only change to the
+     * target table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database            currentModel,
+                                 Database            desiredModel,
+                                 AddPrimaryKeyChange change) throws IOException
+    {
+        writeExternalPrimaryKeysCreateStmt(change.getChangedTable(), change.getPrimaryKeyColumns());
     }
 
     /**
@@ -920,31 +1166,12 @@ public abstract class SqlBuilder
      */
     public void createTable(Database database, Table table, Map parameters) throws IOException 
     {
-        print("CREATE TABLE ");
-        printlnIdentifier(getTableName(table));
-        println("(");
-
-        writeColumns(table);
-        
-        if (getPlatformInfo().isPrimaryKeyEmbedded())
-        {
-            writeEmbeddedPrimaryKeysStmt(table);
-        }
-        if (getPlatformInfo().isForeignKeysEmbedded())
-        {
-            writeEmbeddedForeignKeysStmt(database, table);
-        }
-        if (getPlatformInfo().isIndicesEmbedded())
-        {
-            writeEmbeddedIndicesStmt(table);
-        }
-        println();
-        print(")");
+        writeTableCreationStmt(database, table, parameters);
         writeTableCreationStmtEnding(table, parameters);
 
         if (!getPlatformInfo().isPrimaryKeyEmbedded())
         {
-            writeExternalPrimaryKeysCreateStmt(table);
+            writeExternalPrimaryKeysCreateStmt(table, table.getPrimaryKeyColumns());
         }
         if (!getPlatformInfo().isIndicesEmbedded())
         {
@@ -1394,6 +1621,37 @@ public abstract class SqlBuilder
     }
 
     /** 
+     * Writes the table creation statement without the statement end.
+     *
+     * @param database   The model
+     * @param table      The table
+     * @param parameters Additional platform-specific parameters for the table creation
+     */
+    protected void writeTableCreationStmt(Database database, Table table, Map parameters) throws IOException
+    {
+        print("CREATE TABLE ");
+        printlnIdentifier(getTableName(table));
+        println("(");
+
+        writeColumns(table);
+        
+        if (getPlatformInfo().isPrimaryKeyEmbedded())
+        {
+            writeEmbeddedPrimaryKeysStmt(table);
+        }
+        if (getPlatformInfo().isForeignKeysEmbedded())
+        {
+            writeEmbeddedForeignKeysStmt(database, table);
+        }
+        if (getPlatformInfo().isIndicesEmbedded())
+        {
+            writeEmbeddedIndicesStmt(table);
+        }
+        println();
+        print(")");
+    }
+    
+    /** 
      * Writes the end of the table creation statement. Per default,
      * only the end of the statement is written, but this can be changed
      * in subclasses.
@@ -1772,12 +2030,11 @@ public abstract class SqlBuilder
     /**
      * Writes the primary key constraints of the table as alter table statements.
      * 
-     * @param table The table
+     * @param table             The table
+     * @param primaryKeyColumns The primary key columns 
      */
-    protected void writeExternalPrimaryKeysCreateStmt(Table table) throws IOException
+    protected void writeExternalPrimaryKeysCreateStmt(Table table, Column[] primaryKeyColumns) throws IOException
     {
-        Column[] primaryKeyColumns = table.getPrimaryKeyColumns();
-
         if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
         {
             print("ALTER TABLE ");
@@ -1801,16 +2058,6 @@ public abstract class SqlBuilder
     protected boolean shouldGeneratePrimaryKeys(Column[] primaryKeyColumns)
     {
         return true;
-/*
-        for (int idx = 0; idx < primaryKeyColumns.length; idx++)
-        {
-            if (!primaryKeyColumns[idx].isAutoIncrement())
-            {
-                return true;
-            }
-        }
-        return false;
-*/
     }
 
     /**
@@ -1991,7 +2238,7 @@ public abstract class SqlBuilder
         if (!getPlatformInfo().isAlterTableForDropUsed())
         {
             print(" ON ");
-            print(getTableName(table));
+            printIdentifier(getTableName(table));
         }
         printEndOfStatement();
     }
@@ -2159,7 +2406,7 @@ public abstract class SqlBuilder
      */
     protected void println() throws IOException
     {
-        print(LINE_SEPERATOR);
+        print(LINE_SEPARATOR);
     }
 
     /**

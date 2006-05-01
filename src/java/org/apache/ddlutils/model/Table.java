@@ -661,7 +661,7 @@ public class Table implements Serializable, Cloneable
     /**
      * {@inheritDoc}
      */
-    protected Object clone() throws CloneNotSupportedException
+    public Object clone() throws CloneNotSupportedException
     {
         Table result = (Table)super.clone();
 

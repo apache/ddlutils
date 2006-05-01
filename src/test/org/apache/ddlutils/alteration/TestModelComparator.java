@@ -16,38 +16,19 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
-import java.io.StringReader;
 import java.sql.Types;
 import java.util.List;
 
-import org.apache.ddlutils.io.DatabaseIO;
+import org.apache.ddlutils.TestBase;
 import org.apache.ddlutils.model.Database;
-
-import junit.framework.TestCase;
 
 /**
  * Tests the model comparison.
  * 
  * @version $Revision: $
  */
-public class TestModelComparator extends TestCase
+public class TestModelComparator extends TestBase
 {
-    /**
-     * Parses the database defined in the given XML definition.
-     * 
-     * @param dbDef
-     *            The database XML definition
-     * @return The database model
-     */
-    private Database parseDatabaseFromString(String dbDef)
-    {
-        DatabaseIO dbIO = new DatabaseIO();
-        
-        dbIO.setUseInternalDtd(true);
-        dbIO.setValidateXml(false);
-        return dbIO.read(new StringReader(dbDef));
-    }
-
     /**
      * Tests the addition of a table.
      */
@@ -198,6 +179,60 @@ public class TestModelComparator extends TestCase
 
         assertEquals("TESTFK",
                      change.getNewForeignKey().getName());
+    }
+
+    /**
+     * Tests the addition of two tables with foreign keys to each other .
+     */
+    public void testAddTablesWithForeignKeys()
+    {
+        final String MODEL1 = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='test'>\n" +
+            "</database>";
+        final String MODEL2 = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='test'>\n" +
+            "  <table name='TABLEA'>\n" +
+            "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "    <column name='COLFK' type='INTEGER'/>\n" +
+            "    <foreign-key name='TESTFKB' foreignTable='TABLEB'>\n" +
+            "      <reference local='COLFK' foreign='COLPK'/>\n" +
+            "    </foreign-key>\n" +
+            "  </table>\n" +
+            "  <table name='TABLEB'>\n" +
+            "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "    <column name='COLFK' type='INTEGER'/>\n" +
+            "    <foreign-key name='TESTFKA' foreignTable='TABLEA'>\n" +
+            "      <reference local='COLFK' foreign='COLPK'/>\n" +
+            "    </foreign-key>\n" +
+            "  </table>\n" +
+            "</database>";
+
+        Database model1  = parseDatabaseFromString(MODEL1);
+        Database model2  = parseDatabaseFromString(MODEL2);
+        List     changes = new ModelComparator(false).compare(model1, model2);
+
+        assertEquals(4,
+                     changes.size());
+
+        AddTableChange      tableChange1 = (AddTableChange)changes.get(0);
+        AddForeignKeyChange fkChange1    = (AddForeignKeyChange)changes.get(1);
+        AddTableChange      tableChange2 = (AddTableChange)changes.get(2);
+        AddForeignKeyChange fkChange2    = (AddForeignKeyChange)changes.get(3);
+
+        assertEquals("TABLEA",
+                     tableChange1.getNewTable().getName());
+        assertEquals("TABLEB",
+                     tableChange2.getNewTable().getName());
+        assertEquals("TESTFKB",
+                     fkChange1.getNewForeignKey().getName());
+        assertEquals("TABLEA",
+                     fkChange1.getChangedTable().getName());
+        assertEquals("TESTFKA",
+                     fkChange2.getNewForeignKey().getName());
+        assertEquals("TABLEB",
+                     fkChange2.getChangedTable().getName());
     }
 
     /**

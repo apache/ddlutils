@@ -18,14 +18,8 @@ package org.apache.ddlutils;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 
-import junit.framework.TestCase;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.xml.sax.SAXException;
 
@@ -35,7 +29,7 @@ import org.xml.sax.SAXException;
  * @author Thomas Dudziak
  * @version $Revision$
  */
-public abstract class TestPlatformBase extends TestCase
+public abstract class TestPlatformBase extends TestBase
 {
     /** The database schema for testing the column types. */
     public static final String COLUMN_TEST_SCHEMA =
@@ -126,29 +120,17 @@ public abstract class TestPlatformBase extends TestCase
         "  </table>\n" +
         "</database>";
 
-    /** The log for the tests. */
-    private final Log _log = LogFactory.getLog(getClass());
     /** The tested platform. */
     private Platform _platform;
     /** The writer that the builder of the platform writes to. */
     private StringWriter _writer;
 
     /**
-     * Returns the log.
-     * 
-     * @return The log
-     */
-    protected Log getLog()
-    {
-        return _log;
-    }
-
-    /**
      * {@inheritDoc}
      */
     protected void setUp() throws Exception
     {
-        _writer = new StringWriter();
+        _writer   = new StringWriter();
         _platform = PlatformFactory.createNewPlatformInstance(getDatabaseName());
         _platform.getSqlBuilder().setWriter(_writer);
     }
@@ -159,7 +141,7 @@ public abstract class TestPlatformBase extends TestCase
     protected void tearDown() throws Exception
     {
         _platform = null;
-        _writer = null;
+        _writer   = null;
     }
 
     /**
@@ -200,25 +182,9 @@ public abstract class TestPlatformBase extends TestCase
     protected abstract String getDatabaseName();
 
     /**
-     * Parses the database defined in the given XML definition.
-     * 
-     * @param dbDef
-     *            The database XML definition
-     * @return The database model
-     */
-    protected Database parseDatabaseFromString(String dbDef)
-    {
-        DatabaseIO dbIO = new DatabaseIO();
-        
-        dbIO.setUseInternalDtd(true);
-        dbIO.setValidateXml(false);
-        return dbIO.read(new StringReader(dbDef));
-    }
-
-    /**
      * Creates the database creation sql for the given database schema.
      * 
-     * @param schema Th database schema XML
+     * @param schema The database schema XML
      * @return The sql
      */
     protected String createTestDatabase(String schema) throws IntrospectionException, IOException, SAXException
@@ -229,67 +195,5 @@ public abstract class TestPlatformBase extends TestCase
         getPlatform().setSqlCommentsOn(false);
         getPlatform().getSqlBuilder().createTables(testDb);
         return getBuilderOutput();
-    }
-
-    /**
-     * Compares the two strings but ignores any whitespace differences. It also
-     * recognizes special delimiter chars.
-     * 
-     * @param expected
-     *            The expected string
-     * @param actual
-     *            The actual string
-     */
-    protected void assertEqualsIgnoringWhitespaces(String expected, String actual)
-    {
-        assertEquals(compressWhitespaces(expected), compressWhitespaces(actual));
-    }
-
-    /**
-     * Compresses the whitespaces in the given string to a single space. Also
-     * recognizes special delimiter chars and removes whitespaces before them.
-     * 
-     * @param original
-     *            The original string
-     * @return The resulting string
-     */
-    private String compressWhitespaces(String original)
-    {
-        StringBuffer result  = new StringBuffer();
-        char         oldChar = ' ';
-        char         curChar;
-
-        for (int idx = 0; idx < original.length(); idx++)
-        {
-            curChar = original.charAt(idx);
-            if (Character.isWhitespace(curChar))
-            {
-                if (oldChar != ' ')
-                {
-                    oldChar = ' ';
-                    result.append(oldChar);
-                }
-            }
-            else
-            {
-                if ((curChar == ',') || (curChar == ';') ||
-                    (curChar == '(') || (curChar == ')'))
-                {
-                    if ((oldChar == ' ') && (result.length() > 0))
-                    {
-                        // we're removing whitespaces before commas/semicolons
-                        result.setLength(result.length() - 1);
-                    }
-                }
-                if ((oldChar == ',') || (oldChar == ';'))
-                {
-                    // we're adding a space after commas/semicolons if necessary
-                    result.append(' ');
-                }
-                result.append(curChar);
-                oldChar = curChar;
-            }
-        }
-        return result.toString();
     }
 }

@@ -79,7 +79,9 @@ public class ModelComparator
                 changes.add(new AddTableChange(targetTable));
                 for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
                 {
-                    changes.add(new AddForeignKeyChange(sourceTable, targetTable.getForeignKey(fkIdx)));
+                    // we have to use target table's definition here because the
+                    // complete table is new
+                    changes.add(new AddForeignKeyChange(targetTable, targetTable.getForeignKey(fkIdx)));
                 }
             }
             else
@@ -156,7 +158,9 @@ public class ModelComparator
                 {
                     _log.info("Foreign key " + targetFk + " needs to be created for table " + sourceTable.getName());
                 }
-                changes.add(new AddForeignKeyChange(sourceTable, targetFk));
+                // we have to use the target table here because the foreign key might
+                // reference a new column
+                changes.add(new AddForeignKeyChange(targetTable, targetFk));
             }
         }
 
@@ -185,7 +189,9 @@ public class ModelComparator
                 {
                     _log.info("Index " + targetIndex.getName() + " needs to be created for table " + sourceTable.getName());
                 }
-                changes.add(new AddIndexChange(sourceTable, targetIndex));
+                // we have to use the target table here because the index might
+                // reference a new column
+                changes.add(new AddIndexChange(targetTable, targetIndex));
             }
         }
 
@@ -217,7 +223,9 @@ public class ModelComparator
             {
                 _log.info("A primary key needs to be added to the table " + sourceTable.getName());
             }
-            changes.add(new AddPrimaryKeyChange(sourceTable, targetPK));
+            // we have to use the target table here because the primary key might
+            // reference a new column
+            changes.add(new AddPrimaryKeyChange(targetTable, targetPK));
         }
         else if ((targetPK.length == 0) && (sourcePK.length > 0))
         {

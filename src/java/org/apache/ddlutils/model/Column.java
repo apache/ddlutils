@@ -473,7 +473,7 @@ public class Column implements Cloneable, Serializable
     /**
      * {@inheritDoc}
      */
-    protected Object clone() throws CloneNotSupportedException
+    public Object clone() throws CloneNotSupportedException
     {
         Column result = (Column)super.clone();
 

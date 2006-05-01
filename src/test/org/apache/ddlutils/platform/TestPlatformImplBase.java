@@ -56,7 +56,7 @@ public class TestPlatformImplBase extends TestPlatformBase
     public void testToColumnValues()
     {
         Database         database = parseDatabaseFromString(TESTED_MODEL);
-        PlatformImplBase platform = new PlatformBase();
+        PlatformImplBase platform = new TestPlatform();
         Table            table    = database.getTable(0);
         SqlDynaClass     clz      = SqlDynaClass.newInstance(table);
         DynaBean         db       = new SqlDynaBean(SqlDynaClass.newInstance(table));
@@ -68,20 +68,6 @@ public class TestPlatformImplBase extends TestPlatformBase
         assertEquals("name",
                      map.get("name"));
         assertTrue(map.containsKey("id"));
-    }
-    
-    /**
-     * The tested platform.
-     */
-    public class PlatformBase extends PlatformImplBase 
-    {
-        /**
-         * {@inheritDoc}
-         */
-        public String getName() 
-        {
-            return null;
-        }
     }
 
     /**

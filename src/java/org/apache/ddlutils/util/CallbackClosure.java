@@ -39,35 +39,86 @@ public class CallbackClosure implements Closure
 {
     /** The object on which the callbacks will be invoked. */
     private Object _callee;
+    /** The parameter types. */
+    private Class[] _parameterTypes;
+    /** The parameters. */
+    private Object[] _parameters;
+    /** The position of the callback parameter type. */
+    private int _callbackTypePos = -1;
     /** The cached callbacks. */
     private Map _callbacks = new HashMap();
 
     /**
      * Creates a new closure object.
      * 
-     * @param callee       The object on which the callbacks will be invoked
-     * @param callbackName The name of the callback method
+     * @param callee         The object on which the callbacks will be invoked
+     * @param callbackName   The name of the callback method
+     * @param parameterTypes The parameter types. This array has to contain one <code>null</code>
+     *                       for the type of the object for which the callback is invoked.
+     *                       <code>null</code> or an empty array is regarded to be the
+     *                       same as an array containing a single <code>null</code>
+     * @param parameters     The actual arguments. The value at the placeholder position
+     *                       will be ignored. Can be <code>null</code> if no parameter types
+     *                       where given
      */
-    public CallbackClosure(Object callee, String callbackName)
+    public CallbackClosure(Object callee, String callbackName, Class[] parameterTypes, Object[] parameters)
     {
         _callee = callee;
 
+        if ((parameterTypes == null) || (parameterTypes.length == 0))
+        {
+            _parameterTypes  = new Class[] { null };
+            _parameters      = new Object[] { null };
+            _callbackTypePos = 0;
+        }
+        else
+        {
+            _parameterTypes = new Class[parameterTypes.length];
+            _parameters     = new Object[parameterTypes.length];
+
+            for (int idx = 0; idx < parameterTypes.length; idx++)
+            {
+                if (parameterTypes[idx] == null)
+                {
+                    if (_callbackTypePos >= 0)
+                    {
+                        throw new IllegalArgumentException("The parameter types may contain null only once");
+                    }
+                    _callbackTypePos = idx;
+                }
+                else
+                {
+                    _parameterTypes[idx] = parameterTypes[idx];
+                    _parameters[idx]     = parameters[idx];
+                }
+            }
+            if (_callbackTypePos < 0)
+            {
+                throw new IllegalArgumentException("The parameter types need to a null placeholder");
+            }
+        }
+        
         Class type = callee.getClass();
 
         // we're caching the callbacks
         do
         {
-            Method[] methods = type.getMethods();
+            Method[] methods = type.getDeclaredMethods();
 
             if (methods != null)
             {
                 for (int idx = 0; idx < methods.length; idx++)
                 {
-                    if (methods[idx].getName().equals(callbackName) &&
-                        (methods[idx].getParameterTypes() != null) &&
-                        (methods[idx].getParameterTypes().length == 1))
+                    Method  method     = methods[idx];
+                    Class[] paramTypes = methods[idx].getParameterTypes();
+
+                    method.setAccessible(true);
+                    if (method.getName().equals(callbackName) && typesMatch(paramTypes))
                     {
-                        _callbacks.put(methods[idx].getParameterTypes()[0], methods[idx]);
+                        if (_callbacks.get(paramTypes[_callbackTypePos]) == null)
+                        {
+                            _callbacks.put(paramTypes[_callbackTypePos], methods[idx]);
+                        }
                     }
                 }
             }
@@ -76,6 +127,28 @@ public class CallbackClosure implements Closure
         while ((type != null) && !type.equals(Object.class));
     }
 
+    /**
+     * Checks whether the given method parameter types match the expected ones.
+     * 
+     * @param methodParamTypes The method parameter types
+     * @return <code>true</code> if the parameter types match
+     */
+    private boolean typesMatch(Class[] methodParamTypes)
+    {
+        if ((methodParamTypes == null) || (_parameterTypes.length != methodParamTypes.length))
+        {
+            return false;
+        }
+        for (int idx = 0; idx < _parameterTypes.length; idx++)
+        {
+            if ((idx != _callbackTypePos) && !_parameterTypes[idx].equals(methodParamTypes[idx]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -93,7 +166,8 @@ public class CallbackClosure implements Closure
             {
                 try
                 {
-                    callback.invoke(_callee, new Object[] { obj });
+                    _parameters[_callbackTypePos] = obj;
+                    callback.invoke(_callee, _parameters);
                     return;
                 }
                 catch (InvocationTargetException ex)
