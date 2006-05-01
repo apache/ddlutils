@@ -1199,7 +1199,6 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "DROP INDEX \"TESTINDEX\" ON \"TableA\";\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK\" INTEGER NOT NULL,\n"+
@@ -1216,9 +1215,9 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"Col2\" VARCHAR(64),\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
+            "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\",\"Col2\") SELECT \"ColPK\",\"Col1\",\"Col2\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
-            "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n",
+            "DROP TABLE \"TableA_\";\n",
             getAlterDatabaseSQL(MODEL1, MODEL2));
     }
 
@@ -1262,8 +1261,8 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE TABLE \"TABLEB_\"\n"+
             "(\n"+
             "    \"COLPK\" INTEGER NOT NULL,\n"+
-            "    \"COLFK\" DOUBLE,\n"+
-            "    \"COL\" VARCHAR(64),\n"+
+            "    \"COLFK\" INTEGER,\n"+
+            "    \"COL\" DOUBLE,\n"+
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "INSERT INTO \"TABLEB_\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB\";\n"+
@@ -1271,8 +1270,8 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE TABLE \"TABLEB\"\n"+
             "(\n"+
             "    \"COLPK\" INTEGER NOT NULL,\n"+
-            "    \"COLFK\" DOUBLE,\n"+
-            "    \"COL\" VARCHAR(64),\n"+
+            "    \"COLFK\" INTEGER,\n"+
+            "    \"COL\" DOUBLE,\n"+
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\",\"COL\") SELECT \"COLPK\",\"COLFK\",\"COL\" FROM \"TABLEB_\";\n"+
@@ -1785,7 +1784,6 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "DROP INDEX \"TestIndex\" ON \"TableA\";\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK\" INTEGER NOT NULL,\n"+
@@ -1800,9 +1798,9 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"Col\" DOUBLE NOT NULL,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
+            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
-            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
+            "DROP TABLE \"TableA_\";\n",
             getAlterDatabaseSQL(MODEL1, MODEL2));
     }
 
@@ -1989,7 +1987,6 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "DROP INDEX \"TestIndex\" ON \"TableA\";\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK\" INTEGER NOT NULL,\n"+
@@ -2004,9 +2001,9 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"Col\" DECIMAL(15,2) NOT NULL,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
+            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
-            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
+            "DROP TABLE \"TableA_\";\n",
             getAlterDatabaseSQL(MODEL1, MODEL2));
     }
 
@@ -2193,7 +2190,6 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "DROP INDEX \"TestIndex\" ON \"TableA\";\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK\" INTEGER NOT NULL,\n"+
@@ -2208,9 +2204,9 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"Col\" DATE DEFAULT '2001-02-03' NOT NULL,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
+            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
-            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
+            "DROP TABLE \"TableA_\";\n",
             getAlterDatabaseSQL(MODEL1, MODEL2));
     }
 
@@ -2397,7 +2393,6 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "DROP INDEX \"TestIndex\" ON \"TableA\";\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK\" INTEGER NOT NULL,\n"+
@@ -2412,9 +2407,9 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"Col\" INTEGER NOT NULL IDENTITY,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
+            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
-            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
+            "DROP TABLE \"TableA_\";\n",
             getAlterDatabaseSQL(MODEL1, MODEL2));
     }
 
@@ -2422,7 +2417,7 @@ public class TestAlterationAlgorithm extends TestBase
      * Tests the change of the auto-increment attribute of the columns of a primary key
      * and the referencing foreign key.
      */
-    public void testChangePrimaryAndsForeignKeyColumnsAutoIncrement() throws IOException
+    public void testChangePrimaryAndForeignKeyColumnsAutoIncrement() throws IOException
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
@@ -2602,7 +2597,6 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "DROP INDEX \"TestIndex\" ON \"TableA\";\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK\" INTEGER NOT NULL,\n"+
@@ -2617,9 +2611,9 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"Col\" INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
+            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
-            "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
+            "DROP TABLE \"TableA_\";\n",
             getAlterDatabaseSQL(MODEL1, MODEL2));
     }
 
@@ -2627,7 +2621,7 @@ public class TestAlterationAlgorithm extends TestBase
      * Tests the change of the required attribute of the columns of a primary key
      * and the referencing foreign key.
      */
-    public void testChangePrimaryAndsForeignKeyColumnsRequired() throws IOException
+    public void testChangePrimaryAndForeignKeyColumnsRequired() throws IOException
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +

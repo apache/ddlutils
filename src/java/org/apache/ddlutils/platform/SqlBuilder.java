@@ -590,6 +590,7 @@ public abstract class SqlBuilder
                                                 Collection changes) throws IOException
     {
         ListOrderedMap changesPerTable = new ListOrderedMap();
+        ListOrderedMap unchangedFKs    = new ListOrderedMap();
         boolean        caseSensitive   = getPlatform().isDelimitedIdentifierModeOn();
 
         // we first sort the changes for the tables
@@ -611,8 +612,20 @@ public abstract class SqlBuilder
             {
                 changesForTable = new ArrayList();
                 changesPerTable.put(name, changesForTable);
+                unchangedFKs.put(name, getUnchangedForeignKeys(currentModel, desiredModel, name));
             }
             changesForTable.add(change);
+        }
+        // we're dropping the unchanged foreign keys
+        for (Iterator tableFKIt = unchangedFKs.entrySet().iterator(); tableFKIt.hasNext();)
+        {
+            Map.Entry entry       = (Map.Entry)tableFKIt.next();
+            Table     targetTable = desiredModel.findTable((String)entry.getKey(), caseSensitive);
+
+            for (Iterator fkIt = ((List)entry.getValue()).iterator(); fkIt.hasNext();)
+            {
+                writeExternalForeignKeyDropStmt(targetTable, (ForeignKey)fkIt.next());
+            }
         }
         for (Iterator tableChangeIt = changesPerTable.entrySet().iterator(); tableChangeIt.hasNext();)
         {
@@ -623,8 +636,49 @@ public abstract class SqlBuilder
                                          (String)entry.getKey(),
                                          (List)entry.getValue());
         }
+        // and finally we're re-creating the unchanged foreign keys
+        for (Iterator tableFKIt = unchangedFKs.entrySet().iterator(); tableFKIt.hasNext();)
+        {
+            Map.Entry entry       = (Map.Entry)tableFKIt.next();
+            Table     targetTable = desiredModel.findTable((String)entry.getKey(), caseSensitive);
+
+            for (Iterator fkIt = ((List)entry.getValue()).iterator(); fkIt.hasNext();)
+            {
+                writeExternalForeignKeyCreateStmt(desiredModel, targetTable, (ForeignKey)fkIt.next());
+            }
+        }
     }
 
+    /**
+     * Determines the unchanged foreign keys of the indicated table.
+     * 
+     * @param currentModel The current model
+     * @param desiredModel The desired model
+     * @param tableName    The name of the table
+     * @return The list of unchanged foreign keys
+     */
+    private List getUnchangedForeignKeys(Database currentModel,
+                                         Database desiredModel,
+                                         String   tableName)
+    {
+        ArrayList unchangedFKs  = new ArrayList();
+        boolean   caseSensitive = getPlatform().isDelimitedIdentifierModeOn();
+        Table     sourceTable   = currentModel.findTable(tableName, caseSensitive);
+        Table     targetTable   = desiredModel.findTable(tableName, caseSensitive);
+
+        for (int idx = 0; idx < targetTable.getForeignKeyCount(); idx++)
+        {
+            ForeignKey targetFK = targetTable.getForeignKey(idx);
+            ForeignKey sourceFK = sourceTable.findForeignKey(targetFK, caseSensitive);
+
+            if (sourceFK != null)
+            {
+                unchangedFKs.add(targetFK);
+            }
+        }
+        return unchangedFKs;
+    }
+    
     /**
      * Processes the changes to the structure of a single table.
      * 
@@ -653,13 +707,18 @@ public abstract class SqlBuilder
         }
 
         // TODO: where to get the parameters from ?
-        Table sourceTable = currentModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
-        Table targetTable = desiredModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
-        Table tempTable   = createTemporaryTable(desiredModel, targetTable, null);
+        Map   parameters      = null;
+        Table sourceTable     = currentModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        Table targetTable     = desiredModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        Table tempTable       = createTemporaryTable(desiredModel, targetTable);
+        Table realTargetTable = createRealTargetTable(desiredModel, sourceTable, targetTable);
 
+        createTable(desiredModel, tempTable, parameters);
         writeCopyDataStatement(sourceTable, tempTable);
+        // Note that we don't drop the indices here because the DROP TABLE will take care of that
+        // Likewise, foreign keys have already been dropped as necessary
         dropTable(sourceTable);
-        createTable(desiredModel, targetTable);
+        createTable(desiredModel, realTargetTable, parameters);
         writeCopyDataStatement(tempTable, targetTable);
         dropTable(tempTable);
     }
@@ -673,22 +732,21 @@ public abstract class SqlBuilder
      * 
      * @param targetModel The target database
      * @param targetTable The target table
-     * @param parameters  Table creation parameters
      * @return The temporary table
      */
-    protected Table createTemporaryTable(Database targetModel, Table targetTable, Map parameters) throws IOException
+    protected Table createTemporaryTable(Database targetModel, Table targetTable) throws IOException
     {
-        Table tempTable = new Table();
+        Table table = new Table();
 
-        tempTable.setCatalog(targetTable.getCatalog());
-        tempTable.setSchema(targetTable.getSchema());
-        tempTable.setName(targetTable.getName() + "_");
-        tempTable.setType(targetTable.getType());
+        table.setCatalog(targetTable.getCatalog());
+        table.setSchema(targetTable.getSchema());
+        table.setName(targetTable.getName() + "_");
+        table.setType(targetTable.getType());
         for (int idx = 0; idx < targetTable.getColumnCount(); idx++)
         {
             try
             {
-                tempTable.addColumn((Column)targetTable.getColumn(idx).clone());
+                table.addColumn((Column)targetTable.getColumn(idx).clone());
             }
             catch (CloneNotSupportedException ex)
             {
@@ -696,9 +754,56 @@ public abstract class SqlBuilder
             }
         }
 
-        writeTableCreationStmt(targetModel, tempTable, parameters);
-        writeTableCreationStmtEnding(tempTable, parameters);
-        return tempTable;
+        return table;
+    }
+
+    /**
+     * Creates the target table that differs from the given target table only in the
+     * indices. More specifically, only those indices are used that have not changed.
+     * 
+     * @param targetModel The target database
+     * @param sourceTable The source table
+     * @param targetTable The target table
+     * @return The table
+     */
+    protected Table createRealTargetTable(Database targetModel, Table sourceTable, Table targetTable) throws IOException
+    {
+        Table table = new Table();
+
+        table.setCatalog(targetTable.getCatalog());
+        table.setSchema(targetTable.getSchema());
+        table.setName(targetTable.getName());
+        table.setType(targetTable.getType());
+        for (int idx = 0; idx < targetTable.getColumnCount(); idx++)
+        {
+            try
+            {
+                table.addColumn((Column)targetTable.getColumn(idx).clone());
+            }
+            catch (CloneNotSupportedException ex)
+            {
+                throw new DdlUtilsException(ex);
+            }
+        }
+
+        boolean caseSensitive = getPlatform().isDelimitedIdentifierModeOn();
+
+        for (int idx = 0; idx < targetTable.getIndexCount(); idx++)
+        {
+            Index targetIndex = targetTable.getIndex(idx);
+            Index sourceIndex = sourceTable.findIndex(targetIndex.getName(), caseSensitive);
+
+            if (sourceIndex != null)
+            {
+                if ((caseSensitive  && sourceIndex.equals(targetIndex)) ||
+                    (!caseSensitive && sourceIndex.equalsIgnoreCase(targetIndex)))
+                {
+                    table.addIndex(targetIndex);
+                }
+            }
+        }
+
+        return table;
     }
 
     /**
@@ -2091,7 +2196,6 @@ public abstract class SqlBuilder
         return index.getName();
     }
 
-    
     /**
      * Writes the indexes of the given table.
      * 

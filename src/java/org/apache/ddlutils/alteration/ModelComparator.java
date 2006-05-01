@@ -372,7 +372,7 @@ public class ModelComparator
      */
     private Index findCorrespondingIndex(Table table, Index index)
     {
-        for (int indexIdx = 0; indexIdx < table.getForeignKeyCount(); indexIdx++)
+        for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
         {
             Index curIndex = table.getIndex(indexIdx);
 
