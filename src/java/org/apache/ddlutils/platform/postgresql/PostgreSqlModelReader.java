@@ -102,6 +102,15 @@ public class PostgreSqlModelReader extends JdbcModelReader
             if (column.getSizeAsInt() <= 0)
             {
                 column.setSize(null);
+                // PostgreSQL reports BYTEA and TEXT as BINARY(-1) and VARCHAR(-1) respectively
+                if (column.getTypeCode() == Types.BINARY)
+                {
+                    column.setTypeCode(Types.BLOB);
+                }
+                else if (column.getTypeCode() == Types.VARCHAR)
+                {
+                    column.setTypeCode(Types.CLOB);
+                }
             }
         }
 
