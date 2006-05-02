@@ -768,10 +768,10 @@ public abstract class SqlBuilder
         Map   parameters      = null;
         Table sourceTable     = currentModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
         Table targetTable     = desiredModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
-        Table tempTable       = createTemporaryTable(desiredModel, targetTable);
-        Table realTargetTable = createRealTargetTable(desiredModel, sourceTable, targetTable);
+        Table tempTable       = getTemporaryTableFor(desiredModel, targetTable);
+        Table realTargetTable = getRealTargetTableFor(desiredModel, sourceTable, targetTable);
 
-        createTable(desiredModel, tempTable, parameters);
+        createTemporaryTable(desiredModel, tempTable, parameters);
         writeCopyDataStatement(sourceTable, tempTable);
         // Note that we don't drop the indices here because the DROP TABLE will take care of that
         // Likewise, foreign keys have already been dropped as necessary
@@ -782,7 +782,7 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Creates a temporary table that corresponds to the given table.
+     * Creates a temporary table object that corresponds to the given table.
      * Database-specific implementations may redefine this method if e.g. the
      * database directly supports temporary tables. The default implementation
      * simply appends an underscore to the table name and uses that as the
@@ -792,7 +792,7 @@ public abstract class SqlBuilder
      * @param targetTable The target table
      * @return The temporary table
      */
-    protected Table createTemporaryTable(Database targetModel, Table targetTable) throws IOException
+    protected Table getTemporaryTableFor(Database targetModel, Table targetTable) throws IOException
     {
         Table table = new Table();
 
@@ -816,7 +816,20 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Creates the target table that differs from the given target table only in the
+     * Outputs the DDL to create the given temporary table. Per default this is simply
+     * a call to {@link #createTable(Database, Table, Map)}.
+     * 
+     * @param database   The database model
+     * @param table      The table
+     * @param parameters Additional platform-specific parameters for the table creation
+     */
+    protected void createTemporaryTable(Database database, Table table, Map parameters) throws IOException 
+    {
+        createTable(database, table, parameters);
+    }
+
+    /**
+     * Creates the target table object that differs from the given target table only in the
      * indices. More specifically, only those indices are used that have not changed.
      * 
      * @param targetModel The target database
@@ -824,7 +837,7 @@ public abstract class SqlBuilder
      * @param targetTable The target table
      * @return The table
      */
-    protected Table createRealTargetTable(Database targetModel, Table sourceTable, Table targetTable) throws IOException
+    protected Table getRealTargetTableFor(Database targetModel, Table sourceTable, Table targetTable) throws IOException
     {
         Table table = new Table();
 
@@ -1319,7 +1332,7 @@ public abstract class SqlBuilder
         createTable(database, table, null); 
     }
 
-    /** 
+    /**
      * Outputs the DDL to create the table along with any non-external constraints as well
      * as with external primary keys and indices (but not foreign keys).
      * 
