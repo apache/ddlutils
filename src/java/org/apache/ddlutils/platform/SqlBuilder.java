@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
@@ -616,6 +617,9 @@ public abstract class SqlBuilder
             }
             changesForTable.add(change);
         }
+        // we also need to drop the foreign keys of the unchanged tables referencing the changed tables
+        addRelevantFKsFromUnchangedTables(currentModel, desiredModel, changesPerTable.keySet(), unchangedFKs);
+
         // we're dropping the unchanged foreign keys
         for (Iterator tableFKIt = unchangedFKs.entrySet().iterator(); tableFKIt.hasNext();)
         {
@@ -677,6 +681,60 @@ public abstract class SqlBuilder
             }
         }
         return unchangedFKs;
+    }
+
+    /**
+     * Adds the foreign keys of the unchanged tables that reference changed tables
+     * to the given map.
+     * 
+     * @param currentModel              The current model
+     * @param desiredModel              The desired model
+     * @param namesOfKnownChangedTables The known names of changed tables
+     * @param fksPerTable               The map table name -> foreign keys to which
+     *                                  found foreign keys will be added to
+     */
+    private void addRelevantFKsFromUnchangedTables(Database currentModel,
+                                                   Database desiredModel,
+                                                   Set      namesOfKnownChangedTables,
+                                                   Map      fksPerTable)
+    {
+        boolean caseSensitive = getPlatform().isDelimitedIdentifierModeOn();
+
+        for (int tableIdx = 0; tableIdx < desiredModel.getTableCount(); tableIdx++)
+        {
+            Table  targetTable = desiredModel.getTable(tableIdx);
+            String name        = targetTable.getName();
+            Table  sourceTable = currentModel.findTable(name, caseSensitive);
+            List   relevantFks = null;
+
+            if (!caseSensitive)
+            {
+                name = name.toUpperCase();
+            }
+            if ((sourceTable != null) && !namesOfKnownChangedTables.contains(name))
+            {
+                for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
+                {
+                    ForeignKey targetFk = targetTable.getForeignKey(fkIdx);
+                    ForeignKey sourceFk = sourceTable.findForeignKey(targetFk, caseSensitive);
+                    String     refName  = targetFk.getForeignTable().getName();
+
+                    if (!caseSensitive)
+                    {
+                        refName = refName.toUpperCase();
+                    }
+                    if ((sourceFk != null) && namesOfKnownChangedTables.contains(refName))
+                    {
+                        if (relevantFks == null)
+                        {
+                            relevantFks = new ArrayList();
+                            fksPerTable.put(name, relevantFks);
+                        }
+                        relevantFks.add(targetFk);
+                    }
+                }
+            }
+        }
     }
     
     /**

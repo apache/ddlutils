@@ -1320,6 +1320,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK\" INTEGER NOT NULL,\n"+
+            "    \"Col\" DOUBLE,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
             "INSERT INTO \"TableA_\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA\";\n"+
@@ -2464,22 +2465,6 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
-            "CREATE TABLE \"TABLEB_\"\n"+
-            "(\n"+
-            "    \"COLPK\" INTEGER NOT NULL,\n"+
-            "    \"COLFK\" INTEGER,\n"+
-            "    PRIMARY KEY (\"COLPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TABLEB_\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB\";\n"+
-            "DROP TABLE \"TABLEB\";\n"+
-            "CREATE TABLE \"TABLEB\"\n"+
-            "(\n"+
-            "    \"COLPK\" INTEGER NOT NULL,\n"+
-            "    \"COLFK\" INTEGER,\n"+
-            "    PRIMARY KEY (\"COLPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
-            "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
             getAlterDatabaseSQL(MODEL1, MODEL2));
     }
