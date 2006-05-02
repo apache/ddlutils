@@ -133,7 +133,7 @@ public class TestAlteration extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='VARCHAR' size='50'/>\n"+
+        "    <column name='avalue' type='VARCHAR' size='50' required='true'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model for the removing a column from the pk. */
@@ -188,7 +188,7 @@ public class TestAlteration extends RoundtripTestBase
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
         "    <column name='avalue1' type='DOUBLE'/>\n"+
-        "    <column name='avalue2' type='VARCHAR'/>\n"+
+        "    <column name='avalue2' type='VARCHAR' size='50'/>\n"+
         "    <unique name='test_index'>\n"+
         "      <unique-column name='avalue2'/>\n"+
         "      <unique-column name='avalue1'/>\n"+
@@ -202,7 +202,7 @@ public class TestAlteration extends RoundtripTestBase
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
         "    <column name='avalue1' type='DOUBLE'/>\n"+
-        "    <column name='avalue2' type='VARCHAR'/>\n"+
+        "    <column name='avalue2' type='VARCHAR' size='40'/>\n"+
         "    <index name='test_index'>\n"+
         "      <index-column name='avalue1'/>\n"+
         "    </index>\n"+
@@ -230,7 +230,7 @@ public class TestAlteration extends RoundtripTestBase
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
         "  </table>\n"+
         "  <table name='roundtrip2'>\n"+
-        "    <column name='pk' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+        "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
         "    <column name='avalue' type='INTEGER' required='true'/>\n"+
         "  </table>\n"+
         "</database>";
@@ -299,7 +299,7 @@ public class TestAlteration extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip1'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='VARCHAR' required='true'/>\n"+
+        "    <column name='avalue' type='VARCHAR' size='32' required='true'/>\n"+
         "  </table>\n"+
        "</database>";
     /** Test model for removing a table. */
@@ -747,7 +747,7 @@ public class TestAlteration extends RoundtripTestBase
     	newFkColumn.setRequired(true);
     	model.getTable(1).addColumn(newFkColumn);
 
-    	model.getTable(1).getForeignKey(0).addReference(new Reference(newPkColumn, newFkColumn));
+    	model.getTable(1).getForeignKey(0).addReference(new Reference(newFkColumn, newPkColumn));
 
     	alterDatabase(model);
 
