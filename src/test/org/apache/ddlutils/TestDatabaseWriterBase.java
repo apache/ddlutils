@@ -255,6 +255,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         try
         {
             _model = model;
+            _model.resetDynaClassCache();
 
             getPlatform().setSqlCommentsOn(false);
             getPlatform().alterTables(_model, true, true, false);

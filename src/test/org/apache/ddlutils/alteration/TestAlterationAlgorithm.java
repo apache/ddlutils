@@ -79,7 +79,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testNoChange() throws IOException
     {
-        final String MODEL = 
+        final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TABLEA'>\n" +
@@ -99,7 +99,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "",
-            getAlterDatabaseSQL(MODEL, MODEL));
+            getAlterDatabaseSQL(modelXml, modelXml));
     }
 
     /**
@@ -107,14 +107,14 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddTable() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -131,7 +131,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"COLPK\" INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -139,14 +139,14 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddTableWithIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -169,7 +169,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TABLEB\" (\"COL\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -177,14 +177,14 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddTableWithUniqueIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -207,7 +207,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TABLEB\" (\"COL\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -215,14 +215,14 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddTableWithForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -245,7 +245,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -253,11 +253,11 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddTablesWithForeignKeys() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -291,7 +291,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"ColFK\") REFERENCES \"TABLEB\" (\"COLPK\");\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -299,7 +299,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveTable() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -309,7 +309,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TABLEB'>\n" +
@@ -319,7 +319,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE \"TableA\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -327,7 +327,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveTableWithIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -341,7 +341,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TABLEB'>\n" +
@@ -351,7 +351,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE \"TableA\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -359,7 +359,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveTableWithForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -373,7 +373,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='COLPK' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TABLEB'>\n" +
@@ -384,7 +384,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TableA\" DROP CONSTRAINT \"TESTFK\";\n"+
             "DROP TABLE \"TableA\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -392,7 +392,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveTableReferencedByForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -406,7 +406,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='COLPK' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -418,7 +418,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TableA\" DROP CONSTRAINT \"TESTFK\";\n"+
             "DROP TABLE \"TABLEB\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -426,7 +426,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveTablesWithForeignKeys() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -444,7 +444,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "</database>";
@@ -454,7 +454,7 @@ public class TestAlterationAlgorithm extends TestBase
             "ALTER TABLE \"TABLEB\" DROP CONSTRAINT \"TESTFK\";\n"+
             "DROP TABLE \"TableA\";\n"+
             "DROP TABLE \"TABLEB\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -462,7 +462,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -470,7 +470,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -484,7 +484,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -492,7 +492,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddUniqueIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -500,7 +500,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -514,7 +514,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "CREATE UNIQUE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -522,7 +522,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -533,7 +533,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -544,7 +544,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TestIndex\" ON \"TableA\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -552,7 +552,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveUniqueIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -563,7 +563,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </unique>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -574,7 +574,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TestIndex\" ON \"TableA\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -582,7 +582,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddPrimaryKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -590,7 +590,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='ColPK2' type='VARCHAR' size='64' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -601,7 +601,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TableA_PK\" PRIMARY KEY (\"ColPK1\",\"ColPK2\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -609,7 +609,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemovePrimaryKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -617,7 +617,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='ColPK2' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -641,7 +641,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\", \"ColPK2\") SELECT \"ColPK1\", \"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -649,14 +649,14 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -682,7 +682,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\", \"Col\") SELECT \"ColPK\", \"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -690,7 +690,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -698,7 +698,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -721,7 +721,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -729,14 +729,14 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddPrimaryKeyColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -762,7 +762,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\", \"ColPK2\") SELECT \"ColPK1\", \"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -770,7 +770,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemovePrimaryKeyColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -778,7 +778,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='ColPK2' type='VARCHAR' primaryKey='true' size='64'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -801,7 +801,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\") SELECT \"ColPK1\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -810,7 +810,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddColumnsToPrimaryAndForeignKeys() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -824,7 +824,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -879,7 +879,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK1\",\"COLFK2\") SELECT \"COLPK\",\"COLFK1\",\"COLFK2\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK1\",\"COLFK2\") REFERENCES \"TableA\" (\"ColPK1\",\"ColPK2\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -888,7 +888,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveColumnsFromPrimaryAndForeignKeys() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -905,7 +905,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -953,7 +953,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK1\") SELECT \"COLPK\",\"COLFK1\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK1\") REFERENCES \"TableA\" (\"ColPK1\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -961,7 +961,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddIndexColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -972,7 +972,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1007,7 +1007,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\",\"Col2\") SELECT \"ColPK\",\"Col1\",\"Col2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\",\"Col2\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1015,7 +1015,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveIndexColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1028,7 +1028,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1059,7 +1059,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\") SELECT \"ColPK\",\"Col1\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1067,7 +1067,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddUniqueIndexColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1078,7 +1078,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </unique>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1113,7 +1113,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\",\"Col2\") SELECT \"ColPK\",\"Col1\",\"Col2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\",\"Col2\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1121,7 +1121,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveUniqueIndexColumn() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1134,7 +1134,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </unique>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1165,7 +1165,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\") SELECT \"ColPK\",\"Col1\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
 
@@ -1174,7 +1174,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddColumnToTableWithIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1185,7 +1185,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1218,7 +1218,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\",\"Col2\") SELECT \"ColPK\",\"Col1\",\"Col2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1226,7 +1226,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddColumnToTableWithForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1240,7 +1240,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1277,7 +1277,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\",\"COL\") SELECT \"COLPK\",\"COLFK\",\"COL\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1285,7 +1285,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddColumnToTableReferencedByForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1299,7 +1299,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1334,7 +1334,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1342,7 +1342,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddExistingColumnToPrimaryKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1350,7 +1350,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='ColPK2' type='DOUBLE' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1376,7 +1376,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1384,7 +1384,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveColumnFromPrimaryKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1392,7 +1392,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1418,7 +1418,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1426,7 +1426,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddExistingColumnsToPrimaryAndForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1442,7 +1442,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1479,7 +1479,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK2\",\"COLFK1\") REFERENCES \"TableA\" (\"ColPK1\",\"ColPK2\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1487,7 +1487,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveExistingColumnsFromPrimaryAndForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1504,7 +1504,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1540,7 +1540,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK2\") REFERENCES \"TableA\" (\"ColPK1\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1548,7 +1548,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testAddExistingColumnToIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1560,7 +1560,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </unique>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1577,7 +1577,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TESTINDEX\" ON \"TableA\";\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\",\"Col2\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1585,7 +1585,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveExistingColumnFromIndex() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1598,7 +1598,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1614,7 +1614,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TESTINDEX\" ON \"TableA\";\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1622,7 +1622,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testRemoveColumnFromTableReferencedByForeignKey() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1637,7 +1637,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1669,7 +1669,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1677,7 +1677,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeColumnDatatype() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1685,7 +1685,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1711,7 +1711,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1719,7 +1719,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryKeyColumnDatatype() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1727,7 +1727,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1753,7 +1753,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1761,7 +1761,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeIndexColumnDatatype() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1772,7 +1772,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1802,7 +1802,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1810,7 +1810,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryAndForeignKeyColumnsDatatype() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1824,7 +1824,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1872,7 +1872,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1880,7 +1880,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeColumnSize() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1888,7 +1888,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='VARCHAR' size='32' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1914,7 +1914,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1922,7 +1922,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryKeyColumnSize() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1930,7 +1930,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1956,7 +1956,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1964,7 +1964,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeIndexColumnSize() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -1975,7 +1975,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2005,7 +2005,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2013,7 +2013,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryAndForeignKeyColumnsSize() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2027,7 +2027,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2075,7 +2075,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2083,7 +2083,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeColumnDefault() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2091,7 +2091,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='VARCHAR' size='32' default='test 1' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2117,7 +2117,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2125,7 +2125,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryKeyColumnDefault() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2133,7 +2133,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2159,7 +2159,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2167,7 +2167,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeIndexColumnDefault() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2178,7 +2178,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2208,7 +2208,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2216,7 +2216,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryAndForeignKeyColumnsDefault() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2230,7 +2230,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2278,7 +2278,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2286,7 +2286,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeColumnAutoIncrement() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2294,7 +2294,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' autoIncrement='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2320,7 +2320,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2328,7 +2328,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryKeyColumnAutoIncrement() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2336,7 +2336,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2362,7 +2362,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2370,7 +2370,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeIndexColumnAutoIncrement() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2381,7 +2381,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2411,7 +2411,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2420,7 +2420,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryAndForeignKeyColumnsAutoIncrement() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2434,7 +2434,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2466,7 +2466,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2474,7 +2474,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeColumnRequired() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2482,7 +2482,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2508,7 +2508,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2516,7 +2516,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryKeyColumnRequired() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2524,7 +2524,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2550,7 +2550,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2558,7 +2558,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangeIndexColumnRequired() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2569,7 +2569,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </index>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2599,7 +2599,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2608,7 +2608,7 @@ public class TestAlterationAlgorithm extends TestBase
      */
     public void testChangePrimaryAndForeignKeyColumnsRequired() throws IOException
     {
-        final String MODEL1 = 
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2622,7 +2622,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    </foreign-key>\n" +
             "  </table>\n" +
             "</database>";
-        final String MODEL2 = 
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
@@ -2670,6 +2670,6 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(MODEL1, MODEL2));
+            getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 }

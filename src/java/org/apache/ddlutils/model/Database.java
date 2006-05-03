@@ -457,6 +457,15 @@ public class Database implements Serializable, Cloneable
     }
 
     /**
+     * Resets the dyna class cache. This should be done for instance when a column
+     * has been added or removed to a table.
+     */
+    public void resetDynaClassCache()
+    {
+        _dynaClassCache = null;
+    }
+    
+    /**
      * Returns the {@link org.apache.ddlutils.dynabean.SqlDynaClass} for the given table name. If the it does not
      * exist yet, a new one will be created based on the Table definition.
      * 
