@@ -260,7 +260,11 @@ public class TestAlteration extends RoundtripTestBase
 
         insertRow("roundtrip", new Object[] { new Integer(1), new Integer(2) });
 
+        // since some databases require/automatically make the column required
+        // we use it like this in this test in order to avoid problems when
+        // comparing the model from the live database with our assumed one
     	model.getTable(0).getColumn(1).setAutoIncrement(true);
+        model.getTable(0).getColumn(1).setRequired(true);
 
     	alterDatabase(model);
 
@@ -969,7 +973,7 @@ public class TestAlteration extends RoundtripTestBase
 
     	newPkColumn.setName("pk");
     	newPkColumn.setTypeCode(Types.VARCHAR);
-    	newPkColumn.setSize("20");
+    	newPkColumn.setSize("32");
     	newPkColumn.setPrimaryKey(true);
     	newPkColumn.setRequired(true);
     	newTable.setName("roundtrip2");

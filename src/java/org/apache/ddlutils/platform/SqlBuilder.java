@@ -904,7 +904,7 @@ public abstract class SqlBuilder
         }
 
         print("INSERT INTO ");
-        printlnIdentifier(getTableName(targetTable));
+        printIdentifier(getTableName(targetTable));
         print(" (");
         for (Iterator columnIt = columns.keySet().iterator(); columnIt.hasNext();)
         {
@@ -927,7 +927,7 @@ public abstract class SqlBuilder
             }
         }
         print(" FROM ");
-        printlnIdentifier(getTableName(sourceTable));
+        printIdentifier(getTableName(sourceTable));
         printEndOfStatement();
     }
 
@@ -1998,6 +1998,20 @@ public abstract class SqlBuilder
         String nativeType = (String)getPlatformInfo().getNativeType(column.getTypeCode());
 
         return nativeType == null ? column.getType() : nativeType;
+    }
+
+    /**
+     * Returns the bare database-native type for the given column without any size specifies.
+     * 
+     * @param column The column
+     * @return The native type
+     */
+    protected String getBareNativeType(Column column)
+    {
+        String nativeType = getNativeType(column);
+        int    sizePos    = nativeType.indexOf(SIZE_PLACEHOLDER);
+
+        return sizePos >= 0 ? nativeType.substring(0, sizePos) : nativeType;
     }
 
     /**

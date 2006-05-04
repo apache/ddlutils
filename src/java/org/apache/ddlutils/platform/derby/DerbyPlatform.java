@@ -19,6 +19,7 @@ package org.apache.ddlutils.platform.derby;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -48,6 +49,8 @@ public class DerbyPlatform extends CloudscapePlatform
     public DerbyPlatform()
     {
         super();
+        getPlatformInfo().addNativeTypeMapping(Types.DOUBLE, "DOUBLE");
+        getPlatformInfo().addNativeTypeMapping(Types.FLOAT,  "DOUBLE", Types.DOUBLE);
         setSqlBuilder(new DerbyBuilder(this));
         setModelReader(new DerbyModelReader(this));
     }
