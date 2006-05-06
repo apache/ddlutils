@@ -248,6 +248,19 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     /**
      * Alters the database to match the given model.
      * 
+     * @param schemaXml The model XML
+     */
+    protected Database alterDatabase(String schemaXml) throws DynaSqlException
+    {
+        Database model = parseDatabaseFromString(schemaXml);
+
+        alterDatabase(model);
+        return model;
+    }
+
+    /**
+     * Alters the database to match the given model.
+     * 
      * @param model The model
      */
     protected void alterDatabase(Database model) throws DynaSqlException
