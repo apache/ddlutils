@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 import org.apache.commons.collections.Closure;
 import org.apache.ddlutils.DdlUtilsException;
@@ -154,12 +153,12 @@ public class CallbackClosure implements Closure
      */
     public void execute(Object obj) throws DdlUtilsException
     {
-        Queue queue = new LinkedList();
+        LinkedList queue = new LinkedList();
 
         queue.add(obj.getClass());
         while (!queue.isEmpty())
         {
-            Class  type     = (Class)queue.poll();
+            Class  type     = (Class)queue.removeFirst();
             Method callback = (Method)_callbacks.get(type);
 
             if (callback != null)
