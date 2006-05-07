@@ -17,6 +17,7 @@ package org.apache.ddlutils.alteration;
  */
 
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -49,5 +50,16 @@ public class RemoveColumnChange extends TableChangeImplBase
     public Column getColumn()
     {
         return _column;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Table  table  = database.findTable(getChangedTable().getName());
+        Column column = table.findColumn(_column.getName());
+
+        table.removeColumn(column);
     }
 }

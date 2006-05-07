@@ -18,6 +18,8 @@ package org.apache.ddlutils.model;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+
 /**
  * Provides compatibility with Torque-style xml with separate &lt;index&gt; and
  * &lt;unique&gt; tags, but adds no functionality.  All indexes are treated the
@@ -26,7 +28,7 @@ import java.util.ArrayList;
  * @author John Marshall/Connectria
  * @version $Revision$
  */
-public class UniqueIndex extends NonUniqueIndex
+public class UniqueIndex extends IndexImpBase
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -4097003126550294993L;
@@ -42,9 +44,9 @@ public class UniqueIndex extends NonUniqueIndex
     /**
      * {@inheritDoc}
      */
-    protected Object clone() throws CloneNotSupportedException
+    public Object clone() throws CloneNotSupportedException
     {
-        UniqueIndex result = (UniqueIndex)super.clone();
+        UniqueIndex result = new UniqueIndex();
 
         result._name    = _name;
         result._columns = (ArrayList)_columns.clone();
@@ -61,8 +63,9 @@ public class UniqueIndex extends NonUniqueIndex
         {
             UniqueIndex other = (UniqueIndex)obj;
 
-            // Note that we ignore the name here
-            return _columns.equals(other._columns);
+            return new EqualsBuilder().append(_name,    other._name)
+                                      .append(_columns, other._columns)
+                                      .isEquals();
         }
         else
         {

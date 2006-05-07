@@ -91,6 +91,14 @@ public interface Index extends Cloneable, Serializable
     public void removeColumn(int idx);
 
     /**
+     * Clones this index.
+     * 
+     * @return The clone
+     * @throws CloneNotSupportedException If the cloning did fail
+     */
+    public Object clone() throws CloneNotSupportedException;
+
+    /**
      * Compares this index to the given one while ignoring the case of identifiers.
      * 
      * @param otherIndex The other index

@@ -16,6 +16,8 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 
@@ -52,4 +54,24 @@ public class AddForeignKeyChange extends TableChangeImplBase
     {
         return _newForeignKey;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        ForeignKey newFK = null;
+
+        try
+        {
+            newFK = (ForeignKey)_newForeignKey.clone();
+            newFK.setForeignTable(database.findTable(_newForeignKey.getForeignTableName()));
+        }
+        catch (CloneNotSupportedException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        database.findTable(getChangedTable().getName()).addForeignKey(newFK);
+    }
+
 }

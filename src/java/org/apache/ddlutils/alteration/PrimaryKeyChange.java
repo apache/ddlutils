@@ -17,6 +17,7 @@ package org.apache.ddlutils.alteration;
  */
 
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -63,5 +64,26 @@ public class PrimaryKeyChange extends TableChangeImplBase
     public Column[] getNewPrimaryKeyColumns()
     {
         return _newPrimaryKeyColumns;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Table table = database.findTable(getChangedTable().getName());
+
+        for (int idx = 0; idx < _oldPrimaryKeyColumns.length; idx++)
+        {
+            Column column = table.findColumn(_oldPrimaryKeyColumns[idx].getName());
+
+            column.setPrimaryKey(false);
+        }
+        for (int idx = 0; idx < _newPrimaryKeyColumns.length; idx++)
+        {
+            Column column = table.findColumn(_newPrimaryKeyColumns[idx].getName());
+
+            column.setPrimaryKey(true);
+        }
     }
 }

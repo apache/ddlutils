@@ -19,6 +19,7 @@ package org.apache.ddlutils.alteration;
 import java.sql.Types;
 import java.util.List;
 
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.TestBase;
 import org.apache.ddlutils.model.Database;
 
@@ -29,6 +30,22 @@ import org.apache.ddlutils.model.Database;
  */
 public class TestModelComparator extends TestBase
 {
+    /**
+     * Creates a new model comparator.
+     * 
+     * @return The model comparator
+     */
+    protected ModelComparator createModelComparator(boolean caseSensitive)
+    {
+        PlatformInfo platformInfo = new PlatformInfo();
+
+        platformInfo.setHasSize(Types.DECIMAL, true);
+        platformInfo.setHasSize(Types.NUMERIC, true);
+        platformInfo.setHasSize(Types.CHAR, true);
+        platformInfo.setHasSize(Types.VARCHAR, true);
+        return new ModelComparator(platformInfo, caseSensitive);
+    }
+
     /**
      * Tests the addition of a table.
      */
@@ -54,7 +71,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -90,7 +107,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -123,7 +140,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(2,
                      changes.size());
@@ -170,7 +187,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -211,7 +228,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(4,
                      changes.size());
@@ -268,7 +285,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -315,7 +332,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(2,
                      changes.size());
@@ -371,7 +388,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(2,
                      changes.size());
@@ -428,7 +445,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertTrue(changes.isEmpty());
     }
@@ -460,7 +477,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -498,7 +515,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -539,7 +556,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(2,
                      changes.size());
@@ -587,7 +604,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(2,
                      changes.size());
@@ -634,7 +651,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(2,
                      changes.size());
@@ -681,7 +698,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(2,
                      changes.size());
@@ -717,7 +734,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -752,7 +769,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -789,7 +806,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -832,7 +849,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -875,7 +892,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -909,7 +926,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -944,7 +961,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -981,7 +998,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -1020,7 +1037,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -1039,8 +1056,8 @@ public class TestModelComparator extends TestBase
      * Tests removing the size of a column. This test shows how the comparator
      * reacts in the common case of comparing a model read from a live database
      * (which usually returns sizes for every column) and a model from XML.
-     * The model comparator will not filter out these changes, it is up to the
-     * platform to decide whether such a change is valid or can be ignored. 
+     * The model comparator will filter out these changes depending on the
+     * platform info with which the comparator was created. 
      */
     public void testRemoveColumnSize()
     {
@@ -1063,19 +1080,9 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
-        assertEquals(1,
-                     changes.size());
-
-        ColumnSizeChange change = (ColumnSizeChange)changes.get(0);
-
-        assertEquals("Col",
-                     change.getColumn().getName());
-        assertEquals(0,
-                     change.getNewSize());
-        assertEquals(0,
-                     change.getNewScale());
+        assertTrue(changes.isEmpty());
     }
 
     /**
@@ -1102,7 +1109,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -1140,7 +1147,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertTrue(changes.isEmpty());
     }
@@ -1169,7 +1176,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(true).compare(model1, model2);
+        List     changes = createModelComparator(true).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -1206,7 +1213,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());
@@ -1241,7 +1248,7 @@ public class TestModelComparator extends TestBase
 
         Database model1  = parseDatabaseFromString(MODEL1);
         Database model2  = parseDatabaseFromString(MODEL2);
-        List     changes = new ModelComparator(false).compare(model1, model2);
+        List     changes = createModelComparator(false).compare(model1, model2);
 
         assertEquals(1,
                      changes.size());

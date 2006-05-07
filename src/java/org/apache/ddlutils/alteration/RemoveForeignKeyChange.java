@@ -16,6 +16,7 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 
@@ -51,5 +52,15 @@ public class RemoveForeignKeyChange extends TableChangeImplBase
     public ForeignKey getForeignKey()
     {
         return _foreignKey;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Table table = database.findTable(getChangedTable().getName());
+
+        table.removeForeignKey(_foreignKey);
     }
 }

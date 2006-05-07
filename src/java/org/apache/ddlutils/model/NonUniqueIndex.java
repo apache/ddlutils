@@ -27,15 +27,10 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
-public class NonUniqueIndex implements Index
+public class NonUniqueIndex extends IndexImpBase
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -3591499395114850301L;
-
-    /** The name of the index. */
-    protected String    _name;
-    /** The columns making up the index. */
-    protected ArrayList _columns = new ArrayList();
 
     /**
      * {@inheritDoc}
@@ -48,86 +43,9 @@ public class NonUniqueIndex implements Index
     /**
      * {@inheritDoc}
      */
-    public String getName()
+    public Object clone() throws CloneNotSupportedException
     {
-        return _name;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setName(String name)
-    {
-        _name = name;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int getColumnCount()
-    {
-        return _columns.size();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public IndexColumn getColumn(int idx)
-    {
-        return (IndexColumn)_columns.get(idx);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public IndexColumn[] getColumns()
-    {
-        return (IndexColumn[])_columns.toArray(new IndexColumn[_columns.size()]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void addColumn(IndexColumn column)
-    {
-        if (column != null)
-        {
-            for (int idx = 0; idx < _columns.size(); idx++)
-            {
-                IndexColumn curColumn = getColumn(idx);
-
-                if (curColumn.getOrdinalPosition() > column.getOrdinalPosition())
-                {
-                    _columns.add(idx, column);
-                    return;
-                }
-            }
-            _columns.add(column);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void removeColumn(IndexColumn column)
-    {
-        _columns.remove(column);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void removeColumn(int idx)
-    {
-        _columns.remove(idx);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected Object clone() throws CloneNotSupportedException
-    {
-        NonUniqueIndex result = (NonUniqueIndex)super.clone();
+        NonUniqueIndex result = new NonUniqueIndex();
 
         result._name    = _name;
         result._columns = (ArrayList)_columns.clone();

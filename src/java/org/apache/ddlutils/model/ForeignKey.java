@@ -216,7 +216,7 @@ public class ForeignKey implements Cloneable
     /**
      * {@inheritDoc}
      */
-    protected Object clone() throws CloneNotSupportedException
+    public Object clone() throws CloneNotSupportedException
     {
         ForeignKey result = (ForeignKey)super.clone();
 
@@ -226,7 +226,7 @@ public class ForeignKey implements Cloneable
 
         for (Iterator it = _references.iterator(); it.hasNext();)
         {
-            result._references.add(it.next());
+            result._references.add(((Reference)it.next()).clone());
         }
 
         return result;

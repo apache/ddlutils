@@ -1,5 +1,7 @@
 package org.apache.ddlutils.alteration;
 
+import org.apache.ddlutils.model.Database;
+
 /*
  * Copyright 2006 The Apache Software Foundation.
  * 
@@ -23,4 +25,10 @@ package org.apache.ddlutils.alteration;
  */
 public interface ModelChange
 {
+    /**
+     * Applies this change to the given database.
+     * 
+     * @param database The database
+     */
+    public void apply(Database database);
 }

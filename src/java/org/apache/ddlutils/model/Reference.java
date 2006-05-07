@@ -178,7 +178,7 @@ public class Reference implements Cloneable, Serializable
     /**
      * {@inheritDoc}
      */
-    protected Object clone() throws CloneNotSupportedException
+    public Object clone() throws CloneNotSupportedException
     {
         Reference result = (Reference)super.clone();
 

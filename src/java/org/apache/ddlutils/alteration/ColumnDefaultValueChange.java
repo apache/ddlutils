@@ -17,6 +17,7 @@ package org.apache.ddlutils.alteration;
  */
 
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -63,5 +64,16 @@ public class ColumnDefaultValueChange extends TableChangeImplBase
     public String getNewDefaultValue()
     {
         return _newDefaultValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Table  table  = database.findTable(getChangedTable().getName());
+        Column column = table.findColumn(_column.getName());
+
+        column.setDefaultValue(_newDefaultValue);
     }
 }

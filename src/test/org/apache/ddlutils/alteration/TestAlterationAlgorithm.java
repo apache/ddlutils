@@ -69,7 +69,7 @@ public class TestAlterationAlgorithm extends TestBase
         Database currentModel = parseDatabaseFromString(currentSchema);
         Database desiredModel = parseDatabaseFromString(desiredSchema);
 
-        _platform.getSqlBuilder().alterDatabase2(currentModel, desiredModel);
+        _platform.getSqlBuilder().alterDatabase2(currentModel, desiredModel, null);
 
         return _writer.toString();
     }
@@ -601,6 +601,52 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TableA_PK\" PRIMARY KEY (\"ColPK1\",\"ColPK2\");\n",
+            getAlterDatabaseSQL(model1Xml, model2Xml));
+    }
+
+    /**
+     * Tests the addition of a primary key and a column to an existing table.
+     */
+    public void testAddPrimaryKeyAndColumn() throws IOException
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='test'>\n" +
+            "  <table name='TableA'>\n" +
+            "    <column name='ColPK1' type='INTEGER' required='true'/>\n" +
+            "    <column name='ColPK2' type='VARCHAR' size='64' required='true'/>\n" +
+            "  </table>\n" +
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='test'>\n" +
+            "  <table name='TableA'>\n" +
+            "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "    <column name='ColPK2' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
+            "    <column name='Col' type='DOUBLE'/>\n" +
+            "  </table>\n" +
+            "</database>";
+
+        assertEqualsIgnoringWhitespaces(
+            "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TableA_PK\" PRIMARY KEY (\"ColPK1\",\"ColPK2\");\n"+
+            "CREATE TABLE \"TableA_\"\n"+
+            "(\n"+
+            "    \"ColPK1\" INTEGER NOT NULL,\n"+
+            "    \"ColPK2\" VARCHAR(64) NOT NULL,\n"+
+            "    \"Col\" DOUBLE,\n"+
+            "    PRIMARY KEY (\"ColPK1\",\"ColPK2\")\n"+
+            ");\n"+
+            "INSERT INTO \"TableA_\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA\";\n"+
+            "DROP TABLE \"TableA\";\n"+
+            "CREATE TABLE \"TableA\"\n"+
+            "(\n"+
+            "    \"ColPK1\" INTEGER NOT NULL,\n"+
+            "    \"ColPK2\" VARCHAR(64) NOT NULL,\n"+
+            "    \"Col\" DOUBLE,\n"+
+            "    PRIMARY KEY (\"ColPK1\",\"ColPK2\")\n"+
+            ");\n"+
+            "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\",\"Col\") SELECT \"ColPK1\",\"ColPK2\",\"Col\" FROM \"TableA_\";\n"+
+            "DROP TABLE \"TableA_\";\n",
             getAlterDatabaseSQL(model1Xml, model2Xml));
     }
 

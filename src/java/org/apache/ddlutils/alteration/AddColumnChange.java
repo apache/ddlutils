@@ -16,7 +16,9 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -49,5 +51,23 @@ public class AddColumnChange extends TableChangeImplBase
     public Column getNewColumn()
     {
         return _newColumn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Column newColumn = null;
+
+        try
+        {
+            newColumn = (Column)_newColumn.clone();
+        }
+        catch (CloneNotSupportedException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        database.findTable(getChangedTable().getName()).addColumn(newColumn);
     }
 }

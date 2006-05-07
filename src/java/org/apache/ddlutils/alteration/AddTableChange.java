@@ -16,6 +16,8 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -50,4 +52,20 @@ public class AddTableChange implements ModelChange
     {
         return _newTable;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        try
+        {
+            database.addTable((Table)_newTable.clone());
+        }
+        catch (CloneNotSupportedException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+    }
+
 }

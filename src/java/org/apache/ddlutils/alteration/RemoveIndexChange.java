@@ -16,6 +16,7 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 
@@ -49,5 +50,16 @@ public class RemoveIndexChange extends TableChangeImplBase
     public Index getIndex()
     {
         return _index;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Table table = database.findTable(getChangedTable().getName());
+        Index index = table.findIndex(_index.getName());
+
+        table.removeIndex(index);
     }
 }

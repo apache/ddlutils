@@ -17,6 +17,7 @@ package org.apache.ddlutils.alteration;
  */
 
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -77,5 +78,16 @@ public class ColumnSizeChange extends TableChangeImplBase
     public int getNewScale()
     {
         return _newScale;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Table  table  = database.findTable(getChangedTable().getName());
+        Column column = table.findColumn(_column.getName());
+
+        column.setSizeAndScale(_newSize, _newScale);
     }
 }

@@ -16,6 +16,7 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -33,5 +34,15 @@ public class RemoveTableChange extends TableChangeImplBase
     public RemoveTableChange(Table table)
     {
         super(table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Table table = database.findTable(getChangedTable().getName());
+
+        database.removeTable(table);
     }
 }

@@ -16,6 +16,8 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 
@@ -49,5 +51,23 @@ public class AddIndexChange extends TableChangeImplBase
     public Index getNewIndex()
     {
         return _newIndex;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void apply(Database database)
+    {
+        Index newIndex = null;
+
+        try
+        {
+            newIndex = (Index)_newIndex.clone();
+        }
+        catch (CloneNotSupportedException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        database.findTable(getChangedTable().getName()).addIndex(newIndex);
     }
 }

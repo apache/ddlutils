@@ -19,8 +19,10 @@ package org.apache.ddlutils.alteration;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -40,16 +42,20 @@ public class ModelComparator
     /** The log for this comparator. */
     private final Log _log = LogFactory.getLog(ModelComparator.class);
 
+    /** The platform information. */
+    private PlatformInfo _platformInfo;
     /** Whether comparison is case sensitive. */
     private boolean _caseSensitive;
 
     /**
      * Creates a new model comparator object.
      * 
+     * @param platformInfo  The platform info
      * @param caseSensitive Whether comparison is case sensitive
      */
-    public ModelComparator(boolean caseSensitive)
+    public ModelComparator(PlatformInfo platformInfo, boolean caseSensitive)
     {
+        _platformInfo  = platformInfo;
         _caseSensitive = caseSensitive;
     }
 
@@ -304,11 +310,11 @@ public class ModelComparator
             changes.add(new ColumnDataTypeChange(sourceTable, sourceColumn, targetColumn.getTypeCode()));
         }
 
-        // the concrete platform decides whether the size matters for a given data type
-        // so when the size differs we create a change object and the platform can filter
-        // it later if the size is not relevant
-        if ((sourceColumn.getSizeAsInt() != targetColumn.getSizeAsInt()) ||
-            (sourceColumn.getScale()     != targetColumn.getScale()))
+        boolean sizeMatters = _platformInfo.hasSize(sourceColumn.getTypeCode());
+
+        if ((sizeMatters &&
+            (!StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize())) ||
+             sourceColumn.getScale() != targetColumn.getScale()))
         {
             changes.add(new ColumnSizeChange(sourceTable, sourceColumn, targetColumn.getSizeAsInt(), targetColumn.getScale()));
         }

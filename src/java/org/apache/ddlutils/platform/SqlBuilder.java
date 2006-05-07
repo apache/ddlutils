@@ -347,13 +347,16 @@ public abstract class SqlBuilder
      *
      * @param currentModel  The current database schema
      * @param desiredModel  The desired database schema
+     * @param params        The parameters used in the creation of new tables. Note that for existing
+     *                      tables, the parameters won't be applied
      */
-    public void alterDatabase2(Database currentModel, Database desiredModel) throws IOException
+    public void alterDatabase2(Database currentModel, Database desiredModel, CreationParameters params) throws IOException
     {
-        ModelComparator comparator = new ModelComparator(getPlatform().isDelimitedIdentifierModeOn());
+        ModelComparator comparator = new ModelComparator(getPlatformInfo(),
+                                                         getPlatform().isDelimitedIdentifierModeOn());
         List            changes    = comparator.compare(currentModel, desiredModel);
 
-        processChanges(currentModel, desiredModel, changes);
+        processChanges(currentModel, desiredModel, changes, params);
     }
 
     /**
@@ -420,13 +423,18 @@ public abstract class SqlBuilder
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
      * @param changes      The changes
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      */
-    protected void processChanges(Database currentModel, Database desiredModel, List changes) throws IOException
+    protected void processChanges(Database           currentModel,
+                                  Database           desiredModel,
+                                  List               changes,
+                                  CreationParameters params) throws IOException
     {
         CallbackClosure callbackClosure = new CallbackClosure(this,
                                                               "processChange",
-                                                              new Class[] { Database.class, Database.class, null },
-                                                              new Object[] { currentModel, desiredModel, null });
+                                                              new Class[] { Database.class, Database.class, CreationParameters.class, null },
+                                                              new Object[] { currentModel, desiredModel, params, null });
 
         // 1st pass: removing external constraints and indices
         applyForSelectedChanges(changes,
@@ -453,6 +461,7 @@ public abstract class SqlBuilder
 
         processTableStructureChanges(currentModel,
                                      desiredModel,
+                                     params,
                                      CollectionUtils.select(changes, predicate));
 
         // 4th pass: adding tables
@@ -472,11 +481,14 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param change       The change object
      */
-    protected void processChange(Database    currentModel,
-                                 Database    desiredModel,
-                                 ModelChange change) throws IOException
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 CreationParameters params,
+                                 ModelChange        change) throws IOException
     {
         _log.warn("Change of type " + change.getClass() + " was not handled");
     }
@@ -486,10 +498,13 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param change       The change object
      */
     protected void processChange(Database               currentModel,
                                  Database               desiredModel,
+                                 CreationParameters     params,
                                  RemoveForeignKeyChange change) throws IOException
     {
         writeExternalForeignKeyDropStmt(change.getChangedTable(), change.getForeignKey());
@@ -500,11 +515,14 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param change       The change object
      */
-    protected void processChange(Database          currentModel,
-                                 Database          desiredModel,
-                                 RemoveIndexChange change) throws IOException
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 CreationParameters params,
+                                 RemoveIndexChange  change) throws IOException
     {
         writeExternalIndexDropStmt(change.getChangedTable(), change.getIndex());
     }
@@ -514,11 +532,14 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param change       The change object
      */
-    protected void processChange(Database          currentModel,
-                                 Database          desiredModel,
-                                 RemoveTableChange change) throws IOException
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 CreationParameters params,
+                                 RemoveTableChange  change) throws IOException
     {
         dropTable(change.getChangedTable());
     }
@@ -528,11 +549,14 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param change       The change object
      */
-    protected void processChange(Database       currentModel,
-                                 Database       desiredModel,
-                                 AddTableChange change) throws IOException
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 CreationParameters params,
+                                 AddTableChange     change) throws IOException
     {
         // TODO: where to get the parameters from ?
         writeTableCreationStmt(desiredModel, change.getNewTable(), null);
@@ -554,10 +578,13 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param change       The change object
      */
     protected void processChange(Database            currentModel,
                                  Database            desiredModel,
+                                 CreationParameters  params,
                                  AddForeignKeyChange change) throws IOException
     {
         writeExternalForeignKeyCreateStmt(desiredModel,
@@ -570,11 +597,14 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param change       The change object
      */
-    protected void processChange(Database       currentModel,
-                                 Database       desiredModel,
-                                 AddIndexChange change) throws IOException
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 CreationParameters params,
+                                 AddIndexChange     change) throws IOException
     {
         writeExternalIndexCreateStmt(change.getChangedTable(), change.getNewIndex());
     }
@@ -584,11 +614,14 @@ public abstract class SqlBuilder
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
      * @param changes      The change objects
      */
-    protected void processTableStructureChanges(Database   currentModel,
-                                                Database   desiredModel,
-                                                Collection changes) throws IOException
+    protected void processTableStructureChanges(Database           currentModel,
+                                                Database           desiredModel,
+                                                CreationParameters params,
+                                                Collection         changes) throws IOException
     {
         ListOrderedMap changesPerTable = new ListOrderedMap();
         ListOrderedMap unchangedFKs    = new ListOrderedMap();
@@ -631,13 +664,29 @@ public abstract class SqlBuilder
                 writeExternalForeignKeyDropStmt(targetTable, (ForeignKey)fkIt.next());
             }
         }
+
+        // We're using a copy of the current model so that the table structure changes can
+        // modify it
+        Database copyOfCurrentModel = null;
+
+        try
+        {
+            copyOfCurrentModel = (Database)currentModel.clone();
+        }
+        catch (CloneNotSupportedException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        
         for (Iterator tableChangeIt = changesPerTable.entrySet().iterator(); tableChangeIt.hasNext();)
         {
-            Map.Entry entry = (Map.Entry)tableChangeIt.next();
+            Map.Entry entry       = (Map.Entry)tableChangeIt.next();
+            Table     targetTable = desiredModel.findTable((String)entry.getKey(), caseSensitive);
 
-            processTableStructureChanges(currentModel,
+            processTableStructureChanges(copyOfCurrentModel,
                                          desiredModel,
                                          (String)entry.getKey(),
+                                         params == null ? null : params.getParametersFor(targetTable),
                                          (List)entry.getValue());
         }
         // and finally we're re-creating the unchanged foreign keys
@@ -738,19 +787,66 @@ public abstract class SqlBuilder
     }
     
     /**
-     * Processes the changes to the structure of a single table.
+     * Processes the changes to the structure of a single table. Database-specific
+     * implementations might redefine this method, but it is usually sufficient to
+     * redefine the {@link #processTableStructureChanges(Database, Database, Table, Table)}
+     * method instead.
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
      * @param tableName    The name of the changed table
+     * @param parameters   The creation parameters for the desired table
      * @param changes      The change objects for this table
      */
     protected void processTableStructureChanges(Database currentModel,
                                                 Database desiredModel,
                                                 String   tableName,
+                                                Map      parameters,
                                                 List     changes) throws IOException
     {
-        // we might be able to simplify if there is only one change
+        Table sourceTable = currentModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        Table targetTable = desiredModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+
+        processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
+
+        if (!changes.isEmpty())
+        {
+            Table tempTable       = getTemporaryTableFor(desiredModel, targetTable);
+            Table realTargetTable = getRealTargetTableFor(desiredModel, sourceTable, targetTable);
+
+            createTemporaryTable(desiredModel, tempTable, parameters);
+            writeCopyDataStatement(sourceTable, tempTable);
+            // Note that we don't drop the indices here because the DROP TABLE will take care of that
+            // Likewise, foreign keys have already been dropped as necessary
+            dropTable(sourceTable);
+            createTable(desiredModel, realTargetTable, parameters);
+            writeCopyDataStatement(tempTable, targetTable);
+            dropTable(tempTable);
+        }
+    }
+
+    /**
+     * Allows database-specific implementations to handle changes in a database
+     * specific manner. Any handled change should be applied to the given current
+     * model (which is a copy of the real original model) and be removed from the
+     * list of changes.<br/>
+     * In the default implementation, all {@link AddPrimaryKeyChange} changes are
+     * applied via an <code>ALTER TABLE ADD CONSTRAINT</code> statement.  
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param sourceTable  The original table
+     * @param targetTable  The desired table
+     * @param parameters   The creation parameters for the table
+     * @param changes      The change objects for the target table
+     */
+    protected void processTableStructureChanges(Database currentModel,
+                                                Database desiredModel,
+                                                Table    sourceTable,
+                                                Table    targetTable,
+                                                Map      parameters,
+                                                List     changes) throws IOException
+    {
         if (changes.size() == 1)
         {
             TableChange change = (TableChange)changes.get(0);
@@ -758,29 +854,12 @@ public abstract class SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                return;
+                change.apply(currentModel);
+                changes.clear();
             }
-            // TODO: Once named primary keys are supported, the removal can be handled
-            //       here as well (at least for named primary keys)
         }
-
-        // TODO: where to get the parameters from ?
-        Map   parameters      = null;
-        Table sourceTable     = currentModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
-        Table targetTable     = desiredModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
-        Table tempTable       = getTemporaryTableFor(desiredModel, targetTable);
-        Table realTargetTable = getRealTargetTableFor(desiredModel, sourceTable, targetTable);
-
-        createTemporaryTable(desiredModel, tempTable, parameters);
-        writeCopyDataStatement(sourceTable, tempTable);
-        // Note that we don't drop the indices here because the DROP TABLE will take care of that
-        // Likewise, foreign keys have already been dropped as necessary
-        dropTable(sourceTable);
-        createTable(desiredModel, realTargetTable, parameters);
-        writeCopyDataStatement(tempTable, targetTable);
-        dropTable(tempTable);
     }
-
+    
     /**
      * Creates a temporary table object that corresponds to the given table.
      * Database-specific implementations may redefine this method if e.g. the
@@ -943,11 +1022,9 @@ public abstract class SqlBuilder
     {
         printIdentifier(getColumnName(sourceColumn));
     }
-    
+
     /**
-     * Processes the addition of a primary key to a table. Note that in the default
-     * implementation, this method is called only if this is the only change to the
-     * target table.
+     * Processes the addition of a primary key to a table.
      * 
      * @param currentModel The current database schema
      * @param desiredModel The desired database schema
