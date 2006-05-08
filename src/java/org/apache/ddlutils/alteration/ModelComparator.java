@@ -212,7 +212,9 @@ public class ModelComparator
                 {
                     _log.info("Column " + targetColumn.getName() + " needs to be created for table " + sourceTable.getName());
                 }
-                changes.add(new AddColumnChange(sourceTable, targetColumn));
+                changes.add(new AddColumnChange(sourceTable,
+                                                columnIdx < targetTable.getColumnCount() - 1 ? targetTable.getColumn(columnIdx + 1) :null,
+                                                targetColumn));
             }
             else
             {

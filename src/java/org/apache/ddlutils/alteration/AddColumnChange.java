@@ -30,17 +30,31 @@ public class AddColumnChange extends TableChangeImplBase
 {
     /** The new column. */
     private Column _newColumn;
+    /** The column before which the new column should be added. */
+    private Column _nextColumn;
 
     /**
      * Creates a new change object.
      * 
-     * @param table     The table to add the column to
-     * @param newColumn The new column
+     * @param table      The table to add the column to
+     * @param nextColumn The column before which the new column should be added
+     * @param newColumn  The new column
      */
-    public AddColumnChange(Table table, Column newColumn)
+    public AddColumnChange(Table table, Column nextColumn, Column newColumn)
     {
         super(table);
-        _newColumn = newColumn;
+        _nextColumn = nextColumn;
+        _newColumn  = newColumn;
+    }
+
+    /**
+     * Returns the column before which the new column should be added.
+     *
+     * @return The next column
+     */
+    public Column getNextColumn()
+    {
+        return _nextColumn;
     }
 
     /**

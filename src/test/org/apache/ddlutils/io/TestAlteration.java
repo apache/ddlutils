@@ -219,7 +219,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of a column default value.
+     * Tests the addition of a column's default value.
      */
     public void testAddDefault()
     {
@@ -291,7 +291,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the dropping of a column default value.
+     * Tests the removal of a column default value.
      */
     public void testDropDefault()
     {
@@ -327,10 +327,15 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the making a column auto-increment.
+     * Tests the change of a column's auto-increment state.
      */
     public void testMakeAutoIncrement()
     {
+        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        {
+            return;
+        }
+        
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -366,10 +371,15 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the dropping the column auto-increment status.
+     * Tests the removal the column auto-increment status.
      */
     public void testDropAutoIncrement()
     {
+        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        {
+            return;
+        }
+        
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -402,9 +412,120 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a column.
+     * Tests the addition of a column.
      */
     public void testAddColumn()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1) });
+
+    	alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals((Object)null, beans.get(0), "avalue");
+    }
+
+    /**
+     * Tests the addition of several columns.
+     */
+    public void testAddColumns()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true' default='0'/>\n"+
+            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1), new Double(3.0) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals((Object)null, beans.get(0), "avalue1");
+        assertEquals(new Integer(0), beans.get(0), "avalue2");
+        assertEquals((Object)null, beans.get(0), "avalue4");
+    }
+
+    /**
+     * Tests the addition of a column with a default value.
+     */
+    public void testAddColumnWithDefault()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' default='2'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals(new Integer(2), beans.get(0), "avalue");
+    }
+
+    /**
+     * Tests the addition of a column that is set to NOT NULL.
+     */
+    public void testAddRequiredColumn()
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
@@ -426,7 +547,7 @@ public class TestAlteration extends RoundtripTestBase
 
         insertRow("roundtrip", new Object[] { new Integer(1) });
 
-    	alterDatabase(model2Xml);
+        alterDatabase(model2Xml);
 
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
@@ -437,7 +558,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the dropping a column.
+     * Tests the removal of a column.
      */
     public void testDropColumn()
     {
@@ -472,7 +593,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a column to the pk.
+     * Tests the addition of a column to the pk.
      */
     public void testAddColumnToPK()
     {
@@ -508,7 +629,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the removing a column from the pk.
+     * Tests the removal of a column from the pk.
      */
     public void testRemoveColumnFromPK()
     {
@@ -544,7 +665,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a pk column.
+     * Tests the addition of a pk column.
      */
     public void testAddPKColumn()
     {
@@ -579,7 +700,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a primary key and a column.
+     * Tests the addition of a primary key and a column.
      */
     public void testAddPKAndColumn()
     {
@@ -614,7 +735,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a primary key and a primary key column.
+     * Tests the addition of a primary key and a primary key column.
      */
     public void testAddPKAndPKColumn()
     {
@@ -649,7 +770,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the dropping of a pk column.
+     * Tests the removal of a pk column.
      */
     public void testDropPKColumn()
     {
@@ -684,7 +805,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding of an index.
+     * Tests the addition of an index.
      */
     public void testAddIndex()
     {
@@ -727,7 +848,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding of an unique index.
+     * Tests the addition of an unique index.
      */
     public void testAddUniqueIndex()
     {
@@ -766,7 +887,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the dropping of an unique index.
+     * Tests the removal of an unique index.
      */
     public void testDropUniqueIndex()
     {
@@ -809,7 +930,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding of a column to an index.
+     * Tests the addition of a column to an index.
      */
     public void testAddColumnToIndex()
     {
@@ -855,7 +976,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the removing of a column from an index.
+     * Tests the removal of a column from an index.
      */
     public void testRemoveColumnFromUniqueIndex()
     {
@@ -901,7 +1022,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a foreign key.
+     * Tests the addition of a foreign key.
      */
     public void testAddFK()
     {
@@ -950,7 +1071,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the dropping of a foreign key.
+     * Tests the removal of a foreign key.
      */
     public void testDropFK()
     {
@@ -1006,7 +1127,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a reference to a foreign key.
+     * Tests the addition of a reference to a foreign key.
      */
     public void testAddReferenceToFK()
     {
@@ -1063,7 +1184,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the removing a reference from a foreign key.
+     * Tests the removal of a reference from a foreign key.
      */
     public void testRemoveReferenceFromFK()
     {
@@ -1118,7 +1239,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a table.
+     * Tests the addition of a table.
      */
     public void testAddTable1()
     {
@@ -1159,7 +1280,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the adding a table.
+     * Tests the addition of a table.
      */
     public void testAddTable2()
     {
@@ -1224,7 +1345,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the removing a table.
+     * Tests the removal of a table.
      */
     public void testRemoveTable1()
     {
@@ -1263,7 +1384,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the removing a table.
+     * Tests the removal of a table.
      */
     public void testRemoveTable2()
     {

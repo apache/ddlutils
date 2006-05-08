@@ -200,7 +200,7 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
-     * Adds the given column at the specified position .
+     * Adds the given column at the specified position.
      * 
      * @param idx    The index where to add the column
      * @param column The column
@@ -210,6 +210,28 @@ public class Table implements Serializable, Cloneable
         if (column != null)
         {
             _columns.add(idx, column);
+        }
+    }
+
+    /**
+     * Adds the column after the given previous column.
+     * 
+     * @param previousColumn The column to add the new column after; use
+     *                       <code>null</code> for adding at the begin
+     * @param column         The column
+     */
+    public void addColumn(Column previousColumn, Column column)
+    {
+        if (column != null)
+        {
+            if (previousColumn == null)
+            {
+                _columns.add(0, column);
+            }
+            else
+            {
+                _columns.add(_columns.indexOf(previousColumn), column);
+            }
         }
     }
 
