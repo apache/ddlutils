@@ -202,6 +202,7 @@ public class PostgreSqlBuilder extends SqlBuilder
                 changeIt.remove();
             }
         }
+        super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
     }
 
     /**

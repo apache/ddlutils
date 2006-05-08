@@ -130,9 +130,15 @@ public class DerbyBuilder extends CloudscapeBuilder
 
             if (change instanceof AddColumnChange)
             {
-                processChange(currentModel, desiredModel, (AddColumnChange)change);
-                change.apply(currentModel);
-                changeIt.remove();
+                AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                // Derby can only add not insert columns
+                if (addColumnChange.getNextColumn() == null)
+                {
+                    processChange(currentModel, desiredModel, addColumnChange);
+                    change.apply(currentModel);
+                    changeIt.remove();
+                }
             }
         }
         super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
