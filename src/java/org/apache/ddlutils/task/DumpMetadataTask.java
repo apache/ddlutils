@@ -17,7 +17,7 @@ package org.apache.ddlutils.task;
  */
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -57,6 +57,8 @@ public class DumpMetadataTask extends Task
     private BasicDataSource _dataSource;
     /** The file to write the dump to. */
     private File _outputFile = null;
+    /** The encoding of the XML output file. */
+    private String _outputEncoding = "UTF-8";
     /** The database catalog(s) to read. */
     private String _catalogPattern = "%";
     /** The database schema(s) to read. */
@@ -92,6 +94,16 @@ public class DumpMetadataTask extends Task
     public void setOutputFile(File outputFile)
     {
         _outputFile = outputFile;
+    }
+
+    /**
+     * Set the encoding of the output file.
+     *
+     * @param encoding The encoding
+     */
+    public void setOutputEncoding(String encoding)
+    {
+        _outputEncoding = encoding;
     }
 
     /**
@@ -213,18 +225,20 @@ public class DumpMetadataTask extends Task
             
             dumpMetaData(root, connection.getMetaData());
 
-            XMLWriter writer = null;
+            OutputFormat outputFormat = OutputFormat.createPrettyPrint();
+            XMLWriter    xmlWriter    = null;
 
+            outputFormat.setEncoding(_outputEncoding);
             if (_outputFile == null)
             {
-                writer = new XMLWriter(System.out, OutputFormat.createPrettyPrint());
+                xmlWriter = new XMLWriter(System.out, outputFormat);
             }
             else
             {
-                writer = new XMLWriter(new FileWriter(_outputFile), OutputFormat.createPrettyPrint());
+                xmlWriter = new XMLWriter(new FileOutputStream(_outputFile), outputFormat);
             }
-            writer.write(document);
-            writer.close();
+            xmlWriter.write(document);
+            xmlWriter.close();
         }
         catch (Exception ex)
         {
