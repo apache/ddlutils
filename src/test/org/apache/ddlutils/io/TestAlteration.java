@@ -465,7 +465,7 @@ public class TestAlteration extends RoundtripTestBase
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
-            "    <column name='avalue2' type='INTEGER' required='true' default='0'/>\n"+
+            "    <column name='avalue2' type='INTEGER'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
             "    <column name='avalue4' type='CHAR' size='16'/>\n"+
             "  </table>\n"+
@@ -483,7 +483,7 @@ public class TestAlteration extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         assertEquals((Object)null, beans.get(0), "avalue1");
-        assertEquals(new Integer(0), beans.get(0), "avalue2");
+        assertEquals((Object)null, beans.get(0), "avalue2");
         assertEquals((Object)null, beans.get(0), "avalue4");
     }
 

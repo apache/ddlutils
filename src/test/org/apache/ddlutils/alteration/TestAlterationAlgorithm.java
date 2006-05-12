@@ -628,7 +628,6 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TableA_PK\" PRIMARY KEY (\"ColPK1\",\"ColPK2\");\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
             "    \"ColPK1\" INTEGER NOT NULL,\n"+
