@@ -1958,18 +1958,7 @@ public abstract class SqlBuilder
         printIdentifier(getColumnName(column));
         print(" ");
         print(getSqlType(column));
-
-        if ((column.getDefaultValue() != null) ||
-            (getPlatformInfo().isDefaultValueUsedForIdentitySpec() && column.isAutoIncrement()))
-        {
-            if (!getPlatformInfo().isDefaultValuesForLongTypesSupported() && 
-                ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
-            {
-                throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
-            }
-            print(" DEFAULT ");
-            writeColumnDefaultValue(table, column);
-        }
+        writeColumnDefaultValueStmt(table, column);
         if (column.isRequired())
         {
             print(" ");
@@ -2120,7 +2109,39 @@ public abstract class SqlBuilder
         }
         return result;
     }
-    
+
+    /**
+     * Prints the default value stmt part for the column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */ 
+    protected void writeColumnDefaultValueStmt(Table table, Column column) throws IOException
+    {
+        Object parsedDefault = column.getParsedDefaultValue();
+
+        if (parsedDefault != null)
+        {
+            if (!getPlatformInfo().isDefaultValuesForLongTypesSupported() && 
+                ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
+            {
+                throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
+            }
+            // we write empty default value strings only if the type is not a numeric or date/time type
+            if ((column.getDefaultValue().length() > 0) ||
+                (!TypeMap.isNumericType(column.getTypeCode()) && !TypeMap.isDateTimeType(column.getTypeCode())))
+            {
+                print(" DEFAULT ");
+                writeColumnDefaultValue(table, column);
+            }
+        }
+        else if (getPlatformInfo().isDefaultValueUsedForIdentitySpec() && column.isAutoIncrement())
+        {
+            print(" DEFAULT ");
+            writeColumnDefaultValue(table, column);
+        }
+    }
+
     /**
      * Prints the default value of the column.
      * 

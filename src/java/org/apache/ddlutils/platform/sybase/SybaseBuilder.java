@@ -22,7 +22,6 @@ import java.io.Writer;
 import java.sql.Types;
 import java.util.Map;
 
-import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -68,17 +67,7 @@ public class SybaseBuilder extends SqlBuilder
         printIdentifier(getColumnName(column));
         print(" ");
         print(getSqlType(column));
-
-        if (column.getDefaultValue() != null)
-        {
-            if (!getPlatformInfo().isDefaultValuesForLongTypesSupported() && 
-                ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
-            {
-                throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
-            }
-            print(" DEFAULT ");
-            writeColumnDefaultValue(table, column);
-        }
+        writeColumnDefaultValueStmt(table, column);
         // Sybase does not like NOT NULL and IDENTITY together
         if (column.isRequired() && !column.isAutoIncrement())
         {

@@ -412,7 +412,7 @@ public class Column implements Cloneable, Serializable
      */
     public Object getParsedDefaultValue()
     {
-        if (_defaultValue != null)
+        if ((_defaultValue != null) && (_defaultValue.length() > 0))
         {
             try
             {
@@ -451,9 +451,13 @@ public class Column implements Cloneable, Serializable
                 }
             }
             catch (NumberFormatException ex)
-            {}
+            {
+                return null;
+            }
             catch (IllegalArgumentException ex)
-            {}
+            {
+                return null;
+            }
         }
         return _defaultValue;
     }
