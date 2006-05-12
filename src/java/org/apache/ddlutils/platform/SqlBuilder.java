@@ -2253,9 +2253,10 @@ public abstract class SqlBuilder
      */
     public String getForeignKeyName(Table table, ForeignKey fk)
     {
-        String fkName = fk.getName();
+        String  fkName    = fk.getName();
+        boolean needsName = (fkName == null) || (fkName.length() == 0);
 
-        if ((fkName == null) || (fkName.length() == 0))
+        if (needsName)
         {
             StringBuffer name = new StringBuffer();
     
@@ -2267,7 +2268,15 @@ public abstract class SqlBuilder
             name.append(fk.getForeignTableName());
             fkName = getConstraintName(null, table, "FK", name.toString());
         }
-        return shortenName(fkName, getPlatformInfo().getMaxIdentifierLength());
+        fkName = shortenName(fkName, getPlatformInfo().getMaxIdentifierLength());
+
+        if (needsName)
+        {
+            _log.warn("Encountered a foreign key in table " + table.getName() +" that has no name." +
+                      "DdlUtils will use the auto-generated and shortened name " + fkName + "instead.");
+        }
+
+        return fkName;
     }
 
     /**
