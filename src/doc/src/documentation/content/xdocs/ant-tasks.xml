@@ -498,7 +498,9 @@
         <p>
           DdlUtils will honor the order imposed by the foreign keys. Ie. first all required entries are
           inserted, then the dependent ones. Obviously this requires that no circular references exist
-          in the schema (DdlUtils currently does not check this).
+          in the schema (DdlUtils currently does not check this). Also, the referenced entries must be
+          present in the data, otherwise the task will fail. This behavior can be turned off via the
+          <code>ensureForeignKeyOrder</code> attribute.
         </p>
         <p>
           In order to define data for foreign key dependencies that use auto-incrementing primary keys,
@@ -528,6 +530,14 @@
             <td></td>
             <td></td>
             <td>The name of the single XML file that contains the data to insert into the database.</td>
+          </tr>
+          <tr>
+            <td>ensureForeignKeyOrder</td>
+            <td>no</td>
+            <td>true, false</td>
+            <td>true</td>
+            <td>Whether DdlUtils shall honor the foreign key order or simply assume that the entry
+                order is ok.</td>
           </tr>
           <tr>
             <td>failOnError</td>

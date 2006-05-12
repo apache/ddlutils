@@ -42,6 +42,8 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     private File      _singleDataFile = null;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
+    /** Whether foreign key order shall be followed when inserting data into the database. */
+    private boolean _ensureFKOrder = true;
     /** Whether we should use batch mode. */
     private Boolean _useBatchMode;
     /** The maximum number of objects to insert in one batch. */
@@ -78,13 +80,24 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Specifies whether we shall be using batch mode.
+     * Specifies whether batch mode shall be used.
      *
-     * @param useBatchMode <code>true</code> if we shall use batch mode
+     * @param useBatchMode <code>true</code> if batch mode shall be used
      */
     public void setUseBatchMode(boolean useBatchMode)
     {
         _useBatchMode = Boolean.valueOf(useBatchMode);
+    }
+
+    /**
+     * Specifies whether the foreign key order shall be honored when inserted
+     * data into the database.
+     *
+     * @param ensureFKOrder <code>true</code> if the foreign key order shall be followed
+     */
+    public void setEnsureForeignKeyOrder(boolean ensureFKOrder)
+    {
+        _ensureFKOrder = ensureFKOrder;
     }
 
     /**
@@ -98,6 +111,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
             DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
             DataReader         reader   = new DataReader();
 
+            sink.setEnsureForeignKeyOrder(_ensureFKOrder);
             if (_useBatchMode != null)
             {
                 sink.setUseBatchMode(_useBatchMode.booleanValue());

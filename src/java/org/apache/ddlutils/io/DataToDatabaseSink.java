@@ -123,7 +123,7 @@ public class DataToDatabaseSink implements DataSink
      *
      * @param ensureFkOrder <code>true</code> if beans shall be inserted after its foreignkey-references
      */
-    public void setEnsureFkOrder(boolean ensureFkOrder)
+    public void setEnsureForeignKeyOrder(boolean ensureFkOrder)
     {
         _ensureFkOrder = ensureFkOrder;
     }
@@ -198,17 +198,20 @@ public class DataToDatabaseSink implements DataSink
         // lists of already-processed identities for these tables
         _processedIdentities.clear();
         _waitingObjects.clear();
-        for (int tableIdx = 0; tableIdx < _model.getTableCount(); tableIdx++)
+        if (_ensureFkOrder)
         {
-            Table table = _model.getTable(tableIdx);
-
-            for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+            for (int tableIdx = 0; tableIdx < _model.getTableCount(); tableIdx++)
             {
-                ForeignKey curFk = table.getForeignKey(fkIdx);
-
-                if (!_processedIdentities.containsKey(curFk.getForeignTableName()))
+                Table table = _model.getTable(tableIdx);
+    
+                for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
                 {
-                    _processedIdentities.put(curFk.getForeignTableName(), new HashSet());
+                    ForeignKey curFk = table.getForeignKey(fkIdx);
+    
+                    if (!_processedIdentities.containsKey(curFk.getForeignTableName()))
+                    {
+                        _processedIdentities.put(curFk.getForeignTableName(), new HashSet());
+                    }
                 }
             }
         }
@@ -229,7 +232,7 @@ public class DataToDatabaseSink implements DataSink
     {
         Table table = _model.getDynaClassFor(bean).getTable();
 
-        if (table.getForeignKeyCount() > 0)
+        if (_ensureFkOrder && (table.getForeignKeyCount() > 0))
         {
             WaitingObject waitingObj = new WaitingObject(bean);
 
@@ -268,7 +271,7 @@ public class DataToDatabaseSink implements DataSink
             }
         }
         insertBeanIntoDatabase(table, bean);
-        if (_processedIdentities.containsKey(table.getName()))
+        if (_ensureFkOrder && _processedIdentities.containsKey(table.getName()))
         {
             Identity  identity           = buildIdentityFromPKs(table, bean);
             HashSet   identitiesForTable = (HashSet)_processedIdentities.get(table.getName());
