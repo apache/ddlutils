@@ -32,7 +32,8 @@ public class TestModelComparator extends TestBase
 {
     /**
      * Creates a new model comparator.
-     * 
+     *
+     * @param caseSensitive Whether the comparison is case sensitive 
      * @return The model comparator
      */
     protected ModelComparator createModelComparator(boolean caseSensitive)
@@ -969,7 +970,7 @@ public class TestModelComparator extends TestBase
         ColumnDataTypeChange change = (ColumnDataTypeChange)changes.get(0);
 
         assertEquals("Col",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
         assertEquals(Types.INTEGER,
                      change.getNewTypeCode());
     }
@@ -1006,7 +1007,7 @@ public class TestModelComparator extends TestBase
         ColumnSizeChange change = (ColumnSizeChange)changes.get(0);
 
         assertEquals("Col",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
         assertEquals(32,
                      change.getNewSize());
         assertEquals(0,
@@ -1045,7 +1046,7 @@ public class TestModelComparator extends TestBase
         ColumnSizeChange change = (ColumnSizeChange)changes.get(0);
 
         assertEquals("Col",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
         assertEquals(32,
                      change.getNewSize());
         assertEquals(5,
@@ -1117,7 +1118,7 @@ public class TestModelComparator extends TestBase
         ColumnDefaultValueChange change = (ColumnDefaultValueChange)changes.get(0);
 
         assertEquals("Col",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
         assertEquals("2",
                      change.getNewDefaultValue());
     }
@@ -1184,7 +1185,7 @@ public class TestModelComparator extends TestBase
         ColumnDefaultValueChange change = (ColumnDefaultValueChange)changes.get(0);
 
         assertEquals("Col",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
         assertEquals("0",
                      change.getNewDefaultValue());
     }
@@ -1221,7 +1222,7 @@ public class TestModelComparator extends TestBase
         ColumnRequiredChange change = (ColumnRequiredChange)changes.get(0);
 
         assertEquals("Col",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
     }
 
     /**

@@ -178,9 +178,9 @@ public class DerbyBuilder extends CloudscapeBuilder
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("ALTER ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         print(" SET DATA TYPE VARCHAR(");
-        print(change.getColumn().getSize());
+        print(change.getChangedColumn().getSize());
         print(")");
         printEndOfStatement();
     }

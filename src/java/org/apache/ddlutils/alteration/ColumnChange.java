@@ -16,19 +16,19 @@ package org.apache.ddlutils.alteration;
  * limitations under the License.
  */
 
-import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Column;
 
 /**
- * Marker interface for changes to a database model element.
+ * Represents a change to a column of a table.
  * 
  * @version $Revision: $
  */
-public interface ModelChange
+public interface ColumnChange extends TableChange
 {
     /**
-     * Applies this change to the given database.
+     * Returns the affected column from the original model.
      * 
-     * @param database The database
+     * @return The affected column
      */
-    public void apply(Database database);
+    public Column getChangedColumn();
 }

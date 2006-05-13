@@ -30,31 +30,25 @@ public class AddColumnChange extends TableChangeImplBase
 {
     /** The new column. */
     private Column _newColumn;
+    /** The column after which the new column should be added. */
+    private Column _previousColumn;
     /** The column before which the new column should be added. */
     private Column _nextColumn;
 
     /**
      * Creates a new change object.
      * 
-     * @param table      The table to add the column to
-     * @param nextColumn The column before which the new column should be added
-     * @param newColumn  The new column
+     * @param table          The table to add the column to
+     * @param newColumn      The new column
+     * @param previousColumn The column after which the new column should be added
+     * @param nextColumn     The column before which the new column should be added
      */
-    public AddColumnChange(Table table, Column nextColumn, Column newColumn)
+    public AddColumnChange(Table table, Column newColumn, Column previousColumn, Column nextColumn)
     {
         super(table);
-        _nextColumn = nextColumn;
-        _newColumn  = newColumn;
-    }
-
-    /**
-     * Returns the column before which the new column should be added.
-     *
-     * @return The next column
-     */
-    public Column getNextColumn()
-    {
-        return _nextColumn;
+        _newColumn      = newColumn;
+        _previousColumn = previousColumn;
+        _nextColumn     = nextColumn;
     }
 
     /**
@@ -65,6 +59,26 @@ public class AddColumnChange extends TableChangeImplBase
     public Column getNewColumn()
     {
         return _newColumn;
+    }
+
+    /**
+     * Returns the column after which the new column should be added.
+     *
+     * @return The previous column
+     */
+    public Column getPreviousColumn()
+    {
+        return _previousColumn;
+    }
+
+    /**
+     * Returns the column before which the new column should be added.
+     *
+     * @return The next column
+     */
+    public Column getNextColumn()
+    {
+        return _nextColumn;
     }
 
     /**

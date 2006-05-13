@@ -25,7 +25,7 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnDataTypeChange extends TableChangeImplBase
+public class ColumnDataTypeChange extends TableChangeImplBase implements ColumnChange
 {
     /** The column. */
     private Column _column;
@@ -51,7 +51,7 @@ public class ColumnDataTypeChange extends TableChangeImplBase
      *
      * @return The column
      */
-    public Column getColumn()
+    public Column getChangedColumn()
     {
         return _column;
     }

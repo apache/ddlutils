@@ -304,7 +304,7 @@ public class TestDatatypes extends RoundtripTestBase
         "<database name='roundtriptest'>\n"+
         "  <table name='roundtrip'>\n"+
         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='VARCHAR' size='256' required='true' default='some value'/>\n"+
+        "    <column name='avalue' type='VARCHAR' size='254' required='true' default='some value'/>\n"+
         "  </table>\n"+
         "</database>";
     /** Test model with a simple LONGVARCHAR column. */
