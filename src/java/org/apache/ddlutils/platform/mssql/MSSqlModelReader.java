@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
@@ -124,7 +123,7 @@ public class MSSqlModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-	protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+	protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
 	{
 		// Sql Server generates an index "PK__[table name]__[hex number]"
 		StringBuffer pkIndexName = new StringBuffer();
@@ -221,6 +220,4 @@ public class MSSqlModelReader extends JdbcModelReader
 
 		return column;
 	}
-
-
 }

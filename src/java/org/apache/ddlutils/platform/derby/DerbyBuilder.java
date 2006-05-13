@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.ColumnSizeChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -160,28 +159,6 @@ public class DerbyBuilder extends CloudscapeBuilder
         printIndent();
         print("ADD COLUMN ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
-        printEndOfStatement();
-    }
-
-    /**
-     * Processes the size change of a VARCHAR column.
-     * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
-     */
-    protected void processVarCharSizeChange(Database         currentModel,
-                                            Database         desiredModel,
-                                            ColumnSizeChange change) throws IOException
-    {
-        print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
-        printIndent();
-        print("ALTER ");
-        printIdentifier(getColumnName(change.getChangedColumn()));
-        print(" SET DATA TYPE VARCHAR(");
-        print(change.getChangedColumn().getSize());
-        print(")");
         printEndOfStatement();
     }
 }

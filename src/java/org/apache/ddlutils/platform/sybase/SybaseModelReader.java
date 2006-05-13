@@ -153,7 +153,7 @@ public class SybaseModelReader extends JdbcModelReader
 	/**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
     {
         // Sybase defines a unique index "<table name>_<integer numer>" for primary keys
     	if (index.isUnique() && (index.getName() != null))

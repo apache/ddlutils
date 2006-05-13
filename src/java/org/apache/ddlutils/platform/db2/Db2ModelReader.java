@@ -16,8 +16,10 @@ package org.apache.ddlutils.platform.db2;
  * limitations under the License.
  */
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
@@ -168,11 +170,12 @@ public class Db2ModelReader extends JdbcModelReader
 	/**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index) throws SQLException
     {
+        // Db2 uses the form "SQL060205225246220" if the primary key was defined during table creation
+        // When the ALTER TABLE way was used however, the index has the name of the primary key
     	if (index.getName().startsWith("SQL"))
     	{
-            // Db2 uses the form "SQL060205225246220"
     		try
     		{
     			Long.parseLong(index.getName().substring(3));
@@ -182,7 +185,34 @@ public class Db2ModelReader extends JdbcModelReader
     		{
     			// we ignore it
     		}
+            return false;
     	}
-		return false;
+        else
+        {
+            // we'll compare the index name to the names of all primary keys
+            // TODO: Once primary key names are supported, this can be done easier via the table object
+            ResultSet pkData  = null;
+            HashSet   pkNames = new HashSet();
+
+            try
+            {
+                pkData = metaData.getPrimaryKeys(table.getName());
+                while (pkData.next())
+                {
+                    Map values = readColumns(pkData, getColumnsForPK());
+
+                    pkNames.add(values.get("PK_NAME"));
+                }
+            }
+            finally
+            {
+                if (pkData != null)
+                {
+                    pkData.close();
+                }
+            }
+
+            return pkNames.contains(index.getName());
+        }
     }
 }

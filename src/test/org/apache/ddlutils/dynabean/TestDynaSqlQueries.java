@@ -48,7 +48,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
             "  <table name='TestTable'>\n"+
-            "    <column name='Id'   type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='Text' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
@@ -106,7 +106,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
             "  <table name='TestTable'>\n"+
-            "    <column name='Id'   type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='Text' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
@@ -155,11 +155,11 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
             "  <table name='TestTable1'>\n"+
-            "    <column name='Id1' type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Id1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='Id2' type='INTEGER'/>\n"+
             "  </table>\n"+
             "  <table name='TestTable2'>\n"+
-            "    <column name='Id' type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='Avalue' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");

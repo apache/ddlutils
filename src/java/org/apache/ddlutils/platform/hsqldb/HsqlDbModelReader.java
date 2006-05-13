@@ -69,7 +69,7 @@ public class HsqlDbModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
+    protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index)
     {
         String name = index.getName();
 
@@ -79,7 +79,7 @@ public class HsqlDbModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
     {
         String name = index.getName();
 

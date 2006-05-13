@@ -70,7 +70,7 @@ public class DerbyModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
+    protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index)
     {
         return isInternalIndex(index);
     }
@@ -78,7 +78,7 @@ public class DerbyModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
     {
         return isInternalIndex(index);
     }

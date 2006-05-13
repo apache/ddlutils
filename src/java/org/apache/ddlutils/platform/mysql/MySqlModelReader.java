@@ -86,7 +86,7 @@ public class MySqlModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
     {
         // MySql defines a unique index "PRIMARY" for primary keys
         return "PRIMARY".equals(index.getName());
@@ -95,7 +95,7 @@ public class MySqlModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
+    protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index)
     {
         // MySql defines a non-unique index of the same name as the fk
         return getPlatform().getSqlBuilder().getForeignKeyName(table, fk).equals(index.getName());

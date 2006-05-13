@@ -529,7 +529,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
+            //getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
+            getSqlBuilder().alterDatabase2(currentModel, desiredModel, null);
             sql = buffer.toString();
         }
         catch (IOException ex)
@@ -562,7 +563,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
+            //getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
+            getSqlBuilder().alterDatabase2(currentModel, desiredModel, params);
             sql = buffer.toString();
         }
         catch (IOException ex)
@@ -1824,7 +1826,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             value = resultSet.getObject(columnName);
         }
-        return value;
+        return resultSet.wasNull() ? null : value;
     }
 
 	/**

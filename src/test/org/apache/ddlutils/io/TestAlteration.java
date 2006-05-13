@@ -75,7 +75,9 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the alteration of a column datatype.
+     * Tests the alteration of a column datatype. Note that this test is known to fail on
+     * Derby and DB2 as they have no way to convert a numeric value to a VARCHAR, only to
+     * CHAR which will pad the value with spaces.
      */
     public void testChangeDatatype2()
     {

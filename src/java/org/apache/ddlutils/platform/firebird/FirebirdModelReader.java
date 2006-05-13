@@ -328,7 +328,7 @@ public class FirebirdModelReader extends JdbcModelReader
     /**
 	 * {@inheritDoc}
 	 */
-	protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+	protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
 	{
 		// Firebird generates an unique index for the pks of the form "RDB$PRIMARY825"
 		return index.getName().startsWith("RDB$PRIMARY");
@@ -337,7 +337,7 @@ public class FirebirdModelReader extends JdbcModelReader
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean isInternalForeignKeyIndex(Table table, ForeignKey fk, Index index)
+	protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index)
 	{
 		// Firebird generates a normal index that has the same name as the fk
 		return fk.getName().equals(index.getName());

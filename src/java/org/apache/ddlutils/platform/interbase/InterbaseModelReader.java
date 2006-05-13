@@ -168,7 +168,7 @@ public class InterbaseModelReader extends JdbcModelReader
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(Table table, Index index)
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
     {
         // Interbase generates an unique index for the pks of the form "RDB$PRIMARY825"
         return index.getName().startsWith("RDB$PRIMARY");
