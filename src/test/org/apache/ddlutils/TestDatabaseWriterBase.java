@@ -249,6 +249,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      * Alters the database to match the given model.
      * 
      * @param schemaXml The model XML
+     * @return The model object
      */
     protected Database alterDatabase(String schemaXml) throws DynaSqlException
     {
