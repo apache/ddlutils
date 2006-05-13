@@ -17,11 +17,22 @@ package org.apache.ddlutils.platform.mysql;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.ColumnChange;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
@@ -141,6 +152,191 @@ public class MySqlBuilder extends SqlBuilder
         print("DROP FOREIGN KEY ");
         printIdentifier(getForeignKeyName(table, foreignKey));
         printEndOfStatement();
+        writeTableAlterStmt(table);
+        print("DROP INDEX ");
+        printIdentifier(getForeignKeyName(table, foreignKey));
+        printEndOfStatement();
     }    
 
+    /**
+     * {@inheritDoc}
+     */
+    protected void processTableStructureChanges(Database currentModel,
+                                                Database desiredModel,
+                                                Table    sourceTable,
+                                                Table    targetTable,
+                                                Map      parameters,
+                                                List     changes) throws IOException
+    {
+        // in order to utilize the ALTER TABLE ADD COLUMN AFTER statement
+        // we have to apply the add column changes in the correct order
+        // thus we first gather all add column changes and then execute them
+        ArrayList addColumnChanges = new ArrayList();
+
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof AddColumnChange)
+            {
+                addColumnChanges.add(change);
+                changeIt.remove();
+            }
+        }
+        for (Iterator changeIt = addColumnChanges.iterator(); changeIt.hasNext();)
+        {
+            AddColumnChange addColumnChange = (AddColumnChange)changeIt.next();
+
+            processChange(currentModel, desiredModel, addColumnChange);
+            addColumnChange.apply(currentModel);
+            changeIt.remove();
+        }
+
+        ListOrderedSet changedColumns = new ListOrderedSet();
+        
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof RemoveColumnChange)
+            {
+                processChange(currentModel, desiredModel, (RemoveColumnChange)change);
+                change.apply(currentModel);
+            }
+            else if (change instanceof AddPrimaryKeyChange)
+            {
+                processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
+                change.apply(currentModel);
+            }
+            else if (change instanceof PrimaryKeyChange)
+            {
+                processChange(currentModel, desiredModel, (PrimaryKeyChange)change);
+                change.apply(currentModel);
+            }
+            else if (change instanceof RemovePrimaryKeyChange)
+            {
+                processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
+                change.apply(currentModel);
+            }
+            else
+            {
+                // we gather all changed columns because we can use the ALTER TABLE MODIFY COLUMN
+                // statement for them
+                changedColumns.add(((ColumnChange)change).getChangedColumn());
+            }
+            changeIt.remove();
+        }
+        for (Iterator columnIt = changedColumns.iterator(); columnIt.hasNext();)
+        {
+            Column sourceColumn = (Column)columnIt.next();
+            Column targetColumn = targetTable.findColumn(sourceColumn.getName(), getPlatform().isDelimitedIdentifierModeOn());
+
+            processColumnChange(sourceTable, targetTable, sourceColumn, targetColumn);
+        }
+    }
+
+    /**
+     * Processes the addition of a column to a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database        currentModel,
+                                 Database        desiredModel,
+                                 AddColumnChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("ADD COLUMN ");
+        writeColumn(change.getChangedTable(), change.getNewColumn());
+        if (change.getPreviousColumn() != null)
+        {
+            print(" AFTER ");
+            printIdentifier(getColumnName(change.getPreviousColumn()));
+        }
+        else
+        {
+            print(" FIRST");
+        }
+        printEndOfStatement();
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 RemoveColumnChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP COLUMN ");
+        printIdentifier(getColumnName(change.getColumn()));
+        printEndOfStatement();
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database               currentModel,
+                                 Database               desiredModel,
+                                 RemovePrimaryKeyChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP PRIMARY KEY");
+        printEndOfStatement();
+    }
+
+    /**
+     * Processes the change of the primary key of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database         currentModel,
+                                 Database         desiredModel,
+                                 PrimaryKeyChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP PRIMARY KEY");
+        printEndOfStatement();
+        writeExternalPrimaryKeysCreateStmt(change.getChangedTable(), change.getNewPrimaryKeyColumns());
+    }
+
+    /**
+     * Processes a change to a column.
+     * 
+     * @param sourceTable  The current table
+     * @param targetTable  The desired table
+     * @param sourceColumn The current column
+     * @param targetColumn The desired column
+     */
+    protected void processColumnChange(Table  sourceTable,
+                                       Table  targetTable,
+                                       Column sourceColumn,
+                                       Column targetColumn) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(sourceTable));
+        printIndent();
+        print("MODIFY COLUMN ");
+        writeColumn(targetTable, targetColumn);
+        printEndOfStatement();
+    }
 }
