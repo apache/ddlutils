@@ -61,29 +61,33 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);
 
-        info.addNativeTypeMapping(Types.ARRAY,         "BYTEA",            Types.BINARY);
-        info.addNativeTypeMapping(Types.BINARY,        "BYTEA",            Types.BINARY);
+        info.addNativeTypeMapping(Types.ARRAY,         "BYTEA",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BINARY,        "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
-        info.addNativeTypeMapping(Types.BLOB,          "BYTEA",            Types.BINARY);
-        info.addNativeTypeMapping(Types.CLOB,          "TEXT",             Types.VARCHAR);
+        info.addNativeTypeMapping(Types.BLOB,          "BYTEA",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.CLOB,          "TEXT",             Types.LONGVARCHAR);
         info.addNativeTypeMapping(Types.DECIMAL,       "NUMERIC",          Types.NUMERIC);
-        info.addNativeTypeMapping(Types.DISTINCT,      "BYTEA",            Types.BINARY);
+        info.addNativeTypeMapping(Types.DISTINCT,      "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION", Types.DOUBLE);
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BYTEA",            Types.BINARY);
-        info.addNativeTypeMapping(Types.LONGVARBINARY, "BYTEA",            Types.BINARY);
-        info.addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT",             Types.VARCHAR);
-        info.addNativeTypeMapping(Types.NULL,          "BYTEA",            Types.BINARY);
-        info.addNativeTypeMapping(Types.OTHER,         "BYTEA",            Types.BINARY);
-        info.addNativeTypeMapping(Types.REF,           "BYTEA",            Types.BINARY);
-        info.addNativeTypeMapping(Types.STRUCT,        "BYTEA",            Types.BINARY);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BYTEA",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.LONGVARBINARY, "BYTEA");
+        info.addNativeTypeMapping(Types.LONGVARCHAR,   "TEXT",             Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.NULL,          "BYTEA",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.OTHER,         "BYTEA",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.REF,           "BYTEA",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
-        info.addNativeTypeMapping(Types.VARBINARY,     "BYTEA",            Types.BINARY);
+        info.addNativeTypeMapping(Types.VARBINARY,     "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping("BOOLEAN",  "BOOLEAN", "BIT");
-        info.addNativeTypeMapping("DATALINK", "BYTEA",   "BINARY");
+        info.addNativeTypeMapping("DATALINK", "BYTEA",   "LONGVARBINARY");
 
-        // no support for specifying the size for these types
-        info.setHasSize(Types.BINARY, false);
+        info.setDefaultSize(Types.CHAR,    254);
+        info.setDefaultSize(Types.VARCHAR, 254);
+
+        // no support for specifying the size for these types (because they are mapped
+        // to BYTEA which back-maps to BLOB)
+        info.setHasSize(Types.BINARY,    false);
         info.setHasSize(Types.VARBINARY, false);
 
         setSqlBuilder(new PostgreSqlBuilder(this));

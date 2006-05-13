@@ -103,13 +103,15 @@ public class PostgreSqlModelReader extends JdbcModelReader
             {
                 column.setSize(null);
                 // PostgreSQL reports BYTEA and TEXT as BINARY(-1) and VARCHAR(-1) respectively
+                // Since we cannot currently use the Blob/Clob interface with BYTEA, we instead
+                // map them to LONGVARBINARY/LONGVARCHAR
                 if (column.getTypeCode() == Types.BINARY)
                 {
-                    column.setTypeCode(Types.BLOB);
+                    column.setTypeCode(Types.LONGVARBINARY);
                 }
                 else if (column.getTypeCode() == Types.VARCHAR)
                 {
-                    column.setTypeCode(Types.CLOB);
+                    column.setTypeCode(Types.LONGVARCHAR);
                 }
             }
         }
@@ -139,6 +141,7 @@ public class PostgreSqlModelReader extends JdbcModelReader
                         break;
                     case Types.CHAR:
                     case Types.VARCHAR:
+                    case Types.LONGVARCHAR:
                     case Types.DATE:
                     case Types.TIME:
                     case Types.TIMESTAMP:

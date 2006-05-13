@@ -31,6 +31,15 @@ import org.apache.ddlutils.platform.ModelBasedResultSetIterator;
 public class TestDynaSqlQueries extends TestDatabaseWriterBase
 {
     /**
+     * {@inheritDoc}
+     */
+    protected void setUp() throws Exception
+    {
+        super.setUp();
+        getPlatform().setDelimitedIdentifierModeOn(false);
+    }
+
+    /**
      * Tests a simple SELECT query.
      */
     public void testSimpleQuery() throws Exception
