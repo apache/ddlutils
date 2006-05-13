@@ -55,7 +55,7 @@ public class PlatformInfo
     private boolean _embeddedForeignKeysNamed = false;
 
     /** Whether non-unique indices are supported. */
-    private boolean _nonUniqueIndicesSupported = true;
+    private boolean _indicesSupported = true;
 
     /** Whether indices are embedded inside the create table statement. */
     private boolean _indicesEmbedded = false;
@@ -262,24 +262,23 @@ public class PlatformInfo
     }
 
     /**
-     * Determines whether non-unique indices are supported.
+     * Determines whether indices are supported.
      *
-     * @return <code>true</code> if non-unique indices are supported
+     * @return <code>true</code> if indices are supported
      */
-    public boolean isNonUniqueIndicesSupported()
+    public boolean isIndicesSupported()
     {
-        return _nonUniqueIndicesSupported;
+        return _indicesSupported;
     }
 
     /**
-     * Specifies whether non-unique indices are supported.
+     * Specifies whether indices are supported.
      *
-     * @param supportingNonUniqueIndices <code>true</code> if non-unique indices
-     *                                   are supported
+     * @param supportingIndices <code>true</code> if indices are supported
      */
-    public void setNonUniqueIndicesSupported(boolean supportingNonUniqueIndices)
+    public void setIndicesSupported(boolean supportingIndices)
     {
-        _nonUniqueIndicesSupported = supportingNonUniqueIndices;
+        _indicesSupported = supportingIndices;
     }
 
     /**

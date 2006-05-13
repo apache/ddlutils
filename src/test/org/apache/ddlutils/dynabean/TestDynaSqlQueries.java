@@ -150,8 +150,8 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "    <column name='Id2' type='INTEGER'/>\n"+
             "  </table>\n"+
             "  <table name='TestTable2'>\n"+
-            "    <column name='Id'   type='INTEGER' primaryKey='true'/>\n"+
-            "    <column name='Text' type='VARCHAR' size='15'/>\n"+
+            "    <column name='Id' type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='Avalue' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
 
@@ -160,12 +160,12 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "<data>\n"+
             "  <TestTable1 Id1='1'/>\n"+
             "  <TestTable1 Id1='2' Id2='3'/>\n"+
-            "  <TestTable2 Id='1' Text='Text 1'/>\n"+
-            "  <TestTable2 Id='2' Text='Text 2'/>\n"+
-            "  <TestTable2 Id='3' Text='Text 3'/>"+
+            "  <TestTable2 Id='1' Avalue='Text 1'/>\n"+
+            "  <TestTable2 Id='2' Avalue='Text 2'/>\n"+
+            "  <TestTable2 Id='3' Avalue='Text 3'/>"+
             "</data>");
 
-        ModelBasedResultSetIterator it   = (ModelBasedResultSetIterator)getPlatform().query(getModel(), "SELECT Id1, Text FROM TestTable1, TestTable2 WHERE Id2 = Id");
+        ModelBasedResultSetIterator it   = (ModelBasedResultSetIterator)getPlatform().query(getModel(), "SELECT Id1, Avalue FROM TestTable1, TestTable2 WHERE Id2 = Id");
         DynaBean        bean = null;
 
         assertTrue(it.hasNext());
@@ -175,7 +175,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         assertEquals(new Integer(2),
                      getPropertyValue(bean, "Id1"));
         assertEquals("Text 3",
-                     getPropertyValue(bean, "Text"));
+                     getPropertyValue(bean, "Avalue"));
 
         assertFalse(it.hasNext());
         assertFalse(it.isConnectionOpen());

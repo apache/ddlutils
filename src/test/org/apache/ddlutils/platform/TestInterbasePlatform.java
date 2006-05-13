@@ -56,11 +56,11 @@ public class TestInterbasePlatform extends TestPlatformBase
             "CREATE TABLE \"coltype\"\n"+
             "(\n"+
             "    \"COL_ARRAY\"           BLOB ,\n"+
-            "    \"COL_BIGINT\"          DECIMAL(38,0),\n"+
+            "    \"COL_BIGINT\"          NUMERIC(18,0),\n"+
             "    \"COL_BINARY\"          CHAR CHARACTER SET OCTETS,\n"+
-            "    \"COL_BIT\"             DECIMAL(1,0),\n"+
+            "    \"COL_BIT\"             SMALLINT,\n"+
             "    \"COL_BLOB\"            BLOB ,\n"+
-            "    \"COL_BOOLEAN\"         DECIMAL(1,0),\n"+
+            "    \"COL_BOOLEAN\"         SMALLINT,\n"+
             "    \"COL_CHAR\"            CHAR(15),\n"+
             "    \"COL_CLOB\"            BLOB SUB_TYPE TEXT,\n"+
             "    \"COL_DATALINK\"        BLOB,\n"+
@@ -110,7 +110,7 @@ public class TestInterbasePlatform extends TestPlatformBase
             "    \"COL_NOT_NULL\"         CHAR(100) CHARACTER SET OCTETS NOT NULL,\n"+
             "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
-            "    \"COL_AUTO_INCR\"        DECIMAL(38,0),\n"+
+            "    \"COL_AUTO_INCR\"        NUMERIC(18,0),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n"+
             "COMMIT;\n"+

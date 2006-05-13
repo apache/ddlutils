@@ -133,6 +133,10 @@ public abstract class TestPlatformBase extends TestBase
         _writer   = new StringWriter();
         _platform = PlatformFactory.createNewPlatformInstance(getDatabaseName());
         _platform.getSqlBuilder().setWriter(_writer);
+        if (_platform.getPlatformInfo().isDelimitedIdentifiersSupported())
+        {
+            _platform.setDelimitedIdentifierModeOn(true);
+        }
     }
 
     /**

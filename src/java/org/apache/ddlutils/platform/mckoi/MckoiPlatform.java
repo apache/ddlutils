@@ -52,7 +52,7 @@ public class MckoiPlatform extends PlatformImplBase
         info.setNullAsDefaultValueRequired(false);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
-        info.setNonUniqueIndicesSupported(false);
+        info.setIndicesSupported(false);
         info.setIndicesEmbedded(true);
         info.setDefaultValueUsedForIdentitySpec(true);
 

@@ -62,10 +62,10 @@ public class TestSybasePlatform extends TestPlatformBase
             "(\n"+
             "    \"COL_ARRAY\"           IMAGE,\n"+
             "    \"COL_BIGINT\"          DECIMAL(19,0),\n"+
-            "    \"COL_BINARY\"          BINARY,\n"+
-            "    \"COL_BIT\"             BIT,\n"+
+            "    \"COL_BINARY\"          BINARY(254),\n"+
+            "    \"COL_BIT\"             SMALLINT,\n"+
             "    \"COL_BLOB\"            IMAGE,\n"+
-            "    \"COL_BOOLEAN\"         BIT,\n"+
+            "    \"COL_BOOLEAN\"         SMALLINT,\n"+
             "    \"COL_CHAR\"            CHAR(15),\n"+
             "    \"COL_CLOB\"            TEXT,\n"+
             "    \"COL_DATALINK\"        IMAGE,\n"+
@@ -132,8 +132,8 @@ public class TestSybasePlatform extends TestPlatformBase
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = 'testfk')\n"+
             "    ALTER TABLE \"table3\" DROP CONSTRAINT \"testfk\";\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = 'table2_FK_COL_F_OL_FK_2_table1')\n"+
-            "    ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_F_OL_FK_2_table1\";\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = 'table2_FK_COL_L_FK_2_table1')\n"+
+            "    ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_L_FK_2_table1\";\n"+
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table3')\n"+
@@ -177,7 +177,7 @@ public class TestSybasePlatform extends TestPlatformBase
             "    \"COL_FK\" INT NOT NULL,\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n"+
-            "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_F_OL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
+            "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_L_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
             createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
     }

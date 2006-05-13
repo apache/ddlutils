@@ -2399,7 +2399,7 @@ public abstract class SqlBuilder
         {
             Index index = table.getIndex(idx);
 
-            if (!index.isUnique() && !getPlatformInfo().isNonUniqueIndicesSupported())
+            if (!index.isUnique() && !getPlatformInfo().isIndicesSupported())
             {
                 throw new DynaSqlException("Platform does not support non-unique indices");
             }
@@ -2414,16 +2414,13 @@ public abstract class SqlBuilder
      */
     protected void writeEmbeddedIndicesStmt(Table table) throws IOException 
     {
-        for (int idx = 0; idx < table.getIndexCount(); idx++)
+        if (getPlatformInfo().isIndicesSupported())
         {
-            Index index = table.getIndex(idx);
-
-            if (!index.isUnique() && !getPlatformInfo().isNonUniqueIndicesSupported())
+            for (int idx = 0; idx < table.getIndexCount(); idx++)
             {
-                throw new DynaSqlException("Platform does not support non-unique indices");
+                printStartOfEmbeddedStatement();
+                writeEmbeddedIndexCreateStmt(table, table.getIndex(idx));
             }
-            printStartOfEmbeddedStatement();
-            writeEmbeddedIndexCreateStmt(table, index);
         }
     }
 
@@ -2435,42 +2432,45 @@ public abstract class SqlBuilder
      */
     protected void writeExternalIndexCreateStmt(Table table, Index index) throws IOException
     {
-        if (index.getName() == null)
+        if (getPlatformInfo().isIndicesSupported())
         {
-            _log.warn("Cannot write unnamed index " + index);
-        }
-        else
-        {
-            print("CREATE");
-            if (index.isUnique())
+            if (index.getName() == null)
             {
-                print(" UNIQUE");
+                _log.warn("Cannot write unnamed index " + index);
             }
-            print(" INDEX ");
-            printIdentifier(getIndexName(index));
-            print(" ON ");
-            printIdentifier(getTableName(table));
-            print(" (");
-
-            for (int idx = 0; idx < index.getColumnCount(); idx++)
+            else
             {
-                IndexColumn idxColumn = index.getColumn(idx);
-                Column      col       = table.findColumn(idxColumn.getName());
-
-                if (col == null)
+                print("CREATE");
+                if (index.isUnique())
                 {
-                    //would get null pointer on next line anyway, so throw exception
-                    throw new DynaSqlException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
+                    print(" UNIQUE");
                 }
-                if (idx > 0)
+                print(" INDEX ");
+                printIdentifier(getIndexName(index));
+                print(" ON ");
+                printIdentifier(getTableName(table));
+                print(" (");
+    
+                for (int idx = 0; idx < index.getColumnCount(); idx++)
                 {
-                    print(", ");
+                    IndexColumn idxColumn = index.getColumn(idx);
+                    Column      col       = table.findColumn(idxColumn.getName());
+    
+                    if (col == null)
+                    {
+                        // would get null pointer on next line anyway, so throw exception
+                        throw new DynaSqlException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
+                    }
+                    if (idx > 0)
+                    {
+                        print(", ");
+                    }
+                    printIdentifier(getColumnName(col));
                 }
-                printIdentifier(getColumnName(col));
+    
+                print(")");
+                printEndOfStatement();
             }
-
-            print(")");
-            printEndOfStatement();
         }
     }
 

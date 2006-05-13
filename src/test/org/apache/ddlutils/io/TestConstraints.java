@@ -256,7 +256,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testIndex()
     {
-        if (getPlatformInfo().isNonUniqueIndicesSupported())
+        if (getPlatformInfo().isIndicesSupported())
         {
             performConstraintsTest(TEST_INDEX_MODEL, true);
         }
@@ -267,7 +267,10 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testUniqueIndex()
     {
-        performConstraintsTest(TEST_UNIQUE_INDEX_MODEL, true);
+        if (getPlatformInfo().isIndicesSupported())
+        {
+            performConstraintsTest(TEST_UNIQUE_INDEX_MODEL, true);
+        }
     }
 
     /**
@@ -275,7 +278,7 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testPrimaryKeyIndex()
     {
-        if (getPlatformInfo().isNonUniqueIndicesSupported())
+        if (getPlatformInfo().isIndicesSupported())
         {
             performConstraintsTest(TEST_PRIMARY_KEY_INDEX_MODEL, true);
         }

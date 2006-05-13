@@ -16,6 +16,15 @@ package org.apache.ddlutils;
  * limitations under the License.
  */
 
+import org.apache.ddlutils.alteration.TestAlterationAlgorithm;
+import org.apache.ddlutils.alteration.TestModelComparator;
+import org.apache.ddlutils.dynabean.TestDynaSqlQueries;
+import org.apache.ddlutils.io.TestAlteration;
+import org.apache.ddlutils.io.TestConstraints;
+import org.apache.ddlutils.io.TestDataReader;
+import org.apache.ddlutils.io.TestDatabaseIO;
+import org.apache.ddlutils.io.TestDatatypes;
+import org.apache.ddlutils.model.TestArrayAccessAtTable;
 import org.apache.ddlutils.platform.TestAxionPlatform;
 import org.apache.ddlutils.platform.TestCloudscapePlatform;
 import org.apache.ddlutils.platform.TestDB2Platform;
@@ -26,6 +35,7 @@ import org.apache.ddlutils.platform.TestInterbasePlatform;
 import org.apache.ddlutils.platform.TestMSSqlPlatform;
 import org.apache.ddlutils.platform.TestMaxDbPlatform;
 import org.apache.ddlutils.platform.TestMcKoiPlatform;
+import org.apache.ddlutils.platform.TestMySql50Platform;
 import org.apache.ddlutils.platform.TestMySqlPlatform;
 import org.apache.ddlutils.platform.TestOracle8Platform;
 import org.apache.ddlutils.platform.TestOracle9Platform;
@@ -75,7 +85,12 @@ public class RunAllTests extends TestCase
     {
         TestSuite suite = new TestSuite("Ddlutils tests");
 
+        // tests that don't need a live database
+        suite.addTestSuite(TestArrayAccessAtTable.class);
+        suite.addTestSuite(SqlBuilderTest.class);
         suite.addTestSuite(TestPlatformUtils.class);
+        suite.addTestSuite(TestDatabaseIO.class);
+        suite.addTestSuite(TestDataReader.class);
         suite.addTestSuite(TestAxionPlatform.class);
         suite.addTestSuite(TestCloudscapePlatform.class);
         suite.addTestSuite(TestDB2Platform.class);
@@ -87,12 +102,24 @@ public class RunAllTests extends TestCase
         suite.addTestSuite(TestMcKoiPlatform.class);
         suite.addTestSuite(TestMSSqlPlatform.class);
         suite.addTestSuite(TestMySqlPlatform.class);
+        suite.addTestSuite(TestMySql50Platform.class);
         suite.addTestSuite(TestOracle8Platform.class);
         suite.addTestSuite(TestOracle9Platform.class);
         suite.addTestSuite(TestPostgresqlPlatform.class);
         suite.addTestSuite(TestSapDbPlatform.class);
         suite.addTestSuite(TestSybasePlatform.class);
-        
+        suite.addTestSuite(TestModelComparator.class);
+        suite.addTestSuite(TestAlterationAlgorithm.class);
+
+        // tests that need a live database
+        if (System.getProperty(TestDatabaseWriterBase.JDBC_PROPERTIES_PROPERTY) != null)
+        {
+            suite.addTestSuite(TestDynaSqlQueries.class);
+            suite.addTestSuite(TestDatatypes.class);
+            suite.addTestSuite(TestConstraints.class);
+            suite.addTestSuite(TestAlteration.class);
+        }
+
         return suite;
     }
 }

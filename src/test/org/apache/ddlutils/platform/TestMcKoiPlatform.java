@@ -137,11 +137,11 @@ public class TestMcKoiPlatform extends TestPlatformBase
             "CREATE TABLE \"constraints\"\n"+
             "(\n"+
             "    \"COL_PK\"               VARCHAR(32),\n"+
-            "    \"COL_PK_AUTO_INCR\"     INTEGER DEFAULT UNIQUEKEY('constraints') + 1,\n"+
+            "    \"COL_PK_AUTO_INCR\"     INTEGER DEFAULT UNIQUEKEY('constraints'),\n"+
             "    \"COL_NOT_NULL\"         BINARY(100) NOT NULL,\n"+
             "    \"COL_NOT_NULL_DEFAULT\" DOUBLE DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
-            "    \"COL_AUTO_INCR\"        BIGINT DEFAULT UNIQUEKEY('constraints') + 1,\n"+
+            "    \"COL_AUTO_INCR\"        BIGINT DEFAULT UNIQUEKEY('constraints'),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
             createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
@@ -165,9 +165,7 @@ public class TestMcKoiPlatform extends TestPlatformBase
             "    \"COL_INDEX_1\" BINARY(100) NOT NULL,\n"+
             "    \"COL_INDEX_2\" DOUBLE NOT NULL,\n"+
             "    \"COL_INDEX_3\" CHAR(4),\n"+
-            "    PRIMARY KEY (\"COL_PK_1\", \"COL_PK_2\"),\n"+
-            "    CONSTRAINT \"testindex1\" UNIQUE (\"COL_INDEX_2\"),\n"+
-            "    CONSTRAINT \"testindex2\" UNIQUE (\"COL_INDEX_3\", \"COL_INDEX_1\")\n"+
+            "    PRIMARY KEY (\"COL_PK_1\", \"COL_PK_2\")\n"+
             ");\n"+
             "CREATE TABLE \"table2\"\n"+
             "(\n"+

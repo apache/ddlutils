@@ -17,9 +17,12 @@ package org.apache.ddlutils.platform.mckoi;
  */
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -66,11 +69,27 @@ public class MckoiBuilder extends SqlBuilder
             // we start at value 1 to avoid issues with jdbc
             print("UNIQUEKEY('");
             print(getTableName(table));
-            print("') + 1");
+            print("')");
         }
         else
         {
             super.writeColumnDefaultValue(table, column);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void processTableStructureChanges(Database currentModel,
+                                                Database desiredModel,
+                                                Table    sourceTable,
+                                                Table    targetTable,
+                                                Map      parameters,
+                                                List     changes) throws IOException
+    {
+        // McKoi has this nice ALTER CREATE TABLE statement which saves us a lot of work
+        print("ALTER ");
+        createTable(desiredModel, targetTable, parameters);
+    }
+
 }

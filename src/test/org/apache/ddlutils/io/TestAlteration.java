@@ -809,6 +809,11 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testAddIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -852,6 +857,11 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testAddUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -934,6 +944,11 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testAddColumnToIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -980,6 +995,11 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testRemoveColumnFromUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+

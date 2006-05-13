@@ -46,7 +46,7 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "(\n"+
             "    \"COL_ARRAY\"           LONG BYTE,\n"+
             "    \"COL_BIGINT\"          FIXED(38,0),\n"+
-            "    \"COL_BINARY\"          LONG BYTE,\n"+
+            "    \"COL_BINARY\"          CHAR(254) BYTE,\n"+
             "    \"COL_BIT\"             BOOLEAN,\n"+
             "    \"COL_BLOB\"            LONG BYTE,\n"+
             "    \"COL_BOOLEAN\"         BOOLEAN,\n"+
@@ -54,26 +54,26 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "    \"COL_CLOB\"            LONG,\n"+
             "    \"COL_DATALINK\"        LONG BYTE,\n"+
             "    \"COL_DATE\"            DATE,\n"+
-            "    \"COL_DECIMAL\"         DECIMAL(15,3),\n"+
-            "    \"COL_DECIMAL_NOSCALE\" DECIMAL(15,0),\n"+
+            "    \"COL_DECIMAL\"         FIXED(15,3),\n"+
+            "    \"COL_DECIMAL_NOSCALE\" FIXED(15,0),\n"+
             "    \"COL_DISTINCT\"        LONG BYTE,\n"+
-            "    \"COL_DOUBLE\"          DOUBLE PRECISION,\n"+
-            "    \"COL_FLOAT\"           DOUBLE PRECISION,\n"+
+            "    \"COL_DOUBLE\"          FLOAT(38),\n"+
+            "    \"COL_FLOAT\"           FLOAT(38),\n"+
             "    \"COL_INTEGER\"         INTEGER,\n"+
             "    \"COL_JAVA_OBJECT\"     LONG BYTE,\n"+
             "    \"COL_LONGVARBINARY\"   LONG BYTE,\n"+
-            "    \"COL_LONGVARCHAR\"     LONG VARCHAR,\n"+
+            "    \"COL_LONGVARCHAR\"     LONG,\n"+
             "    \"COL_NULL\"            LONG BYTE,\n"+
-            "    \"COL_NUMERIC\"         DECIMAL(15,0),\n"+
+            "    \"COL_NUMERIC\"         FIXED(15,0),\n"+
             "    \"COL_OTHER\"           LONG BYTE,\n"+
-            "    \"COL_REAL\"            REAL,\n"+
+            "    \"COL_REAL\"            FLOAT(16),\n"+
             "    \"COL_REF\"             LONG BYTE,\n"+
             "    \"COL_SMALLINT\"        SMALLINT,\n"+
             "    \"COL_STRUCT\"          LONG BYTE,\n"+
             "    \"COL_TIME\"            TIME,\n"+
             "    \"COL_TIMESTAMP\"       TIMESTAMP,\n"+
             "    \"COL_TINYINT\"         SMALLINT,\n"+
-            "    \"COL_VARBINARY\"       LONG BYTE,\n"+
+            "    \"COL_VARBINARY\"       VARCHAR(15) BYTE,\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
             ");\n",
             createTestDatabase(COLUMN_TEST_SCHEMA));
@@ -90,8 +90,8 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "(\n"+
             "    \"COL_PK\"               VARCHAR(32),\n"+
             "    \"COL_PK_AUTO_INCR\"     INTEGER DEFAULT SERIAL(1),\n"+
-            "    \"COL_NOT_NULL\"         LONG BYTE NOT NULL,\n"+
-            "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT -2.0 NOT NULL,\n"+
+            "    \"COL_NOT_NULL\"         CHAR(100) BYTE NOT NULL,\n"+
+            "    \"COL_NOT_NULL_DEFAULT\" FLOAT(38) DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
             "    \"COL_AUTO_INCR\"        FIXED(38,0) DEFAULT SERIAL(1),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
@@ -114,8 +114,8 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "(\n"+
             "    \"COL_PK_1\"    VARCHAR(32) NOT NULL,\n"+
             "    \"COL_PK_2\"    INTEGER,\n"+
-            "    \"COL_INDEX_1\" LONG BYTE NOT NULL,\n"+
-            "    \"COL_INDEX_2\" DOUBLE PRECISION NOT NULL,\n"+
+            "    \"COL_INDEX_1\" CHAR(100) BYTE NOT NULL,\n"+
+            "    \"COL_INDEX_2\" FLOAT(38) NOT NULL,\n"+
             "    \"COL_INDEX_3\" CHAR(4),\n"+
             "    PRIMARY KEY (\"COL_PK_1\", \"COL_PK_2\")\n"+
             ");\n"+
