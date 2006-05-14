@@ -17,6 +17,7 @@ package org.apache.ddlutils.alteration;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -201,6 +202,8 @@ public class ModelComparator
             }
         }
 
+        HashMap addColumnChanges = new HashMap();
+
         for (int columnIdx = 0; columnIdx < targetTable.getColumnCount(); columnIdx++)
         {
             Column targetColumn = targetTable.getColumn(columnIdx);
@@ -212,14 +215,34 @@ public class ModelComparator
                 {
                     _log.info("Column " + targetColumn.getName() + " needs to be created for table " + sourceTable.getName());
                 }
-                changes.add(new AddColumnChange(sourceTable,
-                                                targetColumn,
-                                                columnIdx > 0 ? targetTable.getColumn(columnIdx - 1) : null,
-                                                columnIdx < targetTable.getColumnCount() - 1 ? targetTable.getColumn(columnIdx + 1) :null));
+
+                AddColumnChange change = new AddColumnChange(sourceTable,
+                                                             targetColumn,
+                                                             columnIdx > 0 ? targetTable.getColumn(columnIdx - 1) : null,
+                                                             columnIdx < targetTable.getColumnCount() - 1 ? targetTable.getColumn(columnIdx + 1) : null);
+
+                changes.add(change);
+                addColumnChanges.put(targetColumn, change);
             }
             else
             {
                 changes.addAll(compareColumns(sourceTable, sourceColumn, targetTable, targetColumn));
+            }
+        }
+        // if the last columns in the target table are added, then we note this at the changes
+        for (int columnIdx = targetTable.getColumnCount() - 1; columnIdx >= 0; columnIdx--)
+        {
+            Column          targetColumn = targetTable.getColumn(columnIdx);
+            AddColumnChange change       = (AddColumnChange)addColumnChanges.get(targetColumn);
+
+            if (change == null)
+            {
+                // column was not added, so we can ignore any columns before it that were added
+                break;
+            }
+            else
+            {
+                change.setAtEnd(true);
             }
         }
 

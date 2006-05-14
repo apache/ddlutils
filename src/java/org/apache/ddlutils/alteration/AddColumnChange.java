@@ -34,6 +34,8 @@ public class AddColumnChange extends TableChangeImplBase
     private Column _previousColumn;
     /** The column before which the new column should be added. */
     private Column _nextColumn;
+    /** Whether the column is added at the end. */
+    private boolean _atEnd;
 
     /**
      * Creates a new change object.
@@ -82,6 +84,28 @@ public class AddColumnChange extends TableChangeImplBase
     }
 
     /**
+     * Determines whether the column is added at the end (when applied in the order
+     * of creation of the changes).
+     * 
+     * @return <code>true</code> if the column is added at the end
+     */
+    public boolean isAtEnd()
+    {
+        return _atEnd;
+    }
+
+    /**
+     * Specifies whether the column is added at the end (when applied in the order
+     * of creation of the changes).
+     * 
+     * @param atEnd <code>true</code> if the column is added at the end
+     */
+    public void setAtEnd(boolean atEnd)
+    {
+        _atEnd = atEnd;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void apply(Database database)
@@ -96,6 +120,18 @@ public class AddColumnChange extends TableChangeImplBase
         {
             throw new DdlUtilsException(ex);
         }
-        database.findTable(getChangedTable().getName()).addColumn(newColumn);
+
+        Table table = database.findTable(getChangedTable().getName());
+
+        if ((_previousColumn != null) && (_nextColumn != null))
+        {
+            int idx = table.getColumnIndex(_previousColumn) + 1;
+
+            table.addColumn(idx, newColumn);
+        }
+        else
+        {
+            table.addColumn(newColumn);
+        }
     }
 }

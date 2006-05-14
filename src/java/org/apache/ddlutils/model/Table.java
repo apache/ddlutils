@@ -560,6 +560,26 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
+     * Determines the index of the given column.
+     * 
+     * @param column The column
+     * @return The index or <code>-1</code> if it is no column of this table
+     */
+    public int getColumnIndex(Column column)
+    {
+        int idx = 0;
+
+        for (Iterator it = _columns.iterator(); it.hasNext(); idx++)
+        {
+            if (column == it.next())
+            {
+                return idx;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Finds the index with the specified name, using case insensitive matching.
      * Note that this method is not called getIndex to avoid introspection
      * problems.

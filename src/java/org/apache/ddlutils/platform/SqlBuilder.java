@@ -2111,6 +2111,22 @@ public abstract class SqlBuilder
     }
 
     /**
+     * Determines whether the given default spec is a non-empty spec that shall be used in a DEFAULT
+     * expression. E.g. if the spec is an empty string and the type is a numeric type, then it is
+     * no valid default value whereas if it is a string type, then it is valid.
+     * 
+     * @param defaultSpec The default value spec
+     * @param typeCode    The JDBC type code
+     * @return <code>true</code> if the default value spec is valid
+     */
+    protected boolean isValidDefaultValue(String defaultSpec, int typeCode)
+    {
+        return (defaultSpec != null) &&
+               ((defaultSpec.length() > 0) ||
+                (!TypeMap.isNumericType(typeCode) && !TypeMap.isDateTimeType(typeCode)));
+    }
+    
+    /**
      * Prints the default value stmt part for the column.
      * 
      * @param table  The table
@@ -2128,8 +2144,7 @@ public abstract class SqlBuilder
                 throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
             }
             // we write empty default value strings only if the type is not a numeric or date/time type
-            if ((column.getDefaultValue().length() > 0) ||
-                (!TypeMap.isNumericType(column.getTypeCode()) && !TypeMap.isDateTimeType(column.getTypeCode())))
+            if (isValidDefaultValue(column.getDefaultValue(), column.getTypeCode()))
             {
                 print(" DEFAULT ");
                 writeColumnDefaultValue(table, column);
@@ -2150,23 +2165,32 @@ public abstract class SqlBuilder
      */ 
     protected void writeColumnDefaultValue(Table table, Column column) throws IOException
     {
-        boolean shouldUseQuotes = !TypeMap.isNumericType(column.getTypeCode());
+        printDefaultValue(getNativeDefaultValue(column), column.getTypeCode());
+    }
 
-        if (shouldUseQuotes)
+    /**
+     * Prints the default value of the column.
+     * 
+     * @param defaultValue The default value
+     * @param typeCode     The type code to write the default value for
+     */ 
+    protected void printDefaultValue(Object defaultValue, int typeCode) throws IOException
+    {
+        if (defaultValue != null)
         {
-            // characters are only escaped when within a string literal 
-            print(getPlatformInfo().getValueQuoteToken());
-            print(escapeStringValue(getNativeDefaultValue(column).toString()));
-            print(getPlatformInfo().getValueQuoteToken());
-        }
-        else
-        {
-        	Object nativeDefault = getNativeDefaultValue(column);
-
-        	if (nativeDefault != null)
-        	{
-        		print(nativeDefault.toString());
-        	}
+            boolean shouldUseQuotes = !TypeMap.isNumericType(typeCode);
+    
+            if (shouldUseQuotes && (defaultValue != null))
+            {
+                // characters are only escaped when within a string literal 
+                print(getPlatformInfo().getValueQuoteToken());
+                print(escapeStringValue(defaultValue.toString()));
+                print(getPlatformInfo().getValueQuoteToken());
+            }
+            else
+            {
+                print(defaultValue.toString());
+            }
         }
     }
 

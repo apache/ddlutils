@@ -202,29 +202,33 @@ public class MySqlBuilder extends SqlBuilder
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
                 change.apply(currentModel);
+                changeIt.remove();
             }
             else if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
                 change.apply(currentModel);
+                changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (PrimaryKeyChange)change);
                 change.apply(currentModel);
+                changeIt.remove();
             }
             else if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
                 change.apply(currentModel);
+                changeIt.remove();
             }
             else
             {
                 // we gather all changed columns because we can use the ALTER TABLE MODIFY COLUMN
                 // statement for them
                 changedColumns.add(((ColumnChange)change).getChangedColumn());
+                changeIt.remove();
             }
-            changeIt.remove();
         }
         for (Iterator columnIt = changedColumns.iterator(); columnIt.hasNext();)
         {

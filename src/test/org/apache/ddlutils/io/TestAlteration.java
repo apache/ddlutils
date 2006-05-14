@@ -486,6 +486,53 @@ public class TestAlteration extends RoundtripTestBase
 
         assertEquals((Object)null, beans.get(0), "avalue1");
         assertEquals((Object)null, beans.get(0), "avalue2");
+        assertEquals(new Double(3.0), beans.get(0), "avalue3");
+        assertEquals((Object)null, beans.get(0), "avalue4");
+    }
+
+    /**
+     * Tests the addition of several columns at the end of the table. This test
+     * is known to fail on MaxDB where a DEFAULT specification is applied to existing
+     * rows even if they are not defined as NOT NULL (column 'avalue3' in the
+     * target schema).
+     */
+    public void testAddColumnsAtTheEnd()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+            "    <column name='avalue2' type='INTEGER'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+            "    <column name='avalue2' type='INTEGER'/>\n"+
+            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1), "test", new Integer(3) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals((Object)"test", beans.get(0), "avalue1");
+        assertEquals(new Integer(3), beans.get(0), "avalue2");
+        assertEquals((Object)null, beans.get(0), "avalue3");
         assertEquals((Object)null, beans.get(0), "avalue4");
     }
 
@@ -557,6 +604,51 @@ public class TestAlteration extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         assertEquals(new Integer(2), beans.get(0), "avalue");
+    }
+
+    /**
+     * Tests the change of the order of the columns of a table.
+     */
+    public void testChangeColumnOrder()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+            "    <column name='avalue2' type='INTEGER'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+            "    <column name='avalue2' type='INTEGER'/>\n"+
+            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1), "test", "value", null, null });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals((Object)"test", beans.get(0), "avalue1");
+        assertEquals((Object)null, beans.get(0), "avalue2");
+        assertEquals(new Double(1.0), beans.get(0), "avalue3");
+        assertEquals((Object)"value", beans.get(0), "avalue4");
     }
 
     /**
