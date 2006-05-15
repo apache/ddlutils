@@ -766,7 +766,7 @@ public abstract class SqlBuilder
                 {
                     ForeignKey targetFk = targetTable.getForeignKey(fkIdx);
                     ForeignKey sourceFk = sourceTable.findForeignKey(targetFk, caseSensitive);
-                    String     refName  = targetFk.getForeignTable().getName();
+                    String     refName  = targetFk.getForeignTableName();
 
                     if (!caseSensitive)
                     {
@@ -2180,7 +2180,7 @@ public abstract class SqlBuilder
         {
             boolean shouldUseQuotes = !TypeMap.isNumericType(typeCode);
     
-            if (shouldUseQuotes && (defaultValue != null))
+            if (shouldUseQuotes)
             {
                 // characters are only escaped when within a string literal 
                 print(getPlatformInfo().getValueQuoteToken());

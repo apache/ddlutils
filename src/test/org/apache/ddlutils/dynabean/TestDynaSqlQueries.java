@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestDatabaseWriterBase;
+import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.ModelBasedResultSetIterator;
 
 /**
@@ -61,14 +62,15 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable Id='3' Text='Text 3'/>"+
             "</data>");
 
-        ModelBasedResultSetIterator it   = (ModelBasedResultSetIterator)getPlatform().query(getModel(), "SELECT * FROM TestTable");
-        DynaBean        bean = null;
+        ModelBasedResultSetIterator it = (ModelBasedResultSetIterator)getPlatform().query(getModel(),
+                                                                                          "SELECT * FROM TestTable",
+                                                                                          new Table[] { getModel().getTable(0) });
 
         assertTrue(it.hasNext());
         // we call the method a second time to assert that the result set does not get advanced twice
         assertTrue(it.hasNext());
 
-        bean = (DynaBean)it.next();
+        DynaBean bean = (DynaBean)it.next();
 
         assertEquals(new Integer(1),
                      getPropertyValue(bean, "Id"));
@@ -119,7 +121,9 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable Id='3' Text='Text 3'/>"+
             "</data>");
 
-        List beans = getPlatform().fetch(getModel(), "SELECT * FROM TestTable");
+        List beans = getPlatform().fetch(getModel(),
+                                         "SELECT * FROM TestTable",
+                                         new Table[] { getModel().getTable(0) });
 
         assertEquals(3,
                      beans.size());
@@ -174,12 +178,13 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable2 Id='3' Avalue='Text 3'/>"+
             "</data>");
 
-        ModelBasedResultSetIterator it   = (ModelBasedResultSetIterator)getPlatform().query(getModel(), "SELECT Id1, Avalue FROM TestTable1, TestTable2 WHERE Id2 = Id");
-        DynaBean        bean = null;
+        ModelBasedResultSetIterator it = (ModelBasedResultSetIterator)getPlatform().query(getModel(),
+                                                                                          "SELECT Id1, Avalue FROM TestTable1, TestTable2 WHERE Id2 = Id",
+                                                                                          new Table[] { getModel().getTable(0), getModel().getTable(1) });
 
         assertTrue(it.hasNext());
 
-        bean = (DynaBean)it.next();
+        DynaBean bean = (DynaBean)it.next();
 
         assertEquals(new Integer(2),
                      getPropertyValue(bean, "Id1"));

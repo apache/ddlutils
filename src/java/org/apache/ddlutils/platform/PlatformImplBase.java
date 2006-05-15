@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -56,6 +55,7 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.util.Jdbc3Utils;
 import org.apache.ddlutils.util.JdbcSupport;
+import org.apache.ddlutils.util.SqlTokenizer;
 
 /**
  * Base class for platform implementations.
@@ -224,15 +224,17 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         int       errors       = 0;
         int       commandCount = 0;
 
+        // we tokenize the SQL along the delimiters, and we also make sure that only delimiters
+        // at the end of a line or the end of the string are used (row mode)
         try
         {
             statement = connection.createStatement();
-            
-            StringTokenizer tokenizer = new StringTokenizer(sql, ";");
 
-            while (tokenizer.hasMoreTokens())
+            SqlTokenizer tokenizer = new SqlTokenizer(sql);
+
+            while (tokenizer.hasMoreStatements())
             {
-                String command = tokenizer.nextToken();
+                String command = tokenizer.getNextStatement();
                 
                 // ignore whitespace
                 command = command.trim();
@@ -665,7 +667,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
+            //getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
+            getSqlBuilder().alterDatabase2(currentModel, desiredModel, null);
             sql = buffer.toString();
         }
         catch (IOException ex)
@@ -698,7 +701,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
+            //getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
+            getSqlBuilder().alterDatabase2(currentModel, desiredModel, params);
             sql = buffer.toString();
         }
         catch (IOException ex)

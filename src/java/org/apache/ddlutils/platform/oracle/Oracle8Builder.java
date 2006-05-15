@@ -24,6 +24,7 @@ import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
@@ -108,6 +109,18 @@ public class Oracle8Builder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
+    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    {
+        // Index names in Oracle are unique to a schema and hence Oracle does not
+        // use the ON <tablename> clause
+        print("DROP INDEX ");
+        printIdentifier(getIndexName(index));
+        printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void createTable(Database database, Table table, Map parameters) throws IOException
     {
         // lets create any sequences
@@ -124,17 +137,24 @@ public class Oracle8Builder extends SqlBuilder
 
         for (int idx = 0; idx < columns.length; idx++)
         {
+            String columnName  = getColumnName(columns[idx]);
+            String triggerName = getConstraintName("trg", table, columns[idx].getName(), null);
+
+            // note that the BEGIN ... SELECT ... END; is all in one line and does
+            // not contain a semicolon except for the END-one
+            // this way, the tokenizer will not split the statement before the END
             print("CREATE OR REPLACE TRIGGER ");
-            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
+            printIdentifier(triggerName);
             print(" BEFORE INSERT ON ");
             printIdentifier(getTableName(table));
-            println(" FOR EACH ROW");
-            println("BEGIN");
-            print("SELECT ");
+            print(" REFERENCING NEW AS NEW OLD AS OLD FOR EACH ROW WHEN (new.");
+            printIdentifier(columnName);
+            println(" IS NULL)");
+            print("BEGIN SELECT ");
             printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
             print(".nextval INTO :new.");
-            printIdentifier(getColumnName(columns[idx]));
-            print(" FROM dual");
+            printIdentifier(columnName);
+            print(" FROM dual END");
             printEndOfStatement();
         }
     }
@@ -142,24 +162,28 @@ public class Oracle8Builder extends SqlBuilder
 	/**
      * {@inheritDoc}
      */
-    protected void writeColumnDefaultValue(Table table, Column column) throws IOException
+    protected void printDefaultValue(Object defaultValue, int typeCode) throws IOException
     {
-        String  nativeDefault   = getNativeDefaultValue(column);
-        boolean shouldUseQuotes = !TypeMap.isNumericType(column.getTypeCode()) && !nativeDefault.startsWith("TO_DATE(");
-
-        if (shouldUseQuotes)
+        if (defaultValue != null)
         {
-            print(getPlatformInfo().getValueQuoteToken());
-            print(escapeStringValue(nativeDefault));
-            print(getPlatformInfo().getValueQuoteToken());
+            String  defaultValueStr = defaultValue.toString();
+            boolean shouldUseQuotes = !TypeMap.isNumericType(typeCode) && !defaultValueStr.startsWith("TO_DATE(");
+    
+            if (shouldUseQuotes)
+            {
+                // characters are only escaped when within a string literal 
+                print(getPlatformInfo().getValueQuoteToken());
+                print(escapeStringValue(defaultValueStr));
+                print(getPlatformInfo().getValueQuoteToken());
+            }
+            else
+            {
+                print(defaultValueStr);
+            }
         }
-        else
-        {
-            print(nativeDefault);
-        }
-	}
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     protected String getNativeDefaultValue(Column column)
@@ -203,4 +227,14 @@ public class Oracle8Builder extends SqlBuilder
     {
         // we're using sequences instead
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void createTemporaryTable(Database database, Table table, Map parameters) throws IOException
+    {
+        // we don't want the auto-increment triggers/sequences for the temporary table
+        super.createTable(database, table, parameters);
+    }
+
 }

@@ -266,13 +266,17 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected void alterDatabase(Database model) throws DynaSqlException
     {
+        Properties props   = getTestProperties();
+        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
+        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+
         try
         {
             _model = model;
             _model.resetDynaClassCache();
 
             getPlatform().setSqlCommentsOn(false);
-            getPlatform().alterTables(_model, true, true, false);
+            getPlatform().alterTables(catalog, schema, null, _model, true, true, false);
         }
         catch (Exception ex)
         {
