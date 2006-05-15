@@ -194,6 +194,8 @@ public class MySqlBuilder extends SqlBuilder
 
         ListOrderedSet changedColumns = new ListOrderedSet();
         
+        // we don't have to care about the order because the comparator will have ensured
+        // that a add primary key change comes after all necessary columns are present
         for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
         {
             TableChange change = (TableChange)changeIt.next();

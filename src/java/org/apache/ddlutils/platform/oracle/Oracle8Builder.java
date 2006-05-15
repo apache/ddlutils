@@ -18,10 +18,18 @@ package org.apache.ddlutils.platform.oracle;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
@@ -147,14 +155,16 @@ public class Oracle8Builder extends SqlBuilder
             printIdentifier(triggerName);
             print(" BEFORE INSERT ON ");
             printIdentifier(getTableName(table));
-            print(" REFERENCING NEW AS NEW OLD AS OLD FOR EACH ROW WHEN (new.");
+            print(" FOR EACH ROW WHEN (new.");
             printIdentifier(columnName);
             println(" IS NULL)");
             print("BEGIN SELECT ");
             printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
             print(".nextval INTO :new.");
             printIdentifier(columnName);
-            print(" FROM dual END");
+            print(" FROM dual");
+            print(getPlatformInfo().getSqlCommandDelimiter());
+            print(" END");
             printEndOfStatement();
         }
     }
@@ -237,4 +247,142 @@ public class Oracle8Builder extends SqlBuilder
         super.createTable(database, table, parameters);
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void processTableStructureChanges(Database currentModel,
+                                                Database desiredModel,
+                                                Table    sourceTable,
+                                                Table    targetTable,
+                                                Map      parameters,
+                                                List     changes) throws IOException
+    {
+        // First we drop primary keys as necessary
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof RemovePrimaryKeyChange)
+            {
+                processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
+                change.apply(currentModel);
+                changeIt.remove();
+            }
+            else if (change instanceof PrimaryKeyChange)
+            {
+                PrimaryKeyChange       pkChange       = (PrimaryKeyChange)change;
+                RemovePrimaryKeyChange removePkChange = new RemovePrimaryKeyChange(pkChange.getChangedTable(),
+                                                                                   pkChange.getOldPrimaryKeyColumns());
+
+                processChange(currentModel, desiredModel, removePkChange);
+                removePkChange.apply(currentModel);
+            }
+        }
+
+        // Next we add/remove columns
+        // While Oracle has an ALTER TABLE MODIFY statement, it is somewhat limited
+        // esp. if there is data in the table, so we don't use it
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof AddColumnChange)
+            {
+                AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                // Oracle can only add not insert columns
+                if (addColumnChange.isAtEnd())
+                {
+                    processChange(currentModel, desiredModel, addColumnChange);
+                    change.apply(currentModel);
+                    changeIt.remove();
+                }
+            }
+            else if (change instanceof RemoveColumnChange)
+            {
+                processChange(currentModel, desiredModel, (RemoveColumnChange)change);
+                change.apply(currentModel);
+                changeIt.remove();
+            }
+        }
+        // Finally we add primary keys
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof AddPrimaryKeyChange)
+            {
+                processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
+                change.apply(currentModel);
+                changeIt.remove();
+            }
+            else if (change instanceof PrimaryKeyChange)
+            {
+                PrimaryKeyChange    pkChange    = (PrimaryKeyChange)change;
+                AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange(pkChange.getChangedTable(),
+                                                                          pkChange.getNewPrimaryKeyColumns());
+
+                processChange(currentModel, desiredModel, addPkChange);
+                addPkChange.apply(currentModel);
+                changeIt.remove();
+            }
+        }
+    }
+
+    /**
+     * Processes the addition of a column to a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database        currentModel,
+                                 Database        desiredModel,
+                                 AddColumnChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("ADD ");
+        writeColumn(change.getChangedTable(), change.getNewColumn());
+        printEndOfStatement();
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 RemoveColumnChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP COLUMN ");
+        printIdentifier(getColumnName(change.getColumn()));
+        printEndOfStatement();
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database               currentModel,
+                                 Database               desiredModel,
+                                 RemovePrimaryKeyChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP PRIMARY KEY");
+        printEndOfStatement();
+    }
 }

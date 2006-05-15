@@ -225,25 +225,6 @@ public class SapDbBuilder extends SqlBuilder
     }
 
     /**
-     * Processes the change of the primary key of a table.
-     * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
-     */
-    protected void processChange(Database         currentModel,
-                                 Database         desiredModel,
-                                 PrimaryKeyChange change) throws IOException
-    {
-        print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
-        printIndent();
-        print("DROP PRIMARY KEY");
-        printEndOfStatement();
-        writeExternalPrimaryKeysCreateStmt(change.getChangedTable(), change.getNewPrimaryKeyColumns());
-    }
-
-    /**
      * Processes the change of the required constraint of a column.
      * 
      * @param currentModel The current database schema
