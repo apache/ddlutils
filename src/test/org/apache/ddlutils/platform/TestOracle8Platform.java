@@ -113,9 +113,9 @@ public class TestOracle8Platform extends TestPlatformBase
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n"+
             "CREATE OR REPLACE TRIGGER \"trg_constraints_L_PK_AUTO_INCR\" BEFORE INSERT ON \"constraints\" FOR EACH ROW WHEN (new.\"COL_PK_AUTO_INCR\" IS NULL)\n"+
-            "BEGIN SELECT \"seq_constraints_L_PK_AUTO_INCR\".nextval INTO :new.\"COL_PK_AUTO_INCR\" FROM dual; END;\n"+
+            "BEGIN SELECT \"seq_constraints_L_PK_AUTO_INCR\".nextval INTO :new.\"COL_PK_AUTO_INCR\" FROM dual; END;;\n"+
             "CREATE OR REPLACE TRIGGER \"trg_constraints_COL_AUTO_INCR\" BEFORE INSERT ON \"constraints\" FOR EACH ROW WHEN (new.\"COL_AUTO_INCR\" IS NULL)\n"+
-            "BEGIN SELECT \"seq_constraints_COL_AUTO_INCR\".nextval INTO :new.\"COL_AUTO_INCR\" FROM dual; END;\n",
+            "BEGIN SELECT \"seq_constraints_COL_AUTO_INCR\".nextval INTO :new.\"COL_AUTO_INCR\" FROM dual; END;;\n",
             createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
     }
 

@@ -821,7 +821,7 @@ public abstract class SqlBuilder
             dropTable(sourceTable);
             createTable(desiredModel, realTargetTable, parameters);
             writeCopyDataStatement(tempTable, targetTable);
-            dropTable(tempTable);
+            dropTemporaryTable(desiredModel, tempTable);
         }
     }
 
@@ -905,6 +905,18 @@ public abstract class SqlBuilder
     protected void createTemporaryTable(Database database, Table table, Map parameters) throws IOException 
     {
         createTable(database, table, parameters);
+    }
+
+    /**
+     * Outputs the DDL to drop the given temporary table. Per default this is simply
+     * a call to {@link #dropTable(Table)}.
+     * 
+     * @param database The database model
+     * @param table    The table
+     */
+    protected void dropTemporaryTable(Database database, Table table) throws IOException 
+    {
+        dropTable(table);
     }
 
     /**
@@ -2717,6 +2729,8 @@ public abstract class SqlBuilder
      */
     protected void printEndOfStatement() throws IOException
     {
+        // TODO: It might make sense to use a special writer which stores the individual
+        //       statements separately (the end of a statement is identified by this method)
         println(getPlatformInfo().getSqlCommandDelimiter());
         println();
     }

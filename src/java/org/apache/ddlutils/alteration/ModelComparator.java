@@ -36,6 +36,8 @@ import org.apache.ddlutils.model.Table;
  * are changed in the process, however, it is also assumed that the models do not
  * change in between.
  * 
+ * TODO: Add support and tests for the change of the column order 
+ * 
  * @version $Revision: $
  */
 public class ModelComparator

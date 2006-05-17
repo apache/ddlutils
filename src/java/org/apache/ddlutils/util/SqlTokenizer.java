@@ -4,6 +4,8 @@ package org.apache.ddlutils.util;
 /**
  * A statement tokenizer for SQL strings that splits only at delimiters that
  * are at the end of a line or the end of the SQL (row mode).  
+ * 
+ * TODO: Add awareness of strings, so that semicolons within strings are not parsed
  */
 public class SqlTokenizer
 {

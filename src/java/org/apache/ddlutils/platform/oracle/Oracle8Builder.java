@@ -165,6 +165,10 @@ public class Oracle8Builder extends SqlBuilder
             print(" FROM dual");
             print(getPlatformInfo().getSqlCommandDelimiter());
             print(" END");
+            // It is important that there is a semicolon at the end of the statement (or more
+            // precisely, at the end of the PL/SQL block), and thus we put two semicolons here
+            // because the tokenizer will remove the one at the end
+            print(getPlatformInfo().getSqlCommandDelimiter());
             printEndOfStatement();
         }
     }
@@ -247,6 +251,14 @@ public class Oracle8Builder extends SqlBuilder
         super.createTable(database, table, parameters);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    protected void dropTemporaryTable(Database database, Table table) throws IOException
+    {
+        // likewise, we don't need to drop a sequence or trigger
+        super.dropTable(table);
+    }
 
     /**
      * {@inheritDoc}
