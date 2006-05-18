@@ -55,27 +55,20 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'coltype')\n"+
             "BEGIN\n"+
-            "     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)\n"+
-            "     DECLARE refcursor CURSOR FOR\n"+
-            "     select reftables.name tablename, cons.name constraintname\n"+
-            "      from sysobjects tables,\n"+
-            "           sysobjects reftables,\n"+
-            "           sysobjects cons,\n"+
-            "           sysreferences ref\n"+
-            "       where tables.id = ref.rkeyid\n"+
-            "         and cons.id = ref.constid\n"+
-            "         and reftables.id = ref.fkeyid\n"+
-            "         and tables.name = 'coltype'\n"+
-            "     OPEN refcursor\n"+
-            "     FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     while @@FETCH_STATUS = 0\n"+
-            "     BEGIN\n"+
-            "       exec ('alter table '+@reftable+' drop constraint '+@constraintname)\n"+
-            "       FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     END\n"+
-            "     CLOSE refcursor\n"+
-            "     DEALLOCATE refcursor\n"+
-            "     DROP TABLE \"coltype\"\n"+
+            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE refcursor CURSOR FOR\n"+
+            "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
+            "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
+            "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'coltype'  OPEN refcursor\n"+
+            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  WHILE @@FETCH_STATUS = 0\n"+
+            "    BEGIN\n"+
+            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
+            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "    END\n"+
+            "  CLOSE refcursor\n"+
+            "  DEALLOCATE refcursor\n"+
+            "  DROP TABLE \"coltype\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"coltype\"\n"+
@@ -127,27 +120,20 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'constraints')\n"+
             "BEGIN\n"+
-            "     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)\n"+
-            "     DECLARE refcursor CURSOR FOR\n"+
-            "     select reftables.name tablename, cons.name constraintname\n"+
-            "      from sysobjects tables,\n"+
-            "           sysobjects reftables,\n"+
-            "           sysobjects cons,\n"+
-            "           sysreferences ref\n"+
-            "       where tables.id = ref.rkeyid\n"+
-            "         and cons.id = ref.constid\n"+
-            "         and reftables.id = ref.fkeyid\n"+
-            "         and tables.name = 'constraints'\n"+
-            "     OPEN refcursor\n"+
-            "     FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     while @@FETCH_STATUS = 0\n"+
-            "     BEGIN\n"+
-            "       exec ('alter table '+@reftable+' drop constraint '+@constraintname)\n"+
-            "       FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     END\n"+
-            "     CLOSE refcursor\n"+
-            "     DEALLOCATE refcursor\n"+
-            "     DROP TABLE \"constraints\"\n"+
+            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE refcursor CURSOR FOR\n"+
+            "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
+            "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
+            "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'constraints'  OPEN refcursor\n"+
+            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  WHILE @@FETCH_STATUS = 0\n"+
+            "    BEGIN\n"+
+            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
+            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "    END\n"+
+            "  CLOSE refcursor\n"+
+            "  DEALLOCATE refcursor\n"+
+            "  DROP TABLE \"constraints\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"constraints\"\n"+
@@ -170,86 +156,65 @@ public class TestMSSqlPlatform extends TestPlatformBase
     {
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = 'testfk')\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'F' AND name = 'testfk')\n"+
             "     ALTER TABLE \"table3\" DROP CONSTRAINT \"testfk\";\n"+
             "SET quoted_identifier on;\n"+
-            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'RI' AND name = 'table2_FK_COL_FK_1_COL_FK_2_table1')\n"+
+            "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'F' AND name = 'table2_FK_COL_FK_1_COL_FK_2_table1')\n"+
             "     ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_FK_1_COL_FK_2_table1\";\n"+
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table3')\n"+
             "BEGIN\n"+
-            "     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)\n"+
-            "     DECLARE refcursor CURSOR FOR\n"+
-            "     select reftables.name tablename, cons.name constraintname\n"+
-            "      from sysobjects tables,\n"+
-            "           sysobjects reftables,\n"+
-            "           sysobjects cons,\n"+
-            "           sysreferences ref\n"+
-            "       where tables.id = ref.rkeyid\n"+
-            "         and cons.id = ref.constid\n"+
-            "         and reftables.id = ref.fkeyid\n"+
-            "         and tables.name = 'table3'\n"+
-            "     OPEN refcursor\n"+
-            "     FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     while @@FETCH_STATUS = 0\n"+
-            "     BEGIN\n"+
-            "       exec ('alter table '+@reftable+' drop constraint '+@constraintname)\n"+
-            "       FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     END\n"+
-            "     CLOSE refcursor\n"+
-            "     DEALLOCATE refcursor\n"+
-            "     DROP TABLE \"table3\"\n"+
+            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE refcursor CURSOR FOR\n"+
+            "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
+            "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
+            "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'table3'  OPEN refcursor\n"+
+            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  WHILE @@FETCH_STATUS = 0\n"+
+            "    BEGIN\n"+
+            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
+            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "    END\n"+
+            "  CLOSE refcursor\n"+
+            "  DEALLOCATE refcursor\n"+
+            "  DROP TABLE \"table3\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table2')\n"+
             "BEGIN\n"+
-            "     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)\n"+
-            "     DECLARE refcursor CURSOR FOR\n"+
-            "     select reftables.name tablename, cons.name constraintname\n"+
-            "      from sysobjects tables,\n"+
-            "           sysobjects reftables,\n"+
-            "           sysobjects cons,\n"+
-            "           sysreferences ref\n"+
-            "       where tables.id = ref.rkeyid\n"+
-            "         and cons.id = ref.constid\n"+
-            "         and reftables.id = ref.fkeyid\n"+
-            "         and tables.name = 'table2'\n"+
-            "     OPEN refcursor\n"+
-            "     FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     while @@FETCH_STATUS = 0\n"+
-            "     BEGIN\n"+
-            "       exec ('alter table '+@reftable+' drop constraint '+@constraintname)\n"+
-            "       FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     END\n"+
-            "     CLOSE refcursor\n"+
-            "     DEALLOCATE refcursor\n"+
-            "     DROP TABLE \"table2\"\n"+
+            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE refcursor CURSOR FOR\n"+
+            "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
+            "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
+            "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'table2'  OPEN refcursor\n"+
+            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  WHILE @@FETCH_STATUS = 0\n"+
+            "    BEGIN\n"+
+            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
+            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "    END\n"+
+            "  CLOSE refcursor\n"+
+            "  DEALLOCATE refcursor\n"+
+            "  DROP TABLE \"table2\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table1')\n"+
             "BEGIN\n"+
-            "     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)\n"+
-            "     DECLARE refcursor CURSOR FOR\n"+
-            "     select reftables.name tablename, cons.name constraintname\n"+
-            "      from sysobjects tables,\n"+
-            "           sysobjects reftables,\n"+
-            "           sysobjects cons,\n"+
-            "           sysreferences ref\n"+
-            "       where tables.id = ref.rkeyid\n"+
-            "         and cons.id = ref.constid\n"+
-            "         and reftables.id = ref.fkeyid\n"+
-            "         and tables.name = 'table1'\n"+
-            "     OPEN refcursor\n"+
-            "     FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     while @@FETCH_STATUS = 0\n"+
-            "     BEGIN\n"+
-            "       exec ('alter table '+@reftable+' drop constraint '+@constraintname)\n"+
-            "       FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     END\n"+
-            "     CLOSE refcursor\n"+
-            "     DEALLOCATE refcursor\n"+
-            "     DROP TABLE \"table1\"\n"+
+            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE refcursor CURSOR FOR\n"+
+            "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
+            "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
+            "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'table1'  OPEN refcursor\n"+
+            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  WHILE @@FETCH_STATUS = 0\n"+
+            "    BEGIN\n"+
+            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
+            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "    END\n"+
+            "  CLOSE refcursor\n"+
+            "  DEALLOCATE refcursor\n"+
+            "  DROP TABLE \"table1\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"table1\"\n"+
@@ -293,27 +258,20 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'escapedcharacters')\n"+
             "BEGIN\n"+
-            "     DECLARE @reftable nvarchar(60), @constraintname nvarchar(60)\n"+
-            "     DECLARE refcursor CURSOR FOR\n"+
-            "     select reftables.name tablename, cons.name constraintname\n"+
-            "      from sysobjects tables,\n"+
-            "           sysobjects reftables,\n"+
-            "           sysobjects cons,\n"+
-            "           sysreferences ref\n"+
-            "       where tables.id = ref.rkeyid\n"+
-            "         and cons.id = ref.constid\n"+
-            "         and reftables.id = ref.fkeyid\n"+
-            "         and tables.name = 'escapedcharacters'\n"+
-            "     OPEN refcursor\n"+
-            "     FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     while @@FETCH_STATUS = 0\n"+
-            "     BEGIN\n"+
-            "       exec ('alter table '+@reftable+' drop constraint '+@constraintname)\n"+
-            "       FETCH NEXT from refcursor into @reftable, @constraintname\n"+
-            "     END\n"+
-            "     CLOSE refcursor\n"+
-            "     DEALLOCATE refcursor\n"+
-            "     DROP TABLE \"escapedcharacters\"\n"+
+            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE refcursor CURSOR FOR\n"+
+            "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
+            "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
+            "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'escapedcharacters'  OPEN refcursor\n"+
+            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  WHILE @@FETCH_STATUS = 0\n"+
+            "    BEGIN\n"+
+            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
+            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "    END\n"+
+            "  CLOSE refcursor\n"+
+            "  DEALLOCATE refcursor\n"+
+            "  DROP TABLE \"escapedcharacters\"\n"+
             "END;\n"+
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"escapedcharacters\"\n"+

@@ -537,7 +537,10 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of a column with a default value.
+     * Tests the addition of a column with a default value. Note that depending
+     * on whether the database supports this via a statement, this test may fail.
+     * For instance, Sql Server has a statement for this which means that the
+     * existing value in column avalue won't be changed and thus the test fails.
      */
     public void testAddColumnWithDefault()
     {
