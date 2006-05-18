@@ -56,6 +56,10 @@ public class ModelBasedResultSetIterator implements Iterator
     private ResultSet _resultSet;
     /** The dyna class to use for creating beans. */
     private DynaClass _dynaClass;
+    /** Whether the case of identifiers matters. */
+    private boolean _caseSensitive;
+    /** Maps column names to table objects as given by the query hints. */
+    private Map _preparedQueryHints;
     /** Maps column names to properties. */
     private Map _columnsToProperties = new ListOrderedMap();
     /** Whether the next call to hasNext or next needs advancement. */
@@ -83,10 +87,12 @@ public class ModelBasedResultSetIterator implements Iterator
             _platform           = platform;
             _resultSet          = resultSet;
             _cleanUpAfterFinish = cleanUpAfterFinish;
+            _caseSensitive      = _platform.isDelimitedIdentifierModeOn();
+            _preparedQueryHints = prepareQueryHints(queryHints);
 
             try
             {
-                initFromMetaData(model, queryHints);
+                initFromMetaData(model);
             }
             catch (SQLException ex)
             {
@@ -103,16 +109,13 @@ public class ModelBasedResultSetIterator implements Iterator
     /**
      * Initializes this iterator from the resultset metadata.
      * 
-     * @param model      The database model
-     * @param queryHints The tables that were queried in the query that produced the given result set
+     * @param model The database model
      */
-    private void initFromMetaData(Database model, Table[] queryHints) throws SQLException
+    private void initFromMetaData(Database model) throws SQLException
     {
-        ResultSetMetaData metaData           = _resultSet.getMetaData();
-        String            tableName          = null;
-        boolean           singleKnownTable   = true;
-        boolean           caseSensitive      = _platform.isDelimitedIdentifierModeOn();
-        Map               preparedQueryHints = prepareQueryHints(queryHints, caseSensitive);
+        ResultSetMetaData metaData         = _resultSet.getMetaData();
+        String            tableName        = null;
+        boolean           singleKnownTable = true;
 
         for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
         {
@@ -123,13 +126,13 @@ public class ModelBasedResultSetIterator implements Iterator
             if ((tableOfColumn != null) && (tableOfColumn.length() > 0))
             {
                 // the JDBC driver gave us enough meta data info
-                table = model.findTable(tableOfColumn, caseSensitive);
+                table = model.findTable(tableOfColumn, _caseSensitive);
             }
             else
             {
                 // not enough info in the meta data of the result set, lets try the
                 // user-supplied query hints
-                table         = (Table)preparedQueryHints.get(caseSensitive ? columnName : columnName.toLowerCase());
+                table         = (Table)_preparedQueryHints.get(_caseSensitive ? columnName : columnName.toLowerCase());
                 tableOfColumn = (table == null ? null : table.getName());
             }
             if (tableName == null)
@@ -145,7 +148,7 @@ public class ModelBasedResultSetIterator implements Iterator
 
             if (table != null)
             {
-                Column column = table.findColumn(columnName, caseSensitive);
+                Column column = table.findColumn(columnName, _caseSensitive);
 
                 if (column != null)
                 {
@@ -175,11 +178,10 @@ public class ModelBasedResultSetIterator implements Iterator
      * Prepares the query hints by extracting the column names and using them as keys
      * into the resulting map pointing to the corresponding table.
      *  
-     * @param queryHints    The query hints
-     * @param caseSensitive Whether the case of the column names is important
+     * @param queryHints The query hints
      * @return The column name -> table map
      */
-    private Map prepareQueryHints(Table[] queryHints, boolean caseSensitive)
+    private Map prepareQueryHints(Table[] queryHints)
     {
         Map result = new HashMap();
 
@@ -189,7 +191,7 @@ public class ModelBasedResultSetIterator implements Iterator
             {
                 String columnName = queryHints[tableIdx].getColumn(columnIdx).getName();
 
-                if (!caseSensitive)
+                if (!_caseSensitive)
                 {
                     columnName = columnName.toLowerCase();
                 }
@@ -240,7 +242,13 @@ public class ModelBasedResultSetIterator implements Iterator
                     Map.Entry entry      = (Map.Entry)it.next();
                     String    columnName = (String)entry.getKey();
                     String    propName   = (String)entry.getValue();
-                    Object    value      = _platform.getObjectFromResultSet(_resultSet, columnName, table);
+                    Table     curTable   = table;
+
+                    if (curTable == null)
+                    {
+                        curTable = (Table)_preparedQueryHints.get(_caseSensitive ? columnName : columnName.toLowerCase());
+                    }
+                    Object value = _platform.getObjectFromResultSet(_resultSet, columnName, curTable);
 
                     bean.set(propName, value);
                 }
