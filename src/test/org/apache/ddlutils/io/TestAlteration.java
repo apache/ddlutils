@@ -492,8 +492,8 @@ public class TestAlteration extends RoundtripTestBase
 
     /**
      * Tests the addition of several columns at the end of the table. This test
-     * is known to fail on MaxDB where a DEFAULT specification is applied to existing
-     * rows even if they are not defined as NOT NULL (column 'avalue3' in the
+     * is known to fail on MaxDB and Oracle where a DEFAULT specification is applied to
+     * existing rows even if they are not defined as NOT NULL (column 'avalue3' in the
      * target schema).
      */
     public void testAddColumnsAtTheEnd()
@@ -617,7 +617,7 @@ public class TestAlteration extends RoundtripTestBase
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
-            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "    <column name='avalue4' type='CHAR' size='5'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
             "    <column name='avalue2' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -630,7 +630,7 @@ public class TestAlteration extends RoundtripTestBase
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
             "    <column name='avalue2' type='INTEGER'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
-            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "    <column name='avalue4' type='CHAR' size='5'/>\n"+
             "  </table>\n"+
             "</database>";
 

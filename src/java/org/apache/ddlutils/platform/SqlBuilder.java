@@ -48,6 +48,7 @@ import org.apache.ddlutils.alteration.AddTableChange;
 import org.apache.ddlutils.alteration.ColumnAutoIncrementChange;
 import org.apache.ddlutils.alteration.ColumnDataTypeChange;
 import org.apache.ddlutils.alteration.ColumnDefaultValueChange;
+import org.apache.ddlutils.alteration.ColumnOrderChange;
 import org.apache.ddlutils.alteration.ColumnRequiredChange;
 import org.apache.ddlutils.alteration.ColumnSizeChange;
 import org.apache.ddlutils.alteration.ModelChange;
@@ -453,6 +454,7 @@ public abstract class SqlBuilder
                                                                          PrimaryKeyChange.class,
                                                                          RemoveColumnChange.class,
                                                                          AddColumnChange.class,
+                                                                         ColumnOrderChange.class,
                                                                          ColumnAutoIncrementChange.class,
                                                                          ColumnDefaultValueChange.class,
                                                                          ColumnRequiredChange.class,
