@@ -299,7 +299,6 @@ public class MSSqlBuilder extends SqlBuilder
         }
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -579,20 +578,4 @@ public class MSSqlBuilder extends SqlBuilder
             printEndOfStatement();
         }
     }
-
-    // TODO: DROP default is done via selecting the name of the constraint for column avalue of table toundtrip
-    //
-    // SELECT name 
-    // FROM sysobjects so JOIN sysconstraints sc
-    // ON so.id = sc.constid 
-    // WHERE object_name(so.parent_obj) = 'roundtrip' 
-    // AND so.xtype = 'D'
-    // AND sc.colid = 
-    //   (SELECT colid FROM syscolumns 
-    //    WHERE id = object_id('roundtrip') AND 
-    //    name = 'avalue')
-    //
-    // and then using this in
-    //
-    // ALTER TABLE roundtrip DROP CONSTRAINT ...
 }
