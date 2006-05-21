@@ -64,7 +64,7 @@ public class SybasePlatform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(28);
-        info.setNullAsDefaultValueRequired(false);
+        info.setNullAsDefaultValueRequired(true);
         info.setPrimaryKeyEmbedded(true);
         info.setForeignKeysEmbedded(false);
         info.setIndicesEmbedded(false);

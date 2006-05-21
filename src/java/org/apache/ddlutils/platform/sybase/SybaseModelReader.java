@@ -17,16 +17,23 @@ package org.apache.ddlutils.platform.sybase;
  */
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
@@ -153,32 +160,117 @@ public class SybaseModelReader extends JdbcModelReader
 	/**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
+    protected Collection readForeignKeys(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
     {
-        // Sybase defines a unique index "<table name>_<integer numer>" for primary keys
-    	if (index.isUnique() && (index.getName() != null))
-    	{
-	    	int underscorePos = index.getName().lastIndexOf('_');
-	
-	    	if (underscorePos > 0)
-	    	{
-	    		String tableName = index.getName().substring(0, underscorePos);
-	    		String id        = index.getName().substring(underscorePos + 1);
-	
-	    		if (table.getName().startsWith(tableName))
-	    		{
-		    		try
-		    		{
-		    			Long.parseLong(id);
-		    			return true;
-		    		}
-		    		catch (NumberFormatException ex)
-		    		{
-		    			// we ignore it
-		    		}
-	    		}
-	    	}
-    	}
-    	return false;
+        // Sybase (or jConnect) does not return the foreign key names, thus we have to
+        // read the foreign keys manually from the system tables
+        StringBuffer query = new StringBuffer();
+
+        query.append("SELECT refobjs.name, localtables.id, remotetables.name, remotetables.id");
+        for (int idx = 1; idx <= 16; idx++)
+        {
+            query.append(", refs.fokey");
+            query.append(idx);
+            query.append(", refs.refkey");
+            query.append(idx);
+        }
+        query.append(" FROM sysreferences refs, sysobjects refobjs, sysobjects localtables, sysobjects remotetables");
+        query.append(" WHERE refobjs.type = 'RI' AND refs.constrid = refobjs.id AND");
+        query.append(" localtables.type = 'U' AND refs.tableid = localtables.id AND localtables.name = '");
+        query.append(tableName);
+        query.append("' AND remotetables.type = 'U' AND refs.reftabid = remotetables.id");
+
+        Statement         stmt     = getConnection().createStatement();
+        PreparedStatement prepStmt = getConnection().prepareStatement("SELECT name FROM syscolumns WHERE id = ? AND colid = ?");
+        ArrayList         result   = new ArrayList();
+
+        try
+        {
+            ResultSet fkRs = stmt.executeQuery(query.toString());
+
+            while (fkRs.next())
+            {
+                ForeignKey fk            = new ForeignKey(fkRs.getString(1));
+                int        localTableId  = fkRs.getInt(2);
+                int        remoteTableId = fkRs.getInt(4);
+
+                fk.setForeignTableName(fkRs.getString(3));
+                for (int idx = 0; idx < 16; idx++)
+                {
+                    short     fkColIdx = fkRs.getShort(5 + idx + idx);
+                    short     pkColIdx = fkRs.getShort(6 + idx + idx);
+                    Reference ref      = new Reference();
+
+                    if (fkColIdx == 0)
+                    {
+                        break;
+                    }
+
+                    prepStmt.setInt(1, localTableId);
+                    prepStmt.setShort(2, fkColIdx);
+
+                    ResultSet colRs = prepStmt.executeQuery();
+
+                    if (colRs.next())
+                    {
+                        ref.setLocalColumnName(colRs.getString(1));
+                    }
+                    colRs.close();
+
+                    prepStmt.setInt(1, remoteTableId);
+                    prepStmt.setShort(2, pkColIdx);
+
+                    colRs = prepStmt.executeQuery();
+
+                    if (colRs.next())
+                    {
+                        ref.setForeignColumnName(colRs.getString(1));
+                    }
+                    colRs.close();
+
+                    fk.addReference(ref);
+                }
+                result.add(fk);
+            }
+
+            fkRs.close();
+        }
+        finally
+        {
+            stmt.close();
+            prepStmt.close();
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index) throws SQLException
+    {
+        // We can simply check the sysindexes table where a specific flag is set for pk indexes
+        StringBuffer query = new StringBuffer();
+
+        query.append("SELECT name = sysindexes.name FROM sysindexes, sysobjects WHERE sysobjects.name = '");
+        query.append(table.getName());
+        query.append("' AND sysindexes.name = '");
+        query.append(index.getName());
+        query.append("' AND sysobjects.id = sysindexes.id AND (sysindexes.status & 2048) > 0");
+        
+        Statement stmt = getConnection().createStatement();
+
+        try
+        {
+            ResultSet rs     = stmt.executeQuery(query.toString());
+            boolean   result = rs.next();
+
+            rs.close();
+            return result;
+        }
+        finally
+        {
+            stmt.close();
+        }
     }
 }

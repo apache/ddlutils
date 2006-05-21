@@ -60,37 +60,37 @@ public class TestSybasePlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"coltype\"\n"+
             "(\n"+
-            "    \"COL_ARRAY\"           IMAGE,\n"+
-            "    \"COL_BIGINT\"          DECIMAL(19,0),\n"+
-            "    \"COL_BINARY\"          BINARY(254),\n"+
-            "    \"COL_BIT\"             SMALLINT,\n"+
-            "    \"COL_BLOB\"            IMAGE,\n"+
-            "    \"COL_BOOLEAN\"         SMALLINT,\n"+
-            "    \"COL_CHAR\"            CHAR(15),\n"+
-            "    \"COL_CLOB\"            TEXT,\n"+
-            "    \"COL_DATALINK\"        IMAGE,\n"+
-            "    \"COL_DATE\"            DATETIME,\n"+
-            "    \"COL_DECIMAL\"         DECIMAL(15,3),\n"+
-            "    \"COL_DECIMAL_NOSCALE\" DECIMAL(15,0),\n"+
-            "    \"COL_DISTINCT\"        IMAGE,\n"+
-            "    \"COL_DOUBLE\"          DOUBLE PRECISION,\n"+
-            "    \"COL_FLOAT\"           DOUBLE PRECISION,\n"+
-            "    \"COL_INTEGER\"         INT,\n"+
-            "    \"COL_JAVA_OBJECT\"     IMAGE,\n"+
-            "    \"COL_LONGVARBINARY\"   IMAGE,\n"+
-            "    \"COL_LONGVARCHAR\"     TEXT,\n"+
-            "    \"COL_NULL\"            IMAGE,\n"+
-            "    \"COL_NUMERIC\"         NUMERIC(15,0),\n"+
-            "    \"COL_OTHER\"           IMAGE,\n"+
-            "    \"COL_REAL\"            REAL,\n"+
-            "    \"COL_REF\"             IMAGE,\n"+
-            "    \"COL_SMALLINT\"        SMALLINT,\n"+
-            "    \"COL_STRUCT\"          IMAGE,\n"+
-            "    \"COL_TIME\"            DATETIME,\n"+
-            "    \"COL_TIMESTAMP\"       DATETIME,\n"+
-            "    \"COL_TINYINT\"         SMALLINT,\n"+
-            "    \"COL_VARBINARY\"       VARBINARY(15),\n"+
-            "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
+            "    \"COL_ARRAY\"           IMAGE NULL,\n"+
+            "    \"COL_BIGINT\"          DECIMAL(19,0) NULL,\n"+
+            "    \"COL_BINARY\"          BINARY(254) NULL,\n"+
+            "    \"COL_BIT\"             SMALLINT NULL,\n"+
+            "    \"COL_BLOB\"            IMAGE NULL,\n"+
+            "    \"COL_BOOLEAN\"         SMALLINT NULL,\n"+
+            "    \"COL_CHAR\"            CHAR(15) NULL,\n"+
+            "    \"COL_CLOB\"            TEXT NULL,\n"+
+            "    \"COL_DATALINK\"        IMAGE NULL,\n"+
+            "    \"COL_DATE\"            DATETIME NULL,\n"+
+            "    \"COL_DECIMAL\"         DECIMAL(15,3) NULL,\n"+
+            "    \"COL_DECIMAL_NOSCALE\" DECIMAL(15,0) NULL,\n"+
+            "    \"COL_DISTINCT\"        IMAGE NULL,\n"+
+            "    \"COL_DOUBLE\"          DOUBLE PRECISION NULL,\n"+
+            "    \"COL_FLOAT\"           DOUBLE PRECISION NULL,\n"+
+            "    \"COL_INTEGER\"         INT NULL,\n"+
+            "    \"COL_JAVA_OBJECT\"     IMAGE NULL,\n"+
+            "    \"COL_LONGVARBINARY\"   IMAGE NULL,\n"+
+            "    \"COL_LONGVARCHAR\"     TEXT NULL,\n"+
+            "    \"COL_NULL\"            IMAGE NULL,\n"+
+            "    \"COL_NUMERIC\"         NUMERIC(15,0) NULL,\n"+
+            "    \"COL_OTHER\"           IMAGE NULL,\n"+
+            "    \"COL_REAL\"            REAL NULL,\n"+
+            "    \"COL_REF\"             IMAGE NULL,\n"+
+            "    \"COL_SMALLINT\"        SMALLINT NULL,\n"+
+            "    \"COL_STRUCT\"          IMAGE NULL,\n"+
+            "    \"COL_TIME\"            DATETIME NULL,\n"+
+            "    \"COL_TIMESTAMP\"       DATETIME NULL,\n"+
+            "    \"COL_TINYINT\"         SMALLINT NULL,\n"+
+            "    \"COL_VARBINARY\"       VARBINARY(15) NULL,\n"+
+            "    \"COL_VARCHAR\"         VARCHAR(15) NULL\n"+
             ");\n",
             createTestDatabase(COLUMN_TEST_SCHEMA));
     }
@@ -111,11 +111,11 @@ public class TestSybasePlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"constraints\"\n"+
             "(\n"+
-            "    \"COL_PK\"               VARCHAR(32),\n"+
+            "    \"COL_PK\"               VARCHAR(32) NULL,\n"+
             "    \"COL_PK_AUTO_INCR\"     INT IDENTITY,\n"+
             "    \"COL_NOT_NULL\"         BINARY(100) NOT NULL,\n"+
             "    \"COL_NOT_NULL_DEFAULT\" DOUBLE PRECISION DEFAULT -2.0 NOT NULL,\n"+
-            "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
+            "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test' NULL,\n"+
             "    \"COL_AUTO_INCR\"        DECIMAL(19,0) IDENTITY,\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
@@ -154,10 +154,10 @@ public class TestSybasePlatform extends TestPlatformBase
             "CREATE TABLE \"table1\"\n"+
             "(\n"+
             "    \"COL_PK_1\"    VARCHAR(32) NOT NULL,\n"+
-            "    \"COL_PK_2\"    INT,\n"+
+            "    \"COL_PK_2\"    INT NULL,\n"+
             "    \"COL_INDEX_1\" BINARY(100) NOT NULL,\n"+
             "    \"COL_INDEX_2\" DOUBLE PRECISION NOT NULL,\n"+
-            "    \"COL_INDEX_3\" CHAR(4),\n"+
+            "    \"COL_INDEX_3\" CHAR(4) NULL,\n"+
             "    PRIMARY KEY (\"COL_PK_1\", \"COL_PK_2\")\n"+
             ");\n"+
             "CREATE INDEX \"testindex1\" ON \"table1\" (\"COL_INDEX_2\");\n"+
@@ -165,15 +165,15 @@ public class TestSybasePlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"table2\"\n"+
             "(\n"+
-            "    \"COL_PK\"   INT,\n"+
-            "    \"COL_FK_1\" INT,\n"+
+            "    \"COL_PK\"   INT NULL,\n"+
+            "    \"COL_FK_1\" INT NULL,\n"+
             "    \"COL_FK_2\" VARCHAR(32) NOT NULL,\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n"+
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"table3\"\n"+
             "(\n"+
-            "    \"COL_PK\" VARCHAR(16),\n"+
+            "    \"COL_PK\" VARCHAR(16) NULL,\n"+
             "    \"COL_FK\" INT NOT NULL,\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n"+
@@ -197,8 +197,8 @@ public class TestSybasePlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "CREATE TABLE \"escapedcharacters\"\n"+
             "(\n"+
-            "    \"COL_PK\"   INT,\n"+
-            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
+            "    \"COL_PK\"   INT NULL,\n"+
+            "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'' NULL,\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n",
             createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
