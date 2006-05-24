@@ -18,11 +18,19 @@ package org.apache.ddlutils.platform.firebird;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 import org.apache.ddlutils.util.Jdbc3Utils;
@@ -79,7 +87,7 @@ public class FirebirdBuilder extends SqlBuilder
             print("NEW.");
             printIdentifier(getColumnName(columns[idx]));
             print(" = GEN_ID(");
-            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
+            printIdentifier(getGeneratorName(table, columns[idx]));
             println(", 1);");
             println("END;");
             print(TERM_COMMAND);
@@ -110,8 +118,11 @@ public class FirebirdBuilder extends SqlBuilder
 
         for (int idx = 0; idx < columns.length; idx++)
         {
+            print("DROP TRIGGER ");
+            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
+            printEndOfStatement();
             print("DROP GENERATOR ");
-            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
+            printIdentifier(getGeneratorName(table, columns[idx]));
             printEndOfStatement();
         }
     }
@@ -180,4 +191,134 @@ public class FirebirdBuilder extends SqlBuilder
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    {
+        // Index names in Firebird are unique to a schema and hence Firebird does not
+        // use the ON <tablename> clause
+        print("DROP INDEX ");
+        printIdentifier(getIndexName(index));
+        printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void processTableStructureChanges(Database currentModel, Database desiredModel, Table sourceTable, Table targetTable, Map parameters, List changes) throws IOException
+    {
+        // First we drop primary keys as necessary
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof RemovePrimaryKeyChange)
+            {
+                processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
+                change.apply(currentModel);
+                changeIt.remove();
+            }
+            else if (change instanceof PrimaryKeyChange)
+            {
+                PrimaryKeyChange       pkChange       = (PrimaryKeyChange)change;
+                RemovePrimaryKeyChange removePkChange = new RemovePrimaryKeyChange(pkChange.getChangedTable(),
+                                                                                   pkChange.getOldPrimaryKeyColumns());
+
+                processChange(currentModel, desiredModel, removePkChange);
+                removePkChange.apply(currentModel);
+            }
+        }
+
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof AddColumnChange)
+            {
+                processChange(currentModel, desiredModel, (AddColumnChange)change);
+                change.apply(currentModel);
+                changeIt.remove();
+            }
+            else if (change instanceof RemoveColumnChange)
+            {
+                processChange(currentModel, desiredModel, (RemoveColumnChange)change);
+                change.apply(currentModel);
+                changeIt.remove();
+            }
+        }
+        super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database               currentModel,
+                                 Database               desiredModel,
+                                 RemovePrimaryKeyChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP PRIMARY KEY");
+        printEndOfStatement();
+    }
+
+    /**
+     * Processes the addition of a column to a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database        currentModel,
+                                 Database        desiredModel,
+                                 AddColumnChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("ADD ");
+        writeColumn(change.getChangedTable(), change.getNewColumn());
+        printEndOfStatement();
+
+        if (!change.isAtEnd())
+        {
+            Table  curTable   = currentModel.findTable(change.getChangedTable().getName(), getPlatform().isDelimitedIdentifierModeOn());
+            Column prevColumn = change.getPreviousColumn();
+
+            // Even though Firebird can only add columns, we can move them later on
+            print("ALTER TABLE ");
+            printlnIdentifier(getTableName(change.getChangedTable()));
+            printIndent();
+            print("ALTER ");
+            printIdentifier(getColumnName(change.getNewColumn()));
+            print(" POSITION ");
+            print(prevColumn == null ? "0" : String.valueOf(curTable.getColumnIndex(prevColumn)));
+            printEndOfStatement();
+        }
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 RemoveColumnChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP ");
+        printIdentifier(getColumnName(change.getColumn()));
+        printEndOfStatement();
+    }
 }
