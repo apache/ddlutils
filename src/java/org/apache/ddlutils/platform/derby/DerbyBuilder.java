@@ -132,7 +132,7 @@ public class DerbyBuilder extends CloudscapeBuilder
                 AddColumnChange addColumnChange = (AddColumnChange)change;
 
                 // Derby can only add not insert columns
-                if (addColumnChange.getNextColumn() == null)
+                if (addColumnChange.isAtEnd())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
                     change.apply(currentModel);
