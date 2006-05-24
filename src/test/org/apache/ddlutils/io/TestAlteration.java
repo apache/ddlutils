@@ -1310,11 +1310,11 @@ public class TestAlteration extends RoundtripTestBase
             "<database name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='pk2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='VARCHAR' size='12' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "  <table name='roundtrip2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue1' type='VARCHAR' required='true'/>\n"+
+            "    <column name='avalue1' type='VARCHAR' size='12' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
             "    <foreign-key foreignTable='roundtrip1'>\n"+
             "      <reference local='avalue2' foreign='pk1'/>\n"+
