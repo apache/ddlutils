@@ -170,7 +170,8 @@ public class FirebirdModelReader extends JdbcModelReader
 
             while (rs.next())
             {
-                Column column = (Column)names.get(rs.getString(1).trim());
+                String generatorName = rs.getString(1).trim();
+                Column column        = (Column)names.get(generatorName);
 
                 if (column != null)
                 {
@@ -330,8 +331,10 @@ public class FirebirdModelReader extends JdbcModelReader
 	 */
 	protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
 	{
-		// Firebird generates an unique index for the pks of the form "RDB$PRIMARY825"
-		return index.getName().startsWith("RDB$PRIMARY");
+        // In Firebird, primary keys can only be determined from a live database by looking for
+        // unique indexes that cover the primary key columns
+		// These checks however already have been done when DdlUtils enters this method 
+		return true;
 	}
 
 	/**

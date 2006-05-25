@@ -60,9 +60,9 @@ public class ColumnOrderChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
-        Table     table      = database.findTable(getChangedTable().getName());
+        Table     table      = database.findTable(getChangedTable().getName(), caseSensitive);
         ArrayList newColumns = new ArrayList(table.getColumnCount());
 
         for (int idx = 0; idx < table.getColumnCount(); idx++)

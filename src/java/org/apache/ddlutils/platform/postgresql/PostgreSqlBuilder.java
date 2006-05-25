@@ -191,14 +191,14 @@ public class PostgreSqlBuilder extends SqlBuilder
                     (addColumnChange.getNextColumn() == null))
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel);
+                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
             else if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }

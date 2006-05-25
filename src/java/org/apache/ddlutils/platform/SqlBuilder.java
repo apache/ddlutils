@@ -856,7 +856,7 @@ public abstract class SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changes.clear();
             }
         }

@@ -1151,8 +1151,11 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
                 for (int idx = 0; idx < autoIncrColumns.length; idx++)
                 {
-                    Object value = lastInsertedIds.getObject(autoIncrColumns[idx].getName());
-    
+                    // we're using the index rather than the name because we cannot know how
+                    // the SQL statement looks like; rather we assume that we get the values
+                    // back in the same order as the auto increment columns
+                    Object value = lastInsertedIds.getObject(idx + 1);
+
                     PropertyUtils.setProperty(dynaBean, autoIncrColumns[idx].getName(), value);
                 }
             }

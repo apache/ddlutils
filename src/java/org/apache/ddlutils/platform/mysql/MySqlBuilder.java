@@ -188,7 +188,7 @@ public class MySqlBuilder extends SqlBuilder
             AddColumnChange addColumnChange = (AddColumnChange)changeIt.next();
 
             processChange(currentModel, desiredModel, addColumnChange);
-            addColumnChange.apply(currentModel);
+            addColumnChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             changeIt.remove();
         }
 
@@ -203,25 +203,25 @@ public class MySqlBuilder extends SqlBuilder
             if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (PrimaryKeyChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else

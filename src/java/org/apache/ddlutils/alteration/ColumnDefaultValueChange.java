@@ -69,10 +69,10 @@ public class ColumnDefaultValueChange extends TableChangeImplBase implements Col
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName());
-        Column column = table.findColumn(_column.getName());
+        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
+        Column column = table.findColumn(_column.getName(), caseSensitive);
 
         column.setDefaultValue(_newDefaultValue);
     }

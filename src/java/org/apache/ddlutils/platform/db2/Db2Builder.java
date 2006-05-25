@@ -145,7 +145,7 @@ public class Db2Builder extends SqlBuilder
                 if (addColumnChange.getNextColumn() == null)
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel);
+                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
@@ -158,19 +158,19 @@ public class Db2Builder extends SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (PrimaryKeyChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }

@@ -16,16 +16,8 @@ package org.apache.ddlutils.platform.firebird;
  * limitations under the License.
  */
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
 import java.sql.Types;
-import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
@@ -45,8 +37,6 @@ public class FirebirdPlatform extends PlatformImplBase
     public static final String JDBC_DRIVER      = "org.firebirdsql.jdbc.FBDriver";
     /** The subprotocol used by the standard Firebird driver. */
     public static final String JDBC_SUBPROTOCOL = "firebirdsql";
-    /** The log for this platform. */
-    private final Log _log = LogFactory.getLog(getClass());
 
     /**
      * Creates a new Firebird platform instance.
@@ -100,120 +90,4 @@ public class FirebirdPlatform extends PlatformImplBase
     {
         return DATABASENAME;
     }
-
-    /**
-     * Firebird-specific replacement for
-     * {@link org.apache.ddlutils.platform.PlatformImplBase#evaluateBatch(Connection, String, boolean)}
-     * that executes blocks delimited by the term {@link FirebirdBuilder#TERM_COMMAND}
-     * (defined in the database via <code>SET TERM !!;</code>), in one go.
-     *
-     * @param connection      The connection to use
-     * @param sql             The sql to process
-     * @param continueOnError Whether to continue when an error occurs
-     * @return The number of errors
-     */
-    public int evaluateBatch(Connection connection, String sql, boolean continueOnError) throws DynaSqlException
-    {
-        Statement statement    = null;
-        int       commandCount = 0;
-        int       errors       = 0;
-
-        try
-        {
-            statement = connection.createStatement();
-
-            StringTokenizer tokenizer = new StringTokenizer(sql, ";");
-            StringBuffer    command   = new StringBuffer();
-    
-            while (tokenizer.hasMoreTokens())
-            {
-                String token = tokenizer.nextToken().trim();
-
-                command.setLength(0);
-
-                if (token.equals(FirebirdBuilder.TERM_COMMAND))
-                {
-                    while (tokenizer.hasMoreTokens())
-                    {
-                        token = tokenizer.nextToken().trim();  
-
-                        if (token.length() > 0)
-                        {
-                            if (token.equals(FirebirdBuilder.TERM_COMMAND))
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                command.append(token);
-                                command.append(";");
-                            }
-                        }
-                        
-                    }
-                }
-                else
-                {
-                    command.append(token);
-                }
-                if (command.length() == 0)
-                {
-                    continue;
-                }
-                
-                commandCount++;
-                
-                if (_log.isDebugEnabled())
-                {
-                    _log.debug("About to execute SQL " + command.toString());
-                }
-                try
-                {
-                    int results = statement.executeUpdate(command.toString());
-
-                    if (_log.isDebugEnabled())
-                    {
-                        _log.debug("After execution, " + results + " row(s) have been changed");
-                    }
-                }
-                catch (SQLException ex)
-                {
-                    if (continueOnError)
-                    {
-                        _log.error("SQL Command " + command.toString() + " failed", ex);
-                        errors++;
-                    }
-                    else
-                    {
-                        throw new DynaSqlException("Error while executing SQL "+command, ex);
-                    }
-                }
-
-                // lets display any warnings
-                SQLWarning warning = connection.getWarnings();
-
-                while (warning != null)
-                {
-                    _log.warn(warning.toString());
-                    warning = warning.getNextWarning();
-                }
-                connection.clearWarnings();
-            }
-            if (_log.isInfoEnabled())
-            {
-                _log.info("Executed "+ commandCount + " SQL command(s) with " + errors + " error(s)");
-            }
-        }
-        catch (SQLException ex)
-        {
-            throw new DynaSqlException("Error while executing SQL", ex);
-        }
-        finally
-        {
-            closeStatement(statement);
-        }
-
-        return errors;
-    }
-
 }

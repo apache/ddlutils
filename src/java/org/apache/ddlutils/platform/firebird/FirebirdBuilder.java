@@ -24,9 +24,8 @@ import java.util.Map;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
 import org.apache.ddlutils.alteration.RemoveColumnChange;
-import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -44,9 +43,6 @@ import org.apache.ddlutils.util.Jdbc3Utils;
  */
 public class FirebirdBuilder extends SqlBuilder
 {
-    /** Denotes the string used via SET TERM for delimiting commands that need to be executed in one go. */
-    public static final String TERM_COMMAND = "--TERM--";
-
     /**
      * Creates a new builder instance.
      * 
@@ -70,29 +66,68 @@ public class FirebirdBuilder extends SqlBuilder
 
         for (int idx = 0; idx < columns.length; idx++)
         {
-            print("CREATE GENERATOR ");
-            printIdentifier(getGeneratorName(table, columns[idx]));
-            printEndOfStatement();
-            print(TERM_COMMAND);
-            printEndOfStatement();
-            print("CREATE TRIGGER ");
-            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
-            print(" FOR ");
-            printlnIdentifier(getTableName(table));
-            println("ACTIVE BEFORE INSERT POSITION 0 AS");
-            println("BEGIN");
-            print("IF (NEW.");
-            printIdentifier(getColumnName(columns[idx]));
-            println(" IS NULL) THEN");
-            print("NEW.");
-            printIdentifier(getColumnName(columns[idx]));
-            print(" = GEN_ID(");
-            printIdentifier(getGeneratorName(table, columns[idx]));
-            println(", 1);");
-            println("END;");
-            print(TERM_COMMAND);
-            printEndOfStatement();
+            writeAutoIncrementCreateStmts(database, table, columns[idx]);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void dropTable(Table table) throws IOException
+    {
+        // dropping generators for auto-increment
+        Column[] columns = table.getAutoIncrementColumns();
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            writeAutoIncrementDropStmts(table, columns[idx]);
+        }
+        super.dropTable(table);
+    }
+
+    /**
+     * Writes the creation statements to make the given column an auto-increment column.
+     * 
+     * @param database The database model
+     * @param table    The table
+     * @param column   The column to make auto-increment
+     */
+    private void writeAutoIncrementCreateStmts(Database database, Table table, Column column) throws IOException
+    {
+        print("CREATE GENERATOR ");
+        printIdentifier(getGeneratorName(table, column));
+        printEndOfStatement();
+
+        print("CREATE TRIGGER ");
+        printIdentifier(getConstraintName("trg", table, column.getName(), null));
+        print(" FOR ");
+        printlnIdentifier(getTableName(table));
+        println("ACTIVE BEFORE INSERT POSITION 0 AS");
+        print("BEGIN IF (NEW.");
+        printIdentifier(getColumnName(column));
+        print(" IS NULL) THEN NEW.");
+        printIdentifier(getColumnName(column));
+        print(" = GEN_ID(");
+        printIdentifier(getGeneratorName(table, column));
+        print(", 1); END");
+        printEndOfStatement();
+    }
+
+    /**
+     * Writes the statements to drop the auto-increment status for the given column.
+     * 
+     * @param table  The table
+     * @param column The column to remove the auto-increment status for
+     */
+    private void writeAutoIncrementDropStmts(Table table, Column column) throws IOException
+    {
+        print("DROP TRIGGER ");
+        printIdentifier(getConstraintName("trg", table, column.getName(), null));
+        printEndOfStatement();
+
+        print("DROP GENERATOR ");
+        printIdentifier(getGeneratorName(table, column));
+        printEndOfStatement();
     }
 
     /**
@@ -105,26 +140,6 @@ public class FirebirdBuilder extends SqlBuilder
     protected String getGeneratorName(Table table, Column column)
     {
     	return getConstraintName("gen", table, column.getName(), null);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void dropTable(Table table) throws IOException
-    {
-        super.dropTable(table);
-        // dropping generators for auto-increment
-        Column[] columns = table.getAutoIncrementColumns();
-
-        for (int idx = 0; idx < columns.length; idx++)
-        {
-            print("DROP TRIGGER ");
-            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
-            printEndOfStatement();
-            print("DROP GENERATOR ");
-            printIdentifier(getGeneratorName(table, columns[idx]));
-            printEndOfStatement();
-        }
     }
 
     /**
@@ -151,14 +166,14 @@ public class FirebirdBuilder extends SqlBuilder
         {
             StringBuffer result = new StringBuffer();
     
+            result.append("SELECT ");
             for (int idx = 0; idx < columns.length; idx++)
             {
-                result.append("SELECT GEN_ID (");
+                result.append("GEN_ID(");
                 result.append(getConstraintName("gen", table, columns[idx].getName(), null));
-                result.append(",0 ) FROM RDB$DATABASE");
-                result.append(table.getName());
-                result.append(getDelimitedIdentifier(columns[idx].getName()));
+                result.append(", 0)");
             }
+            result.append(" FROM RDB$DATABASE");
             return result.toString();
         }
     }
@@ -208,27 +223,11 @@ public class FirebirdBuilder extends SqlBuilder
      */
     protected void processTableStructureChanges(Database currentModel, Database desiredModel, Table sourceTable, Table targetTable, Map parameters, List changes) throws IOException
     {
-        // First we drop primary keys as necessary
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof RemovePrimaryKeyChange)
-            {
-                processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel);
-                changeIt.remove();
-            }
-            else if (change instanceof PrimaryKeyChange)
-            {
-                PrimaryKeyChange       pkChange       = (PrimaryKeyChange)change;
-                RemovePrimaryKeyChange removePkChange = new RemovePrimaryKeyChange(pkChange.getChangedTable(),
-                                                                                   pkChange.getOldPrimaryKeyColumns());
-
-                processChange(currentModel, desiredModel, removePkChange);
-                removePkChange.apply(currentModel);
-            }
-        }
+    	// TODO: Dropping of primary keys is currently not supported because we cannot
+    	//       determine the pk constraint names and drop them in one go
+    	//       (We could used a stored procedure if Firebird would allow them to use DDL)
+    	//       This will be easier once named primary keys are supported
+        boolean pkColumnAdded = false;
 
         for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
         {
@@ -236,36 +235,50 @@ public class FirebirdBuilder extends SqlBuilder
 
             if (change instanceof AddColumnChange)
             {
-                processChange(currentModel, desiredModel, (AddColumnChange)change);
-                change.apply(currentModel);
-                changeIt.remove();
+            	AddColumnChange addColumnChange = (AddColumnChange)change;
+
+            	// TODO: we cannot add columns to the primary key this way
+            	//       because we would have to drop the pk first and then
+            	//       add a new one afterwards which is not supported yet
+            	if (addColumnChange.getNewColumn().isPrimaryKey())
+                {
+                    pkColumnAdded = true;   
+                }
+                else
+            	{
+	            	processChange(currentModel, desiredModel, addColumnChange);
+	                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
+	                changeIt.remove();
+            	}
             }
             else if (change instanceof RemoveColumnChange)
             {
-                processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel);
+            	RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
+
+            	// TODO: we cannot drop primary key columns this way
+            	//       because we would have to drop the pk first and then
+            	//       add a new one afterwards which is not supported yet
+            	if (!removeColumnChange.getColumn().isPrimaryKey())
+            	{
+	            	processChange(currentModel, desiredModel, removeColumnChange);
+	                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
+	                changeIt.remove();
+            	}
+            }
+        }
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            // we can only add a primary key if all columns are present in the table
+            // i.e. none was added during this alteration
+            if ((change instanceof AddPrimaryKeyChange) && !pkColumnAdded)
+            {
+                processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
-        super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
-    }
-
-    /**
-     * Processes the removal of a primary key from a table.
-     * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
-     */
-    protected void processChange(Database               currentModel,
-                                 Database               desiredModel,
-                                 RemovePrimaryKeyChange change) throws IOException
-    {
-        print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
-        printIndent();
-        print("DROP PRIMARY KEY");
-        printEndOfStatement();
     }
 
     /**
@@ -286,11 +299,17 @@ public class FirebirdBuilder extends SqlBuilder
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
 
+        Table curTable = currentModel.findTable(change.getChangedTable().getName(), getPlatform().isDelimitedIdentifierModeOn());
+
         if (!change.isAtEnd())
         {
-            Table  curTable   = currentModel.findTable(change.getChangedTable().getName(), getPlatform().isDelimitedIdentifierModeOn());
             Column prevColumn = change.getPreviousColumn();
 
+            if (prevColumn != null)
+            {
+            	// we need the corresponding column object from the current table
+            	prevColumn = curTable.findColumn(prevColumn.getName(), getPlatform().isDelimitedIdentifierModeOn());
+            }
             // Even though Firebird can only add columns, we can move them later on
             print("ALTER TABLE ");
             printlnIdentifier(getTableName(change.getChangedTable()));
@@ -298,8 +317,13 @@ public class FirebirdBuilder extends SqlBuilder
             print("ALTER ");
             printIdentifier(getColumnName(change.getNewColumn()));
             print(" POSITION ");
-            print(prevColumn == null ? "0" : String.valueOf(curTable.getColumnIndex(prevColumn)));
+            // column positions start at 1 in Firebird
+            print(prevColumn == null ? "1" : String.valueOf(curTable.getColumnIndex(prevColumn) + 2));
             printEndOfStatement();
+        }
+        if (change.getNewColumn().isAutoIncrement())
+        {
+            writeAutoIncrementCreateStmts(currentModel, curTable, change.getNewColumn());
         }
     }
 
@@ -314,6 +338,10 @@ public class FirebirdBuilder extends SqlBuilder
                                  Database           desiredModel,
                                  RemoveColumnChange change) throws IOException
     {
+        if (change.getColumn().isAutoIncrement())
+        {
+            writeAutoIncrementDropStmts(change.getChangedTable(), change.getColumn());
+        }
         print("ALTER TABLE ");
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();

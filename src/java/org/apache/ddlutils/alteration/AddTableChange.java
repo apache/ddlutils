@@ -56,7 +56,7 @@ public class AddTableChange implements ModelChange
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
         try
         {

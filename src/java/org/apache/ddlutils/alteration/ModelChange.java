@@ -28,7 +28,8 @@ public interface ModelChange
     /**
      * Applies this change to the given database.
      * 
-     * @param database The database
+     * @param database      The database
+     * @param caseSensitive Whether the case of names matters
      */
-    public void apply(Database database);
+    public void apply(Database database, boolean caseSensitive);
 }

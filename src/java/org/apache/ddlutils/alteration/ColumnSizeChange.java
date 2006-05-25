@@ -83,10 +83,10 @@ public class ColumnSizeChange extends TableChangeImplBase implements ColumnChang
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName());
-        Column column = table.findColumn(_column.getName());
+        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
+        Column column = table.findColumn(_column.getName(), caseSensitive);
 
         column.setSizeAndScale(_newSize, _newScale);
     }

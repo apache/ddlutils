@@ -55,13 +55,13 @@ public class AddPrimaryKeyChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
-        Table table = database.findTable(getChangedTable().getName());
+        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
 
         for (int idx = 0; idx < _primaryKeyColumns.length; idx++)
         {
-            Column column = table.findColumn(_primaryKeyColumns[idx].getName());
+            Column column = table.findColumn(_primaryKeyColumns[idx].getName(), caseSensitive);
 
             column.setPrimaryKey(true);
         }

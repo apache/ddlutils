@@ -108,7 +108,7 @@ public class AddColumnChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
         Column newColumn = null;
 
@@ -121,7 +121,7 @@ public class AddColumnChange extends TableChangeImplBase
             throw new DdlUtilsException(ex);
         }
 
-        Table table = database.findTable(getChangedTable().getName());
+        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
 
         if ((_previousColumn != null) && (_nextColumn != null))
         {

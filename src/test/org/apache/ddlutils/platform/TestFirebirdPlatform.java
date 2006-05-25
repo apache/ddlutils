@@ -95,9 +95,11 @@ public class TestFirebirdPlatform extends TestPlatformBase
     public void testColumnConstraints() throws Exception
     {
         assertEqualsIgnoringWhitespaces(
-            "DROP TABLE \"constraints\";\n"+
+            "DROP TRIGGER \"trg_constraints_OL_PK_AUTO_INCR\";\n" +
             "DROP GENERATOR \"gen_constraints_OL_PK_AUTO_INCR\";\n" +
+            "DROP TRIGGER \"trg_constraints_COL_AUTO_INCR\";\n" +
             "DROP GENERATOR \"gen_constraints_COL_AUTO_INCR\";\n" +
+            "DROP TABLE \"constraints\";\n"+
             "CREATE TABLE \"constraints\"\n"+
             "(\n"+
             "    \"COL_PK\"               VARCHAR(32),\n"+
@@ -109,23 +111,13 @@ public class TestFirebirdPlatform extends TestPlatformBase
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n"+
             "CREATE GENERATOR \"gen_constraints_OL_PK_AUTO_INCR\";\n" +
-            "--TERM--;\n"+
             "CREATE TRIGGER \"trg_constraints_OL_PK_AUTO_INCR\" FOR \"constraints\"\n"+
             "ACTIVE BEFORE INSERT POSITION 0 AS\n"+
-            "BEGIN\n"+
-            "  IF (NEW.\"COL_PK_AUTO_INCR\" IS NULL) THEN\n"+
-            "    NEW.\"COL_PK_AUTO_INCR\" = GEN_ID(\"gen_constraints_OL_PK_AUTO_INCR\", 1);\n"+
-            "END;\n"+
-            "--TERM--;\n"+
+            "BEGIN IF (NEW.\"COL_PK_AUTO_INCR\" IS NULL) THEN NEW.\"COL_PK_AUTO_INCR\" = GEN_ID(\"gen_constraints_OL_PK_AUTO_INCR\", 1); END;\n"+
             "CREATE GENERATOR \"gen_constraints_COL_AUTO_INCR\";\n" +
-            "--TERM--;\n"+
             "CREATE TRIGGER \"trg_constraints_COL_AUTO_INCR\" FOR \"constraints\"\n"+
             "ACTIVE BEFORE INSERT POSITION 0 AS\n"+
-            "BEGIN\n"+
-            "  IF (NEW.\"COL_AUTO_INCR\" IS NULL) THEN\n"+
-            "    NEW.\"COL_AUTO_INCR\" = GEN_ID(\"gen_constraints_COL_AUTO_INCR\", 1);\n"+
-            "END;\n"+
-            "--TERM--;\n",
+            "BEGIN IF (NEW.\"COL_AUTO_INCR\" IS NULL) THEN NEW.\"COL_AUTO_INCR\" = GEN_ID(\"gen_constraints_COL_AUTO_INCR\", 1); END;\n",
             createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
     }
 

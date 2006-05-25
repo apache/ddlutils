@@ -135,7 +135,7 @@ public class DerbyBuilder extends CloudscapeBuilder
                 if (addColumnChange.isAtEnd())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel);
+                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }

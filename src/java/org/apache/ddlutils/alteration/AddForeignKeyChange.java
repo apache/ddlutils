@@ -58,14 +58,14 @@ public class AddForeignKeyChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
         ForeignKey newFK = null;
 
         try
         {
             newFK = (ForeignKey)_newForeignKey.clone();
-            newFK.setForeignTable(database.findTable(_newForeignKey.getForeignTableName()));
+            newFK.setForeignTable(database.findTable(_newForeignKey.getForeignTableName(), caseSensitive));
         }
         catch (CloneNotSupportedException ex)
         {

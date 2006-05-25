@@ -102,7 +102,7 @@ public class HsqlDbBuilder extends SqlBuilder
             AddColumnChange addColumnChange = (AddColumnChange)changeIt.previous();
 
             processChange(currentModel, desiredModel, addColumnChange);
-            addColumnChange.apply(currentModel);
+            addColumnChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             changeIt.remove();
         }
 
@@ -118,7 +118,7 @@ public class HsqlDbBuilder extends SqlBuilder
                 if (!removeColumnChange.getColumn().isPrimaryKey())
                 {
                     processChange(currentModel, desiredModel, removeColumnChange);
-                    change.apply(currentModel);
+                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }

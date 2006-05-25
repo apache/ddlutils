@@ -55,10 +55,10 @@ public class RemoveIndexChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database)
+    public void apply(Database database, boolean caseSensitive)
     {
-        Table table = database.findTable(getChangedTable().getName());
-        Index index = table.findIndex(_index.getName());
+        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
+        Index index = table.findIndex(_index.getName(), caseSensitive);
 
         table.removeIndex(index);
     }

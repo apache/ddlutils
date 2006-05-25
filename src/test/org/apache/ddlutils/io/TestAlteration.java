@@ -449,6 +449,46 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
+     * Tests the addition of an auto-increment column.
+     */
+    public void testAddAutoIncrementColumn()
+    {
+    	if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+    	{
+    		return;
+    	}
+
+    	final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1) });
+
+    	alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals(new Integer(1), beans.get(0), "avalue");
+    }
+
+    /**
      * Tests the addition of several columns.
      */
     public void testAddColumns()
@@ -678,6 +718,41 @@ public class TestAlteration extends RoundtripTestBase
         createDatabase(model1Xml);
 
         insertRow("roundtrip", new Object[] { new Integer(1), "test" });
+
+    	alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals(new Integer(1), beans.get(0), "pk");
+    }
+
+    /**
+     * Tests the removal of an auto-increment column.
+     */
+    public void testDropAutoIncrementColumn()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1) });
 
     	alterDatabase(model2Xml);
 
