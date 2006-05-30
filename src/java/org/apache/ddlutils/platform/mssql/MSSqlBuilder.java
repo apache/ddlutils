@@ -110,7 +110,7 @@ public class MSSqlBuilder extends SqlBuilder
         printAlwaysSingleQuotedIdentifier(tableName);
         println(")");
         println("BEGIN");
-        println("  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)");
+        println("  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)");
         println("  DECLARE refcursor CURSOR FOR");
         println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
         println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
@@ -426,7 +426,6 @@ public class MSSqlBuilder extends SqlBuilder
         }
     }
 
-
     /**
      * Processes the addition of a column to a table.
      * 
@@ -481,7 +480,7 @@ public class MSSqlBuilder extends SqlBuilder
         String tableName = getTableName(change.getChangedTable());
 
         println("BEGIN");
-        println("  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)");
+        println("  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)");
         println("  DECLARE refcursor CURSOR FOR");
         println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
         println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
@@ -530,7 +529,7 @@ public class MSSqlBuilder extends SqlBuilder
             String columnName = getColumnName(sourceColumn);
 
             println("BEGIN");
-            println("  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)");
+            println("  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)");
             println("  DECLARE refcursor CURSOR FOR");
             println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
             println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
