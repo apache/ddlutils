@@ -1937,7 +1937,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 		        }
 		        break;
 		}
-		return value;
+        return resultSet.wasNull() ? null : value;
 	}
 
     
