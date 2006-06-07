@@ -141,6 +141,7 @@ public class PlatformUtils
         jdbcSubProtocolToPlatform.put(Db2Platform.JDBC_SUBPROTOCOL,                             Db2Platform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(Db2Platform.JDBC_SUBPROTOCOL_OS390_1,                     Db2Platform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(Db2Platform.JDBC_SUBPROTOCOL_OS390_2,                     Db2Platform.DATABASENAME);
+        jdbcSubProtocolToPlatform.put(Db2Platform.JDBC_SUBPROTOCOL_JTOPEN,                      Db2Platform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(PlatformUtils.JDBC_SUBPROTOCOL_DATADIRECT_DB2,            Db2Platform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(PlatformUtils.JDBC_SUBPROTOCOL_INET_DB2,                  Db2Platform.DATABASENAME);
         jdbcSubProtocolToPlatform.put(DerbyPlatform.JDBC_SUBPROTOCOL,                           DerbyPlatform.DATABASENAME);
@@ -185,6 +186,7 @@ public class PlatformUtils
         jdbcDriverToPlatform.put(Db2Platform.JDBC_DRIVER,                         Db2Platform.DATABASENAME);
         jdbcDriverToPlatform.put(Db2Platform.JDBC_DRIVER_OLD1,                    Db2Platform.DATABASENAME);
         jdbcDriverToPlatform.put(Db2Platform.JDBC_DRIVER_OLD2,                    Db2Platform.DATABASENAME);
+        jdbcDriverToPlatform.put(Db2Platform.JDBC_DRIVER_JTOPEN,                  Db2Platform.DATABASENAME);
         jdbcDriverToPlatform.put(PlatformUtils.JDBC_DRIVER_DATADIRECT_DB2,        Db2Platform.DATABASENAME);
         jdbcDriverToPlatform.put(PlatformUtils.JDBC_DRIVER_INET_DB2,              Db2Platform.DATABASENAME);
         jdbcDriverToPlatform.put(DerbyPlatform.JDBC_DRIVER_EMBEDDED,              DerbyPlatform.DATABASENAME);
