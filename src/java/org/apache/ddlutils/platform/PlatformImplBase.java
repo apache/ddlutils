@@ -1681,7 +1681,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 {
                     String defaultValue = column.getDefaultValue();
 
-                    if ((defaultValue != null) &&
+                    if ((defaultValue != null) && (defaultValue.length() >= 2) &&
                         defaultValue.startsWith("'") && defaultValue.endsWith("'"))
                     {
                         defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
