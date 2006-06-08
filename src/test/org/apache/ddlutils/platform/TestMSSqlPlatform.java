@@ -55,7 +55,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'coltype')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
@@ -120,7 +120,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'constraints')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
@@ -165,7 +165,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table3')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
@@ -183,7 +183,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table2')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
@@ -201,7 +201,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table1')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
@@ -258,7 +258,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'escapedcharacters')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)\n"+
+            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
