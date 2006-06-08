@@ -224,7 +224,7 @@ public class MySqlBuilder extends SqlBuilder
                 change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
-            else
+            else if (change instanceof ColumnChange)
             {
                 // we gather all changed columns because we can use the ALTER TABLE MODIFY COLUMN
                 // statement for them
