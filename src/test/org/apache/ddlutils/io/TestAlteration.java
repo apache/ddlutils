@@ -470,7 +470,7 @@ public class TestAlteration extends RoundtripTestBase
             "<database name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' autoIncrement='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
 
@@ -531,10 +531,7 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of several columns at the end of the table. This test
-     * is known to fail on MaxDB and Oracle where a DEFAULT specification is applied to
-     * existing rows even if they are not defined as NOT NULL (column 'avalue3' in the
-     * target schema).
+     * Tests the addition of several columns at the end of the table.
      */
     public void testAddColumnsAtTheEnd()
     {
@@ -572,7 +569,9 @@ public class TestAlteration extends RoundtripTestBase
 
         assertEquals((Object)"test", beans.get(0), "avalue1");
         assertEquals(new Integer(3), beans.get(0), "avalue2");
-        assertEquals((Object)null, beans.get(0), "avalue3");
+        // we're assuming the default algorithm  which will apply the default value even
+        // to existing columns
+        assertEquals(new Double(1.0), beans.get(0), "avalue3");
         assertEquals((Object)null, beans.get(0), "avalue4");
     }
 
