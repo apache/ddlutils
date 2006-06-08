@@ -509,7 +509,7 @@ public class TestAlteration extends RoundtripTestBase
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
             "    <column name='avalue2' type='INTEGER'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
-            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "    <column name='avalue4' type='VARCHAR' size='16'/>\n"+
             "  </table>\n"+
             "</database>";
 
@@ -552,7 +552,7 @@ public class TestAlteration extends RoundtripTestBase
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
             "    <column name='avalue2' type='INTEGER'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
-            "    <column name='avalue4' type='CHAR' size='16'/>\n"+
+            "    <column name='avalue4' type='VARCHAR' size='16'/>\n"+
             "  </table>\n"+
             "</database>";
 
@@ -659,7 +659,7 @@ public class TestAlteration extends RoundtripTestBase
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
-            "    <column name='avalue4' type='CHAR' size='5'/>\n"+
+            "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
             "    <column name='avalue2' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -672,7 +672,7 @@ public class TestAlteration extends RoundtripTestBase
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
             "    <column name='avalue2' type='INTEGER'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
-            "    <column name='avalue4' type='CHAR' size='5'/>\n"+
+            "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
             "  </table>\n"+
             "</database>";
 
@@ -733,6 +733,11 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testDropAutoIncrementColumn()
     {
+        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
