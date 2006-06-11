@@ -75,8 +75,12 @@ public class PlatformInfo
     /** Whether the database returns a synthetic default value for non-identity required columns. */ 
     private boolean _syntheticDefaultValueForRequiredReturned = false;
     
+    /** Whether the platform allows for the explicit specification of values for identity columns in INSERT
+        and UPDATE statements. */ 
+    private boolean _identityOverrideAllowed = true;
+
     /** Whether the platform is able to determine auto increment status from an existing database. */ 
-    private boolean _autoIncrementStatusReadingSupported = true;
+    private boolean _identityStatusReadingSupported = true;
 
     // other ddl properties
 
@@ -397,15 +401,37 @@ public class PlatformInfo
     }
 
     /**
+     * Determines whether the platform is allows the explicit specification of values for
+     * identity columns in INSERT/UPDATE statements.
+     * 
+     * @return <code>true</code> if values for identity columns can be specified
+     */
+    public boolean isIdentityOverrideAllowed()
+    {
+        return _identityOverrideAllowed;
+    }
+
+    /**
+     * Specifies whether the platform is allows the explicit specification of values for
+     * identity columns in INSERT/UPDATE statements.
+     * 
+     * @param identityOverrideAllowed <code>true</code> if values for identity columns can be specified
+     */
+    public void setIdentityOverrideAllowed(boolean identityOverrideAllowed)
+    {
+        _identityOverrideAllowed = identityOverrideAllowed;
+    }
+
+    /**
      * Determines whether the platform is able to read the auto-increment status for columns
      * from an existing database.
      * 
      * @return <code>true</code> if the auto-increment status can be determined from an existing
      *         database
      */
-    public boolean getAutoIncrementStatusReadingSupported()
+    public boolean getIdentityStatusReadingSupported()
     {
-        return _autoIncrementStatusReadingSupported;
+        return _identityStatusReadingSupported;
     }
 
     /**
@@ -415,9 +441,9 @@ public class PlatformInfo
      * @param canReadAutoIncrementStatus <code>true</code> if the auto-increment status can be
      *                                   determined from an existing database
      */
-    public void setAutoIncrementStatusReadingSupported(boolean canReadAutoIncrementStatus)
+    public void setIdentityStatusReadingSupported(boolean canReadAutoIncrementStatus)
     {
-        _autoIncrementStatusReadingSupported = canReadAutoIncrementStatus;
+        _identityStatusReadingSupported = canReadAutoIncrementStatus;
     }
 
     // other ddl properties

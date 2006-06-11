@@ -423,7 +423,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         assertEquals("Required status not the same for column "+actual.getName()+".",
                      expected.isRequired(),
                      actual.isRequired());
-        if (getPlatformInfo().getAutoIncrementStatusReadingSupported())
+        if (getPlatformInfo().getIdentityStatusReadingSupported())
         {
         	// we're only comparing this if the platform can actually read the
         	// auto-increment status back from an existing database

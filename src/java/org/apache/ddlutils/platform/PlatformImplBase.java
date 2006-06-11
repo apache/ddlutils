@@ -1067,12 +1067,60 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             public boolean evaluate(Object input) {
                 SqlDynaProperty prop = (SqlDynaProperty)input;
 
-                return !prop.getColumn().isAutoIncrement() &&
-                       ((bean.get(prop.getName()) != null) || (prop.getColumn().getDefaultValue() == null));
+                if (bean.get(prop.getName()) != null)
+                {
+                    // we ignore properties for which a value is present in the bean
+                    // only if they are auto-increment and the platform does not allow
+                    // the override of the auto-increment specification
+                    return getPlatformInfo().isIdentityOverrideAllowed() || !prop.getColumn().isAutoIncrement();
+                }
+                else
+                {
+                    // we also return properties without a value in the bean
+                    // if they ain't auto-increment and don't have a default value
+                    // in this case, a NULL is inserted
+                    return !prop.getColumn().isAutoIncrement() && (prop.getColumn().getDefaultValue() == null);
+                }
             }
         });
 
         return (SqlDynaProperty[])result.toArray(new SqlDynaProperty[result.size()]);
+    }
+
+    /**
+     * Returns all identity properties whose value were defined by the database and which
+     * now need to be read back from the DB.
+     * 
+     * @param model     The database model
+     * @param dynaClass The dyna class
+     * @param bean      The bean
+     * @return The columns
+     */
+    private Column[] getRelevantIdentityColumns(Database model, SqlDynaClass dynaClass, final DynaBean bean)
+    {
+        SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
+
+        Collection relevantProperties = CollectionUtils.select(Arrays.asList(properties), new Predicate() {
+            public boolean evaluate(Object input) {
+                SqlDynaProperty prop = (SqlDynaProperty)input;
+
+                // we only want those identity columns that were really specified by the DB
+                // if the platform allows specification of values for identity columns
+                // in INSERT/UPDATE statements, then we need to filter the corresponding
+                // columns out
+                return prop.getColumn().isAutoIncrement() &&
+                       (!getPlatformInfo().isIdentityOverrideAllowed() || (bean.get(prop.getName()) == null));
+            }
+        });
+
+        Column[] columns = new Column[relevantProperties.size()];
+        int      idx     = 0;
+
+        for (Iterator propIt = relevantProperties.iterator(); propIt.hasNext(); idx++)
+        {
+            columns[idx] = ((SqlDynaProperty)propIt.next()).getColumn();
+        }
+        return columns;
     }
 
     /**
@@ -1082,7 +1130,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     {
         SqlDynaClass      dynaClass       = model.getDynaClassFor(dynaBean);
         SqlDynaProperty[] properties      = getPropertiesForInsertion(model, dynaClass, dynaBean);
-        Column[]          autoIncrColumns = model.findTable(dynaClass.getTableName()).getAutoIncrementColumns();
+        Column[]          autoIncrColumns = getRelevantIdentityColumns(model, dynaClass, dynaBean);
 
         if ((properties.length == 0) && (autoIncrColumns.length == 0))
         {
@@ -1100,7 +1148,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
         if ((autoIncrColumns.length > 0) && (queryIdSql == null))
         {
-            _log.warn("The database does not support querying for auto-generated pk values");
+            _log.warn("The database does not support querying for auto-generated column values");
         }
 
         try
@@ -1215,10 +1263,11 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void insert(Connection connection, Database model, Collection dynaBeans) throws DynaSqlException
     {
-        SqlDynaClass      dynaClass  = null;
-        SqlDynaProperty[] properties = null;
-        PreparedStatement statement  = null;
-        int               addedStmts = 0;
+        SqlDynaClass      dynaClass              = null;
+        SqlDynaProperty[] properties             = null;
+        PreparedStatement statement              = null;
+        int               addedStmts             = 0;
+        boolean           identityWarningPrinted = false;
 
         for (Iterator it = dynaBeans.iterator(); it.hasNext();)
         {
@@ -1240,6 +1289,12 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 {
                     _log.warn("Cannot insert instances of type " + dynaClass + " because it has no usable properties");
                     continue;
+                }
+                if (!identityWarningPrinted &&
+                    (getRelevantIdentityColumns(model, curDynaClass, dynaBean).length > 0))
+                {
+                    _log.warn("Updating the bean properties corresponding to auto-increment columns is not supported in batch mode");
+                    identityWarningPrinted = true;
                 }
 
                 String insertSql = createInsertSql(model, dynaClass, properties, null);

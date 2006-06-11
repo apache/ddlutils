@@ -16,6 +16,7 @@
   <property name="sqloutputfile" value="schema.sql"/>
   <property name="platform" value=""/>
   <property name="alterdatabase" value="true"/>
+  <property name="delimitedsqlidentifiers" value="false"/>
   
   <!-- The classpath used for running the tasks -->
   <path id="project-classpath">
@@ -34,7 +35,7 @@
            classpathref="project-classpath"/>
 	
   <target name="createDb">
-    <ddlToDatabase usedelimitedsqlidentifiers="false"
+    <ddlToDatabase usedelimitedsqlidentifiers="${delimitedsqlidentifiers}"
                    catalogpattern="${catalogpattern}"
                    schemapattern="${schemapattern}"
                    databasetype="${platform}" >
@@ -48,7 +49,7 @@
 
   <target name="writeSchemaToDb">
     <ddlToDatabase validatexml="false" 
-                   usedelimitedsqlidentifiers="false"
+                   usedelimitedsqlidentifiers="${delimitedsqlidentifiers}"
                    catalogpattern="${catalogpattern}"
                    schemapattern="${schemapattern}"
                    databasetype="${platform}" >
@@ -68,7 +69,7 @@
 
   <target name="writeSchemaSqlToFile">
     <ddlToDatabase validatexml="false" 
-                   usedelimitedsqlidentifiers="false"
+                   usedelimitedsqlidentifiers="${delimitedsqlidentifiers}"
                    catalogpattern="${catalogpattern}"
                    schemapattern="${schemapattern}"
                    databasetype="${platform}" >
@@ -84,6 +85,25 @@
                             dodrops="true"
                             failonerror="false"
                             outputfile="${sqloutputfile}"/> 
+    </ddlToDatabase> 
+  </target>
+
+  <target name="writeDataToDb">
+    <ddlToDatabase validatexml="false" 
+                   usedelimitedsqlidentifiers="${delimitedsqlidentifiers}"
+                   catalogpattern="${catalogpattern}"
+                   schemapattern="${schemapattern}"
+                   databasetype="${platform}" >
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+      <fileset dir=".">
+        <include name="${schemafiles}"/> 
+      </fileset> 
+
+      <writedatatodatabase datafile="${datafile}"
+                           usebatchmode="false"/>
     </ddlToDatabase> 
   </target>
 </project>

@@ -238,7 +238,7 @@ public class TestConstraints extends RoundtripTestBase
         if (getPlatformInfo().isNonPKIdentityColumnsSupported())
         {
             performConstraintsTest(TEST_AUTO_INCREMENT_INTEGER_MODEL,
-            		               getPlatformInfo().getAutoIncrementStatusReadingSupported());
+            		               getPlatformInfo().getIdentityStatusReadingSupported());
         }
     }
 
@@ -248,7 +248,7 @@ public class TestConstraints extends RoundtripTestBase
     public void testPrimaryKeyAutoIncrementColumn()
     {
         performConstraintsTest(TEST_PRIMARY_KEY_AUTO_INCREMENT_MODEL,
-	                           getPlatformInfo().getAutoIncrementStatusReadingSupported());
+	                           getPlatformInfo().getIdentityStatusReadingSupported());
     }
 
     /**
