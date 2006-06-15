@@ -1952,26 +1952,58 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 		    case Types.CLOB:
 		        Clob clob = resultSet.getClob(columnName);
 
-		        if ((clob == null) || (clob.length() > Integer.MAX_VALUE))
-		        {
-		            value = clob;
-		        }
-		        else
-		        {
-		            value = clob.getSubString(1l, (int)clob.length());
-		        }
+                if (clob == null)
+                {
+                    value = null;
+                }
+                else
+                {
+                    long length = clob.length();
+    
+    		        if (length > Integer.MAX_VALUE)
+    		        {
+    		            value = clob;
+    		        }
+                    else if (length == 0)
+                    {
+                        // the javadoc is not clear about whether Clob.getSubString
+                        // can be used with a substring length of 0
+                        // thus we do the safe thing and handle it ourselves
+                        value = "";
+                    }
+    		        else
+    		        {
+    		            value = clob.getSubString(1l, (int)length);
+    		        }
+                }
 		        break;
 		    case Types.BLOB:
 		        Blob blob = resultSet.getBlob(columnName);
 
-		        if ((blob == null) || (blob.length() > Integer.MAX_VALUE))
-		        {
-		            value = blob;
-		        }
-		        else
-		        {
-		            value = blob.getBytes(1l, (int)blob.length());
-		        }
+                if (blob == null)
+                {
+                    value = null;
+                }
+                else
+                {
+                    long length = blob.length();
+    
+    		        if (length > Integer.MAX_VALUE)
+    		        {
+    		            value = blob;
+    		        }
+                    else if (length == 0)
+                    {
+                        // the javadoc is not clear about whether Blob.getBytes
+                        // can be used with for 0 bytes to be copied
+                        // thus we do the safe thing and handle it ourselves
+                        value = new byte[0];
+                    }
+    		        else
+    		        {
+    		            value = blob.getBytes(1l, (int)length);
+    		        }
+                }
 		        break;
 		    case Types.ARRAY:
 		        value = resultSet.getArray(columnName);
