@@ -1805,7 +1805,7 @@ public abstract class SqlBuilder
      * @param table The table
      * @return The sql, or <code>null</code> if the database does not support this
      */
-    public String getSelectLastInsertId(Table table)
+    public String getSelectLastIdentityValues(Table table)
     {
         // No default possible as the databases are quite different in this respect
         return null;

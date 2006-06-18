@@ -74,15 +74,11 @@ public class PlatformInfo
 
     /** Whether the database returns a synthetic default value for non-identity required columns. */ 
     private boolean _syntheticDefaultValueForRequiredReturned = false;
-    
-    /** Whether the platform allows for the explicit specification of values for identity columns in INSERT
-        and UPDATE statements. */ 
-    private boolean _identityOverrideAllowed = true;
 
     /** Whether the platform is able to determine auto increment status from an existing database. */ 
     private boolean _identityStatusReadingSupported = true;
 
-    // other ddl properties
+    // other DDL/DML properties
 
     /** Whether comments are supported. */
     private boolean _sqlCommentsSupported = true;
@@ -92,6 +88,17 @@ public class PlatformInfo
     
     /** Whether an ALTER TABLE is needed to drop indexes. */
     private boolean _alterTableForDropUsed = false;
+
+    /** Whether the platform allows for the explicit specification of values for identity columns in INSERT
+        and UPDATE statements. */ 
+    private boolean _identityOverrideAllowed = true;
+
+    /** Whether the values of identity columns can be read back from the database after insertion. */ 
+    private boolean _lastIdentityValueReadable = true;
+
+    /** Whether auto-commit mode for the reading of the values of identity columns after insertion
+        shall be used. */ 
+    private boolean _autoCommitModeForLastIdentityValueReading = true;
 
     /** Specifies the maximum length that an identifier (name of a table, column, constraint etc.)
         can have for this database; use -1 if there is no limit. */
@@ -401,28 +408,6 @@ public class PlatformInfo
     }
 
     /**
-     * Determines whether the platform is allows the explicit specification of values for
-     * identity columns in INSERT/UPDATE statements.
-     * 
-     * @return <code>true</code> if values for identity columns can be specified
-     */
-    public boolean isIdentityOverrideAllowed()
-    {
-        return _identityOverrideAllowed;
-    }
-
-    /**
-     * Specifies whether the platform is allows the explicit specification of values for
-     * identity columns in INSERT/UPDATE statements.
-     * 
-     * @param identityOverrideAllowed <code>true</code> if values for identity columns can be specified
-     */
-    public void setIdentityOverrideAllowed(boolean identityOverrideAllowed)
-    {
-        _identityOverrideAllowed = identityOverrideAllowed;
-    }
-
-    /**
      * Determines whether the platform is able to read the auto-increment status for columns
      * from an existing database.
      * 
@@ -508,6 +493,75 @@ public class PlatformInfo
     public void setAlterTableForDropUsed(boolean useAlterTableForDrop)
     {
         _alterTableForDropUsed = useAlterTableForDrop;
+    }
+
+    /**
+     * Determines whether the platform is allows the explicit specification of values for
+     * identity columns in INSERT/UPDATE statements.
+     * 
+     * @return <code>true</code> if values for identity columns can be specified
+     */
+    public boolean isIdentityOverrideAllowed()
+    {
+        return _identityOverrideAllowed;
+    }
+
+    /**
+     * Specifies whether the platform is allows the explicit specification of values for
+     * identity columns in INSERT/UPDATE statements.
+     * 
+     * @param identityOverrideAllowed <code>true</code> if values for identity columns can be specified
+     */
+    public void setIdentityOverrideAllowed(boolean identityOverrideAllowed)
+    {
+        _identityOverrideAllowed = identityOverrideAllowed;
+    }
+
+    /**
+     * Determines whether the values of identity columns can be read back from the
+     * database after insertion of a row.
+     * 
+     * @return <code>true</code> if the identity column(s) can be read back
+     */
+    public boolean isLastIdentityValueReadable()
+    {
+        return _lastIdentityValueReadable;
+    }
+
+    /**
+     * Specifies whether the values of identity columns can be read back from the
+     * database after insertion of a row.
+     * 
+     * @param lastIdentityValueReadable <code>true</code> if the identity column(s) can be read back
+     */
+    public void setLastIdentityValueReadable(boolean lastIdentityValueReadable)
+    {
+        _lastIdentityValueReadable = lastIdentityValueReadable;
+    }
+
+    /**
+     * Determines whether auto-commit mode for the reading of the values of identity columns
+     * after insertion shall be used, i.e. whether between the insertion of the row and the
+     * reading of the database-generated identity value a commit is issued.
+     * 
+     * @return <code>true</code> if auto-commit mode is used
+     */
+    public boolean isAutoCommitModeForLastIdentityValueReading()
+    {
+        return _autoCommitModeForLastIdentityValueReading;
+    }
+
+    /**
+     * Determines whether auto-commit mode for the reading of the values of identity columns
+     * after insertion shall be used, i.e. whether between the insertion of the row and the
+     * reading of the database-generated identity value a commit is issued.
+     * 
+     * @param autoCommitModeForLastIdentityValueReading <code>true</code> if auto-commit mode
+     *                                                  shall be used
+     */
+    public void setAutoCommitModeForLastIdentityValueReading(boolean autoCommitModeForLastIdentityValueReading)
+    {
+        _autoCommitModeForLastIdentityValueReading = autoCommitModeForLastIdentityValueReading;
     }
 
     /**

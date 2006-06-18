@@ -1030,7 +1030,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     {
         Table table = model.findTable(dynaClass.getTableName());
 
-        return _builder.getSelectLastInsertId(table);
+        return _builder.getSelectLastIdentityValues(table);
     }
 
     /**
@@ -1138,21 +1138,37 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             return;
         }
 
-        String            insertSql  = createInsertSql(model, dynaClass, properties, null);
-        String            queryIdSql = autoIncrColumns.length > 0 ? createSelectLastInsertIdSql(model, dynaClass) : null;
-        PreparedStatement statement  = null;
+        String insertSql        = createInsertSql(model, dynaClass, properties, null);
+        String queryIdentitySql = null;
 
         if (_log.isDebugEnabled())
         {
             _log.debug("About to execute SQL: " + insertSql);
         }
-        if ((autoIncrColumns.length > 0) && (queryIdSql == null))
+
+        if (autoIncrColumns.length > 0)
         {
-            _log.warn("The database does not support querying for auto-generated column values");
+            if (!getPlatformInfo().isLastIdentityValueReadable())
+            {
+                _log.warn("The database does not support querying for auto-generated column values");
+            }
+            else
+            {
+                queryIdentitySql = createSelectLastInsertIdSql(model, dynaClass);
+            }
         }
+
+        boolean           autoCommitMode = false;
+        PreparedStatement statement      = null;
 
         try
         {
+            if (!getPlatformInfo().isAutoCommitModeForLastIdentityValueReading())
+            {
+                autoCommitMode = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+            }
+
             statement = connection.prepareStatement(insertSql);
 
             for (int idx = 0; idx < properties.length; idx++ )
@@ -1165,8 +1181,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             if (count != 1)
             {
                 _log.warn("Attempted to insert a single row " + dynaBean +
-                         " in table " + dynaClass.getTableName() +
-                         " but changed " + count + " row(s)");
+                          " in table " + dynaClass.getTableName() +
+                          " but changed " + count + " row(s)");
             }
         }
         catch (SQLException ex)
@@ -1177,23 +1193,27 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             closeStatement(statement);
         }
-        if (queryIdSql != null)
+        if (queryIdentitySql != null)
         {
             Statement queryStmt       = null;
             ResultSet lastInsertedIds = null;
 
             try
             {
-                // we'll have to commit the statement(s) because otherwise most likely
-                // the auto increment hasn't happened yet (the db didn't actually
-                // perform the insert yet so no triggering of sequences did occur)
-                if (!connection.getAutoCommit())
+                if (getPlatformInfo().isAutoCommitModeForLastIdentityValueReading())
                 {
-                    connection.commit();
+                    // we'll commit the statement(s) if no auto-commit is enabled because
+                    // otherwise it is possible that the auto increment hasn't happened yet
+                    // (the db didn't actually perform the insert yet so no triggering of
+                    // sequences did occur)
+                    if (!connection.getAutoCommit())
+                    {
+                        connection.commit();
+                    }
                 }
 
                 queryStmt       = connection.createStatement();
-                lastInsertedIds = queryStmt.executeQuery(queryIdSql);
+                lastInsertedIds = queryStmt.executeQuery(queryIdentitySql);
 
                 lastInsertedIds.next();
 
@@ -1202,7 +1222,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                     // we're using the index rather than the name because we cannot know how
                     // the SQL statement looks like; rather we assume that we get the values
                     // back in the same order as the auto increment columns
-                    Object value = lastInsertedIds.getObject(idx + 1);
+                    Object value = getObjectFromResultSet(lastInsertedIds, autoIncrColumns[idx], idx + 1);
 
                     PropertyUtils.setProperty(dynaBean, autoIncrColumns[idx].getName(), value);
                 }
@@ -1221,7 +1241,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             }
             catch (SQLException ex)
             {
-                throw new DynaSqlException("Error while retrieving the auto-generated primary key from the database", ex);
+                throw new DynaSqlException("Error while retrieving the identity column value(s) from the database", ex);
             }
             finally
             {
@@ -1237,6 +1257,19 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                     }
                 }
                 closeStatement(statement);
+            }
+        }
+        if (!getPlatformInfo().isAutoCommitModeForLastIdentityValueReading())
+        {
+            try
+            {
+                // we need to do a manual commit now
+                connection.commit();
+                connection.setAutoCommit(autoCommitMode);
+            }
+            catch (SQLException ex)
+            {
+                throw new DynaSqlException(ex);
             }
         }
     }
@@ -1882,12 +1915,48 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 // we should not use the Clob interface if the database doesn't map to this type 
                 jdbcType = targetJdbcType;
             }
-            value = extractColumnValue(resultSet, columnName, jdbcType);
+            value = extractColumnValue(resultSet, columnName, 0, jdbcType);
         }
         else
         {
             value = resultSet.getObject(columnName);
         }
+        return resultSet.wasNull() ? null : value;
+    }
+
+    /**
+     * Helper method esp. for the {@link ModelBasedResultSetIterator} class that retrieves
+     * the value for a column from the given result set. If a table was specified,
+     * and it contains the column, then the jdbc type defined for the column is used for extracting
+     * the value, otherwise the object directly retrieved from the result set is returned.<br/>
+     * The method is defined here rather than in the {@link ModelBasedResultSetIterator} class
+     * so that concrete platforms can modify its behavior.
+     * 
+     * @param resultSet  The result set
+     * @param columnName The name of the column
+     * @param table      The table
+     * @return The value
+     */
+    protected Object getObjectFromResultSet(ResultSet resultSet, Column column, int idx) throws SQLException
+    {
+        int    originalJdbcType = column.getTypeCode();
+        int    targetJdbcType   = getPlatformInfo().getTargetJdbcType(originalJdbcType);
+        int    jdbcType         = originalJdbcType;
+        Object value            = null;
+
+        // in general we're trying to retrieve the value using the original type
+        // but sometimes we also need the target type:
+        if ((originalJdbcType == Types.BLOB) && (targetJdbcType != Types.BLOB))
+        {
+            // we should not use the Blob interface if the database doesn't map to this type 
+            jdbcType = targetJdbcType;
+        }
+        if ((originalJdbcType == Types.CLOB) && (targetJdbcType != Types.CLOB))
+        {
+            // we should not use the Clob interface if the database doesn't map to this type 
+            jdbcType = targetJdbcType;
+        }
+        value = extractColumnValue(resultSet, null, idx, jdbcType);
         return resultSet.wasNull() ? null : value;
     }
 
@@ -1897,60 +1966,64 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	 * point where database-specific implementations can change this behavior.
 	 * 
 	 * @param resultSet  The result set to extract the value from
-	 * @param columnName The name of the column
+	 * @param columnName The name of the column; can be <code>null</code> in which case the
+     *                   <code>columnIdx</code> will be used instead
+     * @param columnIdx  The index of the column's value in the result set; is only used if
+     *                   <code>columnName</code> is <code>null</code>
 	 * @param jdbcType   The jdbc type to extract
 	 * @return The value
 	 * @throws SQLException If an error occurred while accessing the result set
 	 */
-	protected Object extractColumnValue(ResultSet resultSet, String columnName, int jdbcType) throws SQLException
+	protected Object extractColumnValue(ResultSet resultSet, String columnName, int columnIdx, int jdbcType) throws SQLException
 	{
-		Object value;
+        boolean useIdx = (columnName == null);
+		Object  value;
 
 		switch (jdbcType)
 		{
 		    case Types.CHAR:
 		    case Types.VARCHAR:
 		    case Types.LONGVARCHAR:
-		        value = resultSet.getString(columnName);
+		        value = useIdx ? resultSet.getString(columnIdx) : resultSet.getString(columnName);
 		        break;
 		    case Types.NUMERIC:
 		    case Types.DECIMAL:
-		        value = resultSet.getBigDecimal(columnName);
+		        value = useIdx ? resultSet.getBigDecimal(columnIdx) : resultSet.getBigDecimal(columnName);
 		        break;
 		    case Types.BIT:
-		        value = new Boolean(resultSet.getBoolean(columnName));
+		        value = new Boolean(useIdx ? resultSet.getBoolean(columnIdx) : resultSet.getBoolean(columnName));
 		        break;
 		    case Types.TINYINT:
 		    case Types.SMALLINT:
 		    case Types.INTEGER:
-		        value = new Integer(resultSet.getInt(columnName));
+		        value = new Integer(useIdx ? resultSet.getInt(columnIdx) : resultSet.getInt(columnName));
 		        break;
 		    case Types.BIGINT:
-		        value = new Long(resultSet.getLong(columnName));
+		        value = new Long(useIdx ? resultSet.getLong(columnIdx) : resultSet.getLong(columnName));
 		        break;
 		    case Types.REAL:
-		        value = new Float(resultSet.getFloat(columnName));
+		        value = new Float(useIdx ? resultSet.getFloat(columnIdx) : resultSet.getFloat(columnName));
 		        break;
 		    case Types.FLOAT:
 		    case Types.DOUBLE:
-		        value = new Double(resultSet.getDouble(columnName));
+		        value = new Double(useIdx ? resultSet.getDouble(columnIdx) : resultSet.getDouble(columnName));
 		        break;
 		    case Types.BINARY:
 		    case Types.VARBINARY:
 		    case Types.LONGVARBINARY:
-		        value = resultSet.getBytes(columnName);
+		        value = useIdx ? resultSet.getBytes(columnIdx) : resultSet.getBytes(columnName);
 		        break;
 		    case Types.DATE:
-		        value = resultSet.getDate(columnName);
+		        value = useIdx ? resultSet.getDate(columnIdx) : resultSet.getDate(columnName);
 		        break;
 		    case Types.TIME:
-		        value = resultSet.getTime(columnName);
+		        value = useIdx ? resultSet.getTime(columnIdx) : resultSet.getTime(columnName);
 		        break;
 		    case Types.TIMESTAMP:
-		        value = resultSet.getTimestamp(columnName);
+		        value = useIdx ? resultSet.getTimestamp(columnIdx) : resultSet.getTimestamp(columnName);
 		        break;
 		    case Types.CLOB:
-		        Clob clob = resultSet.getClob(columnName);
+		        Clob clob = useIdx ? resultSet.getClob(columnIdx) : resultSet.getClob(columnName);
 
                 if (clob == null)
                 {
@@ -1978,7 +2051,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 }
 		        break;
 		    case Types.BLOB:
-		        Blob blob = resultSet.getBlob(columnName);
+		        Blob blob = useIdx ? resultSet.getBlob(columnIdx) : resultSet.getBlob(columnName);
 
                 if (blob == null)
                 {
@@ -2006,21 +2079,21 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 }
 		        break;
 		    case Types.ARRAY:
-		        value = resultSet.getArray(columnName);
+		        value = useIdx ? resultSet.getArray(columnIdx) : resultSet.getArray(columnName);
 		        break;
 		    case Types.REF:
-		        value = resultSet.getRef(columnName);
+		        value = useIdx ? resultSet.getRef(columnIdx) : resultSet.getRef(columnName);
 		        break;
 		    default:
 		        // special handling for Java 1.4/JDBC 3 types
 		        if (Jdbc3Utils.supportsJava14JdbcTypes() &&
 		            (jdbcType == Jdbc3Utils.determineBooleanTypeCode()))
 		        {
-		            value = new Boolean(resultSet.getBoolean(columnName));
+		            value = new Boolean(useIdx ? resultSet.getBoolean(columnIdx) : resultSet.getBoolean(columnName));
 		        }
 		        else
 		        {
-		            value = resultSet.getObject(columnName);
+		            value = useIdx ? resultSet.getObject(columnIdx) : resultSet.getObject(columnName);
 		        }
 		        break;
 		}

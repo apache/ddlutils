@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.Platform;
@@ -1042,5 +1043,37 @@ public class JdbcModelReader
                 stmt.close();
             }
         }
+    }
+
+    /**
+     * Replaces a specific character sequence in the given text with the character sequence
+     * whose escaped version it is.
+     * 
+     * @param text      The text
+     * @param unescaped The unescaped string, e.g. "'"
+     * @param escaped   The escaped version, e.g. "''"
+     * @return The resulting text
+     */
+    protected String unescape(String text, String unescaped, String escaped)
+    {
+        String result = text;
+
+        // we need special handling if the single quote is escaped via a double single quote
+        if (escaped.equals("''"))
+        {
+            if ((result.length() >= 2) && result.startsWith("'") && result.endsWith("'"))
+            {
+                result = "'" + StringUtils.replace(result.substring(1, result.length() - 1), escaped, unescaped) + "'";
+            }
+            else
+            {
+                result = StringUtils.replace(result, escaped, unescaped);
+            }
+        }
+        else
+        {
+            result = StringUtils.replace(result, escaped, unescaped);
+        }
+        return result;
     }
 }
