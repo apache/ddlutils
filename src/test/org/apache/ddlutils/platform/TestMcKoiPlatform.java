@@ -133,15 +133,19 @@ public class TestMcKoiPlatform extends TestPlatformBase
         // note that this is not valid SQL as obviously only one auto increment field
         // can be defined for each table
         assertEqualsIgnoringWhitespaces(
-            "DROP TABLE IF EXISTS \"constraints\";\n" +
+            "DROP TABLE IF EXISTS \"constraints\";\n"+
+            "DROP SEQUENCE \"seq_constraints_COL_PK_AUTO_INCR\";\n"+
+            "DROP SEQUENCE \"seq_constraints_COL_AUTO_INCR\";\n"+
+            "CREATE SEQUENCE \"seq_constraints_COL_PK_AUTO_INCR\";\n"+
+            "CREATE SEQUENCE \"seq_constraints_COL_AUTO_INCR\";\n"+
             "CREATE TABLE \"constraints\"\n"+
             "(\n"+
             "    \"COL_PK\"               VARCHAR(32),\n"+
-            "    \"COL_PK_AUTO_INCR\"     INTEGER DEFAULT UNIQUEKEY('constraints'),\n"+
+            "    \"COL_PK_AUTO_INCR\"     INTEGER DEFAULT NEXTVAL('seq_constraints_COL_PK_AUTO_INCR'),\n"+
             "    \"COL_NOT_NULL\"         BINARY(100) NOT NULL,\n"+
             "    \"COL_NOT_NULL_DEFAULT\" DOUBLE DEFAULT -2.0 NOT NULL,\n"+
             "    \"COL_DEFAULT\"          CHAR(4) DEFAULT 'test',\n"+
-            "    \"COL_AUTO_INCR\"        BIGINT DEFAULT UNIQUEKEY('constraints'),\n"+
+            "    \"COL_AUTO_INCR\"        BIGINT DEFAULT NEXTVAL('seq_constraints_COL_AUTO_INCR'),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
             createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));

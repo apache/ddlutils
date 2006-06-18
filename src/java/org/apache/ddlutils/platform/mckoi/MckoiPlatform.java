@@ -55,6 +55,7 @@ public class MckoiPlatform extends PlatformImplBase
         info.setIndicesSupported(false);
         info.setIndicesEmbedded(true);
         info.setDefaultValueUsedForIdentitySpec(true);
+        info.setAutoCommitModeForLastIdentityValueReading(false);
 
         info.addNativeTypeMapping(Types.ARRAY,    "BLOB",   Types.BLOB);
         info.addNativeTypeMapping(Types.DISTINCT, "BLOB",   Types.BLOB);

@@ -26,6 +26,7 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 
@@ -112,10 +113,18 @@ public class MckoiModelReader extends JdbcModelReader
 
         String defaultValue = column.getDefaultValue();
 
-        if ((defaultValue != null) && defaultValue.startsWith("UNIQUEKEY("))
+        if (defaultValue != null)
         {
-            column.setDefaultValue(null);
-            column.setAutoIncrement(true);
+            if (defaultValue.toLowerCase().startsWith("nextval('") ||
+                defaultValue.toLowerCase().startsWith("uniquekey('"))
+            {
+                column.setDefaultValue(null);
+                column.setAutoIncrement(true);
+            }
+            else if (TypeMap.isTextType(column.getTypeCode()))
+            {
+                column.setDefaultValue(unescape(column.getDefaultValue(), "'", "\\'"));
+            }
         }
         return column;
     }

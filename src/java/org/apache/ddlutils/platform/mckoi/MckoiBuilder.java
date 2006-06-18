@@ -17,10 +17,15 @@ package org.apache.ddlutils.platform.mckoi;
  */
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.ColumnAutoIncrementChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -52,10 +57,68 @@ public class MckoiBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
+    public void createTable(Database database, Table table, Map parameters) throws IOException
+    {
+        // we use sequences instead of the UNIQUEKEY function because this way
+        // we can read their values back
+        Column[] columns = table.getAutoIncrementColumns();
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            createAutoIncrementSequence(table, columns[idx]);
+        }
+
+        super.createTable(database, table, parameters);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void dropTable(Table table) throws IOException
     { 
         print("DROP TABLE IF EXISTS ");
         printIdentifier(getTableName(table));
+        printEndOfStatement();
+
+        Column[] columns = table.getAutoIncrementColumns();
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            dropAutoIncrementSequence(table, columns[idx]);
+        }
+    }
+
+    /**
+     * Creates the sequence necessary for the auto-increment of the given column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */
+    protected void createAutoIncrementSequence(Table  table,
+                                               Column column) throws IOException
+    {
+        print("CREATE SEQUENCE ");
+        printIdentifier(getConstraintName("seq",
+                                          table,
+                                          column.getName(),
+                                          null));
+        printEndOfStatement();
+    }
+
+    /**
+     * Drops the sequence used for the auto-increment of the given column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */
+    protected void dropAutoIncrementSequence(Table  table,
+                                             Column column) throws IOException
+    {
+        print("DROP SEQUENCE ");
+        printIdentifier(getConstraintName("seq",
+                                          table,
+                                          column.getName(),
+                                          null));
         printEndOfStatement();
     }
 
@@ -67,13 +130,43 @@ public class MckoiBuilder extends SqlBuilder
         if (column.isAutoIncrement())
         {
             // we start at value 1 to avoid issues with jdbc
-            print("UNIQUEKEY('");
-            print(getTableName(table));
+            print("NEXTVAL('");
+            print(getConstraintName("seq", table, column.getName(), null));
             print("')");
         }
         else
         {
             super.writeColumnDefaultValue(table, column);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        Column[] columns = table.getAutoIncrementColumns();
+
+        if (columns.length > 0)
+        {
+            StringBuffer result = new StringBuffer();
+
+            result.append("SELECT ");
+            for (int idx = 0; idx < columns.length; idx++)
+            {
+                if (idx > 0)
+                {
+                    result.append(",");
+                }
+                result.append("CURRVAL('");
+                result.append(getConstraintName("seq", table, columns[idx].getName(), null));
+                result.append("')");
+            }
+            return result.toString();
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -88,8 +181,67 @@ public class MckoiBuilder extends SqlBuilder
                                                 List     changes) throws IOException
     {
         // McKoi has this nice ALTER CREATE TABLE statement which saves us a lot of work
-        print("ALTER ");
-        createTable(desiredModel, targetTable, parameters);
-    }
+        // We only have to handle auto-increment changes manually
+        for (Iterator it = changes.iterator(); it.hasNext();)
+        {
+            TableChange change = (TableChange)it.next();
 
+            if (change instanceof ColumnAutoIncrementChange)
+            {
+                Column column = ((ColumnAutoIncrementChange)change).getColumn();
+
+                // we have to defer removal of the sequences until they are no longer used
+                if (!column.isAutoIncrement())
+                {
+                    ColumnAutoIncrementChange autoIncrChange = (ColumnAutoIncrementChange)change;
+
+                    createAutoIncrementSequence(autoIncrChange.getChangedTable(),
+                                                autoIncrChange.getColumn());
+                }
+            }
+            else if (change instanceof AddColumnChange)
+            {
+                AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                if (addColumnChange.getNewColumn().isAutoIncrement())
+                {
+                    createAutoIncrementSequence(addColumnChange.getChangedTable(),
+                                                addColumnChange.getNewColumn());
+                }
+            }
+        }
+
+        print("ALTER ");
+        super.createTable(desiredModel, targetTable, parameters);
+
+        for (Iterator it = changes.iterator(); it.hasNext();)
+        {
+            TableChange change = (TableChange)it.next();
+    
+            if (change instanceof ColumnAutoIncrementChange)
+            {
+                Column column = ((ColumnAutoIncrementChange)change).getColumn();
+    
+                if (column.isAutoIncrement())
+                {
+                    ColumnAutoIncrementChange autoIncrChange = (ColumnAutoIncrementChange)change;
+        
+                    dropAutoIncrementSequence(autoIncrChange.getChangedTable(),
+                                              autoIncrChange.getColumn());
+                }
+            }
+            else if (change instanceof RemoveColumnChange)
+            {
+                RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
+
+                if (removeColumnChange.getColumn().isAutoIncrement())
+                {
+                    dropAutoIncrementSequence(removeColumnChange.getChangedTable(),
+                                              removeColumnChange.getColumn());
+                }
+            }
+        }
+        changes.clear();
+    }
 }
+
