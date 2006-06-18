@@ -49,17 +49,17 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
             "  <table name='TestTable'>\n"+
-            "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='Text' type='VARCHAR' size='15'/>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
 
         insertData(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<data>\n"+
-            "  <TestTable Id='1' Text='Text 1'/>\n"+
-            "  <TestTable Id='2' Text='Text 2'/>\n"+
-            "  <TestTable Id='3' Text='Text 3'/>"+
+            "  <TestTable TheId='1' TheText='Text 1'/>\n"+
+            "  <TestTable TheId='2' TheText='Text 2'/>\n"+
+            "  <TestTable TheId='3' TheText='Text 3'/>"+
             "</data>");
 
         ModelBasedResultSetIterator it = (ModelBasedResultSetIterator)getPlatform().query(getModel(),
@@ -73,27 +73,27 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         DynaBean bean = (DynaBean)it.next();
 
         assertEquals(new Integer(1),
-                     getPropertyValue(bean, "Id"));
+                     getPropertyValue(bean, "TheId"));
         assertEquals("Text 1",
-                     getPropertyValue(bean, "Text"));
+                     getPropertyValue(bean, "TheText"));
         
         assertTrue(it.hasNext());
 
         bean = (DynaBean)it.next();
 
         assertEquals(new Integer(2),
-                     getPropertyValue(bean, "Id"));
+                     getPropertyValue(bean, "TheId"));
         assertEquals("Text 2",
-                     getPropertyValue(bean, "Text"));
+                     getPropertyValue(bean, "TheText"));
 
         assertTrue(it.hasNext());
 
         bean = (DynaBean)it.next();
 
         assertEquals(new Integer(3),
-                     getPropertyValue(bean, "Id"));
+                     getPropertyValue(bean, "TheId"));
         assertEquals("Text 3",
-                     getPropertyValue(bean, "Text"));
+                     getPropertyValue(bean, "TheText"));
 
         assertFalse(it.hasNext());
         assertFalse(it.isConnectionOpen());
@@ -108,17 +108,17 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='ddlutils'>\n"+
             "  <table name='TestTable'>\n"+
-            "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='Text' type='VARCHAR' size='15'/>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
             "  </table>\n"+
             "</database>");
 
         insertData(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<data>\n"+
-            "  <TestTable Id='1' Text='Text 1'/>\n"+
-            "  <TestTable Id='2' Text='Text 2'/>\n"+
-            "  <TestTable Id='3' Text='Text 3'/>"+
+            "  <TestTable TheId='1' TheText='Text 1'/>\n"+
+            "  <TestTable TheId='2' TheText='Text 2'/>\n"+
+            "  <TestTable TheId='3' TheText='Text 3'/>"+
             "</data>");
 
         List beans = getPlatform().fetch(getModel(),
@@ -131,23 +131,120 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         DynaBean bean = (DynaBean)beans.get(0);
 
         assertEquals(new Integer(1),
-                     getPropertyValue(bean, "Id"));
+                     getPropertyValue(bean, "TheId"));
         assertEquals("Text 1",
-                     getPropertyValue(bean, "Text"));
+                     getPropertyValue(bean, "TheText"));
         
         bean = (DynaBean)beans.get(1);
 
         assertEquals(new Integer(2),
-                     getPropertyValue(bean, "Id"));
+                     getPropertyValue(bean, "TheId"));
         assertEquals("Text 2",
-                     getPropertyValue(bean, "Text"));
+                     getPropertyValue(bean, "TheText"));
 
         bean = (DynaBean)beans.get(2);
 
         assertEquals(new Integer(3),
-                     getPropertyValue(bean, "Id"));
+                     getPropertyValue(bean, "TheId"));
         assertEquals("Text 3",
-                     getPropertyValue(bean, "Text"));
+                     getPropertyValue(bean, "TheText"));
+    }
+
+    /**
+     * Tests insertion & reading of auto-increment columns.
+     */
+    public void testAutoIncrement() throws Exception
+    {
+        createDatabase(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>");
+
+        // we're inserting the rows manually via beans since we do want to
+        // check the back-reading of the auto-increment columns
+        SqlDynaClass dynaClass = getModel().getDynaClassFor("TestTable");
+        DynaBean     bean      = null;
+        Object       id1       = null;
+        Object       id2       = null;
+        Object       id3       = null;
+
+        bean = dynaClass.newInstance();
+        bean.set("TheText", "Text 1");
+        getPlatform().insert(getModel(), bean);
+        if (getPlatformInfo().isLastIdentityValueReadable())
+        {
+            // we cannot know the value for sure (though it usually will be 1)
+            id1 = getPropertyValue(bean, "TheId");
+            assertNotNull(id1);
+        }
+        bean = dynaClass.newInstance();
+        bean.set("TheText", "Text 2");
+        getPlatform().insert(getModel(), bean);
+        if (getPlatformInfo().isLastIdentityValueReadable())
+        {
+            // we cannot know the value for sure (though it usually will be 2)
+            id2 = getPropertyValue(bean, "TheId");
+            assertNotNull(id2);
+        }
+        bean = dynaClass.newInstance();
+        bean.set("TheText", "Text 3");
+        getPlatform().insert(getModel(), bean);
+        if (getPlatformInfo().isLastIdentityValueReadable())
+        {
+            // we cannot know the value for sure (though it usually will be 3)
+            id3 = getPropertyValue(bean, "TheId");
+            assertNotNull(id3);
+        }
+
+        List beans = getPlatform().fetch(getModel(),
+                                         "SELECT * FROM TestTable",
+                                         new Table[] { getModel().getTable(0) });
+
+        assertEquals(3,
+                     beans.size());
+
+        bean = (DynaBean)beans.get(0);
+        if (getPlatformInfo().isLastIdentityValueReadable())
+        {
+            assertEquals(id1,
+                         getPropertyValue(bean, "TheId"));
+        }
+        else
+        {
+            assertNotNull(getPropertyValue(bean, "TheId"));
+        }
+        assertEquals("Text 1",
+                     getPropertyValue(bean, "TheText"));
+        
+        bean = (DynaBean)beans.get(1);
+        if (getPlatformInfo().isLastIdentityValueReadable())
+        {
+            assertEquals(id2,
+                         getPropertyValue(bean, "TheId"));
+        }
+        else
+        {
+            assertNotNull(getPropertyValue(bean, "TheId"));
+        }
+        assertEquals("Text 2",
+                     getPropertyValue(bean, "TheText"));
+
+        bean = (DynaBean)beans.get(2);
+        if (getPlatformInfo().isLastIdentityValueReadable())
+        {
+            assertEquals(id3,
+                         getPropertyValue(bean, "TheId"));
+        }
+        else
+        {
+            assertNotNull(getPropertyValue(bean, "TheId"));
+        }
+        assertEquals("Text 3",
+                     getPropertyValue(bean, "TheText"));
     }
 
     /**

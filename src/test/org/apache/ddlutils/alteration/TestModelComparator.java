@@ -1024,11 +1024,13 @@ public class TestModelComparator extends TestBase
      */
     public void testChangeColumnSize()
     {
+        // note that we also have a size for the INTEGER column, but we don't
+        // expect a change for it because the size is not relevant for this type
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
             "<database name='test'>\n" +
             "  <table name='TableA'>\n" +
-            "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "    <column name='ColPK' type='INTEGER' size='8' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='16'/>\n" +
             "  </table>\n" +
             "</database>";

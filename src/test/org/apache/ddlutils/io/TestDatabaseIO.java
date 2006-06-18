@@ -54,7 +54,11 @@ public class TestDatabaseIO extends TestCase
      */
     private Database readModel(String modelAsXml)
     {
-        return new DatabaseIO().read(new StringReader(modelAsXml));
+        DatabaseIO dbIO = new DatabaseIO();
+
+        dbIO.setUseInternalDtd(true);
+        dbIO.setValidateXml(false);
+        return dbIO.read(new StringReader(modelAsXml));
     }
 
     /**

@@ -83,7 +83,11 @@ public class TestDataReader extends TestCase
      */
     public void testRead() throws Exception
     {
-        DatabaseIO      modelReader = new DatabaseIO();
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setUseInternalDtd(true);
+        modelReader.setValidateXml(false);
+        
         Database        model       = modelReader.read(new StringReader(TEST_SCHEMA));
         final ArrayList readObjects = new ArrayList();
         DataReader      dataReader  = new DataReader();
