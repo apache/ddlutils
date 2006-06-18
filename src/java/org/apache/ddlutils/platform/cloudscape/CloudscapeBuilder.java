@@ -49,4 +49,12 @@ public class CloudscapeBuilder extends SqlBuilder
     {
         print("GENERATED ALWAYS AS IDENTITY");
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        return "VALUES IDENTITY_VAL_LOCAL()";
+    }
 }

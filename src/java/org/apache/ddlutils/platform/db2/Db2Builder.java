@@ -84,6 +84,14 @@ public class Db2Builder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        return "VALUES IDENTITY_VAL_LOCAL()";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
     {
         // Index names in DB2 are unique to a schema and hence Derby does not

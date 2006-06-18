@@ -65,7 +65,7 @@ public class HsqlDbBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public String getSelectLastInsertId(Table table) 
+    public String getSelectLastIdentityValues(Table table) 
     {
         return "CALL IDENTITY()";
     }

@@ -20,9 +20,11 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 
@@ -64,6 +66,21 @@ public class HsqlDbModelReader extends JdbcModelReader
         }
         
         return table;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Column readColumn(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+    {
+        Column column = super.readColumn(metaData, values);
+
+        if (TypeMap.isTextType(column.getTypeCode()) &&
+            (column.getDefaultValue() != null))
+        {
+            column.setDefaultValue(unescape(column.getDefaultValue(), "'", "''"));
+        }
+        return column;
     }
 
     /**

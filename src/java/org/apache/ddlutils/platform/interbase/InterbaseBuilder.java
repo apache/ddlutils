@@ -158,4 +158,31 @@ public class InterbaseBuilder extends SqlBuilder
     {
         // we're using a generator
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        Column[] columns = table.getAutoIncrementColumns();
+
+        if (columns.length == 0)
+        {
+            return null;
+        }
+        else
+        {
+            StringBuffer result = new StringBuffer();
+    
+            result.append("SELECT ");
+            for (int idx = 0; idx < columns.length; idx++)
+            {
+                result.append("GEN_ID(");
+                result.append(getConstraintName("gen", table, columns[idx].getName(), null));
+                result.append(", 0)");
+            }
+            result.append(" FROM RDB$DATABASE");
+            return result.toString();
+        }
+    }
 }

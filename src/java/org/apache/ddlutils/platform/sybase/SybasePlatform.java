@@ -188,7 +188,7 @@ public class SybasePlatform extends PlatformImplBase
 		}
 		else
 		{
-			return super.extractColumnValue(resultSet, columnName, jdbcType);
+			return super.extractColumnValue(resultSet, columnName, 0, jdbcType);
 		}
 	}
 

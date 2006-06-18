@@ -152,9 +152,8 @@ public class FirebirdBuilder extends SqlBuilder
 
     /**
      * {@inheritDoc}
-     * @todo : we are kind of stuck here, since last insert id needs the database name..
      */
-    public String getSelectLastInsertId(Table table)
+    public String getSelectLastIdentityValues(Table table)
     {
         Column[] columns = table.getAutoIncrementColumns();
 

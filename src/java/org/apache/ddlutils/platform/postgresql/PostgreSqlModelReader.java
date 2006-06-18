@@ -26,6 +26,7 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 
@@ -147,6 +148,10 @@ public class PostgreSqlModelReader extends JdbcModelReader
                     case Types.TIMESTAMP:
                         defaultValue = extractDelimitedDefaultValue(defaultValue);
                         break;
+                }
+                if (TypeMap.isTextType(column.getTypeCode()))
+                {
+                    defaultValue = unescape(defaultValue, "'", "\\'");
                 }
             }
             column.setDefaultValue(defaultValue);

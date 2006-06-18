@@ -73,9 +73,7 @@ public class PostgreSqlBuilder extends SqlBuilder
 
         for (int idx = 0; idx < columns.length; idx++)
         {
-            print("DROP SEQUENCE ");
-            printIdentifier(getConstraintName(null, table, columns[idx].getName(), "seq"));
-            printEndOfStatement();
+            dropAutoIncrementSequence(table, columns[idx]);
         }
     }
 
@@ -120,6 +118,19 @@ public class PostgreSqlBuilder extends SqlBuilder
     }
 
     /**
+     * Creates the auto-increment sequence that is then used in the column.
+     *  
+     * @param table  The table
+     * @param column The column
+     */
+    private void dropAutoIncrementSequence(Table table, Column column) throws IOException
+    {
+        print("DROP SEQUENCE ");
+        printIdentifier(getConstraintName(null, table, column.getName(), "seq"));
+        printEndOfStatement();
+    }
+
+    /**
      * {@inheritDoc}
      */
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
@@ -132,7 +143,7 @@ public class PostgreSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public String getSelectLastInsertId(Table table)
+    public String getSelectLastIdentityValues(Table table)
     {
         Column[] columns = table.getAutoIncrementColumns();
 
@@ -241,5 +252,9 @@ public class PostgreSqlBuilder extends SqlBuilder
         print("DROP COLUMN ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        if (change.getColumn().isAutoIncrement())
+        {
+            dropAutoIncrementSequence(change.getChangedTable(), change.getColumn());
+        }
     }
 }

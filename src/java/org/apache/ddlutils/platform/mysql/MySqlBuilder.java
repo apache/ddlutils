@@ -104,7 +104,7 @@ public class MySqlBuilder extends SqlBuilder
      * Since ddlutils expects the real column name of the field that is autoincrementing, the
      * column has an alias of that column name.
      */
-    public String getSelectLastInsertId(Table table)
+    public String getSelectLastIdentityValues(Table table)
     {
         String autoIncrementKeyName = "";
         if (table.getAutoIncrementColumns().length > 0)

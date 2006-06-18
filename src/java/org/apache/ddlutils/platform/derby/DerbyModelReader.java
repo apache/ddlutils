@@ -19,7 +19,6 @@ package org.apache.ddlutils.platform.derby;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
@@ -67,17 +66,7 @@ public class DerbyModelReader extends JdbcModelReader
             }
             else if (TypeMap.isTextType(column.getTypeCode()))
             {
-                // Derby escapes the single quote even when returning the default value
-                // so we have to unescape it
-                if ((defaultValue.length() >= 2) && defaultValue.startsWith("'") && defaultValue.endsWith("'"))
-                {
-                    defaultValue = "'" + StringUtils.replace(defaultValue.substring(1, defaultValue.length() - 1), "''", "'") + "'";
-                }
-                else
-                {
-                    defaultValue = StringUtils.replace(defaultValue, "''", "'");
-                }
-                column.setDefaultValue(defaultValue);
+                column.setDefaultValue(unescape(defaultValue, "'", "''"));
             }
         }
         return column;
