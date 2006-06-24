@@ -36,6 +36,8 @@ public class PlatformConfiguration
     private BasicDataSource _dataSource;
     /** Whether to use delimited SQL identifiers. */
     private boolean _useDelimitedSqlIdentifiers;
+    /** Whether to shutdown the database after the task has finished. */
+    private boolean _shutdownDatabase = false;
     /** The catalog pattern. */
     private String _catalogPattern;
     /** The schema pattern. */
@@ -139,6 +141,26 @@ public class PlatformConfiguration
     public void setUseDelimitedSqlIdentifiers(boolean useDelimitedSqlIdentifiers)
     {
         _useDelimitedSqlIdentifiers = useDelimitedSqlIdentifiers;
+    }
+
+    /**
+     * Determines whether the database shall be shut down after the task has finished.
+     *
+     * @return <code>true</code> if the database shall be shut down
+     */
+    public boolean isShutdownDatabase()
+    {
+        return _shutdownDatabase;
+    }
+
+    /**
+     * Specifies whether the database shall be shut down after the task has finished.
+     *
+     * @param shutdownDatabase <code>true</code> if the database shall be shut down
+     */
+    public void setShutdownDatabase(boolean shutdownDatabase)
+    {
+        _shutdownDatabase = shutdownDatabase;
     }
 
     /**

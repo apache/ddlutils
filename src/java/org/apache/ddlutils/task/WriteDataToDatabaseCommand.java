@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
@@ -187,17 +188,18 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
             try
             {
                 reader.parse(dataFile);
-                task.log("Read data file "+dataFile.getAbsolutePath(), Project.MSG_INFO);
+                task.log("Written data file "+dataFile.getAbsolutePath() + " to database", Project.MSG_INFO);
             }
             catch (Exception ex)
             {
                 if (isFailOnError())
                 {
-                    throw new BuildException("Could not read data file "+dataFile.getAbsolutePath(), ex);
+                    throw new BuildException("Could not parse or write data file "+dataFile.getAbsolutePath(), ex);
                 }
                 else
                 {
-                    task.log("Could not read data file "+dataFile.getAbsolutePath(), Project.MSG_ERR);
+                    task.log("Could not parse or write data file "+dataFile.getAbsolutePath() + ":", Project.MSG_ERR);
+                    task.log(ExceptionUtils.getFullStackTrace(ex));
                 }
             }
         }

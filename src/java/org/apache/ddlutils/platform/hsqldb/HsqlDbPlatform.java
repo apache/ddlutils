@@ -17,9 +17,11 @@ package org.apache.ddlutils.platform.hsqldb;
  */
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 
-import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
@@ -86,20 +88,22 @@ public class HsqlDbPlatform extends PlatformImplBase
     /**
      * {@inheritDoc}
      */
-    public void shutdownDatabase(Connection connection) throws DynaSqlException
+    public void shutdownDatabase(Connection connection)
     {
-        // TODO: Determine whether we're running in embedded mode (from the url ?)
-//        
-//        try
-//        {
-//            Statement stmt = connection.createStatement();
-//
-//            stmt.executeUpdate("SHUTDOWN");
-//            stmt.close();
-//        }
-//        catch (SQLException ex)
-//        {
-//            throw new DynaSqlException(ex);
-//        }
+        Statement stmt = null;
+
+        try
+        {
+            stmt = connection.createStatement();
+            stmt.executeUpdate("SHUTDOWN");
+        }
+        catch (SQLException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        finally
+        {
+            closeStatement(stmt);    
+        }
     }
 }

@@ -130,6 +130,26 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
+     * Determines whether the database shall be shut down after the task has finished.
+     *
+     * @return <code>true</code> if the database shall be shut down
+     */
+    public boolean isShutdownDatabase()
+    {
+        return _platformConf.isShutdownDatabase();
+    }
+
+    /**
+     * Specifies whether the database shall be shut down after the task has finished.
+     *
+     * @param shutdownDatabase <code>true</code> if the database shall be shut down
+     */
+    public void setShutdownDatabase(boolean shutdownDatabase)
+    {
+        _platformConf.setShutdownDatabase(shutdownDatabase);
+    }
+
+    /**
      * Adds a command.
      * 
      * @param command The command
@@ -223,6 +243,10 @@ public abstract class DatabaseTaskBase extends Task
         }
         finally
         {
+            if ((getDataSource() != null) && isShutdownDatabase())
+            {
+                getPlatform().shutdownDatabase();
+            }
             // rollback of our classloader change
             Thread.currentThread().setContextClassLoader(sysClassLoader);
         }

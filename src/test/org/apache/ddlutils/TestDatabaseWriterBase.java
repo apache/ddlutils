@@ -196,17 +196,10 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected void tearDown() throws Exception
     {
-        try
+        if (_model != null)
         {
-            if (_model != null)
-            {
-                dropDatabase();
-                _model = null;
-            }
-        }
-        finally
-        {
-            getPlatform().shutdownDatabase();
+            dropDatabase();
+            _model = null;
         }
         super.tearDown();
     }
