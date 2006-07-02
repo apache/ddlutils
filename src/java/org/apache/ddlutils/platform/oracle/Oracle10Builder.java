@@ -47,21 +47,17 @@ public class Oracle10Builder extends Oracle8Builder
     {
     	// The only difference to the Oracle 8/9 variant is the purge which prevents the
     	// table from being moved to the recycle bin (which is new in Oracle 10)
-        print("DROP TABLE ");
-        printIdentifier(getTableName(table));
-        print(" CASCADE CONSTRAINTS PURGE");
-        printEndOfStatement();
-
         Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {
-            print("DROP TRIGGER ");
-            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
-            printEndOfStatement();
-            print("DROP SEQUENCE ");
-            printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
-            printEndOfStatement();
+            dropAutoIncrementTrigger(table, columns[idx]);
+            dropAutoIncrementSequence(table, columns[idx]);
         }
+
+        print("DROP TABLE ");
+        printIdentifier(getTableName(table));
+        print(" CASCADE CONSTRAINTS PURGE");
+        printEndOfStatement();
     }
 }

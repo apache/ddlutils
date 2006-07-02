@@ -85,13 +85,13 @@ public class TestOracle9Platform extends TestPlatformBase
     public void testColumnConstraints() throws Exception
     {
         assertEqualsIgnoringWhitespaces(
-            "DROP TABLE \"constraints\" CASCADE CONSTRAINTS;\n" +
             "DROP TRIGGER \"trg_constraints_L_PK_AUTO_INCR\";\n"+
-            "DROP SEQUENCE \"seq_constraints_L_PK_AUTO_INCR\";\n" +
+            "DROP SEQUENCE \"seq_constraints_L_PK_AUTO_INCR\";\n"+
             "DROP TRIGGER \"trg_constraints_COL_AUTO_INCR\";\n"+
-            "DROP SEQUENCE \"seq_constraints_COL_AUTO_INCR\";\n" +
-            "CREATE SEQUENCE \"seq_constraints_L_PK_AUTO_INCR\";\n" +
-            "CREATE SEQUENCE \"seq_constraints_COL_AUTO_INCR\";\n" +
+            "DROP SEQUENCE \"seq_constraints_COL_AUTO_INCR\";\n"+
+            "DROP TABLE \"constraints\" CASCADE CONSTRAINTS;\n"+
+            "CREATE SEQUENCE \"seq_constraints_L_PK_AUTO_INCR\";\n"+
+            "CREATE SEQUENCE \"seq_constraints_COL_AUTO_INCR\";\n"+
             "CREATE TABLE \"constraints\"\n"+
             "(\n"+
             "    \"COL_PK\"               VARCHAR2(32),\n"+

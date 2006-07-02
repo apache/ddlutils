@@ -86,24 +86,135 @@ public class Oracle8Builder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void dropTable(Table table) throws IOException
+    public void createTable(Database database, Table table, Map parameters) throws IOException
     {
-        print("DROP TABLE ");
-        printIdentifier(getTableName(table));
-        print(" CASCADE CONSTRAINTS");
-        printEndOfStatement();
-
+        // lets create any sequences
         Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {
-            print("DROP TRIGGER ");
-            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
-            printEndOfStatement();
-            print("DROP SEQUENCE ");
-            printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
-            printEndOfStatement();
+            createAutoIncrementSequence(table, columns[idx]);
         }
+
+        super.createTable(database, table, parameters);
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            createAutoIncrementTrigger(table, columns[idx]);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void dropTable(Table table) throws IOException
+    {
+        Column[] columns = table.getAutoIncrementColumns();
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            dropAutoIncrementTrigger(table, columns[idx]);
+            dropAutoIncrementSequence(table, columns[idx]);
+        }
+
+        print("DROP TABLE ");
+        printIdentifier(getTableName(table));
+        print(" CASCADE CONSTRAINTS");
+        printEndOfStatement();
+    }
+
+    /**
+     * Creates the sequence necessary for the auto-increment of the given column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */
+    protected void createAutoIncrementSequence(Table  table,
+                                               Column column) throws IOException
+    {
+        print("CREATE SEQUENCE ");
+        printIdentifier(getConstraintName("seq", table, column.getName(), null));
+        printEndOfStatement();
+    }
+
+    /**
+     * Creates the trigger necessary for the auto-increment of the given column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */
+    protected void createAutoIncrementTrigger(Table  table,
+                                              Column column) throws IOException
+    {
+        String columnName  = getColumnName(column);
+        String triggerName = getConstraintName("trg", table, column.getName(), null);
+
+        // note that the BEGIN ... SELECT ... END; is all in one line and does
+        // not contain a semicolon except for the END-one
+        // this way, the tokenizer will not split the statement before the END
+        print("CREATE OR REPLACE TRIGGER ");
+        printIdentifier(triggerName);
+        print(" BEFORE INSERT ON ");
+        printIdentifier(getTableName(table));
+        print(" FOR EACH ROW WHEN (new.");
+        printIdentifier(columnName);
+        println(" IS NULL)");
+        print("BEGIN SELECT ");
+        printIdentifier(getConstraintName("seq", table, column.getName(), null));
+        print(".nextval INTO :new.");
+        printIdentifier(columnName);
+        print(" FROM dual");
+        print(getPlatformInfo().getSqlCommandDelimiter());
+        print(" END");
+        // It is important that there is a semicolon at the end of the statement (or more
+        // precisely, at the end of the PL/SQL block), and thus we put two semicolons here
+        // because the tokenizer will remove the one at the end
+        print(getPlatformInfo().getSqlCommandDelimiter());
+        printEndOfStatement();
+    }
+
+    /**
+     * Drops the sequence used for the auto-increment of the given column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */
+    protected void dropAutoIncrementSequence(Table  table,
+                                             Column column) throws IOException
+    {
+        print("DROP SEQUENCE ");
+        printIdentifier(getConstraintName("seq", table, column.getName(), null));
+        printEndOfStatement();
+    }
+
+    /**
+     * Drops the trigger used for the auto-increment of the given column.
+     * 
+     * @param table  The table
+     * @param column The column
+     */
+    protected void dropAutoIncrementTrigger(Table  table,
+                                            Column column) throws IOException
+    {
+        print("DROP TRIGGER ");
+        printIdentifier(getConstraintName("trg", table, column.getName(), null));
+        printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void createTemporaryTable(Database database, Table table, Map parameters) throws IOException
+    {
+        createTable(database, table, parameters);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void dropTemporaryTable(Database database, Table table) throws IOException
+    {
+        dropTable(table);
     }
 
     /**
@@ -124,53 +235,6 @@ public class Oracle8Builder extends SqlBuilder
         print("DROP INDEX ");
         printIdentifier(getIndexName(index));
         printEndOfStatement();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void createTable(Database database, Table table, Map parameters) throws IOException
-    {
-        // lets create any sequences
-        Column[] columns = table.getAutoIncrementColumns();
-
-        for (int idx = 0; idx < columns.length; idx++)
-        {
-            print("CREATE SEQUENCE ");
-            printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
-            printEndOfStatement();
-        }
-
-        super.createTable(database, table, parameters);
-
-        for (int idx = 0; idx < columns.length; idx++)
-        {
-            String columnName  = getColumnName(columns[idx]);
-            String triggerName = getConstraintName("trg", table, columns[idx].getName(), null);
-
-            // note that the BEGIN ... SELECT ... END; is all in one line and does
-            // not contain a semicolon except for the END-one
-            // this way, the tokenizer will not split the statement before the END
-            print("CREATE OR REPLACE TRIGGER ");
-            printIdentifier(triggerName);
-            print(" BEFORE INSERT ON ");
-            printIdentifier(getTableName(table));
-            print(" FOR EACH ROW WHEN (new.");
-            printIdentifier(columnName);
-            println(" IS NULL)");
-            print("BEGIN SELECT ");
-            printIdentifier(getConstraintName("seq", table, columns[idx].getName(), null));
-            print(".nextval INTO :new.");
-            printIdentifier(columnName);
-            print(" FROM dual");
-            print(getPlatformInfo().getSqlCommandDelimiter());
-            print(" END");
-            // It is important that there is a semicolon at the end of the statement (or more
-            // precisely, at the end of the PL/SQL block), and thus we put two semicolons here
-            // because the tokenizer will remove the one at the end
-            print(getPlatformInfo().getSqlCommandDelimiter());
-            printEndOfStatement();
-        }
     }
 
 	/**
@@ -245,19 +309,31 @@ public class Oracle8Builder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void createTemporaryTable(Database database, Table table, Map parameters) throws IOException
+    public String getSelectLastIdentityValues(Table table)
     {
-        // we don't want the auto-increment triggers/sequences for the temporary table
-        super.createTable(database, table, parameters);
-    }
+        Column[] columns = table.getAutoIncrementColumns();
 
-    /**
-     * {@inheritDoc}
-     */
-    protected void dropTemporaryTable(Database database, Table table) throws IOException
-    {
-        // likewise, we don't need to drop a sequence or trigger
-        super.dropTable(table);
+        if (columns.length > 0)
+        {
+            StringBuffer result = new StringBuffer();
+
+            result.append("SELECT ");
+            for (int idx = 0; idx < columns.length; idx++)
+            {
+                if (idx > 0)
+                {
+                    result.append(",");
+                }
+                result.append(getConstraintName("seq", table, columns[idx].getName(), null));
+                result.append(".currval");
+            }
+            result.append(" FROM dual");
+            return result.toString();
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -304,7 +380,9 @@ public class Oracle8Builder extends SqlBuilder
                 AddColumnChange addColumnChange = (AddColumnChange)change;
 
                 // Oracle can only add not insert columns
-                if (addColumnChange.isAtEnd())
+                // Also, we cannot add NOT NULL columns unless they have a default value
+                if (addColumnChange.isAtEnd() &&
+                    (!addColumnChange.getNewColumn().isRequired() || (addColumnChange.getNewColumn().getDefaultValue() != null)))
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
                     change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
@@ -359,6 +437,11 @@ public class Oracle8Builder extends SqlBuilder
         print("ADD ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
+        if (change.getNewColumn().isAutoIncrement())
+        {
+            createAutoIncrementSequence(change.getChangedTable(), change.getNewColumn());
+            createAutoIncrementTrigger(change.getChangedTable(), change.getNewColumn());
+        }
     }
 
     /**
@@ -372,6 +455,11 @@ public class Oracle8Builder extends SqlBuilder
                                  Database           desiredModel,
                                  RemoveColumnChange change) throws IOException
     {
+        if (change.getColumn().isAutoIncrement())
+        {
+            dropAutoIncrementTrigger(change.getChangedTable(), change.getColumn());
+            dropAutoIncrementSequence(change.getChangedTable(), change.getColumn());
+        }
         print("ALTER TABLE ");
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
