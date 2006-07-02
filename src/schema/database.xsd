@@ -48,6 +48,7 @@
       <xsd:enumeration value="BINARY"/>
       <xsd:enumeration value="BIT"/>
       <xsd:enumeration value="BLOB"/>
+      <xsd:enumeration value="BOOLEAN"/>
       <xsd:enumeration value="CHAR"/>
       <xsd:enumeration value="CLOB"/>
       <xsd:enumeration value="DATE"/>
@@ -77,18 +78,36 @@
     </xsd:restriction>
   </xsd:simpleType>
 
+  <xsd:simpleType name="foreign-key-constraint-type">
+    <xsd:restriction base="xsd:NMTOKEN">
+      <xsd:enumeration value="cascade"/>
+      <xsd:enumeration value="setnull"/>
+      <xsd:enumeration value="restrict"/>
+      <xsd:enumeration value="none"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
   <xsd:complexType name="database-type">
-    <xsd:sequence>
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
       <xsd:element name="table"
-                   type="db:table-type"
-                   maxOccurs="unbounded">
+                   type="db:table-type">
         <xsd:annotation>
           <xsd:documentation>
             TODO
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-    </xsd:sequence>
+
+      <xsd:element name="domain"
+                   type="db:domain-type">
+        <xsd:annotation>
+          <xsd:documentation>
+            TODO
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:choice>
+
     <xsd:attribute name="name"
                    type="xsd:string"
                    use="required" >
@@ -98,52 +117,187 @@
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
+
+    <xsd:attribute name="schema"
+                   type="xsd:string"
+                   use="optional" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="domain-type">
+    <xsd:attribute name="default"
+                   type="xsd:string"
+                   use="optional" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="description"
+                   type="xsd:string"
+                   use="optional" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="name"
+                   type="xsd:string"
+                   use="required" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="schema"
+                   type="xsd:string"
+                   use="optional" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="size"
+                   type="xsd:string"
+                   use="optional" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="scale"
+                   type="xsd:string"
+                   use="optional" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="type"
+                   type="db:jdbc-type"
+                   use="required"
+                   default="VARCHAR" >
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
   </xsd:complexType>
 
   <xsd:complexType name="table-type">
-    <xsd:sequence>
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
       <xsd:element name="column"
-                   type="column-type"
-                   maxOccurs="unbounded">
+                   type="column-type">
         <xsd:annotation>
           <xsd:documentation>
             TODO
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:choice minOccurs="0" maxOccurs="unbounded">
-        <xsd:element name="foreign-key"
-                     type="db:foreign-key-type">
-          <xsd:annotation>
-            <xsd:documentation>
-              TODO
-            </xsd:documentation>
-          </xsd:annotation>
-        </xsd:element>
 
-        <xsd:element name="index"
-                     type="db:index-type">
-          <xsd:annotation>
-            <xsd:documentation>
-              TODO
-            </xsd:documentation>
-          </xsd:annotation>
-        </xsd:element>
+      <xsd:element name="foreign-key"
+                   type="db:foreign-key-type">
+        <xsd:annotation>
+          <xsd:documentation>
+            TODO
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
-        <xsd:element name="unique"
-                     type="db:unique-type">
-          <xsd:annotation>
-            <xsd:documentation>
-              TODO
-            </xsd:documentation>
-          </xsd:annotation>
-        </xsd:element>
-      </xsd:choice>
-    </xsd:sequence>
+      <xsd:element name="index"
+                   type="db:index-type">
+        <xsd:annotation>
+          <xsd:documentation>
+            TODO
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="unique"
+                   type="db:unique-type">
+        <xsd:annotation>
+          <xsd:documentation>
+            TODO
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:choice>
+
+    <xsd:attribute name="description"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
 
     <xsd:attribute name="name"
                    type="xsd:string"
                    use="required">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="schema"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="skipSql"
+                   type="xsd:boolean"
+                   use="optional"
+                   default="false">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="column-type">
+    <xsd:attribute name="autoIncrement"
+                   type="xsd:boolean"
+                   use="optional"
+                   default="false">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="default"
+                   type="xsd:string"
+                   use="optional">
       <xsd:annotation>
         <xsd:documentation>
           TODO
@@ -160,9 +314,17 @@
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
-  </xsd:complexType>
 
-  <xsd:complexType name="column-type">
+    <xsd:attribute name="domain"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
     <xsd:attribute name="name"
                    type="xsd:string"
                    use="required">
@@ -175,6 +337,7 @@
 
     <xsd:attribute name="primaryKey"
                    type="xsd:boolean"
+                   use="optional"
                    default="false">
       <xsd:annotation>
         <xsd:documentation>
@@ -185,17 +348,8 @@
 
     <xsd:attribute name="required"
                    type="xsd:boolean"
+                   use="optional"
                    default="false">
-      <xsd:annotation>
-        <xsd:documentation>
-          TODO
-        </xsd:documentation>
-      </xsd:annotation>
-    </xsd:attribute>
-
-    <xsd:attribute name="type"
-                   type="db:jdbc-type"
-                   default="VARCHAR">
       <xsd:annotation>
         <xsd:documentation>
           TODO
@@ -213,19 +367,9 @@
       </xsd:annotation>
     </xsd:attribute>
 
-    <xsd:attribute name="defaultValue"
-                   type="xsd:string"
-                   use="optional">
-      <xsd:annotation>
-        <xsd:documentation>
-          TODO
-        </xsd:documentation>
-      </xsd:annotation>
-    </xsd:attribute>
-    
-    <xsd:attribute name="description"
-                   type="xsd:string"
-                   use="optional">
+    <xsd:attribute name="type"
+                   type="db:jdbc-type"
+                   use="required">
       <xsd:annotation>
         <xsd:documentation>
           TODO
@@ -235,13 +379,18 @@
   </xsd:complexType>
 
   <xsd:complexType name="foreign-key-type">
-    <xsd:sequence>
+    <xsd:sequence minOccurs="1" maxOccurs="unbounded">
       <xsd:element name="reference"
-                   type="reference-type"
-                   maxOccurs="unbounded"/>
+                   type="reference-type">
+        <xsd:annotation>
+          <xsd:documentation>
+            TODO
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
 
-    <xsd:attribute name="name"
+    <xsd:attribute name="description"
                    type="xsd:string"
                    use="optional">
       <xsd:annotation>
@@ -261,12 +410,54 @@
       </xsd:annotation>
     </xsd:attribute>
 
+    <xsd:attribute name="foreignTableSchema"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="name"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="onUpdate"
+                   type="db:foreign-key-constraint-type"
+                   use="optional"
+                   default="none">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
+    <xsd:attribute name="onDelete"
+                   type="db:foreign-key-constraint-type"
+                   use="optional"
+                   default="none">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
   </xsd:complexType>
 
   <xsd:complexType name="reference-type">
-    <xsd:attribute name="local"
+    <xsd:attribute name="description"
                    type="xsd:string"
-                   use="required">
+                   use="optional">
       <xsd:annotation>
         <xsd:documentation>
           TODO
@@ -283,13 +474,22 @@
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
+
+    <xsd:attribute name="local"
+                   type="xsd:string"
+                   use="required">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
   </xsd:complexType>
 
   <xsd:complexType name="index-type">
-    <xsd:sequence>
+    <xsd:sequence minOccurs="1" maxOccurs="unbounded">
       <xsd:element name="index-column"
-                   type="db:index-column-type"
-                   maxOccurs="unbounded">
+                   type="db:index-column-type">
         <xsd:annotation>
           <xsd:documentation>
             TODO
@@ -298,12 +498,38 @@
       </xsd:element>
     </xsd:sequence>
 
+    <xsd:attribute name="description"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
     <xsd:attribute name="name"
                    type="xsd:string"
-                   use="optional"/>
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
   </xsd:complexType>
 
   <xsd:complexType name="index-column-type">
+    <xsd:attribute name="description"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
     <xsd:attribute name="name"
                    type="xsd:string"
                    use="required">
@@ -326,10 +552,9 @@
   </xsd:complexType>
 
   <xsd:complexType name="unique-type">
-    <xsd:sequence>
+    <xsd:sequence minOccurs="1" maxOccurs="unbounded">
       <xsd:element name="unique-column"
-                   type="db:unique-column-type"
-                   maxOccurs="unbounded">
+                   type="db:unique-column-type">
         <xsd:annotation>
           <xsd:documentation>
             TODO
@@ -337,6 +562,16 @@
         </xsd:annotation>
       </xsd:element>
     </xsd:sequence>
+
+    <xsd:attribute name="description"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
 
     <xsd:attribute name="name"
                    type="xsd:string"
@@ -347,9 +582,30 @@
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
+
+    <xsd:attribute name="withIndex"
+                   type="xsd:boolean"
+                   use="optional"
+                   default="true">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
   </xsd:complexType>
 
   <xsd:complexType name="unique-column-type">
+    <xsd:attribute name="description"
+                   type="xsd:string"
+                   use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          TODO
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
     <xsd:attribute name="name"
                    type="xsd:string"
                    use="required">
