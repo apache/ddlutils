@@ -1059,20 +1059,23 @@ public class JdbcModelReader
         String result = text;
 
         // we need special handling if the single quote is escaped via a double single quote
-        if (escaped.equals("''"))
+        if (result != null)
         {
-            if ((result.length() >= 2) && result.startsWith("'") && result.endsWith("'"))
+            if (escaped.equals("''"))
             {
-                result = "'" + StringUtils.replace(result.substring(1, result.length() - 1), escaped, unescaped) + "'";
+                if ((result.length() >= 2) && result.startsWith("'") && result.endsWith("'"))
+                {
+                    result = "'" + StringUtils.replace(result.substring(1, result.length() - 1), escaped, unescaped) + "'";
+                }
+                else
+                {
+                    result = StringUtils.replace(result, escaped, unescaped);
+                }
             }
             else
             {
                 result = StringUtils.replace(result, escaped, unescaped);
             }
-        }
-        else
-        {
-            result = StringUtils.replace(result, escaped, unescaped);
         }
         return result;
     }
