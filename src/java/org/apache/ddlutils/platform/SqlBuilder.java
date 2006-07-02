@@ -2326,7 +2326,7 @@ public abstract class SqlBuilder
      * @param suffix     The constraint suffix, e.g. a counter (can be <code>null</code>)
      * @return The constraint name
      */
-    protected String getConstraintName(String prefix, Table table, String secondPart, String suffix)
+    public String getConstraintName(String prefix, Table table, String secondPart, String suffix)
     {
         StringBuffer result = new StringBuffer();
         
