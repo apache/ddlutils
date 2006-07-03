@@ -202,6 +202,14 @@ public class SybaseBuilder extends SqlBuilder
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        return "SELECT @@IDENTITY";
+    }
+
+    /**
      * Writes the statement that turns on the ability to write delimited identifiers.
      */
     private void writeQuotationOnStatement() throws IOException
@@ -224,6 +232,30 @@ public class SybaseBuilder extends SqlBuilder
         print("'");
         print(identifier);
         print("'");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeCopyDataStatement(Table sourceTable, Table targetTable) throws IOException
+    {
+        boolean hasIdentity = targetTable.getAutoIncrementColumns().length > 0;
+
+        if (hasIdentity)
+        {
+            print("SET IDENTITY_INSERT ");
+            printIdentifier(getTableName(targetTable));
+            print(" ON");
+            printEndOfStatement();
+        }
+        super.writeCopyDataStatement(sourceTable, targetTable);
+        if (hasIdentity)
+        {
+            print("SET IDENTITY_INSERT ");
+            printIdentifier(getTableName(targetTable));
+            print(" OFF");
+            printEndOfStatement();
+        }
     }
 
     /**

@@ -35,6 +35,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.oro.text.regex.MalformedPatternException;
@@ -109,26 +110,33 @@ public class SybaseModelReader extends JdbcModelReader
 			// Back-mapping to BIGINT
 			column.setTypeCode(Types.BIGINT);
 		}
-		else if ((column.getTypeCode() == Types.TIMESTAMP) && (column.getDefaultValue() != null))
-		{
-			// Sybase maintains the default values for DATE/TIME jdbc types, so we have to
-			// migrate the default value to TIMESTAMP
-			PatternMatcher matcher   = new Perl5Matcher();
-			Timestamp      timestamp = null;
-
-			if (matcher.matches(column.getDefaultValue(), _isoDatePattern))
-			{
-				timestamp = new Timestamp(Date.valueOf(matcher.getMatch().group(1)).getTime());
-			}
-			else if (matcher.matches(column.getDefaultValue(), _isoTimePattern))
-			{
-				timestamp = new Timestamp(Time.valueOf(matcher.getMatch().group(1)).getTime());
-			}
-			if (timestamp != null)
-			{
-				column.setDefaultValue(timestamp.toString());
-			}
-		}
+        else if (column.getDefaultValue() != null)
+        {
+    		if (column.getTypeCode() == Types.TIMESTAMP)
+    		{
+    			// Sybase maintains the default values for DATE/TIME jdbc types, so we have to
+    			// migrate the default value to TIMESTAMP
+    			PatternMatcher matcher   = new Perl5Matcher();
+    			Timestamp      timestamp = null;
+    
+    			if (matcher.matches(column.getDefaultValue(), _isoDatePattern))
+    			{
+    				timestamp = new Timestamp(Date.valueOf(matcher.getMatch().group(1)).getTime());
+    			}
+    			else if (matcher.matches(column.getDefaultValue(), _isoTimePattern))
+    			{
+    				timestamp = new Timestamp(Time.valueOf(matcher.getMatch().group(1)).getTime());
+    			}
+    			if (timestamp != null)
+    			{
+    				column.setDefaultValue(timestamp.toString());
+    			}
+    		}
+            else if (TypeMap.isTextType(column.getTypeCode()))
+            {
+                column.setDefaultValue(unescape(column.getDefaultValue(), "'", "''"));
+            }
+        }
 		return column;
 	}
 
