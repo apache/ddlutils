@@ -27,6 +27,7 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.oro.text.regex.MalformedPatternException;
@@ -163,6 +164,10 @@ public class Db2ModelReader extends JdbcModelReader
 					column.setDefaultValue(newDefault.toString());
 				}
 			}
+            else if (TypeMap.isTextType(column.getTypeCode()))
+            {
+                column.setDefaultValue(unescape(column.getDefaultValue(), "'", "''"));
+            }
 		}
 		return column;
 	}
