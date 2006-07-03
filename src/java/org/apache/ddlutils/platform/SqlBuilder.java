@@ -2310,8 +2310,8 @@ public abstract class SqlBuilder
 
         if (needsName)
         {
-            _log.warn("Encountered a foreign key in table " + table.getName() +" that has no name." +
-                      "DdlUtils will use the auto-generated and shortened name " + fkName + "instead.");
+            _log.warn("Encountered a foreign key in table " + table.getName() + " that has no name. " +
+                      "DdlUtils will use the auto-generated and shortened name " + fkName + " instead.");
         }
 
         return fkName;
