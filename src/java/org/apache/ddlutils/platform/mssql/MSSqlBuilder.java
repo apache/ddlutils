@@ -221,6 +221,14 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        return "SELECT @@IDENTITY";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getDeleteSql(Table table, Map pkValues, boolean genPlaceholders)
     {
         return getQuotationOnStatement() + super.getDeleteSql(table, pkValues, genPlaceholders);

@@ -29,6 +29,7 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 import org.apache.oro.text.regex.MalformedPatternException;
@@ -211,6 +212,11 @@ public class MSSqlModelReader extends JdbcModelReader
 					defaultValue = defaultValue.substring(0, defaultValue.length() - 1);
 				}
 			}
+            else if (TypeMap.isTextType(column.getTypeCode()))
+            {
+                defaultValue = unescape(defaultValue, "'", "''");
+            }
+            
 			column.setDefaultValue(defaultValue);
 		}
 		if ((column.getTypeCode() == Types.DECIMAL) && (column.getSizeAsInt() == 19) && (column.getScale() == 0))
