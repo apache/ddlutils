@@ -22,6 +22,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestDatabaseWriterBase;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.ModelBasedResultSetIterator;
+import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
  * Tests the sql querying.
@@ -155,14 +156,31 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
      */
     public void testAutoIncrement() throws Exception
     {
-        createDatabase(
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='ddlutils'>\n"+
-            "  <table name='TestTable'>\n"+
-            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
-            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
-            "  </table>\n"+
-            "</database>");
+        // we need special catering for Sybase which does not support identity for INTEGER columns
+        final String modelXml; 
+
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database name='ddlutils'>\n"+
+                       "  <table name='TestTable'>\n"+
+                       "    <column name='TheId' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                       "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+        else
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database name='ddlutils'>\n"+
+                       "  <table name='TestTable'>\n"+
+                       "    <column name='TheId' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                       "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+
+        createDatabase(modelXml);
 
         // we're inserting the rows manually via beans since we do want to
         // check the back-reading of the auto-increment columns

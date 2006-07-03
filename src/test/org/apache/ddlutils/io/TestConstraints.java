@@ -17,6 +17,7 @@ package org.apache.ddlutils.io;
  */
 
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 import junit.framework.Test;
 
@@ -28,154 +29,6 @@ import junit.framework.Test;
  */
 public class TestConstraints extends RoundtripTestBase
 {
-    /** Test model with a nullable column. */
-    protected static final String TEST_NULL_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='INTEGER' required='false'/>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with a not-nullable column. */
-    protected static final String TEST_NOT_NULL_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='VARCHAR' required='true'/>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with a auto-increment INTEGER column. */
-    protected static final String TEST_AUTO_INCREMENT_INTEGER_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='INTEGER' required='true' autoIncrement='true'/>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with a auto-increment DOUBLE column. */
-    protected static final String TEST_AUTO_INCREMENT_DOUBLE_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='DOUBLE' required='true' autoIncrement='true'/>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with a auto-increment primary key column. */
-    protected static final String TEST_PRIMARY_KEY_AUTO_INCREMENT_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with a simple index. */
-    protected static final String TEST_INDEX_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='DOUBLE'/>\n"+
-        "    <index name='TEST_INDEX'>\n"+
-        "      <index-column name='avalue'/>\n"+
-        "    </index>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with an unique index with two columns. */
-    protected static final String TEST_UNIQUE_INDEX_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='value_1' type='DOUBLE'/>\n"+
-        "    <column name='value_2' type='VARCHAR' size='32'/>\n"+
-        "    <unique name='test_index'>\n"+
-        "      <unique-column name='value_2'/>\n"+
-        "      <unique-column name='value_1'/>\n"+
-        "    </unique>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with an index with two columns, one of which a pk field. */
-    protected static final String TEST_PRIMARY_KEY_INDEX_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip'>\n"+
-        "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='DOUBLE'/>\n"+
-        "    <index name='test_index'>\n"+
-        "      <index-column name='avalue'/>\n"+
-        "      <index-column name='pk_1'/>\n"+
-        "    </index>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with two tables and a simple foreign key relationship between them. */
-    protected static final String TEST_SIMPLE_FOREIGN_KEY_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip_1'>\n"+
-        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "  </table>\n"+
-        "  <table name='roundtrip_2'>\n"+
-        "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
-        "    <column name='avalue' type='INTEGER' required='true'/>\n"+
-        "    <foreign-key foreignTable='roundtrip_1'>\n"+
-        "      <reference local='avalue' foreign='pk'/>\n"+
-        "    </foreign-key>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with two tables and overlapping foreign keys between them. */
-    protected static final String TEST_OVERLAPPING_FOREIGN_KEYS_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip_1'>\n"+
-        "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
-        "  </table>\n"+
-        "  <table name='roundtrip_2'>\n"+
-        "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
-        "    <column name='value_1' type='INTEGER' required='true'/>\n"+
-        "    <column name='value_2' type='INTEGER'/>\n"+
-        "    <column name='value_3' type='VARCHAR' size='32'/>\n"+
-        "    <foreign-key name='fk_1' foreignTable='roundtrip_1'>\n"+
-        "      <reference local='value_1' foreign='pk_1'/>\n"+
-        "      <reference local='value_3' foreign='pk_2'/>\n"+
-        "    </foreign-key>\n"+
-        "    <foreign-key foreignTable='roundtrip_1'>\n"+
-        "      <reference local='value_2' foreign='pk_1'/>\n"+
-        "      <reference local='value_3' foreign='pk_2'/>\n"+
-        "    </foreign-key>\n"+
-        "  </table>\n"+
-        "</database>";
-    /** Test model with two tables and circular foreign key relationships between them. */
-    protected static final String TEST_CIRCULAR_FOREIGN_KEYS_MODEL = 
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='roundtriptest'>\n"+
-        "  <table name='roundtrip_1'>\n"+
-        "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
-        "    <column name='value_1' type='INTEGER'/>\n"+
-        "    <column name='value_2' type='VARCHAR' size='32'/>\n"+
-        "    <foreign-key foreignTable='roundtrip_2'>\n"+
-        "      <reference local='value_1' foreign='pk_1'/>\n"+
-        "      <reference local='value_2' foreign='pk_2'/>\n"+
-        "    </foreign-key>\n"+
-        "  </table>\n"+
-        "  <table name='roundtrip_2'>\n"+
-        "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-        "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
-        "    <column name='value_1' type='VARCHAR' size='32' required='true'/>\n"+
-        "    <column name='value_2' type='INTEGER' required='true'/>\n"+
-        "    <foreign-key foreignTable='roundtrip_1'>\n"+
-        "      <reference local='value_2' foreign='pk_1'/>\n"+
-        "      <reference local='value_1' foreign='pk_2'/>\n"+
-        "    </foreign-key>\n"+
-        "  </table>\n"+
-        "</database>";
-
     /**
      * Parameterized test case pattern.
      * 
@@ -218,7 +71,16 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testNullableColumn()
     {
-        performConstraintsTest(TEST_NULL_MODEL, true);
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**
@@ -226,7 +88,16 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testNotNullableColumn()
     {
-        performConstraintsTest(TEST_NOT_NULL_MODEL, true);
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='VARCHAR' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**
@@ -235,11 +106,37 @@ public class TestConstraints extends RoundtripTestBase
     public void testAutoIncrementIntegerColumn()
     {
         // only test this if the platform supports it
-        if (getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
         {
-            performConstraintsTest(TEST_AUTO_INCREMENT_INTEGER_MODEL,
-            		               getPlatformInfo().getIdentityStatusReadingSupported());
+            return;
         }
+
+        // we need special catering for Sybase which does not support identity for INTEGER columns
+        final String modelXml; 
+
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database name='roundtriptest'>\n"+
+                       "  <table name='roundtrip'>\n"+
+                       "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                       "    <column name='avalue' type='NUMERIC' size='12,0' required='true' autoIncrement='true'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+        else
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database name='roundtriptest'>\n"+
+                       "  <table name='roundtrip'>\n"+
+                       "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                       "    <column name='avalue' type='INTEGER' required='true' autoIncrement='true'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+
+        performConstraintsTest(modelXml,
+                               getPlatformInfo().getIdentityStatusReadingSupported());
     }
 
     /**
@@ -247,7 +144,29 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testPrimaryKeyAutoIncrementColumn()
     {
-        performConstraintsTest(TEST_PRIMARY_KEY_AUTO_INCREMENT_MODEL,
+        // we need special catering for Sybase which does not support identity for INTEGER columns
+        final String modelXml; 
+
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database name='roundtriptest'>\n"+
+                       "  <table name='roundtrip'>\n"+
+                       "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+        else
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database name='roundtriptest'>\n"+
+                       "  <table name='roundtrip'>\n"+
+                       "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+
+        performConstraintsTest(modelXml,
 	                           getPlatformInfo().getIdentityStatusReadingSupported());
     }
 
@@ -256,10 +175,24 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testIndex()
     {
-        if (getPlatformInfo().isIndicesSupported())
+        if (!getPlatformInfo().isIndicesSupported())
         {
-            performConstraintsTest(TEST_INDEX_MODEL, true);
+            return;
         }
+
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='DOUBLE'/>\n"+
+            "    <index name='TEST_INDEX'>\n"+
+            "      <index-column name='avalue'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**
@@ -267,10 +200,26 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testUniqueIndex()
     {
-        if (getPlatformInfo().isIndicesSupported())
+        if (!getPlatformInfo().isIndicesSupported())
         {
-            performConstraintsTest(TEST_UNIQUE_INDEX_MODEL, true);
+            return;
         }
+
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value_1' type='DOUBLE'/>\n"+
+            "    <column name='value_2' type='VARCHAR' size='32'/>\n"+
+            "    <unique name='test_index'>\n"+
+            "      <unique-column name='value_2'/>\n"+
+            "      <unique-column name='value_1'/>\n"+
+            "    </unique>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**
@@ -278,10 +227,26 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testPrimaryKeyIndex()
     {
-        if (getPlatformInfo().isIndicesSupported())
+        if (!getPlatformInfo().isIndicesSupported())
         {
-            performConstraintsTest(TEST_PRIMARY_KEY_INDEX_MODEL, true);
+            return;
         }
+
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='DOUBLE'/>\n"+
+            "    <index name='test_index'>\n"+
+            "      <index-column name='avalue'/>\n"+
+            "      <index-column name='pk_1'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**
@@ -289,7 +254,22 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testSimpleForeignKey()
     {
-        performConstraintsTest(TEST_SIMPLE_FOREIGN_KEY_MODEL, true);
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**
@@ -297,7 +277,30 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testOverlappingForeignKeys()
     {
-        performConstraintsTest(TEST_OVERLAPPING_FOREIGN_KEYS_MODEL, true);
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "    <column name='value_1' type='INTEGER' required='true'/>\n"+
+            "    <column name='value_2' type='INTEGER'/>\n"+
+            "    <column name='value_3' type='VARCHAR' size='32'/>\n"+
+            "    <foreign-key name='fk_1' foreignTable='roundtrip_1'>\n"+
+            "      <reference local='value_1' foreign='pk_1'/>\n"+
+            "      <reference local='value_3' foreign='pk_2'/>\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key foreignTable='roundtrip_1'>\n"+
+            "      <reference local='value_2' foreign='pk_1'/>\n"+
+            "      <reference local='value_3' foreign='pk_2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**
@@ -305,6 +308,31 @@ public class TestConstraints extends RoundtripTestBase
      */
     public void testCircularForeignKeys()
     {
-        performConstraintsTest(TEST_CIRCULAR_FOREIGN_KEYS_MODEL, true);
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "    <column name='value_1' type='INTEGER'/>\n"+
+            "    <column name='value_2' type='VARCHAR' size='32'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_2'>\n"+
+            "      <reference local='value_1' foreign='pk_1'/>\n"+
+            "      <reference local='value_2' foreign='pk_2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk_1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk_2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "    <column name='value_1' type='VARCHAR' size='32' required='true'/>\n"+
+            "    <column name='value_2' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1'>\n"+
+            "      <reference local='value_2' foreign='pk_1'/>\n"+
+            "      <reference local='value_1' foreign='pk_2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 }

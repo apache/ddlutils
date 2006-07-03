@@ -16,11 +16,13 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
+import java.math.BigDecimal;
 import java.util.List;
 
-import org.apache.commons.beanutils.DynaBean;
-
 import junit.framework.Test;
+
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
  * Performs tests for the alteration of databases.
@@ -339,8 +341,9 @@ public class TestAlteration extends RoundtripTestBase
         {
             return;
         }
-        
-        final String model1Xml = 
+
+        boolean isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        String  model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
@@ -348,17 +351,31 @@ public class TestAlteration extends RoundtripTestBase
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
             "</database>";
+        String model2Xml;
+
         // since some databases require/automatically make the column required
         // we also make the column required in order to avoid problems when
         // comparing the model from the live database with our assumed one
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' autoIncrement='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
+        if (isSybase)
+        {
+            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='NUMERIC' size='12,0' autoIncrement='true' required='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
+        else
+        {
+            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='INTEGER' autoIncrement='true' required='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
 
         createDatabase(model1Xml);
 
@@ -371,7 +388,14 @@ public class TestAlteration extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        assertEquals(new Integer(2), beans.get(0), "avalue");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(2), beans.get(0), "avalue");
+        }
+        else
+        {
+            assertEquals(new Integer(2), beans.get(0), "avalue");
+        }
     }
 
     /**
@@ -383,23 +407,45 @@ public class TestAlteration extends RoundtripTestBase
         {
             return;
         }
-        
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' autoIncrement='false'/>\n"+
-            "  </table>\n"+
-            "</database>";
+
+        boolean isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        String  model1Xml; 
+        String  model2Xml;
+
+        if (isSybase)
+        {
+            model1Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='NUMERIC' size='12,0' required='true' autoIncrement='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='NUMERIC' size='12,0' required='true' autoIncrement='false'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
+        else
+        {
+            model1Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='INTEGER' autoIncrement='false'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
 
         createDatabase(model1Xml);
 
@@ -412,7 +458,14 @@ public class TestAlteration extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        assertEquals(new Integer(1), beans.get(0), "avalue");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(1), beans.get(0), "avalue");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "avalue");
+        }
     }
 
     /**
@@ -460,21 +513,37 @@ public class TestAlteration extends RoundtripTestBase
     		return;
     	}
 
-    	final String model1Xml = 
+        // we need special catering for Sybase which does not support identity for INTEGER columns
+        boolean isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        String  model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' autoIncrement='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
+        String model2Xml;
+
+        if (isSybase)
+        {
+            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='NUMERIC' size='12,0' autoIncrement='true' required='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
+        else
+        {
+            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='INTEGER' autoIncrement='true' required='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
 
         createDatabase(model1Xml);
 
@@ -487,7 +556,14 @@ public class TestAlteration extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        assertEquals(new Integer(1), beans.get(0), "avalue");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(1), beans.get(0), "avalue");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "avalue");
+        }
     }
 
     /**
@@ -750,22 +826,37 @@ public class TestAlteration extends RoundtripTestBase
             return;
         }
 
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
+        boolean isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
+        String model1Xml; 
 
+        if (isSybase)
+        {
+            model1Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='NUMERIC' size='12,0' required='true' autoIncrement='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
+        else
+        {
+            model1Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                        "<database name='roundtriptest'>\n"+
+                        "  <table name='roundtrip'>\n"+
+                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                        "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
+                        "  </table>\n"+
+                        "</database>";
+        }
+        
         createDatabase(model1Xml);
 
         insertRow("roundtrip", new Object[] { new Integer(1) });
