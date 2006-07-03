@@ -18,6 +18,8 @@ package org.apache.ddlutils.io;
 
 import java.util.List;
 
+import org.apache.commons.beanutils.DynaBean;
+
 import junit.framework.Test;
 
 /**
@@ -569,9 +571,14 @@ public class TestAlteration extends RoundtripTestBase
 
         assertEquals((Object)"test", beans.get(0), "avalue1");
         assertEquals(new Integer(3), beans.get(0), "avalue2");
-        // we're assuming the default algorithm  which will apply the default value even
-        // to existing columns
-        assertEquals(new Double(1.0), beans.get(0), "avalue3");
+
+        // we cannot be sure whether the default algorithm is used (which will apply the
+        // default value even to existing columns with NULL in it) or the database supports
+        // it dircetly (in which case it might still be NULL)
+        Object avalue3 = ((DynaBean)beans.get(0)).get("avalue3");
+
+        assertTrue((avalue3 == null) || new Double(1.0).equals(avalue3));
+        
         assertEquals((Object)null, beans.get(0), "avalue4");
     }
 
@@ -610,7 +617,12 @@ public class TestAlteration extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        assertEquals(new Integer(2), beans.get(0), "avalue");
+        // we cannot be sure whether the default algorithm is used (which will apply the
+        // default value even to existing columns with NULL in it) or the database supports
+        // it dircetly (in which case it might still be NULL)
+        Object avalue = ((DynaBean)beans.get(0)).get("avalue");
+
+        assertTrue((avalue == null) || new Integer(2).equals(avalue));
     }
 
     /**
@@ -907,7 +919,12 @@ public class TestAlteration extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        assertEquals(new Integer(0), beans.get(0), "avalue");
+        // we cannot be sure whether the default algorithm is used (which will apply the
+        // default value even to existing columns with NULL in it) or the database supports
+        // it dircetly (in which case it might still be NULL)
+        Object avalue = ((DynaBean)beans.get(0)).get("avalue");
+
+        assertTrue((avalue == null) || new Integer(0).equals(avalue));
     }
 
     /**
