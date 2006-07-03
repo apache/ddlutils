@@ -77,6 +77,19 @@ public class SapDbBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append("SELECT ");
+        result.append(getDelimitedIdentifier(getTableName(table)));
+        result.append(".CURRVAL FROM DUAL");
+        return result.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     protected void processTableStructureChanges(Database currentModel,
                                                 Database desiredModel,
                                                 Table    sourceTable,
