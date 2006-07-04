@@ -562,7 +562,9 @@ public class TestAlteration extends RoundtripTestBase
         }
         else
         {
-            assertEquals(new Integer(1), beans.get(0), "avalue");
+            Object avalue = ((DynaBean)beans.get(0)).get("avalue");
+
+            assertTrue((avalue == null) || new Integer(1).equals(avalue));
         }
     }
 
