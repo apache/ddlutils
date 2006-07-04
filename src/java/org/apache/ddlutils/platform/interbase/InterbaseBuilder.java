@@ -76,41 +76,13 @@ public class InterbaseBuilder extends SqlBuilder
     public void createTable(Database database, Table table, Map parameters) throws IOException
     {
         super.createTable(database, table, parameters);
-        print("COMMIT");
-        printEndOfStatement();
 
         // creating generator and trigger for auto-increment
         Column[] columns = table.getAutoIncrementColumns();
 
         for (int idx = 0; idx < columns.length; idx++)
         {
-            print("CREATE GENERATOR ");
-            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
-            printEndOfStatement();
-            print("COMMIT");
-            printEndOfStatement();
-            print("SET TERM !!");
-            printEndOfStatement();
-            print("CREATE TRIGGER ");
-            printIdentifier(getConstraintName("trg", table, columns[idx].getName(), null));
-            print(" FOR ");
-            printlnIdentifier(getTableName(table));
-            println("ACTIVE BEFORE INSERT POSITION 0 AS");
-            println("BEGIN");
-            print("IF (NEW.");
-            printIdentifier(getColumnName(columns[idx]));
-            println(" IS NULL) THEN");
-            print("NEW.");
-            printIdentifier(getColumnName(columns[idx]));
-            print(" = GEN_ID(");
-            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
-            println(", 1);");
-            println("END !!");
-            print("SET TERM ");
-            print(getPlatformInfo().getSqlCommandDelimiter());
-            println(" !!");
-            print("COMMIT");
-            printEndOfStatement();
+            writeAutoIncrementCreateStmts(database, table, columns[idx]);
         }
     }
 
@@ -140,15 +112,66 @@ public class InterbaseBuilder extends SqlBuilder
 
         for (int idx = 0; idx < columns.length; idx++)
         {
-            print("DELETE FROM RDB$GENERATOR WHERE RDB$GENERATOR_NAME = ");
-            printIdentifier(getConstraintName("gen", table, columns[idx].getName(), null));
-            printEndOfStatement();
-            print("COMMIT");
-            printEndOfStatement();
+            writeAutoIncrementDropStmts(table, columns[idx]);
         }
         super.dropTable(table);
-        print("COMMIT");
+    }
+
+    /**
+     * Writes the creation statements to make the given column an auto-increment column.
+     * 
+     * @param database The database model
+     * @param table    The table
+     * @param column   The column to make auto-increment
+     */
+    private void writeAutoIncrementCreateStmts(Database database, Table table, Column column) throws IOException
+    {
+        print("CREATE GENERATOR ");
+        printIdentifier(getGeneratorName(table, column));
         printEndOfStatement();
+
+        print("CREATE TRIGGER ");
+        printIdentifier(getConstraintName("trg", table, column.getName(), null));
+        print(" FOR ");
+        printlnIdentifier(getTableName(table));
+        println("ACTIVE BEFORE INSERT POSITION 0 AS");
+        print("BEGIN IF (NEW.");
+        printIdentifier(getColumnName(column));
+        print(" IS NULL) THEN NEW.");
+        printIdentifier(getColumnName(column));
+        print(" = GEN_ID(");
+        printIdentifier(getGeneratorName(table, column));
+        print(", 1); END");
+        printEndOfStatement();
+    }
+
+    /**
+     * Writes the statements to drop the auto-increment status for the given column.
+     * 
+     * @param table  The table
+     * @param column The column to remove the auto-increment status for
+     */
+    private void writeAutoIncrementDropStmts(Table table, Column column) throws IOException
+    {
+        print("DROP TRIGGER ");
+        printIdentifier(getConstraintName("trg", table, column.getName(), null));
+        printEndOfStatement();
+
+        print("DROP GENERATOR ");
+        printIdentifier(getGeneratorName(table, column));
+        printEndOfStatement();
+    }
+
+    /**
+     * Determines the name of the generator for an auto-increment column.
+     * 
+     * @param table  The table
+     * @param column The auto-increment column
+     * @return The generator name
+     */
+    protected String getGeneratorName(Table table, Column column)
+    {
+        return getConstraintName("gen", table, column.getName(), null);
     }
 
     /**
@@ -178,7 +201,7 @@ public class InterbaseBuilder extends SqlBuilder
             for (int idx = 0; idx < columns.length; idx++)
             {
                 result.append("GEN_ID(");
-                result.append(getConstraintName("gen", table, columns[idx].getName(), null));
+                result.append(getGeneratorName(table, columns[idx]));
                 result.append(", 0)");
             }
             result.append(" FROM RDB$DATABASE");

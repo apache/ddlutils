@@ -52,26 +52,27 @@ public class InterbasePlatform extends PlatformImplBase
         info.setCommentSuffix("*/");
 
         // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
-        info.addNativeTypeMapping(Types.ARRAY,         "BLOB");
+        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIGINT,        "NUMERIC(18,0)");
-        info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} CHARACTER SET OCTETS");
-        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",         Types.SMALLINT);
-        info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
-        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB");
+        info.addNativeTypeMapping(Types.BINARY,        "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",           Types.SMALLINT);
+        info.addNativeTypeMapping(Types.BLOB,          "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT", Types.VARCHAR);
+        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION", Types.DOUBLE);
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB");
-        info.addNativeTypeMapping(Types.LONGVARBINARY, "BLOB");
-        info.addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT");
-        info.addNativeTypeMapping(Types.NULL,          "BLOB");
-        info.addNativeTypeMapping(Types.OTHER,         "BLOB");
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",   Types.DOUBLE);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.LONGVARBINARY, "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT", Types.VARCHAR);
+        info.addNativeTypeMapping(Types.NULL,          "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.OTHER,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
-        info.addNativeTypeMapping(Types.REF,           "BLOB");
-        info.addNativeTypeMapping(Types.STRUCT,        "BLOB");
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
-        info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} CHARACTER SET OCTETS");
+        info.addNativeTypeMapping(Types.REF,           "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",           Types.SMALLINT);
+        info.addNativeTypeMapping(Types.VARBINARY,     "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "BLOB");
+        info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
         setSqlBuilder(new InterbaseBuilder(this));
         setModelReader(new InterbaseModelReader(this));

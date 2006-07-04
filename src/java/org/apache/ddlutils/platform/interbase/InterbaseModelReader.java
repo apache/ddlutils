@@ -16,11 +16,14 @@ package org.apache.ddlutils.platform.interbase;
  * limitations under the License.
  */
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +31,7 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
 
@@ -51,6 +55,24 @@ public class InterbaseModelReader extends JdbcModelReader
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");
         setDefaultColumnPattern("%");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+    {
+        Table table = super.readTable(metaData, values);
+
+        if (table != null)
+        {
+            determineColumnSizes(table);
+            determineColumnDefaultValues(table);
+            determineAutoIncrementColumns(table);
+            adjustColumns(table);
+        }
+
+        return table;
     }
 
     /**
@@ -105,17 +127,163 @@ public class InterbaseModelReader extends JdbcModelReader
     }
 
     /**
+     * Helper method that determines the column default values using Interbase's system tables.
+     *
+     * @param table The table
+     */
+    protected void determineColumnDefaultValues(Table table) throws SQLException
+    {
+        PreparedStatement prepStmt = getConnection().prepareStatement("SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE FROM RDB$RELATION_FIELDS WHERE RDB$RELATION_NAME=?");
+
+        try
+        {
+            prepStmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? table.getName() : table.getName().toUpperCase());
+
+            ResultSet rs = prepStmt.executeQuery();
+
+            while (rs.next())
+            {
+                String columnName = rs.getString(1).trim();
+                Column column     = table.findColumn(columnName, getPlatform().isDelimitedIdentifierModeOn());
+
+                if (column != null)
+                {
+                    String defaultValue = rs.getString(2);
+
+                    if (!rs.wasNull() && (defaultValue != null))
+                    {
+                        defaultValue = defaultValue.trim();
+                        if (defaultValue.startsWith("DEFAULT "))
+                        {
+                            defaultValue = defaultValue.substring("DEFAULT ".length());
+                        }
+                        column.setDefaultValue(defaultValue);
+                    }
+                }
+            }
+            rs.close();
+        }
+        finally
+        {
+            prepStmt.close();
+        }
+    }
+
+    /**
+     * Helper method that determines the column sizes (precision, scale) using Interbase's system tables.
+     *
+     * @param table The table
+     */
+    protected void determineColumnSizes(Table table) throws SQLException
+    {
+        PreparedStatement prepStmt = getConnection().prepareStatement("SELECT a.RDB$FIELD_NAME, b.RDB$FIELD_PRECISION, b.RDB$FIELD_SCALE FROM RDB$RELATION_FIELDS a, RDB$FIELDS b WHERE a.RDB$RELATION_NAME=? AND a.RDB$FIELD_SOURCE=b.RDB$FIELD_NAME");
+
+        try
+        {
+            prepStmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? table.getName() : table.getName().toUpperCase());
+
+            ResultSet rs = prepStmt.executeQuery();
+
+            while (rs.next())
+            {
+                String columnName = rs.getString(1).trim();
+                Column column     = table.findColumn(columnName, getPlatform().isDelimitedIdentifierModeOn());
+
+                if (column != null)
+                {
+                    short   precision          = rs.getShort(2);
+                    boolean precisionSpecified = !rs.wasNull();
+                    short   scale              = rs.getShort(3);
+                    boolean scaleSpecified     = !rs.wasNull();
+
+                    if (precisionSpecified)
+                    {
+                        // for some reason, Interbase stores the negative scale
+                        column.setSizeAndScale(precision, scaleSpecified ? -scale : 0);
+                    }
+                }
+            }
+            rs.close();
+        }
+        finally
+        {
+            prepStmt.close();
+        }
+    }
+
+    /**
+     * Helper method that determines the auto increment status using Interbase's system tables.
+     *
+     * @param table The table
+     */
+    protected void determineAutoIncrementColumns(Table table) throws SQLException
+    {
+        // Since for long table and column names, the generator name will be shortened
+        // we have to determine for each column whether there is a generator for it
+        InterbaseBuilder builder = (InterbaseBuilder)getPlatform().getSqlBuilder();
+        Column[]         columns = table.getColumns();
+        HashMap          names   = new HashMap();
+        String           name;
+
+        for (int idx = 0; idx < columns.length; idx++)
+        {
+            name = builder.getGeneratorName(table, columns[idx]);
+            if (!getPlatform().isDelimitedIdentifierModeOn())
+            {
+                name = name.toUpperCase();
+            }
+            names.put(name, columns[idx]);
+        }
+
+        Statement stmt = getConnection().createStatement();
+
+        try
+        {
+            ResultSet rs = stmt.executeQuery("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS");
+
+            while (rs.next())
+            {
+                String generatorName = rs.getString(1).trim();
+                Column column        = (Column)names.get(generatorName);
+
+                if (column != null)
+                {
+                    column.setAutoIncrement(true);
+                }
+            }
+            rs.close();
+        }
+        finally
+        {
+            stmt.close();
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
-    protected Column readColumn(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+    protected void adjustColumns(Table table)
     {
-        Column column = super.readColumn(metaData, values);
+        Column[] columns = table.getColumns();
 
-        if (column.getTypeCode() == Types.FLOAT)
+        for (int idx = 0; idx < columns.length; idx++)
         {
-            column.setTypeCode(Types.REAL);
+            if (columns[idx].getTypeCode() == Types.FLOAT)
+            {
+                columns[idx].setTypeCode(Types.REAL);
+            }
+            else if ((columns[idx].getTypeCode() == Types.NUMERIC) || (columns[idx].getTypeCode() == Types.DECIMAL))
+            {
+                if ((columns[idx].getTypeCode() == Types.NUMERIC) && (columns[idx].getSizeAsInt() == 18) && (columns[idx].getScale() == 0))
+                {
+                    columns[idx].setTypeCode(Types.BIGINT);
+                }
+            }
+            else if (TypeMap.isTextType(columns[idx].getTypeCode()))
+            {
+                columns[idx].setDefaultValue(unescape(columns[idx].getDefaultValue(), "'", "''"));
+            }
         }
-        return column;
     }
 
     /**
