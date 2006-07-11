@@ -16,8 +16,16 @@ package org.apache.ddlutils.platform.interbase;
  * limitations under the License.
  */
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
@@ -54,16 +62,18 @@ public class InterbasePlatform extends PlatformImplBase
         // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIGINT,        "NUMERIC(18,0)");
+        // Theoretically we could use (VAR)CHAR CHARACTER SET OCTETS but the JDBC driver is not
+        // able to handle that properly (the byte[]/BinaryStream accessors do not work)
         info.addNativeTypeMapping(Types.BINARY,        "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.BLOB,          "BLOB",               Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT", Types.VARCHAR);
+        info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",   Types.DOUBLE);
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "BLOB",               Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT", Types.VARCHAR);
+        info.addNativeTypeMapping(Types.LONGVARCHAR,   "BLOB SUB_TYPE TEXT", Types.CLOB);
         info.addNativeTypeMapping(Types.NULL,          "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.OTHER,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.REAL,          "FLOAT");
@@ -74,6 +84,11 @@ public class InterbasePlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
+        info.setDefaultSize(Types.CHAR,      254);
+        info.setDefaultSize(Types.VARCHAR,   254);
+        info.setDefaultSize(Types.BINARY,    254);
+        info.setDefaultSize(Types.VARBINARY, 254);
+        
         setSqlBuilder(new InterbaseBuilder(this));
         setModelReader(new InterbaseModelReader(this));
     }
@@ -85,4 +100,76 @@ public class InterbasePlatform extends PlatformImplBase
     {
         return DATABASENAME;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void setStatementParameterValue(PreparedStatement statement, int sqlIndex, int typeCode, Object value) throws SQLException
+    {
+        if (value != null)
+        {
+            if ((value instanceof byte[]) &&
+                ((typeCode == Types.BINARY) || (typeCode == Types.VARBINARY) || (typeCode == Types.BLOB)))
+            {
+                byte[]               bytes  = (byte[])value;
+                ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+
+                statement.setBinaryStream(sqlIndex, stream, bytes.length);
+                return;
+            }
+            else if ((value instanceof String) && ((typeCode == Types.CLOB) || (typeCode == Types.LONGVARCHAR)))
+            {
+                // Clob is not supported directly
+                statement.setString(sqlIndex, (String)value);
+            }
+        }
+        super.setStatementParameterValue(statement, sqlIndex, typeCode, value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Object extractColumnValue(ResultSet resultSet, String columnName, int columnIdx, int jdbcType) throws SQLException
+    {
+        boolean useIdx = (columnName == null);
+
+        switch (jdbcType)
+        {
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.BLOB:
+                try
+                {
+                    BufferedInputStream input = new BufferedInputStream(useIdx ? resultSet.getBinaryStream(columnIdx) : resultSet.getBinaryStream(columnName));
+        
+                    if (resultSet.wasNull())
+                    {
+                        return null;
+                    }
+        
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream(1024);
+                    byte[]                data   = new byte[1024];
+                    int                   numRead;
+        
+                    while ((numRead = input.read(data, 0, data.length)) != -1)
+                    {
+                        buffer.write(data, 0, numRead);
+                    }
+                    input.close();
+                    return buffer.toByteArray();
+                }
+                catch (IOException ex)
+                {
+                    throw new DdlUtilsException(ex);
+                }
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+                String value = useIdx ? resultSet.getString(columnIdx) : resultSet.getString(columnName);
+
+                return resultSet.wasNull() ? null : value;
+            default:
+                return super.extractColumnValue(resultSet, columnName, columnIdx, jdbcType);
+        }
+    }
+
 }

@@ -66,8 +66,7 @@ public class InterbaseModelReader extends JdbcModelReader
 
         if (table != null)
         {
-            determineColumnSizes(table);
-            determineColumnDefaultValues(table);
+            determineExtraColumnInfo(table);
             determineAutoIncrementColumns(table);
             adjustColumns(table);
         }
@@ -127,13 +126,19 @@ public class InterbaseModelReader extends JdbcModelReader
     }
 
     /**
-     * Helper method that determines the column default values using Interbase's system tables.
+     * Helper method that determines extra column info from the system tables: default value, precision, scale.
      *
      * @param table The table
      */
-    protected void determineColumnDefaultValues(Table table) throws SQLException
+    protected void determineExtraColumnInfo(Table table) throws SQLException
     {
-        PreparedStatement prepStmt = getConnection().prepareStatement("SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE FROM RDB$RELATION_FIELDS WHERE RDB$RELATION_NAME=?");
+        StringBuffer query   = new StringBuffer();
+        
+        query.append("SELECT a.RDB$FIELD_NAME, a.RDB$DEFAULT_SOURCE, b.RDB$FIELD_PRECISION, b.RDB$FIELD_SCALE,");
+        query.append(" b.RDB$FIELD_TYPE, b.RDB$FIELD_SUB_TYPE FROM RDB$RELATION_FIELDS a, RDB$FIELDS b");
+        query.append(" WHERE a.RDB$RELATION_NAME=? AND a.RDB$FIELD_SOURCE=b.RDB$FIELD_NAME");
+
+        PreparedStatement prepStmt = getConnection().prepareStatement(query.toString());
 
         try
         {
@@ -159,47 +164,25 @@ public class InterbaseModelReader extends JdbcModelReader
                         }
                         column.setDefaultValue(defaultValue);
                     }
-                }
-            }
-            rs.close();
-        }
-        finally
-        {
-            prepStmt.close();
-        }
-    }
-
-    /**
-     * Helper method that determines the column sizes (precision, scale) using Interbase's system tables.
-     *
-     * @param table The table
-     */
-    protected void determineColumnSizes(Table table) throws SQLException
-    {
-        PreparedStatement prepStmt = getConnection().prepareStatement("SELECT a.RDB$FIELD_NAME, b.RDB$FIELD_PRECISION, b.RDB$FIELD_SCALE FROM RDB$RELATION_FIELDS a, RDB$FIELDS b WHERE a.RDB$RELATION_NAME=? AND a.RDB$FIELD_SOURCE=b.RDB$FIELD_NAME");
-
-        try
-        {
-            prepStmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? table.getName() : table.getName().toUpperCase());
-
-            ResultSet rs = prepStmt.executeQuery();
-
-            while (rs.next())
-            {
-                String columnName = rs.getString(1).trim();
-                Column column     = table.findColumn(columnName, getPlatform().isDelimitedIdentifierModeOn());
-
-                if (column != null)
-                {
-                    short   precision          = rs.getShort(2);
+                    
+                    short   precision          = rs.getShort(3);
                     boolean precisionSpecified = !rs.wasNull();
-                    short   scale              = rs.getShort(3);
+                    short   scale              = rs.getShort(4);
                     boolean scaleSpecified     = !rs.wasNull();
 
                     if (precisionSpecified)
                     {
                         // for some reason, Interbase stores the negative scale
                         column.setSizeAndScale(precision, scaleSpecified ? -scale : 0);
+                    }
+
+                    short dbType      = rs.getShort(5);
+                    short blobSubType = rs.getShort(6);
+
+                    // CLOBs are returned by the driver as VARCHAR
+                    if (!rs.wasNull() && (dbType == 261) && (blobSubType == 1))
+                    {
+                        column.setTypeCode(Types.CLOB);
                     }
                 }
             }
