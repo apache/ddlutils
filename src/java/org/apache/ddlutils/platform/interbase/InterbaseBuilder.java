@@ -1,7 +1,7 @@
 package org.apache.ddlutils.platform.interbase;
 
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
+ * Copyright 2005-2006 The Apache Software Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,17 @@ package org.apache.ddlutils.platform.interbase;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
@@ -197,5 +202,137 @@ public class InterbaseBuilder extends SqlBuilder
             result.append(" FROM RDB$DATABASE");
             return result.toString();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void processTableStructureChanges(Database currentModel, Database desiredModel, Table sourceTable, Table targetTable, Map parameters, List changes) throws IOException
+    {
+        // TODO: Dropping of primary keys is currently not supported because we cannot
+        //       determine the pk constraint names and drop them in one go
+        //       (We could used a stored procedure if Interbase would allow them to use DDL)
+        //       This will be easier once named primary keys are supported
+        boolean pkColumnAdded = false;
+
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof AddColumnChange)
+            {
+                AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                // TODO: we cannot add columns to the primary key this way
+                //       because we would have to drop the pk first and then
+                //       add a new one afterwards which is not supported yet
+                if (addColumnChange.getNewColumn().isPrimaryKey())
+                {
+                    pkColumnAdded = true;   
+                }
+                else
+                {
+                    processChange(currentModel, desiredModel, addColumnChange);
+                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
+                    changeIt.remove();
+                }
+            }
+            else if (change instanceof RemoveColumnChange)
+            {
+                RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
+
+                // TODO: we cannot drop primary key columns this way
+                //       because we would have to drop the pk first and then
+                //       add a new one afterwards which is not supported yet
+                if (!removeColumnChange.getColumn().isPrimaryKey())
+                {
+                    processChange(currentModel, desiredModel, removeColumnChange);
+                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
+                    changeIt.remove();
+                }
+            }
+        }
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            // we can only add a primary key if all columns are present in the table
+            // i.e. none was added during this alteration
+            if ((change instanceof AddPrimaryKeyChange) && !pkColumnAdded)
+            {
+                processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
+                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
+                changeIt.remove();
+            }
+        }
+    }
+
+    /**
+     * Processes the addition of a column to a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database        currentModel,
+                                 Database        desiredModel,
+                                 AddColumnChange change) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("ADD ");
+        writeColumn(change.getChangedTable(), change.getNewColumn());
+        printEndOfStatement();
+
+        Table curTable = currentModel.findTable(change.getChangedTable().getName(), getPlatform().isDelimitedIdentifierModeOn());
+
+        if (!change.isAtEnd())
+        {
+            Column prevColumn = change.getPreviousColumn();
+
+            if (prevColumn != null)
+            {
+                // we need the corresponding column object from the current table
+                prevColumn = curTable.findColumn(prevColumn.getName(), getPlatform().isDelimitedIdentifierModeOn());
+            }
+            // Even though Interbase can only add columns, we can move them later on
+            print("ALTER TABLE ");
+            printlnIdentifier(getTableName(change.getChangedTable()));
+            printIndent();
+            print("ALTER ");
+            printIdentifier(getColumnName(change.getNewColumn()));
+            print(" POSITION ");
+            // column positions start at 1 in Interbase
+            print(prevColumn == null ? "1" : String.valueOf(curTable.getColumnIndex(prevColumn) + 2));
+            printEndOfStatement();
+        }
+        if (change.getNewColumn().isAutoIncrement())
+        {
+            writeAutoIncrementCreateStmts(currentModel, curTable, change.getNewColumn());
+        }
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param desiredModel The desired database schema
+     * @param change       The change object
+     */
+    protected void processChange(Database           currentModel,
+                                 Database           desiredModel,
+                                 RemoveColumnChange change) throws IOException
+    {
+        if (change.getColumn().isAutoIncrement())
+        {
+            writeAutoIncrementDropStmts(change.getChangedTable(), change.getColumn());
+        }
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(change.getChangedTable()));
+        printIndent();
+        print("DROP ");
+        printIdentifier(getColumnName(change.getColumn()));
+        printEndOfStatement();
     }
 }
