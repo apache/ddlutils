@@ -23,8 +23,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -509,6 +512,15 @@ public class JdbcModelReader
                     tables.add(table);
                 }
             }
+
+            final Collator collator = Collator.getInstance();
+            
+            Collections.sort(tables, new Comparator() {
+                public int compare(Object obj1, Object obj2)
+                {
+                    return collator.compare(((Table)obj1).getName().toUpperCase(), ((Table)obj2).getName().toUpperCase());
+                }
+            });
             return tables;
         }
         finally
