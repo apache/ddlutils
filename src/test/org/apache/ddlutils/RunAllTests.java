@@ -83,7 +83,7 @@ public class RunAllTests extends TestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Ddlutils tests");
+        TestSuite suite = new TestSuite("DdlUtils tests");
 
         // tests that don't need a live database
         suite.addTestSuite(TestArrayAccessAtTable.class);
