@@ -24,6 +24,7 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
+import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 import org.apache.ddlutils.util.Jdbc3Utils;
@@ -45,29 +46,6 @@ public class InterbaseBuilder extends SqlBuilder
     {
         super(platform);
         addEscapedCharSequence("'", "''");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
-    {
-        super.writeExternalForeignKeyCreateStmt(database, table, key);
-        if (key.getForeignTableName() != null)
-        {
-            print("COMMIT");
-            printEndOfStatement();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
-    {
-        super.writeExternalForeignKeyDropStmt(table, foreignKey);
-        print("COMMIT");
-        printEndOfStatement();
     }
 
     /**
@@ -115,6 +93,18 @@ public class InterbaseBuilder extends SqlBuilder
             writeAutoIncrementDropStmts(table, columns[idx]);
         }
         super.dropTable(table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    {
+        // Index names in Interbase are unique to a schema and hence we do not
+        // need the ON <tablename> clause
+        print("DROP INDEX ");
+        printIdentifier(getIndexName(index));
+        printEndOfStatement();
     }
 
     /**

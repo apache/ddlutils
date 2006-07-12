@@ -84,10 +84,10 @@ public class InterbasePlatform extends PlatformImplBase
         info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
         info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
-        info.setDefaultSize(Types.CHAR,      254);
-        info.setDefaultSize(Types.VARCHAR,   254);
-        info.setDefaultSize(Types.BINARY,    254);
-        info.setDefaultSize(Types.VARBINARY, 254);
+        info.setDefaultSize(Types.CHAR,    254);
+        info.setDefaultSize(Types.VARCHAR, 254);
+        info.setHasSize(Types.BINARY,    false);
+        info.setHasSize(Types.VARBINARY, false);
         
         setSqlBuilder(new InterbaseBuilder(this));
         setModelReader(new InterbaseModelReader(this));
@@ -121,6 +121,7 @@ public class InterbasePlatform extends PlatformImplBase
             {
                 // Clob is not supported directly
                 statement.setString(sqlIndex, (String)value);
+                return;
             }
         }
         super.setStatementParameterValue(statement, sqlIndex, typeCode, value);

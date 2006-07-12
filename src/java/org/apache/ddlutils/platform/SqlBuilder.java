@@ -1856,7 +1856,7 @@ public abstract class SqlBuilder
      * @param table The table
      * @return The table name
      */
-    protected String getTableName(Table table)
+    public String getTableName(Table table)
     {
         return shortenName(table.getName(), getPlatformInfo().getMaxIdentifierLength());
     }
@@ -2421,7 +2421,7 @@ public abstract class SqlBuilder
      * @param index The index
      * @return The index name
      */
-    protected String getIndexName(Index index) throws IOException
+    public String getIndexName(Index index)
     {
         return index.getName();
     }

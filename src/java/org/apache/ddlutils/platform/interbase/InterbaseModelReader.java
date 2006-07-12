@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
@@ -315,13 +316,70 @@ public class InterbaseModelReader extends JdbcModelReader
         }
         return pks;
     }
-    
+
     /**
      * {@inheritDoc}
      */
-    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index) throws SQLException
     {
-        // Interbase generates an unique index for the pks of the form "RDB$PRIMARY825"
-        return index.getName().startsWith("RDB$PRIMARY");
+        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        StringBuffer query     = new StringBuffer();
+
+        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$INDEX_NAME=?");
+
+        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
+
+        try 
+        {
+            stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
+            stmt.setString(2, "PRIMARY KEY");
+            stmt.setString(3, indexName);
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            return resultSet.next();
+        }
+        finally
+        {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index) throws SQLException
+    {
+        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        String       fkName    = getPlatform().getSqlBuilder().getForeignKeyName(table, fk);
+        StringBuffer query     = new StringBuffer();
+
+        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$CONSTRAINT_NAME=? AND RDB$INDEX_NAME=?");
+
+        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
+
+        try 
+        {
+            stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
+            stmt.setString(2, "FOREIGN KEY");
+            stmt.setString(3, fkName);
+            stmt.setString(4, indexName);
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            return resultSet.next();
+        }
+        finally
+        {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+        }
     }
 }
