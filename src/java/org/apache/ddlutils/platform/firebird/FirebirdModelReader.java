@@ -332,24 +332,68 @@ public class FirebirdModelReader extends JdbcModelReader
     }
 
     /**
-	 * {@inheritDoc}
-	 */
-	protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index)
-	{
-        // In Firebird, primary keys can only be determined from a live database by looking for
-        // unique indexes that cover the primary key columns
-		// These checks however already have been done when DdlUtils enters this method 
-		return true;
-	}
+     * {@inheritDoc}
+     */
+    protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index) throws SQLException
+    {
+        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        StringBuffer query     = new StringBuffer();
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index)
-	{
-		// Firebird generates a normal index that has the same name as the fk
-		return fk.getName().equals(index.getName());
-	}
+        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$INDEX_NAME=?");
 
+        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
 
+        try 
+        {
+            stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
+            stmt.setString(2, "PRIMARY KEY");
+            stmt.setString(3, indexName);
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            return resultSet.next();
+        }
+        finally
+        {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index) throws SQLException
+    {
+        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        String       fkName    = getPlatform().getSqlBuilder().getForeignKeyName(table, fk);
+        StringBuffer query     = new StringBuffer();
+
+        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$CONSTRAINT_NAME=? AND RDB$INDEX_NAME=?");
+
+        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
+
+        try 
+        {
+            stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
+            stmt.setString(2, "FOREIGN KEY");
+            stmt.setString(3, fkName);
+            stmt.setString(4, indexName);
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            return resultSet.next();
+        }
+        finally
+        {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+        }
+    }
 }
