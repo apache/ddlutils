@@ -110,7 +110,6 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
         Platform           platform        = getPlatform();
         boolean            isCaseSensitive = platform.isDelimitedIdentifierModeOn();
         CreationParameters params          = getFilteredParameters(model, platform.getName(), isCaseSensitive);
-        Connection         connection      = null;
 
         try
         {
@@ -122,7 +121,37 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
                 platform.setSqlCommentsOn(true);
             }
             platform.getSqlBuilder().setWriter(writer);
-            if (isAlterDatabase() && (getDataSource() != null))
+
+            boolean shouldAlter = isAlterDatabase();
+
+            if (shouldAlter)
+            {
+                if (getDataSource() == null)
+                {
+                    shouldAlter = false;
+                    task.log("Cannot alter the database because no database connection was specified." +
+                             " SQL for database creation will be generated instead.",
+                             Project.MSG_WARN);
+                }
+                else
+                {
+                    try
+                    {
+                        Connection connection = getDataSource().getConnection();
+
+                        connection.close();
+                    }
+                    catch (SQLException ex)
+                    {
+                        shouldAlter = false;
+                        task.log("Could not establish a connection to the specified database, " +
+                                 "so SQL for database creation will be generated instead. The error was: " +
+                                 ex.getMessage(),
+                                 Project.MSG_WARN);
+                    }
+                }
+            }
+            if (shouldAlter)
             {
                 Database currentModel = (getCatalogPattern() != null) || (getSchemaPattern() != null) ?
                                              platform.readModelFromDatabase(null, getCatalogPattern(), getSchemaPattern(), null) :
@@ -146,18 +175,6 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
             else
             {
                 task.log(ex.getMessage() == null ? ex.toString() : ex.getMessage(), Project.MSG_ERR);
-            }
-        }
-        finally
-        {
-            if (connection != null)
-            {
-                try
-                {
-                    connection.close();
-                }
-                catch (SQLException ex)
-                {}
             }
         }
     }
