@@ -363,7 +363,7 @@ public class MSSqlBuilder extends SqlBuilder
             {
                 AddColumnChange addColumnChange = (AddColumnChange)change;
 
-                // Oracle can only add not insert columns
+                // Sql Server can only add not insert columns
                 if (addColumnChange.isAtEnd())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
