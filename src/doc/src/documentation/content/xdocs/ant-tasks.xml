@@ -150,6 +150,18 @@
           </td>
         </tr>
         <tr>
+          <td>sortForeignKeys</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>false</td>
+          <td>
+            Whether DdlUtils shall sort (alphabetically) the foreign keys of a table read from a live
+            database or leave them in the order that they are returned by the database. Note that
+            the sort is case sensitive only if delimied identifier mode is on (useDelimitedSqlIdentifiers
+            is set to <code>true</code>).
+          </td>
+        </tr>
+        <tr>
           <td>useDelimitedSqlIdentifiers</td>
           <td>no</td>
           <td>true, false</td>
@@ -732,6 +744,18 @@
             The pattern is that of
             <a href="ext:java/api/databaseMetaData-getTables">java.sql.DatabaseMetaData#getTables</a>.
             The special pattern '%' indicates that every table schema shall be used.
+          </td>
+        </tr>
+        <tr>
+          <td>sortForeignKeys</td>
+          <td>no</td>
+          <td>true, false</td>
+          <td>false</td>
+          <td>
+            Whether DdlUtils shall sort (alphabetically) the foreign keys of a table read from a live
+            database or leave them in the order that they are returned by the database. Note that
+            the sort is case sensitive only if delimied identifier mode is on (useDelimitedSqlIdentifiers
+            is set to <code>true</code>).
           </td>
         </tr>
         <tr>

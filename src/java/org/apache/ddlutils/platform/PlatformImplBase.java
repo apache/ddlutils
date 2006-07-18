@@ -82,6 +82,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     private boolean _sqlCommentsOn = true;
     /** Whether delimited identifiers are used or not. */
     private boolean _delimitedIdentifierModeOn = false;
+    /** Whether read foreign keys shall be sorted alphabetically. */
+    private boolean _foreignKeysSorted = false;
 
     /**
      * {@inheritDoc}
@@ -169,6 +171,22 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             throw new DdlUtilsException("Platform " + getName() + " does not support delimited identifier");
         }
         _delimitedIdentifierModeOn = delimitedIdentifierModeOn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isForeignKeysSorted()
+    {
+        return _foreignKeysSorted;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setForeignKeysSorted(boolean foreignKeysSorted)
+    {
+        _foreignKeysSorted = foreignKeysSorted;
     }
 
     /**

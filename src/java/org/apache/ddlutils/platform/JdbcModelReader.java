@@ -469,6 +469,12 @@ public class JdbcModelReader
         {
             _connection = connection;
             db.addTables(readTables(catalog, schema, tableTypes));
+            // Note that we do this here instead of in readTable since platforms may redefine the
+            // readTable method whereas it is highly unlikely that this method gets redefined
+            if (getPlatform().isForeignKeysSorted())
+            {
+                sortForeignKeys(db);
+            }
         }
         finally
         {
@@ -1057,6 +1063,19 @@ public class JdbcModelReader
         }
     }
 
+    /**
+     * Sorts the foreign keys in the tables of the model.
+     * 
+     * @param model The model
+     */
+    protected void sortForeignKeys(Database model)
+    {
+        for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+        {
+            model.getTable(tableIdx).sortForeignKeys(getPlatform().isDelimitedIdentifierModeOn());
+        }
+    }
+    
     /**
      * Replaces a specific character sequence in the given text with the character sequence
      * whose escaped version it is.

@@ -143,6 +143,22 @@ public interface Platform
      */
     public void setSqlCommentsOn(boolean sqlCommentsOn);
 
+    /**
+     * Determines whether foreign keys of a table read from a live database
+     * are alphabetically sorted.
+     *
+     * @return <code>true</code> if read foreign keys are sorted
+     */
+    public boolean isForeignKeysSorted();
+
+    /**
+     * Specifies whether foreign keys read from a live database, shall be
+     * alphabetically sorted.
+     *
+     * @param foreignKeysSorted <code>true</code> if read foreign keys shall be sorted
+     */
+    public void setForeignKeysSorted(boolean foreignKeysSorted);
+
     // functionality
     
     /**

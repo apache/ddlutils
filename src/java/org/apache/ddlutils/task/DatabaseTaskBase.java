@@ -130,6 +130,28 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
+     * Determines whether a table's foreign keys read from a live database
+     * shall be sorted alphabetically. Is <code>false</code> by default.
+     *
+     * @return <code>true</code> if the foreign keys shall be sorted
+     */
+    public boolean isSortForeignKeys()
+    {
+        return _platformConf.isSortForeignKeys();
+    }
+
+    /**
+     * Specifies whether a table's foreign keys read from a live database
+     * shall be sorted alphabetically.
+     *
+     * @param sortForeignKeys <code>true</code> if the foreign keys shall be sorted
+     */
+    public void setSortForeignKeys(boolean sortForeignKeys)
+    {
+        _platformConf.setSortForeignKeys(sortForeignKeys);
+    }
+
+    /**
      * Determines whether the database shall be shut down after the task has finished.
      *
      * @return <code>true</code> if the database shall be shut down

@@ -17,7 +17,10 @@ package org.apache.ddlutils.model;
  */
 
 import java.io.Serializable;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collection;
@@ -700,6 +703,34 @@ public class Table implements Serializable, Cloneable
         return (Column[])autoIncrColumns.toArray(new Column[autoIncrColumns.size()]);
     }
 
+    /**
+     * Sorts the foreign keys alphabetically.
+     * 
+     * @param caseSensitive Whether case matters
+     */
+    public void sortForeignKeys(final boolean caseSensitive)
+    {
+        if (!_foreignKeys.isEmpty())
+        {
+            final Collator collator = Collator.getInstance();
+    
+            Collections.sort(_foreignKeys, new Comparator() {
+                public int compare(Object obj1, Object obj2)
+                {
+                    String fk1Name = ((ForeignKey)obj1).getName();
+                    String fk2Name = ((ForeignKey)obj2).getName();
+
+                    if (!caseSensitive)
+                    {
+                        fk1Name = (fk1Name != null ? fk1Name.toLowerCase() : null);
+                        fk2Name = (fk2Name != null ? fk2Name.toLowerCase() : null);
+                    }
+                    return collator.compare(fk1Name, fk2Name);
+                }
+            });
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */

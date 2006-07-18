@@ -36,8 +36,10 @@ public class PlatformConfiguration
     private BasicDataSource _dataSource;
     /** Whether to use delimited SQL identifiers. */
     private boolean _useDelimitedSqlIdentifiers;
+    /** Whether read foreign keys shall be sorted. */
+    private boolean _sortForeignKeys;
     /** Whether to shutdown the database after the task has finished. */
-    private boolean _shutdownDatabase = false;
+    private boolean _shutdownDatabase;
     /** The catalog pattern. */
     private String _catalogPattern;
     /** The schema pattern. */
@@ -144,6 +146,28 @@ public class PlatformConfiguration
     }
 
     /**
+     * Determines whether a table's foreign keys read from a live database
+     * shall be sorted alphabetically. Is <code>false</code> by default.
+     *
+     * @return <code>true</code> if the foreign keys shall be sorted
+     */
+    public boolean isSortForeignKeys()
+    {
+        return _sortForeignKeys;
+    }
+
+    /**
+     * Specifies whether a table's foreign keys read from a live database
+     * shall be sorted alphabetically.
+     *
+     * @param sortForeignKeys <code>true</code> if the foreign keys shall be sorted
+     */
+    public void setSortForeignKeys(boolean sortForeignKeys)
+    {
+        _sortForeignKeys = sortForeignKeys;
+    }
+
+    /**
      * Determines whether the database shall be shut down after the task has finished.
      *
      * @return <code>true</code> if the database shall be shut down
@@ -202,6 +226,7 @@ public class PlatformConfiguration
         }
         platform.setDataSource(_dataSource);
         platform.setDelimitedIdentifierModeOn(isUseDelimitedSqlIdentifiers());
+        platform.setForeignKeysSorted(isSortForeignKeys());
 
         return platform;
     }
