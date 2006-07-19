@@ -48,6 +48,7 @@ public class ColumnOrderChange extends TableChangeImplBase
     /**
      * Returns the new position of the given source column.
      *
+     * @param sourceColumn The column
      * @return The new position or -1 if no position is marked for the column
      */
     public int getNewPosition(Column sourceColumn)

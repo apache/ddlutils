@@ -1943,16 +1943,12 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     }
 
     /**
-     * Helper method esp. for the {@link ModelBasedResultSetIterator} class that retrieves
-     * the value for a column from the given result set. If a table was specified,
-     * and it contains the column, then the jdbc type defined for the column is used for extracting
-     * the value, otherwise the object directly retrieved from the result set is returned.<br/>
-     * The method is defined here rather than in the {@link ModelBasedResultSetIterator} class
-     * so that concrete platforms can modify its behavior.
+     * Helper method for retrieving the value for a column from the given result set
+     * using the type code of the column.
      * 
-     * @param resultSet  The result set
-     * @param columnName The name of the column
-     * @param table      The table
+     * @param resultSet The result set
+     * @param column    The column
+     * @param idx       The value's index in the result set (starting from 1) 
      * @return The value
      */
     protected Object getObjectFromResultSet(ResultSet resultSet, Column column, int idx) throws SQLException
