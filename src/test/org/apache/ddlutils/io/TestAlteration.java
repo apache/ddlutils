@@ -111,8 +111,14 @@ public class TestAlteration extends RoundtripTestBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
+        List     beans = getRows("roundtrip");
+        DynaBean bean  = (DynaBean)beans.get(0); 
 
+        // Some databases (e.g. DB2) pad the string for some reason, so we manually trim it
+        if (bean.get("avalue") instanceof String)
+        {
+            bean.set("avalue", ((String)bean.get("avalue")).trim());
+        }
         assertEquals((Object)"2", beans.get(0), "avalue");
     }
 
