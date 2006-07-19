@@ -2056,7 +2056,7 @@ public abstract class SqlBuilder
             else if (getPlatformInfo().hasPrecisionAndScale(column.getTypeCode()))
             {
                 sqlType.append("(");
-                sqlType.append(sizeSpec.toString());
+                sqlType.append(column.getSizeAsInt());
                 sqlType.append(",");
                 sqlType.append(column.getScale());
                 sqlType.append(")");

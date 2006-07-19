@@ -319,17 +319,17 @@ public class Column implements Cloneable, Serializable
         {
             int pos = size.indexOf(",");
 
+            _size  = size;
             if (pos < 0)
             {
-                _size  = size;
-                _scale = 0;
+                _scale     = 0;
+                _sizeAsInt = new Integer(_size);
             }
             else
             {
-                _size  = size.substring(0, pos);
-                _scale = Integer.parseInt(size.substring(pos + 1));
+                _sizeAsInt = new Integer(size.substring(0, pos));
+                _scale     = Integer.parseInt(size.substring(pos + 1));
             }
-            _sizeAsInt = new Integer(_size);
         }
         else
         {
@@ -356,7 +356,7 @@ public class Column implements Cloneable, Serializable
      */
     public void setScale(int scale)
     {
-        _scale = scale;
+        setSizeAndScale(getSizeAsInt(), scale);
     }
 
     /**
@@ -367,9 +367,13 @@ public class Column implements Cloneable, Serializable
      */
     public void setSizeAndScale(int size, int scale)
     {
-        _size      = String.valueOf(size);
         _sizeAsInt = new Integer(size);
         _scale     = scale;
+        _size      = String.valueOf(size);
+        if (scale > 0)
+        {
+            _size += "," + _scale;
+        }
     }
     
     /**
