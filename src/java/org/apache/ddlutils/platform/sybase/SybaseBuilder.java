@@ -478,22 +478,24 @@ public class SybaseBuilder extends SqlBuilder
     {
         // TODO: this would be easier when named primary keys are supported
         //       because then we can use ALTER TABLE DROP
-        String tableName = getTableName(change.getChangedTable());
+        String tableName         = getTableName(change.getChangedTable());
+        String tableNameVar      = "tn" + createUniqueIdentifier();
+        String constraintNameVar = "cn" + createUniqueIdentifier();
 
         println("BEGIN");
-        println("  DECLARE @tablename nvarchar(60), @constraintname nvarchar(60)");
+        println("  DECLARE @" + tableNameVar + " nvarchar(60), @" + constraintNameVar + " nvarchar(60)");
         println("  WHILE EXISTS(SELECT sysindexes.name");
         println("                 FROM sysindexes, sysobjects");
         print("                 WHERE sysobjects.name = ");
         printAlwaysSingleQuotedIdentifier(tableName);
         println(" AND sysobjects.id = sysindexes.id AND (sysindexes.status & 2048) > 0)");
         println("  BEGIN");
-        println("    SELECT @tablename = sysobjects.name, @constraintname = sysindexes.name");
+        println("    SELECT @" + tableNameVar + " = sysobjects.name, @" + constraintNameVar + " = sysindexes.name");
         println("      FROM sysindexes, sysobjects");
         print("      WHERE sysobjects.name = ");
         printAlwaysSingleQuotedIdentifier(tableName);
         print(" AND sysobjects.id = sysindexes.id AND (sysindexes.status & 2048) > 0");
-        println("    EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)");
+        println("    EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")");
         println("  END");
         print("END");
         printEndOfStatement();

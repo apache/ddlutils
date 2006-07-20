@@ -103,25 +103,27 @@ public class MSSqlBuilder extends SqlBuilder
      */
     public void dropTable(Table table) throws IOException
     {
-        String tableName = getTableName(table);
+        String tableName         = getTableName(table);
+        String tableNameVar      = "tn" + createUniqueIdentifier();
+        String constraintNameVar = "cn" + createUniqueIdentifier();
 
         writeQuotationOnStatement();
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = ");
         printAlwaysSingleQuotedIdentifier(tableName);
         println(")");
         println("BEGIN");
-        println("  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)");
+        println("  DECLARE @" + tableNameVar + " nvarchar(256), @" + constraintNameVar + " nvarchar(256)");
         println("  DECLARE refcursor CURSOR FOR");
         println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
         println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
         print("    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = ");
         printAlwaysSingleQuotedIdentifier(tableName);
         println("  OPEN refcursor");
-        println("  FETCH NEXT FROM refcursor INTO @tablename, @constraintname");
+        println("  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
         println("  WHILE @@FETCH_STATUS = 0");
         println("    BEGIN");
-        println("      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)");
-        println("      FETCH NEXT FROM refcursor INTO @tablename, @constraintname");
+        println("      EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")");
+        println("      FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
         println("    END");
         println("  CLOSE refcursor");
         println("  DEALLOCATE refcursor");
@@ -485,21 +487,23 @@ public class MSSqlBuilder extends SqlBuilder
     {
         // TODO: this would be easier when named primary keys are supported
         //       because then we can use ALTER TABLE DROP
-        String tableName = getTableName(change.getChangedTable());
+        String tableName         = getTableName(change.getChangedTable());
+        String tableNameVar      = "tn" + createUniqueIdentifier();
+        String constraintNameVar = "cn" + createUniqueIdentifier();
 
         println("BEGIN");
-        println("  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)");
+        println("  DECLARE @" + tableNameVar + " nvarchar(256), @" + constraintNameVar + " nvarchar(256)");
         println("  DECLARE refcursor CURSOR FOR");
         println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
         println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
         print("    WHERE objs.xtype = 'PK' AND object_name(objs.parent_obj) = ");
         printAlwaysSingleQuotedIdentifier(tableName);
         println("  OPEN refcursor");
-        println("  FETCH NEXT FROM refcursor INTO @tablename, @constraintname");
+        println("  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
         println("  WHILE @@FETCH_STATUS = 0");
         println("    BEGIN");
-        println("      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)");
-        println("      FETCH NEXT FROM refcursor INTO @tablename, @constraintname");
+        println("      EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")");
+        println("      FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
         println("    END");
         println("  CLOSE refcursor");
         println("  DEALLOCATE refcursor");
@@ -533,11 +537,13 @@ public class MSSqlBuilder extends SqlBuilder
         if (hasDefault)
         {
             // we're dropping the old default
-            String tableName  = getTableName(sourceTable);
-            String columnName = getColumnName(sourceColumn);
+            String tableName         = getTableName(sourceTable);
+            String columnName        = getColumnName(sourceColumn);
+            String tableNameVar      = "tn" + createUniqueIdentifier();
+            String constraintNameVar = "cn" + createUniqueIdentifier();
 
             println("BEGIN");
-            println("  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)");
+            println("  DECLARE @" + tableNameVar + " nvarchar(256), @" + constraintNameVar + " nvarchar(256)");
             println("  DECLARE refcursor CURSOR FOR");
             println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
             println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
@@ -550,11 +556,11 @@ public class MSSqlBuilder extends SqlBuilder
             print("          object_name(objs.parent_obj) = ");
             printAlwaysSingleQuotedIdentifier(tableName);
             println("  OPEN refcursor");
-            println("  FETCH NEXT FROM refcursor INTO @tablename, @constraintname");
+            println("  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
             println("  WHILE @@FETCH_STATUS = 0");
             println("    BEGIN");
-            println("      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)");
-            println("      FETCH NEXT FROM refcursor INTO @tablename, @constraintname");
+            println("      EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")");
+            println("      FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
             println("    END");
             println("  CLOSE refcursor");
             println("  DEALLOCATE refcursor");
