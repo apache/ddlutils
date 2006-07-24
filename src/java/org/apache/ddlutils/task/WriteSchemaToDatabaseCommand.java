@@ -90,6 +90,7 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
         boolean            isCaseSensitive = platform.isDelimitedIdentifierModeOn();
         CreationParameters params          = getFilteredParameters(model, platform.getName(), isCaseSensitive);
 
+        platform.setScriptModeOn(false);
         // we're disabling the comment generation because we're writing directly to the database
         platform.setSqlCommentsOn(false);
         try

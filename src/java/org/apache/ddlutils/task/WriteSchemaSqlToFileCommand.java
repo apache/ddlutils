@@ -115,6 +115,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
         {
             FileWriter writer = new FileWriter(_outputFile);
 
+            platform.setScriptModeOn(true);
             if (platform.getPlatformInfo().isSqlCommentsSupported())
             {
                 // we're generating SQL comments if possible

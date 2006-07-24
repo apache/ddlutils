@@ -78,12 +78,14 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     private SqlBuilder _builder;
     /** The model reader for this platform. */
     private JdbcModelReader _modelReader;
+    /** Whether script mode is on. */
+    private boolean _scriptModeOn;
     /** Whether SQL comments are generated or not. */
     private boolean _sqlCommentsOn = true;
     /** Whether delimited identifiers are used or not. */
-    private boolean _delimitedIdentifierModeOn = false;
+    private boolean _delimitedIdentifierModeOn;
     /** Whether read foreign keys shall be sorted alphabetically. */
-    private boolean _foreignKeysSorted = false;
+    private boolean _foreignKeysSorted;
 
     /**
      * {@inheritDoc}
@@ -131,6 +133,22 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     public PlatformInfo getPlatformInfo()
     {
         return _info;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isScriptModeOn()
+    {
+        return _scriptModeOn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setScriptModeOn(boolean scriptModeOn)
+    {
+        _scriptModeOn = scriptModeOn;
     }
 
     /**

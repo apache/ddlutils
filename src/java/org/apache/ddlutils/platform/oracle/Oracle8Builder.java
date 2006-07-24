@@ -149,28 +149,53 @@ public class Oracle8Builder extends SqlBuilder
         String columnName  = getColumnName(column);
         String triggerName = getConstraintName("trg", table, column.getName(), null);
 
-        // note that the BEGIN ... SELECT ... END; is all in one line and does
-        // not contain a semicolon except for the END-one
-        // this way, the tokenizer will not split the statement before the END
-        print("CREATE OR REPLACE TRIGGER ");
-        printIdentifier(triggerName);
-        print(" BEFORE INSERT ON ");
-        printIdentifier(getTableName(table));
-        print(" FOR EACH ROW WHEN (new.");
-        printIdentifier(columnName);
-        println(" IS NULL)");
-        print("BEGIN SELECT ");
-        printIdentifier(getConstraintName("seq", table, column.getName(), null));
-        print(".nextval INTO :new.");
-        printIdentifier(columnName);
-        print(" FROM dual");
-        print(getPlatformInfo().getSqlCommandDelimiter());
-        print(" END");
-        // It is important that there is a semicolon at the end of the statement (or more
-        // precisely, at the end of the PL/SQL block), and thus we put two semicolons here
-        // because the tokenizer will remove the one at the end
-        print(getPlatformInfo().getSqlCommandDelimiter());
-        printEndOfStatement();
+        if (getPlatform().isScriptModeOn())
+        {
+            // For the script, we output a more nicely formatted version
+            print("CREATE OR REPLACE TRIGGER ");
+            printlnIdentifier(triggerName);
+            print("BEFORE INSERT ON ");
+            printlnIdentifier(getTableName(table));
+            print("FOR EACH ROW WHEN (new.");
+            printIdentifier(columnName);
+            println(" IS NULL)");
+            println("BEGIN");
+            print("  SELECT ");
+            printIdentifier(getConstraintName("seq", table, column.getName(), null));
+            print(".nextval INTO :new.");
+            printIdentifier(columnName);
+            print(" FROM dual");
+            println(getPlatformInfo().getSqlCommandDelimiter());
+            print("END");
+            println(getPlatformInfo().getSqlCommandDelimiter());
+            println("/");
+            println();
+        }
+        else
+        {
+            // note that the BEGIN ... SELECT ... END; is all in one line and does
+            // not contain a semicolon except for the END-one
+            // this way, the tokenizer will not split the statement before the END
+            print("CREATE OR REPLACE TRIGGER ");
+            printIdentifier(triggerName);
+            print(" BEFORE INSERT ON ");
+            printIdentifier(getTableName(table));
+            print(" FOR EACH ROW WHEN (new.");
+            printIdentifier(columnName);
+            println(" IS NULL)");
+            print("BEGIN SELECT ");
+            printIdentifier(getConstraintName("seq", table, column.getName(), null));
+            print(".nextval INTO :new.");
+            printIdentifier(columnName);
+            print(" FROM dual");
+            print(getPlatformInfo().getSqlCommandDelimiter());
+            print(" END");
+            // It is important that there is a semicolon at the end of the statement (or more
+            // precisely, at the end of the PL/SQL block), and thus we put two semicolons here
+            // because the tokenizer will remove the one at the end
+            print(getPlatformInfo().getSqlCommandDelimiter());
+            printEndOfStatement();
+        }
     }
 
     /**
