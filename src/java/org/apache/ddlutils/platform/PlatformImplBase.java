@@ -479,13 +479,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public void alterTables(Database desiredDb, boolean continueOnError) throws DynaSqlException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, desiredDb, doDrops, modifyColumns, continueOnError);
+            alterTables(connection, desiredDb, continueOnError);
         }
         finally
         {
@@ -496,13 +496,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(Database desiredDb, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Database desiredDb) throws DynaSqlException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            return getAlterTablesSql(connection, desiredDb, doDrops, modifyColumns, continueOnError);
+            return getAlterTablesSql(connection, desiredDb);
         }
         finally
         {
@@ -513,13 +513,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public void alterTables(Database desiredDb, CreationParameters params, boolean continueOnError) throws DynaSqlException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, desiredDb, params, doDrops, modifyColumns, continueOnError);
+            alterTables(connection, desiredDb, params, continueOnError);
         }
         finally
         {
@@ -530,13 +530,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(Database desiredDb, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Database desiredDb, CreationParameters params) throws DynaSqlException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            return getAlterTablesSql(connection, desiredDb, params, doDrops, modifyColumns, continueOnError);
+            return getAlterTablesSql(connection, desiredDb, params);
         }
         finally
         {
@@ -547,9 +547,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public void alterTables(Connection connection, Database desiredModel, boolean continueOnError) throws DynaSqlException
     {
-        String sql = getAlterTablesSql(connection, desiredModel, doDrops, modifyColumns, continueOnError);
+        String sql = getAlterTablesSql(connection, desiredModel);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -557,7 +557,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(Connection connection, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Connection connection, Database desiredModel) throws DynaSqlException
     {
         String   sql          = null;
         Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
@@ -567,7 +567,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            //getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
             getSqlBuilder().alterDatabase(currentModel, desiredModel, null);
             sql = buffer.toString();
         }
@@ -581,9 +580,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Connection connection, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public void alterTables(Connection connection, Database desiredModel, CreationParameters params, boolean continueOnError) throws DynaSqlException
     {
-        String sql = getAlterTablesSql(connection, desiredModel, params, doDrops, modifyColumns, continueOnError);
+        String sql = getAlterTablesSql(connection, desiredModel, params);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -591,7 +590,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(Connection connection, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(Connection connection, Database desiredModel, CreationParameters params) throws DynaSqlException
     {
         String   sql          = null;
         Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
@@ -601,7 +600,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            //getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
             getSqlBuilder().alterDatabase(currentModel, desiredModel, params);
             sql = buffer.toString();
         }
@@ -615,13 +613,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, boolean continueOnError) throws DynaSqlException
 	{
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, catalog, schema, tableTypes, desiredModel, doDrops, modifyColumns, continueOnError);
+            alterTables(connection, catalog, schema, tableTypes, desiredModel, continueOnError);
         }
         finally
         {
@@ -632,13 +630,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-	public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel) throws DynaSqlException
 	{
         Connection connection = borrowConnection();
 
         try
         {
-            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, doDrops, modifyColumns, continueOnError);
+            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel);
         }
         finally
         {
@@ -649,13 +647,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean continueOnError) throws DynaSqlException
 	{
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, catalog, schema, tableTypes, desiredModel, params, doDrops, modifyColumns, continueOnError);
+            alterTables(connection, catalog, schema, tableTypes, desiredModel, params, continueOnError);
         }
         finally
         {
@@ -666,13 +664,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+    public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params) throws DynaSqlException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params, doDrops, modifyColumns, continueOnError);
+            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params);
         }
         finally
         {
@@ -683,9 +681,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, boolean continueOnError) throws DynaSqlException
     {
-        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, doDrops, modifyColumns, continueOnError);
+        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel);
 
         evaluateBatch(connection, sql, continueOnError);
 	}
@@ -693,7 +691,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel) throws DynaSqlException
 	{
         String   sql          = null;
         Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
@@ -703,7 +701,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            //getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
             getSqlBuilder().alterDatabase(currentModel, desiredModel, null);
             sql = buffer.toString();
         }
@@ -717,9 +714,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean continueOnError) throws DynaSqlException
 	{
-        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params, doDrops, modifyColumns, continueOnError);
+        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params);
 
         evaluateBatch(connection, sql, continueOnError);
 	}
@@ -727,7 +724,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
-	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean doDrops, boolean modifyColumns, boolean continueOnError) throws DynaSqlException
+	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params) throws DynaSqlException
 	{
         String   sql          = null;
         Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
@@ -737,7 +734,6 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            //getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
             getSqlBuilder().alterDatabase(currentModel, desiredModel, params);
             sql = buffer.toString();
         }

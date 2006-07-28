@@ -104,16 +104,12 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
                                          null,
                                          model,
                                          params,
-                                         _doDrops,
-                                         true,
                                          true);
                 }
                 else
                 {
                     platform.alterTables(model,
                                          params,
-                                         _doDrops,
-                                         true,
                                          true);
                 }
             }
