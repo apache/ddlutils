@@ -17,8 +17,6 @@ package org.apache.ddlutils.platform.mssql;
  */
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -71,31 +69,6 @@ public class MSSqlBuilder extends SqlBuilder
     {
         writeQuotationOnStatement();
         super.createTable(database, table, parameters);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected void alterTable(Database currentModel, Table currentTable, Database desiredModel, Table desiredTable, boolean doDrops, boolean modifyColumns) throws IOException
-    {
-    	// we only want to generate the quotation start statement if there is something to write
-    	// thus we write the alteration commands into a temporary writer
-    	// and only if something was written, write the quotation start statement and the
-    	// alteration commands to the original writer
-    	Writer       originalWriter = getWriter();
-    	StringWriter tempWriter     = new StringWriter();
-
-    	setWriter(tempWriter);
-        super.alterTable(currentModel, currentTable, desiredModel, desiredTable, doDrops, modifyColumns);
-        setWriter(originalWriter);
-
-        String alterationCommands = tempWriter.toString();
-
-        if (alterationCommands.trim().length() > 0)
-        {
-        	writeQuotationOnStatement();
-        	getWriter().write(alterationCommands);
-        }
     }
 
     /**
@@ -176,17 +149,6 @@ public class MSSqlBuilder extends SqlBuilder
         printIdentifier(getTableName(table));
         print(".");
         printIdentifier(getIndexName(index));
-        printEndOfStatement();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void writeColumnAlterStmt(Table table, Column column, boolean isNewColumn) throws IOException
-    {
-        writeTableAlterStmt(table);
-        print(isNewColumn ? "ADD " : "ALTER COLUMN ");
-        writeColumn(table, column);
         printEndOfStatement();
     }
 

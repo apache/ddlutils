@@ -568,7 +568,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             getSqlBuilder().setWriter(buffer);
             //getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
-            getSqlBuilder().alterDatabase2(currentModel, desiredModel, null);
+            getSqlBuilder().alterDatabase(currentModel, desiredModel, null);
             sql = buffer.toString();
         }
         catch (IOException ex)
@@ -602,7 +602,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             getSqlBuilder().setWriter(buffer);
             //getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
-            getSqlBuilder().alterDatabase2(currentModel, desiredModel, params);
+            getSqlBuilder().alterDatabase(currentModel, desiredModel, params);
             sql = buffer.toString();
         }
         catch (IOException ex)
@@ -704,7 +704,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             getSqlBuilder().setWriter(buffer);
             //getSqlBuilder().alterDatabase(currentModel, desiredModel, doDrops, modifyColumns);
-            getSqlBuilder().alterDatabase2(currentModel, desiredModel, null);
+            getSqlBuilder().alterDatabase(currentModel, desiredModel, null);
             sql = buffer.toString();
         }
         catch (IOException ex)
@@ -738,7 +738,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             getSqlBuilder().setWriter(buffer);
             //getSqlBuilder().alterDatabase(currentModel, desiredModel, params, doDrops, modifyColumns);
-            getSqlBuilder().alterDatabase2(currentModel, desiredModel, params);
+            getSqlBuilder().alterDatabase(currentModel, desiredModel, params);
             sql = buffer.toString();
         }
         catch (IOException ex)

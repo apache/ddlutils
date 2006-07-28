@@ -158,7 +158,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
                                              platform.readModelFromDatabase(null, getCatalogPattern(), getSchemaPattern(), null) :
                                              platform.readModelFromDatabase(null);
 
-                platform.getSqlBuilder().alterDatabase(currentModel, model, params, _doDrops, true);
+                platform.getSqlBuilder().alterDatabase(currentModel, model, params);
             }
             else
             {
