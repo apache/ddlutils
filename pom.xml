@@ -1,3 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright 2005-2006 The Apache Software Foundation.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -11,7 +29,64 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>Apache DdlUtils</name>
+  <description>
+    DdlUtils is a small, easy-to-use component for working with Database Definition (DDL) files.
+  </description>
+  <inceptionYear>2005</inceptionYear>
   <url>http://db.apache.org/ddlutils</url>
+  
+  <mailingLists>
+    <mailingList>
+      <name>Ddlutils Dev List</name>
+      <post>ddlutils-dev@db.apache.org</post>
+      <subscribe>ddlutils-dev-subscribe@db.apache.org</subscribe>
+      <unsubscribe>ddlutils-dev-unsubscribe@db.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/db-ddlutils-dev/</archive>
+      <otherArchives>
+        <otherArchive>http://www.mail-archive.com/ddlutils-dev@db.apache.org/</otherArchive>
+        <otherArchive>http://www.nabble.com/Apache-DdlUtils---Dev-f14475.html</otherArchive>
+      </otherArchives>
+    </mailingList>
+    <mailingList>
+      <name>Ddlutils User List</name>
+      <post>ddlutils-user@db.apache.org</post>
+      <subscribe>ddlutils-user-subscribe@db.apache.org</subscribe>
+      <unsubscribe>ddlutils-user-unsubscribe@db.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/db-ddlutils-user/</archive>
+      <otherArchives>
+        <otherArchive>http://www.mail-archive.com/ddlutils-user@db.apache.org/</otherArchive>
+        <otherArchive>http://www.nabble.com/Apache-DdlUtils---User-f14474.html</otherArchive>
+      </otherArchives>
+    </mailingList>
+  </mailingLists>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>http://issues.apache.org/jira/browse/DDLUTILS</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/db/ddlutils/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/db/ddlutils/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewcvs.cgi/db/ddlutils/trunk/</url>
+  </scm>
+
+  <distributionManagement>
+    <site>
+      <id>apache.website</id>
+      <url>scp://minotaur.apache.org/www/db.apache.org/ddlutils/</url>
+    </site>
+  </distributionManagement>
+
+  <developers>
+    <developer>
+      <id>tomdz</id>
+      <name>Thomas Dudziak</name>
+      <email>tomdz@maven.org</email>
+      <organization>ASF</organization>
+    </developer>
+  </developers>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -43,6 +118,16 @@
       <version>3.1</version>
     </dependency>
     <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.7.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-digester</groupId>
+      <artifactId>commons-digester</artifactId>
+      <version>1.7</version>
+    </dependency>
+    <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
       <version>1.2</version>
@@ -72,6 +157,54 @@
       <artifactId>oro</artifactId>
       <version>2.0.8</version>
     </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging-api</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>axion</groupId>
+      <artifactId>axion</artifactId>
+      <version>1.0-M3-dev</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyclient</artifactId>
+      <version>10.1.2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>1.8.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>mckoi</groupId>
+      <artifactId>mckoi</artifactId>
+      <version>1.0.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>3.1.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>8.1-404.jdbc3</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- NB: No public driver for DB2, interbase, sapdb, oracle, sqlserver -->
   </dependencies>
 
   <properties>
@@ -80,12 +213,31 @@
 
   <build>
     <sourceDirectory>src/java</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src/java</directory>
+        <includes>
+          <include>**.dtd</include>
+          <include>**.xml</include>
+        </includes>
+      </resource>
+    </resources>
     <testSourceDirectory>src/test</testSourceDirectory>
+    <testResources>
+      <testResource>
+        <directory>src/test</directory>
+        <includes>
+          <include>jdbc.properties.*</include>
+        </includes>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <!-- TODO Need user configuration and review all tests for all platforms -->
+          <skip>true</skip>
           <systemProperties>
             <property>
               <name>jdbc.properties.file</name>
@@ -96,5 +248,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
