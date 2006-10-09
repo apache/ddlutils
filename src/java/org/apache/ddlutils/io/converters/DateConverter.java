@@ -18,17 +18,30 @@ package org.apache.ddlutils.io.converters;
 
 import java.sql.Date;
 import java.sql.Types;
+import java.util.Calendar;
 
 /**
  * Converts between {@link java.sql.Date} and {@link java.lang.String} using the standard
  * representation "yyyy", or "yyyy-mm", or "yyyy-mm-dd".
  * 
- * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
 public class DateConverter implements SqlTypeConverter 
 {
-    /**
+	/** The calendar object to convert to/from dates. */
+	private Calendar _calendar;
+
+	/**
+	 * Creates a new date converter object.
+	 */
+	public DateConverter()
+	{
+		_calendar = Calendar.getInstance();
+
+		_calendar.setLenient(false);
+	}
+
+	/**
      * {@inheritDoc}
      */
     public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException
@@ -69,7 +82,10 @@ public class DateConverter implements SqlTypeConverter
                         day   = Integer.parseInt(dateAsText.substring(slashPos + 1));
                     }
                 }
-                return new Date(year - 1900, month - 1, day);
+
+                _calendar.clear();
+                _calendar.set(year, month - 1, day);
+                return new Date(_calendar.getTimeInMillis());
             }
             catch (NumberFormatException ex)
             {
@@ -91,6 +107,16 @@ public class DateConverter implements SqlTypeConverter
      */
     public String convertToString(Object obj, int sqlTypeCode) throws ConversionException
     {
-        return obj == null ? null : obj.toString();
+        String result = null;
+
+        if (obj != null)
+        {
+            if (!(obj instanceof Date))
+            {
+                throw new ConversionException("Expected object of type java.sql.Date, but instead received " + obj.getClass().getName());
+            }
+            result = obj.toString();
+        }
+        return result;
     }
 }

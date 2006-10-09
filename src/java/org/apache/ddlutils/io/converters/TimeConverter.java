@@ -18,6 +18,7 @@ package org.apache.ddlutils.io.converters;
 
 import java.sql.Time;
 import java.sql.Types;
+import java.util.Calendar;
 
 /**
  * Converts between {@link java.sql.Time} and {@link java.lang.String} using the standard
@@ -28,7 +29,20 @@ import java.sql.Types;
  */
 public class TimeConverter implements SqlTypeConverter 
 {
-    /**
+	/** The calendar object to convert to/from times. */
+	private Calendar _calendar;
+
+	/**
+	 * Creates a new time converter object.
+	 */
+	public TimeConverter()
+	{
+		_calendar = Calendar.getInstance();
+
+		_calendar.setLenient(false);
+	}
+
+	/**
      * {@inheritDoc}
      */
     public Object convertFromString(String textRep, int sqlTypeCode) throws ConversionException
@@ -69,7 +83,12 @@ public class TimeConverter implements SqlTypeConverter
                         seconds = Integer.parseInt(timeAsText.substring(slashPos + 1));
                     }
                 }
-                return new Time(hours, minutes, seconds);
+
+                _calendar.clear();
+                _calendar.set(Calendar.HOUR, hours);
+                _calendar.set(Calendar.MINUTE, minutes);
+                _calendar.set(Calendar.SECOND, seconds);
+                return new Time(_calendar.getTimeInMillis());
             }
             catch (NumberFormatException ex)
             {
@@ -91,6 +110,16 @@ public class TimeConverter implements SqlTypeConverter
      */
     public String convertToString(Object obj, int sqlTypeCode) throws ConversionException
     {
-        return obj == null ? null : obj.toString();
+        String result = null;
+
+        if (obj != null)
+        {
+            if (!(obj instanceof Time))
+            {
+                throw new ConversionException("Expected object of type java.sql.Time, but instead received " + obj.getClass().getName());
+            }
+            result = obj.toString();
+        }
+        return result;
     }
 }
