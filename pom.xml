@@ -101,8 +101,10 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <!-- TODO: There is no 0.8 version of betwixt at the moment so this will fail
-                 But this is better than specifying 0.7 which will not work with DdlUtils -->
+      <!-- TODO: Move to a released version of Betwixt
+           Since version 0.8 doesn't exist yet, install 0.8 into the local repo
+           mvn install:install-file -DgroupId=commons-betwixt -DartifactId=commons-betwixt -Dversion=0.8-dev -Dpackaging=jar -Dfile=lib/commons-betwixt-0.8-dev.jar -DgeneratePom=true
+      -->
       <groupId>commons-betwixt</groupId>
       <artifactId>commons-betwixt</artifactId>
       <version>0.8</version>
@@ -183,7 +185,7 @@
     <dependency>
       <groupId>hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
-      <version>1.8.0.1</version>
+      <version>1.8.0.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -208,7 +210,7 @@
   </dependencies>
 
   <properties>
-    <jdbc.properties.file>jdbc.properties.hsqldb</jdbc.properties.file>
+    <jdbc.properties.file>/jdbc.properties.hsqldb</jdbc.properties.file>
   </properties>
 
   <build>
