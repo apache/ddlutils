@@ -18,6 +18,7 @@ package org.apache.ddlutils.io;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +29,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
@@ -100,6 +102,29 @@ public class DataWriter
             XMLOutputFactory factory = XMLOutputFactory.newInstance();
 
             _writer  = factory.createXMLStreamWriter(output, _encoding);
+        }
+        catch (XMLStreamException ex)
+        {
+            throw new DataWriterException(ex);
+        }
+    }
+
+    /**
+     * Creates a data writer instance using the specified writer. Note that the writer
+     * needs to be configured using the specified encoding.
+     * 
+     * @param output   The target to write the data XML to
+     * @param encoding The encoding of the writer
+     */
+    public DataWriter(Writer output, String encoding) throws DataWriterException
+    {
+        _output   = new PrintWriter(output);
+        _encoding = encoding;
+        try
+        {
+            XMLOutputFactory factory = XMLOutputFactory.newInstance();
+
+            _writer = factory.createXMLStreamWriter(_output);
         }
         catch (XMLStreamException ex)
         {
@@ -252,7 +277,9 @@ public class DataWriter
                 }
                 if (valueAsText != null)
                 {
-                    if (valueAsText.length() > MAX_ATTRIBUTE_LENGTH)
+                    // we create an attribute only if the text is not too long
+                    // and if it does not contain special characters
+                    if ((valueAsText.length() > MAX_ATTRIBUTE_LENGTH) || containsSpecialCharacters(valueAsText))
                     {
                         // we defer writing the sub elements
                         subElements.put(column.getName(), valueAsText);
@@ -267,12 +294,25 @@ public class DataWriter
             {
                 for (Iterator it = subElements.entrySet().iterator(); it.hasNext();)
                 {
-                    Map.Entry entry = (Map.Entry)it.next();
-        
+                    Map.Entry entry     = (Map.Entry)it.next();
+                    String    content   = entry.getValue().toString();
+
                     printlnIfPrettyPrinting();
                     indentIfPrettyPrinting(2);
                     _writer.writeStartElement(entry.getKey().toString());
-                    _writer.writeCData(entry.getValue().toString());
+
+                    // if the content contains special characters, we have to apply base64 encoding to it
+                    // if the content is too short, then it has to contain special characters, otherwise we check
+                    if ((content.length() <= MAX_ATTRIBUTE_LENGTH) || containsSpecialCharacters(content))
+                    {
+                        _writer.writeAttribute(DatabaseIO.BASE64_ATTR_NAME, "true");
+                        _writer.writeCData(new String(Base64.encodeBase64(content.getBytes())));
+                    }
+                    else
+                    {
+                        _writer.writeCData(content);
+                    }
+
                     _writer.writeEndElement();
                 }
                 printlnIfPrettyPrinting();
@@ -289,6 +329,29 @@ public class DataWriter
         {
             throw new DataWriterException(ex);
         }
+    }
+
+    /**
+     * Determines whether the given string contains special characters that cannot
+     * be used in XML.
+     * 
+     * @param text The text
+     * @return <code>true</code> if the text contains special characters
+     */
+    private boolean containsSpecialCharacters(String text)
+    {
+        int numChars = text.length();
+
+        for (int charPos = 0; charPos < numChars; charPos++)
+        {
+            char c = text.charAt(charPos);
+
+            if ((c < 0x0020) && (c != '\n') && (c != '\r') && (c != '\t'))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

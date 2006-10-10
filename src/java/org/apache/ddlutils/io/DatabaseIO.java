@@ -44,6 +44,10 @@ import org.xml.sax.SAXException;
  */
 public class DatabaseIO
 {
+    /** The name of the XML attribute use to denote that teh content of a data XML
+        element uses Base64 encoding. */
+    public static final String BASE64_ATTR_NAME = "base64";
+
     /** Whether to validate the XML. */
     private boolean _validateXml = true;
     /** Whether to use the internal dtd that comes with DdlUtils. */

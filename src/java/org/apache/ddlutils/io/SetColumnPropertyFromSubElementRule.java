@@ -17,9 +17,11 @@ package org.apache.ddlutils.io;
  */
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.digester.Rule;
 import org.apache.ddlutils.io.converters.SqlTypeConverter;
 import org.apache.ddlutils.model.Column;
+import org.xml.sax.Attributes;
 
 /**
  * A digester rule for setting a bean property that corresponds to a column
@@ -34,6 +36,8 @@ public class SetColumnPropertyFromSubElementRule extends Rule
     private Column _column;
     /** The converter for generating the property value from a string. */
     private SqlTypeConverter _converter;
+    /** Whether the element's content uses Base64. */
+    private boolean _usesBase64 = false;
 
     /**
      * Creates a new creation rule that sets the property corresponding to the given column.
@@ -50,9 +54,45 @@ public class SetColumnPropertyFromSubElementRule extends Rule
     /**
      * {@inheritDoc}
      */
+    public void begin(Attributes attributes) throws Exception
+    {
+        for (int idx = 0; idx < attributes.getLength(); idx++)
+        {
+            String attrName = attributes.getLocalName(idx);
+
+            if ("".equals(attrName))
+            {
+                attrName = attributes.getQName(idx);
+            }
+            if (DatabaseIO.BASE64_ATTR_NAME.equals(attrName) &&
+                "true".equalsIgnoreCase(attributes.getValue(idx)))
+            {
+                _usesBase64 = true;
+                break;
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void end() throws Exception
+    {
+        _usesBase64 = false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void body(String text) throws Exception
     {
         String attrValue = text.trim();
+
+        if (_usesBase64 && (attrValue != null))
+        {
+            attrValue = new String(Base64.decodeBase64(attrValue.getBytes()));
+        }
+
         Object propValue = (_converter != null ? _converter.convertFromString(attrValue, _column.getTypeCode()) : attrValue);
 
         if (digester.getLogger().isDebugEnabled())
