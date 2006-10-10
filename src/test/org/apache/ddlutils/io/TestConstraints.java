@@ -16,6 +16,7 @@ package org.apache.ddlutils.io;
  * limitations under the License.
  */
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
@@ -64,6 +65,107 @@ public class TestConstraints extends RoundtripTestBase
 	
 	        assertTrue(alterTablesSql.length() == 0);
         }
+    }
+
+    /**
+     * Tests a table name that is longer than the maximum allowed.
+     */
+    public void testLongTableName()
+    {
+        if (getSqlBuilder().getMaxTableNameLength() == -1)
+        {
+            return;
+        }
+
+        String       tableName = StringUtils.repeat("Test", (getSqlBuilder().getMaxTableNameLength() / 4) + 3);
+        final String modelXml  = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='" + tableName + "'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+    }
+
+    /**
+     * Tests a column name that is longer than the maximum allowed.
+     */
+    public void testLongColumnName()
+    {
+        if (getPlatformInfo().getMaxColumnNameLength() == -1)
+        {
+            return;
+        }
+
+        String       columnName = StringUtils.repeat("Test", (getSqlBuilder().getMaxColumnNameLength() / 4) + 3);
+        final String modelXml   = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='lengthtest'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='" + columnName + "' type='INTEGER' required='false'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+    }
+
+    /**
+     * Tests a constraint name that is longer than the maximum allowed.
+     */
+    public void testLongConstraintName()
+    {
+        if (getSqlBuilder().getMaxConstraintNameLength() == -1)
+        {
+            return;
+        }
+
+        String       constraintName = StringUtils.repeat("Test", (getSqlBuilder().getMaxConstraintNameLength() / 4) + 3);
+        final String modelXml       = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='DOUBLE'/>\n"+
+            "    <index name='" + constraintName + "'>\n"+
+            "      <index-column name='avalue'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+    }
+
+    /**
+     * Tests a foreign key name that is longer than the maximum allowed.
+     */
+    public void testLongForeignKeyName()
+    {
+        if (getSqlBuilder().getMaxForeignKeyNameLength() == -1)
+        {
+            return;
+        }
+
+        String       fkName   = StringUtils.repeat("Test", (getSqlBuilder().getMaxForeignKeyNameLength() / 4) + 3);
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key name='" + fkName + "' foreignTable='roundtrip_1'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
     }
 
     /**

@@ -100,9 +100,17 @@ public class PlatformInfo
         shall be used. */ 
     private boolean _autoCommitModeForLastIdentityValueReading = true;
 
-    /** Specifies the maximum length that an identifier (name of a table, column, constraint etc.)
-        can have for this database; use -1 if there is no limit. */
-    private int _maxIdentifierLength = -1;
+    /** Specifies the maximum length that a table name can have for this database (-1 if there is no limit). */
+    private int _maxTableNameLength = -1;
+
+    /** Specifies the maximum length that a column name can have for this database (-1 if there is no limit). */
+    private int _maxColumnNameLength = -1;
+
+    /** Specifies the maximum length that a constraint name can have for this database (-1 if there is no limit). */
+    private int _maxConstraintNameLength = -1;
+
+    /** Specifies the maximum length that a foreign key name can have for this database (-1 if there is no limit). */
+    private int _maxForeignKeyNameLength = -1;
 
     /** The string used for delimiting SQL identifiers, eg. table names, column names etc. */
     private String _delimiterToken = "\"";
@@ -565,23 +573,97 @@ public class PlatformInfo
     }
 
     /**
-     * Returns the maximum length of identifiers that this database allows.
+     * Returns the maximum number of characters that a table name can have.
      * 
-     * @return The maximum identifier length, -1 if unlimited
+     * @return The number of characters, or -1 if not limited
      */
-    public int getMaxIdentifierLength()
+    public int getMaxTableNameLength()
     {
-        return _maxIdentifierLength;
+        return _maxTableNameLength;
     }
 
     /**
-     * Sets the maximum length of identifiers that this database allows.
+     * Returns the maximum number of characters that a column name can have.
+     * 
+     * @return The number of characters, or -1 if not limited
+     */
+    public int getMaxColumnNameLength()
+    {
+        return _maxColumnNameLength;
+    }
+
+    /**
+     * Returns the maximum number of characters that a constraint name can have.
+     * 
+     * @return The number of characters, or -1 if not limited
+     */
+    public int getMaxConstraintNameLength()
+    {
+        return _maxConstraintNameLength;
+    }
+
+    /**
+     * Returns the maximum number of characters that a foreign key name can have.
+     * 
+     * @return The number of characters, or -1 if not limited
+     */
+    public int getMaxForeignKeyNameLength()
+    {
+        return _maxForeignKeyNameLength;
+    }
+
+    /**
+     * Sets the maximum length of all identifiers that this database allows.
+     * Use this method if the length limit is the same for all kinds of identifiers.
      * 
      * @param maxIdentifierLength The maximum identifier length, -1 if unlimited
      */
     public void setMaxIdentifierLength(int maxIdentifierLength)
     {
-        _maxIdentifierLength = maxIdentifierLength;
+        _maxTableNameLength      = maxIdentifierLength;
+        _maxColumnNameLength     = maxIdentifierLength;
+        _maxConstraintNameLength = maxIdentifierLength;
+        _maxForeignKeyNameLength = maxIdentifierLength;
+    }
+
+    /**
+     * Sets the maximum length of table names that this database allows.
+     * 
+     * @param maxTableNameLength The maximum length, -1 if unlimited
+     */
+    public void setMaxTableNameLength(int maxTableNameLength)
+    {
+        _maxTableNameLength = maxTableNameLength;
+    }
+
+    /**
+     * Sets the maximum length of column names that this database allows.
+     * 
+     * @param maxColumnNameLength The maximum length, -1 if unlimited
+     */
+    public void setMaxColumnNameLength(int maxColumnNameLength)
+    {
+        _maxColumnNameLength = maxColumnNameLength;
+    }
+
+    /**
+     * Sets the maximum length of constraint names that this database allows.
+     * 
+     * @param maxConstraintNameLength The maximum length, -1 if unlimited
+     */
+    public void setMaxConstraintNameLength(int maxConstraintNameLength)
+    {
+        _maxConstraintNameLength = maxConstraintNameLength;
+    }
+
+    /**
+     * Sets the maximum length of foreign key names that this database allows.
+     * 
+     * @param maxForeignKeyNameLength The maximum length, -1 if unlimited
+     */
+    public void setMaxForeignKeyNameLength(int maxForeignKeyNameLength)
+    {
+        _maxForeignKeyNameLength = maxForeignKeyNameLength;
     }
 
     /**

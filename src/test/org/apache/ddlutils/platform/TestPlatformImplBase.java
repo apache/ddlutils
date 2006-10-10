@@ -51,6 +51,14 @@ public class TestPlatformImplBase extends TestPlatformBase
     }
 
     /**
+     * {@inheritDoc}
+     */
+    protected String getDatabaseName()
+    {
+        return null;
+    }
+
+    /**
      * Test the toColumnValues method.
      */
     public void testToColumnValues()
@@ -68,13 +76,5 @@ public class TestPlatformImplBase extends TestPlatformBase
         assertEquals("name",
                      map.get("name"));
         assertTrue(map.containsKey("id"));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected String getDatabaseName()
-    {
-        return null;
     }
 }

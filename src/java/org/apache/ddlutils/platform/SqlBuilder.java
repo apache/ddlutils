@@ -287,7 +287,55 @@ public abstract class SqlBuilder
     {
         _charSequencesToEscape.put(charSequence, escapedVersion);
     }
-    
+
+    /**
+     * Returns the maximum number of characters that a table name can have.
+     * This method is intended to give platform specific builder implementations
+     * more control over the maximum length.
+     * 
+     * @return The number of characters, or -1 if not limited
+     */
+    public int getMaxTableNameLength()
+    {
+        return getPlatformInfo().getMaxTableNameLength();
+    }
+
+    /**
+     * Returns the maximum number of characters that a column name can have.
+     * This method is intended to give platform specific builder implementations
+     * more control over the maximum length.
+     * 
+     * @return The number of characters, or -1 if not limited
+     */
+    public int getMaxColumnNameLength()
+    {
+        return getPlatformInfo().getMaxColumnNameLength();
+    }
+
+    /**
+     * Returns the maximum number of characters that a constraint name can have.
+     * This method is intended to give platform specific builder implementations
+     * more control over the maximum length.
+     * 
+     * @return The number of characters, or -1 if not limited
+     */
+    public int getMaxConstraintNameLength()
+    {
+        return getPlatformInfo().getMaxConstraintNameLength();
+    }
+
+    /**
+     * Returns the maximum number of characters that a foreign key name can have.
+     * This method is intended to give platform specific builder implementations
+     * more control over the maximum length.
+     * 
+     * @return The number of characters, or -1 if not limited
+     */
+    public int getMaxForeignKeyNameLength()
+    {
+        return getPlatformInfo().getMaxForeignKeyNameLength();
+    }
+
     //
     // public interface
     //
@@ -1536,7 +1584,7 @@ public abstract class SqlBuilder
      * @param desiredLength The desired maximum length
      * @return The shortened version
      */
-    protected String shortenName(String name, int desiredLength)
+    public String shortenName(String name, int desiredLength)
     {
         // TODO: Find an algorithm that generates unique names
         int originalLength = name.length();
@@ -1571,7 +1619,7 @@ public abstract class SqlBuilder
      */
     public String getTableName(Table table)
     {
-        return shortenName(table.getName(), getPlatformInfo().getMaxIdentifierLength());
+        return shortenName(table.getName(), getMaxTableNameLength());
     }
     
     /** 
@@ -1670,7 +1718,7 @@ public abstract class SqlBuilder
      */
     protected String getColumnName(Column column) throws IOException
     {
-        return shortenName(column.getName(), getPlatformInfo().getMaxIdentifierLength());
+        return shortenName(column.getName(), getMaxColumnNameLength());
     }
 
     /**
@@ -1990,7 +2038,7 @@ public abstract class SqlBuilder
             name.append(fk.getForeignTableName());
             fkName = getConstraintName(null, table, "FK", name.toString());
         }
-        fkName = shortenName(fkName, getPlatformInfo().getMaxIdentifierLength());
+        fkName = shortenName(fkName, getMaxForeignKeyNameLength());
 
         if (needsName)
         {
@@ -2027,7 +2075,7 @@ public abstract class SqlBuilder
             result.append("_");
             result.append(suffix);
         }
-        return shortenName(result.toString(), getPlatformInfo().getMaxIdentifierLength());
+        return shortenName(result.toString(), getMaxConstraintNameLength());
     }
 
     /**
@@ -2107,7 +2155,7 @@ public abstract class SqlBuilder
      */
     public String getIndexName(Index index)
     {
-        return index.getName();
+        return shortenName(index.getName(), getMaxConstraintNameLength());
     }
 
     /**

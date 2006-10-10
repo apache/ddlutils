@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.SqlBuilder;
 import org.xml.sax.SAXException;
 
 /**
@@ -166,6 +167,16 @@ public abstract class TestPlatformBase extends TestBase
     protected PlatformInfo getPlatformInfo()
     {
         return getPlatform().getPlatformInfo();
+    }
+
+    /**
+     * Returns the SQL builder of the tested platform.
+     * 
+     * @return The builder object
+     */
+    protected SqlBuilder getSqlBuilder()
+    {
+        return getPlatform().getSqlBuilder();
     }
 
     /**

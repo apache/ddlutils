@@ -1,4 +1,4 @@
-package org.apache.ddlutils;
+package org.apache.ddlutils.platform;
 
 /*
  * Copyright 2005-2006 The Apache Software Foundation.
@@ -19,10 +19,9 @@ package org.apache.ddlutils;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.ddlutils.TestBase;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.platform.SqlBuilder;
-import org.apache.ddlutils.platform.TestPlatform;
 
 /**
  * Test the base SqlBuilder class.
@@ -30,7 +29,7 @@ import org.apache.ddlutils.platform.TestPlatform;
  * @author Martin van den Bemt
  * @version $Revision: $
  */
-public class SqlBuilderTest extends TestBase
+public class TestSqlBuilder extends TestBase
 {
     /**
      * Tests the {@link SqlBuilder#getUpdateSql(Table, Map, boolean)} method.

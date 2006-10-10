@@ -44,6 +44,7 @@ import org.apache.ddlutils.platform.TestOracle9Platform;
 import org.apache.ddlutils.platform.TestPlatformUtils;
 import org.apache.ddlutils.platform.TestPostgresqlPlatform;
 import org.apache.ddlutils.platform.TestSapDbPlatform;
+import org.apache.ddlutils.platform.TestSqlBuilder;
 import org.apache.ddlutils.platform.TestSybasePlatform;
 
 import junit.framework.Test;
@@ -89,7 +90,7 @@ public class RunAllTests extends TestCase
 
         // tests that don't need a live database
         suite.addTestSuite(TestArrayAccessAtTable.class);
-        suite.addTestSuite(SqlBuilderTest.class);
+        suite.addTestSuite(TestSqlBuilder.class);
         suite.addTestSuite(TestPlatformUtils.class);
         suite.addTestSuite(TestDatabaseIO.class);
         suite.addTestSuite(TestDataReader.class);
