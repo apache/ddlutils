@@ -19,6 +19,8 @@ package org.apache.ddlutils.io;
 import java.sql.Types;
 import java.util.HashMap;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.ddlutils.io.converters.ByteArrayBase64Converter;
 import org.apache.ddlutils.io.converters.DateConverter;
 import org.apache.ddlutils.io.converters.NumberConverter;
 import org.apache.ddlutils.io.converters.SqlTypeConverter;
@@ -46,22 +48,26 @@ public class ConverterConfiguration
      */
     public ConverterConfiguration()
     {
+        NumberConverter          numberConverter = new NumberConverter();
+        ByteArrayBase64Converter binaryConverter = new ByteArrayBase64Converter();
 
-        NumberConverter numberConverter = new NumberConverter();
-
-        registerConverter(Types.DATE,      new DateConverter());
-        registerConverter(Types.TIME,      new TimeConverter());
-        registerConverter(Types.TIMESTAMP, new TimestampConverter());
-        registerConverter(Types.BIGINT,    numberConverter);
-        registerConverter(Types.BIT,       numberConverter);
-        registerConverter(Types.DECIMAL,   numberConverter);
-        registerConverter(Types.DOUBLE,    numberConverter);
-        registerConverter(Types.FLOAT,     numberConverter);
-        registerConverter(Types.INTEGER,   numberConverter);
-        registerConverter(Types.NUMERIC,   numberConverter);
-        registerConverter(Types.REAL,      numberConverter);
-        registerConverter(Types.SMALLINT,  numberConverter);
-        registerConverter(Types.TINYINT,   numberConverter);
+        registerConverter(Types.DATE,          new DateConverter());
+        registerConverter(Types.TIME,          new TimeConverter());
+        registerConverter(Types.TIMESTAMP,     new TimestampConverter());
+        registerConverter(Types.BIGINT,        numberConverter);
+        registerConverter(Types.BIT,           numberConverter);
+        registerConverter(Types.DECIMAL,       numberConverter);
+        registerConverter(Types.DOUBLE,        numberConverter);
+        registerConverter(Types.FLOAT,         numberConverter);
+        registerConverter(Types.INTEGER,       numberConverter);
+        registerConverter(Types.NUMERIC,       numberConverter);
+        registerConverter(Types.REAL,          numberConverter);
+        registerConverter(Types.SMALLINT,      numberConverter);
+        registerConverter(Types.TINYINT,       numberConverter);
+        registerConverter(Types.BINARY,        binaryConverter);
+        registerConverter(Types.VARBINARY,     binaryConverter);
+        registerConverter(Types.LONGVARBINARY, binaryConverter);
+        registerConverter(Types.BLOB,          binaryConverter);
     }
 
     /**

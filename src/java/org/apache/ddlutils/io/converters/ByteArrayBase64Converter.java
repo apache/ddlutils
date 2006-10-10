@@ -33,7 +33,7 @@ public class ByteArrayBase64Converter implements SqlTypeConverter
     {
         try
         {
-            return textRep == null ? null : Base64.encodeBase64(textRep.getBytes());
+            return textRep == null ? null : Base64.decodeBase64(textRep.getBytes());
         }
         catch (Exception ex)
         {
@@ -48,7 +48,7 @@ public class ByteArrayBase64Converter implements SqlTypeConverter
     {
         try
         {
-            return obj == null ? null : new String(Base64.decodeBase64((byte[])obj));
+            return obj == null ? null : new String(Base64.encodeBase64((byte[])obj));
         }
         catch (Exception ex)
         {
