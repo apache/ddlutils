@@ -310,7 +310,7 @@
       </condition>
     </fail>
 
-      <taskdef resource="checkstyletask.properties"
+    <taskdef resource="checkstyletask.properties"
              classpathref="compilation-classpath"/>
 
     <checkstyle config="${src.check.dir}/ddlutils-checks.xml"

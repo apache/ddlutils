@@ -331,8 +331,7 @@ public abstract class SqlBuilder
      * Returns a new date format object for formatting numbers in the specified locale.
      * Platforms can override this if necessary.
      * 
-     * @param locale The locale
-     * @return The number format object
+     * @param format The number format object
      */
     protected void setValueNumberFormat(NumberFormat format)
     {
