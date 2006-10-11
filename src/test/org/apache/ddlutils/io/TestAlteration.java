@@ -18,10 +18,12 @@ package org.apache.ddlutils.io;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Properties;
 
 import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
@@ -1737,5 +1739,33 @@ public class TestAlteration extends RoundtripTestBase
 
         assertEquals(new Integer(1), beans.get(0), "pk");
         assertEquals((Object)"test", beans.get(0), "avalue");
+    }
+
+    /**
+     * Test for DDLUTILS-54.
+     */
+    public void testIssue54() throws Exception
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='test'>\n" +
+            "  <table name='coltype'>\n" +
+            "    <column name='COL_FLOAT' primaryKey='false' required='false' type='FLOAT'/>\n" +
+            "    <column name='COL_BOOLEAN' primaryKey='false' required='false' type='BOOLEAN'/>\n" +
+            "  </table>\n" +
+            "</database>";
+
+        createDatabase(modelXml);
+
+        Properties props   = getTestProperties();
+        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
+        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+        Database   model   = parseDatabaseFromString(modelXml);
+
+        getPlatform().setSqlCommentsOn(false);
+
+        String alterationSql = getPlatform().getAlterTablesSql(catalog, schema, null, model);
+
+        assertEqualsIgnoringWhitespaces("", alterationSql);
     }
 }
