@@ -18,6 +18,12 @@ package org.apache.ddlutils.platform;
 
 import org.apache.ddlutils.TestPlatformBase;
 import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
+import org.apache.oro.text.regex.MatchResult;
+import org.apache.oro.text.regex.Pattern;
+import org.apache.oro.text.regex.PatternMatcher;
+import org.apache.oro.text.regex.PatternMatcherInput;
+import org.apache.oro.text.regex.Perl5Compiler;
+import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Tests the Microsoft SQL Server platform.
@@ -50,21 +56,35 @@ public class TestMSSqlPlatform extends TestPlatformBase
      */
     public void testColumnTypes() throws Exception
     {
+        String sql = createTestDatabase(COLUMN_TEST_SCHEMA);
+
+        // Since we have no way of knowing the auto-generated variables in the SQL,
+        // we simply try to extract it from the SQL
+        Pattern        declarePattern    = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        PatternMatcher matcher           = new Perl5Matcher();
+        String         tableNameVar      = "tablename";
+        String         constraintNameVar = "constraintname";
+
+        if (matcher.contains(sql, declarePattern))
+        {
+            tableNameVar      = matcher.getMatch().group(1);
+            constraintNameVar = matcher.getMatch().group(2);
+        }
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'coltype')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
+            "  DECLARE @" + tableNameVar + " nvarchar(256), @" + constraintNameVar + " nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
             "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'coltype'  OPEN refcursor\n"+
-            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar + "\n"+
             "  WHILE @@FETCH_STATUS = 0\n"+
             "    BEGIN\n"+
-            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
-            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "      EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")\n"+
+            "      FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar + "\n"+
             "    END\n"+
             "  CLOSE refcursor\n"+
             "  DEALLOCATE refcursor\n"+
@@ -105,7 +125,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "    \"COL_VARBINARY\"       VARBINARY(15),\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
             ");\n",
-            createTestDatabase(COLUMN_TEST_SCHEMA));
+            sql);
     }
 
 
@@ -114,22 +134,36 @@ public class TestMSSqlPlatform extends TestPlatformBase
      */
     public void testColumnConstraints() throws Exception
     {
-        // this is not valid sql as a table can have only one identity column at most 
+        String sql = createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA);
+
+        // Since we have no way of knowing the auto-generated variables in the SQL,
+        // we simply try to extract it from the SQL
+        Pattern        declarePattern    = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        PatternMatcher matcher           = new Perl5Matcher();
+        String         tableNameVar      = "tablename";
+        String         constraintNameVar = "constraintname";
+
+        if (matcher.contains(sql, declarePattern))
+        {
+            tableNameVar      = matcher.getMatch().group(1);
+            constraintNameVar = matcher.getMatch().group(2);
+        }
+        // Note that this is not valid SQL as a table can have only one identity column at most 
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'constraints')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
+            "  DECLARE @" + tableNameVar + " nvarchar(256), @" + constraintNameVar + " nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
             "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'constraints'  OPEN refcursor\n"+
-            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar + "\n"+
             "  WHILE @@FETCH_STATUS = 0\n"+
             "    BEGIN\n"+
-            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
-            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "      EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")\n"+
+            "      FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar + "\n"+
             "    END\n"+
             "  CLOSE refcursor\n"+
             "  DEALLOCATE refcursor\n"+
@@ -146,7 +180,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "    \"COL_AUTO_INCR\"        DECIMAL(19,0) IDENTITY(1,1),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
+            sql);
     }
 
     /**
@@ -154,6 +188,24 @@ public class TestMSSqlPlatform extends TestPlatformBase
      */
     public void testTableConstraints() throws Exception
     {
+        String sql = createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA);
+
+        // Since we have no way of knowing the auto-generated variables in the SQL,
+        // we simply try to extract it from the SQL
+        Pattern             declarePattern     = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        PatternMatcherInput input              = new PatternMatcherInput(sql);
+        PatternMatcher      matcher            = new Perl5Matcher();
+        String[]            tableNameVars      = { "tablename", "tablename", "tablename" };
+        String[]            constraintNameVars = { "constraintname", "constraintname", "constraintname" };
+
+        for (int idx = 0; (idx < 3) && matcher.contains(input, declarePattern); idx++)
+        {
+            MatchResult result = matcher.getMatch();
+
+            tableNameVars[idx]      = result.group(1);
+            constraintNameVars[idx] = result.group(2);
+            input.setCurrentOffset(result.endOffset(2));
+        }
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'F' AND name = 'testfk')\n"+
@@ -165,16 +217,16 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table3')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
+            "  DECLARE @" + tableNameVars[0] + " nvarchar(256), @" + constraintNameVars[0] + " nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
             "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'table3'  OPEN refcursor\n"+
-            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  FETCH NEXT FROM refcursor INTO @" + tableNameVars[0] + ", @" + constraintNameVars[0] + "\n"+
             "  WHILE @@FETCH_STATUS = 0\n"+
             "    BEGIN\n"+
-            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
-            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "      EXEC ('ALTER TABLE '+@" + tableNameVars[0] + "+' DROP CONSTRAINT '+@" + constraintNameVars[0] + ")\n"+
+            "      FETCH NEXT FROM refcursor INTO @" + tableNameVars[0] + ", @" + constraintNameVars[0] + "\n"+
             "    END\n"+
             "  CLOSE refcursor\n"+
             "  DEALLOCATE refcursor\n"+
@@ -183,16 +235,16 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table2')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
+            "  DECLARE @" + tableNameVars[1] + " nvarchar(256), @" + constraintNameVars[1] + " nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
             "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'table2'  OPEN refcursor\n"+
-            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  FETCH NEXT FROM refcursor INTO @" + tableNameVars[1] + ", @" + constraintNameVars[1] + "\n"+
             "  WHILE @@FETCH_STATUS = 0\n"+
             "    BEGIN\n"+
-            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
-            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "      EXEC ('ALTER TABLE '+@" + tableNameVars[1] + "+' DROP CONSTRAINT '+@" + constraintNameVars[1] + ")\n"+
+            "      FETCH NEXT FROM refcursor INTO @" + tableNameVars[1] + ", @" + constraintNameVars[1] + "\n"+
             "    END\n"+
             "  CLOSE refcursor\n"+
             "  DEALLOCATE refcursor\n"+
@@ -201,16 +253,16 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'table1')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
+            "  DECLARE @" + tableNameVars[2] + " nvarchar(256), @" + constraintNameVars[2] + " nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
             "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'table1'  OPEN refcursor\n"+
-            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  FETCH NEXT FROM refcursor INTO @" + tableNameVars[2] + ", @" + constraintNameVars[2] + "\n"+
             "  WHILE @@FETCH_STATUS = 0\n"+
             "    BEGIN\n"+
-            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
-            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "      EXEC ('ALTER TABLE '+@" + tableNameVars[2] + "+' DROP CONSTRAINT '+@" + constraintNameVars[2] + ")\n"+
+            "      FETCH NEXT FROM refcursor INTO @" + tableNameVars[2] + ", @" + constraintNameVars[2] + "\n"+
             "    END\n"+
             "  CLOSE refcursor\n"+
             "  DEALLOCATE refcursor\n"+
@@ -245,7 +297,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
             ");\n"+
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_FK_1_COL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
-            createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+            sql);
     }
 
     /**
@@ -253,21 +305,35 @@ public class TestMSSqlPlatform extends TestPlatformBase
      */
     public void testCharacterEscaping() throws Exception
     {
+        String sql = createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE);
+
+        // Since we have no way of knowing the auto-generated variables in the SQL,
+        // we simply try to extract it from the SQL
+        Pattern        declarePattern    = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        PatternMatcher matcher           = new Perl5Matcher();
+        String         tableNameVar      = "tablename";
+        String         constraintNameVar = "constraintname";
+
+        if (matcher.contains(sql, declarePattern))
+        {
+            tableNameVar      = matcher.getMatch().group(1);
+            constraintNameVar = matcher.getMatch().group(2);
+        }
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
             "SET quoted_identifier on;\n"+
             "IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = 'escapedcharacters')\n"+
             "BEGIN\n"+
-            "  DECLARE @tablename nvarchar(256), @constraintname nvarchar(256)\n"+
+            "  DECLARE @" + tableNameVar + " nvarchar(256), @" + constraintNameVar + " nvarchar(256)\n"+
             "  DECLARE refcursor CURSOR FOR\n"+
             "  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname\n"+
             "    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid\n"+
             "    WHERE objs.xtype != 'PK' AND object_name(objs.parent_obj) = 'escapedcharacters'  OPEN refcursor\n"+
-            "  FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar + "\n"+
             "  WHILE @@FETCH_STATUS = 0\n"+
             "    BEGIN\n"+
-            "      EXEC ('ALTER TABLE '+@tablename+' DROP CONSTRAINT '+@constraintname)\n"+
-            "      FETCH NEXT FROM refcursor INTO @tablename, @constraintname\n"+
+            "      EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")\n"+
+            "      FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar + "\n"+
             "    END\n"+
             "  CLOSE refcursor\n"+
             "  DEALLOCATE refcursor\n"+
@@ -280,6 +346,6 @@ public class TestMSSqlPlatform extends TestPlatformBase
             "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+            sql);
     }
 }

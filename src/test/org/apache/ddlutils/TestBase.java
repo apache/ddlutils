@@ -49,8 +49,7 @@ public abstract class TestBase extends TestCase
     /**
      * Parses the database defined in the given XML definition.
      * 
-     * @param dbDef
-     *            The database XML definition
+     * @param dbDef The database XML definition
      * @return The database model
      */
     protected Database parseDatabaseFromString(String dbDef)
@@ -66,22 +65,22 @@ public abstract class TestBase extends TestCase
      * Compares the two strings but ignores any whitespace differences. It also
      * recognizes special delimiter chars.
      * 
-     * @param expected
-     *            The expected string
-     * @param actual
-     *            The actual string
+     * @param expected The expected string
+     * @param actual   The actual string
      */
     protected void assertEqualsIgnoringWhitespaces(String expected, String actual)
     {
-        assertEquals(compressWhitespaces(expected), compressWhitespaces(actual));
+        String processedExpected = compressWhitespaces(expected);
+        String processedActual   = compressWhitespaces(actual);
+
+        assertEquals(processedExpected, processedActual);
     }
 
     /**
      * Compresses the whitespaces in the given string to a single space. Also
      * recognizes special delimiter chars and removes whitespaces before them.
      * 
-     * @param original
-     *            The original string
+     * @param original The original string
      * @return The resulting string
      */
     private String compressWhitespaces(String original)

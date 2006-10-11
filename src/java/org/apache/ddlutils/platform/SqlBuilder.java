@@ -264,19 +264,81 @@ public abstract class SqlBuilder
                     locale = new Locale(language);
                 }
 
-                _valueLocale       = localeStr;
-                _valueDateFormat   = DateFormat.getDateInstance(DateFormat.SHORT, locale);
-                _valueTimeFormat   = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
-                _valueNumberFormat = NumberFormat.getNumberInstance(locale);
+                _valueLocale = localeStr;
+                setValueDateFormat(DateFormat.getDateInstance(DateFormat.SHORT, locale));
+                setValueTimeFormat(DateFormat.getTimeInstance(DateFormat.SHORT, locale));
+                setValueNumberFormat(NumberFormat.getNumberInstance(locale));
                 return;
             }
         }
-        _valueLocale       = null;
-        _valueDateFormat   = null;
-        _valueTimeFormat   = null;
-        _valueNumberFormat = null;
+        _valueLocale = null;
+        setValueDateFormat(null);
+        setValueTimeFormat(null);
+        setValueNumberFormat(null);
     }
 
+    /**
+     * Returns the format object for formatting dates in the specified locale.
+     * 
+     * @return The date format object or null if no locale is set
+     */
+    protected DateFormat getValueDateFormat()
+    {
+        return _valueDateFormat;
+    }
+    
+    /**
+     * Sets the format object for formatting dates in the specified locale.
+     * 
+     * @param format The date format object
+     */
+    protected void setValueDateFormat(DateFormat format)
+    {
+        _valueDateFormat = format;
+    }
+
+    /**
+     * Returns the format object for formatting times in the specified locale.
+     * 
+     * @return The time format object or null if no locale is set
+     */
+    protected DateFormat getValueTimeFormat()
+    {
+        return _valueTimeFormat;
+    }
+
+    /**
+     * Sets the date format object for formatting times in the specified locale.
+     * 
+     * @param format The time format object
+     */
+    protected void setValueTimeFormat(DateFormat format)
+    {
+        _valueTimeFormat = format;
+    }
+
+    /**
+     * Returns the format object for formatting numbers in the specified locale.
+     * 
+     * @return The number format object or null if no locale is set
+     */
+    protected NumberFormat getValueNumberFormat()
+    {
+        return _valueNumberFormat;
+    }
+
+    /**
+     * Returns a new date format object for formatting numbers in the specified locale.
+     * Platforms can override this if necessary.
+     * 
+     * @param locale The locale
+     * @return The number format object
+     */
+    protected void setValueNumberFormat(NumberFormat format)
+    {
+        _valueNumberFormat = format;
+    }
+    
     /**
      * Adds a char sequence that needs escaping, and its escaped version.
      * 
@@ -1506,13 +1568,12 @@ public abstract class SqlBuilder
         // TODO: Handle binary types (BINARY, VARBINARY, LONGVARBINARY, BLOB)
         switch (column.getTypeCode())
         {
-            // Note: TIMESTAMP (java.sql.Timestamp) is properly handled by its toString method
             case Types.DATE:
                 result.append(getPlatformInfo().getValueQuoteToken());
-                if (!(value instanceof String) && (_valueDateFormat != null))
+                if (!(value instanceof String) && (getValueDateFormat() != null))
                 {
                     // TODO: Can the format method handle java.sql.Date properly ?
-                    result.append(_valueDateFormat.format(value));
+                    result.append(getValueDateFormat().format(value));
                 }
                 else
                 {
@@ -1522,15 +1583,22 @@ public abstract class SqlBuilder
                 break;
             case Types.TIME:
                 result.append(getPlatformInfo().getValueQuoteToken());
-                if (!(value instanceof String) && (_valueTimeFormat != null))
+                if (!(value instanceof String) && (getValueTimeFormat() != null))
                 {
                     // TODO: Can the format method handle java.sql.Date properly ?
-                    result.append(_valueTimeFormat.format(value));
+                    result.append(getValueTimeFormat().format(value));
                 }
                 else
                 {
                     result.append(value.toString());
                 }
+                result.append(getPlatformInfo().getValueQuoteToken());
+                break;
+            case Types.TIMESTAMP:
+                result.append(getPlatformInfo().getValueQuoteToken());
+                // TODO: SimpleDateFormat does not support nano seconds so we would
+                //       need a custom date formatter for timestamps
+                result.append(value.toString());
                 result.append(getPlatformInfo().getValueQuoteToken());
                 break;
             case Types.REAL:
@@ -1539,9 +1607,9 @@ public abstract class SqlBuilder
             case Types.DOUBLE:
             case Types.DECIMAL:
                 result.append(getPlatformInfo().getValueQuoteToken());
-                if (!(value instanceof String) && (_valueNumberFormat != null))
+                if (!(value instanceof String) && (getValueNumberFormat() != null))
                 {
-                    result.append(_valueNumberFormat.format(value));
+                    result.append(getValueNumberFormat().format(value));
                 }
                 else
                 {

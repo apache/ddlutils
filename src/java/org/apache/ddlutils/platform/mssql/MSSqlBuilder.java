@@ -18,6 +18,8 @@ package org.apache.ddlutils.platform.mssql;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,6 +53,11 @@ import org.apache.ddlutils.util.Jdbc3Utils;
  */
 public class MSSqlBuilder extends SqlBuilder
 {
+    /** We use a generic date format. */
+    private DateFormat _genericDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    /** We use a generic date format. */
+    private DateFormat _genericTimeFormat = new SimpleDateFormat("HH:mm:ss");
+
     /**
      * Creates a new builder instance.
      * 
@@ -113,6 +120,76 @@ public class MSSqlBuilder extends SqlBuilder
     {
         writeQuotationOnStatement();
         super.dropExternalForeignKeys(table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected DateFormat getValueDateFormat()
+    {
+        return _genericDateFormat;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected DateFormat getValueTimeFormat()
+    {
+        return _genericTimeFormat;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected String getValueAsString(Column column, Object value)
+    {
+        if (value == null)
+        {
+            return "NULL";
+        }
+
+        StringBuffer result = new StringBuffer();
+
+        switch (column.getTypeCode())
+        {
+            case Types.REAL:
+            case Types.NUMERIC:
+            case Types.FLOAT:
+            case Types.DOUBLE:
+            case Types.DECIMAL:
+                // SQL Server does not want quotes around the value
+                if (!(value instanceof String) && (getValueNumberFormat() != null))
+                {
+                    result.append(getValueNumberFormat().format(value));
+                }
+                else
+                {
+                    result.append(value.toString());
+                }
+                break;
+            case Types.DATE:
+                result.append("CAST(");
+                result.append(getPlatformInfo().getValueQuoteToken());
+                result.append(value instanceof String ? (String)value : getValueDateFormat().format(value));
+                result.append(getPlatformInfo().getValueQuoteToken());
+                result.append(" AS datetime)");
+                break;
+            case Types.TIME:
+                result.append("CAST(");
+                result.append(getPlatformInfo().getValueQuoteToken());
+                result.append(value instanceof String ? (String)value : getValueTimeFormat().format(value));
+                result.append(getPlatformInfo().getValueQuoteToken());
+                result.append(" AS datetime)");
+                break;
+            case Types.TIMESTAMP:
+                result.append("CAST(");
+                result.append(getPlatformInfo().getValueQuoteToken());
+                result.append(value.toString());
+                result.append(getPlatformInfo().getValueQuoteToken());
+                result.append(" AS datetime)");
+                break;
+        }
+        return super.getValueAsString(column, value);
     }
 
     /**
