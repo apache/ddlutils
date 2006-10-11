@@ -244,7 +244,9 @@ public class InterbaseModelReader extends JdbcModelReader
     }
 
     /**
-     * {@inheritDoc}
+     * Adjusts the columns in the table by fixing types and default values.
+     * 
+     * @param table The table
      */
     protected void adjustColumns(Table table)
     {

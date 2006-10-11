@@ -57,7 +57,7 @@
     </javac>
     <copy todir="${build.java.dir}">
       <fileset dir="${src.java.dir}"
-               excludes="**/*.java"/>
+               excludes="**/*.java,**/*.html"/>
     </copy>
   </target>
 
@@ -139,12 +139,12 @@
           description="Builds the API javadocs.">
     <mkdir dir="${build.javadoc.dir}"/>
     <javadoc sourcepath="${src.java.dir}"
-    		     classpathref="compilation-classpath"
+             classpathref="compilation-classpath"
              destdir="${build.javadoc.dir}"
              doctitle="${javadoc.title}"
              windowtitle="${javadoc.title} API documentation"
              bottom="${javadoc.footer}"
-        	   protected="true"
+             protected="true"
              author="true"
              version="true"
              packagenames="org.*">
@@ -310,7 +310,7 @@
       </condition>
     </fail>
 
-    <taskdef resource="checkstyletask.properties"
+      <taskdef resource="checkstyletask.properties"
              classpathref="compilation-classpath"/>
 
     <checkstyle config="${src.check.dir}/ddlutils-checks.xml"

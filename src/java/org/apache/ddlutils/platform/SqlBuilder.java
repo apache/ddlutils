@@ -901,7 +901,7 @@ public abstract class SqlBuilder
     /**
      * Processes the changes to the structure of a single table. Database-specific
      * implementations might redefine this method, but it is usually sufficient to
-     * redefine the {@link #processTableStructureChanges(Database, Database, Table, Table)}
+     * redefine the {@link #processTableStructureChanges(Database, Database, Table, Table, Map, List)}
      * method instead.
      * 
      * @param currentModel The current database schema

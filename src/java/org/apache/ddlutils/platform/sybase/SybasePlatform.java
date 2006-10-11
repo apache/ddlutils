@@ -141,15 +141,16 @@ public class SybasePlatform extends PlatformImplBase
     	}
     }
 
-    
-	/**
+    /**
      * {@inheritDoc}
      */
-	protected Object extractColumnValue(ResultSet resultSet, String columnName, int jdbcType) throws SQLException
+	protected Object extractColumnValue(ResultSet resultSet, String columnName, int columnIdx, int jdbcType) throws SQLException
 	{
-		if (jdbcType == Types.LONGVARBINARY)
+        boolean useIdx = (columnName == null);
+
+        if (jdbcType == Types.LONGVARBINARY)
 		{
-			InputStream stream = resultSet.getBinaryStream(columnName);
+			InputStream stream = useIdx ? resultSet.getBinaryStream(columnIdx) : resultSet.getBinaryStream(columnName);
 
 			if (stream == null)
 			{
@@ -188,7 +189,7 @@ public class SybasePlatform extends PlatformImplBase
 		}
 		else
 		{
-			return super.extractColumnValue(resultSet, columnName, 0, jdbcType);
+			return super.extractColumnValue(resultSet, columnName, columnIdx, jdbcType);
 		}
 	}
 

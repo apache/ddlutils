@@ -51,12 +51,13 @@ public class MySqlModelReader extends JdbcModelReader
 
     /**
      * {@inheritDoc}
-     * @todo This needs some more work, since table names can be case sensitive or lowercase
-     *       depending on the platform (really cute).
-     *       See http://dev.mysql.com/doc/refman/4.1/en/name-case-sensitivity.html for more info.
      */
     protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
+        // TODO This needs some more work, since table names can be case sensitive or lowercase
+        //      depending on the platform (really cute).
+        //      See http://dev.mysql.com/doc/refman/4.1/en/name-case-sensitivity.html for more info.
+
         Table table = super.readTable(metaData, values);
 
         if (table != null)

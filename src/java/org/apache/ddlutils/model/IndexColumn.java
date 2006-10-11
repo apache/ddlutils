@@ -151,7 +151,10 @@ public class IndexColumn implements Cloneable, Serializable
     }
 
     /**
-     * {@inheritDoc}
+     * Compares this index column to the given one while ignoring the case of identifiers.
+     * 
+     * @param other The other index column
+     * @return <code>true</code> if this index column is equal (ignoring case) to the given one
      */
     public boolean equalsIgnoreCase(IndexColumn other)
     {
