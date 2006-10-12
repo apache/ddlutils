@@ -223,7 +223,7 @@ public class PlatformUtils
      * @param dataSource The data source
      * @return The database type or <code>null</code> if the database type couldn't be determined
      */
-    public String determineDatabaseType(DataSource dataSource) throws DynaSqlException
+    public String determineDatabaseType(DataSource dataSource) throws DatabaseOperationException
     {
         return determineDatabaseType(dataSource, null, null);
     }
@@ -237,7 +237,7 @@ public class PlatformUtils
      * @param password   The password to use for connecting to the database
      * @return The database type or <code>null</code> if the database type couldn't be determined
      */
-    public String determineDatabaseType(DataSource dataSource, String username, String password) throws DynaSqlException
+    public String determineDatabaseType(DataSource dataSource, String username, String password) throws DatabaseOperationException
     {
         Connection connection = null;
 
@@ -258,7 +258,7 @@ public class PlatformUtils
         }
         catch (SQLException ex)
         {
-            throw new DynaSqlException("Error while reading the database metadata: " + ex.getMessage(), ex);
+            throw new DatabaseOperationException("Error while reading the database metadata: " + ex.getMessage(), ex);
         }
         finally
         {

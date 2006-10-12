@@ -32,7 +32,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -134,7 +134,7 @@ public class SybasePlatform extends PlatformImplBase
     	}
     	catch (SQLException ex)
     	{
-    		throw new DynaSqlException(ex);
+    		throw new DatabaseOperationException(ex);
     	}
     	finally
     	{
@@ -146,7 +146,7 @@ public class SybasePlatform extends PlatformImplBase
     /**
      * {@inheritDoc}
      */
-	protected Object extractColumnValue(ResultSet resultSet, String columnName, int columnIdx, int jdbcType) throws SQLException
+	protected Object extractColumnValue(ResultSet resultSet, String columnName, int columnIdx, int jdbcType) throws DatabaseOperationException, SQLException
 	{
         boolean useIdx = (columnName == null);
 
@@ -184,8 +184,8 @@ public class SybasePlatform extends PlatformImplBase
 				}
 				catch (IOException ex)
 				{
-					throw new DynaSqlException("Error while extracting the value of column " + columnName + " of type " +
-							                   TypeMap.getJdbcTypeName(jdbcType) + " from a result set", ex);
+					throw new DatabaseOperationException("Error while extracting the value of column " + columnName + " of type " +
+							                             TypeMap.getJdbcTypeName(jdbcType) + " from a result set", ex);
 				}
 			}
 		}
@@ -226,7 +226,7 @@ public class SybasePlatform extends PlatformImplBase
 	/**
      * {@inheritDoc}
      */
-	public List fetch(Database model, String sql, Collection parameters, Table[] queryHints, int start, int end) throws DynaSqlException
+	public List fetch(Database model, String sql, Collection parameters, Table[] queryHints, int start, int end) throws DatabaseOperationException
 	{
 		setTextSize(MAX_TEXT_SIZE);
 		return super.fetch(model, sql, parameters, queryHints, start, end);
@@ -235,7 +235,7 @@ public class SybasePlatform extends PlatformImplBase
     /**
      * {@inheritDoc}
      */
-	public List fetch(Database model, String sql, Table[] queryHints, int start, int end) throws DynaSqlException
+	public List fetch(Database model, String sql, Table[] queryHints, int start, int end) throws DatabaseOperationException
 	{
 		setTextSize(MAX_TEXT_SIZE);
 		return super.fetch(model, sql, queryHints, start, end);
@@ -244,7 +244,7 @@ public class SybasePlatform extends PlatformImplBase
     /**
      * {@inheritDoc}
      */
-	public Iterator query(Database model, String sql, Collection parameters, Table[] queryHints) throws DynaSqlException
+	public Iterator query(Database model, String sql, Collection parameters, Table[] queryHints) throws DatabaseOperationException
 	{
 		setTextSize(MAX_TEXT_SIZE);
 		return super.query(model, sql, parameters, queryHints);
@@ -253,7 +253,7 @@ public class SybasePlatform extends PlatformImplBase
     /**
      * {@inheritDoc}
      */
-	public Iterator query(Database model, String sql, Table[] queryHints) throws DynaSqlException
+	public Iterator query(Database model, String sql, Table[] queryHints) throws DatabaseOperationException
 	{
 		setTextSize(MAX_TEXT_SIZE);
 		return super.query(model, sql, queryHints);

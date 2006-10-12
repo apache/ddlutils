@@ -1,4 +1,6 @@
-package org.apache.ddlutils;
+package org.apache.ddlutils.dynabean;
+
+import org.apache.ddlutils.DdlUtilsException;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,19 +22,19 @@ package org.apache.ddlutils;
  */
 
 /**
- * This exception is thrown when a database operation failed.
+ * This exception is thrown when something dealing with sql dyna beans or classes failed.
  * 
  * @version $Revision: 289996 $
  */
-public class DynaSqlException extends DdlUtilsException 
+public class SqlDynaException extends DdlUtilsException
 {
     /** Constant for serializing instances of this class. */
-    private static final long serialVersionUID = 7524362294381844776L;
+	private static final long serialVersionUID = 7904337501884384392L;
 
-    /**
+	/**
      * Creates a new empty exception object.
      */
-    public DynaSqlException()
+    public SqlDynaException()
     {
         super();
     }
@@ -42,7 +44,7 @@ public class DynaSqlException extends DdlUtilsException
      * 
      * @param msg The exception message
      */
-    public DynaSqlException(String msg)
+    public SqlDynaException(String msg)
     {
         super(msg);
     }
@@ -52,7 +54,7 @@ public class DynaSqlException extends DdlUtilsException
      * 
      * @param baseEx The base exception
      */
-    public DynaSqlException(Throwable baseEx)
+    public SqlDynaException(Throwable baseEx)
     {
         super(baseEx);
     }
@@ -63,7 +65,7 @@ public class DynaSqlException extends DdlUtilsException
      * @param msg    The exception message
      * @param baseEx The base exception
      */
-    public DynaSqlException(String msg, Throwable baseEx)
+    public SqlDynaException(String msg, Throwable baseEx)
     {
         super(msg, baseEx);
     }

@@ -29,9 +29,9 @@ import java.util.Iterator;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.dynabean.DynaClassCache;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
+import org.apache.ddlutils.dynabean.SqlDynaException;
 
 /**
  * Represents the database model, ie. the tables in the database. It also
@@ -62,7 +62,7 @@ public class Database implements Serializable, Cloneable
      * 
      * @param otherDb The other database model
      */
-    public void mergeWith(Database otherDb) throws DynaSqlException
+    public void mergeWith(Database otherDb) throws ModelException
     {
         for (Iterator it = otherDb._tables.iterator(); it.hasNext();)
         {
@@ -71,7 +71,7 @@ public class Database implements Serializable, Cloneable
             if (findTable(table.getName()) != null)
             {
                 // TODO: It might make more sense to log a warning and overwrite the table (or merge them) ?
-                throw new DynaSqlException("Cannot merge the models because table "+table.getName()+" already defined in this model");
+                throw new ModelException("Cannot merge the models because table "+table.getName()+" already defined in this model");
             }
             try
             {
@@ -497,7 +497,7 @@ public class Database implements Serializable, Cloneable
      * @param table The table to create the bean for
      * @return The new dyna bean
      */
-    public DynaBean createDynaBeanFor(Table table) throws DynaSqlException
+    public DynaBean createDynaBeanFor(Table table) throws SqlDynaException
     {
         return getDynaClassCache().createNewInstance(table);
     }
@@ -510,7 +510,7 @@ public class Database implements Serializable, Cloneable
      * @param caseSensitive Whether case matters for the names
      * @return The new dyna bean
      */
-    public DynaBean createDynaBeanFor(String tableName, boolean caseSensitive) throws DynaSqlException
+    public DynaBean createDynaBeanFor(String tableName, boolean caseSensitive) throws SqlDynaException
     {
         return getDynaClassCache().createNewInstance(findTable(tableName, caseSensitive));
     }

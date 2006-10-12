@@ -35,7 +35,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.model.Column;
@@ -82,7 +82,7 @@ public class ModelBasedResultSetIterator implements Iterator
      * @param cleanUpAfterFinish Whether to close the statement and connection after finishing
      *                           the iteration, upon on exception, or when this iterator is garbage collected
      */
-    public ModelBasedResultSetIterator(PlatformImplBase platform, Database model, ResultSet resultSet, Table[] queryHints, boolean cleanUpAfterFinish) throws DynaSqlException
+    public ModelBasedResultSetIterator(PlatformImplBase platform, Database model, ResultSet resultSet, Table[] queryHints, boolean cleanUpAfterFinish) throws DatabaseOperationException
     {
         if (resultSet != null)
         {
@@ -99,7 +99,7 @@ public class ModelBasedResultSetIterator implements Iterator
             catch (SQLException ex)
             {
                 cleanUp();
-                throw new DynaSqlException("Could not read the metadata of the result set", ex);
+                throw new DatabaseOperationException("Could not read the metadata of the result set", ex);
             }
         }
         else
@@ -209,7 +209,7 @@ public class ModelBasedResultSetIterator implements Iterator
     /**
      * {@inheritDoc}
      */
-    public boolean hasNext() throws DynaSqlException
+    public boolean hasNext() throws DatabaseOperationException
     {
         advanceIfNecessary();
         return !_isAtEnd;
@@ -218,7 +218,7 @@ public class ModelBasedResultSetIterator implements Iterator
     /**
      * {@inheritDoc}
      */
-    public Object next() throws DynaSqlException
+    public Object next() throws DatabaseOperationException
     {
         advanceIfNecessary();
         if (_isAtEnd)
@@ -260,7 +260,7 @@ public class ModelBasedResultSetIterator implements Iterator
             catch (Exception ex)
             {
                 cleanUp();
-                throw new DynaSqlException("Exception while reading the row from the resultset", ex);
+                throw new DatabaseOperationException("Exception while reading the row from the resultset", ex);
             }
         }
     }
@@ -268,7 +268,7 @@ public class ModelBasedResultSetIterator implements Iterator
     /**
      * Advances the result set if necessary.
      */
-    private void advanceIfNecessary() throws DynaSqlException
+    private void advanceIfNecessary() throws DatabaseOperationException
     {
         if (_needsAdvancing && !_isAtEnd)
         {
@@ -280,7 +280,7 @@ public class ModelBasedResultSetIterator implements Iterator
             catch (SQLException ex)
             {
                 cleanUp();
-                throw new DynaSqlException("Could not retrieve next row from result set", ex);
+                throw new DatabaseOperationException("Could not retrieve next row from result set", ex);
             }
             if (_isAtEnd)
             {
@@ -292,7 +292,7 @@ public class ModelBasedResultSetIterator implements Iterator
     /**
      * {@inheritDoc}
      */
-    public void remove() throws DynaSqlException
+    public void remove() throws DatabaseOperationException
     {
         try
         {
@@ -301,7 +301,7 @@ public class ModelBasedResultSetIterator implements Iterator
         catch (SQLException ex)
         {
             cleanUp();
-            throw new DynaSqlException("Failed to delete current row", ex);
+            throw new DatabaseOperationException("Failed to delete current row", ex);
         }
     }
 

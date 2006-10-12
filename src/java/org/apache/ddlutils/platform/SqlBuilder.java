@@ -41,7 +41,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.alteration.AddColumnChange;
@@ -69,6 +68,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.ModelException;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
@@ -1814,7 +1814,7 @@ public abstract class SqlBuilder
         {
             if (!getPlatformInfo().isNonPKIdentityColumnsSupported() && !column.isPrimaryKey())
             {
-                throw new DynaSqlException("Column "+column.getName()+" in table "+table.getName()+" is auto-incrementing but not a primary key column, which is not supported by the platform");
+                throw new ModelException("Column "+column.getName()+" in table "+table.getName()+" is auto-incrementing but not a primary key column, which is not supported by the platform");
             }
             print(" ");
             writeColumnAutoIncrementStmt(table, column);
@@ -1952,7 +1952,7 @@ public abstract class SqlBuilder
             if (!getPlatformInfo().isDefaultValuesForLongTypesSupported() && 
                 ((column.getTypeCode() == Types.LONGVARBINARY) || (column.getTypeCode() == Types.LONGVARCHAR)))
             {
-                throw new DynaSqlException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
+                throw new ModelException("The platform does not support default values for LONGVARCHAR or LONGVARBINARY columns");
             }
             // we write empty default value strings only if the type is not a numeric or date/time type
             if (isValidDefaultValue(column.getDefaultValue(), column.getTypeCode()))
@@ -2236,7 +2236,7 @@ public abstract class SqlBuilder
 
             if (!index.isUnique() && !getPlatformInfo().isIndicesSupported())
             {
-                throw new DynaSqlException("Platform does not support non-unique indices");
+                throw new ModelException("Platform does not support non-unique indices");
             }
             writeExternalIndexCreateStmt(table, index);
         }
@@ -2294,7 +2294,7 @@ public abstract class SqlBuilder
                     if (col == null)
                     {
                         // would get null pointer on next line anyway, so throw exception
-                        throw new DynaSqlException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
+                        throw new ModelException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
                     }
                     if (idx > 0)
                     {
@@ -2339,8 +2339,8 @@ public abstract class SqlBuilder
 
             if (col == null)
             {
-                //would get null pointer on next line anyway, so throw exception
-                throw new DynaSqlException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
+                // would get null pointer on next line anyway, so throw exception
+                throw new ModelException("Invalid column '" + idxColumn.getName() + "' on index " + index.getName() + " for table " + table.getName());
             }
             if (idx > 0)
             {

@@ -141,7 +141,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         }
         catch (Exception ex)
         {
-            throw new DynaSqlException(ex);
+            throw new DatabaseOperationException(ex);
         }
 
         _databaseName = props.getProperty(PLATFORM_PROPERTY);
@@ -151,7 +151,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             _databaseName = new PlatformUtils().determineDatabaseType(_dataSource);
             if (_databaseName == null)
             {
-                throw new DynaSqlException("Could not determine platform from datasource, please specify it in the jdbc.properties via the ddlutils.platform property");
+                throw new DatabaseOperationException("Could not determine platform from datasource, please specify it in the jdbc.properties via the ddlutils.platform property");
             }
         }
     }
@@ -212,7 +212,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      * @param schemaXml The XML database schema
      * @return The parsed database model
      */
-    protected Database createDatabase(String schemaXml) throws DynaSqlException
+    protected Database createDatabase(String schemaXml) throws DatabaseOperationException
     {
     	Database model = parseDatabaseFromString(schemaXml);
 
@@ -225,7 +225,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      * 
      * @param model The model
      */
-    protected void createDatabase(Database model) throws DynaSqlException
+    protected void createDatabase(Database model) throws DatabaseOperationException
     {
         try
         {
@@ -236,7 +236,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         }
         catch (Exception ex)
         {
-            throw new DynaSqlException(ex);
+            throw new DatabaseOperationException(ex);
         }
     }
 
@@ -246,7 +246,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      * @param schemaXml The model XML
      * @return The model object
      */
-    protected Database alterDatabase(String schemaXml) throws DynaSqlException
+    protected Database alterDatabase(String schemaXml) throws DatabaseOperationException
     {
         Database model = parseDatabaseFromString(schemaXml);
 
@@ -259,7 +259,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      * 
      * @param model The model
      */
-    protected void alterDatabase(Database model) throws DynaSqlException
+    protected void alterDatabase(Database model) throws DatabaseOperationException
     {
         Properties props   = getTestProperties();
         String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
@@ -275,7 +275,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         }
         catch (Exception ex)
         {
-            throw new DynaSqlException(ex);
+            throw new DatabaseOperationException(ex);
         }
     }
 
@@ -285,7 +285,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      * @param dataXml The data xml
      * @return The database
      */
-    protected Database insertData(String dataXml) throws DynaSqlException
+    protected Database insertData(String dataXml) throws DatabaseOperationException
     {
         try
         {
@@ -298,23 +298,16 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         }
         catch (Exception ex)
         {
-            throw new DynaSqlException(ex);
+            throw new DatabaseOperationException(ex);
         }
     }
 
     /**
      * Drops the tables defined in the database model.
      */
-    protected void dropDatabase() throws DynaSqlException
+    protected void dropDatabase() throws DatabaseOperationException
     {
-        try
-        {
-            getPlatform().dropTables(_model, true);
-        }
-        catch (Exception ex)
-        {
-            throw new DynaSqlException(ex);
-        }
+        getPlatform().dropTables(_model, true);
     }
 
     /**
