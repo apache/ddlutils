@@ -1,19 +1,22 @@
 package org.apache.ddlutils.platform.postgresql;
 
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import java.sql.Connection;
@@ -26,7 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.platform.PlatformImplBase;
@@ -34,7 +37,6 @@ import org.apache.ddlutils.platform.PlatformImplBase;
 /**
  * The platform implementation for PostgresSql.
  * 
- * @author Thomas Dudziak
  * @version $Revision: 231306 $
  */
 public class PostgreSqlPlatform extends PlatformImplBase
@@ -112,7 +114,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
      * @param parameters          Additional parameters for the operation
      * @param createDb            Whether to create or drop the database
      */
-    private void createOrDropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters, boolean createDb) throws DynaSqlException, UnsupportedOperationException
+    private void createOrDropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters, boolean createDb) throws DatabaseOperationException, UnsupportedOperationException
     {
         if (JDBC_DRIVER.equals(jdbcDriverClassName))
         {
@@ -120,7 +122,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
 
             if (slashPos < 0)
             {
-                throw new DynaSqlException("Cannot parse the given connection url "+connectionUrl);
+                throw new DatabaseOperationException("Cannot parse the given connection url "+connectionUrl);
             }
 
             int          paramPos   = connectionUrl.lastIndexOf('?');
@@ -163,7 +165,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
             }
             catch (Exception ex)
             {
-                throw new DynaSqlException("Error while trying to " + (createDb ? "create" : "drop") + " a database: "+ex.getLocalizedMessage(), ex);
+                throw new DatabaseOperationException("Error while trying to " + (createDb ? "create" : "drop") + " a database: "+ex.getLocalizedMessage(), ex);
             }
             finally
             {
@@ -196,7 +198,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
     /**
      * {@inheritDoc}
      */
-    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DynaSqlException, UnsupportedOperationException
+    public void createDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password, Map parameters) throws DatabaseOperationException, UnsupportedOperationException
     {
         // With PostgreSQL, you create a database by executing "CREATE DATABASE" in an existing database (usually 
         // the template1 database because it usually exists)
@@ -206,7 +208,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
     /**
      * {@inheritDoc}
      */
-    public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DynaSqlException, UnsupportedOperationException
+    public void dropDatabase(String jdbcDriverClassName, String connectionUrl, String username, String password) throws DatabaseOperationException, UnsupportedOperationException
     {
         // With PostgreSQL, you create a database by executing "DROP DATABASE" in an existing database (usually 
         // the template1 database because it usually exists)

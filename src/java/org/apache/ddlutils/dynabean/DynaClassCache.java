@@ -1,19 +1,22 @@
 package org.apache.ddlutils.dynabean;
 
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,15 +26,12 @@ import java.util.Map;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
-import org.apache.ddlutils.DynaSqlException;
 import org.apache.ddlutils.model.Table;
 
 /**
  * Provides a cache of dyna class instances for a specific model, as well as
  * helper methods for dealing with these classes.
  *
- * @author James Strachan
- * @author Thomas Dudziak
  * @version $Revision: 231110 $
  */
 public class DynaClassCache
@@ -45,7 +45,7 @@ public class DynaClassCache
      * @param table The table
      * @return The new empty dyna bean
      */
-    public DynaBean createNewInstance(Table table) throws DynaSqlException
+    public DynaBean createNewInstance(Table table) throws SqlDynaException
     {
         try
         {
@@ -53,11 +53,11 @@ public class DynaClassCache
         }
         catch (InstantiationException ex)
         {
-            throw new DynaSqlException("Could not create a new dyna bean for table "+table.getName(), ex);
+            throw new SqlDynaException("Could not create a new dyna bean for table "+table.getName(), ex);
         }
         catch (IllegalAccessException ex)
         {
-            throw new DynaSqlException("Could not create a new dyna bean for table "+table.getName(), ex);
+            throw new SqlDynaException("Could not create a new dyna bean for table "+table.getName(), ex);
         }
     }
 
@@ -75,7 +75,7 @@ public class DynaClassCache
      * @return A new dyna bean bound to the given table and containing all the properties from
      *         the source object
      */
-    public DynaBean copy(Table table, Object source) throws DynaSqlException
+    public DynaBean copy(Table table, Object source) throws SqlDynaException
     {
         DynaBean answer = createNewInstance(table);
 
@@ -86,11 +86,11 @@ public class DynaClassCache
         }
         catch (InvocationTargetException ex)
         {
-            throw new DynaSqlException("Could not populate the bean", ex);
+            throw new SqlDynaException("Could not populate the bean", ex);
         }
         catch (IllegalAccessException ex)
         {
-            throw new DynaSqlException("Could not populate the bean", ex);
+            throw new SqlDynaException("Could not populate the bean", ex);
         }
 
         return answer;
@@ -121,18 +121,18 @@ public class DynaClassCache
      * @param dynaBean The bean
      * @return The dyna bean class
      */
-    public SqlDynaClass getDynaClass(DynaBean dynaBean) throws DynaSqlException
+    public SqlDynaClass getDynaClass(DynaBean dynaBean) throws SqlDynaException
     {
         DynaClass dynaClass = dynaBean.getDynaClass();
 
         if (dynaClass instanceof SqlDynaClass)
         {
-            return (SqlDynaClass) dynaClass;
+            return (SqlDynaClass)dynaClass;
         }
         else
         {
             // TODO: we could autogenerate an SqlDynaClass here ?
-            throw new DynaSqlException("The dyna bean is not an instance of a SqlDynaClass");
+            throw new SqlDynaException("The dyna bean is not an instance of a SqlDynaClass");
         }
     }
 

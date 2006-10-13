@@ -1,19 +1,22 @@
 package org.apache.ddlutils.io;
 
 /*
- * Copyright 1999-2006 The Apache Software Foundation.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import java.sql.Connection;
@@ -26,7 +29,7 @@ import java.util.Iterator;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ddlutils.DynaSqlException;
+import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.model.Column;
@@ -40,7 +43,6 @@ import org.apache.ddlutils.model.Table;
  * sure that the beans are inserted in the correct order according to the foreignkeys. Note
  * that this will only work if there are no circles.
  * 
- * @author Thomas Dudziak
  * @version $Revision: 289996 $
  */
 public class DataToDatabaseSink implements DataSink
@@ -219,7 +221,7 @@ public class DataToDatabaseSink implements DataSink
         {
             _connection = _platform.borrowConnection();
         }
-        catch (DynaSqlException ex)
+        catch (DatabaseOperationException ex)
         {
             throw new DataSinkException(ex);
         }
