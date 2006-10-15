@@ -19,6 +19,8 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
 
 import junit.framework.Test;
 
@@ -114,6 +117,45 @@ public class TestDatatypes extends RoundtripTestBase
 
         assertEquals("",
         		     alterTablesSql);
+
+        StringWriter stringWriter = new StringWriter();
+        DataWriter   dataWriter   = new DataWriter(stringWriter, "UTF-8");
+
+        dataWriter.writeDocumentStart();
+        for (int idx = 0; idx < getModel().getTableCount(); idx++)
+        {
+            Table[] tables = { (Table)getModel().getTable(idx) };
+
+            dataWriter.write(getPlatform().query(getModel(), "select * from " + tables[0].getName(), tables));
+        }
+        dataWriter.writeDocumentEnd();
+
+        String dataSql = stringWriter.toString();
+        
+        getPlatform().dropTables(getModel(), false);
+
+        createDatabase(modelXml);
+
+        DataToDatabaseSink sink   = new DataToDatabaseSink(getPlatform(), getModel());
+        DataReader         reader = new DataReader();
+
+        sink.setEnsureForeignKeyOrder(true);
+        sink.setUseBatchMode(false);
+        reader.setModel(getModel());
+        reader.setSink(sink);
+        try
+        {
+            reader.parse(new StringReader(dataSql));
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(ex);
+        }
+
+        beans = getRows("roundtrip");
+
+        assertEquals(expected1, beans.get(0), "avalue");
+        assertEquals(expected2, beans.get(1), "avalue");
     }
 
     /**

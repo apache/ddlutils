@@ -87,7 +87,7 @@ public class TimeConverter implements SqlTypeConverter
                 }
 
                 _calendar.clear();
-                _calendar.set(Calendar.HOUR, hours);
+                _calendar.set(Calendar.HOUR_OF_DAY, hours);
                 _calendar.set(Calendar.MINUTE, minutes);
                 _calendar.set(Calendar.SECOND, seconds);
                 return new Time(_calendar.getTimeInMillis());
