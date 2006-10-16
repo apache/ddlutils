@@ -211,9 +211,9 @@ under the License.
   <!-- Runs the test cases                                                -->
   <!-- ================================================================== -->
   <target name="junit"
-          description="Runs the test cases against the default database (Hsqldb)">
-    <antcall target="junit-hsqldb"/>
- 	</target>
+          description="Runs the test cases against no database or the one specified via -Djdbc.properties.file">
+    <antcall target="-junit-internal"/>
+  </target>
 
   <!-- ================================================================== -->
   <!-- Runs the test cases against HsqlDb                                 -->
@@ -241,7 +241,7 @@ under the License.
   </target>
 
   <!-- ================================================================== -->
-  <!-- Runs the test cases against AxionDB                                -->
+  <!-- Runs the test cases against MySQL                                -->
   <!-- ================================================================== -->
   <target name="junit-mysql"
           description="Runs the test cases against mysql">
@@ -277,8 +277,9 @@ under the License.
       <classpath refid="compilation-classpath"/>
       <batchtest todir="${build.test.dir}">
           <fileset dir="${src.test.dir}" includes="**/Test*.java">
-    	    <exclude name="**/TestDatabaseWriterBase.java"/>
-  	        <exclude name="**/TestPlatformBase.java"/>
+    	    <exclude name="**/Test*Base.java"/>
+  	        <exclude name="**/TestPlatform.java"/>
+  	        <exclude name="**/TestSummaryCreatorTask.java"/>
           </fileset>
       </batchtest>
     </junit>
@@ -296,6 +297,23 @@ under the License.
       <report format="frames"
               todir="${build.test.dir}"/>
     </junitreport>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Creates the test summary                                           -->
+  <!-- ================================================================== -->
+  <target name="junit-summary"
+  	      depends="compile-tests"
+          description="Creates a test summary">
+    <taskdef name="testSummary"
+             classname="org.apache.ddlutils.TestSummaryCreatorTask"
+             classpathref="compilation-classpath"/>
+    <testSummary>
+      <fileset dir="${build.test.dir}"
+      	       casesensitive="false">
+          <include name="test*.xml"/>
+      </fileset>
+    </testSummary>
   </target>
 
   <!-- ================================================================== -->

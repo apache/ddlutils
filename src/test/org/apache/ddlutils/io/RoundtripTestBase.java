@@ -151,14 +151,14 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     }
 
     /**
-     * Retrieves all rows from the given table.
-     * 
-     * @param tableName The table
-     * @return The rows
+     * Returns a "SELECT * FROM [table name]" statement. It also takes
+     * delimited identifier mode into account if enabled.
+     *  
+     * @param table The table
+     * @return The statement
      */
-    protected List getRows(String tableName)
+    protected String getSelectQueryForAllString(Table table)
     {
-        Table        table = getModel().findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
         StringBuffer query = new StringBuffer();
 
         query.append("SELECT * FROM ");
@@ -171,8 +171,20 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         {
             query.append(getPlatformInfo().getDelimiterToken());
         }
+        return query.toString();
+    }
+    
+    /**
+     * Retrieves all rows from the given table.
+     * 
+     * @param tableName The table
+     * @return The rows
+     */
+    protected List getRows(String tableName)
+    {
+        Table table = getModel().findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
         
-        return getPlatform().fetch(getModel(), query.toString(), new Table[] { table });
+        return getPlatform().fetch(getModel(), getSelectQueryForAllString(table), new Table[] { table });
     }
 
     /**

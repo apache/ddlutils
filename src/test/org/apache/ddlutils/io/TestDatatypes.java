@@ -124,14 +124,16 @@ public class TestDatatypes extends RoundtripTestBase
         dataWriter.writeDocumentStart();
         for (int idx = 0; idx < getModel().getTableCount(); idx++)
         {
-            Table[] tables = { (Table)getModel().getTable(idx) };
+            Table table = getModel().getTable(idx);
 
-            dataWriter.write(getPlatform().query(getModel(), "select * from " + tables[0].getName(), tables));
+            dataWriter.write(getPlatform().query(getModel(), getSelectQueryForAllString(table), new Table[] { table }));
         }
         dataWriter.writeDocumentEnd();
 
         String dataSql = stringWriter.toString();
         
+        assertTrue((dataSql != null) && (dataSql.length() > 0));
+
         getPlatform().dropTables(getModel(), false);
 
         createDatabase(modelXml);
