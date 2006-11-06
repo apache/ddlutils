@@ -30,6 +30,7 @@ import org.apache.ddlutils.platform.CreationParameters;
  * Base type for database commands that use creation parameters.
  * 
  * @version $Revision: 289996 $
+ * @ant.type ignore="true"
  */
 public abstract class DatabaseCommandWithCreationParameters extends DatabaseCommand
 {

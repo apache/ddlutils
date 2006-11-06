@@ -30,9 +30,10 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
 /**
- * Command to dump data from the database into an XML file.
+ * Generates an XML file containing the data currently stored in the database.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="writeDataToFile"
  */
 public class WriteDataToFileCommand extends ConvertingDatabaseCommand
 {
@@ -42,9 +43,10 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
     private String _encoding;
 
     /**
-     * Sets the file to output the data to.
+     * Specifies the file to write the data XML to.
      * 
      * @param outputFile The output file
+     * @ant.required
      */
     public void setOutputFile(File outputFile)
     {
@@ -52,9 +54,10 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Sets the output encoding.
+     * Specifies the encoding of the XML file.
      * 
      * @param encoding The encoding
+     * @ant.not-required The default encoding is <code>UTF-8</code>.
      */
     public void setEncoding(String encoding)
     {

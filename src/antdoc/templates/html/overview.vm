@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+  <title>$title</title>
+<style type="text/css">
+          /*  */
+          @import "skin/tigris.css";
+          @import "skin/quirks.css";
+          @import "skin/inst.css";
+         /*   */
+        </style>
+<link media="print" href="skin/print.css" type="text/css" rel="stylesheet">
+<link href="skin/forrest.css" type="text/css" rel="stylesheet">
+
+</head>
+<body>
+
+<h1>$title - Documentation</h1>
+
+<p>
+DdlUtils comes with two <a href="http://ant.apache.org/">Ant</a> tasks that allow you to manipulate the
+database structure, insert data into the database, and to dump the database structure and
+data contained in it, to XML.
+</p>
+
+<h3>Using the Tasks</h3>
+
+<p>
+Lets see examples for how to use them:
+</p>
+<pre class="code">
+&lt;path id="runtime-classpath"&gt;
+  &lt;fileset dir="lib"&gt;
+    &lt;include name="**/*.jar"/&gt;
+    &lt;include name="**/*.zip"/&gt;
+
+  &lt;/fileset&gt;
+&lt;/path&gt;
+
+
+&lt;target name="database-setup"
+        description="Creates the database structure and inserts data into the database"&gt;
+  &lt;taskdef name="ddlToDatabase"
+           classname="org.apache.ddlutils.task.DdlToDatabaseTask"&gt;
+    &lt;classpath refid="runtime-classpath"/&gt;
+  &lt;/taskdef&gt;
+
+  &lt;ddlToDatabase&gt;
+    &lt;database url="jdbc:postgresql://localhost/test"
+              driverClassName="org.postgresql.Driver"
+              username="someuser"
+              password="somepassword"/&gt;
+    &lt;fileset dir="src/schema"&gt;
+      &lt;include name="project-schema.xml"/&gt;
+    &lt;/fileset&gt;
+
+    &lt;createDatabase failonerror="false"/&gt;
+
+    &lt;writeSchemaToDatabase/&gt; 
+    &lt;writeDataToDatabase datafile="src/data/data.xml"/&gt; 
+  &lt;/ddlToDatabase&gt;
+&lt;/target&gt;</pre>
+<p>
+This snippet essentially uses the <code>DdlToDatabaseTask</code> task to create the a PostgreSQL
+database at <code>//localhost/test</code>, establish the database structure (tables etc.)
+defined in the file <code>src/schema/project-schema.xml</code> in this database, and then
+inserts the data defined in <code>src/data/data.xml</code>.
+</p>
+<p>
+Required for this to work is that both DdlUtils and the JDBC driver are available
+in the path specified by <code>runtime-classpath</code>. In the above snippet, this path
+contains all JARs and ZIPs in sub-directory <code>lib</code>.
+</p>
+<div class="infomessage">
+<p>
+<strong>Note</strong>
+</p>
+<p>
+Not every database platform supports creation of new databases via JDBC. Please refer to the
+documentation of the support for the individual databases <a href="database-support.html">here</a>.
+</p>
+</div>
+<p>
+The opposite direction is achieved via the <code>DatabaseToDdlTask</code> task:
+</p>
+<pre class="code">
+&lt;path id="runtime-classpath"&gt;
+  &lt;fileset dir="lib"&gt;
+    &lt;include name="**/*.jar"/&gt;
+
+    &lt;include name="**/*.zip"/&gt;
+  &lt;/fileset&gt;
+&lt;/path&gt;
+
+&lt;target name="database-dump" description="Dumps the database structure"&gt;
+  &lt;taskdef name="databaseToDdl"
+           classname="org.apache.ddlutils.task.DatabaseToDdlTask"&gt;
+    &lt;classpath refid="runtime-classpath"/&gt;
+
+  &lt;/taskdef&gt;
+  &lt;databaseToDdl modelName="MyModel"&gt;
+    &lt;database url="jdbc:derby:ddlutils"
+              driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+              username=""
+              password=""/&gt;
+
+    &lt;writeSchemaToFile outputFile="db-schema.xml"/&gt;
+    &lt;writeDataToFile outputFile="data.xml"/&gt;
+  &lt;/databaseToDdl&gt;
+
+&lt;/target&gt;</pre>
+<p>
+Here, the database schema is retrieved via the specified JDBC driver and written
+to the file <code>db-schema.xml</code>. Likewise, the data in the database is written
+to the file <code>data.xml</code>.
+</p>
+
+
+<h3>Requirements</h3>
+<p>The DdlUtils tasks require Ant version 1.5 or newer.</p>
+
+<h3>Reference</h3>
+<p>The tasks reference documentation can be found <a href="index.all.html">here</a>.</p>
+
+<div class="copyright">
+  <hr />
+  <br />
+  <em>Copyright &copy; 2005-2006 Apache Software Foundation. All Rights Reserved.</em>
+</div>
+
+	
+</body>
+</html>

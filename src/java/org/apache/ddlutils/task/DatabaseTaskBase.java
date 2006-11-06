@@ -34,6 +34,7 @@ import org.apache.tools.ant.Task;
  * Base class for DdlUtils Ant tasks that operate on a database.
  * 
  * @version $Revision: 289996 $
+ * @ant.task ignore="true"
  */
 public abstract class DatabaseTaskBase extends Task
 {
@@ -53,9 +54,15 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Sets the database type.
+     * Specifies the database type. You should only need to specify this if DdlUtils is not able to
+     * derive the setting from the name of the used jdbc driver or the jdbc connection url.
+     * If you need to specify this, please post your jdbc driver and connection url combo
+     * to the user mailing list so that DdlUtils can be enhanced to support this combo.<br/>
+     * Valid values are currently: <code>axion, cloudscape, db2, derby, firebird, hsqldb, interbase,
+     * maxdb, mckoi, mssql, mysql, mysql5, oracle, oracle9, oracle10, postgresql, sapdb, sybase</code>
      * 
      * @param type The database type
+     * @ant.not-required Per default, DdlUtils tries to determine the database type via JDBC.
      */
     public void setDatabaseType(String type)
     {
@@ -86,9 +93,10 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Sets the catalog pattern.
+     * Sets the catalog pattern used when accessing the database.
      * 
      * @param catalogPattern The catalog pattern
+     * @ant.not-required Per default, no specific catalog is used.
      */
     public void setCatalogPattern(String catalogPattern)
     {
@@ -99,9 +107,10 @@ public abstract class DatabaseTaskBase extends Task
     }
     
     /**
-     * Sets the schema pattern.
+     * Sets the schema pattern used when accessing the database.
      * 
      * @param schemaPattern The schema pattern
+     * @ant.not-required Per default, no specific schema is used.
      */
     public void setSchemaPattern(String schemaPattern)
     {
@@ -122,9 +131,16 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Specifies whether delimited SQL identifiers shall be used.
+     * Specifies whether DdlUtils shall use delimited (quoted) identifiers (table names, column names etc.)
+     * In most databases, undelimited identifiers will be converted to uppercase by the database,
+     * and the case of the identifier is ignored when performing any SQL command. Undelimited
+     * identifiers can contain only alphanumerical characters and the underscore. Also, no reserved
+     * words can be used as such identifiers.<br/>
+     * The limitations do not exist for delimited identifiers. However case of the identifier will be
+     * important in every SQL command executed against the database.
      *
      * @param useDelimitedSqlIdentifiers <code>true</code> if delimited SQL identifiers shall be used
+     * @ant.not-required Default is <code>false</code>.
      */
     public void setUseDelimitedSqlIdentifiers(boolean useDelimitedSqlIdentifiers)
     {
@@ -143,10 +159,13 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Specifies whether a table's foreign keys read from a live database
-     * shall be sorted alphabetically.
+     * Specifies whether a table's foreign keys read from a live database shall be sorted
+     * alphabetically or left in the order that they are returned by the database. Note that
+     * the sort is case sensitive only if delimied identifier mode is on
+     * (<code>useDelimitedSqlIdentifiers</code> is set to <code>true</code>).
      *
      * @param sortForeignKeys <code>true</code> if the foreign keys shall be sorted
+     * @ant.not-required Default is <code>false</code>.
      */
     public void setSortForeignKeys(boolean sortForeignKeys)
     {
@@ -165,8 +184,10 @@ public abstract class DatabaseTaskBase extends Task
 
     /**
      * Specifies whether the database shall be shut down after the task has finished.
+     * This is mostly usefule for embedded databases.
      *
      * @param shutdownDatabase <code>true</code> if the database shall be shut down
+     * @ant.not-required Default is <code>false</code>.
      */
     public void setShutdownDatabase(boolean shutdownDatabase)
     {

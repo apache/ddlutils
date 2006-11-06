@@ -27,9 +27,11 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * Command for writing a database schema into the database.
+ * Creates the schema in the database that is described by the schema XML files specified for
+ * the enclosing task.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="writeSchemaToDatabase"
  */
 public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationParameters
 {
@@ -49,9 +51,11 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
     }
 
     /**
-     * Specifies whether to alter the database if it already exists, or re-set it.
+     * Specifies whether DdlUtils shall alter an existing database rather than clearing it and
+     * creating it new.
      * 
      * @param alterTheDb <code>true</code> if to alter the database
+     * @ant.not-required Per default, an existing database is altered
      */
     public void setAlterDatabase(boolean alterTheDb)
     {
@@ -69,9 +73,11 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
     }
 
     /**
-     * Specifies whether to drop tables and the associated constraints if necessary.
+     * Specifies whether tables, external constraints, etc. can be dropped if necessary.
+     * Note that this is only relevant when <code>alterDatabase</code> is <code>false</code>.
      * 
      * @param doDrops <code>true</code> if drops shall be performed
+     * @ant.not-required Per default, database structures are dropped if necessary
      */
     public void setDoDrops(boolean doDrops)
     {

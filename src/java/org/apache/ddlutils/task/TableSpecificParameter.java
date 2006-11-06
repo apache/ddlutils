@@ -26,21 +26,26 @@ import java.util.StringTokenizer;
 import org.apache.ddlutils.model.Table;
 
 /**
- * A {@link org.apache.ddlutils.task.Parameter} intended for specific tables.
- * 
- * TODO: Some wildcard/regular expression mechanism would be useful
+ * Specifies a parameter for the creation of the tables. These are usually platform specific.
+ * Note that parameters are only applied when creating new tables, not when altering existing ones.
+ * Note that if no table name is specified, the parameter is applied to all tables.
  * 
  * @version $Revision: 231306 $
+ * @ant.type name="tableParameter"
  */
 public class TableSpecificParameter extends Parameter
 {
+    // TODO: Some wildcard/regular expression mechanism would be useful
+
     /** The tables for which this parameter is applicable. */
     private ArrayList _tables = new ArrayList();
 
     /**
-     * Sets the tables as a comma-separated list.
+     * Specifies the comma-separated list of table names where this parameter shall be applied.
      * 
      * @param tableList The tables
+     * @ant.not-required Use this or the <code>table</code> parameter. If neiter is specified,
+     *                   the parameter is applied to all tables.
      */
     public void setTables(String tableList)
     {
@@ -56,9 +61,11 @@ public class TableSpecificParameter extends Parameter
     }
 
     /**
-     * Sets the single table.
+     * Specifies the name of the table where this parameter shall be applied.
      * 
      * @param tableName The table
+     * @ant.not-required Use this or the <code>tables</code> parameter. If neiter is specified,
+     *                   the parameter is applied to all tables.
      */
     public void setTable(String tableName)
     {

@@ -35,9 +35,19 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 
 /**
- * Command for inserting data into a database.
+ * Inserts the data defined by the data XML file(s) into the database. This requires the schema
+ * in the database to match the schema defined by the XML files specified at the enclosing task.<br/>
+ * DdlUtils will honor the order imposed by the foreign keys. Ie. first all required entries are
+ * inserted, then the dependent ones. Obviously this requires that no circular references exist
+ * in the schema (DdlUtils currently does not check this). Also, the referenced entries must be
+ * present in the data, otherwise the task will fail. This behavior can be turned off via the
+ * <code>ensureForeignKeyOrder</code> attribute.<br/>
+ * In order to define data for foreign key dependencies that use auto-incrementing primary keys,
+ * simply use unique values for their columns. DdlUtils will automatically use the real primary
+ * key values. Note though that not every database supports the retrieval of auto-increment values.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="writeDataToDatabase"
  */
 public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
 {
@@ -63,9 +73,10 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Set the xml data file.
+     * Specifies the name of the single XML file that contains the data to insert into the database.
      *
      * @param dataFile The data file
+     * @ant.not-required If not specified, no data is inserted into the database upon creation.
      */
     public void setDataFile(File dataFile)
     {
@@ -73,9 +84,12 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Sets the maximum number of objects to insert in one batch.
+     * The maximum number of insert statements to combine in one batch. The number typically
+     * depends on the JDBC driver and the amount of available memory.<br/>
+     * This value is only used if <code>useBatchMode</code> is <code>true</code>.
      *
      * @param batchSize The number of objects
+     * @ant.not-required The default value is 1
      */
     public void setBatchSize(int batchSize)
     {
@@ -83,9 +97,14 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Specifies whether batch mode shall be used.
+     * Specifies whether batch mode shall be used for inserting the data. In this mode, insert statements
+     * for the same table are bundled together and executed as one statement which can be a lot faster
+     * than single insert statements. To achieve the highest performance, you should group the data in the
+     * XML file according to the tables because a batch insert only works for one table which means when
+     * the table changes the batch is executed and a new one will be started.
      *
      * @param useBatchMode <code>true</code> if batch mode shall be used
+     * @ant.not-required Per default, batch mode is not used
      */
     public void setUseBatchMode(boolean useBatchMode)
     {
@@ -93,10 +112,14 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Specifies whether the foreign key order shall be honored when inserted
-     * data into the database.
+     * Specifies whether the foreign key order shall be honored when inserted data into the database.
+     * Otherwise, DdlUtils will simply assume that the entry order is ok. Note that execution will
+     * be slower when DdlUtils has to ensured in the inserted data, so if you know that the data is
+     * specified in foreign key order (i.e. referenced rows come before referencing rows), then
+     * turn this off.
      *
      * @param ensureFKOrder <code>true</code> if the foreign key order shall be followed
+     * @ant.not-required Per default, foreign key order is honored
      */
     public void setEnsureForeignKeyOrder(boolean ensureFKOrder)
     {

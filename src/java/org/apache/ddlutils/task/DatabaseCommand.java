@@ -27,6 +27,7 @@ import org.apache.tools.ant.BuildException;
  * Base type for commands that have the database info embedded.
  * 
  * @version $Revision: 289996 $
+ * @ant.type ignore="true"
  */
 public abstract class DatabaseCommand implements Command
 {
@@ -97,9 +98,10 @@ public abstract class DatabaseCommand implements Command
     }
 
     /**
-     * Specifies whether the command execution will be stopped upon an error.
+     * Specifies whether the execution shall stop if an error has occurred while the task runs.
      *
-     * @param failOnError <code>true</code> if the execution stops in case of an error
+     * @param failOnError <code>true</code> if the execution shall stop in case of an error
+     * @ant.not-required By default, execution will be stopped when an error is encountered.
      */
     public void setFailOnError(boolean failOnError)
     {

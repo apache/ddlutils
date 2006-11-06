@@ -29,6 +29,7 @@ import org.apache.tools.ant.BuildException;
  * Encloses the platform configuration for the Ant tasks.
  * 
  * @version $Revision: 329426 $
+ * @ant.type ignore="true"
  */
 public class PlatformConfiguration
 {

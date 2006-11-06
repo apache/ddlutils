@@ -31,9 +31,13 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * Command for creating a database.
+ * The sub task for creating the target database. Note that this is only supported on some database
+ *  platforms. See <a href="database-support.html">here</a> for details on which platforms support this.<br/>
+ *  This sub task does not require schema files. Therefore the <code>fileset</code> subelement and
+ *  the <code>schemaFile</code> attribute of the task can be omitted.
  * 
  * @version $Revision: 231306 $
+ * @ant.task name="createDatabase"
  */
 public class CreateDatabaseCommand extends DatabaseCommand
 {

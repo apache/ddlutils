@@ -31,9 +31,13 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
 /**
- * Ant task for working with DDL, e.g. generating the database from a schema, inserting data.
+ * This is the container for sub tasks that operate in the direction file -> database, e.g.
+ * that create/drop a schema in the database, insert data into the database. They also
+ * create DTDs for these data files, and dump the SQL for creating a schema in the database
+ * to a file.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="ddlToDatabase"
  */
 public class DdlToDatabaseTask extends DatabaseTaskBase
 {
@@ -47,9 +51,12 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     private boolean _validateXml = false;
 
     /**
-     * Specifies whether XML input files are validated against the internal or an external DTD.
+     * Specifies whether DdlUtils shall use the embedded DTD for validating the schema XML (if
+     * it matches <code>http://db.apache.org/torque/dtd/database.dtd</code>). This is useful for
+     * instance for environments where no web access is possible.
      *
      * @param useInternalDtd <code>true</code> if input files are to be validated against the internal DTD
+     * @ant.not-required Default is <code>true</code>.
      */
     public void setUseInternalDtd(boolean useInternalDtd)
     {
@@ -57,9 +64,10 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     }
 
     /**
-     * Specifies whether XML input files are validated at all.
+     * Specifies whether XML input files should be validated against the DTD.
      *
      * @param validateXml <code>true</code> if input files are to be validated
+     * @ant.not-required Default is <code>false</code>.
      */
     public void setValidateXml(boolean validateXml)
     {
@@ -77,9 +85,11 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     }
 
     /**
-     * Set the xml schema describing the application model.
+     * The single file that contains the database file. You can use this instead of embedded
+     * <code>fileset</code> elements if you only have one schema file.
      *
      * @param schemaFile The schema
+     * @ant.not-required Use either this or one or more embedded fileset elements.
      */
     public void setSchemaFile(File schemaFile)
     {

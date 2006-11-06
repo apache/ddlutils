@@ -32,9 +32,13 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * Creates the SQL for a schema and writes it to a file.
+ * Creates the SQL commands necessary to create the schema in the database that is described by
+ * the schema XML files specified for the enclosing task. Note that this subtask requires either
+ * the specification of the data source in the enclosing task, or the use of the
+ * <code>databaseType</code> attribute at the enclosing task.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="writeSchemaSqlToFile"
  */
 public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationParameters
 {
@@ -46,9 +50,10 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
     private boolean _doDrops = true;
 
     /**
-     * Sets the file to output the sql to.
+     * Specifies the name of the file to write the SQL commands to.
      * 
      * @param outputFile The output file
+     * @ant.required
      */
     public void setOutputFile(File outputFile)
     {
@@ -66,9 +71,11 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
     }
 
     /**
-     * Specifies whether to alter the database if it already exists, or re-set it.
+     * Specifies whether DdlUtils shall alter an existing database rather than clearing it and
+     * creating it new.
      * 
      * @param alterTheDb <code>true</code> if to alter the database
+     * @ant.not-required Per default, SQL for altering the database is created
      */
     public void setAlterDatabase(boolean alterTheDb)
     {
@@ -86,9 +93,11 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
     }
 
     /**
-     * Specifies whether to drop tables and the associated constraints if necessary.
+     * Specifies whether SQL for dropping tables, external constraints, etc. is created if necessary.
+     * Note that this is only relevant when <code>alterDatabase</code> is <code>false</code>.
      * 
      * @param doDrops <code>true</code> if drops shall be performed if necessary
+     * @ant.not-required Per default, drop SQL statements are created
      */
     public void setDoDrops(boolean doDrops)
     {

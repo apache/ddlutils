@@ -27,6 +27,7 @@ import org.apache.tools.ant.Task;
  * Base interface for commands that work with a model.
  * 
  * @version $Revision: 289996 $
+ * @ant.type ignore="true"
  */
 public interface Command
 {

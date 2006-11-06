@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+##
+## This is a Velocity template for generating an HTML
+## document describing an Ant Task/Type 
+## 
+## Objects expected in context:
+##
+##     $taskDoc - Describes an Ant Task/Type (of type AntDoc)
+##
+## 
+<html>
+<head>
+<title>&lt;$taskDoc.getAntName()&gt;</title>
+<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+<body>
+<h2>#if( $taskDoc.getAnyCategory().length() > 0 ) $!taskDoc.getAntCategory() : #end $taskDoc.getAntName()</h2>
+<h3>Type</h3>
+<p>$taskDoc.getFullClassName()</p>
+<h3>Description</h3>
+<p>$taskDoc.getComment()</p>
+<h3><a name="attributes"><strong>Parameters</strong></a></h3>
+#foreach ($attr in $taskDoc.attributes )
+	<h4>$attr</h4>
+	<table>
+		<tr>
+			<td><b>Type</b></td>
+			<td>$taskDoc.getAttributeType($attr)</td>
+		</tr>
+		<tr>
+			<td><b>Required?</b></td>
+			<td>
+  #if ($taskDoc.getAttributeRequired($attr))
+            	<b>Yes</b> $taskDoc.getAttributeRequired($attr)
+  #elseif ($taskDoc.getAttributeNotRequired($attr))
+                <b>No</b> $taskDoc.getAttributeNotRequired($attr)
+  #else
+				<i>unknown</i>
+  #end
+			</td>
+		</tr>
+	</table>
+	<p>$taskDoc.getAttributeComment($attr)</p>
+#end
+<h3>Nested elements</h3>
+#if ($taskDoc.isTaskContainer())
+<p>This Task is a Container (it accepts nested Tasks).</p>
+#end
+#if ($taskDoc.supportsCharacters())
+<p>This Task accepts text in its element body.</p>
+#end
+#foreach ($element in $taskDoc.getNestedElements())
+  #set ($elementDoc = $taskDoc.getElementDoc($element))
+  #if ($elementDoc.sourceIncluded() && $elementDoc.isTagged())
+	<h4><a href="${elementDoc.getFullClassName()}.html"><strong>&lt;$element&gt; ...</strong></a></h4>
+  #else
+	<h4><strong>&lt;$element&gt;</strong>#if (!$elementDoc.sourceIncluded()) (Of type ${elementDoc.getAntName()}) #end </h4>
+	  #if($elementDoc.getComment())
+		<p>$elementDoc.getComment()</p>
+	  #end
+		<strong>Parameters</strong>
+	  #foreach ($attr in $elementDoc.attributes )
+		<h5>$attr</h5>
+		<table>
+			<tr>
+				<td><b>Type</b></td>
+				<td>$elementDoc.getAttributeType($attr)</td>
+			</tr>
+			<tr>
+				<td><b>Required?</b></td>
+				<td>
+		#if ($elementDoc.getAttributeRequired($attr))
+            		<b>Yes</b> $elementDoc.getAttributeRequired($attr)
+		#elseif ($elementDoc.getAttributeNotRequired($attr))
+                	<b>No</b> $elementDoc.getAttributeNotRequired($attr)
+		#else
+					<i>unknown</i>
+		#end
+				</td>
+			</tr>
+		</table>
+		#if($elementDoc.getAttributeComment($attr))
+		<p>$elementDoc.getAttributeComment($attr)</p>
+		#end
+	  #end
+  #end
+#end
+		</div>
+    <br />
+	<hr />
+
+	<div class="copyright"><em>Generated with <a href="http://antdoclet.neuroning.com">AntDoclet</a></em></div>
+
+</body>
+</html>

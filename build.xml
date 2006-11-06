@@ -162,10 +162,10 @@ under the License.
              classpathref="compilation-classpath"
              destdir="${build.javadoc.dir}"
              doctitle="${javadoc.title}"
-             windowtitle="${javadoc.title} API documentation"
+             windowtitle="${javadoc.title}"
              bottom="${javadoc.footer}"
              protected="true"
-             author="true"
+             author="false"
              version="true"
              packagenames="org.*">
       <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/> 
@@ -191,6 +191,32 @@ under the License.
 
     <mkdir dir="${build.schemadoc.dir}"/>
     <dtddoc destdir="${build.schemadoc.dir}" sourcedir="${src.java.dir}" includes="*.dtd"/>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Builds the documentation for the Ant tasks                         -->
+  <!-- ================================================================== -->
+  <target name="antdoc"
+          description="Builds the documentation for the Ant tasks">
+    <available classname="com.neuroning.antdoclet.AntDoclet"
+               classpathref="compilation-classpath"
+               property="antdoc.available"/>
+    <fail unless="antdoc.available" message="For building the Ant task documentaion, you'll need AntDoc which can be downloaded from http://antdoclet.neuroning.com/. Please make the AntDoc libraries available in the classpath."/>
+    <mkdir dir="${build.antdoc.dir}"/>
+    <javadoc sourcepath="${src.java.dir}"
+             classpathref="compilation-classpath"
+             destdir="${build.antdoc.dir}"
+             doctitle="${antdoc.title}"
+             protected="true"
+             author="false"
+             version="true"
+             packagenames="org.apache.ddlutils.task">
+      <doclet name="com.neuroning.antdoclet.AntDoclet"
+              pathref="compilation-classpath">
+        <param name="-templatesdir" value="${antdoc.templates.dir}"/>
+        <param name="-templates" value="html/main.vm" />
+      </doclet>
+    </javadoc> 
   </target>
 
   <!-- ================================================================== -->

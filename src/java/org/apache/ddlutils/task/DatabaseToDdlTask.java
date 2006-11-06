@@ -26,10 +26,13 @@ import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 
 /**
- * Ant task for working with a database, e.g. retrieving the schema from a
- * database, dumping data, etc.
+ * This is the container for sub tasks that operate in the direction database -> file, eg.
+ * that create/drop a schema in the database, insert data into the database, etc. They also
+ * create DTDs for these data files, and dump the SQL for creating a schema in the database
+ * to a file.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="databaseToDdl"
  */
 public class DatabaseToDdlTask extends DatabaseTaskBase
 {
@@ -43,9 +46,13 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     private String _modelName;
 
     /**
-     * Sets the database schema to access.
+     * Specifies the table schema(s) to access. This is only necessary for some databases. The
+     * pattern is that of
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
+     * The special pattern <code>'%'</code> indicates that every table schema shall be used.
      * 
      * @param schema The schema
+     * @ant.not-required No schema is used by default.
      */
     public void setSchema(String schema)
     {
@@ -53,9 +60,13 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
-     * Sets the database catalog to access.
+     * Specifies the catalog(s) to access. This is only necessary for some databases. The pattern
+     * is that of
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
+     * The special pattern <code>'%'</code> indicates that every catalog shall be used.
      * 
      * @param catalog The catalog
+     * @ant.not-required No catalog is used by default.
      */
     public void setCatalog(String catalog)
     {
@@ -63,9 +74,11 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
-     * Sets the table types ro recognize.
+     * Specifies the table types to be processed. For details and typical table types see
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
      * 
      * @param tableTypes The table types as a comma-separated list
+     * @ant.not-required By default, only tables of type <code>TABLE</code> are read.
      */
     public void setTableTypes(String tableTypes)
     {
@@ -73,10 +86,12 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
-     * Sets the name that the model read from the database shall have.
-     * Use <code>null</code> or an empty string for the default name.
+     * Specifies the name of the model, e.g. the value of the name attribute in the XML if
+     * the <code>writeSchemaToFile</code> sub-task is used.
      * 
-     * @param modelName The model name
+     * @param modelName The model name. Use <code>null</code> or an empty string for the default name
+     * @ant.not-required By default, DldUtils uses the schema name returned from the database
+     *                   or <code>default</code> if none was returned.
      */
     public void setModelName(String modelName)
     {

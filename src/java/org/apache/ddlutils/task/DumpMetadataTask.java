@@ -46,9 +46,10 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
 /**
- * A simple task that dumps information about a database.
+ * A simple helper task that dumps information about a database using JDBC.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="dumpMetadata"
  */
 public class DumpMetadataTask extends Task
 {
@@ -89,9 +90,10 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Set the output file.
+     * Specifies the output file to which the database metadata is written to.
      *
      * @param outputFile The output file
+     * @ant.required
      */
     public void setOutputFile(File outputFile)
     {
@@ -99,9 +101,10 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Set the encoding of the output file.
+     * Specifies the encoding of the output file.
      *
      * @param encoding The encoding
+     * @ant.not-required Per default, <code>UTF-8</code> is used.
      */
     public void setOutputEncoding(String encoding)
     {
@@ -109,9 +112,10 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Sets the catalog pattern.
+     * Sets the catalog pattern used when accessing the database.
      *
      * @param catalogPattern The catalog pattern
+     * @ant.not-required Per default, no specific catalog is used (value <code>%</code>).
      */
     public void setCatalogPattern(String catalogPattern)
     {
@@ -119,9 +123,10 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Sets the schema pattern.
+     * Sets the schema pattern used when accessing the database.
      *
      * @param schemaPattern The schema pattern
+     * @ant.not-required Per default, no specific schema is used (value <code>%</code>).
      */
     public void setSchemaPattern(String schemaPattern)
     {
@@ -129,9 +134,11 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Sets the table pattern.
+     * Specifies the table to be processed. For details see
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
      *
      * @param tablePattern The table pattern
+     * @ant.not-required By default, all tables are read (value <code>%</code>).
      */
     public void setTablePattern(String tablePattern)
     {
@@ -139,9 +146,11 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Sets the procedure pattern.
+     * Specifies the procedures to be processed. For details and typical table types see
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getProcedures(java.lang.String,%20java.lang.String,%20java.lang.String)">java.sql.DatabaseMetaData#getProcedures</a>.
      *
      * @param procedurePattern The procedure pattern
+     * @ant.not-required By default, all procedures are read (value <code>%</code>).
      */
     public void setProcedurePattern(String procedurePattern)
     {
@@ -149,9 +158,11 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Sets the column pattern.
+     * Specifies the columns to be processed. For details and typical table types see
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getColumns(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getColumns</a>.
      *
      * @param columnPattern The column pattern
+     * @ant.not-required By default, all columns are read (value <code>%</code>).
      */
     public void setColumnPattern(String columnPattern)
     {
@@ -159,9 +170,11 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Sets the table types as a comma-separated list.
+     * Specifies the table types to be processed. For details and typical table types see
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
      *
-     * @param tableTypes The table types
+     * @param tablePattern The table pattern
+     * @ant.not-required By default, all types of tables are read.
      */
     public void setTableTypes(String tableTypes)
     {
@@ -188,6 +201,7 @@ public class DumpMetadataTask extends Task
      * Specifies whether procedures shall be read from the database.
      *
      * @param readProcedures <code>true</code> if procedures shall be read
+     * @ant.not-required By default, procedures are read.
      */
     public void setDumpProcedures(boolean readProcedures)
     {
@@ -198,6 +212,7 @@ public class DumpMetadataTask extends Task
      * Specifies whether tables shall be read from the database.
      *
      * @param readTables <code>true</code> if tables shall be read
+     * @ant.not-required By default, tables are read.
      */
     public void setDumpTables(boolean readTables)
     {

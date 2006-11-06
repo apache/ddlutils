@@ -29,9 +29,10 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * Command for writing the database schema to a file.
+ * Dumps the schema in the live database specified in the enclosing task, to a schema XML file.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="writeSchemaToFile"
  */
 public class WriteSchemaToFileCommand implements Command
 {
@@ -39,9 +40,10 @@ public class WriteSchemaToFileCommand implements Command
     private File _outputFile;
 
     /**
-     * Sets the file to output the schema to.
+     * Specifries the name of the file to write the schema XML to.
      * 
      * @param outputFile The output file
+     * @ant.required
      */
     public void setOutputFile(File outputFile)
     {

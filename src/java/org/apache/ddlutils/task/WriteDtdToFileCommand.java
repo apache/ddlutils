@@ -29,9 +29,12 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * The command for creating a data DTD for a given database model.
+ * Creates a DTD that specifies the layout for data XML files.<br/>
+ * This sub task does not require a database connection, so the <code>dataSource</code>
+ * subelement of the task can be omitted.
  * 
  * @version $Revision: 289996 $
+ * @ant.task name="writeDtdToFile"
  */
 public class WriteDtdToFileCommand implements Command
 {
@@ -39,9 +42,10 @@ public class WriteDtdToFileCommand implements Command
     private File _outputFile;
 
     /**
-     * Sets the file to output the DTD to.
+     * Specifies the name of the file to write the DTD to.
      * 
      * @param outputFile The output file
+     * @ant.required
      */
     public void setOutputFile(File outputFile)
     {

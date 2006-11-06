@@ -25,10 +25,12 @@ import java.util.StringTokenizer;
 import org.apache.ddlutils.PlatformFactory;
 
 /**
- * A parameter which consists of a name-value pair and an optional list of platforms
- * for which the parameter is applicable.
+ * Specifies a parameter for the creation of the database. These are usually platform specific.
+ * A parameter consists of a name-value pair and an optional list of platforms for which the
+ * parameter shall be used.
  * 
  * @version $Revision: 231306 $
+ * @ant.type name="parameter"
  */
 public class Parameter
 {
@@ -50,9 +52,11 @@ public class Parameter
     }
 
     /**
-     * Sets the name.
+     * Specifies the name of the parameter. See <a href="database-support.html">here</a>
+     * for the parameters supported by the individual platforms.</td>
      *
      * @param name The name
+     * @ant.required
      */
     public void setName(String name)
     {
@@ -70,9 +74,10 @@ public class Parameter
     }
 
     /**
-     * Sets the value.
+     * Specifies the parameter value.
      *
      * @param value The value
+     * @ant.not-required If none is given, <code>null</code> is used.
      */
     public void setValue(String value)
     {
@@ -80,9 +85,12 @@ public class Parameter
     }
 
     /**
-     * Sets the platforms - a comma-separated list of platform names - for which this parameter shall be used.
+     * Specifies the platforms - a comma-separated list of platform names - for which this parameter
+     * shall be used (see the <code>databaseType</code> attribute of the tasks possible values).
+     * For every platform not in this list, the parameter is ignored.
      * 
      * @param platforms The platforms
+     * @ant.not-required If not specified then the parameter is processed for every platform.
      */
     public void setPlatforms(String platforms)
     {

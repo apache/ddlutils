@@ -30,6 +30,7 @@ import org.apache.tools.ant.BuildException;
  * Base type for database commands that use converters.
  * 
  * @version $Revision: 289996 $
+ * @ant.type ignore="true"
  */
 public abstract class ConvertingDatabaseCommand extends DatabaseCommand
 {
