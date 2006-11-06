@@ -463,7 +463,7 @@ which will be used to configure the chosen Forrest skin.
   <credits>
       <credit box-location="alt">
             <name>Ant</name>
-            <url>http://jakarta.apache.org/ant/</url>
+            <url>http://ant.apache.org/</url>
             <image>images/ant.gif</image>
             <width>80</width>
             <height>30</height>

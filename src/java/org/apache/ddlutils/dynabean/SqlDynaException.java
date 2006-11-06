@@ -1,7 +1,5 @@
 package org.apache.ddlutils.dynabean;
 
-import org.apache.ddlutils.DdlUtilsException;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,6 +18,8 @@ import org.apache.ddlutils.DdlUtilsException;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import org.apache.ddlutils.DdlUtilsException;
 
 /**
  * This exception is thrown when something dealing with sql dyna beans or classes failed.

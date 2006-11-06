@@ -127,7 +127,7 @@ public void changeDatabase(DataSource dataSource,
     
     if (alterDb)
     {
-        platform.alterTables(targetModel, true, alterDb, false);
+        platform.alterTables(targetModel, false);
     }
     else
     {
@@ -194,18 +194,88 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
 
 ...
 
 public void dumpBooks(DataSource dataSource,
-                      Database database)
+                      Database   database)
 {
     Platform  platform = PlatformFactory.createNewPlatformInstance(dataSource);
     ArrayList params   = new ArrayList();
     
     params.add("Some title");
+    
+    Iterator it = platform.query(database,
+                                 "select * from book where title = ?",
+                                 params,
+                                 new Table[] { database.findTable("book") });
+    
+    while (it.hasNext())
+    {
+        DynaBean book = (DynaBean)it.next();
+        
+        System.out.println(book.get("title"));
+    }
+}]]></source>
+      <p>
+        There are two things to note in this sample code:
+      </p>
+      <p>
+        First, we specified so-called query hints in the call to the <code>query</code>. Query hints
+        are an array of tables whose columns are used by the query statement. The reason why they
+        should be used is that not all databases provide sufficient information in the JDBC result set
+        object to determine the table to which a column belongs to. Since this info is need by
+        DdlUtils to properly extract the value and convert it to the corresponding Java type, it is
+        safer to specify these hints. What DdlUtils does in this case, is to search for a column
+        of that name within the specified tables and use the mapping for this column. This of course
+        can fail if you use aliases in the query statement (and the JDBC driver handles them in
+        a strange way), or if more than one table has a column of this name. But in most cases you'll
+        get the expected results.
+      </p>
+      <p>
+        The other thing to note is that DdlUtils does not parse the query statement. This means that
+        if you use delimited identifier mode (i.e. identifiers can contain whitespaces, non-alphanumeric
+        characters etc., but they also need to be enclosed in double quotes), then you'll have to
+        specify the query statement accordingly - DdlUtils won't do that for you. If you'd like to be
+        on the safe side, then you could write the above statement like this:
+      </p>
+      <source><![CDATA[
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.sql.DataSource;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.PlatformFactory;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
 
-    for (Iterator it = platform.query(database, "select * from book where title = ?", params); it.hasNext();)
+...
+
+public void dumpBooks(DataSource dataSource,
+                      Database   database)
+{
+    Platform  platform = PlatformFactory.createNewPlatformInstance(dataSource);
+    ArrayList params   = new ArrayList();
+    String    sql;
+    
+    params.add("Some title");
+
+    if (platform.isDelimitedIdentifierModeOn())
+    {
+        sql = "select * from \"book\" where \"title\" = ?";
+    }
+    else
+    {
+        sql = "select * from book where title = ?";
+    }
+
+    Iterator it = platform.query(database,
+                                 sql,
+                                 params,
+                                 new Table[] { database.findTable("book") });
+    
+    while (it.hasNext())
     {
         DynaBean book = (DynaBean)it.next();
         

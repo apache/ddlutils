@@ -87,8 +87,7 @@ under the License.
   <!-- Build the documentation                                            -->
   <!-- ================================================================== -->
   <target name="doc"
-  	    depends="javadoc"
-          description="Builds the complete documentation using Forrest">
+          description="Builds the complete documentation">
     <fail message="Please set the FORREST_HOME environment variable to the 'src/core' subdirectory of your Forrest installation. If you don't have yet installed Forrest, you can get it from http://forrest.apache.org.">
       <condition>
         <not>
@@ -100,7 +99,7 @@ under the License.
     <fail unless="commons.resolver.available" message="Please make the Apache XML Commons Resolver library available in the classpath, e.g. by copying the xml-commons-resolver jar file from the 'tools/ant/lib' subdirectory of your Forrest installation (${env.FORREST_HOME}/tools/ant/lib) into the lib subdirectory of your Ant installation (${env.ANT_HOME}/lib)."/>
 
     <delete dir="${build.doc.dir}"
-    	      failonerror="false"/>
+    	    failonerror="false"/>
     <mkdir dir="${build.doc.dir}"/>
 
     <!-- Copy all forrest src stuff to a temporary directoy -->
@@ -115,9 +114,15 @@ under the License.
     <replace file="${build.doc.dir}/src/documentation/content/xdocs/to-do.xml" token="@@content@@" value="${todo.content}"/>
     <replace file="${build.doc.dir}/src/documentation/content/xdocs/release-notes.xml" token="@@content@@" value="${release-notes.content}"/>
 
-    <!-- Copy generated javadoc into the forrest structure in the temporary directoy -->
+    <!-- Copy generated javadoc into the forrest structure in the temporary directory -->
+    <antcall target="javadoc"/>
     <copy todir="${forrest.javadoc.destdir}">
       <fileset dir="${build.javadoc.dir}"/>
+    </copy>
+    <!-- Copy generated schema doc into the forrest structure in the temporary directory -->
+    <antcall target="schemadoc"/>
+    <copy todir="${forrest.schemadoc.destdir}">
+      <fileset dir="${build.schemadoc.dir}"/>
     </copy>
 
     <ant antfile="${env.FORREST_HOME}/main/forrest.build.xml"
@@ -131,6 +136,19 @@ under the License.
     <copy todir="${doc.dir}">
       <fileset dir="${forrest.output.dir}"/>
     </copy>
+  </target>
+
+  <target name="-docbook">
+    <mkdir dir="${build.doc.dir}"/>
+    <copy todir="${build.doc.dir}">
+      <fileset dir="../velocity-docbook/"/>
+    </copy>
+    <mkdir dir="${build.doc.dir}/src/docbook/ddlutils"/>
+    <copy file="${src.doc.dir}/manual.xml" todir="${build.doc.dir}/src/docbook/ddlutils"/>
+    <ant antfile="build-docbook.xml" target="all" inheritall="false" dir="${build.doc.dir}">
+      <property name="docbook.dir" value="ddlutils"/>
+      <property name="docbook.file" value="manual"/>
+    </ant>
   </target>
 
   <!-- ================================================================== -->
@@ -156,6 +174,42 @@ under the License.
       <link href="http://jakarta.apache.org/commons/digester/apidocs/"/>
       <link href="http://jakarta.apache.org/commons/betwixt/apidocs/"/>
     </javadoc> 
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Builds the documentation for the database XML schema format        -->
+  <!-- ================================================================== -->
+  <target name="schemadoc"
+          description="Builds the documentation for the database XML schema format">
+    <available classname="DTDDoc.DTDDocTask"
+               classpathref="compilation-classpath"
+               property="dtddoc.available"/>
+    <fail unless="dtddoc.available" message="For building the XML Schema documentaion, you'll need DTDDoc which can be downloaded from http://sourceforge.net/projects/dtddoc. Please make the DTDDoc and dtdparser jars available in the classpath."/>
+    <taskdef name="dtddoc"
+             classname="DTDDoc.DTDDocTask"
+             classpathref="compilation-classpath"/>
+
+    <mkdir dir="${build.schemadoc.dir}"/>
+    <dtddoc destdir="${build.schemadoc.dir}" sourcedir="${src.java.dir}" includes="*.dtd"/>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Checks the docs for broken links                                   -->
+  <!-- ================================================================== -->
+  <target name="check-doc"
+          description="Checks the doc for broken links using linklint">
+    <echo>Running linklint on ${build.doc.dir}. The output can be found in linklint.log.</echo>
+    <exec executable="linklint">
+      <arg line="-quiet"/>
+      <arg line="-net"/>
+      <arg line="-error"/>
+      <arg line="-warn"/>
+      <arg line="-out"/>
+      <arg line="linklint.org"/>
+      <arg line="-root"/>
+      <arg line="${build.doc.dir}"/>
+      <arg line="/@"/>
+    </exec>
   </target>
 
   <!-- ================================================================== -->

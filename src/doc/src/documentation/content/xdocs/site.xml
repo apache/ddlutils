@@ -48,7 +48,7 @@ See http://forrest.apache.org/docs/linking.html for more info
   <documentation label="Documentation">
     <index label="Summary" href="documentation.html"/>
     <database-support label="Supported databases" href="database-support.html" description="List of the supported databases"/>
-    <schema label="The schema format" href="schema.html" description="The schema format"/>
+    <schema label="The XML schema format" href="ext:ddlutils/schemadoc" description="The schema format"/>
     <ant-tasks label="The Ant tasks" href="ant-tasks.html" description="How to use the Ant tasks"/>
     <api-usage label="Using the API" href="api-usage.html" description="How to use DdlUtils in your code"/>
     <javadoc label="Javadoc" href="ext:ddlutils/javadoc" description="The API documentation"/>
@@ -62,10 +62,11 @@ See http://forrest.apache.org/docs/linking.html for more info
   <external-refs>
     <ddlutils>
       <jira href="http://issues.apache.org/jira/secure/BrowseProject.jspa?id=10731"/>
-      <javadoc href="api/index.html">
-        <model href="?org/apache/ddlutils/model/package-summary.html"/>
+      <javadoc href="api/">
+        <model href="index.html?org/apache/ddlutils/model/package-summary.html"/>
         <converter href="org/apache/ddlutils/io/converters/SqlTypeConverter.html"/>
       </javadoc>
+      <schemadoc href="schema/database.dtd.html"/>
       <svn-view href="http://svn.apache.org/viewcvs.cgi/db/ddlutils/trunk/"/>
       <user-list>
         <subscribe href="mailto:ddlutils-user-subscribe@db.apache.org"/>
@@ -102,13 +103,13 @@ See http://forrest.apache.org/docs/linking.html for more info
     <derby href="http://db.apache.org/derby/">
       <manual href="manuals/index.html"/>
     </derby>
-    <eclipse href="http://www.eclipse.org"/>
-    <firebird href="http://firebird.sourceforge.net/"/>
-    <hsqldb href="http://hsqldb.sourceforge.net/">
-      <sql-syntax href="doc/guide/ch08.html"/>
+    <eclipse href="http://www.eclipse.org/"/>
+    <firebird href="http://www.firebirdsql.org/"/>
+    <hsqldb href="http://www.hsqldb.org/">
+      <sql-syntax href="doc/guide/ch09.html"/>
     </hsqldb>
-    <idea href="http://www.jetbrains.com/idea"/>
-    <interbase href="http://www.borland.com/interbase/"/>
+    <idea href="http://www.jetbrains.com/idea/"/>
+    <interbase href="http://www.borland.com/us/products/interbase/"/>
     <jakarta href="http://jakarta.apache.org/">
       <commons href="commons/">
         <dbcp href="dbcp/">
@@ -136,15 +137,15 @@ See http://forrest.apache.org/docs/linking.html for more info
     <mysql href="http://www.mysql.com/products/mysql/">
       <manual href="http://dev.mysql.com/doc/mysql/en/index.html"/>
     </mysql>
-    <netbeans href="http://www.netbeans.org">
+    <netbeans href="http://www.netbeans.org/">
       <subversion-profile href="http://vcsgeneric.netbeans.org/profiles/index.html"/>
     </netbeans>
-    <ojb href="http://db.apache.org/ojb"/>
+    <ojb href="http://db.apache.org/ojb/"/>
     <oracle href="http://www.oracle.com/">
       <otn href="technology/index.html"/>
     </oracle>
     <postgresql href="http://www.postgresql.org/">
-      <manual href="docs/7.2/interactive/index.html"/>
+      <manual href="docs/7.4/interactive/index.html"/>
     </postgresql>
     <sapdb href="http://www.sapdb.org/">
       <manual href="pdf/reference_72_73eng.pdf"/>
@@ -159,9 +160,9 @@ See http://forrest.apache.org/docs/linking.html for more info
       <manual href="http://sybooks.sybase.com/as.html"/>
     </sybase>
     <tigris>
-      <subclipse href="http://subclipse.tigris.org"/>
-      <svn href="http://subversion.tigris.org"/>
-      <svn-up href="http://svnup.tigris.org"/>
+      <subclipse href="http://subclipse.tigris.org/"/>
+      <svn href="http://subversion.tigris.org/"/>
+      <svn-up href="http://svnup.tigris.org/"/>
       <tortoisesvn href="http://tortoisesvn.tigris.org"/>
     </tigris>
     <torque href="http://db.apache.org/torque/">
