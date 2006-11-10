@@ -105,12 +105,12 @@ under the License.
     </dependency>
     <dependency>
       <!-- TODO: Move to a released version of Betwixt
-           Since version 0.8 doesn't exist yet, install 0.8 into the local repo
-           mvn install:install-file -DgroupId=commons-betwixt -DartifactId=commons-betwixt -Dversion=0.8-dev -Dpackaging=jar -Dfile=lib/commons-betwixt-0.8-dev.jar -DgeneratePom=true
+           Since version 0.8 doesn't exist yet, install 0.8-RC1 into the local repo
+           mvn install:install-file -DgroupId=commons-betwixt -DartifactId=commons-betwixt -Dversion=0.8-RC1 -Dpackaging=jar -Dfile=lib/commons-betwixt-0.8-RC1.jar -DgeneratePom=true
       -->
       <groupId>commons-betwixt</groupId>
       <artifactId>commons-betwixt</artifactId>
-      <version>0.8</version>
+      <version>0.8-RC1</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
