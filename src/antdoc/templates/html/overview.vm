@@ -2,30 +2,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-  <title>$title</title>
-<style type="text/css">
-          /*  */
-          @import "skin/tigris.css";
-          @import "skin/quirks.css";
-          @import "skin/inst.css";
-         /*   */
-        </style>
-<link media="print" href="skin/print.css" type="text/css" rel="stylesheet">
-<link href="skin/forrest.css" type="text/css" rel="stylesheet">
-
+<title>$title</title>
+<link href="styles.css" type="text/css" rel="stylesheet">
 </head>
 <body>
-
 <h1>$title - Documentation</h1>
-
 <p>
 DdlUtils comes with two <a href="http://ant.apache.org/">Ant</a> tasks that allow you to manipulate the
 database structure, insert data into the database, and to dump the database structure and
 data contained in it, to XML.
 </p>
-
 <h3>Using the Tasks</h3>
-
 <p>
 Lets see examples for how to use them:
 </p>
@@ -72,15 +59,13 @@ Required for this to work is that both DdlUtils and the JDBC driver are availabl
 in the path specified by <code>runtime-classpath</code>. In the above snippet, this path
 contains all JARs and ZIPs in sub-directory <code>lib</code>.
 </p>
-<div class="infomessage">
-<p>
-<strong>Note</strong>
-</p>
+<fieldset class="note">
+<legend>Note</legend>
 <p>
 Not every database platform supports creation of new databases via JDBC. Please refer to the
 documentation of the support for the individual databases <a href="database-support.html">here</a>.
 </p>
-</div>
+</fieldset>
 <p>
 The opposite direction is achieved via the <code>DatabaseToDdlTask</code> task:
 </p>
@@ -115,20 +100,14 @@ Here, the database schema is retrieved via the specified JDBC driver and written
 to the file <code>db-schema.xml</code>. Likewise, the data in the database is written
 to the file <code>data.xml</code>.
 </p>
-
-
 <h3>Requirements</h3>
 <p>The DdlUtils tasks require Ant version 1.5 or newer.</p>
-
 <h3>Reference</h3>
 <p>The tasks reference documentation can be found <a href="index.all.html">here</a>.</p>
-
 <div class="copyright">
   <hr />
   <br />
   <em>Copyright &copy; 2005-2006 Apache Software Foundation. All Rights Reserved.</em>
 </div>
-
-	
 </body>
 </html>

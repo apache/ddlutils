@@ -1,0 +1,87 @@
+body {
+    width: 780px;
+    margin-left: 20px;
+    font: normal 14px/18px Tahoma,Verdana,Helvetica,Arial,sans-serif;
+    color: #000;
+}
+a:link,
+a:visited,
+a:hover {
+    color: #777777;
+    text-decoration: underline;
+}
+a.anchor:link,
+a.anchor:hover {
+    color: #000;
+    text-decoration: none;
+}
+a:hover {
+    background-color: #000;
+    color: #fff;
+}
+a.anchor:hover {
+    background-color: #777;
+    color: #fff;
+}
+h2 {
+    font-size: 1.5em;
+    line-height: 1.7em;
+    color: #777777;
+}
+h3 {
+    font-size: 1.2em;
+    line-height: 1.4em;
+}
+code,
+pre {
+    font: normal 13px Courier,monospace;
+}
+pre {
+    border: 1px solid #ddd;
+    padding: 10px;    
+}
+fieldset.taskDescription,
+fieldset.taskParameters,
+fieldset.taskNestedElements {
+    border: 1px solid #ddd;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+fieldset.taskDescription legend,
+fieldset.taskParameters legend,
+fieldset.taskNestedElements legend {
+    font-style: bold;
+    font-size: 1.2em;
+}
+fieldset.note {
+    border: 1px solid #777;
+    margin: 20px;
+    padding: 10px;
+}
+fieldset.note legend {
+    font-style: bold;
+    font-size: 1.2em;
+}
+.taskParameterSeparator,
+.taskNestedElementSeparator {
+    margin-left: 10px;
+    margin-right: 10px;
+    border-top: 1px solid #ddd;
+}
+.taskParameterDefinition {
+    font: normal 13px Courier,monospace;
+}
+.taskParameterDefinition .requiredInfo {
+    font: normal 1em Tahoma,Verdana,Helvetica,Arial,sans-serif;
+    color: #000;
+}
+.taskParameterDescription {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.copyright {
+    margin-top: 20px;
+    font-size: 0.7em;
+}

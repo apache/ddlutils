@@ -216,7 +216,10 @@ under the License.
         <param name="-templatesdir" value="${antdoc.templates.dir}"/>
         <param name="-templates" value="html/main.vm" />
       </doclet>
-    </javadoc> 
+    </javadoc>
+    <copy todir="${build.antdoc.dir}">
+      <fileset dir="${src.antdoc.dir}" includes="*.css,*.js"/>
+    </copy>
   </target>
 
   <!-- ================================================================== -->

@@ -12,85 +12,62 @@
 <html>
 <head>
 <title>&lt;$taskDoc.getAntName()&gt;</title>
-<link rel="stylesheet" type="text/css" href="style.css" />
+<link href="styles.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 <h2>#if( $taskDoc.getAnyCategory().length() > 0 ) $!taskDoc.getAntCategory() : #end $taskDoc.getAntName()</h2>
-<h3>Type</h3>
-<p>$taskDoc.getFullClassName()</p>
-<h3>Description</h3>
+<fieldset class="taskDescription">
+<legend><a class="anchor" name="description">Description</a></legend>
+<p>Java type: <a href="../javadoc/${taskDoc.getFullClassName().replace(".", "/")}.html"><code>$taskDoc.getFullClassName()</code></a></p>
 <p>$taskDoc.getComment()</p>
-<h3><a name="attributes"><strong>Parameters</strong></a></h3>
+</fieldset>
+<fieldset class="taskParameters">
+<legend><a class="anchor" name="parameters">Parameters</a></legend>
 #foreach ($attr in $taskDoc.attributes )
-	<h4>$attr</h4>
-	<table>
-		<tr>
-			<td><b>Type</b></td>
-			<td>$taskDoc.getAttributeType($attr)</td>
-		</tr>
-		<tr>
-			<td><b>Required?</b></td>
-			<td>
+  #if ($velocityCount > 1) <div class="taskParameterSeparator"></div> #end
+	<p class="taskParameterDefinition">
+	  <a class="anchor" name="parameter-$attr">$attr</a> : $taskDoc.getAttributeType($attr)
+  #if ($taskDoc.getAttributeRequired($attr)) <span class="requiredInfo">(required)</span> #end
+	</p>
+	<p class="taskParameterDescription">
+	$taskDoc.getAttributeComment($attr) <br/>
   #if ($taskDoc.getAttributeRequired($attr))
-            	<b>Yes</b> $taskDoc.getAttributeRequired($attr)
+      $taskDoc.getAttributeRequired($attr)
   #elseif ($taskDoc.getAttributeNotRequired($attr))
-                <b>No</b> $taskDoc.getAttributeNotRequired($attr)
-  #else
-				<i>unknown</i>
+      $taskDoc.getAttributeNotRequired($attr)
   #end
-			</td>
-		</tr>
-	</table>
-	<p>$taskDoc.getAttributeComment($attr)</p>
+	</p>
 #end
-<h3>Nested elements</h3>
+</fieldset>
+<fieldset class="taskNestedElements">
+<legend><a class="anchor" name="nestedElements">Nested elements</a></legend>
 #if ($taskDoc.isTaskContainer())
 <p>This Task is a Container (it accepts nested Tasks).</p>
 #end
 #if ($taskDoc.supportsCharacters())
 <p>This Task accepts text in its element body.</p>
 #end
+#set ($hasExternalRefs = false)
+#foreach ($element in $taskDoc.getNestedElements())
+  #set ($elementDoc = $taskDoc.getElementDoc($element))
+  #if ($elementDoc.getAntName() == 'FileSet')
+    #set ($hasExternalRefs = true)
+	<p class="taskNestedElementExternalRef">&rArr;&nbsp;<a href="http://ant.apache.org/manual/CoreTypes/fileset.html">Ant's <code>fileset</code> type</a></p>
+  #elseif ($elementDoc.getAntName() == 'BasicDataSource')
+    #set ($hasExternalRefs = true)
+	<p class="taskNestedElementExternalRef">&rArr;&nbsp;<a href="http://jakarta.apache.org/commons/dbcp/apidocs/org/apache/commons/dbcp/BasicDataSource.html"><code>$element</code> (an object of type <code>org.apache.commons.dbcp.BasicDataSource</code>)</a></p>
+  #end
+#end
+#if ($hasExternalRefs)
+<div class="taskNestedElementSeparator"></div>
+#end
 #foreach ($element in $taskDoc.getNestedElements())
   #set ($elementDoc = $taskDoc.getElementDoc($element))
   #if ($elementDoc.sourceIncluded() && $elementDoc.isTagged())
-	<h4><a href="${elementDoc.getFullClassName()}.html"><strong>&lt;$element&gt; ...</strong></a></h4>
-  #else
-	<h4><strong>&lt;$element&gt;</strong>#if (!$elementDoc.sourceIncluded()) (Of type ${elementDoc.getAntName()}) #end </h4>
-	  #if($elementDoc.getComment())
-		<p>$elementDoc.getComment()</p>
-	  #end
-		<strong>Parameters</strong>
-	  #foreach ($attr in $elementDoc.attributes )
-		<h5>$attr</h5>
-		<table>
-			<tr>
-				<td><b>Type</b></td>
-				<td>$elementDoc.getAttributeType($attr)</td>
-			</tr>
-			<tr>
-				<td><b>Required?</b></td>
-				<td>
-		#if ($elementDoc.getAttributeRequired($attr))
-            		<b>Yes</b> $elementDoc.getAttributeRequired($attr)
-		#elseif ($elementDoc.getAttributeNotRequired($attr))
-                	<b>No</b> $elementDoc.getAttributeNotRequired($attr)
-		#else
-					<i>unknown</i>
-		#end
-				</td>
-			</tr>
-		</table>
-		#if($elementDoc.getAttributeComment($attr))
-		<p>$elementDoc.getAttributeComment($attr)</p>
-		#end
-	  #end
+	<p class="taskNestedElementRef">&rArr;&nbsp;<a href="${elementDoc.getFullClassName()}.html"><code>$element</code></a></p>
   #end
 #end
-		</div>
-    <br />
-	<hr />
-
-	<div class="copyright"><em>Generated with <a href="http://antdoclet.neuroning.com">AntDoclet</a></em></div>
-
+</fieldset>
+<div class="copyright">Copyright &copy; 2005-2006 The Apache Software Foundation. All rights reserved.</div>
 </body>
 </html>
