@@ -11,11 +11,11 @@
 ## 
 <html>
 <head>
-<title>&lt;$taskDoc.getAntName()&gt;</title>
+<title>$taskDoc.getAntName()</title>
 <link href="styles.css" type="text/css" rel="stylesheet">
 </head>
 <body>
-<h2>#if( $taskDoc.getAnyCategory().length() > 0 ) $!taskDoc.getAntCategory() : #end $taskDoc.getAntName()</h2>
+<h2>#if ($taskDoc.getAnyCategory().length() > 0) $!taskDoc.getAntCategory() : #end $taskDoc.getAntName()</h2>
 <fieldset class="taskDescription">
 <legend><a class="anchor" name="description">Description</a></legend>
 <p>Java type: <a href="../javadoc/${taskDoc.getFullClassName().replace(".", "/")}.html"><code>$taskDoc.getFullClassName()</code></a></p>
@@ -68,6 +68,5 @@
   #end
 #end
 </fieldset>
-<div class="copyright">Copyright &copy; 2005-2006 The Apache Software Foundation. All rights reserved.</div>
 </body>
 </html>

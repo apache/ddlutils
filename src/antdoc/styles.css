@@ -1,8 +1,14 @@
 body {
-    width: 780px;
-    margin-left: 20px;
+    width: 760px;
+    padding-left: 10px;
     font: normal 14px/18px Tahoma,Verdana,Helvetica,Arial,sans-serif;
     color: #000;
+}
+body.index {
+    width: 200px;
+    padding-left: 0px;
+    padding-right: 10px;
+    overflow: hidden;
 }
 a:link,
 a:visited,
@@ -39,6 +45,12 @@ pre {
 pre {
     border: 1px solid #ddd;
     padding: 10px;    
+}
+.taskDescription pre {
+    margin: 20px;
+}
+.taskShortDescription {
+    padding-left: 10px;
 }
 fieldset.taskDescription,
 fieldset.taskParameters,
@@ -82,6 +94,8 @@ fieldset.note legend {
     margin-right: 20px;
 }
 .copyright {
-    margin-top: 20px;
+    border-top: 1px solid #777;
+    margin-top: 10px;
+    padding-top: 10px;
     font-size: 0.7em;
 }

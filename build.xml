@@ -219,6 +219,7 @@ under the License.
     </javadoc>
     <copy todir="${build.antdoc.dir}">
       <fileset dir="${src.antdoc.dir}" includes="*.css,*.js"/>
+      <fileset dir="${antdoc.templates.dir}/html" includes="*.htm*"/>
     </copy>
   </target>
 

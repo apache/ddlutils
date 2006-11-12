@@ -31,10 +31,35 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
 /**
- * This is the container for sub tasks that operate in the direction file -> database, e.g.
- * that create/drop a schema in the database, insert data into the database. They also
- * create DTDs for these data files, and dump the SQL for creating a schema in the database
- * to a file.
+ * Task for performing operations on a live database. Sub tasks e.g. create the
+ * schema in the database, drop database schemas, insert data into the database,
+ * create DTDs for data files, or write the SQL for creating a schema to a file.
+ * <br/>
+ * Example:<br/>
+ * <pre>
+ * &lt;taskdef classname="org.apache.ddlutils.task.DdlToDatabaseTask"
+ *          name="ddlToDatabase"
+ *          classpathref="project-classpath"/&gt;
+ * 
+ * &lt;ddlToDatabase usedelimitedsqlidentifiers="true"&gt;
+ *   &lt;database driverclassname="org.apache.derby.jdbc.ClientDriver"
+ *             url="jdbc:derby://localhost/ddlutils"
+ *             username="ddlutils"
+ *             password="ddlutils"/&gt; 
+ *   &lt;fileset dir="."&gt;
+ *     &lt;include name="*schema.xml"/&gt; 
+ *   &lt;/fileset&gt; 
+ * 
+ *   &lt;createdatabase failonerror="false"/&gt; 
+ *   &lt;writeschematodatabase alterdatabase="true"
+ *                          failonerror="false"/&gt; 
+ *   &lt;writedatatodatabase datafile="data.xml"
+ *                        usebatchmode="true"
+ *                        batchsize="1000"/&gt;
+ * &lt;/ddlToDatabase&gt; 
+ * </pre>
+ * This Ant build file snippet essentially creates a database, creates tables, foreign keys
+ * etc. int it and then writes data into the newly created tables.
  * 
  * @version $Revision: 289996 $
  * @ant.task name="ddlToDatabase"
@@ -52,8 +77,8 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
 
     /**
      * Specifies whether DdlUtils shall use the embedded DTD for validating the schema XML (if
-     * it matches <code>http://db.apache.org/torque/dtd/database.dtd</code>). This is useful for
-     * instance for environments where no web access is possible.
+     * it matches <code>http://db.apache.org/torque/dtd/database.dtd</code>). This is
+     * especially useful in environments where no web access is possible or desired.
      *
      * @param useInternalDtd <code>true</code> if input files are to be validated against the internal DTD
      * @ant.not-required Default is <code>true</code>.
@@ -64,10 +89,10 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     }
 
     /**
-     * Specifies whether XML input files should be validated against the DTD.
+     * Specifies whether XML input files should be validated against the DTD at all.
      *
      * @param validateXml <code>true</code> if input files are to be validated
-     * @ant.not-required Default is <code>false</code>.
+     * @ant.not-required Default is <code>false</code> meaning that the XML is not validated at all.
      */
     public void setValidateXml(boolean validateXml)
     {
@@ -85,7 +110,7 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
     }
 
     /**
-     * The single file that contains the database file. You can use this instead of embedded
+     * Defines the single file that contains the database file. You can use this instead of embedded
      * <code>fileset</code> elements if you only have one schema file.
      *
      * @param schemaFile The schema

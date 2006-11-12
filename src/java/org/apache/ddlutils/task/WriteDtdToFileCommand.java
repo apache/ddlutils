@@ -31,7 +31,7 @@ import org.apache.tools.ant.Task;
 /**
  * Creates a DTD that specifies the layout for data XML files.<br/>
  * This sub task does not require a database connection, so the <code>dataSource</code>
- * subelement of the task can be omitted.
+ * sub element of the enclosing task can be omitted.
  * 
  * @version $Revision: 289996 $
  * @ant.task name="writeDtdToFile"

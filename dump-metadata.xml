@@ -78,8 +78,8 @@ under the License.
           description="Dumps the database model using the connection properties from the file specified via the jdbc.properties.file environment variable">
     <databaseToDdl databasetype="${ddlutils.platform}"
                    tabletypes="${tabletypes}"
-                   catalog="${catalogpattern}"
-                   schema="${schemapattern}"
+                   catalogpattern="${catalogpattern}"
+                   schemapattern="${schemapattern}"
                    modelname="${modelname}">
       <database driverclassname="${datasource.driverClassName}"
                 url="${datasource.url}"

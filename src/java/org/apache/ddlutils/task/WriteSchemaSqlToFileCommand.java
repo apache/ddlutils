@@ -32,10 +32,11 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * Creates the SQL commands necessary to create the schema in the database that is described by
- * the schema XML files specified for the enclosing task. Note that this subtask requires either
- * the specification of the data source in the enclosing task, or the use of the
- * <code>databaseType</code> attribute at the enclosing task.
+ * Parses the schema XML files specified in the enclosing task, and writes the SQL statements
+ * necessary to create this schema in the database, to a file. Note that this SQL is
+ * database specific and hence this subtask requires that for the enclosing task, either a
+ * data source is specified (via the <code>database</code> sub element) or the
+ * <code>databaseType</code> attribute is used to specify the database type.
  * 
  * @version $Revision: 289996 $
  * @ant.task name="writeSchemaSqlToFile"
@@ -71,11 +72,11 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
     }
 
     /**
-     * Specifies whether DdlUtils shall alter an existing database rather than clearing it and
-     * creating it new.
+     * Specifies whether DdlUtils shall generate SQL to alter an existing database rather
+     * than SQL for clearing it and creating it new.
      * 
-     * @param alterTheDb <code>true</code> if to alter the database
-     * @ant.not-required Per default, SQL for altering the database is created
+     * @param alterTheDb <code>true</code> if SQL to alter the database shall be created
+     * @ant.not-required Per default SQL for altering the database is created
      */
     public void setAlterDatabase(boolean alterTheDb)
     {
@@ -83,9 +84,10 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
     }
 
     /**
-     * Determines whether to drop tables and the associated constraints if necessary.
+     * Determines whether SQL is generated to drop tables and the associated constraints
+     * if necessary.
      * 
-     * @return <code>true</code> if drops shall be performed if necessary
+     * @return <code>true</code> if drops SQL shall be generated if necessary
      */
     protected boolean isDoDrops()
     {

@@ -54,11 +54,11 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Specifies the database type. You should only need to specify this if DdlUtils is not able to
+     * Specifies the database type. You should only need to set this if DdlUtils is not able to
      * derive the setting from the name of the used jdbc driver or the jdbc connection url.
-     * If you need to specify this, please post your jdbc driver and connection url combo
+     * If you have to specify this, please post your jdbc driver and connection url combo
      * to the user mailing list so that DdlUtils can be enhanced to support this combo.<br/>
-     * Valid values are currently: <code>axion, cloudscape, db2, derby, firebird, hsqldb, interbase,
+     * Valid values are currently:<br/><code>axion, cloudscape, db2, derby, firebird, hsqldb, interbase,
      * maxdb, mckoi, mssql, mysql, mysql5, oracle, oracle9, oracle10, postgresql, sapdb, sybase</code>
      * 
      * @param type The database type
@@ -93,10 +93,12 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Sets the catalog pattern used when accessing the database.
+     * Specifies a pattern that defines which database catalogs to use. For some
+     * more info on catalog patterns and JDBC, see
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html">java.sql.DatabaseMetaData</a>.
      * 
      * @param catalogPattern The catalog pattern
-     * @ant.not-required Per default, no specific catalog is used.
+     * @ant.not-required Per default no specific catalog is used.
      */
     public void setCatalogPattern(String catalogPattern)
     {
@@ -107,10 +109,12 @@ public abstract class DatabaseTaskBase extends Task
     }
     
     /**
-     * Sets the schema pattern used when accessing the database.
+     * Specifies a pattern that defines which database schemas to use. For some
+     * more info on schema patterns and JDBC, see
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html">java.sql.DatabaseMetaData</a>.
      * 
      * @param schemaPattern The schema pattern
-     * @ant.not-required Per default, no specific schema is used.
+     * @ant.not-required Per default no specific schema is used.
      */
     public void setSchemaPattern(String schemaPattern)
     {
@@ -131,13 +135,15 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Specifies whether DdlUtils shall use delimited (quoted) identifiers (table names, column names etc.)
-     * In most databases, undelimited identifiers will be converted to uppercase by the database,
-     * and the case of the identifier is ignored when performing any SQL command. Undelimited
-     * identifiers can contain only alphanumerical characters and the underscore. Also, no reserved
-     * words can be used as such identifiers.<br/>
-     * The limitations do not exist for delimited identifiers. However case of the identifier will be
-     * important in every SQL command executed against the database.
+     * Specifies whether DdlUtils shall use delimited (quoted) identifiers (such as table and column
+     * names). Most databases convert undelimited identifiers to uppercase and ignore the case of
+     * identifiers when performing any SQL command. Undelimited identifiers also cannot be reserved
+     * words and can only contain alphanumerical characters and the underscore.<br/>
+     * These limitations do not exist for delimited identifiers where identifiers have to be enclosed
+     * in double quotes. Delimited identifiers can contain unicode characters, and even reserved
+     * words can be used as identifiers. Please be aware though, that they always have to enclosed
+     * in double quotes, and that the case of the identifier will be important in every SQL command
+     * executed against the database.
      *
      * @param useDelimitedSqlIdentifiers <code>true</code> if delimited SQL identifiers shall be used
      * @ant.not-required Default is <code>false</code>.
@@ -159,9 +165,9 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Specifies whether a table's foreign keys read from a live database shall be sorted
-     * alphabetically or left in the order that they are returned by the database. Note that
-     * the sort is case sensitive only if delimied identifier mode is on
+     * Specifies whether DdlUtils shall sort the foreign keys of a table read from a live database or
+     * leave them in the order in which they are returned by the database/JDBC driver. Note that
+     * the sort is case sensitive only if delimited identifier mode is on
      * (<code>useDelimitedSqlIdentifiers</code> is set to <code>true</code>).
      *
      * @param sortForeignKeys <code>true</code> if the foreign keys shall be sorted
@@ -183,8 +189,8 @@ public abstract class DatabaseTaskBase extends Task
     }
 
     /**
-     * Specifies whether the database shall be shut down after the task has finished.
-     * This is mostly usefule for embedded databases.
+     * Specifies whether DdlUtils shall shut down the database after the task has finished.
+     * This is mostly useful for embedded databases.
      *
      * @param shutdownDatabase <code>true</code> if the database shall be shut down
      * @ant.not-required Default is <code>false</code>.
@@ -223,7 +229,17 @@ public abstract class DatabaseTaskBase extends Task
     {
         return _commands.iterator();
     }
-    
+
+    /**
+     * Creates the platform configuration.
+     * 
+     * @return The platform configuration
+     */
+    protected PlatformConfiguration getPlatformConfiguration()
+    {
+        return _platformConf;
+    }
+
     /**
      * Creates the platform for the configured database.
      * 

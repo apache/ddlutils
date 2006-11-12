@@ -6,11 +6,11 @@
 <link href="styles.css" type="text/css" rel="stylesheet">
 </head>
 <body>
-<h1>$title - Documentation</h1>
+<h2>$title - Documentation</h2>
 <p>
 DdlUtils comes with two <a href="http://ant.apache.org/">Ant</a> tasks that allow you to manipulate the
-database structure, insert data into the database, and to dump the database structure and
-data contained in it, to XML.
+database structure, insert data into the database, dump the database structure and data contained in it,
+to XML, etc.
 </p>
 <h3>Using the Tasks</h3>
 <p>
@@ -49,13 +49,13 @@ Lets see examples for how to use them:
   &lt;/ddlToDatabase&gt;
 &lt;/target&gt;</pre>
 <p>
-This snippet essentially uses the <code>DdlToDatabaseTask</code> task to create the a PostgreSQL
-database at <code>//localhost/test</code>, establish the database structure (tables etc.)
-defined in the file <code>src/schema/project-schema.xml</code> in this database, and then
-inserts the data defined in <code>src/data/data.xml</code>.
+This snippet essentially uses the <code>DdlToDatabaseTask</code> task to create a PostgreSQL
+database at <code>//localhost/test</code>, establish the database structure (tables, foreign keys
+etc.) defined in the file <code>src/schema/project-schema.xml</code> in this new database,
+and then insert the data contained in <code>src/data/data.xml</code>.
 </p>
 <p>
-Required for this to work is that both DdlUtils and the JDBC driver are available
+In order for this to work, both DdlUtils and the JDBC driver have to be available
 in the path specified by <code>runtime-classpath</code>. In the above snippet, this path
 contains all JARs and ZIPs in sub-directory <code>lib</code>.
 </p>
@@ -63,7 +63,8 @@ contains all JARs and ZIPs in sub-directory <code>lib</code>.
 <legend>Note</legend>
 <p>
 Not every database platform supports creation of new databases via JDBC. Please refer to the
-documentation of the support for the individual databases <a href="database-support.html">here</a>.
+documentation <a href="database-support.html">here</a> for details of what is supported
+with individual databases.
 </p>
 </fieldset>
 <p>
@@ -96,18 +97,13 @@ The opposite direction is achieved via the <code>DatabaseToDdlTask</code> task:
 
 &lt;/target&gt;</pre>
 <p>
-Here, the database schema is retrieved via the specified JDBC driver and written
+Here, the database schema is retrieved using the specified JDBC driver, and then written
 to the file <code>db-schema.xml</code>. Likewise, the data in the database is written
 to the file <code>data.xml</code>.
 </p>
 <h3>Requirements</h3>
 <p>The DdlUtils tasks require Ant version 1.5 or newer.</p>
 <h3>Reference</h3>
-<p>The tasks reference documentation can be found <a href="index.all.html">here</a>.</p>
-<div class="copyright">
-  <hr />
-  <br />
-  <em>Copyright &copy; 2005-2006 Apache Software Foundation. All Rights Reserved.</em>
-</div>
+<p>The reference documentation for the Ant tasks can be found <a href="index.all.html">here</a>.</p>
 </body>
 </html>

@@ -43,8 +43,9 @@ import org.apache.tools.ant.types.FileSet;
  * present in the data, otherwise the task will fail. This behavior can be turned off via the
  * <code>ensureForeignKeyOrder</code> attribute.<br/>
  * In order to define data for foreign key dependencies that use auto-incrementing primary keys,
- * simply use unique values for their columns. DdlUtils will automatically use the real primary
- * key values. Note though that not every database supports the retrieval of auto-increment values.
+ * simply use some unique values for their columns. DdlUtils then will automatically use the real
+ * primary key values when inserting the data. Note though that not every database supports the
+ * retrieval of auto-increment values which is necessary for this to work.
  * 
  * @version $Revision: 289996 $
  * @ant.task name="writeDataToDatabase"
@@ -76,7 +77,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
      * Specifies the name of the single XML file that contains the data to insert into the database.
      *
      * @param dataFile The data file
-     * @ant.not-required If not specified, no data is inserted into the database upon creation.
+     * @ant.not-required Use either this or <code>fileset</code> sub elements.
      */
     public void setDataFile(File dataFile)
     {
@@ -89,7 +90,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
      * This value is only used if <code>useBatchMode</code> is <code>true</code>.
      *
      * @param batchSize The number of objects
-     * @ant.not-required The default value is 1
+     * @ant.not-required The default value is 1.
      */
     public void setBatchSize(int batchSize)
     {
@@ -97,14 +98,15 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Specifies whether batch mode shall be used for inserting the data. In this mode, insert statements
-     * for the same table are bundled together and executed as one statement which can be a lot faster
-     * than single insert statements. To achieve the highest performance, you should group the data in the
-     * XML file according to the tables because a batch insert only works for one table which means when
-     * the table changes the batch is executed and a new one will be started.
+     * Specifies whether batch mode shall be used for inserting the data. In batch mode, insert statements
+     * for the same table are bundled together and executed as one statement. This can be a lot faster
+     * than single insert statements but is not supported by all JDBC drivers/databases. To achieve the
+     * highest performance, you should group the data in the XML file according to the tables. This is
+     * because a batch insert only works for one table at a time. Thus when the table changes in an
+     * entry in the XML file, the batch is committed and then a new one is started.
      *
      * @param useBatchMode <code>true</code> if batch mode shall be used
-     * @ant.not-required Per default, batch mode is not used
+     * @ant.not-required Per default batch mode is not used.
      */
     public void setUseBatchMode(boolean useBatchMode)
     {
@@ -112,14 +114,14 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     }
 
     /**
-     * Specifies whether the foreign key order shall be honored when inserted data into the database.
-     * Otherwise, DdlUtils will simply assume that the entry order is ok. Note that execution will
-     * be slower when DdlUtils has to ensured in the inserted data, so if you know that the data is
-     * specified in foreign key order (i.e. referenced rows come before referencing rows), then
-     * turn this off.
+     * Specifies whether the foreign key order shall be honored when inserting data into the database.
+     * If not, DdlUtils will simply assume that the entry order is correct, i.e. that referenced rows
+     * come before referencing rows in the data XML. Note that execution will be slower when DdlUtils
+     * has to ensure the foreign-key order of the data. Thus if you know that the data is specified in
+     * foreign key order turn this off.
      *
      * @param ensureFKOrder <code>true</code> if the foreign key order shall be followed
-     * @ant.not-required Per default, foreign key order is honored
+     * @ant.not-required Per default foreign key order is honored.
      */
     public void setEnsureForeignKeyOrder(boolean ensureFKOrder)
     {

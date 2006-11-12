@@ -6,60 +6,25 @@
 ##
 ## Objects expected in context:
 ##
-##     $title      - Project title (of type String)
+##     $title   - Project title (of type String)
 ##     $antroot - (of type AntRoot)
 ## 
 <html>
 <head>
-  <title>$title Ant Tasks</title>
-  <link rel="stylesheet" type="text/css" href="style.css" />
-
+<title>$title</title>
+<link href="styles.css" type="text/css" rel="stylesheet">
 </head>
-<body>
-
-<div id="navigation">
-
-    ## Tasks
-<h2>$category Tasks</h2>
-
-	#foreach( $taskDoc in $antroot.getTasksByCategory($category) )
-		#if($taskDoc && !$taskDoc.isInnerClass())
-
-<p><a href="${taskDoc.getFullClassName()}.html" target="task">
-    Task &lt;${taskDoc.getAntName()}&gt;
-       </a>
-</p>
- <div class="description">
-                 #if($taskDoc.getShortComment())
-		    $taskDoc.getShortComment()
-		 #else
-		    <i>No comment available</i>
-		 #end
-</div>
-		#end
-	#end
-
-
-  ## Types
-<h2>$category Types</h2>
-
-  #foreach( $taskDoc in $antroot.getTypesByCategory($category) )
-    #if($taskDoc && !$taskDoc.isInnerClass() && $taskDoc.isTagged())
-<p><a href="${taskDoc.getFullClassName()}.html"  target="task">
-    Type &lt;${taskDoc.getAntName()}&gt;
-   </a>
-</p>
-
-<div class="description">
-                #if($taskDoc.getShortComment())
-		    $taskDoc.getShortComment()
-		 #else
-		    <i>No comment available</i>
-		 #end
-</div>
-
+<body class="index">
+<div>
+<h3>#if ($category == 'all') Core #else $category #end Tasks</h3>
+#foreach( $taskDoc in $antroot.getTasksByCategory($category) )
+  #if ($taskDoc && !$taskDoc.isInnerClass())
+<p><a href="${taskDoc.getFullClassName()}.html" target="task">Task <code>${taskDoc.getAntName()}</code></a></p>
+    #if ($taskDoc.getShortComment())
+<p class="taskShortDescription">$taskDoc.getShortComment()</p>
     #end
   #end
+#end
 </div>
 </body>
 </html>

@@ -29,7 +29,8 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * Dumps the schema in the live database specified in the enclosing task, to a schema XML file.
+ * Reads the schema of the live database (as specified in the enclosing task), and writes
+ * it as XML to a file.
  * 
  * @version $Revision: 289996 $
  * @ant.task name="writeSchemaToFile"
@@ -40,7 +41,7 @@ public class WriteSchemaToFileCommand implements Command
     private File _outputFile;
 
     /**
-     * Specifries the name of the file to write the schema XML to.
+     * Specifies the name of the file to write the schema XML to.
      * 
      * @param outputFile The output file
      * @ant.required

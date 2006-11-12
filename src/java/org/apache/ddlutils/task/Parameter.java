@@ -86,7 +86,7 @@ public class Parameter
 
     /**
      * Specifies the platforms - a comma-separated list of platform names - for which this parameter
-     * shall be used (see the <code>databaseType</code> attribute of the tasks possible values).
+     * shall be used (see the <code>databaseType</code> attribute of the tasks for possible values).
      * For every platform not in this list, the parameter is ignored.
      * 
      * @param platforms The platforms

@@ -27,10 +27,10 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
- * The sub task for dropping the target database. Note that this is only supported on some database
+ * Sub task for dropping the target database. Note that this is only supported on some database
  * platforms. See <a href="database-support.html">here</a> for details on which platforms support this.<br/>
  * This sub task does not require schema files. Therefore the <code>fileset</code> subelement and
- * the <code>schemaFile</code> attribute of the task can be omitted.
+ * the <code>schemaFile</code> attribute of the enclosing task can be omitted.
  * 
  * @version $Revision: 289996 $
  * @ant.task name="dropDatabase"

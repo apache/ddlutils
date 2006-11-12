@@ -30,7 +30,8 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
 /**
- * Generates an XML file containing the data currently stored in the database.
+ * Reads the data currently in the table in the live database (as specified by the
+ * enclosing task), and writes it as XML to a file.
  * 
  * @version $Revision: 289996 $
  * @ant.task name="writeDataToFile"

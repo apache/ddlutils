@@ -28,10 +28,10 @@ import org.apache.ddlutils.model.Table;
 /**
  * Specifies a parameter for the creation of the tables. These are usually platform specific.
  * Note that parameters are only applied when creating new tables, not when altering existing ones.
- * Note that if no table name is specified, the parameter is applied to all tables.
+ * Note also that if no table name is specified, the parameter is used for all created tables.
  * 
  * @version $Revision: 231306 $
- * @ant.type name="tableParameter"
+ * @ant.type name="parameter"
  */
 public class TableSpecificParameter extends Parameter
 {
@@ -41,11 +41,12 @@ public class TableSpecificParameter extends Parameter
     private ArrayList _tables = new ArrayList();
 
     /**
-     * Specifies the comma-separated list of table names where this parameter shall be applied.
+     * Specifies the comma-separated list of table names in whose creation this parameter
+     * shall be used. For every table not in this list, the parameter is ignored.
      * 
      * @param tableList The tables
-     * @ant.not-required Use this or the <code>table</code> parameter. If neiter is specified,
-     *                   the parameter is applied to all tables.
+     * @ant.not-required Use this or the <code>table</code> parameter. If neither is specified,
+     *                   the parameter is applied in the creation of all tables.
      */
     public void setTables(String tableList)
     {
@@ -61,11 +62,11 @@ public class TableSpecificParameter extends Parameter
     }
 
     /**
-     * Specifies the name of the table where this parameter shall be applied.
+     * Specifies the name of the table in whose creation this parameter shall be applied.
      * 
      * @param tableName The table
-     * @ant.not-required Use this or the <code>tables</code> parameter. If neiter is specified,
-     *                   the parameter is applied to all tables.
+     * @ant.not-required Use this or the <code>tables</code> parameter. If neither is specified,
+     *                   the parameter is applied in the creation of all tables.
      */
     public void setTable(String tableName)
     {
