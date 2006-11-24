@@ -45,10 +45,6 @@ public class CloudscapePlatform extends PlatformImplBase
     {
         PlatformInfo info = getPlatformInfo();
 
-        info.setNullAsDefaultValueRequired(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
         info.setMaxIdentifierLength(128);
         // BINARY and VARBINARY will also be handled by CloudscapeBuilder.getSqlType
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                     Types.BLOB);
@@ -60,8 +56,8 @@ public class CloudscapePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",                     Types.BLOB);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
-        info.addNativeTypeMapping(Types.OTHER,         "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.OTHER,         "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.REF,           "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",                  Types.SMALLINT);

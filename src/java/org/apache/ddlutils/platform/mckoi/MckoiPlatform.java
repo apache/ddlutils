@@ -51,9 +51,6 @@ public class MckoiPlatform extends PlatformImplBase
     {
         PlatformInfo info = getPlatformInfo();
 
-        info.setNullAsDefaultValueRequired(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
         info.setIndicesSupported(false);
         info.setIndicesEmbedded(true);
         info.setDefaultValueUsedForIdentitySpec(true);

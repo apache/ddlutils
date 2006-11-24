@@ -50,9 +50,6 @@ public class MySqlPlatform extends PlatformImplBase
         info.setMaxIdentifierLength(64);
         info.setNullAsDefaultValueRequired(true);
         info.setDefaultValuesForLongTypesSupported(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
         // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
         info.setNonPKIdentityColumnsSupported(false);
         // MySql returns synthetic default values for pk columns

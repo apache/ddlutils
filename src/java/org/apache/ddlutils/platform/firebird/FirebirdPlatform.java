@@ -47,10 +47,6 @@ public class FirebirdPlatform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(31);
-        info.setNullAsDefaultValueRequired(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
 

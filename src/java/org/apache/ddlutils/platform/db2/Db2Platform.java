@@ -58,23 +58,20 @@ public class Db2Platform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(18);
-        info.setNullAsDefaultValueRequired(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
+
         // the BINARY types are also handled by Db2Builder.getSqlType(Column)
-        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                     Types.BLOB);
+        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} FOR BIT DATA");
-        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",                 Types.SMALLINT);
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE",                   Types.DOUBLE);
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",                     Types.BLOB);
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",                  Types.SMALLINT);
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE",                    Types.DOUBLE);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
-        info.addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA");
-        info.addNativeTypeMapping(Types.NUMERIC,       "DECIMAL",                  Types.DECIMAL);
-        info.addNativeTypeMapping(Types.OTHER,         "BLOB",                     Types.BLOB);
-        info.addNativeTypeMapping(Types.STRUCT,        "BLOB",                     Types.BLOB);
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",                 Types.SMALLINT);
+        info.addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.NUMERIC,       "DECIMAL",                   Types.DECIMAL);
+        info.addNativeTypeMapping(Types.OTHER,         "BLOB",                      Types.BLOB);
+        info.addNativeTypeMapping(Types.STRUCT,        "BLOB",                      Types.BLOB);
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",                  Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} FOR BIT DATA");
         info.addNativeTypeMapping("BOOLEAN", "SMALLINT", "SMALLINT");
 

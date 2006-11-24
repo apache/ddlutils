@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="ISO-8859-15"?>
 <!--
-  Copyright 2002-2005 The Apache Software Foundation
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
 
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
 -->
 
 <!--
@@ -47,9 +50,24 @@ See http://forrest.apache.org/docs/linking.html for more info
 
   <documentation label="Documentation">
     <index label="Summary" href="documentation.html"/>
-    <database-support label="Supported databases" href="database-support.html" description="List of the supported databases"/>
-    <schema label="The XML schema format" href="ext:ddlutils/schemadoc" description="The schema format"/>
-    <ant-tasks label="The Ant tasks" href="ant-tasks.html" description="How to use the Ant tasks"/>
+    <database-support label="Support for databases">
+      <general-info label="General info" href="database-support.html" description="General info about database support"/>
+      <axion-support label="Axion" href="databases/axion.html" description="Support for the Axion database"/>
+      <db2-support label="DB2" href="databases/db2.html" description="Support for the DB2 database"/>
+      <derby-support label="Derby/Cloudscape" href="databases/derby.html" description="Support for the Derby/Cloudscape databases"/>
+      <firebird-support label="Firebird" href="databases/firebird.html" description="Support for the Firebird database"/>
+      <hsqldb-support label="HSQLDB" href="databases/hsqldb.html" description="Support for the HSQLDB database"/>
+      <interbase-support label="Interbase" href="databases/interbase.html" description="Support for the Interbase database"/>
+      <maxdb-support label="MaxDB/SapDB" href="databases/maxdb.html" description="Support for the MaxDB/SapDB databases"/>
+      <mckoi-support label="McKoi" href="databases/mckoi.html" description="Support for the McKoi database"/>
+      <mysql-support label="MySql" href="databases/mysql.html" description="Support for the MySQL database"/>
+      <oracle-support label="Oracle" href="databases/oracle.html" description="Support for the Oracle database"/>
+      <postgresql-support label="PostgreSQL" href="databases/postgresql.html" description="Support for the PostgreSQL database"/>
+      <sqlserver-support label="SQL Server" href="databases/sqlserver.html" description="Support for the SQL Server database"/>
+      <sybase-support label="Sybase" href="databases/sybase.html" description="Support for the Sybase database"/>
+    </database-support>
+    <schema label="The XML schema format" href="ext:ddlutils/schemadoc/" description="The schema format"/>
+    <ant-tasks label="The Ant tasks" href="ext:ddlutils/antdoc/" description="How to use the Ant tasks"/>
     <api-usage label="Using the API" href="api-usage.html" description="How to use DdlUtils in your code"/>
     <javadoc label="Javadoc" href="ext:ddlutils/javadoc" description="The API documentation"/>
   </documentation>
@@ -66,7 +84,8 @@ See http://forrest.apache.org/docs/linking.html for more info
         <model href="index.html?org/apache/ddlutils/model/package-summary.html"/>
         <converter href="org/apache/ddlutils/io/converters/SqlTypeConverter.html"/>
       </javadoc>
-      <schemadoc href="schema/database.dtd.html"/>
+      <schemadoc href="schema/"/>
+      <antdoc href="ant/"/>
       <svn-view href="http://svn.apache.org/viewcvs.cgi/db/ddlutils/trunk/"/>
       <user-list>
         <subscribe href="mailto:ddlutils-user-subscribe@db.apache.org"/>
