@@ -237,9 +237,9 @@
       <arg line="-error"/>
       <arg line="-warn"/>
       <arg line="-out"/>
-      <arg line="linklint.org"/>
+      <arg line="linklint.log"/>
       <arg line="-root"/>
-      <arg line="${build.doc.dir}"/>
+      <arg line="${forrest.output.dir}"/>
       <arg line="/@"/>
     </exec>
   </target>

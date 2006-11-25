@@ -83,7 +83,7 @@ contains all JARs and ZIPs in sub-directory <code>lib</code>.
 <legend>Note</legend>
 <p>
 Not every database platform supports creation of new databases via JDBC. Please refer to the
-documentation <a href="database-support.html">here</a> for details of what is supported
+documentation <a href="../database-support.html">here</a> for details of what is supported
 with individual databases.
 </p>
 </fieldset>

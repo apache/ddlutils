@@ -28,7 +28,7 @@ import org.apache.tools.ant.Task;
 
 /**
  * Sub task for dropping the target database. Note that this is only supported on some database
- * platforms. See <a href="database-support.html">here</a> for details on which platforms support this.<br/>
+ * platforms. See the database support documentation for details on which platforms support this.<br/>
  * This sub task does not require schema files. Therefore the <code>fileset</code> subelement and
  * the <code>schemaFile</code> attribute of the enclosing task can be omitted.
  * 

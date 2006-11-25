@@ -52,8 +52,8 @@ public class Parameter
     }
 
     /**
-     * Specifies the name of the parameter. See <a href="database-support.html">here</a>
-     * for the parameters supported by the individual platforms.</td>
+     * Specifies the name of the parameter. See the database support documentation
+     * for details on the parameters supported by the individual platforms.</td>
      *
      * @param name The name
      * @ant.required

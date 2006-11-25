@@ -173,7 +173,7 @@ See http://forrest.apache.org/docs/linking.html for more info
     </sqlserver>
     <sybase>
       <sqlserver href="http://www.sybase.com/products/archivedproducts/sqlserver"/>
-      <ase href="http://www.sybase.com/products/informationmanagement/adaptiveserverenterprise"/>
+      <ase href="http://www.sybase.com/products/databasemanagement/adaptiveserverenterprise"/>
       <manual-archive href="http://sybooks.sybase.com/onlinebooks/group-asarc/@Generic__CollectionView;pt=group-asarc"/>
       <manual href="http://sybooks.sybase.com/as.html"/>
     </sybase>
