@@ -55,10 +55,6 @@ public class Oracle8Platform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(30);
-        info.setNullAsDefaultValueRequired(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
         info.setIdentityStatusReadingSupported(false);
 
         // Note that the back-mappings are partially done by the model reader, not the driver

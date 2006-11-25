@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>Oracle</title>
+  </header> 
+  <body> 
+    <p>
+      DdlUtils has support for the <a href="ext:oracle">Oracle database</a> for versions <strong>8.1.7</strong>
+      and above.<br/>
+      Info about the datatypes and SQL elements supported in this version can be found in the
+      <strong>Oracle SQL Reference</strong>. You can access this documentation from the
+      <a href="ext:oracle/otn">Oracle Technology Network</a>. Registration to this area is free.
+    </p>
+    <p>
+      DdlUtils provides different platforms for Oracle v8, v9, and v10. The v9 platform adds support for
+      the native <code>TIMESTAMP</code> type, and the v10 platform handles the recycle bin that was
+      introduced in version 10 of the Oracle database.<br/>
+      Note that DdlUtils currently does not automatically detect the database version, so it will always
+      choose the v8 version. If you want to make use of the additional features, then you have to
+      specify the platform identifier manually.
+    </p>
+    <p>&nbsp;</p>
+    <p>
+      Platform identifiers:
+    </p>
+    <ul>
+      <li><code>Oracle</code></li>
+      <li><code>Oracle9</code></li>
+      <li><code>Oracle10</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>
+      Recognized JDBC drivers:
+    </p>
+    <ul>
+      <li><code>oracle.jdbc.driver.OracleDriver</code></li>
+      <li><code>oracle.jdbc.dnlddriver.OracleDriver</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>
+      Recognized JDBC sub protocols:
+    </p>
+    <ul>
+      <li><code>jdbc:oracle:thin</code></li>
+      <li><code>jdbc:oracle:oci8</code></li>
+      <li><code>jdbc:oracle:dnldthin</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <table>
+      <tr>
+        <td class="platformPropName">The database supports SQL comments</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports delimited identifiers</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database's maximum identifier length</td>
+        <td class="platformPropValue">30</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils uses sequences for identity columns</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports non-primary key columns as identity columns</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database allows INSERT/UPDATE statements to set values for identity columns</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can read back the auto-generated value of an identity column</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports non-unique indices</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+    </table>
+    <p>&nbsp;</p>
+    <table>
+      <tr>
+        <th class="typeMappingJdbcType">JDBC Type</th>
+        <th class="typeMappingNativeType">Database Type</th>
+        <th class="typeMappingComments">Additional comments</th>
+      </tr>
+      <tr>
+        <td>ARRAY</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>BIGINT</td>
+        <td>NUMBER(38)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BINARY</td>
+        <td>RAW</td>
+        <td>Oracle requires the specification of the size for <code>RAW</code> columns.
+            If no size was specified, then 254 is used.<br/>
+            Will be read back as VARBINARY</td>
+      </tr>
+      <tr>
+        <td>BIT</td>
+        <td>NUMBER(1)</td>
+        <td>Oracle has no native boolean type.</td>
+      </tr>
+      <tr>
+        <td>BLOB</td>
+        <td>BLOB</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BOOLEAN</td>
+        <td>NUMBER(1)</td>
+        <td>Oracle has no native boolean type.<br/>
+            Will be read back as BIT</td>
+      </tr>
+      <tr>
+        <td>CHAR</td>
+        <td>CHAR</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>CLOB</td>
+        <td>CLOB</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DATALINK</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>DATE</td>
+        <td>DATE</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DECIMAL</td>
+        <td>NUMBER</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DISTINCT</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>DOUBLE</td>
+        <td>DOUBLE PRECISION</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>FLOAT</td>
+        <td>FLOAT</td>
+        <td>Will be read back as DOUBLE</td>
+      </tr>
+      <tr>
+        <td>INTEGER</td>
+        <td>INTEGER</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>JAVA_OBJECT</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>LONGVARBINARY</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>LONGVARCHAR</td>
+        <td>CLOB</td>
+        <td>Will be read back as CLOB</td>
+      </tr>
+      <tr>
+        <td>NULL</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>NUMERIC</td>
+        <td>NUMBER</td>
+        <td>Will be read back as DECIMAL</td>
+      </tr>
+      <tr>
+        <td>OTHER</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>REAL</td>
+        <td>REAL</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>REF</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>SMALLINT</td>
+        <td>NUMBER(5)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>STRUCT</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>TIME</td>
+        <td>DATE</td>
+        <td>Will be read back as TIMESTAMP</td>
+      </tr>
+      <tr>
+        <td>TIMESTAMP</td>
+        <td>Oracle8 platform: DATE<br/>Oracle9/10 platforms: TIMESTAMP</td>
+        <td>The TIMESTAMP native type is only supported in Oracle 9 and above.</td>
+      </tr>
+      <tr>
+        <td>TINYINT</td>
+        <td>NUMBER(3)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>VARBINARY</td>
+        <td>RAW</td>
+        <td>Oracle requires the specification of the size for <code>RAW</code> columns.
+            If no size was specified, then 254 is used.</td>
+      </tr>
+      <tr>
+        <td>VARCHAR</td>
+        <td>VARCHAR2</td>
+        <td></td>
+      </tr>
+    </table>
+  </body>
+</document>

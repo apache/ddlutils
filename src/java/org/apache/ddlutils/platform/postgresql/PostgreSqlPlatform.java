@@ -58,10 +58,6 @@ public class PostgreSqlPlatform extends PlatformImplBase
         // this is the default length though it might be changed when building PostgreSQL
         // in file src/include/postgres_ext.h
         info.setMaxIdentifierLength(31);
-        info.setNullAsDefaultValueRequired(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
 
         info.addNativeTypeMapping(Types.ARRAY,         "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BINARY,        "BYTEA",            Types.LONGVARBINARY);

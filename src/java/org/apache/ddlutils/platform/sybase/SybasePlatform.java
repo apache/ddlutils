@@ -67,17 +67,14 @@ public class SybasePlatform extends PlatformImplBase
 
         info.setMaxIdentifierLength(28);
         info.setNullAsDefaultValueRequired(true);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
 
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE");
-        // we're not using the native BIT type because it is rather limited (cannot be NULL, cannot be indexed)
-        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",         Types.SMALLINT);
         // BIGINT is mapped back in the model reader
         info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
+        // we're not using the native BIT type because it is rather limited (cannot be NULL, cannot be indexed)
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.BLOB,          "IMAGE",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.CLOB,          "TEXT",             Types.LONGVARCHAR);
         info.addNativeTypeMapping(Types.DATE,          "DATETIME",         Types.TIMESTAMP);

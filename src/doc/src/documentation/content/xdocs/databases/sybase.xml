@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>Sybase</title>
+  </header> 
+  <body> 
+    <p>
+      DdlUtils supports the Sybase products <a href="ext:sybase/sqlserver">SQL Server</a> from version 
+      <strong>10.0</strong> on, and <a href="ext:sybase/ase">Adaptive Server Enterprise</a> from version
+      <strong>11.5</strong> on. The Sybase documentation can be found in the
+      <a href="ext:sybase/manual-archive">Archive</a> in the <em>Transact-SQL User's Guide</em> document
+      for the respective version. The manual for the newest version is found <a href="ext:sybase/manual">here</a>.
+    </p>
+    <p>&nbsp;</p>
+    <p>
+      Platform identifier:
+    </p>
+    <ul>
+      <li><code>Sybase</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>
+      Recognized JDBC drivers:
+    </p>
+    <ul>
+      <li><code>com.sybase.jdbc2.jdbc.SybDriver</code></li>
+      <li><code>com.sybase.jdbc.SybDriver</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>
+      Recognized JDBC sub protocol:
+    </p>
+    <ul>
+      <li><code>jdbc:sybase:Tds</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <table>
+      <tr>
+        <td class="platformPropName">The database supports SQL comments</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports delimited identifiers</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database's maximum identifier length</td>
+        <td class="platformPropValue">28</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils uses sequences for identity columns</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports non-primary key columns as identity columns</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database allows INSERT/UPDATE statements to set values for identity columns</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can read back the auto-generated value of an identity column</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports non-unique indices</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+    </table>
+    <p>&nbsp;</p>
+    <table>
+      <tr>
+        <th class="typeMappingJdbcType">JDBC Type</th>
+        <th class="typeMappingNativeType">Database Type</th>
+        <th class="typeMappingComments">Additional comments</th>
+      </tr>
+      <tr>
+        <td>ARRAY</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>BIGINT</td>
+        <td>DECIMAL(19,0)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BINARY</td>
+        <td>BINARY</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BIT</td>
+        <td>SMALLINT</td>
+        <td>The native BIT type is rather limited (cannot be NULL, cannot be indexed), hence DdlUtils uses SMALLINT instead.<br/>
+            Will be read back as SMALLINT</td>
+      </tr>
+      <tr>
+        <td>BLOB</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>BOOLEAN</td>
+        <td>SMALLINT</td>
+        <td>The native BIT type is rather limited (cannot be NULL, cannot be indexed), hence DdlUtils uses SMALLINT instead.<br/>
+            Will be read back as SMALLINT</td>
+      </tr>
+      <tr>
+        <td>CHAR</td>
+        <td>CHAR</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>CLOB</td>
+        <td>TEXT</td>
+        <td>Will be read back as LONGVARCHAR</td>
+      </tr>
+      <tr>
+        <td>DATALINK</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>DATE</td>
+        <td>DATETIME</td>
+        <td>Will be read back as TIMSTAMP</td>
+      </tr>
+      <tr>
+        <td>DECIMAL</td>
+        <td>DECIMAL</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DISTINCT</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>DOUBLE</td>
+        <td>DOUBLE PRECISION</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>FLOAT</td>
+        <td>DOUBLE PRECISION</td>
+        <td>Will be read back as DOUBLE</td>
+      </tr>
+      <tr>
+        <td>INTEGER</td>
+        <td>INT</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>JAVA_OBJECT</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>LONGVARBINARY</td>
+        <td>IMAGE</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>LONGVARCHAR</td>
+        <td>TEXT</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>NULL</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>NUMERIC</td>
+        <td>NUMERIC</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>OTHER</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>REAL</td>
+        <td>REAL</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>REF</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>SMALLINT</td>
+        <td>SMALLINT</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>STRUCT</td>
+        <td>IMAGE</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>TIME</td>
+        <td>DATETIME</td>
+        <td>Will be read back as TIMESTAMP</td>
+      </tr>
+      <tr>
+        <td>TIMESTAMP</td>
+        <td>DATETIME</td>
+        <td>Will be read back as TIMESTAMP</td>
+      </tr>
+      <tr>
+        <td>TINYINT</td>
+        <td>SMALLINT</td>
+        <td>The native <code>TINYINT</code> type only supports values between 0 and 255.<br/>
+            Will be read back as SMALLINT</td>
+      </tr>
+      <tr>
+        <td>VARBINARY</td>
+        <td>VARBINARY</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>VARCHAR</td>
+        <td>VARCHAR</td>
+        <td></td>
+      </tr>
+    </table>
+  </body>
+</document>

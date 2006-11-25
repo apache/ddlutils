@@ -52,19 +52,14 @@ public class MSSqlPlatform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(128);
-        info.setNullAsDefaultValueRequired(false);
-        info.setPrimaryKeyEmbedded(true);
-        info.setForeignKeysEmbedded(false);
-        info.setIndicesEmbedded(false);
-        //info.setCommentPrefix("#");
 
-        info.addNativeTypeMapping(Types.ARRAY,         "IMAGE");
+        info.addNativeTypeMapping(Types.ARRAY,         "IMAGE",         Types.LONGVARBINARY);
         // BIGINT will be mapped back to BIGINT by the model reader 
         info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
         info.addNativeTypeMapping(Types.BLOB,          "IMAGE",         Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.CLOB,          "TEXT",          Types.LONGVARCHAR);
         info.addNativeTypeMapping(Types.DATE,          "DATETIME",      Types.TIMESTAMP);
-        info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE");
+        info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE",         Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "FLOAT",         Types.FLOAT);
         info.addNativeTypeMapping(Types.INTEGER,       "INT");
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "IMAGE",         Types.LONGVARBINARY);

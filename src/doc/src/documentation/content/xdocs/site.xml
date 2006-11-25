@@ -37,7 +37,6 @@ See http://forrest.apache.org/docs/linking.html for more info
   <about label="About">
     <index label="Home" href="index.html" description="Welcome to DdlUtils"/>
     <changes label="Release Notes" href="release-notes.html" description="Release Notes" />
-    <todo label="Todo" href="to-do.html" description="ToDo list" />
     <mail-lists label="Mailing lists" href="mail-lists.html" description="Info about DdlUtils' mailing lists"/>
     <jira label="Bug database (JIRA)" href="ext:ddlutils/jira"/>
   </about>

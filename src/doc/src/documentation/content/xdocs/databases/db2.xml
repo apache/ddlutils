@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>DB 2</title>
+  </header> 
+  <body> 
+    <p>
+      The DdlUtils support for <a href="ext:db2">IBM DB2</a> is based upon version <strong>7</strong>.
+      The datatypes and SQL elements in DB2 are described in the
+      <a href="ext:db2/manual">DB2 SQL Reference V7</a>. Some specifics related to the JDBC driver and
+      suggested typemappings can also be found <a href="ext:db2/jdbc-mappings">here</a>.
+    </p>
+    <p>
+      DdlUtils provides two platforms for DB2, one for version 7 and one for version 8 and above, which
+      mainly differ in the maximum identifier lengths (see below for details.) Note that you have to
+      specify the v8 platform manually as the auto detection currently always selects the v7 platform.
+    </p>
+    <p>&nbsp;</p>
+    <p>
+      Platform identifiers:
+    </p>
+    <ul>
+      <li><code>DB2</code> for the v7 platform</li>
+      <li><code>DB2v8</code> for the v8 platform</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>
+      Recognized JDBC drivers:
+    </p>
+    <ul>
+      <li><code>com.ibm.db2.jcc.DB2Driver</code></li>
+      <li><code>COM.ibm.db2.jdbc.app.DB2Driver</code></li>
+      <li><code>COM.ibm.db2os390.sqlj.jdbc.DB2SQLJDriver</code></li>
+      <li><code>com.ibm.as400.access.AS400JDBCDriver</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>
+      Recognized JDBC sub protocols:
+    </p>
+    <ul>
+      <li><code>jdbc:db2</code></li>
+      <li><code>jdbc:db2os390</code></li>
+      <li><code>jdbc:2os390sqlj</code></li>
+      <li><code>jdbc:as400</code></li>
+    </ul>
+    <p>&nbsp;</p>
+    <table>
+      <tr>
+        <td class="platformPropName">The database supports SQL comments</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports delimited identifiers</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database's maximum identifier length</td>
+        <td class="platformPropValue">18 for the v7 platform<br/>The v8 platform supports 128 characters
+                                      for identifiers (e.g. table names), 30 characters for column names,
+                                      and 18 for constraints and foreign keys</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports default values for <code>LONG</code> types</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils uses sequences for identity columns</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports non-primary key columns as identity columns</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database allows INSERT/UPDATE statements to set values for identity columns</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can read back the auto-generated value of an identity column</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">The database supports non-unique indices</td>
+        <td class="platformPropValue">yes</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can create a database via JDBC</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+      <tr>
+        <td class="platformPropName">DdlUtils can drop a database via JDBC</td>
+        <td class="platformPropValue">no</td>
+      </tr>
+    </table>
+    <p>&nbsp;</p>
+    <table>
+      <tr>
+        <th class="typeMappingJdbcType">JDBC Type</th>
+        <th class="typeMappingNativeType">Database Type</th>
+        <th class="typeMappingComments">Additional comments</th>
+      </tr>
+      <tr>
+        <td>ARRAY</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>BIGINT</td>
+        <td>BIGINT</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BINARY</td>
+        <td>CHAR(n) FOR BIT DATA</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BIT</td>
+        <td>SMALLINT</td>
+        <td>DB2 has no native boolean type<br/>
+            Will be read back as SMALLINT</td>
+      </tr>
+      <tr>
+        <td>BLOB</td>
+        <td>BLOB</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>BOOLEAN</td>
+        <td>SMALLINT</td>
+        <td>DB2 has no native boolean type<br/>
+            Will be read back as SMALLINT</td>
+      </tr>
+      <tr>
+        <td>CHAR</td>
+        <td>CHAR</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>CLOB</td>
+        <td>CLOB</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DATALINK</td>
+        <td>DATALINK</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DATE</td>
+        <td>DATE</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DECIMAL</td>
+        <td>DECIMAL</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DISTINCT</td>
+        <td>DISTINCT</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>DOUBLE</td>
+        <td>DOUBLE</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>FLOAT</td>
+        <td>DOUBLE</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>INTEGER</td>
+        <td>INTEGER</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>JAVA_OBJECT</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>LONGVARBINARY</td>
+        <td>LONG VARCHAR FOR BIT DATA</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>LONGVARCHAR</td>
+        <td>LONG VARCHAR</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>NULL</td>
+        <td>LONG VARCHAR FOR BIT DATA</td>
+        <td>Will be read back as LONGVARBINARY</td>
+      </tr>
+      <tr>
+        <td>NUMERIC</td>
+        <td>DECIMAL</td>
+        <td>Will be read back as DECIMAL</td>
+      </tr>
+      <tr>
+        <td>OTHER</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>REAL</td>
+        <td>REAL</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>REF</td>
+        <td>REF</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>SMALLINT</td>
+        <td>SMALLINT</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>STRUCT</td>
+        <td>BLOB</td>
+        <td>Will be read back as BLOB</td>
+      </tr>
+      <tr>
+        <td>TIME</td>
+        <td>TIME</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>TIMESTAMP</td>
+        <td>TIMESTAMP</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>TINYINT</td>
+        <td>SMALLINT</td>
+        <td>Will be read back as SMALLINT</td>
+      </tr>
+      <tr>
+        <td>VARBINARY</td>
+        <td>VARCHAR(n) FOR BIT DATA</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>VARCHAR</td>
+        <td>VARCHAR</td>
+        <td></td>
+      </tr>
+    </table>
+  </body>
+</document>
