@@ -36,7 +36,7 @@ import org.xml.sax.SAXException;
 public class LocalEntityResolver implements EntityResolver
 {
     /** The default DTD. */
-    private static final String DTD_PREFIX = "http://db.apache.org/torque/dtd/database";
+    public static final String DTD_PREFIX = "http://db.apache.org/torque/dtd/database";
 
     /**
      * {@inheritDoc}

@@ -130,6 +130,7 @@ public class TestDatabaseIO extends TestCase
                      column.getDescription());
         assertEquals("javaId", column.getJavaName());
         assertEquals(
+            "<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">\n" +
             "  <database name=\"test\">\n" +
             "    <table name=\"SomeTable\" description=\"Some table\">\n" +
             "      <column name=\"ID\" primaryKey=\"true\" required=\"true\" type=\"INTEGER\" autoIncrement=\"false\" description=\"The primary key\" javaName=\"javaId\"/>\n" +
@@ -254,6 +255,7 @@ public class TestDatabaseIO extends TestCase
                      ref.getForeignColumnName());
 
         assertEquals(
+            "<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">\n" +
             "  <database name=\"test\">\n" +
             "    <table name=\"SomeTable\" description=\"Some table\">\n" +
             "      <column name=\"ID\" primaryKey=\"true\" required=\"true\" type=\"VARCHAR\" size=\"16\" autoIncrement=\"false\" description=\"The primary key\"/>\n" +
@@ -392,6 +394,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(indexColumn.getSize());
 
         assertEquals(
+            "<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">\n" +
             "  <database name=\"test\">\n" +
             "    <table name=\"TableWidthIndex\">\n" +
             "      <column name=\"id\" primaryKey=\"true\" required=\"true\" type=\"DOUBLE\" autoIncrement=\"false\"/>\n" +
@@ -510,6 +513,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(indexColumn.getSize());
 
         assertEquals(
+            "<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">\n" +
             "  <database name=\"test\">\n" +
             "    <table name=\"TableWidthIndices\">\n" +
             "      <column name=\"id\" primaryKey=\"false\" required=\"true\" type=\"SMALLINT\" autoIncrement=\"true\"/>\n" +
@@ -914,6 +918,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(indexColumn.getSize());
 
         assertEquals(
+            "<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">\n" +
             "  <database name=\"test\">\n" +
             "    <table name=\"A\" description=\"Table A\">\n" +
             "      <column name=\"id\" primaryKey=\"true\" required=\"true\" type=\"INTEGER\" autoIncrement=\"true\" description=\"The primary key of table A\"/>\n" +
@@ -1333,6 +1338,7 @@ public class TestDatabaseIO extends TestCase
         assertNull(column.getDescription());
 
         assertEquals(
+            "<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">\n" +
             "  <database name=\"test\">\n" +
             "    <table name=\"SomeTable\">\n" +
             "      <column name=\"intField\" primaryKey=\"false\" required=\"false\" type=\"TINYINT\" autoIncrement=\"false\"/>\n" +

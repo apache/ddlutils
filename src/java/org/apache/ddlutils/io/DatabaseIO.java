@@ -132,18 +132,25 @@ public class DatabaseIO
      * @param output The target output writer
      * @return The writer
      */
-    protected BeanWriter getWriter(Writer output) throws IntrospectionException, SAXException, IOException
+    protected BeanWriter getWriter(Writer output) throws DdlUtilsException
     {
-        BeanWriter writer = new BeanWriter(output);
-
-        writer.getXMLIntrospector().register(getBetwixtMapping());
-        writer.getXMLIntrospector().getConfiguration().setAttributesForPrimitives(true);
-        writer.getXMLIntrospector().getConfiguration().setWrapCollectionsInElement(false);
-        writer.getXMLIntrospector().getConfiguration().setElementNameMapper(new HyphenatedNameMapper());
-        writer.getBindingConfiguration().setMapIDs(false);
-        writer.enablePrettyPrint();
-
-        return writer;
+        try
+        {
+            BeanWriter writer = new BeanWriter(output);
+    
+            writer.getXMLIntrospector().register(getBetwixtMapping());
+            writer.getXMLIntrospector().getConfiguration().setAttributesForPrimitives(true);
+            writer.getXMLIntrospector().getConfiguration().setWrapCollectionsInElement(false);
+            writer.getXMLIntrospector().getConfiguration().setElementNameMapper(new HyphenatedNameMapper());
+            writer.getBindingConfiguration().setMapIDs(false);
+            writer.enablePrettyPrint();
+    
+            return writer;
+        }
+        catch (Exception ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
     }
 
     /**
@@ -233,6 +240,7 @@ public class DatabaseIO
         model.initialize();
         return model;
     }
+
     /**
      * Writes the database model to the specified file.
      * 
@@ -249,7 +257,7 @@ public class DatabaseIO
             {
                 writer = new BufferedWriter(new FileWriter(filename));
     
-                getWriter(writer).write(model);
+                write(model, writer);
                 writer.flush();
             }
             finally
@@ -275,14 +283,7 @@ public class DatabaseIO
      */
     public void write(Database model, OutputStream output) throws DdlUtilsException
     {
-        try
-        {
-            getWriter(new OutputStreamWriter(output)).write(model);
-        }
-        catch (Exception ex)
-        {
-            throw new DdlUtilsException(ex);
-        }
+        write(model, getWriter(new OutputStreamWriter(output)));
     }
 
     /**
@@ -294,9 +295,21 @@ public class DatabaseIO
      */
     public void write(Database model, Writer output) throws DdlUtilsException
     {
+        write(model, getWriter(output));
+    }
+
+    /**
+     * Internal method that writes the database model using the given bean writer.
+     * 
+     * @param model  The database model
+     * @param writer The bean writer
+     */
+    private void write(Database model, BeanWriter writer) throws DdlUtilsException
+    {
         try
         {
-            getWriter(output).write(model);
+            writer.writeXmlDeclaration("<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">");
+            writer.write(model);
         }
         catch (Exception ex)
         {
