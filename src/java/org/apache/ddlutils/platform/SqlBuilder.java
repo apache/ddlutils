@@ -668,19 +668,7 @@ public abstract class SqlBuilder
                                  CreationParameters params,
                                  AddTableChange     change) throws IOException
     {
-        // TODO: where to get the parameters from ?
-        writeTableCreationStmt(desiredModel, change.getNewTable(), null);
-        writeTableCreationStmtEnding(change.getNewTable(), null);
-
-        if (!getPlatformInfo().isPrimaryKeyEmbedded())
-        {
-            writeExternalPrimaryKeysCreateStmt(change.getNewTable(),
-                                               change.getNewTable().getPrimaryKeyColumns());
-        }
-        if (!getPlatformInfo().isIndicesEmbedded())
-        {
-            writeExternalIndicesCreateStmt(change.getNewTable());
-        }
+        createTable(desiredModel, change.getNewTable(), params == null ? null : params.getParametersFor(change.getNewTable()));
     }
 
     /**

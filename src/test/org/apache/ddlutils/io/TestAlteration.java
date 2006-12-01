@@ -1661,6 +1661,43 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
+     * Tests the addition of a table with an auto-increment primary key.
+     */
+    public void testAddAutoIncrementTable()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+           "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' autoIncrement='true' required='true'/>\n"+
+            "  </table>\n"+
+           "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip1");
+
+        assertEquals((Object)"1", beans.get(0), "pk");
+    }
+
+    /**
      * Tests the removal of a table.
      */
     public void testRemoveTable1()
