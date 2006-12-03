@@ -107,6 +107,23 @@ public class TestDateConverter extends TestCase
     }
 
     /**
+     * Tests a full datetime string.
+     */
+    public void testNormalConvertFromFullDateTimeString()
+    {
+        String   textRep = "2005-06-07 10:11:12";
+        Calendar cal     = Calendar.getInstance();
+
+        cal.clear();
+        cal.set(2005, 5, 7);
+
+        Object result = _dateConverter.convertFromString(textRep, Types.DATE);
+
+        assertTrue(result instanceof Date);
+        assertEquals(cal.getTimeInMillis(), ((Date)result).getTime());
+    }
+
+    /**
      * Tests converting with an invalid SQL type.
      */
     public void testConvertFromStringWithInvalidSqlType()

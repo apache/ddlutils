@@ -111,6 +111,26 @@ public class TestTimeConverter extends TestCase
     }
 
     /**
+     * Tests a full ISO datetime string.
+     */
+    public void testNormalConvertFromIsoDateTimeString()
+    {
+        String   textRep = "2004-01-13 04:45:09.245";
+        Calendar cal     = Calendar.getInstance();
+
+        cal.setLenient(false);
+        cal.clear();
+        cal.set(Calendar.HOUR, 4);
+        cal.set(Calendar.MINUTE, 45);
+        cal.set(Calendar.SECOND, 9);
+
+        Object result = _timeConverter.convertFromString(textRep, Types.TIME);
+
+        assertTrue(result instanceof Time);
+        assertEquals(cal.getTimeInMillis(), ((Time)result).getTime());
+    }
+
+    /**
      * Tests converting with an invalid SQL type.
      */
     public void testConvertFromStringWithInvalidSqlType()

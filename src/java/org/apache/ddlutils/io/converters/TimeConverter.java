@@ -23,6 +23,14 @@ import java.sql.Time;
 import java.sql.Types;
 import java.util.Calendar;
 
+import org.apache.ddlutils.DdlUtilsException;
+import org.apache.oro.text.regex.MalformedPatternException;
+import org.apache.oro.text.regex.MatchResult;
+import org.apache.oro.text.regex.Pattern;
+import org.apache.oro.text.regex.PatternCompiler;
+import org.apache.oro.text.regex.Perl5Compiler;
+import org.apache.oro.text.regex.Perl5Matcher;
+
 /**
  * Converts between {@link java.sql.Time} and {@link java.lang.String} using the standard
  * representation "hh:mm:ss".
@@ -31,6 +39,8 @@ import java.util.Calendar;
  */
 public class TimeConverter implements SqlTypeConverter 
 {
+    /** The regular expression pattern for the parsing of ISO times. */
+    private Pattern _timePattern;
 	/** The calendar object to convert to/from times. */
 	private Calendar _calendar;
 
@@ -39,8 +49,18 @@ public class TimeConverter implements SqlTypeConverter
 	 */
 	public TimeConverter()
 	{
-		_calendar = Calendar.getInstance();
+        PatternCompiler compiler = new Perl5Compiler();
 
+        try
+        {
+            _timePattern = compiler.compile("(?:\\d{4}\\-\\d{2}\\-\\d{2}\\s)?(\\d{2})(?::(\\d{2}))?(?::(\\d{2}))?(?:\\..*)?");
+        }
+        catch (MalformedPatternException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+
+        _calendar = Calendar.getInstance();
 		_calendar.setLenient(false);
 	}
 
@@ -57,48 +77,48 @@ public class TimeConverter implements SqlTypeConverter
         {
             // we're not using {@link java.sql.Time#valueOf(String)} as this method is too strict
             // it only parses the full spec "hh:mm:ss"
+            Perl5Matcher matcher = new Perl5Matcher();
+            int          hours   = 0;
+            int          minutes = 0;
+            int          seconds = 0;
 
-            String timeAsText = textRep;
-            int    hours      = 0;
-            int    minutes    = 0;
-            int    seconds    = 0;
-            int    slashPos   = timeAsText.indexOf(':');
-
-            try
+            if (matcher.matches(textRep, _timePattern))
             {
-                if (slashPos < 0)
-                {
-                    hours = Integer.parseInt(timeAsText);
-                }
-                else
-                {
-                    hours      = Integer.parseInt(timeAsText.substring(0, slashPos));
-                    timeAsText = timeAsText.substring(slashPos + 1);
-                    slashPos   = timeAsText.indexOf(':');
-                    if (slashPos < 0)
-                    {
-                        minutes = Integer.parseInt(timeAsText);
-                    }
-                    else
-                    {
-                        minutes = Integer.parseInt(timeAsText.substring(0, slashPos));
-                        seconds = Integer.parseInt(timeAsText.substring(slashPos + 1));
-                    }
-                }
+                MatchResult match     = matcher.getMatch();
+                int         numGroups = match.groups();
 
+                try
+                {
+                    hours = Integer.parseInt(match.group(1));
+                    if ((numGroups > 2) && (match.group(2) != null))
+                    {
+                        minutes = Integer.parseInt(match.group(2));
+                    }
+                    if ((numGroups > 3) && (match.group(3) != null))
+                    {
+                        seconds = Integer.parseInt(match.group(3));
+                    }
+                }
+                catch (NumberFormatException ex)
+                {
+                    throw new ConversionException("Not a valid time : " + textRep, ex);
+                }
                 _calendar.clear();
-                _calendar.set(Calendar.HOUR_OF_DAY, hours);
-                _calendar.set(Calendar.MINUTE, minutes);
-                _calendar.set(Calendar.SECOND, seconds);
-                return new Time(_calendar.getTimeInMillis());
+                try
+                {
+                    _calendar.set(Calendar.HOUR_OF_DAY, hours);
+                    _calendar.set(Calendar.MINUTE, minutes);
+                    _calendar.set(Calendar.SECOND, seconds);
+                    return new Time(_calendar.getTimeInMillis());
+                }
+                catch (IllegalArgumentException ex)
+                {
+                    throw new ConversionException("Not a valid time : " + textRep, ex);
+                }
             }
-            catch (NumberFormatException ex)
+            else
             {
-                throw new ConversionException(ex);
-            }
-            catch (IllegalArgumentException ex)
-            {
-                throw new ConversionException(ex);
+                throw new ConversionException("Not a valid time : " + textRep);
             }
         }
         else
