@@ -1781,6 +1781,34 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
+     * Tests the removal of a table with an auto-increment column.
+     */
+    public void testRemoveTable3()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+            "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { null, new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
      * Test for DDLUTILS-54.
      */
     public void testIssue54() throws Exception
