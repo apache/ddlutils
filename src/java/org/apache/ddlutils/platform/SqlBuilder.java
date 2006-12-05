@@ -1343,6 +1343,8 @@ public abstract class SqlBuilder
                 }
             }
         }
+        // and the foreign keys from the table
+        dropExternalForeignKeys(table);
 
         writeTableComment(table);
         dropTable(table);
