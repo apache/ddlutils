@@ -748,6 +748,55 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 	/**
      * {@inheritDoc}
      */
+    public void dropTable(Connection connection, Database model, Table table, boolean continueOnError) throws DatabaseOperationException
+    {
+        String sql = getDropTableSql(model, table, continueOnError);
+
+        evaluateBatch(connection, sql, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void dropTable(Database model, Table table, boolean continueOnError) throws DatabaseOperationException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            dropTable(connection, model, table, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDropTableSql(Database model, Table table, boolean continueOnError)
+    {
+        String sql = null;
+
+        try
+        {
+            StringWriter buffer = new StringWriter();
+
+            getSqlBuilder().setWriter(buffer);
+            getSqlBuilder().dropTable(model, table);
+            sql = buffer.toString();
+        }
+        catch (IOException e)
+        {
+            // won't happen because we're using a string writer
+        }
+        return sql;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void dropTables(Database model, boolean continueOnError) throws DatabaseOperationException
     {
         Connection connection = borrowConnection();

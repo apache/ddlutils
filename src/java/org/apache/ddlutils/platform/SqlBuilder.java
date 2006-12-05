@@ -1321,7 +1321,37 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Outputs the DDL to drop the table.
+     * Outputs the DDL required to drop the given table. This method also
+     * drops foreign keys to the table.
+     * 
+     * @param database The database
+     * @param table    The table
+     */
+    public void dropTable(Database database, Table table) throws IOException
+    {
+        // we're dropping the foreignkeys to the table first
+        for (int idx = database.getTableCount() - 1; idx >= 0; idx--)
+        {
+            Table        otherTable = database.getTable(idx);
+            ForeignKey[] fks        = otherTable.getForeignKeys();
+
+            for (int fkIdx = 0; (fks != null) && (fkIdx < fks.length); fkIdx++)
+            {
+                if (fks[fkIdx].getForeignTable().equals(table))
+                {
+                    writeExternalForeignKeyDropStmt(otherTable, fks[fkIdx]);
+                }
+            }
+        }
+
+        writeTableComment(table);
+        dropTable(table);
+    }
+
+    /**
+     * Outputs the DDL to drop the table. Note that this method does not drop
+     * foreign keys to this table. Use {@link #dropTable(Database, Table)}
+     * if you want that.
      * 
      * @param table The table to drop
      */

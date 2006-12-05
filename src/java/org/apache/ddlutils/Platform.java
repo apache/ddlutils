@@ -520,6 +520,35 @@ public interface Platform
     public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredDb, CreationParameters params) throws DatabaseOperationException;
 
     /**
+     * Drops the specified table and all foreign keys pointing to it.
+     * 
+     * @param model           The database model
+     * @param table           The table to drop
+     * @param continueOnError Whether to continue executing the sql commands when an error occurred
+     */
+    public void dropTable(Database model, Table table, boolean continueOnError) throws DatabaseOperationException;
+
+    /**
+     * Returns the SQL for dropping the given table and all foreign keys pointing to it.
+     * 
+     * @param model           The database model
+     * @param table           The table to drop
+     * @param continueOnError Whether to continue executing the sql commands when an error occurred
+     * @return The SQL statements
+     */
+    public String getDropTableSql(Database model, Table table, boolean continueOnError);
+
+    /**
+     * Drops the specified table and all foreign keys pointing to it.
+     * 
+     * @param connection      The connection to the database
+     * @param model           The database model
+     * @param table           The table to drop
+     * @param continueOnError Whether to continue executing the sql commands when an error occurred
+     */
+    public void dropTable(Connection connection, Database model, Table table, boolean continueOnError) throws DatabaseOperationException; 
+
+    /**
      * Drops the tables defined in the given database.
      * 
      * @param model           The database model
