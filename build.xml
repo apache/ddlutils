@@ -69,9 +69,20 @@
       <fileset dir="${src.java.dir}"
                excludes="**/*.java"/>
     </copy>
-    <jar jarfile="${dist.dir}/${dist-filename-prefix}.jar"
+    <jar jarfile="${dist.dir}/${dist.filename.prefix}.jar"
          basedir="${build.java.dir}"
-         excludes="**/package.html"/>
+         excludes="**/package.html">
+      <manifest>
+        <attribute name="Built-By" value="${java.version} (${java.vendor})"/>
+        <attribute name="Package" value="org.apache.ddlutils"/>
+        <attribute name="Extension-Name" value="ddlutils"/>
+        <attribute name="Specification-Version" value="${dist.version}"/>
+        <attribute name="Specification-Vendor" value="${dist.vendor}"/>
+        <attribute name="Specification-Title" value="${dist.name}"/>
+        <attribute name="Implementation-Version" value="${dist.version}"/>
+        <attribute name="Implementation-Vendor" value="${dist.vendor}"/>
+      </manifest>
+    </jar>
   </target>
 
   <target name="clean"
@@ -249,7 +260,7 @@
   <!-- ================================================================== -->
   <target name="doc-archive" depends="doc"
           description="Builds the complete documentation archive.">
-    <zip zipfile="${dist.dir}/${dist-filename-prefix}-doc.zip"
+    <zip zipfile="${dist.dir}/${dist.filename.prefix}-doc.zip"
          basedir="."
          includes="doc/**"/>
   </target>
@@ -302,6 +313,24 @@
   </target>
 
   <!-- ================================================================== -->
+  <!-- Runs the test cases against AxionDB                                -->
+  <!-- ================================================================== -->
+  <target name="junit-axion"
+          description="Runs the test cases against Axion">
+    <property name="jdbc.properties.file" value="/jdbc.properties.axion"/>
+    <antcall target="-junit-internal"/>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Runs the test cases against Derby                                  -->
+  <!-- ================================================================== -->
+  <target name="junit-derby"
+          description="Runs the test cases against Derby">
+    <property name="jdbc.properties.file" value="/jdbc.properties.derby"/>
+    <antcall target="-junit-internal"/>
+  </target>
+
+  <!-- ================================================================== -->
   <!-- Runs the test cases against HsqlDb                                 -->
   <!-- ================================================================== -->
   <target name="junit-hsqldb"
@@ -311,34 +340,11 @@
   </target>
 
   <!-- ================================================================== -->
-  <!-- Runs the test cases against AxionDB                                -->
-  <!-- ================================================================== -->
-  <target name="junit-axion"
-          description="Runs the test cases against axion">
-  	<condition property="jdbc.properties.file" value="${test.profile.directory}/${profile}/jdbc.properties.axion">
-  		<isset property="profile"/>
-  	</condition>
-  	<condition property="jdbc.properties.file" value="/jdbc.properties.axion">
-  		<not>
-    		<isset property="jdbc.properties.file"/>
-  	    </not>
-  	</condition>
-    <antcall target="-junit-internal"/>
-  </target>
-
-  <!-- ================================================================== -->
   <!-- Runs the test cases against MySQL                                -->
   <!-- ================================================================== -->
   <target name="junit-mysql"
-          description="Runs the test cases against mysql">
-  	<condition property="jdbc.properties.file" value="${test.profile.directory}/${profile}/jdbc.properties.mysql">
-  		<isset property="profile"/>
-  	</condition>
-  	<condition property="jdbc.properties.file" value="/jdbc.properties.mysql">
-  		<not>
-    		<isset property="jdbc.properties.file"/>
-  	    </not>
-  	</condition>
+          description="Runs the test cases against MySql">
+  	<property name="jdbc.properties.file" value="/jdbc.properties.mysql"/>
     <antcall target="-junit-internal"/>
   </target>
 
@@ -394,12 +400,17 @@
     <taskdef name="testSummary"
              classname="org.apache.ddlutils.TestSummaryCreatorTask"
              classpathref="compilation-classpath"/>
-    <testSummary>
+    <testSummary version="${dist.version}"
+                 outputfile="${build.test.dir}/summary.xml">
       <fileset dir="${build.test.dir}"
       	       casesensitive="false">
           <include name="test*.xml"/>
       </fileset>
     </testSummary>
+    <property name="test.summary.stylesheet" value="${test.summary.dir}/moinmoin.xsl"/>
+    <style in="${build.test.dir}/summary.xml"
+           style="${test.summary.stylesheet}"
+           out="${build.test.dir}/summary.txt"/>
   </target>
 
   <!-- ================================================================== -->
@@ -416,7 +427,7 @@
       </condition>
     </fail>
 
-      <taskdef resource="checkstyletask.properties"
+    <taskdef resource="checkstyletask.properties"
              classpathref="compilation-classpath"/>
 
     <checkstyle config="${src.check.dir}/ddlutils-checks.xml"

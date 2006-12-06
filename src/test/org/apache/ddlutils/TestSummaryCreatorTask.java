@@ -59,10 +59,22 @@ import org.xml.sax.InputSource;
  */
 public class TestSummaryCreatorTask extends Task
 {
+    /** The DdlUtils version. */
+    private String _version;
     /** The file to write the snippet to. */
-    private File _outputFile = null;
+    private File _outputFile;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
+
+    /**
+     * Set the DdlUtils version used to run the tests.
+     *
+     * @param version The version
+     */
+    public void setVersion(String version)
+    {
+        _version = version;
+    }
 
     /**
      * Set the output file.
@@ -186,8 +198,12 @@ public class TestSummaryCreatorTask extends Task
             	generalElement = summaryDoc.getRootElement().addElement("general");
 
             	// General run info (we only need this once)
-            	generalElement.addAttribute("date", getAttrValue(testDoc, "//property[@name='TODAY']", "value"));
-            	generalElement.addAttribute("lang", getAttrValue(testDoc, "//property[@name='env.LANG']", "value"));
+                generalElement.addAttribute("ddlUtilsVersion",
+                                            _version);
+            	generalElement.addAttribute("date",
+                                            getAttrValue(testDoc, "//property[@name='TODAY']", "value"));
+            	generalElement.addAttribute("lang",
+                                            getAttrValue(testDoc, "//property[@name='env.LANG']", "value"));
             	generalElement.addAttribute("jre",
                                             getAttrValue(testDoc, "//property[@name='java.runtime.name']", "value") + " " +
                                             getAttrValue(testDoc, "//property[@name='java.runtime.version']", "value") + " (" +
@@ -196,7 +212,8 @@ public class TestSummaryCreatorTask extends Task
                                             getAttrValue(testDoc, "//property[@name='os.name']", "value") + " " +
                                             getAttrValue(testDoc, "//property[@name='os.version']", "value") + ", arch " +
                                             getAttrValue(testDoc, "//property[@name='os.arch']", "value"));
-            	addTargetDatabaseInfo(generalElement, getAttrValue(testDoc, "//property[@name='jdbc.properties.file']", "value"));
+            	addTargetDatabaseInfo(generalElement,
+                                      getAttrValue(testDoc, "//property[@name='jdbc.properties.file']", "value"));
             }
             else
             {
@@ -301,8 +318,6 @@ public class TestSummaryCreatorTask extends Task
             element.addAttribute("platform", platformName);
             element.addAttribute("dataSourceClass", dataSourceClass);
 
-            // TODO: we're also interested in the specific versions of the DB and the JDBC driver
-            //       used as well as the used data source
             conn     = dataSource.getConnection();
             metaData = conn.getMetaData();
 
