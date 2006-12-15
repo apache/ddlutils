@@ -19,12 +19,8 @@ package org.apache.ddlutils.task;
  * under the License.
  */
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import org.apache.ddlutils.io.ConverterConfiguration;
 import org.apache.ddlutils.io.DataConverterRegistration;
-import org.apache.tools.ant.BuildException;
+import org.apache.ddlutils.io.DatabaseDataIO;
 
 /**
  * Base type for database commands that use converters.
@@ -34,8 +30,18 @@ import org.apache.tools.ant.BuildException;
  */
 public abstract class ConvertingDatabaseCommand extends DatabaseCommand
 {
-    /** The converters. */
-    private ArrayList _converters = new ArrayList();
+    /** The database data io object. */
+    private DatabaseDataIO _dataIO = new DatabaseDataIO();
+
+    /**
+     * Returns the database data io object.
+     * 
+     * @return The data io object
+     */
+    protected DatabaseDataIO getDataIO()
+    {
+        return _dataIO;
+    }
 
     /**
      * Registers a converter.
@@ -44,35 +50,6 @@ public abstract class ConvertingDatabaseCommand extends DatabaseCommand
      */
     public void addConfiguredConverter(DataConverterRegistration converterRegistration)
     {
-        _converters.add(converterRegistration);
-    }
-
-    /**
-     * Registers the converters at the given configuration.
-     * 
-     * @param converterConf The converter configuration
-     */
-    protected void registerConverters(ConverterConfiguration converterConf) throws BuildException
-    {
-        for (Iterator it = _converters.iterator(); it.hasNext();)
-        {
-            DataConverterRegistration registrationInfo = (DataConverterRegistration)it.next();
-
-            if (registrationInfo.getTypeCode() != Integer.MIN_VALUE)
-            {
-                converterConf.registerConverter(registrationInfo.getTypeCode(),
-                                                registrationInfo.getConverter());
-            }
-            else
-            {
-                if ((registrationInfo.getTable() == null) || (registrationInfo.getColumn() == null)) 
-                {
-                    throw new BuildException("Please specify either the jdbc type or a table/column pair for which the converter shall be defined");
-                }
-                converterConf.registerConverter(registrationInfo.getTable(),
-                                                registrationInfo.getColumn(),
-                                                registrationInfo.getConverter());
-            }
-        }
+        _dataIO.registerConverter(converterRegistration);
     }
 }

@@ -27,6 +27,7 @@ import org.apache.ddlutils.io.TestConstraints;
 import org.apache.ddlutils.io.TestDataReaderAndWriter;
 import org.apache.ddlutils.io.TestDatabaseIO;
 import org.apache.ddlutils.io.TestDatatypes;
+import org.apache.ddlutils.io.TestMisc;
 import org.apache.ddlutils.io.converters.TestDateConverter;
 import org.apache.ddlutils.io.converters.TestTimeConverter;
 import org.apache.ddlutils.model.TestArrayAccessAtTable;
@@ -125,6 +126,7 @@ public class RunAllTests extends TestCase
             suite.addTestSuite(TestDatatypes.class);
             suite.addTestSuite(TestConstraints.class);
             suite.addTestSuite(TestAlteration.class);
+            suite.addTestSuite(TestMisc.class);
         }
 
         return suite;

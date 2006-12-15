@@ -43,5 +43,5 @@ public interface DataSink
     /**
      * Notifies the sink that all beans have been added.
      */
-    public void end()  throws DataSinkException;
+    public void end() throws DataSinkException;
 }

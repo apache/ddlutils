@@ -24,10 +24,11 @@ import org.apache.ddlutils.io.converters.SqlTypeConverter;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
-import org.xml.sax.SAXException;
 
 /**
- * Reads data XML into dyna beans matching a specified database model.
+ * Reads data XML into dyna beans matching a specified database model. Note that
+ * the data sink won't be started or ended by the data reader, this has to be done
+ * in the code that uses the data reader. 
  * 
  * @version $Revision: 289996 $
  */
@@ -156,23 +157,5 @@ public class DataReader extends Digester
             _needsConfiguration = false;
         }
         super.configure();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void endDocument() throws SAXException
-    {
-        super.endDocument();
-        _sink.end();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void startDocument() throws SAXException
-    {
-        _sink.start();
-        super.startDocument();
     }
 }

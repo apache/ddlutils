@@ -106,6 +106,7 @@ public class TestDataReaderAndWriter extends TestCase
             public void end() throws DataSinkException
             {}
         });
+        // no need to call start/end as the don't do anything anyways
         dataReader.parse(new StringReader(testDataXml));
 
         assertEquals(5, readObjects.size());
@@ -215,6 +216,7 @@ public class TestDataReaderAndWriter extends TestCase
             public void end() throws DataSinkException
             {}
         });
+        // no need to call start/end as the don't do anything anyways
         dataReader.parse(new StringReader(dataXml));
 
         assertEquals(1, readObjects.size());

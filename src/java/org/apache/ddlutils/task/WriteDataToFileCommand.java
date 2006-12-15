@@ -22,10 +22,7 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.io.DataWriter;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.Table;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
@@ -72,22 +69,8 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
     {
         try
         {
-            Platform   platform = getPlatform();
-            DataWriter writer   = new DataWriter(new FileOutputStream(_outputFile), _encoding);
-            Table[]    tables   = new Table[1];
-            
-            registerConverters(writer.getConverterConfiguration());
-
-            // TODO: An advanced algorithm could be employed here that writes objects
-            //       related by foreign keys, in the correct order
-            writer.writeDocumentStart();
-            for (int idx = 0; idx < model.getTableCount(); idx++)
-            {
-                tables[0] = (Table)model.getTable(idx);
-
-                writer.write(platform.query(model, "select * from "+tables[0].getName(), tables));
-            }
-            writer.writeDocumentEnd();
+            getDataIO().writeDataToXML(getPlatform(),
+                                       new FileOutputStream(_outputFile), _encoding);
         }
         catch (Exception ex)
         {

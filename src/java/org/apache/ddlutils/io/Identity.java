@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.ddlutils.model.Table;
+
 /**
  * Stores the identity of an database object as defined by its primary keys. Is used
  * by {@link org.apache.ddlutils.io.DataToDatabaseSink} class for inserting objects
@@ -32,33 +34,43 @@ import java.util.Map;
  */
 public class Identity
 {
-    /** The name of the table. */
-    private String _tableName;
+    /** The table. */
+    private Table _table;
     /** The optional foreign key name whose referenced object this identity represents. */
     private String _fkName;
     /** The identity columns and their values. */
     private HashMap _columnValues = new HashMap();
 
     /**
-     * Creates a new identity object for the indicated table.
+     * Creates a new identity object for the given table.
      * 
-     * @param tableName The name of the table
+     * @param table The name of the table
      */
-    public Identity(String tableName)
+    public Identity(Table table)
     {
-        _tableName = tableName;
+        _table = table;
     }
 
     /**
-     * Creates a new identity object for the indicated table.
+     * Creates a new identity object for the given table.
      * 
-     * @param tableName The name of the table
-     * @param fkName    The name of the foreign key whose referenced object this identity represents
+     * @param table  The table
+     * @param fkName The name of the foreign key whose referenced object this identity represents
      */
-    public Identity(String tableName, String fkName)
+    public Identity(Table table, String fkName)
     {
-        _tableName = tableName;
-        _fkName    = fkName;
+        _table  = table;
+        _fkName = fkName;
+    }
+
+    /**
+     * Returns the table that this identity is for.
+     * 
+     * @return The table
+     */
+    public Table getTable()
+    {
+        return _table;
     }
 
     /**
@@ -74,14 +86,25 @@ public class Identity
     }
     
     /**
-     * Specifies the value for one of the identity columns.
+     * Specifies the value of the indicated identity columns.
      * 
      * @param name  The column name
      * @param value The value for the column
      */
-    public void setIdentityColumn(String name, Object value)
+    public void setColumnValue(String name, Object value)
     {
         _columnValues.put(name, value);
+    }
+
+    /**
+     * Returns the value of the indicated identity columns.
+     * 
+     * @param name  The column name
+     * @return The column's value
+     */
+    public Object getColumnValue(String name)
+    {
+        return _columnValues.get(name);
     }
 
     /**
@@ -96,7 +119,7 @@ public class Identity
 
         Identity otherIdentity = (Identity)obj;
 
-        if (!_tableName.equals(otherIdentity._tableName))
+        if (!_table.equals(otherIdentity._table))
         {
             return false;
         }
@@ -143,7 +166,7 @@ public class Identity
     {
         StringBuffer buffer = new StringBuffer();
 
-        buffer.append(_tableName);
+        buffer.append(_table.getName());
         buffer.append(":");
         for (Iterator it = _columnValues.entrySet().iterator(); it.hasNext();)
         {

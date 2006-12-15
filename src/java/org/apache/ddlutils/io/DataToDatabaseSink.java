@@ -66,8 +66,10 @@ public class DataToDatabaseSink implements DataSink
     private ArrayList _batchQueue = new ArrayList();
     /** The number of beans to insert in one batch. */
     private int _batchSize = 1024;
-    /** Stores the already-processed identities per table name. */
-    private HashMap _processedIdentities = new HashMap();
+    /** Stores the tables that are target of a foreign key. */
+    private HashSet _fkTables = new HashSet();
+    /** Maps original to processed identities. */
+    private HashMap _identityMap = new HashMap();
     /** Stores the objects that are waiting for other objects to be inserted. */
     private ArrayList _waitingObjects = new ArrayList();
 
@@ -196,9 +198,7 @@ public class DataToDatabaseSink implements DataSink
      */
     public void start() throws DataSinkException
     {
-        // we're determining all tables referenced by foreignkeys, and initialize the
-        // lists of already-processed identities for these tables
-        _processedIdentities.clear();
+        _fkTables.clear();
         _waitingObjects.clear();
         if (_ensureFkOrder)
         {
@@ -210,10 +210,7 @@ public class DataToDatabaseSink implements DataSink
                 {
                     ForeignKey curFk = table.getForeignKey(fkIdx);
     
-                    if (!_processedIdentities.containsKey(curFk.getForeignTableName()))
-                    {
-                        _processedIdentities.put(curFk.getForeignTableName(), new HashSet());
-                    }
+                    _fkTables.add(curFk.getForeignTable());
                 }
             }
         }
@@ -245,9 +242,13 @@ public class DataToDatabaseSink implements DataSink
 
                 if (fkIdentity != null)
                 {
-                    HashSet identitiesForTable = (HashSet)_processedIdentities.get(fk.getForeignTableName());
+                    Identity processedIdentity = (Identity)_identityMap.get(fkIdentity);
     
-                    if (!identitiesForTable.contains(fkIdentity))
+                    if (processedIdentity != null)
+                    {
+                        updateFKColumns(bean, fkIdentity.getForeignKeyName(), processedIdentity);
+                    }
+                    else
                     {
                         waitingObj.addPendingFK(fkIdentity);
                     }
@@ -258,6 +259,7 @@ public class DataToDatabaseSink implements DataSink
                 if (_log.isDebugEnabled())
                 {
                     StringBuffer msg = new StringBuffer();
+
                     msg.append("Defering insertion of bean ");
                     msg.append(buildIdentityFromPKs(table, bean).toString());
                     msg.append(" because it is waiting for:");
@@ -272,18 +274,21 @@ public class DataToDatabaseSink implements DataSink
                 return;
             }
         }
-        insertBeanIntoDatabase(table, bean);
-        if (_ensureFkOrder && _processedIdentities.containsKey(table.getName()))
-        {
-            Identity  identity           = buildIdentityFromPKs(table, bean);
-            HashSet   identitiesForTable = (HashSet)_processedIdentities.get(table.getName());
-            ArrayList finishedObjs       = new ArrayList();
 
-            identitiesForTable.add(identity);
+        Identity origIdentity = buildIdentityFromPKs(table, bean);
+
+        insertBeanIntoDatabase(table, bean);
+
+        if (_ensureFkOrder && _fkTables.contains(table))
+        {
+            Identity  newIdentity  = buildIdentityFromPKs(table, bean);
+            ArrayList finishedObjs = new ArrayList();
+
+            _identityMap.put(origIdentity, newIdentity);
             for (Iterator waitingObjIt = _waitingObjects.iterator(); waitingObjIt.hasNext();)
             {
                 WaitingObject waitingObj = (WaitingObject)waitingObjIt.next();
-                Identity      fkIdentity = waitingObj.removePendingFK(identity);
+                Identity      fkIdentity = waitingObj.removePendingFK(origIdentity);
 
                 if (!waitingObj.hasPendingFKs())
                 {
@@ -291,7 +296,7 @@ public class DataToDatabaseSink implements DataSink
                     // the object was only waiting for this one, so store it now
                     // prior to that we also update the fk fields in case one of the pk
                     // columns of the target object is auto-incremented by the database
-                    updateFKColumns(waitingObj.getObject(), bean, fkIdentity.getForeignKeyName());
+                    updateFKColumns(waitingObj.getObject(), fkIdentity.getForeignKeyName(), newIdentity);
                     // we defer handling of the finished objects to avoid concurrent modification exceptions
                     finishedObjs.add(waitingObj.getObject());
                 }
@@ -453,12 +458,12 @@ public class DataToDatabaseSink implements DataSink
      */
     private Identity buildIdentityFromPKs(Table table, DynaBean bean)
     {
-        Identity identity  = new Identity(table.getName());
+        Identity identity  = new Identity(table);
         Column[] pkColumns = table.getPrimaryKeyColumns();
 
         for (int idx = 0; idx < pkColumns.length; idx++)
         {
-            identity.setIdentityColumn(pkColumns[idx].getName(), bean.get(pkColumns[idx].getName()));
+            identity.setColumnValue(pkColumns[idx].getName(), bean.get(pkColumns[idx].getName()));
         }
         return identity;
     }
@@ -474,7 +479,7 @@ public class DataToDatabaseSink implements DataSink
      */
     private Identity buildIdentityFromFK(Table owningTable, ForeignKey fk, DynaBean bean)
     {
-        Identity identity = new Identity(fk.getForeignTableName(), getFKName(owningTable, fk));
+        Identity identity = new Identity(fk.getForeignTable(), getFKName(owningTable, fk));
 
         for (int idx = 0; idx < fk.getReferenceCount(); idx++)
         {
@@ -485,23 +490,23 @@ public class DataToDatabaseSink implements DataSink
             {
                 return null;
             }
-            identity.setIdentityColumn(reference.getForeignColumnName(), value);
+            identity.setColumnValue(reference.getForeignColumnName(), value);
         }
         return identity;
     }
 
     /**
-     * Updates the values of the columns constituting the foreign key between the two given beans to
-     * the current values of the primary key columns of the referenced bean.
+     * Updates the values of the columns constituting the indicated foreign key with the values
+     * of the given identity.
      * 
-     * @param referencingBean The referencing bean whose foreign key columns shall be updated
-     * @param referencedBean  The referenced bean whose primary key column values will be used
-     * @param fkName          The name of the foreign key
+     * @param bean     The bean whose columns shall be updated
+     * @param fkName   The name of the foreign key
+     * @param identity The target identity
      */
-    private void updateFKColumns(DynaBean referencingBean, DynaBean referencedBean, String fkName)
+    private void updateFKColumns(DynaBean bean, String fkName, Identity identity)
     {
-        Table      sourceTable = ((SqlDynaClass)referencingBean.getDynaClass()).getTable();
-        Table      targetTable = ((SqlDynaClass)referencedBean.getDynaClass()).getTable();
+        Table      sourceTable = ((SqlDynaClass)bean.getDynaClass()).getTable();
+        Table      targetTable = identity.getTable();
         ForeignKey fk          = null;
 
         for (int idx = 0; idx < sourceTable.getForeignKeyCount(); idx++)
@@ -522,10 +527,10 @@ public class DataToDatabaseSink implements DataSink
             for (int idx = 0; idx < fk.getReferenceCount(); idx++)
             {
                 Reference curRef       = fk.getReference(idx);
-                Column    sourceColumn = sourceTable.findColumn(curRef.getLocalColumnName());
-                Column    targetColumn = targetTable.findColumn(curRef.getForeignColumnName());
+                Column    sourceColumn = curRef.getLocalColumn();
+                Column    targetColumn = curRef.getForeignColumn();
 
-                referencingBean.set(sourceColumn.getName(), referencedBean.get(targetColumn.getName()));
+                bean.set(sourceColumn.getName(), identity.getColumnValue(targetColumn.getName()));
             }
         }
     }

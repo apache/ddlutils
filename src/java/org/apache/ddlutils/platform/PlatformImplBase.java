@@ -85,6 +85,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     private boolean _sqlCommentsOn = true;
     /** Whether delimited identifiers are used or not. */
     private boolean _delimitedIdentifierModeOn;
+    /** Whether identity override is enabled. */
+    private boolean _identityOverrideOn = true;
     /** Whether read foreign keys shall be sorted alphabetically. */
     private boolean _foreignKeysSorted;
 
@@ -190,6 +192,22 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             throw new DdlUtilsException("Platform " + getName() + " does not support delimited identifier");
         }
         _delimitedIdentifierModeOn = delimitedIdentifierModeOn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isIdentityOverrideOn()
+    {
+        return _identityOverrideOn;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setIdentityOverrideOn(boolean identityOverrideOn)
+    {
+        _identityOverrideOn = identityOverrideOn;
     }
 
     /**
@@ -1152,16 +1170,19 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 if (bean.get(prop.getName()) != null)
                 {
                     // we ignore properties for which a value is present in the bean
-                    // only if they are auto-increment and the platform does not allow
-                    // the override of the auto-increment specification
-                    return getPlatformInfo().isIdentityOverrideAllowed() || !prop.getColumn().isAutoIncrement();
+                    // only if they are identity and identity override is off or
+                    // the platform does not allow the override of the auto-increment
+                    // specification
+                    return !prop.getColumn().isAutoIncrement() ||
+                           (isIdentityOverrideOn() && getPlatformInfo().isIdentityOverrideAllowed());
                 }
                 else
                 {
                     // we also return properties without a value in the bean
                     // if they ain't auto-increment and don't have a default value
                     // in this case, a NULL is inserted
-                    return !prop.getColumn().isAutoIncrement() && (prop.getColumn().getDefaultValue() == null);
+                    return !prop.getColumn().isAutoIncrement() &&
+                           (prop.getColumn().getDefaultValue() == null);
                 }
             }
         });
@@ -1191,7 +1212,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 // in INSERT/UPDATE statements, then we need to filter the corresponding
                 // columns out
                 return prop.getColumn().isAutoIncrement() &&
-                       (!getPlatformInfo().isIdentityOverrideAllowed() || (bean.get(prop.getName()) == null));
+                       (!isIdentityOverrideOn() || !getPlatformInfo().isIdentityOverrideAllowed() || (bean.get(prop.getName()) == null));
             }
         });
 
@@ -1269,7 +1290,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
         catch (SQLException ex)
         {
-            throw new DatabaseOperationException("Error while inserting into the database", ex);
+            throw new DatabaseOperationException("Error while inserting into the database: " + ex.getMessage(), ex);
         }
         finally
         {

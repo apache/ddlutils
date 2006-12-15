@@ -24,9 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DataReader;
-import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
@@ -56,12 +54,6 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     private File      _singleDataFile = null;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
-    /** Whether foreign key order shall be followed when inserting data into the database. */
-    private boolean _ensureFKOrder = true;
-    /** Whether we should use batch mode. */
-    private Boolean _useBatchMode;
-    /** The maximum number of objects to insert in one batch. */
-    private Integer _batchSize;
     
     /**
      * Adds a fileset.
@@ -94,7 +86,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
      */
     public void setBatchSize(int batchSize)
     {
-        _batchSize = new Integer(batchSize);
+        getDataIO().setBatchSize(new Integer(batchSize));
     }
 
     /**
@@ -110,7 +102,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
      */
     public void setUseBatchMode(boolean useBatchMode)
     {
-        _useBatchMode = Boolean.valueOf(useBatchMode);
+        getDataIO().setUseBatchMode(useBatchMode);
     }
 
     /**
@@ -125,7 +117,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
      */
     public void setEnsureForeignKeyOrder(boolean ensureFKOrder)
     {
-        _ensureFKOrder = ensureFKOrder;
+        getDataIO().setEnsureFKOrder(ensureFKOrder);
     }
 
     /**
@@ -133,32 +125,20 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
      */
     public void execute(Task task, Database model) throws BuildException
     {
+        if ((_singleDataFile != null) && !_fileSets.isEmpty())
+        {
+            throw new BuildException("Please use either the datafile attribute or the sub fileset element, but not both");
+        }
+
+        DataReader dataReader = null;
+
         try
         {
-            Platform           platform = getPlatform();
-            DataToDatabaseSink sink     = new DataToDatabaseSink(platform, model);
-            DataReader         reader   = new DataReader();
-
-            sink.setEnsureForeignKeyOrder(_ensureFKOrder);
-            if (_useBatchMode != null)
-            {
-                sink.setUseBatchMode(_useBatchMode.booleanValue());
-                if (_batchSize != null)
-                {
-                    sink.setBatchSize(_batchSize.intValue());
-                }
-            }
-            
-            reader.setModel(model);
-            reader.setSink(sink);
-            registerConverters(reader.getConverterConfiguration());
-            if ((_singleDataFile != null) && !_fileSets.isEmpty())
-            {
-                throw new BuildException("Please use either the datafile attribute or the sub fileset element, but not both");
-            }
+            dataReader = getDataIO().getConfiguredDataReader(getPlatform(), model);
+            dataReader.getSink().start();
             if (_singleDataFile != null)
             {
-                readSingleDataFile(task, reader, _singleDataFile);
+                readSingleDataFile(task, dataReader, _singleDataFile);
             }
             else
             {
@@ -171,7 +151,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     
                     for (int idx = 0; (files != null) && (idx < files.length); idx++)
                     {
-                        readSingleDataFile(task, reader, new File(fileSetDir, files[idx]));
+                        readSingleDataFile(task, dataReader, new File(fileSetDir, files[idx]));
                     }
                 }
             }
@@ -185,6 +165,13 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
             else
             {
                 throw new BuildException(ex);
+            }
+        }
+        finally
+        {
+            if (dataReader != null)
+            {
+                dataReader.getSink().end();
             }
         }
     }
@@ -214,7 +201,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
         {
             try
             {
-                reader.parse(dataFile);
+                getDataIO().writeDataToDatabase(reader, dataFile.getAbsolutePath());
                 task.log("Written data file "+dataFile.getAbsolutePath() + " to database", Project.MSG_INFO);
             }
             catch (Exception ex)

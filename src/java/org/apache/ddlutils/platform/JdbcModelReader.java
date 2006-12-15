@@ -481,6 +481,7 @@ public class JdbcModelReader
         {
             _connection = null;
         }
+        db.initialize();
         return db;
     }
 

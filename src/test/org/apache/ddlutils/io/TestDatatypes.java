@@ -145,6 +145,7 @@ public class TestDatatypes extends RoundtripTestBase
         sink.setUseBatchMode(false);
         reader.setModel(getModel());
         reader.setSink(sink);
+        sink.start();
         try
         {
             reader.parse(new StringReader(dataSql));
@@ -152,6 +153,10 @@ public class TestDatatypes extends RoundtripTestBase
         catch (Exception ex)
         {
             throw new RuntimeException(ex);
+        }
+        finally
+        {
+            sink.end();
         }
 
         beans = getRows("roundtrip");

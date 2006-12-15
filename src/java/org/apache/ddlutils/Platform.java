@@ -164,6 +164,26 @@ public interface Platform
     public void setSqlCommentsOn(boolean sqlCommentsOn);
 
     /**
+     * Determines whether SQL insert statements can specify values for identity columns.
+     * This setting is only relevant if the database supports it
+     * ({@link PlatformInfo#isIdentityOverrideAllowed()). If this is off, then the
+     * <code>insert</code> methods will ignore values for identity columns. 
+     *  
+     * @return <code>true</code> if identity override is enabled (the default)
+     */
+    public boolean isIdentityOverrideOn();
+
+    /**
+     * Specifies whether SQL insert statements can specify values for identity columns.
+     * This setting is only relevant if the database supports it
+     * ({@link PlatformInfo#isIdentityOverrideAllowed()). If this is off, then the
+     * <code>insert</code> methods will ignore values for identity columns. 
+     *  
+     * @param identityOverrideOn <code>true</code> if identity override is enabled (the default)
+     */
+    public void setIdentityOverrideOn(boolean identityOverrideOn);
+
+    /**
      * Determines whether foreign keys of a table read from a live database
      * are alphabetically sorted.
      *
