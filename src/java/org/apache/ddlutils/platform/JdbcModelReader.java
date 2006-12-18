@@ -1096,7 +1096,7 @@ public class JdbcModelReader
         {
             if (escaped.equals("''"))
             {
-                if ((result.length() >= 2) && result.startsWith("'") && result.endsWith("'"))
+                if ((result.length() > 2) && result.startsWith("'") && result.endsWith("'"))
                 {
                     result = "'" + StringUtils.replace(result.substring(1, result.length() - 1), escaped, unescaped) + "'";
                 }

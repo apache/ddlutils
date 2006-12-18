@@ -94,11 +94,11 @@ public class TestMisc extends RoundtripTestBase
         SAXReader reader    = new SAXReader();
         Document  testDoc   = reader.read(new InputSource(new StringReader(dataAsXml)));
 
-        if (getPlatform().isDelimitedIdentifierModeOn())
-        {
-            List misc1Rows = testDoc.selectNodes("//misc1");
-            List misc2Rows = testDoc.selectNodes("//misc2");
+        List misc1Rows = testDoc.selectNodes("//misc1");
+        List misc2Rows = testDoc.selectNodes("//misc2");
 
+        if (misc1Rows.size() > 0)
+        {
             assertEquals(3, misc1Rows.size());
             assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("pk"));
             assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue("avalue"));
@@ -114,8 +114,8 @@ public class TestMisc extends RoundtripTestBase
         }
         else
         {
-            List misc1Rows = testDoc.selectNodes("//MISC1");
-            List misc2Rows = testDoc.selectNodes("//MISC2");
+            misc1Rows = testDoc.selectNodes("//MISC1");
+            misc2Rows = testDoc.selectNodes("//MISC2");
 
             assertEquals(3, misc1Rows.size());
             assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("PK"));
@@ -202,11 +202,11 @@ public class TestMisc extends RoundtripTestBase
         SAXReader reader    = new SAXReader();
         Document  testDoc   = reader.read(new InputSource(new StringReader(dataAsXml)));
 
-        if (getPlatform().isDelimitedIdentifierModeOn())
-        {
-            List misc1Rows = testDoc.selectNodes("//misc1");
-            List misc2Rows = testDoc.selectNodes("//misc2");
+        List misc1Rows = testDoc.selectNodes("//misc1");
+        List misc2Rows = testDoc.selectNodes("//misc2");
 
+        if (misc1Rows.size() > 0)
+        {
             assertEquals(3, misc1Rows.size());
             assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("pk"));
             assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue("avalue"));
@@ -222,8 +222,8 @@ public class TestMisc extends RoundtripTestBase
         }
         else
         {
-            List misc1Rows = testDoc.selectNodes("//MISC1");
-            List misc2Rows = testDoc.selectNodes("//MISC2");
+            misc1Rows = testDoc.selectNodes("//MISC1");
+            misc2Rows = testDoc.selectNodes("//MISC2");
 
             assertEquals(3, misc1Rows.size());
             assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("PK"));

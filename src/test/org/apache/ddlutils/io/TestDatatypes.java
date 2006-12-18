@@ -19,6 +19,7 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -30,10 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
-import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.Table;
-
 import junit.framework.Test;
+
+import org.apache.ddlutils.model.Database;
 
 /**
  * Performs roundtrip datatype tests.
@@ -118,17 +118,10 @@ public class TestDatatypes extends RoundtripTestBase
         assertEquals("",
         		     alterTablesSql);
 
-        StringWriter stringWriter = new StringWriter();
-        DataWriter   dataWriter   = new DataWriter(stringWriter, "UTF-8");
+        StringWriter   stringWriter = new StringWriter();
+        DatabaseDataIO dataIO       = new DatabaseDataIO();
 
-        dataWriter.writeDocumentStart();
-        for (int idx = 0; idx < getModel().getTableCount(); idx++)
-        {
-            Table table = getModel().getTable(idx);
-
-            dataWriter.write(getPlatform().query(getModel(), getSelectQueryForAllString(table), new Table[] { table }));
-        }
-        dataWriter.writeDocumentEnd();
+        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
 
         String dataSql = stringWriter.toString();
         
@@ -138,26 +131,7 @@ public class TestDatatypes extends RoundtripTestBase
 
         createDatabase(modelXml);
 
-        DataToDatabaseSink sink   = new DataToDatabaseSink(getPlatform(), getModel());
-        DataReader         reader = new DataReader();
-
-        sink.setEnsureForeignKeyOrder(true);
-        sink.setUseBatchMode(false);
-        reader.setModel(getModel());
-        reader.setSink(sink);
-        sink.start();
-        try
-        {
-            reader.parse(new StringReader(dataSql));
-        }
-        catch (Exception ex)
-        {
-            throw new RuntimeException(ex);
-        }
-        finally
-        {
-            sink.end();
-        }
+        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { new StringReader(dataSql) });
 
         beans = getRows("roundtrip");
 

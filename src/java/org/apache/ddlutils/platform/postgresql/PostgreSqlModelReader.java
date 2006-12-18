@@ -153,7 +153,7 @@ public class PostgreSqlModelReader extends JdbcModelReader
                 }
                 if (TypeMap.isTextType(column.getTypeCode()))
                 {
-                    defaultValue = unescape(defaultValue, "'", "\\'");
+                    defaultValue = unescape(defaultValue, "'", "''");
                 }
             }
             column.setDefaultValue(defaultValue);
