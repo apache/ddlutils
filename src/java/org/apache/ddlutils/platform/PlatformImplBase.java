@@ -86,7 +86,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /** Whether delimited identifiers are used or not. */
     private boolean _delimitedIdentifierModeOn;
     /** Whether identity override is enabled. */
-    private boolean _identityOverrideOn = true;
+    private boolean _identityOverrideOn;
     /** Whether read foreign keys shall be sorted alphabetically. */
     private boolean _foreignKeysSorted;
 

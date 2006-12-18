@@ -77,6 +77,8 @@ public class TestMisc extends RoundtripTestBase
 
         createDatabase(modelXml);
 
+        getPlatform().setIdentityOverrideOn(true);
+
         insertRow("misc1", new Object[] { new Integer(10), new Integer(1) });
         insertRow("misc1", new Object[] { new Integer(12), new Integer(2) });
         insertRow("misc1", new Object[] { new Integer(13), new Integer(3) });
@@ -159,6 +161,12 @@ public class TestMisc extends RoundtripTestBase
      */
     public void testIdentityOverrideOff() throws Exception
     {
+        if (!getPlatformInfo().isIdentityOverrideAllowed())
+        {
+            // TODO: for testing these platforms, we need deleteRows
+            return;
+        }
+
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -176,6 +184,8 @@ public class TestMisc extends RoundtripTestBase
             "</database>";
 
         createDatabase(modelXml);
+
+        getPlatform().setIdentityOverrideOn(true);
 
         insertRow("misc1", new Object[] { new Integer(10), new Integer(1) });
         insertRow("misc1", new Object[] { new Integer(12), new Integer(2) });

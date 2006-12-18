@@ -54,7 +54,26 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     private File      _singleDataFile = null;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
-    
+    /** Whether explicit values for identity columns will be used. */
+    private boolean _useExplicitIdentityValues;
+
+    /**
+     * Defines whether values for identity columns in the data XML shall be used instead of
+     * letting the database define the value. Unless <code>ensureForeignKeyOrder</code> is
+     * set to false, setting this to <code>false</code> (the default) does not affect foreign
+     * keys as DdlUtils will automatically update the values of the columns of foreign keys
+     * pointing to the inserted row with the database-created values. 
+     *
+     * @param useExplicitIdentityValues <code>true</code> if explicitly specified identity
+     *                                  column values should be inserted instead of letting
+     *                                  the database define the values for these columns
+     * @ant.not-required Default is <code>false</code>
+     */
+    public void setUseExplicitIdentityValues(boolean useExplicitIdentityValues)
+    {
+        _useExplicitIdentityValues = useExplicitIdentityValues;
+    }
+
     /**
      * Adds a fileset.
      * 
@@ -132,6 +151,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
 
         DataReader dataReader = null;
 
+        getPlatform().setIdentityOverrideOn(_useExplicitIdentityValues);
         try
         {
             dataReader = getDataIO().getConfiguredDataReader(getPlatform(), model);
