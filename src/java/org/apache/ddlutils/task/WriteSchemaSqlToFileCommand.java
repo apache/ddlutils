@@ -165,8 +165,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
             if (shouldAlter)
             {
                 Database currentModel = (getCatalogPattern() != null) || (getSchemaPattern() != null) ?
-                                             platform.readModelFromDatabase(null, getCatalogPattern(), getSchemaPattern(), null) :
-                                             platform.readModelFromDatabase(null);
+                                             platform.readModelFromDatabase("unnamed", getCatalogPattern(), getSchemaPattern(), null) :
+                                             platform.readModelFromDatabase("unnamed");
 
                 platform.getSqlBuilder().alterDatabase(currentModel, model, params);
             }

@@ -29,13 +29,14 @@
 
   <!-- These properties can be overriden on the commandline using -D --> 
   <property name="schemafiles" value="testmodel.xml"/>
+  <property name="datafile" value="testdata.xml"/>
   <property name="catalogpattern" value=""/>
   <property name="schemapattern" value=""/>
   <property name="sqloutputfile" value="schema.sql"/>
   <property name="platform" value=""/>
   <property name="alterdatabase" value="true"/>
   <property name="delimitedsqlidentifiers" value="false"/>
-  <property name="verbosity" value="debug"/>
+  <property name="verbosity" value="info"/>
   
   <!-- The classpath used for running the tasks -->
   <path id="project-classpath">

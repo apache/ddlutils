@@ -189,7 +189,32 @@ public class DataToDatabaseSink implements DataSink
         }
         if (!_waitingObjects.isEmpty())
         {
-            throw new DataSinkException("There are "+_waitingObjects.size()+" objects still not written because of missing referenced objects");
+            if (_log.isDebugEnabled())
+            {
+                for (Iterator it = _waitingObjects.iterator(); it.hasNext();)
+                {
+                    WaitingObject obj   = (WaitingObject)it.next();
+                    Table         table = _model.getDynaClassFor(obj.getObject()).getTable();
+                    Identity      objId = buildIdentityFromPKs(table, obj.getObject());
+
+                    _log.debug("Row " + objId + " is still not written because it depends on these yet unwritten rows");
+                    for (Iterator fkIt = obj.getPendingFKs(); fkIt.hasNext();)
+                    {
+                        Identity pendingFkId = (Identity)fkIt.next();
+
+                        _log.debug("  " + pendingFkId);
+                    }
+                        
+                }
+            }
+            if (_waitingObjects.size() == 1)
+            {
+                throw new DataSinkException("There is one row still not written because of missing referenced rows");
+            }
+            else
+            {
+                throw new DataSinkException("There are " + _waitingObjects.size() + " rows still not written because of missing referenced rows");
+            }
         }
     }
 
@@ -260,7 +285,7 @@ public class DataToDatabaseSink implements DataSink
                 {
                     StringBuffer msg = new StringBuffer();
 
-                    msg.append("Defering insertion of bean ");
+                    msg.append("Defering insertion of row ");
                     msg.append(buildIdentityFromPKs(table, bean).toString());
                     msg.append(" because it is waiting for:");
                     for (Iterator it = waitingObj.getPendingFKs(); it.hasNext();)
@@ -310,7 +335,7 @@ public class DataToDatabaseSink implements DataSink
                 {
                     Table waitingObjTable = ((SqlDynaClass)finishedObj.getDynaClass()).getTable();
 
-                    _log.debug("Inserted deferred bean "+buildIdentityFromPKs(waitingObjTable, finishedObj));
+                    _log.debug("Inserted deferred row "+buildIdentityFromPKs(waitingObjTable, finishedObj));
                 }
             }
         }
@@ -343,31 +368,34 @@ public class DataToDatabaseSink implements DataSink
      */
     private void purgeBatchQueue() throws DataSinkException
     {
-        try
+        if (!_batchQueue.isEmpty())
         {
-            _platform.insert(_connection, _model, _batchQueue);
-            if (!_connection.getAutoCommit())
+            try
             {
-                _connection.commit();
+                _platform.insert(_connection, _model, _batchQueue);
+                if (!_connection.getAutoCommit())
+                {
+                    _connection.commit();
+                }
+                if (_log.isDebugEnabled())
+                {
+                    _log.debug("Inserted " + _batchQueue.size() + " rows in batch mode ");
+                }
             }
-            if (_log.isDebugEnabled())
+            catch (Exception ex)
             {
-                _log.debug("Inserted "+_batchQueue.size()+" beans in batch mode ");
+                if (_haltOnErrors)
+                {
+                    _platform.returnConnection(_connection);
+                    throw new DataSinkException(ex);
+                }
+                else
+                {
+                    _log.warn("Exception while inserting " + _batchQueue.size() + " rows via batch mode into the database", ex);
+                }
             }
+            _batchQueue.clear();
         }
-        catch (Exception ex)
-        {
-            if (_haltOnErrors)
-            {
-                _platform.returnConnection(_connection);
-                throw new DataSinkException(ex);
-            }
-            else
-            {
-                _log.warn("Exception while inserting "+_batchQueue.size()+" beans via batch mode into the database", ex);
-            }
-        }
-        _batchQueue.clear();
     }
     
     /**
@@ -399,7 +427,7 @@ public class DataToDatabaseSink implements DataSink
             }
             else
             {
-                _log.warn("Exception while inserting a bean into the database", ex);
+                _log.warn("Exception while inserting a row into the database", ex);
             }
         }
     }

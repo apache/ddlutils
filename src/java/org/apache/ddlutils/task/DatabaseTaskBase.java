@@ -344,7 +344,7 @@ public abstract class DatabaseTaskBase extends Task
         props.setProperty("log4j.appender.A.layout", "org.apache.log4j.PatternLayout");
         props.setProperty("log4j.appender.A.layout.ConversionPattern", "%m%n");
         // we don't want debug logging from Digester/Betwixt
-        props.setProperty("log4j.logger.org.apache.commons", (_verbosity.isDebug() ? "DEBUG" : "WARN"));
+        props.setProperty("log4j.logger.org.apache.commons", "WARN");
 
         LogManager.resetConfiguration();
         PropertyConfigurator.configure(props);
