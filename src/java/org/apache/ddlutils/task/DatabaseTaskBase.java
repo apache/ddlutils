@@ -21,14 +21,20 @@ package org.apache.ddlutils.task;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Properties;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.EnumeratedAttribute;
 
 /**
  * Base class for DdlUtils Ant tasks that operate on a database.
@@ -38,10 +44,78 @@ import org.apache.tools.ant.Task;
  */
 public abstract class DatabaseTaskBase extends Task
 {
+    /**
+     * Helper class that defines the possible values for the verbosity attribute.
+     */
+    public static class VerbosityLevel extends EnumeratedAttribute {
+        /** The possible levels. */
+        private static final String[] LEVELS = { Level.FATAL.toString().toUpperCase(),
+                                                 Level.ERROR.toString().toUpperCase(),
+                                                 Level.WARN.toString().toUpperCase(),
+                                                 Level.INFO.toString().toUpperCase(),
+                                                 Level.DEBUG.toString().toUpperCase(),
+                                                 Level.FATAL.toString().toLowerCase(),
+                                                 Level.ERROR.toString().toLowerCase(),
+                                                 Level.WARN.toString().toLowerCase(),
+                                                 Level.INFO.toString().toLowerCase(),
+                                                 Level.DEBUG.toString().toLowerCase() };
+
+        /**
+         * Creates an uninitialized verbosity level object.
+         */
+        public VerbosityLevel()
+        {
+            super();
+        }
+
+        /**
+         * Creates an initialized verbosity level object.
+         * 
+         * @param level The level
+         */
+        public VerbosityLevel(String level)
+        {
+            super();
+            setValue(level);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public String[] getValues() {
+            return LEVELS;
+        }
+
+        /**
+         * Determines whether this is DEBUG verbosity.
+         * 
+         * @return <code>true</code> if this is the DEBUG level
+         */
+        public boolean isDebug()
+        {
+            return Level.DEBUG.toString().equalsIgnoreCase(getValue());
+        }
+    }
+
+    /** The log. */
+    protected Log _log;
+
     /** The platform configuration. */
     private PlatformConfiguration _platformConf = new PlatformConfiguration();
     /** The sub tasks to execute. */
     private ArrayList _commands = new ArrayList();
+    /** The verbosity of the task's debug output. */
+    private VerbosityLevel _verbosity = new VerbosityLevel(Level.INFO.toString());
+
+    /**
+     * Specifies the verbosity of the task's debug output. Default is <code>WARN</code>.
+     * 
+     * @param verbosity The verbosity level
+     */
+    public void setVerbosity(VerbosityLevel level)
+    {
+        _verbosity = level;
+    }
 
     /**
      * Returns the database type.
@@ -258,6 +332,27 @@ public abstract class DatabaseTaskBase extends Task
     protected abstract Database readModel();
 
     /**
+     * Initializes the logging.
+     */
+    private void initLogging()
+    {
+        // For Ant, we're forcing DdlUtils to do logging via log4j to the console
+        Properties props = new Properties();
+
+        props.setProperty("log4j.rootCategory", _verbosity.getValue().toUpperCase() + ",A");
+        props.setProperty("log4j.appender.A", "org.apache.log4j.ConsoleAppender");
+        props.setProperty("log4j.appender.A.layout", "org.apache.log4j.PatternLayout");
+        props.setProperty("log4j.appender.A.layout.ConversionPattern", "%m%n");
+        // we don't want debug logging from Digester/Betwixt
+        props.setProperty("log4j.logger.org.apache.commons", (_verbosity.isDebug() ? "DEBUG" : "WARN"));
+
+        LogManager.resetConfiguration();
+        PropertyConfigurator.configure(props);
+
+        _log = LogFactory.getLog(getClass());
+    }
+
+    /**
      * Executes the commands.
      * 
      * @param model The database model
@@ -285,9 +380,11 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void execute() throws BuildException
     {
+        initLogging();
+
         if (!hasCommands())
         {
-            log("No sub tasks specified, so there is nothing to do.", Project.MSG_INFO);
+            _log.info("No sub tasks specified, so there is nothing to do.");
             return;
         }
 
@@ -297,7 +394,7 @@ public abstract class DatabaseTaskBase extends Task
         // we're changing the thread classloader so that we can access resources
         // from the classpath used to load this task's class
         Thread.currentThread().setContextClassLoader(newClassLoader);
-        
+
         try
         {
             executeCommands(readModel());

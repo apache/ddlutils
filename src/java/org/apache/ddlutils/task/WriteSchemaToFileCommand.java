@@ -22,10 +22,11 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.io.FileWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -37,6 +38,9 @@ import org.apache.tools.ant.Task;
  */
 public class WriteSchemaToFileCommand implements Command
 {
+    /** The log. */
+    private final Log _log = LogFactory.getLog(getClass());
+
     /** The file to output the schema to. */
     private File _outputFile;
 
@@ -80,11 +84,11 @@ public class WriteSchemaToFileCommand implements Command
 
             dbIO.write(model, outputWriter);
             outputWriter.close();
-            task.log("Written schema to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);
+            _log.info("Written schema to " + _outputFile.getAbsolutePath());
         }
         catch (Exception ex)
         {
-            throw new BuildException("Failed to write to output file "+_outputFile.getAbsolutePath(), ex);
+            throw new BuildException("Failed to write to output file " + _outputFile.getAbsolutePath(), ex);
         }
     }
 }

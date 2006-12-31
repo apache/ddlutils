@@ -23,12 +23,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 
@@ -51,7 +49,7 @@ import org.apache.tools.ant.types.FileSet;
 public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
 {
     /** A single data file to insert. */
-    private File      _singleDataFile = null;
+    private File _singleDataFile = null;
     /** The input files. */
     private ArrayList _fileSets = new ArrayList();
     /** Whether explicit values for identity columns will be used. */
@@ -207,33 +205,33 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     {
         if (!dataFile.exists())
         {
-            task.log("Could not find data file "+dataFile.getAbsolutePath(), Project.MSG_ERR);
+            _log.error("Could not find data file " + dataFile.getAbsolutePath());
         }
         else if (!dataFile.isFile())
         {
-            task.log("Path "+dataFile.getAbsolutePath()+" does not denote a data file", Project.MSG_ERR);
+            _log.error("Path " + dataFile.getAbsolutePath() + " does not denote a data file");
         }
         else if (!dataFile.canRead())
         {
-            task.log("Could not read data file "+dataFile.getAbsolutePath(), Project.MSG_ERR);
+            _log.error("Could not read data file " + dataFile.getAbsolutePath());
         }
         else
         {
             try
             {
                 getDataIO().writeDataToDatabase(reader, dataFile.getAbsolutePath());
-                task.log("Written data file "+dataFile.getAbsolutePath() + " to database", Project.MSG_INFO);
+                _log.info("Written data from file " + dataFile.getAbsolutePath() + " to database");
             }
             catch (Exception ex)
             {
                 if (isFailOnError())
                 {
-                    throw new BuildException("Could not parse or write data file "+dataFile.getAbsolutePath(), ex);
+                    throw new BuildException("Could not parse or write data file " + dataFile.getAbsolutePath(), ex);
                 }
                 else
                 {
-                    task.log("Could not parse or write data file "+dataFile.getAbsolutePath() + ":", Project.MSG_ERR);
-                    task.log(ExceptionUtils.getFullStackTrace(ex));
+                    _log.error("Could not parse or write data file " + dataFile.getAbsolutePath(),
+                               ex);
                 }
             }
         }

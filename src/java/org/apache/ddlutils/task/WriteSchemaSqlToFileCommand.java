@@ -28,7 +28,6 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -143,9 +142,8 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
                 if (getDataSource() == null)
                 {
                     shouldAlter = false;
-                    task.log("Cannot alter the database because no database connection was specified." +
-                             " SQL for database creation will be generated instead.",
-                             Project.MSG_WARN);
+                    _log.warn("Cannot alter the database because no database connection was specified." +
+                              " SQL for database creation will be generated instead.");
                 }
                 else
                 {
@@ -158,10 +156,9 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
                     catch (SQLException ex)
                     {
                         shouldAlter = false;
-                        task.log("Could not establish a connection to the specified database, " +
-                                 "so SQL for database creation will be generated instead. The error was: " +
-                                 ex.getMessage(),
-                                 Project.MSG_WARN);
+                        _log.warn("Could not establish a connection to the specified database, " +
+                                  "so SQL for database creation will be generated instead.",
+                                  ex);
                     }
                 }
             }
@@ -178,7 +175,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
                 platform.getSqlBuilder().createTables(model, params, _doDrops);
             }
             writer.close();
-            task.log("Written SQL to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);
+            _log.info("Written schema SQL to " + _outputFile.getAbsolutePath());
         }
         catch (Exception ex)
         {
@@ -188,7 +185,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
             }
             else
             {
-                task.log(ex.getMessage() == null ? ex.toString() : ex.getMessage(), Project.MSG_ERR);
+                _log.error(ex);
             }
         }
     }

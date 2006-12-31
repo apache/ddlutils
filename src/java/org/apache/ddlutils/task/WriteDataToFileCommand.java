@@ -36,7 +36,7 @@ import org.apache.tools.ant.Task;
 public class WriteDataToFileCommand extends ConvertingDatabaseCommand
 {
     /** The file to output the data to. */
-    private File   _outputFile;
+    private File _outputFile;
     /** The character encoding to use. */
     private String _encoding;
 
@@ -71,6 +71,7 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
         {
             getDataIO().writeDataToXML(getPlatform(),
                                        new FileOutputStream(_outputFile), _encoding);
+            _log.info("Written data XML to file" + _outputFile.getAbsolutePath());
         }
         catch (Exception ex)
         {

@@ -20,6 +20,8 @@ package org.apache.ddlutils.task;
  */
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.Platform;
 import org.apache.tools.ant.BuildException;
 
@@ -31,6 +33,9 @@ import org.apache.tools.ant.BuildException;
  */
 public abstract class DatabaseCommand implements Command
 {
+    /** The log. */
+    protected final Log _log = LogFactory.getLog(getClass());
+
     /** The platform configuration. */
     private PlatformConfiguration _platformConf = new PlatformConfiguration();
     /** Whether to stop execution upon an error. */

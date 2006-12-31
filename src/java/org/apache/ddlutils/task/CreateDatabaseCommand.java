@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -84,11 +84,13 @@ public class CreateDatabaseCommand extends DatabaseCommand
                                     dataSource.getPassword(),
                                     getFilteredParameters(platform.getName()));
 
-            task.log("Created database", Project.MSG_INFO);
+            _log.info("Created database");
         }
         catch (UnsupportedOperationException ex)
         {
-            task.log("Database platform "+getPlatform().getName()+" does not support database creation via JDBC or there was an error while creating it: "+ex.getMessage(), Project.MSG_ERR);
+            _log.error("Database platform " + getPlatform().getName() + " does not support database creation " +
+                       "via JDBC or there was an error while creating it.",
+                       ex);
         }
         catch (Exception ex)
         {
@@ -98,7 +100,7 @@ public class CreateDatabaseCommand extends DatabaseCommand
             }
             else
             {
-                task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
+                _log.error(ex);
             }
         }
     }

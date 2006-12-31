@@ -23,7 +23,6 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -129,7 +128,7 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
                                       true);
             }
 
-            task.log("Written schema to database", Project.MSG_INFO);
+            _log.info("Written schema to database");
         }
         catch (Exception ex)
         {
@@ -139,7 +138,7 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
             }
             else
             {
-                task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
+                _log.error(ex);
             }
         }
     }

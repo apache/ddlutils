@@ -22,10 +22,11 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.io.FileWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.io.DataDtdWriter;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -38,6 +39,9 @@ import org.apache.tools.ant.Task;
  */
 public class WriteDtdToFileCommand implements Command
 {
+    /** The log. */
+    private final Log _log = LogFactory.getLog(getClass());
+
     /** The file to output the DTD to. */
     private File _outputFile;
 
@@ -71,7 +75,7 @@ public class WriteDtdToFileCommand implements Command
         }
         if (_outputFile.exists() && !_outputFile.canWrite())
         {
-            throw new BuildException("Cannot overwrite output file "+_outputFile.getAbsolutePath());
+            throw new BuildException("Cannot overwrite output file " + _outputFile.getAbsolutePath());
         }
 
         try
@@ -81,11 +85,11 @@ public class WriteDtdToFileCommand implements Command
 
             dtdWriter.writeDtd(model, outputWriter);
             outputWriter.close();
-            task.log("Written DTD to "+_outputFile.getAbsolutePath(), Project.MSG_INFO);
+            _log.info("Written DTD to " + _outputFile.getAbsolutePath());
         }
         catch (Exception ex)
         {
-            throw new BuildException("Failed to write to output file "+_outputFile.getAbsolutePath(), ex);
+            throw new BuildException("Failed to write to output file " + _outputFile.getAbsolutePath(), ex);
         }
     }
 }

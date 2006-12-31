@@ -23,7 +23,6 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -66,11 +65,12 @@ public class DropDatabaseCommand extends DatabaseCommand
                                   dataSource.getUsername(),
                                   dataSource.getPassword());
 
-            task.log("Dropped database", Project.MSG_INFO);
+            _log.info("Dropped database");
         }
         catch (UnsupportedOperationException ex)
         {
-            task.log("Database platform "+getPlatform().getName()+" does not support database dropping via JDBC", Project.MSG_ERR);
+            _log.info("Database platform " + getPlatform().getName() + " does not support database dropping via JDBC",
+                      ex);
         }
         catch (Exception ex)
         {
@@ -80,7 +80,7 @@ public class DropDatabaseCommand extends DatabaseCommand
             }
             else
             {
-                task.log(ex.getLocalizedMessage(), Project.MSG_ERR);
+                _log.error(ex);
             }
         }
     }

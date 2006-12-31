@@ -27,7 +27,6 @@ import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
 /**
@@ -256,18 +255,18 @@ public class DdlToDatabaseTask extends DatabaseTaskBase
 
         if (!schemaFile.isFile())
         {
-            log("Path "+schemaFile.getAbsolutePath()+" does not denote a schema file", Project.MSG_ERR);
+            _log.error("Path " + schemaFile.getAbsolutePath() + " does not denote a file");
         }
         else if (!schemaFile.canRead())
         {
-            log("Could not read schema file "+schemaFile.getAbsolutePath(), Project.MSG_ERR);
+            _log.error("Could not read schema file " + schemaFile.getAbsolutePath());
         }
         else
         {
             try
             {
                 model = reader.read(schemaFile);
-                log("Read schema file "+schemaFile.getAbsolutePath(), Project.MSG_INFO);
+                _log.info("Read schema file " + schemaFile.getAbsolutePath());
             }
             catch (Exception ex)
             {
