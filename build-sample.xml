@@ -130,4 +130,18 @@
                            usebatchmode="false"/>
     </ddlToDatabase> 
   </target>
+
+  <target name="readDataFromDb">
+    <databaseToDdl usedelimitedsqlidentifiers="${delimitedsqlidentifiers}"
+                   catalogpattern="${catalogpattern}"
+                   schemapattern="${schemapattern}"
+                   databasetype="${platform}"
+                   verbosity="${verbosity}">
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+      <writedatatofile outputfile="${datafile}"/>
+    </databaseToDdl> 
+  </target>
 </project>

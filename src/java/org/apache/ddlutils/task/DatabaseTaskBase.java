@@ -110,7 +110,7 @@ public abstract class DatabaseTaskBase extends Task
     /**
      * Specifies the verbosity of the task's debug output. Default is <code>WARN</code>.
      * 
-     * @param verbosity The verbosity level
+     * @param level The verbosity level
      */
     public void setVerbosity(VerbosityLevel level)
     {

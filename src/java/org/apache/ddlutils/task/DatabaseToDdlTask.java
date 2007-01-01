@@ -59,7 +59,7 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     /** The table types to recognize when reading the model from the database. */
     private String _tableTypes;
     /** The name of the model read from the database. */
-    private String _modelName;
+    private String _modelName = "unnamed";
 
     /**
      * Specifies the table types to be processed. More precisely, all tables that are of a

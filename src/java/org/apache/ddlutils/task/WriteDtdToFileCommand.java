@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.io.DataDtdWriter;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 /**
  * Creates a DTD that specifies the layout for data XML files.<br/>
@@ -67,7 +66,7 @@ public class WriteDtdToFileCommand implements Command
     /**
      * {@inheritDoc}
      */
-    public void execute(Task task, Database model) throws BuildException
+    public void execute(DatabaseTaskBase task, Database model) throws BuildException
     {
         if (_outputFile == null)
         {

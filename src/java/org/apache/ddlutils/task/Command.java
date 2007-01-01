@@ -21,7 +21,6 @@ package org.apache.ddlutils.task;
 
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 /**
  * Base interface for commands that work with a model.
@@ -45,5 +44,5 @@ public interface Command
      * @param task  The executing task
      * @param model The database model
      */
-    public void execute(Task task, Database model) throws BuildException;
+    public void execute(DatabaseTaskBase task, Database model) throws BuildException;
 }

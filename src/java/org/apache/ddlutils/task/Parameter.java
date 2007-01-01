@@ -53,7 +53,7 @@ public class Parameter
 
     /**
      * Specifies the name of the parameter. See the database support documentation
-     * for details on the parameters supported by the individual platforms.</td>
+     * for details on the parameters supported by the individual platforms.
      *
      * @param name The name
      * @ant.required

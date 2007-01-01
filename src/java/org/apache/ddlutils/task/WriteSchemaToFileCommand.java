@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 /**
  * Reads the schema of the live database (as specified in the enclosing task), and writes
@@ -66,7 +65,7 @@ public class WriteSchemaToFileCommand implements Command
     /**
      * {@inheritDoc}
      */
-    public void execute(Task task, Database model) throws BuildException
+    public void execute(DatabaseTaskBase task, Database model) throws BuildException
     {
         if (_outputFile == null)
         {

@@ -19,6 +19,7 @@ package org.apache.ddlutils.platform.interbase;
  * under the License.
  */
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -383,6 +384,92 @@ public class InterbaseModelReader extends JdbcModelReader
             if (stmt != null)
             {
                 stmt.close();
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String determineSchemaOf(Connection connection, String schemaPattern, Table table) throws SQLException
+    {
+        ResultSet tableData  = null;
+        ResultSet columnData = null;
+
+        try
+        {
+            DatabaseMetaDataWrapper metaData = new DatabaseMetaDataWrapper();
+
+            metaData.setMetaData(connection.getMetaData());
+            metaData.setCatalog(getDefaultCatalogPattern());
+            metaData.setSchemaPattern(schemaPattern == null ? getDefaultSchemaPattern() : schemaPattern);
+            metaData.setTableTypes(getDefaultTableTypes());
+
+            String tablePattern = table.getName();
+
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                tablePattern = tablePattern.toUpperCase();
+            }
+
+            tableData = metaData.getTables(tablePattern);
+
+            boolean found  = false;
+            String  schema = null;
+
+            while (!found && tableData.next())
+            {
+                Map    values    = readColumns(tableData, getColumnsForTable());
+                String tableName = (String)values.get("TABLE_NAME");
+
+                if ((tableName != null) && (tableName.length() > 0))
+                {
+                    schema = (String)values.get("TABLE_SCHEM");
+                    found  = true;
+
+                    if (getPlatform().isDelimitedIdentifierModeOn())
+                    {
+                        // Jaybird has a problem when delimited identifiers are used as
+                        // it is not able to find the columns for the table
+                        // So we have to filter manually below
+                        columnData = metaData.getColumns(getDefaultTablePattern(), getDefaultColumnPattern());
+                    }
+                    else
+                    {
+                        columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
+                    }
+
+                    while (found && columnData.next())
+                    {
+                        values = readColumns(columnData, getColumnsForColumn());
+
+                        if (getPlatform().isDelimitedIdentifierModeOn() &&
+                            !tableName.equals(values.get("TABLE_NAME")))
+                        {
+                            continue;
+                        }
+
+                        if (table.findColumn((String)values.get("COLUMN_NAME"),
+                                             getPlatform().isDelimitedIdentifierModeOn()) == null)
+                        {
+                            found = false;
+                        }
+                    }
+                    columnData.close();
+                    columnData = null;
+                }
+            }
+            return found ? schema : null;
+        }
+        finally
+        {
+            if (columnData != null)
+            {
+                columnData.close();
+            }
+            if (tableData != null)
+            {
+                tableData.close();
             }
         }
     }

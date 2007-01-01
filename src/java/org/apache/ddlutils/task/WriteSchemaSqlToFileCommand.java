@@ -28,7 +28,6 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 /**
  * Parses the schema XML files specified in the enclosing task, and writes the SQL statements
@@ -108,7 +107,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
     /**
      * {@inheritDoc}
      */
-    public void execute(Task task, Database model) throws BuildException
+    public void execute(DatabaseTaskBase task, Database model) throws BuildException
     {
         if (_outputFile == null)
         {

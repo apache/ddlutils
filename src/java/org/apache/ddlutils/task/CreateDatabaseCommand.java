@@ -28,7 +28,6 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 /**
  * The sub task for creating the target database. Note that this is only supported on some database
@@ -65,7 +64,7 @@ public class CreateDatabaseCommand extends DatabaseCommand
     /**
      * {@inheritDoc}
      */
-    public void execute(Task task, Database model) throws BuildException
+    public void execute(DatabaseTaskBase task, Database model) throws BuildException
     {
         BasicDataSource dataSource = getDataSource();
 

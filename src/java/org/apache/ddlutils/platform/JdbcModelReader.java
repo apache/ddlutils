@@ -457,9 +457,9 @@ public class JdbcModelReader
                     catalog = db.getName();
                 }
             } 
-            catch(Exception e) 
+            catch (Exception ex) 
             {
-                _log.info("Cannot determine the catalog name from connection.");
+                _log.info("Cannot determine the catalog name from connection.", ex);
             }
         }
         else
@@ -1111,5 +1111,81 @@ public class JdbcModelReader
             }
         }
         return result;
+    }
+
+    /**
+     * Tries to find the schema to which the given table belongs.
+     * 
+     * @param connection    The database connection
+     * @param schemaPattern The schema pattern to limit the schemas to search in
+     * @param table         The table to search for
+     * @return The schema name or <code>null</code> if the schema of the table
+     *         could not be found
+     * @deprecated Will be removed once full schema support is in place
+     */
+    public String determineSchemaOf(Connection connection, String schemaPattern, Table table) throws SQLException
+    {
+        ResultSet tableData  = null;
+        ResultSet columnData = null;
+
+        try
+        {
+            DatabaseMetaDataWrapper metaData = new DatabaseMetaDataWrapper();
+
+            metaData.setMetaData(connection.getMetaData());
+            metaData.setCatalog(getDefaultCatalogPattern());
+            metaData.setSchemaPattern(schemaPattern == null ? getDefaultSchemaPattern() : schemaPattern);
+            metaData.setTableTypes(getDefaultTableTypes());
+
+            String tablePattern = table.getName();
+
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                tablePattern = tablePattern.toUpperCase();
+            }
+
+            tableData = metaData.getTables(tablePattern);
+
+            boolean found  = false;
+            String  schema = null;
+
+            while (!found && tableData.next())
+            {
+                Map    values    = readColumns(tableData, getColumnsForTable());
+                String tableName = (String)values.get("TABLE_NAME");
+
+                if ((tableName != null) && (tableName.length() > 0))
+                {
+                    schema     = (String)values.get("TABLE_SCHEM");
+                    columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
+                    found      = true;
+
+                    while (found && columnData.next())
+                    {
+                        values = readColumns(columnData, getColumnsForColumn());
+
+                        if (table.findColumn((String)values.get("COLUMN_NAME"),
+                                             getPlatform().isDelimitedIdentifierModeOn()) == null)
+                        {
+                            found = false;
+                        }
+                    }
+                    columnData.close();
+                    columnData = null;
+                }
+            }
+            return found ? schema : null;
+        }
+        finally
+        {
+            if (columnData != null)
+            {
+                columnData.close();
+            }
+            if (tableData != null)
+            {
+                tableData.close();
+            }
+        }
     }
 }

@@ -140,7 +140,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
     /**
      * {@inheritDoc}
      */
-    public void execute(Task task, Database model) throws BuildException
+    public void execute(DatabaseTaskBase task, Database model) throws BuildException
     {
         if ((_singleDataFile != null) && !_fileSets.isEmpty())
         {

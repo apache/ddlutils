@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -52,6 +54,11 @@ public class DatabaseDataIO
     /** The maximum number of objects to insert in one batch. */
     private Integer _batchSize;
 
+    /** Whether DdlUtils should search for the schema of the tables. @deprecated */
+    private boolean _determineSchema;
+    /** The schema pattern for finding tables when reading data from a live database. @deprecated */
+    private String _schemaPattern;
+    
     /**
      * Registers a converter.
      * 
@@ -141,11 +148,34 @@ public class DatabaseDataIO
      * result in beans not inserted at all. The sink will then throw an appropriate exception at the end
      * of the insertion process (method {@link #end()}).
      *
-     * @param ensureFkOrder <code>true</code> if beans shall be inserted after its foreignkey-references
+     * @param ensureFKOrder <code>true</code> if beans shall be inserted after its foreignkey-references
      */
     public void setEnsureFKOrder(boolean ensureFKOrder)
     {
         _ensureFKOrder = ensureFKOrder;
+    }
+
+    /**
+     * Specifies whether DdlUtils should try to find the schema of the tables when reading data
+     * from a live database.
+     * 
+     * @param determineSchema Whether to try to find the table's schemas
+     * @deprecated Will be removed once proper schema support is in place
+     */
+    public void setDetermineSchema(boolean determineSchema)
+    {
+        _determineSchema = determineSchema;
+    }
+
+    /**
+     * Sets the schema pattern to find the schemas of tables when reading data from a live database.
+     * 
+     * @param schemaPattern The schema pattern
+     * @deprecated Will be removed once proper schema support is in place
+     */
+    public void setSchemaPattern(String schemaPattern)
+    {
+        _schemaPattern = schemaPattern;
     }
 
     /**
@@ -350,6 +380,37 @@ public class DatabaseDataIO
             query.setLength(0);
             query.append("SELECT ");
 
+            Connection connection = null;
+            String     schema     = null;
+
+            if (_determineSchema)
+            {
+                try
+                {
+                    // TODO: Remove this once we have full support for schemas
+                    connection = platform.borrowConnection();
+                    schema     = platform.getModelReader().determineSchemaOf(connection, _schemaPattern, tables[0]);
+                }
+                catch (SQLException ex)
+                {
+                    // ignored
+                }
+                finally
+                {
+                    if (connection != null)
+                    {
+                        try
+                        {
+                            connection.close();
+                        }
+                        catch (SQLException ex)
+                        {
+                            // ignored
+                        }
+                    }
+                }
+            }
+
             Column[] columns = tables[0].getColumns();
 
             for (int columnIdx = 0; columnIdx < columns.length; columnIdx++)
@@ -372,6 +433,11 @@ public class DatabaseDataIO
             if (platform.isDelimitedIdentifierModeOn())
             {
                 query.append(platform.getPlatformInfo().getDelimiterToken());
+            }
+            if (schema != null)
+            {
+                query.append(schema);
+                query.append(".");
             }
             query.append(tables[0].getName());
             if (platform.isDelimitedIdentifierModeOn())
@@ -428,7 +494,7 @@ public class DatabaseDataIO
      * platform is connected.
      * 
      * @param platform The platform, must be connected to a live database
-     * @param input    The input streams for the XML data
+     * @param inputs   The input streams for the XML data
      */
     public void writeDataToDatabase(Platform platform, InputStream[] inputs) throws DdlUtilsException
     {
@@ -440,7 +506,7 @@ public class DatabaseDataIO
      * platform is connected.
      * 
      * @param platform The platform, must be connected to a live database
-     * @param input    The input readers for the XML data
+     * @param inputs   The input readers for the XML data
      */
     public void writeDataToDatabase(Platform platform, Reader[] inputs) throws DdlUtilsException
     {
@@ -473,7 +539,7 @@ public class DatabaseDataIO
      * 
      * @param platform The platform, must be connected to a live database
      * @param model    The model to which to constrain the written data
-     * @param input    The input streams for the XML data
+     * @param inputs   The input streams for the XML data
      */
     public void writeDataToDatabase(Platform platform, Database model, InputStream[] inputs) throws DdlUtilsException
     {
@@ -493,7 +559,7 @@ public class DatabaseDataIO
      * 
      * @param platform The platform, must be connected to a live database
      * @param model    The model to which to constrain the written data
-     * @param input    The input readers for the XML data
+     * @param inputs   The input readers for the XML data
      */
     public void writeDataToDatabase(Platform platform, Database model, Reader[] inputs) throws DdlUtilsException
     {
@@ -530,7 +596,7 @@ public class DatabaseDataIO
      * code using this method.
      * 
      * @param dataReader The data reader
-     * @param input      The input streams for the XML data
+     * @param inputs     The input streams for the XML data
      */
     public void writeDataToDatabase(DataReader dataReader, InputStream[] inputs) throws DdlUtilsException
     {
@@ -547,7 +613,7 @@ public class DatabaseDataIO
      * code using this method.
      * 
      * @param dataReader The data reader
-     * @param input      The input readers for the XML data
+     * @param inputs     The input readers for the XML data
      */
     public void writeDataToDatabase(DataReader dataReader, Reader[] inputs) throws DdlUtilsException
     {

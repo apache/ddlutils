@@ -173,7 +173,7 @@ public class DumpMetadataTask extends Task
      * Specifies the table types to be processed. For details and typical table types see
      * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
      *
-     * @param tablePattern The table pattern
+     * @param tableTypes The table types to read
      * @ant.not-required By default, all types of tables are read.
      */
     public void setTableTypes(String tableTypes)

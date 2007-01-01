@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 /**
  * Reads the data currently in the table in the live database (as specified by the
@@ -39,6 +38,9 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
     private File _outputFile;
     /** The character encoding to use. */
     private String _encoding;
+
+    /** Whether DdlUtils should search for the schema of the tables. @deprecated */
+    private boolean _determineSchema;
 
     /**
      * Specifies the file to write the data XML to.
@@ -63,12 +65,26 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
     }
 
     /**
+     * Specifies whether DdlUtils should try to find the schema of the tables when reading data
+     * from a live database.
+     * 
+     * @param determineSchema Whether to try to find the table's schemas
+     * @deprecated Will be removed once proper schema support is in place
+     */
+    public void setDetermineSchema(boolean determineSchema)
+    {
+        _determineSchema = determineSchema;
+    }
+
+    /**
      * {@inheritDoc}
      */
-    public void execute(Task task, Database model) throws BuildException
+    public void execute(DatabaseTaskBase task, Database model) throws BuildException
     {
         try
         {
+            getDataIO().setDetermineSchema(_determineSchema);
+            getDataIO().setSchemaPattern(task.getPlatformConfiguration().getSchemaPattern());
             getDataIO().writeDataToXML(getPlatform(),
                                        new FileOutputStream(_outputFile), _encoding);
             _log.info("Written data XML to file" + _outputFile.getAbsolutePath());
