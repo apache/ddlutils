@@ -46,6 +46,8 @@ public abstract class DatabaseTaskBase extends Task
 {
     /**
      * Helper class that defines the possible values for the verbosity attribute.
+     * 
+     * @ant.task ignore="true"
      */
     public static class VerbosityLevel extends EnumeratedAttribute {
         /** The possible levels. */

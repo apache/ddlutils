@@ -31,13 +31,23 @@ AntDoclet - Running project $title
 
 - Generating Task and Types documentation...
 ##
-#foreach( $taskDoc in $antroot.getAll() ) ##
-  #if ( ! $taskDoc.isIgnored() )
+#foreach( $curTaskDoc in $antroot.getAll() ) ##
+  #if (!$curTaskDoc.isIgnored())
 
-- Processing $taskDoc.antName ##
-      $velocity.eval( "html/task.vm", "${taskDoc.getFullClassName()}.html" ) ##
+- Processing $curTaskDoc.antName ##
+      #set ($taskDoc = $curTaskDoc)
+      $velocity.eval( "html/task.vm", "${curTaskDoc.getFullClassName()}.html" ) ##
+    #foreach ($curElement in $curTaskDoc.getNestedElements())
+      #set ($curElementDoc = $curTaskDoc.getElementDoc($curElement))
+      #if (!$curElementDoc.isIgnored() && $curElementDoc.sourceIncluded() && $curElementDoc.isTagged())
+
+    Processing sub element $curElementDoc.antName ##
+        #set ($taskDoc = $curElementDoc)
+        $velocity.eval( "html/task.vm", "${curElementDoc.getFullClassName()}.html" ) ##
+      #end
+    #end
   #else ##
-- Ignoring $taskDoc.fullClassName()##
+- Ignoring $curTaskDoc.fullClassName()##
   #end ##
 #end ##
 

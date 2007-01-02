@@ -82,7 +82,7 @@
 #foreach ($element in $taskDoc.getNestedElements())
   #set ($elementDoc = $taskDoc.getElementDoc($element))
   #if ($elementDoc.sourceIncluded() && $elementDoc.isTagged())
-	<p class="taskNestedElementRef">&rArr;&nbsp;<a href="../api/${elementDoc.getFullClassName().replace(".", "/")}.html"><code>$element</code></a></p>
+	<p class="taskNestedElementRef">&rArr;&nbsp;<a href="${elementDoc.getFullClassName()}.html"><code>$element</code></a></p>
   #end
 #end
 </fieldset>
