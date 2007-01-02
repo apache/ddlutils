@@ -108,7 +108,7 @@ public abstract class DatabaseTaskBase extends Task
     private VerbosityLevel _verbosity = new VerbosityLevel(Level.INFO.toString());
 
     /**
-     * Specifies the verbosity of the task's debug output. Default is <code>WARN</code>.
+     * Specifies the verbosity of the task's debug output. Default is <code>INFO</code>.
      * 
      * @param level The verbosity level
      */

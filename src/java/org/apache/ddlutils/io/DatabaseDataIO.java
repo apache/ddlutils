@@ -146,7 +146,7 @@ public class DatabaseDataIO
      * via foreignkeys are already inserted into the database.<br/>
      * Note that you should careful with setting <code>haltOnErrors</code> to false as this might
      * result in beans not inserted at all. The sink will then throw an appropriate exception at the end
-     * of the insertion process (method {@link #end()}).
+     * of the insertion process (method {@link DataSink#end()}).
      *
      * @param ensureFKOrder <code>true</code> if beans shall be inserted after its foreignkey-references
      */

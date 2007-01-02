@@ -166,7 +166,7 @@ public interface Platform
     /**
      * Determines whether SQL insert statements can specify values for identity columns.
      * This setting is only relevant if the database supports it
-     * ({@link PlatformInfo#isIdentityOverrideAllowed()). If this is off, then the
+     * ({@link PlatformInfo#isIdentityOverrideAllowed()}). If this is off, then the
      * <code>insert</code> methods will ignore values for identity columns. 
      *  
      * @return <code>true</code> if identity override is enabled (the default)
@@ -176,7 +176,7 @@ public interface Platform
     /**
      * Specifies whether SQL insert statements can specify values for identity columns.
      * This setting is only relevant if the database supports it
-     * ({@link PlatformInfo#isIdentityOverrideAllowed()). If this is off, then the
+     * ({@link PlatformInfo#isIdentityOverrideAllowed()}). If this is off, then the
      * <code>insert</code> methods will ignore values for identity columns. 
      *  
      * @param identityOverrideOn <code>true</code> if identity override is enabled (the default)

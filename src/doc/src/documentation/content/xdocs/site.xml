@@ -85,7 +85,7 @@ See http://forrest.apache.org/docs/linking.html for more info
       </javadoc>
       <schemadoc href="schema/"/>
       <antdoc href="ant/"/>
-      <svn-view href="http://svn.apache.org/viewcvs.cgi/db/ddlutils/trunk/"/>
+      <svn-view href="http://svn.apache.org/viewvc/db/ddlutils/trunk/"/>
       <user-list>
         <subscribe href="mailto:ddlutils-user-subscribe@db.apache.org"/>
         <unsubscribe href="mailto:ddlutils-user-unsubscribe@db.apache.org"/>
@@ -116,7 +116,7 @@ See http://forrest.apache.org/docs/linking.html for more info
     </cloudscape>
     <db2 href="http://www-130.ibm.com/developerworks/db2/">
       <manual href="ftp://ftp.software.ibm.com/ps/products/db2/info/vr7/pdf/letter/db2s0e70.pdf"/>
-      <jdbc-mappings href="http://publib.boulder.ibm.com/infocenter/db2help/topic/com.ibm.db2.udb.doc/ad/rjvjdata.htm#jvregou"/>
+      <jdbc-mappings href="http://publib.boulder.ibm.com/infocenter/db2luw/v8/topic/com.ibm.db2.udb.doc/ad/rjvjdata.htm"/>
     </db2>
     <derby href="http://db.apache.org/derby/">
       <manual href="manuals/index.html"/>
@@ -127,7 +127,7 @@ See http://forrest.apache.org/docs/linking.html for more info
       <sql-syntax href="doc/guide/ch09.html"/>
     </hsqldb>
     <idea href="http://www.jetbrains.com/idea/"/>
-    <interbase href="http://www.borland.com/us/products/interbase/"/>
+    <interbase href="http://www.codegear.com/tabid/125/Default.aspx"/>
     <jakarta href="http://jakarta.apache.org/">
       <commons href="commons/">
         <dbcp href="dbcp/">
@@ -168,12 +168,12 @@ See http://forrest.apache.org/docs/linking.html for more info
     <sapdb href="http://www.sapdb.org/">
       <manual href="pdf/reference_72_73eng.pdf"/>
     </sapdb>
-    <sqlserver href="http://msdn.microsoft.com/SQL/">
-      <manual-2000 href="http://msdn.microsoft.com/library/en-us/tsqlref/ts_tsqlcon_6lyk.asp?frame=true"/>
+    <sqlserver href="http://msdn2.microsoft.com/en-us/sql/default.aspx">
+      <manual-2000 href="http://msdn.microsoft.com/library/en-us/tsqlref/ts_tsqlcon_6lyk.asp"/>
     </sqlserver>
     <sybase>
       <sqlserver href="http://www.sybase.com/products/archivedproducts/sqlserver"/>
-      <ase href="http://www.sybase.com/products/databasemanagement/adaptiveserverenterprise"/>
+      <ase href="http://www.sybase.com:80/products/databasemanagement/adaptiveserverenterprise"/>
       <manual-archive href="http://sybooks.sybase.com/onlinebooks/group-asarc/@Generic__CollectionView;pt=group-asarc"/>
       <manual href="http://sybooks.sybase.com/as.html"/>
     </sybase>
