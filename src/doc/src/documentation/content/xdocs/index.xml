@@ -98,7 +98,7 @@
       <ul>
         <li>
           In an <a href="ext:ant">Ant</a> build script via the task provided by DdlUtils.
-          You can learn more about <a href="site:documentation/ant-tasks">here</a>.
+          You can learn more about <a href="ext:ddlutils/antdoc/">here</a>.
         </li>
         <li>
           From within your Java program, about which you can learn more 

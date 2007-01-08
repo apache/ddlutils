@@ -51,7 +51,7 @@
         </li>
         <li>
           The <strong>Ant tasks</strong> are explained in detail in
-          <a href="site:documentation/ant-tasks">this document</a>.
+          <a href="ext:ddlutils/antdoc/">this document</a>.
         </li>
       </ul>
     </section>
