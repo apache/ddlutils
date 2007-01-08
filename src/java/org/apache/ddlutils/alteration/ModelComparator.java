@@ -356,11 +356,17 @@ public class ModelComparator
             changes.add(new ColumnDataTypeChange(sourceTable, sourceColumn, targetColumn.getTypeCode()));
         }
 
-        boolean sizeMatters = _platformInfo.hasSize(sourceColumn.getTypeCode());
+        boolean sizeMatters  = _platformInfo.hasSize(sourceColumn.getTypeCode());
+        boolean scaleMatters = _platformInfo.hasPrecisionAndScale(sourceColumn.getTypeCode());
 
-        if ((sizeMatters &&
-            (!StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize())) ||
-             sourceColumn.getScale() != targetColumn.getScale()))
+        if (sizeMatters &&
+            !StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize()))
+        {
+            changes.add(new ColumnSizeChange(sourceTable, sourceColumn, targetColumn.getSizeAsInt(), targetColumn.getScale()));
+        }
+        else if (scaleMatters &&
+            (!StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize()) ||
+             (sourceColumn.getScale() != targetColumn.getScale())))
         {
             changes.add(new ColumnSizeChange(sourceTable, sourceColumn, targetColumn.getSizeAsInt(), targetColumn.getScale()));
         }
