@@ -153,6 +153,8 @@ public class PostgreSqlModelReader extends JdbcModelReader
                 }
                 if (TypeMap.isTextType(column.getTypeCode()))
                 {
+                    // We assume escaping via double quote (see also the backslash_quote setting:
+                    // http://www.postgresql.org/docs/7.4/interactive/runtime-config.html#RUNTIME-CONFIG-COMPATIBLE)
                     defaultValue = unescape(defaultValue, "'", "''");
                 }
             }
