@@ -34,9 +34,15 @@
 </head>
 <body class="index">
 <div>
-<h3>#if ($category == 'all') Core #else $category #end Tasks</h3>
-#foreach( $taskDoc in $antroot.getTasksByCategory($category) )
-  #if ($taskDoc && !$taskDoc.isInnerClass())
+#if ($category == 'all')
+#set ($taskDocs = $antroot.getAll())
+<h3>Core Tasks</h3>
+#else
+#set ($taskDocs = $antroot.getTasksByCategory($category))
+<h3>$category Tasks</h3>
+#end
+#foreach ($taskDoc in $taskDocs)
+  #if ($taskDoc && $taskDoc.isTask() && !$taskDoc.isIgnored())
 <p><a href="${taskDoc.getFullClassName()}.html" target="task">Task <code>${taskDoc.getAntName()}</code></a></p>
     #if ($taskDoc.getShortComment())
 <p class="taskShortDescription">$taskDoc.getShortComment()</p>
