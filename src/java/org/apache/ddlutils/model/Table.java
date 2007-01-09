@@ -673,6 +673,25 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
+     * Returns the foreign key referencing this table if it exists.
+     * 
+     * @return The self-referencing foreign key if any
+     */
+    public ForeignKey getSelfReferencingForeignKey()
+    {
+        for (int idx = 0; idx < getForeignKeyCount(); idx++)
+        {
+            ForeignKey fk = getForeignKey(idx);
+
+            if (this.equals(fk.getForeignTable()))
+            {
+                return fk;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the primary key columns of this table.
      * 
      * @return The primary key columns

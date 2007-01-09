@@ -68,6 +68,10 @@ public class DataToDatabaseSink implements DataSink
     private int _batchSize = 1024;
     /** Stores the tables that are target of a foreign key. */
     private HashSet _fkTables = new HashSet();
+    /** Contains the tables that have a self-referencing foreign key to a (partially) identity primary key. */
+    private HashSet _tablesWithSelfIdentityReference = new HashSet();
+    /** Contains the tables that have a self-referencing foreign key that is required. */
+    private HashSet _tablesWithRequiredSelfReference = new HashSet();
     /** Maps original to processed identities. */
     private HashMap _identityMap = new HashMap();
     /** Stores the objects that are waiting for other objects to be inserted. */
@@ -83,6 +87,33 @@ public class DataToDatabaseSink implements DataSink
     {
         _platform = platform;
         _model    = model;
+        for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+        {
+            Table      table     = model.getTable(tableIdx);
+            ForeignKey selfRefFk = table.getSelfReferencingForeignKey();
+
+            if (selfRefFk != null)
+            {
+                Column[] pkColumns = table.getPrimaryKeyColumns();
+
+                for (int idx = 0; idx < pkColumns.length; idx++)
+                {
+                    if (pkColumns[idx].isAutoIncrement())
+                    {
+                        _tablesWithSelfIdentityReference.add(table);
+                        break;
+                    }
+                }
+                for (int idx = 0; idx < selfRefFk.getReferenceCount(); idx++)
+                {
+                    if (selfRefFk.getReference(idx).getLocalColumn().isRequired())
+                    {
+                        _tablesWithRequiredSelfReference.add(table);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -254,7 +285,8 @@ public class DataToDatabaseSink implements DataSink
      */
     public void addBean(DynaBean bean) throws DataSinkException
     {
-        Table table = _model.getDynaClassFor(bean).getTable();
+        Table    table        = _model.getDynaClassFor(bean).getTable();
+        Identity origIdentity = buildIdentityFromPKs(table, bean);
 
         if (_ensureFkOrder && (table.getForeignKeyCount() > 0))
         {
@@ -265,10 +297,10 @@ public class DataToDatabaseSink implements DataSink
                 ForeignKey fk         = table.getForeignKey(idx);
                 Identity   fkIdentity = buildIdentityFromFK(table, fk, bean);
 
-                if (fkIdentity != null)
+                if ((fkIdentity != null) && !fkIdentity.equals(origIdentity))
                 {
                     Identity processedIdentity = (Identity)_identityMap.get(fkIdentity);
-    
+
                     if (processedIdentity != null)
                     {
                         updateFKColumns(bean, fkIdentity.getForeignKeyName(), processedIdentity);
@@ -299,8 +331,6 @@ public class DataToDatabaseSink implements DataSink
                 return;
             }
         }
-
-        Identity origIdentity = buildIdentityFromPKs(table, bean);
 
         insertBeanIntoDatabase(table, bean);
 
@@ -408,7 +438,57 @@ public class DataToDatabaseSink implements DataSink
     {
         try
         {
-            _platform.insert(_connection, _model, bean);
+            boolean    needTwoStepInsert = false;
+            ForeignKey selfRefFk         = null;
+
+            if (!_platform.isIdentityOverrideOn() &&
+                _tablesWithSelfIdentityReference.contains(table))
+            {
+                selfRefFk = table.getSelfReferencingForeignKey();
+
+                // in case of a self-reference (fk points to the very row that we're inserting)
+                // and (at least) one of the pk columns is an identity column, we first need
+                // to insert the row with the fk columns set to null
+                Identity pkIdentity = buildIdentityFromPKs(table, bean);
+                Identity fkIdentity = buildIdentityFromFK(table, selfRefFk, bean);
+
+                if (pkIdentity.equals(fkIdentity))
+                {
+                    if (_tablesWithRequiredSelfReference.contains(table))
+                    {
+                        throw new DataSinkException("Can only insert rows with fk pointing to themselves when all fk columns can be NULL (row pk is " + pkIdentity + ")");
+                    }
+                    else
+                    {
+                        needTwoStepInsert = true;
+                    }
+                }
+            }
+
+            if (needTwoStepInsert)
+            {
+                // we first insert the bean without the fk, then in the second step we update the bean
+                // with the row with the identity pk values
+                ArrayList fkValues = new ArrayList();
+
+                for (int idx = 0; idx < selfRefFk.getReferenceCount(); idx++)
+                {
+                    String columnName = selfRefFk.getReference(idx).getLocalColumnName();
+
+                    fkValues.add(bean.get(columnName));
+                    bean.set(columnName, null);
+                }
+                _platform.insert(_connection, _model, bean);
+                for (int idx = 0; idx < selfRefFk.getReferenceCount(); idx++)
+                {
+                    bean.set(selfRefFk.getReference(idx).getLocalColumnName(), fkValues.get(idx));
+                }
+                _platform.update(_connection, _model, bean);
+            }
+            else
+            {
+                _platform.insert(_connection, _model, bean);
+            }
             if (!_connection.getAutoCommit())
             {
                 _connection.commit();
