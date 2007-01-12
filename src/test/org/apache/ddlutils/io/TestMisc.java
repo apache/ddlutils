@@ -95,42 +95,33 @@ public class TestMisc extends RoundtripTestBase
         SAXReader reader    = new SAXReader();
         Document  testDoc   = reader.read(new InputSource(new StringReader(dataAsXml)));
 
-        List misc1Rows = testDoc.selectNodes("//misc1");
-        List misc2Rows = testDoc.selectNodes("//misc2");
+        List   misc1Rows       = testDoc.selectNodes("//misc1");
+        List   misc2Rows       = testDoc.selectNodes("//misc2");
+        String pkColumnName    = "pk";
+        String fkColumnName    = "fk";
+        String valueColumnName = "avalue";
 
-        if (misc1Rows.size() > 0)
+        if (misc1Rows.size() == 0)
         {
-            assertEquals(3, misc1Rows.size());
-            assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("pk"));
-            assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue("avalue"));
-            assertEquals("12", ((Element)misc1Rows.get(1)).attributeValue("pk"));
-            assertEquals("2",  ((Element)misc1Rows.get(1)).attributeValue("avalue"));
-            assertEquals("13", ((Element)misc1Rows.get(2)).attributeValue("pk"));
-            assertEquals("3",  ((Element)misc1Rows.get(2)).attributeValue("avalue"));
-            assertEquals(2, misc2Rows.size());
-            assertEquals("1",  ((Element)misc2Rows.get(0)).attributeValue("pk"));
-            assertEquals("10", ((Element)misc2Rows.get(0)).attributeValue("fk"));
-            assertEquals("2",  ((Element)misc2Rows.get(1)).attributeValue("pk"));
-            assertEquals("13", ((Element)misc2Rows.get(1)).attributeValue("fk"));
+            misc1Rows       = testDoc.selectNodes("//MISC1");
+            misc2Rows       = testDoc.selectNodes("//MISC2");
+            pkColumnName    = pkColumnName.toUpperCase();
+            fkColumnName    = fkColumnName.toUpperCase();
+            valueColumnName = valueColumnName.toUpperCase();
         }
-        else
-        {
-            misc1Rows = testDoc.selectNodes("//MISC1");
-            misc2Rows = testDoc.selectNodes("//MISC2");
 
-            assertEquals(3, misc1Rows.size());
-            assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("PK"));
-            assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue("AVALUE"));
-            assertEquals("12", ((Element)misc1Rows.get(1)).attributeValue("PK"));
-            assertEquals("2",  ((Element)misc1Rows.get(1)).attributeValue("AVALUE"));
-            assertEquals("13", ((Element)misc1Rows.get(2)).attributeValue("PK"));
-            assertEquals("3",  ((Element)misc1Rows.get(2)).attributeValue("AVALUE"));
-            assertEquals(2, misc2Rows.size());
-            assertEquals("1",  ((Element)misc2Rows.get(0)).attributeValue("PK"));
-            assertEquals("10", ((Element)misc2Rows.get(0)).attributeValue("FK"));
-            assertEquals("2",  ((Element)misc2Rows.get(1)).attributeValue("PK"));
-            assertEquals("13", ((Element)misc2Rows.get(1)).attributeValue("FK"));
-        }
+        assertEquals(3, misc1Rows.size());
+        assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue(pkColumnName));
+        assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue(valueColumnName));
+        assertEquals("12", ((Element)misc1Rows.get(1)).attributeValue(pkColumnName));
+        assertEquals("2",  ((Element)misc1Rows.get(1)).attributeValue(valueColumnName));
+        assertEquals("13", ((Element)misc1Rows.get(2)).attributeValue(pkColumnName));
+        assertEquals("3",  ((Element)misc1Rows.get(2)).attributeValue(valueColumnName));
+        assertEquals(2, misc2Rows.size());
+        assertEquals("1",  ((Element)misc2Rows.get(0)).attributeValue(pkColumnName));
+        assertEquals("10", ((Element)misc2Rows.get(0)).attributeValue(fkColumnName));
+        assertEquals("2",  ((Element)misc2Rows.get(1)).attributeValue(pkColumnName));
+        assertEquals("13", ((Element)misc2Rows.get(1)).attributeValue(fkColumnName));
 
         dropDatabase();
         createDatabase(modelXml);
@@ -203,42 +194,33 @@ public class TestMisc extends RoundtripTestBase
         SAXReader reader    = new SAXReader();
         Document  testDoc   = reader.read(new InputSource(new StringReader(dataAsXml)));
 
-        List misc1Rows = testDoc.selectNodes("//misc1");
-        List misc2Rows = testDoc.selectNodes("//misc2");
+        List   misc1Rows       = testDoc.selectNodes("//misc1");
+        List   misc2Rows       = testDoc.selectNodes("//misc2");
+        String pkColumnName    = "pk";
+        String fkColumnName    = "fk";
+        String valueColumnName = "avalue";
 
-        if (misc1Rows.size() > 0)
+        if (misc1Rows.size() == 0)
         {
-            assertEquals(3, misc1Rows.size());
-            assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("pk"));
-            assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue("avalue"));
-            assertEquals("12", ((Element)misc1Rows.get(1)).attributeValue("pk"));
-            assertEquals("2",  ((Element)misc1Rows.get(1)).attributeValue("avalue"));
-            assertEquals("13", ((Element)misc1Rows.get(2)).attributeValue("pk"));
-            assertEquals("3",  ((Element)misc1Rows.get(2)).attributeValue("avalue"));
-            assertEquals(2, misc2Rows.size());
-            assertEquals("1",  ((Element)misc2Rows.get(0)).attributeValue("pk"));
-            assertEquals("10", ((Element)misc2Rows.get(0)).attributeValue("fk"));
-            assertEquals("2",  ((Element)misc2Rows.get(1)).attributeValue("pk"));
-            assertEquals("13", ((Element)misc2Rows.get(1)).attributeValue("fk"));
+            misc1Rows       = testDoc.selectNodes("//MISC1");
+            misc2Rows       = testDoc.selectNodes("//MISC2");
+            pkColumnName    = pkColumnName.toUpperCase();
+            fkColumnName    = fkColumnName.toUpperCase();
+            valueColumnName = valueColumnName.toUpperCase();
         }
-        else
-        {
-            misc1Rows = testDoc.selectNodes("//MISC1");
-            misc2Rows = testDoc.selectNodes("//MISC2");
 
-            assertEquals(3, misc1Rows.size());
-            assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue("PK"));
-            assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue("AVALUE"));
-            assertEquals("12", ((Element)misc1Rows.get(1)).attributeValue("PK"));
-            assertEquals("2",  ((Element)misc1Rows.get(1)).attributeValue("AVALUE"));
-            assertEquals("13", ((Element)misc1Rows.get(2)).attributeValue("PK"));
-            assertEquals("3",  ((Element)misc1Rows.get(2)).attributeValue("AVALUE"));
-            assertEquals(2, misc2Rows.size());
-            assertEquals("1",  ((Element)misc2Rows.get(0)).attributeValue("PK"));
-            assertEquals("10", ((Element)misc2Rows.get(0)).attributeValue("FK"));
-            assertEquals("2",  ((Element)misc2Rows.get(1)).attributeValue("PK"));
-            assertEquals("13", ((Element)misc2Rows.get(1)).attributeValue("FK"));
-        }
+        assertEquals(3, misc1Rows.size());
+        assertEquals("10", ((Element)misc1Rows.get(0)).attributeValue(pkColumnName));
+        assertEquals("1",  ((Element)misc1Rows.get(0)).attributeValue(valueColumnName));
+        assertEquals("12", ((Element)misc1Rows.get(1)).attributeValue(pkColumnName));
+        assertEquals("2",  ((Element)misc1Rows.get(1)).attributeValue(valueColumnName));
+        assertEquals("13", ((Element)misc1Rows.get(2)).attributeValue(pkColumnName));
+        assertEquals("3",  ((Element)misc1Rows.get(2)).attributeValue(valueColumnName));
+        assertEquals(2, misc2Rows.size());
+        assertEquals("1",  ((Element)misc2Rows.get(0)).attributeValue(pkColumnName));
+        assertEquals("10", ((Element)misc2Rows.get(0)).attributeValue(fkColumnName));
+        assertEquals("2",  ((Element)misc2Rows.get(1)).attributeValue(pkColumnName));
+        assertEquals("13", ((Element)misc2Rows.get(1)).attributeValue(fkColumnName));
 
         dropDatabase();
         createDatabase(modelXml);
@@ -302,34 +284,26 @@ public class TestMisc extends RoundtripTestBase
         SAXReader reader    = new SAXReader();
         Document  testDoc   = reader.read(new InputSource(new StringReader(dataAsXml)));
 
-        List miscRows = testDoc.selectNodes("//misc");
+        List   miscRows     = testDoc.selectNodes("//misc");
+        String pkColumnName = "pk";
+        String fkColumnName = "fk";
 
-        if (miscRows.size() > 0)
+        if (miscRows.size() == 0)
         {
-            assertEquals(4, miscRows.size());
-            assertEquals("1", ((Element)miscRows.get(0)).attributeValue("pk"));
-            assertNull(((Element)miscRows.get(0)).attributeValue("fk"));
-            assertEquals("2", ((Element)miscRows.get(1)).attributeValue("pk"));
-            assertEquals("1", ((Element)miscRows.get(1)).attributeValue("fk"));
-            assertEquals("3", ((Element)miscRows.get(2)).attributeValue("pk"));
-            assertEquals("2", ((Element)miscRows.get(2)).attributeValue("fk"));
-            assertEquals("4", ((Element)miscRows.get(3)).attributeValue("pk"));
-            assertEquals("4", ((Element)miscRows.get(3)).attributeValue("fk"));
+            miscRows     = testDoc.selectNodes("//MISC");
+            pkColumnName = pkColumnName.toUpperCase();
+            fkColumnName = fkColumnName.toUpperCase();
         }
-        else
-        {
-            miscRows = testDoc.selectNodes("//MISC");
 
-            assertEquals(4, miscRows.size());
-            assertEquals("1", ((Element)miscRows.get(0)).attributeValue("PK"));
-            assertNull(((Element)miscRows.get(0)).attributeValue("FK"));
-            assertEquals("2", ((Element)miscRows.get(1)).attributeValue("PK"));
-            assertEquals("1", ((Element)miscRows.get(1)).attributeValue("FK"));
-            assertEquals("3", ((Element)miscRows.get(2)).attributeValue("PK"));
-            assertEquals("2", ((Element)miscRows.get(2)).attributeValue("FK"));
-            assertEquals("4", ((Element)miscRows.get(3)).attributeValue("PK"));
-            assertEquals("4", ((Element)miscRows.get(3)).attributeValue("FK"));
-        }
+        assertEquals(4, miscRows.size());
+        assertEquals("1", ((Element)miscRows.get(0)).attributeValue(pkColumnName));
+        assertNull(((Element)miscRows.get(0)).attributeValue(fkColumnName));
+        assertEquals("2", ((Element)miscRows.get(1)).attributeValue(pkColumnName));
+        assertEquals("1", ((Element)miscRows.get(1)).attributeValue(fkColumnName));
+        assertEquals("3", ((Element)miscRows.get(2)).attributeValue(pkColumnName));
+        assertEquals("2", ((Element)miscRows.get(2)).attributeValue(fkColumnName));
+        assertEquals("4", ((Element)miscRows.get(3)).attributeValue(pkColumnName));
+        assertEquals("4", ((Element)miscRows.get(3)).attributeValue(fkColumnName));
 
         dropDatabase();
         createDatabase(modelXml);
@@ -392,34 +366,26 @@ public class TestMisc extends RoundtripTestBase
         SAXReader reader    = new SAXReader();
         Document  testDoc   = reader.read(new InputSource(new StringReader(dataAsXml)));
 
-        List miscRows = testDoc.selectNodes("//misc");
+        List   miscRows     = testDoc.selectNodes("//misc");
+        String pkColumnName = "pk";
+        String fkColumnName = "fk";
 
-        if (miscRows.size() > 0)
+        if (miscRows.size() == 0)
         {
-            assertEquals(4, miscRows.size());
-            assertEquals("10", ((Element)miscRows.get(0)).attributeValue("pk"));
-            assertNull(((Element)miscRows.get(0)).attributeValue("fk"));
-            assertEquals("11", ((Element)miscRows.get(1)).attributeValue("pk"));
-            assertEquals("10", ((Element)miscRows.get(1)).attributeValue("fk"));
-            assertEquals("12", ((Element)miscRows.get(2)).attributeValue("pk"));
-            assertEquals("11", ((Element)miscRows.get(2)).attributeValue("fk"));
-            assertEquals("13", ((Element)miscRows.get(3)).attributeValue("pk"));
-            assertEquals("13", ((Element)miscRows.get(3)).attributeValue("fk"));
+            miscRows     = testDoc.selectNodes("//MISC");
+            pkColumnName = pkColumnName.toUpperCase();
+            fkColumnName = fkColumnName.toUpperCase();
         }
-        else
-        {
-            miscRows = testDoc.selectNodes("//MISC");
 
-            assertEquals(4, miscRows.size());
-            assertEquals("10", ((Element)miscRows.get(0)).attributeValue("PK"));
-            assertNull(((Element)miscRows.get(0)).attributeValue("FK"));
-            assertEquals("11", ((Element)miscRows.get(1)).attributeValue("PK"));
-            assertEquals("10", ((Element)miscRows.get(1)).attributeValue("FK"));
-            assertEquals("12", ((Element)miscRows.get(2)).attributeValue("PK"));
-            assertEquals("11", ((Element)miscRows.get(2)).attributeValue("FK"));
-            assertEquals("13", ((Element)miscRows.get(3)).attributeValue("PK"));
-            assertEquals("13", ((Element)miscRows.get(3)).attributeValue("FK"));
-        }
+        assertEquals(4, miscRows.size());
+        assertEquals("10", ((Element)miscRows.get(0)).attributeValue(pkColumnName));
+        assertNull(((Element)miscRows.get(0)).attributeValue(fkColumnName));
+        assertEquals("11", ((Element)miscRows.get(1)).attributeValue(pkColumnName));
+        assertEquals("10", ((Element)miscRows.get(1)).attributeValue(fkColumnName));
+        assertEquals("12", ((Element)miscRows.get(2)).attributeValue(pkColumnName));
+        assertEquals("11", ((Element)miscRows.get(2)).attributeValue(fkColumnName));
+        assertEquals("13", ((Element)miscRows.get(3)).attributeValue(pkColumnName));
+        assertEquals("13", ((Element)miscRows.get(3)).attributeValue(fkColumnName));
 
         dropDatabase();
         createDatabase(modelXml);
@@ -438,5 +404,83 @@ public class TestMisc extends RoundtripTestBase
         assertEquals(new Integer(11), beans.get(2), "fk");
         assertEquals(new Integer(13), beans.get(3), "pk");
         assertEquals(new Integer(13), beans.get(3), "fk");
+    }
+
+    /**
+     * Tests the backup and restore of a self-referencing data set.
+     */
+    public void testSelfReferences() throws Exception
+    {
+        if (!getPlatformInfo().isIdentityOverrideAllowed())
+        {
+            // TODO: for testing these platforms, we need deleteRows
+            return;
+        }
+
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='misc'>\n"+
+            "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
+            "    <column name='parent_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
+            "    <foreign-key foreignTable='misc' name='misc_parent_fk'>\n"+
+            "      <reference local='parent_id' foreign='id'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String dataXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<data>\n"+
+            "  <misc id='4' parent_id='1'/>\n"+
+            "  <misc id='7' parent_id='1'/>\n"+
+            "  <misc id='3' parent_id='2'/>\n"+
+            "  <misc id='5' parent_id='3'/>\n"+
+            "  <misc id='8' parent_id='7'/>\n"+
+            "  <misc id='9' parent_id='6'/>\n"+
+            "  <misc id='10' parent_id='4'/>\n"+
+            "  <misc id='1'/>\n"+
+            "  <misc id='2'/>\n"+
+            "  <misc id='6'/>\n"+
+            "  <misc id='11'/>\n"+
+            "  <misc id='12' parent_id='11'/>\n"+
+            "</data>";
+
+        createDatabase(modelXml);
+
+        getPlatform().setIdentityOverrideOn(true);
+
+        DatabaseDataIO dataIO       = new DatabaseDataIO();
+        StringReader   stringReader = new StringReader(dataXml);
+
+        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+
+        List beans = getRows("misc");
+
+        assertEquals(12, beans.size());
+        // this is the order of actual insertion (the fk order)
+        assertEquals(new Integer(1),  beans.get(0), "id");
+        assertNull(((DynaBean)beans.get(0)).get("parent_id"));
+        assertEquals(new Integer(4),  beans.get(1), "id");
+        assertEquals(new Integer(1),  beans.get(1), "parent_id");
+        assertEquals(new Integer(10), beans.get(2), "id");
+        assertEquals(new Integer(4),  beans.get(2), "parent_id");
+        assertEquals(new Integer(7),  beans.get(3), "id");
+        assertEquals(new Integer(1),  beans.get(3), "parent_id");
+        assertEquals(new Integer(8),  beans.get(4), "id");
+        assertEquals(new Integer(7),  beans.get(4), "parent_id");
+        assertEquals(new Integer(2),  beans.get(5), "id");
+        assertNull(((DynaBean)beans.get(5)).get("parent_id"));
+        assertEquals(new Integer(3),  beans.get(6), "id");
+        assertEquals(new Integer(2),  beans.get(6), "parent_id");
+        assertEquals(new Integer(5),  beans.get(7), "id");
+        assertEquals(new Integer(3),  beans.get(7), "parent_id");
+        assertEquals(new Integer(6),  beans.get(8), "id");
+        assertNull(((DynaBean)beans.get(8)).get("parent_id"));
+        assertEquals(new Integer(9),  beans.get(9), "id");
+        assertEquals(new Integer(6),  beans.get(9), "parent_id");
+        assertEquals(new Integer(11), beans.get(10), "id");
+        assertNull(((DynaBean)beans.get(10)).get("parent_id"));
+        assertEquals(new Integer(12), beans.get(11), "id");
+        assertEquals(new Integer(11), beans.get(11), "parent_id");
     }
 }
