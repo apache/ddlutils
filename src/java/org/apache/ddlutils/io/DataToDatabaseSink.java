@@ -334,38 +334,62 @@ public class DataToDatabaseSink implements DataSink
 
         insertBeanIntoDatabase(table, bean);
 
+        if (_log.isDebugEnabled())
+        {
+            _log.debug("Inserted bean " + origIdentity);
+        }
+
         if (_ensureFkOrder && _fkTables.contains(table))
         {
             Identity  newIdentity  = buildIdentityFromPKs(table, bean);
             ArrayList finishedObjs = new ArrayList();
 
             _identityMap.put(origIdentity, newIdentity);
-            for (Iterator waitingObjIt = _waitingObjects.iterator(); waitingObjIt.hasNext();)
-            {
-                WaitingObject waitingObj = (WaitingObject)waitingObjIt.next();
-                Identity      fkIdentity = waitingObj.removePendingFK(origIdentity);
 
-                if (!waitingObj.hasPendingFKs())
+            // we're doing multiple passes so that we can insert as much objects in
+            // one go as possible
+            ArrayList identitiesToCheck = new ArrayList();
+
+            identitiesToCheck.add(origIdentity);
+            while (!identitiesToCheck.isEmpty() && !_waitingObjects.isEmpty())
+            {
+                Identity curIdentity    = (Identity)identitiesToCheck.get(0);
+                Identity curNewIdentity = (Identity)_identityMap.get(curIdentity);
+
+                identitiesToCheck.remove(0);
+                finishedObjs.clear();
+                for (Iterator waitingObjIt = _waitingObjects.iterator(); waitingObjIt.hasNext();)
                 {
-                    waitingObjIt.remove();
-                    // the object was only waiting for this one, so store it now
-                    // prior to that we also update the fk fields in case one of the pk
-                    // columns of the target object is auto-incremented by the database
-                    updateFKColumns(waitingObj.getObject(), fkIdentity.getForeignKeyName(), newIdentity);
-                    // we defer handling of the finished objects to avoid concurrent modification exceptions
-                    finishedObjs.add(waitingObj.getObject());
+                    WaitingObject waitingObj = (WaitingObject)waitingObjIt.next();
+                    Identity      fkIdentity = waitingObj.removePendingFK(curIdentity);
+
+                    if (fkIdentity != null)
+                    {
+                        updateFKColumns(waitingObj.getObject(), fkIdentity.getForeignKeyName(), curNewIdentity);
+                    }
+                    if (!waitingObj.hasPendingFKs())
+                    {
+                        waitingObjIt.remove();
+                        // we defer handling of the finished objects to avoid concurrent modification exceptions
+                        finishedObjs.add(waitingObj.getObject());
+                    }
                 }
-            }
-            for (Iterator finishedObjIt = finishedObjs.iterator(); finishedObjIt.hasNext();)
-            {
-                DynaBean finishedObj = (DynaBean)finishedObjIt.next();
-
-                addBean(finishedObj);
-                if (_log.isDebugEnabled())
+                for (Iterator finishedObjIt = finishedObjs.iterator(); finishedObjIt.hasNext();)
                 {
-                    Table waitingObjTable = ((SqlDynaClass)finishedObj.getDynaClass()).getTable();
+                    DynaBean finishedObj = (DynaBean)finishedObjIt.next();
+                    Table    tableForObj = _model.getDynaClassFor(finishedObj).getTable();
+                    Identity objIdentity = buildIdentityFromPKs(tableForObj, finishedObj);
 
-                    _log.debug("Inserted deferred row "+buildIdentityFromPKs(waitingObjTable, finishedObj));
+                    insertBeanIntoDatabase(tableForObj, finishedObj);
+                    
+                    Identity newObjIdentity = buildIdentityFromPKs(tableForObj, finishedObj);
+
+                    _identityMap.put(objIdentity, newObjIdentity);
+                    identitiesToCheck.add(objIdentity);
+                    if (_log.isDebugEnabled())
+                    {
+                        _log.debug("Inserted deferred row " + objIdentity);
+                    }
                 }
             }
         }
@@ -492,10 +516,6 @@ public class DataToDatabaseSink implements DataSink
             if (!_connection.getAutoCommit())
             {
                 _connection.commit();
-            }
-            if (_log.isDebugEnabled())
-            {
-                _log.debug("Inserted bean "+buildIdentityFromPKs(table, bean).toString());
             }
         }
         catch (Exception ex)
