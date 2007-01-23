@@ -87,7 +87,7 @@ public class CreateDatabaseCommand extends DatabaseCommand
         }
         catch (UnsupportedOperationException ex)
         {
-            _log.error("Database platform " + getPlatform().getName() + " does not support database creation " +
+            _log.error("Database platform " + platform.getName() + " does not support database creation " +
                        "via JDBC or there was an error while creating it.",
                        ex);
         }

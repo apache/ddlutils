@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
@@ -147,12 +148,13 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
             throw new BuildException("Please use either the datafile attribute or the sub fileset element, but not both");
         }
 
+        Platform   platform   = getPlatform();
         DataReader dataReader = null;
 
-        getPlatform().setIdentityOverrideOn(_useExplicitIdentityValues);
+        platform.setIdentityOverrideOn(_useExplicitIdentityValues);
         try
         {
-            dataReader = getDataIO().getConfiguredDataReader(getPlatform(), model);
+            dataReader = getDataIO().getConfiguredDataReader(platform, model);
             dataReader.getSink().start();
             if (_singleDataFile != null)
             {

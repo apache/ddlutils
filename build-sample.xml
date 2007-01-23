@@ -37,6 +37,7 @@
   <property name="alterdatabase" value="true"/>
   <property name="delimitedsqlidentifiers" value="false"/>
   <property name="verbosity" value="info"/>
+  <property name="useexplicitidentityvalues" value="false"/>
   
   <!-- The classpath used for running the tasks -->
   <path id="project-classpath">
@@ -127,7 +128,8 @@
       </fileset> 
 
       <writedatatodatabase datafile="${datafile}"
-                           usebatchmode="false"/>
+                           usebatchmode="false"
+                           useexplicitidentityvalues="${useexplicitidentityvalues}"/>
     </ddlToDatabase> 
   </target>
 
