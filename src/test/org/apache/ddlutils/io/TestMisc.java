@@ -458,14 +458,15 @@ public class TestMisc extends RoundtripTestBase
 
         assertEquals(12, beans.size());
         // this is the order of actual insertion (the fk order)
+        // expected insertion order is: 1, 4, 7, 10, 8, 2, 3, 5, 6, 9, 11, 12
         assertEquals(new Integer(1),  beans.get(0), "id");
         assertNull(((DynaBean)beans.get(0)).get("parent_id"));
         assertEquals(new Integer(4),  beans.get(1), "id");
         assertEquals(new Integer(1),  beans.get(1), "parent_id");
-        assertEquals(new Integer(10), beans.get(2), "id");
-        assertEquals(new Integer(4),  beans.get(2), "parent_id");
-        assertEquals(new Integer(7),  beans.get(3), "id");
-        assertEquals(new Integer(1),  beans.get(3), "parent_id");
+        assertEquals(new Integer(7),  beans.get(2), "id");
+        assertEquals(new Integer(1),  beans.get(2), "parent_id");
+        assertEquals(new Integer(10), beans.get(3), "id");
+        assertEquals(new Integer(4),  beans.get(3), "parent_id");
         assertEquals(new Integer(8),  beans.get(4), "id");
         assertEquals(new Integer(7),  beans.get(4), "parent_id");
         assertEquals(new Integer(2),  beans.get(5), "id");
@@ -483,4 +484,154 @@ public class TestMisc extends RoundtripTestBase
         assertEquals(new Integer(12), beans.get(11), "id");
         assertEquals(new Integer(11), beans.get(11), "parent_id");
     }
+
+    /**
+     * Tests the backup and restore of several tables with complex relationships with an identity column and a foreign key to
+     * itself while identity override is off.
+     */
+    public void testComplexTableModel() throws Exception
+    {
+        // A: self-reference (A1->A2)
+        // B: self- and foreign-reference (B1->B2|G1, B2->G2)
+        // C: circular reference involving more than one table (C1->D1,C2->D2)
+        // D: foreign-reference to F (D1->F1,D2)
+        // E: isolated table (E1)
+        // F: foreign-reference to C (F1->C2)
+        // G: no references (G1, G2)
+
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='A'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='AtoA' foreignTable='A'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='B'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk1' type='INTEGER' required='false'/>\n"+
+            "    <column name='fk2' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='BtoB' foreignTable='B'>\n"+
+            "      <reference local='fk1' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key name='BtoG' foreignTable='G'>\n"+
+            "      <reference local='fk2' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='C'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='CtoD' foreignTable='D'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='D'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='DtoF' foreignTable='F'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='E'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='F'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='FtoC' foreignTable='C'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='G'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(modelXml);
+
+        getPlatform().setIdentityOverrideOn(false);
+
+        // this is the optimal insertion order
+        insertRow("E", new Object[] { new Integer(1) });
+        insertRow("G", new Object[] { new Integer(1) });
+        insertRow("G", new Object[] { new Integer(2) });
+        insertRow("A", new Object[] { new Integer(2), null });
+        insertRow("A", new Object[] { new Integer(1), new Integer(2) });
+        insertRow("B", new Object[] { new Integer(2), null,           new Integer(2) });
+        insertRow("B", new Object[] { new Integer(1), new Integer(2), new Integer(1) });
+        insertRow("D", new Object[] { new Integer(2), null });
+        insertRow("C", new Object[] { new Integer(2), new Integer(2) });
+        insertRow("F", new Object[] { new Integer(1), new Integer(2) });
+        insertRow("D", new Object[] { new Integer(1), new Integer(1) });
+        insertRow("C", new Object[] { new Integer(1), new Integer(1) });
+
+        StringWriter   stringWriter = new StringWriter();
+        DatabaseDataIO dataIO       = new DatabaseDataIO();
+
+        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
+
+        String dataAsXml = stringWriter.toString();
+
+        // the somewhat optimized order that DdlUtils currently generates is:
+        // E1, G1, G2, A2, A1, B2, B1, C2, C1, D2, D1, F1
+        // note that the order per table is the insertion order above
+        SAXReader reader       = new SAXReader();
+        Document  testDoc      = reader.read(new InputSource(new StringReader(dataAsXml)));
+        boolean   uppercase    = false;
+        List      rows         = testDoc.selectNodes("/*/*");
+        String    pkColumnName = "pk";
+
+        assertEquals(12, rows.size());
+        if (!"e".equals(((Element)rows.get(0)).getName()))
+        {
+            assertEquals("E", ((Element)rows.get(0)).getName());
+            uppercase    = true;
+        }
+        if (!"pk".equals(((Element)rows.get(0)).attribute(0).getName()))
+        {
+            pkColumnName = pkColumnName.toUpperCase();
+        }
+        assertEquals("1", ((Element)rows.get(0)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "G" : "g", ((Element)rows.get(1)).getName());
+        assertEquals("1", ((Element)rows.get(1)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "G" : "g", ((Element)rows.get(2)).getName());
+        assertEquals("2", ((Element)rows.get(2)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "A" : "a", ((Element)rows.get(3)).getName());
+        assertEquals("2", ((Element)rows.get(3)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "A" : "a", ((Element)rows.get(4)).getName());
+        assertEquals("1", ((Element)rows.get(4)).attributeValue(pkColumnName));
+
+        assertEquals(uppercase ? "B" : "b", ((Element)rows.get(5)).getName());
+        assertEquals("2", ((Element)rows.get(5)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "B" : "b", ((Element)rows.get(6)).getName());
+        assertEquals("1", ((Element)rows.get(6)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "C" : "c", ((Element)rows.get(7)).getName());
+        assertEquals("2", ((Element)rows.get(7)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "C" : "c", ((Element)rows.get(8)).getName());
+        assertEquals("1", ((Element)rows.get(8)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "D" : "d", ((Element)rows.get(9)).getName());
+        assertEquals("2", ((Element)rows.get(9)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "D" : "d", ((Element)rows.get(10)).getName());
+        assertEquals("1", ((Element)rows.get(10)).attributeValue(pkColumnName));
+        assertEquals(uppercase ? "F" : "f", ((Element)rows.get(11)).getName());
+        assertEquals("1", ((Element)rows.get(11)).attributeValue(pkColumnName));
+
+        dropDatabase();
+        createDatabase(modelXml);
+
+        StringReader stringReader = new StringReader(dataAsXml);
+
+        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+
+        assertEquals(2, getRows("A").size());
+        assertEquals(2, getRows("B").size());
+        assertEquals(2, getRows("C").size());
+        assertEquals(2, getRows("D").size());
+        assertEquals(1, getRows("E").size());
+        assertEquals(1, getRows("F").size());
+        assertEquals(2, getRows("G").size());
+    }
+
 }

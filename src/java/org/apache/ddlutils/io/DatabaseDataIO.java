@@ -28,8 +28,12 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
@@ -365,89 +369,173 @@ public class DatabaseDataIO
      */
     public void writeDataToXML(Platform platform, Database model, DataWriter writer)
     {
-        Table[] tables = new Table[1];
-        
         registerConverters(writer.getConverterConfiguration());
 
-        // TODO: An advanced algorithm could be employed here that writes objects
-        //       related by foreign keys, in the correct order
-        StringBuffer query = new StringBuffer();
+        // TODO: An advanced algorithm could be employed here that writes individual
+        //       objects related by foreign keys, in the correct order
+        List tables = sortTables(model.getTables());
 
         writer.writeDocumentStart();
-        for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+        for (Iterator it = tables.iterator(); it.hasNext();)
         {
-            tables[0] = (Table)model.getTable(tableIdx);
-            query.setLength(0);
-            query.append("SELECT ");
+            writeDataForTableToXML(platform, model, (Table)it.next(), writer);
+        }
+        writer.writeDocumentEnd();
+    }
 
-            Connection connection = null;
-            String     schema     = null;
+    /**
+     * Sorts the given table according to their foreign key order.
+     * 
+     * @param tables The tables
+     * @return The sorted tables
+     */
+    private List sortTables(Table[] tables)
+    {
+        ArrayList      result    = new ArrayList();
+        HashSet        processed = new HashSet();
+        ListOrderedMap pending   = new ListOrderedMap();
 
-            if (_determineSchema)
+        for (int idx = 0; idx < tables.length; idx++)
+        {
+            Table table = tables[idx];
+
+            if (table.getForeignKeyCount() == 0)
             {
-                try
+                result.add(table);
+                processed.add(table);
+            }
+            else
+            {
+                HashSet waitedFor = new HashSet();
+
+                for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
                 {
-                    // TODO: Remove this once we have full support for schemas
-                    connection = platform.borrowConnection();
-                    schema     = platform.getModelReader().determineSchemaOf(connection, _schemaPattern, tables[0]);
-                }
-                catch (SQLException ex)
-                {
-                    // ignored
-                }
-                finally
-                {
-                    if (connection != null)
+                    Table waitedForTable = table.getForeignKey(fkIdx).getForeignTable();
+
+                    if (!table.equals(waitedForTable))
                     {
-                        try
-                        {
-                            connection.close();
-                        }
-                        catch (SQLException ex)
-                        {
-                            // ignored
-                        }
+                        waitedFor.add(waitedForTable);
+                    }
+                }
+                pending.put(table, waitedFor);
+            }
+        }
+
+        HashSet newProcessed = new HashSet();
+
+        while (!processed.isEmpty() && !pending.isEmpty())
+        {
+            newProcessed.clear();
+            for (Iterator it = pending.entrySet().iterator(); it.hasNext();)
+            {
+                Map.Entry entry     = (Map.Entry)it.next();
+                Table     table     = (Table)entry.getKey();
+                HashSet   waitedFor = (HashSet)entry.getValue();
+
+                waitedFor.removeAll(processed);
+                if (waitedFor.isEmpty())
+                {
+                    it.remove();
+                    result.add(table);
+                    newProcessed.add(table);
+                }
+            }
+            processed.clear();
+
+            HashSet tmp = processed;
+
+            processed    = newProcessed;
+            newProcessed = tmp;
+        }
+        // the remaining are within circular dependencies
+        for (Iterator it = pending.keySet().iterator(); it.hasNext();)
+        {
+            result.add(it.next());
+        }
+        return result;
+    }
+    
+    /**
+     * Writes the data contained in a single table to XML.
+     * 
+     * @param platform The platform
+     * @param model    The database model
+     * @param writer   The data writer
+     * @param tableIdx 
+     */
+    private void writeDataForTableToXML(Platform platform, Database model, Table table, DataWriter writer)
+    {
+        Table[]      tables = { table };
+        StringBuffer query  = new StringBuffer();
+
+        query.append("SELECT ");
+
+        Connection connection = null;
+        String     schema     = null;
+
+        if (_determineSchema)
+        {
+            try
+            {
+                // TODO: Remove this once we have full support for schemas
+                connection = platform.borrowConnection();
+                schema     = platform.getModelReader().determineSchemaOf(connection, _schemaPattern, tables[0]);
+            }
+            catch (SQLException ex)
+            {
+                // ignored
+            }
+            finally
+            {
+                if (connection != null)
+                {
+                    try
+                    {
+                        connection.close();
+                    }
+                    catch (SQLException ex)
+                    {
+                        // ignored
                     }
                 }
             }
-
-            Column[] columns = tables[0].getColumns();
-
-            for (int columnIdx = 0; columnIdx < columns.length; columnIdx++)
-            {
-                if (columnIdx > 0)
-                {
-                    query.append(",");
-                }
-                if (platform.isDelimitedIdentifierModeOn())
-                {
-                    query.append(platform.getPlatformInfo().getDelimiterToken());
-                }
-                query.append(columns[columnIdx].getName());
-                if (platform.isDelimitedIdentifierModeOn())
-                {
-                    query.append(platform.getPlatformInfo().getDelimiterToken());
-                }
-            }
-            query.append(" FROM ");
-            if (platform.isDelimitedIdentifierModeOn())
-            {
-                query.append(platform.getPlatformInfo().getDelimiterToken());
-            }
-            if (schema != null)
-            {
-                query.append(schema);
-                query.append(".");
-            }
-            query.append(tables[0].getName());
-            if (platform.isDelimitedIdentifierModeOn())
-            {
-                query.append(platform.getPlatformInfo().getDelimiterToken());
-            }
-
-            writer.write(platform.query(model, query.toString(), tables));
         }
-        writer.writeDocumentEnd();
+
+        Column[] columns = tables[0].getColumns();
+
+        for (int columnIdx = 0; columnIdx < columns.length; columnIdx++)
+        {
+            if (columnIdx > 0)
+            {
+                query.append(",");
+            }
+            if (platform.isDelimitedIdentifierModeOn())
+            {
+                query.append(platform.getPlatformInfo().getDelimiterToken());
+            }
+            query.append(columns[columnIdx].getName());
+            if (platform.isDelimitedIdentifierModeOn())
+            {
+                query.append(platform.getPlatformInfo().getDelimiterToken());
+            }
+        }
+        query.append(" FROM ");
+        if (platform.isDelimitedIdentifierModeOn())
+        {
+            query.append(platform.getPlatformInfo().getDelimiterToken());
+        }
+        if (schema != null)
+        {
+            query.append(schema);
+            query.append(".");
+        }
+        query.append(tables[0].getName());
+        if (platform.isDelimitedIdentifierModeOn())
+        {
+            query.append(platform.getPlatformInfo().getDelimiterToken());
+        }
+
+        writer.write(platform.query(model, query.toString(), tables));
     }
 
     /**

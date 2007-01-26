@@ -301,7 +301,14 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
                 value = new BinaryObjectsHelper().deserialize((byte[])value);
             }
         }
-        assertEquals(expected, value);
+        if (expected == null)
+        {
+            assertNull(value);
+        }
+        else
+        {
+            assertEquals(expected, value);
+        }
     }
 
     /**
