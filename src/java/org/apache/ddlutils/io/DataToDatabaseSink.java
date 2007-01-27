@@ -290,7 +290,7 @@ public class DataToDatabaseSink implements DataSink
 
         if (_ensureFkOrder && (table.getForeignKeyCount() > 0))
         {
-            WaitingObject waitingObj = new WaitingObject(bean);
+            WaitingObject waitingObj = new WaitingObject(bean, origIdentity);
 
             for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
             {

@@ -19,11 +19,10 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.collections.set.ListOrderedSet;
 
 /**
  * Represents an object waiting for insertion into the database. Is used by the
@@ -36,17 +35,21 @@ public class WaitingObject
 {
     /** The object that is waiting for insertion. */
     private DynaBean _obj;
+    /** The original identity of the waiting object. */
+    private Identity _objIdentity;
     /** The identities of the waited-for objects. */
-    private List _waitedForIdentites = new ArrayList();
+    private ListOrderedSet _waitedForIdentites = new ListOrderedSet();
 
     /**
      * Creates a new <code>WaitingObject</code> instance for the given object.
      * 
-     * @param obj The object that is waiting
+     * @param obj         The object that is waiting
+     * @param objIdentity The (original) identity of the object
      */
-    public WaitingObject(DynaBean obj)
+    public WaitingObject(DynaBean obj, Identity objIdentity)
     {
-        _obj = obj;
+        _obj         = obj;
+        _objIdentity = objIdentity;
     }
 
     /**
@@ -107,5 +110,18 @@ public class WaitingObject
     public boolean hasPendingFKs()
     {
         return !_waitedForIdentites.isEmpty();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString()
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append(_objIdentity);
+        result.append(" waiting for ");
+        result.append(_waitedForIdentites.toString());
+        return result.toString();
     }
 }
