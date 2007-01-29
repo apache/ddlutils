@@ -304,7 +304,7 @@ public class TestSummaryCreatorTask extends Task
                 }
             }
 
-            String platformName = props.getProperty(TestDatabaseWriterBase.PLATFORM_PROPERTY);
+            String platformName = props.getProperty(TestDatabaseWriterBase.DDLUTILS_PLATFORM_PROPERTY);
 
             if (platformName == null)
             {

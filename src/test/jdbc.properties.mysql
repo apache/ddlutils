@@ -13,4 +13,7 @@ datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=com.mysql.jdbc.Driver
 datasource.url=jdbc:mysql://localhost/ddlutils
 datasource.username=root
-datasource.password=root123
+datasource.password=
+
+# We want to test against InnoDB tables (so that we get e.g. foreign keys)
+ddlutils.tableCreation.ENGINE=InnoDB

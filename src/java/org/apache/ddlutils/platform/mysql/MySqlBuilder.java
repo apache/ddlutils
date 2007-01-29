@@ -152,10 +152,14 @@ public class MySqlBuilder extends SqlBuilder
         print("DROP FOREIGN KEY ");
         printIdentifier(getForeignKeyName(table, foreignKey));
         printEndOfStatement();
-        writeTableAlterStmt(table);
-        print("DROP INDEX ");
-        printIdentifier(getForeignKeyName(table, foreignKey));
-        printEndOfStatement();
+
+        if (foreignKey.isAutoIndexPresent())
+        {
+            writeTableAlterStmt(table);
+            print("DROP INDEX ");
+            printIdentifier(getForeignKeyName(table, foreignKey));
+            printEndOfStatement();
+        }
     }    
 
     /**

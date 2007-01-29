@@ -35,6 +35,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.CreationParameters;
 
 /**
  * Base class for database writer tests.
@@ -50,7 +51,13 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     /** The prefix for properties for ddlutils. */
     public static final String DDLUTILS_PROPERTY_PREFIX = "ddlutils.";
     /** The property for specifying the platform. */
-    public static final String PLATFORM_PROPERTY = DDLUTILS_PROPERTY_PREFIX + "platform";
+    public static final String DDLUTILS_PLATFORM_PROPERTY = DDLUTILS_PROPERTY_PREFIX + "platform";
+    /** The property specifying the catalog for the tests. */
+    public static final String DDLUTILS_CATALOG_PROPERTY = DDLUTILS_PROPERTY_PREFIX + "catalog";
+    /** The property specifying the schema for the tests. */
+    public static final String DDLUTILS_SCHEMA_PROPERTY = DDLUTILS_PROPERTY_PREFIX + "schema";
+    /** The prefix for table creation properties. */
+    public static final String DDLUTILS_TABLE_CREATION_PREFIX = DDLUTILS_PROPERTY_PREFIX + "tableCreation.";
 
     /** The test properties as defined by an external properties file. */
     private static Properties _testProps;
@@ -144,7 +151,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             throw new DatabaseOperationException(ex);
         }
 
-        _databaseName = props.getProperty(PLATFORM_PROPERTY);
+        _databaseName = props.getProperty(DDLUTILS_PLATFORM_PROPERTY);
         if (_databaseName == null)
         {
             // property not set, then try to determine
@@ -154,6 +161,34 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
                 throw new DatabaseOperationException("Could not determine platform from datasource, please specify it in the jdbc.properties via the ddlutils.platform property");
             }
         }
+    }
+
+    /**
+     * Returns the test table creation parameters for the given model.
+     * 
+     * @param model The model
+     * @return The creation parameters
+     */
+    protected CreationParameters getTableCreationParameters(Database model)
+    {
+        CreationParameters params = new CreationParameters();
+
+        for (Iterator entryIt = _testProps.entrySet().iterator(); entryIt.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry)entryIt.next();
+            String    name  = (String)entry.getKey();
+            String    value = (String)entry.getValue();
+
+            if (name.startsWith(DDLUTILS_TABLE_CREATION_PREFIX))
+            {
+                name = name.substring(DDLUTILS_TABLE_CREATION_PREFIX.length());
+                for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+                {
+                    params.addParameter(model.getTable(tableIdx), name, value);
+                }
+            }
+        }
+        return params;
     }
 
     /**
@@ -232,7 +267,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             _model = model;
 
             getPlatform().setSqlCommentsOn(false);
-            getPlatform().createTables(_model, false, false);
+            getPlatform().createTables(_model, getTableCreationParameters(_model), false, false);
         }
         catch (Exception ex)
         {
@@ -262,8 +297,8 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     protected void alterDatabase(Database model) throws DatabaseOperationException
     {
         Properties props   = getTestProperties();
-        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
-        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+        String     catalog = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
+        String     schema  = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
 
         try
         {
@@ -271,7 +306,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             _model.resetDynaClassCache();
 
             getPlatform().setSqlCommentsOn(false);
-            getPlatform().alterTables(catalog, schema, null, _model, false);
+            getPlatform().alterTables(catalog, schema, null, _model, getTableCreationParameters(_model), false);
         }
         catch (Exception ex)
         {
@@ -321,8 +356,8 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     protected Database readModelFromDatabase(String databaseName)
     {
     	Properties props   = getTestProperties();
-        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
-        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+        String     catalog = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
+        String     schema  = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
 
     	return getPlatform().readModelFromDatabase(databaseName, catalog, schema, null);
     }
@@ -336,8 +371,8 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     protected String getAlterTablesSql(Database desiredModel)
     {
     	Properties props   = getTestProperties();
-        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
-        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+        String     catalog = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
+        String     schema  = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
 
         return getPlatform().getAlterTablesSql(catalog, schema, null, desiredModel);
     }

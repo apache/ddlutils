@@ -486,6 +486,78 @@ public class TestMisc extends RoundtripTestBase
     }
 
     /**
+     * Tests the backup and restore of a self-referencing data set (with multiple self references
+     * in the same table).
+     */
+    public void testMultiSelfReferences() throws Exception
+    {
+        if (!getPlatformInfo().isIdentityOverrideAllowed())
+        {
+            // TODO: for testing these platforms, we need deleteRows
+            return;
+        }
+
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='misc'>\n"+
+            "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
+            "    <column name='left_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
+            "    <column name='right_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
+            "    <foreign-key foreignTable='misc' name='misc_left_fk'>\n"+
+            "      <reference local='left_id' foreign='id'/>\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key foreignTable='misc' name='misc_right_fk'>\n"+
+            "      <reference local='right_id' foreign='id'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String dataXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<data>\n"+
+            "  <misc id='1' left_id='2' right_id='3'/>\n"+
+            "  <misc id='3' left_id='2' right_id='4'/>\n"+
+            "  <misc id='2' left_id='5' right_id='4'/>\n"+
+            "  <misc id='5' right_id='6'/>\n"+
+            "  <misc id='6'/>\n"+
+            "  <misc id='4' left_id='6'/>\n"+
+            "</data>";
+
+        createDatabase(modelXml);
+
+        getPlatform().setIdentityOverrideOn(true);
+
+        DatabaseDataIO dataIO       = new DatabaseDataIO();
+        StringReader   stringReader = new StringReader(dataXml);
+
+        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+
+        List beans = getRows("misc");
+
+        assertEquals(6, beans.size());
+        // this is the order of actual insertion (the fk order)
+        // expected insertion order is: 6, 5, 4, 2, 3, 1
+        assertEquals(new Integer(6), beans.get(0), "id");
+        assertEquals((Object)null,   beans.get(0), "left_id");
+        assertEquals((Object)null,   beans.get(0), "right_id");
+        assertEquals(new Integer(5), beans.get(1), "id");
+        assertEquals((Object)null,   beans.get(1), "left_id");
+        assertEquals(new Integer(6), beans.get(1), "right_id");
+        assertEquals(new Integer(4), beans.get(2), "id");
+        assertEquals(new Integer(6), beans.get(2), "left_id");
+        assertEquals((Object)null,   beans.get(2), "right_id");
+        assertEquals(new Integer(2), beans.get(3), "id");
+        assertEquals(new Integer(5), beans.get(3), "left_id");
+        assertEquals(new Integer(4), beans.get(3), "right_id");
+        assertEquals(new Integer(3), beans.get(4), "id");
+        assertEquals(new Integer(2), beans.get(4), "left_id");
+        assertEquals(new Integer(4), beans.get(4), "right_id");
+        assertEquals(new Integer(1), beans.get(5), "id");
+        assertEquals(new Integer(2), beans.get(5), "left_id");
+        assertEquals(new Integer(3), beans.get(5), "right_id");
+    }
+
+    /**
      * Tests the backup and restore of several tables with complex relationships with an identity column and a foreign key to
      * itself while identity override is off.
      */

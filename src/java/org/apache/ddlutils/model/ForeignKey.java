@@ -34,13 +34,15 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public class ForeignKey implements Cloneable
 {
     /** The name of the foreign key, may be <code>null</code>. */
-    private String         _name;
+    private String _name;
     /** The target table. */
-    private Table          _foreignTable;
+    private Table _foreignTable;
     /** The name of the foreign table. */
-    private String         _foreignTableName;
+    private String _foreignTableName;
     /** The references between local and remote columns. */
     private ListOrderedSet _references = new ListOrderedSet();
+    /** Whether this foreign key has an associated auto-generated index. */
+    private boolean _autoIndexPresent;
 
     /**
      * Creates a new foreign key object that has no name.
@@ -213,6 +215,26 @@ public class ForeignKey implements Cloneable
     public void removeReference(int idx)
     {
         _references.remove(idx);
+    }
+
+    /**
+     * Determines whether this foreign key has an auto-generated associated index.
+     * 
+     * @return <code>true</code> if an auto-generated index exists
+     */
+    public boolean isAutoIndexPresent()
+    {
+        return _autoIndexPresent;
+    }
+
+    /**
+     * Specifies whether this foreign key has an auto-generated associated index.
+     * 
+     * @param autoIndexPresent <code>true</code> if an auto-generated index exists
+     */
+    public void setAutoIndexPresent(boolean autoIndexPresent)
+    {
+        _autoIndexPresent = autoIndexPresent;
     }
 
     /**

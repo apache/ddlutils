@@ -127,6 +127,55 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
+     * Tests the alteration of the datatypes of PK and FK columns.
+     */
+    public void testChangePKAndFKDatatypes()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='VARCHAR' required='false'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1) });
+        insertRow("roundtrip2", new Object[] { new Integer(1), new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip2");
+
+        assertEquals((Object)"1", beans.get(0), "fk");
+    }
+
+    /**
      * Tests the alteration of a column size.
      */
     public void testChangeSize()
@@ -1443,6 +1492,91 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
+     * Tests the removal of several foreign keys. Test for DDLUTILS-150.
+     */
+    public void testDropFKs()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip3'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip4'>\n"+
+            "    <column name='pk' primaryKey='true' required='true' type='INTEGER' />\n"+
+            "    <column name='fk1' required='true' type='INTEGER' />\n"+
+            "    <column name='fk2' type='INTEGER' required='false' />\n"+
+            "    <foreign-key name='roundtrip1_fk' foreignTable='roundtrip1'>\n"+
+            "      <reference foreign='pk' local='pk' />\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key name='roundtrip2_fk1' foreignTable='roundtrip2'>\n"+
+            "      <reference foreign='pk' local='fk1' />\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key name='roundtrip2_fk2' foreignTable='roundtrip2'>\n"+
+            "      <reference foreign='pk' local='fk2' />\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key name='roundtrip3_fk' foreignTable='roundtrip3'>\n"+
+            "      <reference foreign='pk1' local='pk' />\n"+
+            "      <reference foreign='pk2' local='fk2' />\n"+
+            "    </foreign-key>\n"+
+            "   </table> \n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip3'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip4'>\n"+
+            "    <column name='pk' primaryKey='true' required='true' type='INTEGER' />\n"+
+            "    <column name='fk1' required='true' type='INTEGER' />\n"+
+            "    <column name='fk2' type='INTEGER' required='false' />\n"+
+            "   </table> \n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1) });
+        insertRow("roundtrip2", new Object[] { new Integer(2) });
+        insertRow("roundtrip2", new Object[] { new Integer(3) });
+        insertRow("roundtrip3", new Object[] { new Integer(1), new Integer(2) });
+        insertRow("roundtrip4", new Object[] { new Integer(1), new Integer(3), new Integer(2) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans1 = getRows("roundtrip1");
+        List beans2 = getRows("roundtrip2");
+        List beans3 = getRows("roundtrip3");
+        List beans4 = getRows("roundtrip4");
+
+        assertEquals(new Integer(1),  beans1.get(0), "pk");
+        assertEquals(new Integer(2),  beans2.get(0), "pk");
+        assertEquals(new Integer(3),  beans2.get(1), "pk");
+        assertEquals(new Integer(1),  beans3.get(0), "pk1");
+        assertEquals(new Integer(2),  beans3.get(0), "pk2");
+        assertEquals(new Integer(1),  beans4.get(0), "pk");
+        assertEquals(new Integer(3),  beans4.get(0), "fk1");
+        assertEquals(new Integer(2),  beans4.get(0), "fk2");
+    }
+
+    /**
      * Tests the addition of a reference to a foreign key.
      */
     public void testAddReferenceToFK()
@@ -1825,8 +1959,8 @@ public class TestAlteration extends RoundtripTestBase
         createDatabase(modelXml);
 
         Properties props   = getTestProperties();
-        String     catalog = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "catalog");
-        String     schema  = props.getProperty(DDLUTILS_PROPERTY_PREFIX + "schema");
+        String     catalog = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
+        String     schema  = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
         Database   model   = parseDatabaseFromString(modelXml);
 
         getPlatform().setSqlCommentsOn(false);

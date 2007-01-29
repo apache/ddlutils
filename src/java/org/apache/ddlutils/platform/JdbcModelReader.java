@@ -651,6 +651,7 @@ public class JdbcModelReader
             if (!index.isUnique() && matches(index, columnNames) && 
                 isInternalForeignKeyIndex(metaData, table, fk, index))
             {
+                fk.setAutoIndexPresent(true);
                 table.removeIndex(indexIdx);
                 break;
             }
