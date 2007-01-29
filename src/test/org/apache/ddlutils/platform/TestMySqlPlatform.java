@@ -127,9 +127,7 @@ public class TestMySqlPlatform extends TestPlatformBase
     {
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE `table3` DROP FOREIGN KEY `testfk`;\n"+
-            "ALTER TABLE `table3` DROP INDEX `testfk`;\n"+
             "ALTER TABLE `table2` DROP FOREIGN KEY `table2_FK_COL_FK_1_COL_FK_2_table1`;\n"+
-            "ALTER TABLE `table2` DROP INDEX `table2_FK_COL_FK_1_COL_FK_2_table1`;\n"+
             "DROP TABLE IF EXISTS `table3`;\n"+
             "DROP TABLE IF EXISTS `table2`;\n"+
             "DROP TABLE IF EXISTS `table1`;\n"+
