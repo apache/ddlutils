@@ -637,18 +637,27 @@ public class JdbcModelReader
      */
     protected void removeInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk) throws SQLException
     {
-        List columnNames = new ArrayList();
+        List    columnNames  = new ArrayList();
+        boolean mustBeUnique = true;
 
         for (int columnIdx = 0; columnIdx < fk.getReferenceCount(); columnIdx++)
         {
-            columnNames.add(fk.getReference(columnIdx).getLocalColumnName());
+            String name        = fk.getReference(columnIdx).getLocalColumnName();
+            Column localColumn = table.findColumn(name,
+                                                  getPlatform().isDelimitedIdentifierModeOn());
+
+            if (!localColumn.isPrimaryKey())
+            {
+                mustBeUnique = false;
+            }
+            columnNames.add(name);
         }
 
         for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
         {
             Index index = table.getIndex(indexIdx);
 
-            if (!index.isUnique() && matches(index, columnNames) && 
+            if ((mustBeUnique == index.isUnique()) && matches(index, columnNames) && 
                 isInternalForeignKeyIndex(metaData, table, fk, index))
             {
                 fk.setAutoIndexPresent(true);
