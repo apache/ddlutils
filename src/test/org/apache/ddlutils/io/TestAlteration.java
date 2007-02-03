@@ -182,6 +182,50 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
+     * Tests the alteration of the datatypes of a column that is indexed.
+     */
+    public void testChangeIndexColumnDatatype()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='NUMERIC' size='8' required='false'/>\n"+
+            "    <index name='avalue_index'>\n"+
+            "      <index-column name='avalue'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+            "    <index name='avalue_index'>\n"+
+            "      <index-column name='avalue'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1), new Integer(1) });
+        insertRow("roundtrip", new Object[] { new Integer(2), new Integer(10) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals(new Integer(1), beans.get(0), "avalue");
+        assertEquals(new Integer(10), beans.get(1), "avalue");
+    }
+
+    /**
      * Tests the alteration of a column size.
      */
     public void testChangeSize()
