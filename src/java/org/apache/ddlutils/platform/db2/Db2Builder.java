@@ -156,7 +156,6 @@ public class Db2Builder extends SqlBuilder
                 if ((addColumnChange.getNextColumn() == null) && !addColumnChange.getNewColumn().isAutoIncrement())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
@@ -169,19 +168,16 @@ public class Db2Builder extends SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (PrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -204,6 +200,7 @@ public class Db2Builder extends SqlBuilder
         print("ADD COLUMN ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -223,6 +220,7 @@ public class Db2Builder extends SqlBuilder
         print("DROP COLUMN ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -241,6 +239,7 @@ public class Db2Builder extends SqlBuilder
         printIndent();
         print("DROP PRIMARY KEY");
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -260,5 +259,6 @@ public class Db2Builder extends SqlBuilder
         print("DROP PRIMARY KEY");
         printEndOfStatement();
         writeExternalPrimaryKeysCreateStmt(change.getChangedTable(), change.getNewPrimaryKeyColumns());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

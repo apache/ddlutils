@@ -284,7 +284,6 @@ public class SybaseBuilder extends SqlBuilder
             if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -294,7 +293,6 @@ public class SybaseBuilder extends SqlBuilder
                                                                                    pkChange.getOldPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, removePkChange);
-                removePkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             }
         }
 
@@ -314,14 +312,12 @@ public class SybaseBuilder extends SqlBuilder
                 if (addColumnChange.isAtEnd())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
             else if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof ColumnAutoIncrementChange)
@@ -384,7 +380,6 @@ public class SybaseBuilder extends SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -394,7 +389,6 @@ public class SybaseBuilder extends SqlBuilder
                                                                           pkChange.getNewPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, addPkChange);
-                addPkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -418,6 +412,7 @@ public class SybaseBuilder extends SqlBuilder
         print("ADD ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -437,6 +432,7 @@ public class SybaseBuilder extends SqlBuilder
         print("DROP ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -473,6 +469,7 @@ public class SybaseBuilder extends SqlBuilder
         println("  END");
         print("END");
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -506,6 +503,7 @@ public class SybaseBuilder extends SqlBuilder
             print("NULL");
         }
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -568,5 +566,5 @@ public class SybaseBuilder extends SqlBuilder
             }
             printEndOfStatement();
         }
-    }
+   }
 }

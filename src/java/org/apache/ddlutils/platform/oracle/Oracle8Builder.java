@@ -380,7 +380,6 @@ public class Oracle8Builder extends SqlBuilder
             if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -390,7 +389,6 @@ public class Oracle8Builder extends SqlBuilder
                                                                                    pkChange.getOldPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, removePkChange);
-                removePkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             }
         }
 
@@ -411,14 +409,12 @@ public class Oracle8Builder extends SqlBuilder
                     (!addColumnChange.getNewColumn().isRequired() || (addColumnChange.getNewColumn().getDefaultValue() != null)))
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
             else if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -430,7 +426,6 @@ public class Oracle8Builder extends SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -440,7 +435,6 @@ public class Oracle8Builder extends SqlBuilder
                                                                           pkChange.getNewPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, addPkChange);
-                addPkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -468,6 +462,7 @@ public class Oracle8Builder extends SqlBuilder
             createAutoIncrementSequence(change.getChangedTable(), change.getNewColumn());
             createAutoIncrementTrigger(change.getChangedTable(), change.getNewColumn());
         }
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -492,6 +487,7 @@ public class Oracle8Builder extends SqlBuilder
         print("DROP COLUMN ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -510,5 +506,6 @@ public class Oracle8Builder extends SqlBuilder
         printIndent();
         print("DROP PRIMARY KEY");
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

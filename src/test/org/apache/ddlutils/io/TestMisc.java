@@ -454,31 +454,29 @@ public class TestMisc extends RoundtripTestBase
 
         dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
 
-        List beans = getRows("misc");
+        List beans = getRows("misc", "id");
 
         assertEquals(12, beans.size());
-        // this is the order of actual insertion (the fk order)
-        // expected insertion order is: 1, 4, 7, 10, 8, 2, 3, 5, 6, 9, 11, 12
         assertEquals(new Integer(1),  beans.get(0), "id");
         assertNull(((DynaBean)beans.get(0)).get("parent_id"));
-        assertEquals(new Integer(4),  beans.get(1), "id");
-        assertEquals(new Integer(1),  beans.get(1), "parent_id");
-        assertEquals(new Integer(7),  beans.get(2), "id");
-        assertEquals(new Integer(1),  beans.get(2), "parent_id");
-        assertEquals(new Integer(10), beans.get(3), "id");
-        assertEquals(new Integer(4),  beans.get(3), "parent_id");
-        assertEquals(new Integer(8),  beans.get(4), "id");
-        assertEquals(new Integer(7),  beans.get(4), "parent_id");
-        assertEquals(new Integer(2),  beans.get(5), "id");
+        assertEquals(new Integer(2),  beans.get(1), "id");
+        assertNull(((DynaBean)beans.get(1)).get("parent_id"));
+        assertEquals(new Integer(3),  beans.get(2), "id");
+        assertEquals(new Integer(2),  beans.get(2), "parent_id");
+        assertEquals(new Integer(4),  beans.get(3), "id");
+        assertEquals(new Integer(1),  beans.get(3), "parent_id");
+        assertEquals(new Integer(5),  beans.get(4), "id");
+        assertEquals(new Integer(3),  beans.get(4), "parent_id");
+        assertEquals(new Integer(6),  beans.get(5), "id");
         assertNull(((DynaBean)beans.get(5)).get("parent_id"));
-        assertEquals(new Integer(3),  beans.get(6), "id");
-        assertEquals(new Integer(2),  beans.get(6), "parent_id");
-        assertEquals(new Integer(5),  beans.get(7), "id");
-        assertEquals(new Integer(3),  beans.get(7), "parent_id");
-        assertEquals(new Integer(6),  beans.get(8), "id");
-        assertNull(((DynaBean)beans.get(8)).get("parent_id"));
-        assertEquals(new Integer(9),  beans.get(9), "id");
-        assertEquals(new Integer(6),  beans.get(9), "parent_id");
+        assertEquals(new Integer(7),  beans.get(6), "id");
+        assertEquals(new Integer(1),  beans.get(6), "parent_id");
+        assertEquals(new Integer(8),  beans.get(7), "id");
+        assertEquals(new Integer(7),  beans.get(7), "parent_id");
+        assertEquals(new Integer(9),  beans.get(8), "id");
+        assertEquals(new Integer(6),  beans.get(8), "parent_id");
+        assertEquals(new Integer(10), beans.get(9), "id");
+        assertEquals(new Integer(4),  beans.get(9), "parent_id");
         assertEquals(new Integer(11), beans.get(10), "id");
         assertNull(((DynaBean)beans.get(10)).get("parent_id"));
         assertEquals(new Integer(12), beans.get(11), "id");
@@ -532,29 +530,27 @@ public class TestMisc extends RoundtripTestBase
 
         dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
 
-        List beans = getRows("misc");
+        List beans = getRows("misc", "id");
 
         assertEquals(6, beans.size());
-        // this is the order of actual insertion (the fk order)
-        // expected insertion order is: 6, 5, 4, 2, 3, 1
-        assertEquals(new Integer(6), beans.get(0), "id");
-        assertEquals((Object)null,   beans.get(0), "left_id");
-        assertEquals((Object)null,   beans.get(0), "right_id");
-        assertEquals(new Integer(5), beans.get(1), "id");
-        assertEquals((Object)null,   beans.get(1), "left_id");
-        assertEquals(new Integer(6), beans.get(1), "right_id");
-        assertEquals(new Integer(4), beans.get(2), "id");
-        assertEquals(new Integer(6), beans.get(2), "left_id");
-        assertEquals((Object)null,   beans.get(2), "right_id");
-        assertEquals(new Integer(2), beans.get(3), "id");
-        assertEquals(new Integer(5), beans.get(3), "left_id");
-        assertEquals(new Integer(4), beans.get(3), "right_id");
-        assertEquals(new Integer(3), beans.get(4), "id");
-        assertEquals(new Integer(2), beans.get(4), "left_id");
-        assertEquals(new Integer(4), beans.get(4), "right_id");
-        assertEquals(new Integer(1), beans.get(5), "id");
-        assertEquals(new Integer(2), beans.get(5), "left_id");
-        assertEquals(new Integer(3), beans.get(5), "right_id");
+        assertEquals(new Integer(1), beans.get(0), "id");
+        assertEquals(new Integer(2), beans.get(0), "left_id");
+        assertEquals(new Integer(3), beans.get(0), "right_id");
+        assertEquals(new Integer(2), beans.get(1), "id");
+        assertEquals(new Integer(5), beans.get(1), "left_id");
+        assertEquals(new Integer(4), beans.get(1), "right_id");
+        assertEquals(new Integer(3), beans.get(2), "id");
+        assertEquals(new Integer(2), beans.get(2), "left_id");
+        assertEquals(new Integer(4), beans.get(2), "right_id");
+        assertEquals(new Integer(4), beans.get(3), "id");
+        assertEquals(new Integer(6), beans.get(3), "left_id");
+        assertEquals((Object)null,   beans.get(3), "right_id");
+        assertEquals(new Integer(5), beans.get(4), "id");
+        assertEquals((Object)null,   beans.get(4), "left_id");
+        assertEquals(new Integer(6), beans.get(4), "right_id");
+        assertEquals(new Integer(6), beans.get(5), "id");
+        assertEquals((Object)null,   beans.get(5), "left_id");
+        assertEquals((Object)null,   beans.get(5), "right_id");
     }
 
     /**
@@ -623,7 +619,7 @@ public class TestMisc extends RoundtripTestBase
 
         createDatabase(modelXml);
 
-        getPlatform().setIdentityOverrideOn(false);
+        getPlatform().setIdentityOverrideOn(true);
 
         // this is the optimal insertion order
         insertRow("E", new Object[] { new Integer(1) });

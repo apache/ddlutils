@@ -247,7 +247,6 @@ public class FirebirdBuilder extends SqlBuilder
                 else
             	{
 	            	processChange(currentModel, desiredModel, addColumnChange);
-	                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
 	                changeIt.remove();
             	}
             }
@@ -261,7 +260,6 @@ public class FirebirdBuilder extends SqlBuilder
             	if (!removeColumnChange.getColumn().isPrimaryKey())
             	{
 	            	processChange(currentModel, desiredModel, removeColumnChange);
-	                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
 	                changeIt.remove();
             	}
             }
@@ -275,7 +273,6 @@ public class FirebirdBuilder extends SqlBuilder
             if ((change instanceof AddPrimaryKeyChange) && !pkColumnAdded)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -325,6 +322,7 @@ public class FirebirdBuilder extends SqlBuilder
         {
             writeAutoIncrementCreateStmts(currentModel, curTable, change.getNewColumn());
         }
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -348,5 +346,6 @@ public class FirebirdBuilder extends SqlBuilder
         print("DROP ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

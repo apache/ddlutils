@@ -218,6 +218,46 @@ public class ForeignKey implements Cloneable
     }
 
     /**
+     * Determines whether this foreign key uses the given column as a local
+     * column in a reference.
+     * 
+     * @param column The column to check
+     * @return <code>true</code> if a reference uses the column as a local
+     *         column
+     */
+    public boolean hasLocalColumn(Column column)
+    {
+        for (int idx = 0; idx < getReferenceCount(); idx++)
+        {
+            if (column.equals(getReference(idx).getLocalColumn()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determines whether this foreign key uses the given column as a foreign
+     * column in a reference.
+     * 
+     * @param column The column to check
+     * @return <code>true</code> if a reference uses the column as a foreign
+     *         column
+     */
+    public boolean hasForeignColumn(Column column)
+    {
+        for (int idx = 0; idx < getReferenceCount(); idx++)
+        {
+            if (column.equals(getReference(idx).getForeignColumn()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Determines whether this foreign key has an auto-generated associated index.
      * 
      * @return <code>true</code> if an auto-generated index exists

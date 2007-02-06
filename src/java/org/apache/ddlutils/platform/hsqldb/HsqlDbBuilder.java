@@ -103,7 +103,6 @@ public class HsqlDbBuilder extends SqlBuilder
             AddColumnChange addColumnChange = (AddColumnChange)changeIt.previous();
 
             processChange(currentModel, desiredModel, addColumnChange);
-            addColumnChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             changeIt.remove();
         }
 
@@ -119,7 +118,6 @@ public class HsqlDbBuilder extends SqlBuilder
                 if (!removeColumnChange.getColumn().isPrimaryKey())
                 {
                     processChange(currentModel, desiredModel, removeColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
@@ -148,6 +146,7 @@ public class HsqlDbBuilder extends SqlBuilder
             printIdentifier(getColumnName(change.getNextColumn()));
         }
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -167,5 +166,6 @@ public class HsqlDbBuilder extends SqlBuilder
         print("DROP COLUMN ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

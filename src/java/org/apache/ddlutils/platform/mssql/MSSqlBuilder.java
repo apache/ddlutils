@@ -31,11 +31,17 @@ import java.util.Map;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddForeignKeyChange;
+import org.apache.ddlutils.alteration.AddIndexChange;
 import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
 import org.apache.ddlutils.alteration.ColumnAutoIncrementChange;
 import org.apache.ddlutils.alteration.ColumnChange;
+import org.apache.ddlutils.alteration.ColumnDataTypeChange;
+import org.apache.ddlutils.alteration.ColumnSizeChange;
 import org.apache.ddlutils.alteration.PrimaryKeyChange;
 import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemoveForeignKeyChange;
+import org.apache.ddlutils.alteration.RemoveIndexChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
@@ -249,50 +255,6 @@ public class MSSqlBuilder extends SqlBuilder
     }
 
     /**
-     * Writes the statement that turns on the ability to write delimited identifiers.
-     */
-    private void writeQuotationOnStatement() throws IOException
-    {
-        if (getPlatform().isDelimitedIdentifierModeOn())
-        {
-            print("SET quoted_identifier on");
-            printEndOfStatement();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getSelectLastIdentityValues(Table table)
-    {
-        return "SELECT @@IDENTITY";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getDeleteSql(Table table, Map pkValues, boolean genPlaceholders)
-    {
-        return getQuotationOnStatement() + super.getDeleteSql(table, pkValues, genPlaceholders);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getInsertSql(Table table, Map columnValues, boolean genPlaceholders)
-    {
-        return getQuotationOnStatement() + super.getInsertSql(table, columnValues, genPlaceholders);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getUpdateSql(Table table, Map columnValues, boolean genPlaceholders)
-    {
-        return getQuotationOnStatement() + super.getUpdateSql(table, columnValues, genPlaceholders);
-    }
-
-    /**
      * Returns the statement that turns on the ability to write delimited identifiers.
      * 
      * @return The quotation-on statement
@@ -307,6 +269,84 @@ public class MSSqlBuilder extends SqlBuilder
         {
             return "";
         }
+    }
+
+    /**
+     * Writes the statement that turns on the ability to write delimited identifiers.
+     */
+    private void writeQuotationOnStatement() throws IOException
+    {
+        print(getQuotationOnStatement());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getSelectLastIdentityValues(Table table)
+    {
+        return "SELECT @@IDENTITY";
+    }
+
+    /**
+     * Returns the SQL to enable identity override mode.
+     * 
+     * @param table The table to enable the mode for
+     * @return The SQL
+     */
+    protected String getEnableIdentityOverrideSql(Table table)
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append(getQuotationOnStatement());
+        result.append("SET IDENTITY_INSERT ");
+        result.append(getDelimitedIdentifier(getTableName(table)));
+        result.append(" ON");
+        result.append(getPlatformInfo().getSqlCommandDelimiter());
+
+        return result.toString();
+    }
+
+    /**
+     * Returns the SQL to disable identity override mode.
+     * 
+     * @param table The table to disable the mode for
+     * @return The SQL
+     */
+    protected String getDisableIdentityOverrideSql(Table table)
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append(getQuotationOnStatement());
+        result.append("SET IDENTITY_INSERT ");
+        result.append(getDelimitedIdentifier(getTableName(table)));
+        result.append(" OFF");
+        result.append(getPlatformInfo().getSqlCommandDelimiter());
+
+        return result.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDeleteSql(Table table, Map pkValues, boolean genPlaceholders)
+    {
+        return getQuotationOnStatement() + super.getDeleteSql(table, pkValues, genPlaceholders);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public String getInsertSql(Table table, Map columnValues, boolean genPlaceholders)
+    {
+        return getQuotationOnStatement() + super.getInsertSql(table, columnValues, genPlaceholders);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getUpdateSql(Table table, Map columnValues, boolean genPlaceholders)
+    {
+        return getQuotationOnStatement() + super.getUpdateSql(table, columnValues, genPlaceholders);
     }
 
     /**
@@ -358,6 +398,84 @@ public class MSSqlBuilder extends SqlBuilder
         {
             writeQuotationOnStatement();
         }
+        // For column data type and size changes, we need to drop and then re-create indexes
+        // and foreign keys using the column, as well as any primary keys containg
+        // these columns
+        // However, if the index/foreign key/primary key is already slated for removal or
+        // change, then we don't want to generate change duplication
+        HashSet removedIndexes     = new HashSet();
+        HashSet removedForeignKeys = new HashSet();
+        HashSet removedPKs         = new HashSet();
+
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            Object change = changeIt.next();
+
+            if (change instanceof RemoveIndexChange)
+            {
+                removedIndexes.add(((RemoveIndexChange)change).getIndex());
+            }
+            else if (change instanceof RemoveForeignKeyChange)
+            {
+                removedForeignKeys.add(((RemoveForeignKeyChange)change).getForeignKey());
+            }
+            else if (change instanceof RemovePrimaryKeyChange)
+            {
+                removedPKs.add(((RemovePrimaryKeyChange)change).getChangedTable());
+            }
+        }
+
+        ArrayList additionalChanges = new ArrayList();
+
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            Object change = changeIt.next();
+
+            if ((change instanceof ColumnDataTypeChange) ||
+                (change instanceof ColumnSizeChange))
+            {
+                Column column = ((ColumnChange)change).getChangedColumn();
+                Table  table  = ((ColumnChange)change).getChangedTable();
+
+                if (column.isPrimaryKey() && !removedPKs.contains(table))
+                {
+                    Column[] pk = table.getPrimaryKeyColumns();
+
+                    additionalChanges.add(new RemovePrimaryKeyChange(table, pk));
+                    additionalChanges.add(new AddPrimaryKeyChange(table, pk));
+                    removedPKs.add(table);
+                }
+                for (int idx = 0; idx < table.getIndexCount(); idx++)
+                {
+                    Index index = table.getIndex(idx);
+
+                    if (index.hasColumn(column) && !removedIndexes.contains(index))
+                    {
+                        additionalChanges.add(new RemoveIndexChange(table, index));
+                        additionalChanges.add(new AddIndexChange(table, index));
+                        removedIndexes.add(index);
+                    }
+                }
+                for (int tableIdx = 0; tableIdx < currentModel.getTableCount(); tableIdx++)
+                {
+                    Table curTable = currentModel.getTable(tableIdx);
+
+                    for (int fkIdx = 0; fkIdx < curTable.getForeignKeyCount(); fkIdx++)
+                    {
+                        ForeignKey curFk = curTable.getForeignKey(fkIdx);
+
+                        if ((curFk.hasLocalColumn(column) || curFk.hasForeignColumn(column)) &&
+                            !removedForeignKeys.contains(curFk))
+                        {
+                            additionalChanges.add(new RemoveForeignKeyChange(curTable, curFk));
+                            additionalChanges.add(new AddForeignKeyChange(curTable, curFk));
+                            removedForeignKeys.add(curFk);
+                        }
+                    }
+                }
+            }
+        }
+        changes.addAll(additionalChanges);
         super.processChanges(currentModel, desiredModel, changes, params);
     }
 
@@ -379,7 +497,6 @@ public class MSSqlBuilder extends SqlBuilder
             if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -389,10 +506,8 @@ public class MSSqlBuilder extends SqlBuilder
                                                                                    pkChange.getOldPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, removePkChange);
-                removePkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             }
         }
-
 
         ArrayList columnChanges = new ArrayList();
 
@@ -409,19 +524,17 @@ public class MSSqlBuilder extends SqlBuilder
                 if (addColumnChange.isAtEnd())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
             else if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof ColumnAutoIncrementChange)
             {
-                // Sql Server has no way of adding or removing a IDENTITY constraint
+                // Sql Server has no way of adding or removing an IDENTITY constraint
                 // Thus we have to rebuild the table anyway and can ignore all the other 
                 // column changes
                 columnChanges = null;
@@ -445,7 +558,11 @@ public class MSSqlBuilder extends SqlBuilder
 
                 if (!processedColumns.contains(targetColumn))
                 {
-                    processColumnChange(sourceTable, targetTable, sourceColumn, targetColumn);
+                    processColumnChange(sourceTable,
+                                        targetTable,
+                                        sourceColumn,
+                                        targetColumn,
+                                        (change instanceof ColumnDataTypeChange) || (change instanceof ColumnSizeChange));
                     processedColumns.add(targetColumn);
                 }
                 changes.remove(change);
@@ -460,7 +577,6 @@ public class MSSqlBuilder extends SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -470,7 +586,6 @@ public class MSSqlBuilder extends SqlBuilder
                                                                           pkChange.getNewPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, addPkChange);
-                addPkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -493,6 +608,7 @@ public class MSSqlBuilder extends SqlBuilder
         print("ADD ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -512,6 +628,7 @@ public class MSSqlBuilder extends SqlBuilder
         print("DROP COLUMN ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -549,6 +666,7 @@ public class MSSqlBuilder extends SqlBuilder
         println("  DEALLOCATE refcursor");
         print("END");
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -558,11 +676,13 @@ public class MSSqlBuilder extends SqlBuilder
      * @param targetTable  The desired table
      * @param sourceColumn The current column
      * @param targetColumn The desired column
+     * @param typeChange   Whether this is a type change
      */
-    protected void processColumnChange(Table  sourceTable,
-                                       Table  targetTable,
-                                       Column sourceColumn,
-                                       Column targetColumn) throws IOException
+    protected void processColumnChange(Table   sourceTable,
+                                       Table   targetTable,
+                                       Column  sourceColumn,
+                                       Column  targetColumn,
+                                       boolean typeChange) throws IOException
     {
         boolean hasDefault       = sourceColumn.getParsedDefaultValue() != null;
         boolean shallHaveDefault = targetColumn.getParsedDefaultValue() != null;

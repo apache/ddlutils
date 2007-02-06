@@ -138,7 +138,6 @@ public class DerbyBuilder extends CloudscapeBuilder
                 if (addColumnChange.isAtEnd() && !addColumnChange.getNewColumn().isAutoIncrement())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
@@ -163,5 +162,6 @@ public class DerbyBuilder extends CloudscapeBuilder
         print("ADD COLUMN ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

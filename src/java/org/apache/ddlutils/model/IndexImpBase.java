@@ -76,6 +76,23 @@ public abstract class IndexImpBase implements Index
     /**
      * {@inheritDoc}
      */
+    public boolean hasColumn(Column column)
+    {
+        for (int idx = 0; idx < _columns.size(); idx++)
+        {
+            IndexColumn curColumn = getColumn(idx);
+
+            if (column.equals(curColumn.getColumn()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void addColumn(IndexColumn column)
     {
         if (column != null)

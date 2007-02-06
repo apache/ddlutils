@@ -192,7 +192,6 @@ public class MySqlBuilder extends SqlBuilder
             AddColumnChange addColumnChange = (AddColumnChange)changeIt.next();
 
             processChange(currentModel, desiredModel, addColumnChange);
-            addColumnChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             changeIt.remove();
         }
 
@@ -207,25 +206,21 @@ public class MySqlBuilder extends SqlBuilder
             if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (PrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof ColumnChange)
@@ -271,6 +266,7 @@ public class MySqlBuilder extends SqlBuilder
             print(" FIRST");
         }
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -290,6 +286,7 @@ public class MySqlBuilder extends SqlBuilder
         print("DROP COLUMN ");
         printIdentifier(getColumnName(change.getColumn()));
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -308,6 +305,7 @@ public class MySqlBuilder extends SqlBuilder
         printIndent();
         print("DROP PRIMARY KEY");
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -327,6 +325,7 @@ public class MySqlBuilder extends SqlBuilder
         print("DROP PRIMARY KEY");
         printEndOfStatement();
         writeExternalPrimaryKeysCreateStmt(change.getChangedTable(), change.getNewPrimaryKeyColumns());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**

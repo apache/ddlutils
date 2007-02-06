@@ -19,9 +19,12 @@ package org.apache.ddlutils.platform.mssql;
  * under the License.
  */
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -90,5 +93,60 @@ public class MSSqlPlatform extends PlatformImplBase
     public String getName()
     {
         return DATABASENAME;
+    }
+
+    /**
+     * Determines whether we need to use identity override mode for the given table.
+     * 
+     * @param table The table
+     * @return <code>true</code> if identity override mode is needed
+     */
+    private boolean useIdentityOverrideFor(Table table)
+    {
+        return isIdentityOverrideOn() &&
+               getPlatformInfo().isIdentityOverrideAllowed() &&
+               (table.getAutoIncrementColumns().length > 0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void beforeInsert(Connection connection, Table table) throws SQLException
+    {
+        if (useIdentityOverrideFor(table))
+        {
+            MSSqlBuilder builder = (MSSqlBuilder)getSqlBuilder();
+    
+            connection.createStatement().execute(builder.getEnableIdentityOverrideSql(table));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void afterInsert(Connection connection, Table table) throws SQLException
+    {
+        if (useIdentityOverrideFor(table))
+        {
+            MSSqlBuilder builder = (MSSqlBuilder)getSqlBuilder();
+    
+            connection.createStatement().execute(builder.getDisableIdentityOverrideSql(table));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void beforeUpdate(Connection connection, Table table) throws SQLException
+    {
+        beforeInsert(connection, table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void afterUpdate(Connection connection, Table table) throws SQLException
+    {
+        afterInsert(connection, table);
     }
 }

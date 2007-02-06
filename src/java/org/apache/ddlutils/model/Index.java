@@ -72,6 +72,14 @@ public interface Index extends Cloneable, Serializable
     public IndexColumn[] getColumns();
 
     /**
+     * Determines whether this index includes the given column.
+     * 
+     * @param column The column to check for
+     * @return <code>true</code> if the column is included in this index
+     */
+    public boolean hasColumn(Column column);
+
+    /**
      * Adds a column that makes up this index.
      * 
      * @param column The column to add

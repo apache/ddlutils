@@ -618,6 +618,7 @@ public abstract class SqlBuilder
                                  RemoveForeignKeyChange change) throws IOException
     {
         writeExternalForeignKeyDropStmt(change.getChangedTable(), change.getForeignKey());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -635,6 +636,7 @@ public abstract class SqlBuilder
                                  RemoveIndexChange  change) throws IOException
     {
         writeExternalIndexDropStmt(change.getChangedTable(), change.getIndex());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -652,6 +654,7 @@ public abstract class SqlBuilder
                                  RemoveTableChange  change) throws IOException
     {
         dropTable(change.getChangedTable());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -669,6 +672,7 @@ public abstract class SqlBuilder
                                  AddTableChange     change) throws IOException
     {
         createTable(desiredModel, change.getNewTable(), params == null ? null : params.getParametersFor(change.getNewTable()));
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -688,6 +692,7 @@ public abstract class SqlBuilder
         writeExternalForeignKeyCreateStmt(desiredModel,
                                           change.getChangedTable(),
                                           change.getNewForeignKey());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -705,6 +710,7 @@ public abstract class SqlBuilder
                                  AddIndexChange     change) throws IOException
     {
         writeExternalIndexCreateStmt(change.getChangedTable(), change.getNewIndex());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -952,7 +958,6 @@ public abstract class SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changes.clear();
             }
         }
@@ -1145,6 +1150,7 @@ public abstract class SqlBuilder
                                  AddPrimaryKeyChange change) throws IOException
     {
         writeExternalPrimaryKeysCreateStmt(change.getChangedTable(), change.getPrimaryKeyColumns());
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**

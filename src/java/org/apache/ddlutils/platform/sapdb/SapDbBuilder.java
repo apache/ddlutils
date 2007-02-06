@@ -106,7 +106,6 @@ public class SapDbBuilder extends SqlBuilder
             if (change instanceof RemovePrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -116,7 +115,6 @@ public class SapDbBuilder extends SqlBuilder
                                                                                    pkChange.getOldPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, removePkChange);
-                removePkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
             }
         }
         // Next we add/change/remove columns
@@ -134,26 +132,22 @@ public class SapDbBuilder extends SqlBuilder
                 if (addColumnChange.isAtEnd())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
             else if (change instanceof ColumnDefaultValueChange)
             {
                 processChange(currentModel, desiredModel, (ColumnDefaultValueChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof ColumnRequiredChange)
             {
                 processChange(currentModel, desiredModel, (ColumnRequiredChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -165,7 +159,6 @@ public class SapDbBuilder extends SqlBuilder
             if (change instanceof AddPrimaryKeyChange)
             {
                 processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
             else if (change instanceof PrimaryKeyChange)
@@ -175,7 +168,6 @@ public class SapDbBuilder extends SqlBuilder
                                                                           pkChange.getNewPrimaryKeyColumns());
 
                 processChange(currentModel, desiredModel, addPkChange);
-                addPkChange.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -198,6 +190,7 @@ public class SapDbBuilder extends SqlBuilder
         print("ADD ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -218,6 +211,7 @@ public class SapDbBuilder extends SqlBuilder
         printIdentifier(getColumnName(change.getColumn()));
         print(" RELEASE SPACE");
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -236,6 +230,7 @@ public class SapDbBuilder extends SqlBuilder
         printIndent();
         print("DROP PRIMARY KEY");
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -263,6 +258,7 @@ public class SapDbBuilder extends SqlBuilder
             print(" NOT NULL");
         }
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -303,5 +299,6 @@ public class SapDbBuilder extends SqlBuilder
             print(" DROP DEFAULT");
         }
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

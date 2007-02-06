@@ -182,6 +182,59 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
+     * Tests the alteration of the datatypes of columns of a PK and FK that
+     * will be dropped.
+     */
+    public void testChangeDroppedPKAndFKDatatypes()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='VARCHAR' primaryKey='false' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='VARCHAR' required='false'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1) });
+        insertRow("roundtrip2", new Object[] { new Integer(1), new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List     beans = getRows("roundtrip2");
+        DynaBean bean  = (DynaBean)beans.get(0);
+
+        // Some databases (e.g. DB2) pad the string for some reason, so we manually trim it
+        if (bean.get("fk") instanceof String)
+        {
+            bean.set("fk", ((String)bean.get("fk")).trim());
+        }
+        assertEquals((Object)"1", bean, "fk");
+    }
+    
+    /**
      * Tests the alteration of the datatypes of a column that is indexed.
      */
     public void testChangeIndexColumnDatatype()
@@ -206,6 +259,48 @@ public class TestAlteration extends RoundtripTestBase
             "    <index name='avalue_index'>\n"+
             "      <index-column name='avalue'/>\n"+
             "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1), new Integer(1) });
+        insertRow("roundtrip", new Object[] { new Integer(2), new Integer(10) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals(new Integer(1), beans.get(0), "avalue");
+        assertEquals(new Integer(10), beans.get(1), "avalue");
+    }
+
+    /**
+     * Tests the alteration of the datatypes of an indexed column where
+     * the index will be dropped.
+     */
+    public void testChangeDroppedIndexColumnDatatype()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='NUMERIC' size='8' required='false'/>\n"+
+            "    <index name='avalue_index'>\n"+
+            "      <index-column name='avalue'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
             "  </table>\n"+
             "</database>";
 

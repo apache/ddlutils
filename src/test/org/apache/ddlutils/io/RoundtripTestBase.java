@@ -154,10 +154,11 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      * Returns a "SELECT * FROM [table name]" statement. It also takes
      * delimited identifier mode into account if enabled.
      *  
-     * @param table The table
+     * @param table       The table
+     * @param orderColumn The column to order the rows by (can be <code>null</code>)
      * @return The statement
      */
-    protected String getSelectQueryForAllString(Table table)
+    protected String getSelectQueryForAllString(Table table, String orderColumn)
     {
         StringBuffer query = new StringBuffer();
 
@@ -171,9 +172,22 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         {
             query.append(getPlatformInfo().getDelimiterToken());
         }
+        if (orderColumn != null)
+        {
+            query.append(" ORDER BY ");
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+            query.append(orderColumn);
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+        }
         return query.toString();
     }
-    
+
     /**
      * Retrieves all rows from the given table.
      * 
@@ -184,7 +198,25 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     {
         Table table = getModel().findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
         
-        return getPlatform().fetch(getModel(), getSelectQueryForAllString(table), new Table[] { table });
+        return getPlatform().fetch(getModel(),
+                                   getSelectQueryForAllString(table, null),
+                                   new Table[] { table });
+    }
+
+    /**
+     * Retrieves all rows from the given table.
+     * 
+     * @param tableName   The table
+     * @param orderColumn The column to order the rows by
+     * @return The rows
+     */
+    protected List getRows(String tableName, String orderColumn)
+    {
+        Table table = getModel().findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        
+        return getPlatform().fetch(getModel(),
+                                   getSelectQueryForAllString(table, orderColumn),
+                                   new Table[] { table });
     }
 
     /**

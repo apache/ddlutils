@@ -1272,6 +1272,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 connection.setAutoCommit(false);
             }
 
+            beforeInsert(connection, dynaClass.getTable());
+            
             statement = connection.prepareStatement(insertSql);
 
             for (int idx = 0; idx < properties.length; idx++ )
@@ -1280,6 +1282,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             }
 
             int count = statement.executeUpdate();
+
+            afterInsert(connection, dynaClass.getTable());
 
             if (count != 1)
             {
@@ -1414,7 +1418,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             {
                 if (dynaClass != null)
                 {
-                    executeBatch(statement, addedStmts, dynaClass.getTableName());
+                    executeBatch(statement, addedStmts, dynaClass.getTable());
                     addedStmts = 0;
                 }
 
@@ -1464,7 +1468,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
         if (dynaClass != null)
         {
-            executeBatch(statement, addedStmts, dynaClass.getTableName());
+            executeBatch(statement, addedStmts, dynaClass.getTable());
         }
     }
 
@@ -1473,17 +1477,22 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      * 
      * @param statement The prepared statement
      * @param numRows   The number of rows that should change
-     * @param tableName The name of the changed table
+     * @param table     The changed table
      */
-    private void executeBatch(PreparedStatement statement, int numRows, String tableName) throws DatabaseOperationException
+    private void executeBatch(PreparedStatement statement, int numRows, Table table) throws DatabaseOperationException
     {
         if (statement != null)
         {
             try
             {
+                Connection connection = statement.getConnection();
+
+                beforeInsert(connection, table);
+
                 int[] results = statement.executeBatch();
 
                 closeStatement(statement);
+                afterInsert(connection, table);
 
                 int sum = 0;
 
@@ -1493,7 +1502,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 }
                 if (sum != numRows)
                 {
-                    _log.warn("Attempted to insert " + numRows + " rows into table " + tableName + " but changed " + sum + " rows");
+                    _log.warn("Attempted to insert " + numRows + " rows into table " + table.getName() + " but changed " + sum + " rows");
                 }
             }
             catch (SQLException ex)
@@ -1518,6 +1527,28 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             returnConnection(connection);
         }
+    }
+
+    /**
+     * Allows platforms to issue statements directly before rows are inserted into
+     * the specified table.
+     *  
+     * @param connection The connection used for the insertion
+     * @param table      The table that the rows are inserted into
+     */
+    protected void beforeInsert(Connection connection, Table table) throws SQLException
+    {
+    }
+    
+    /**
+     * Allows platforms to issue statements directly after rows have been inserted into
+     * the specified table.
+     *  
+     * @param connection The connection used for the insertion
+     * @param table      The table that the rows have been inserted into
+     */
+    protected void afterInsert(Connection connection, Table table) throws SQLException
+    {
     }
 
     /**
@@ -1583,6 +1614,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         }
         try
         {
+            beforeUpdate(connection, dynaClass.getTable());
+
             statement = connection.prepareStatement(sql);
 
             int sqlIndex = 1;
@@ -1597,6 +1630,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             }
 
             int count = statement.executeUpdate();
+
+            afterUpdate(connection, dynaClass.getTable());
 
             if (count != 1)
             {
@@ -1630,6 +1665,28 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         {
             returnConnection(connection);
         }
+    }
+
+    /**
+     * Allows platforms to issue statements directly before rows are updated in
+     * the specified table.
+     *  
+     * @param connection The connection used for the update
+     * @param table      The table that the rows are updateed into
+     */
+    protected void beforeUpdate(Connection connection, Table table) throws SQLException
+    {
+    }
+    
+    /**
+     * Allows platforms to issue statements directly after rows have been updated in
+     * the specified table.
+     *  
+     * @param connection The connection used for the update
+     * @param table      The table that the rows have been updateed into
+     */
+    protected void afterUpdate(Connection connection, Table table) throws SQLException
+    {
     }
 
     /**

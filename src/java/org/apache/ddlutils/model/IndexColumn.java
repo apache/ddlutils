@@ -36,6 +36,8 @@ public class IndexColumn implements Cloneable, Serializable
 
     /** The position within the owning index. */
     private int    _ordinalPosition;
+    /** The indexed column. */
+    private Column _column;
     /** The name of the column. */
     protected String _name;
     /** The size of the column in the index. */
@@ -50,6 +52,17 @@ public class IndexColumn implements Cloneable, Serializable
     {
     }
     
+    /**
+     * Creates a new index column object.
+     * 
+     * @param column The indexed column
+     */
+    public IndexColumn(Column column)
+    {
+        _column = column;
+        _name   = column.getName();
+    }
+
     /**
      * Creates a new index column object.
      * 
@@ -99,6 +112,27 @@ public class IndexColumn implements Cloneable, Serializable
     public void setName(String name)
     {
         _name = name;
+    }
+
+    /**
+     * Returns the indexed column.
+     *
+     * @return The column
+     */
+    public Column getColumn()
+    {
+        return _column;
+    }
+
+    /**
+     * Sets the indexed column.
+     *
+     * @param column The column
+     */
+    public void setColumn(Column column)
+    {
+        _column = column;
+        _name   = (column == null ? null : column.getName());
     }
 
     /**

@@ -203,14 +203,12 @@ public class PostgreSqlBuilder extends SqlBuilder
                     (addColumnChange.getNextColumn() == null))
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
-                    change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                     changeIt.remove();
                 }
             }
             else if (change instanceof RemoveColumnChange)
             {
                 processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
                 changeIt.remove();
             }
         }
@@ -234,6 +232,7 @@ public class PostgreSqlBuilder extends SqlBuilder
         print("ADD COLUMN ");
         writeColumn(change.getChangedTable(), change.getNewColumn());
         printEndOfStatement();
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
@@ -257,5 +256,6 @@ public class PostgreSqlBuilder extends SqlBuilder
         {
             dropAutoIncrementSequence(change.getChangedTable(), change.getColumn());
         }
+        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }
