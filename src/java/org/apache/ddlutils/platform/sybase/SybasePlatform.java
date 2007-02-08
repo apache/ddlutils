@@ -255,4 +255,60 @@ public class SybasePlatform extends PlatformImplBase
 		setTextSize(MAX_TEXT_SIZE);
 		return super.query(model, sql, queryHints);
 	}
+
+
+    /**
+     * Determines whether we need to use identity override mode for the given table.
+     * 
+     * @param table The table
+     * @return <code>true</code> if identity override mode is needed
+     */
+    private boolean useIdentityOverrideFor(Table table)
+    {
+        return isIdentityOverrideOn() &&
+               getPlatformInfo().isIdentityOverrideAllowed() &&
+               (table.getAutoIncrementColumns().length > 0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void beforeInsert(Connection connection, Table table) throws SQLException
+    {
+        if (useIdentityOverrideFor(table))
+        {
+            SybaseBuilder builder = (SybaseBuilder)getSqlBuilder();
+    
+            connection.createStatement().execute(builder.getEnableIdentityOverrideSql(table));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void afterInsert(Connection connection, Table table) throws SQLException
+    {
+        if (useIdentityOverrideFor(table))
+        {
+            SybaseBuilder builder = (SybaseBuilder)getSqlBuilder();
+    
+            connection.createStatement().execute(builder.getDisableIdentityOverrideSql(table));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void beforeUpdate(Connection connection, Table table) throws SQLException
+    {
+        beforeInsert(connection, table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void afterUpdate(Connection connection, Table table) throws SQLException
+    {
+        afterInsert(connection, table);
+    }
 }

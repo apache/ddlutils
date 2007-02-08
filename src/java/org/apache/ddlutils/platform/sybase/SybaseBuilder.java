@@ -184,15 +184,65 @@ public class SybaseBuilder extends SqlBuilder
     }
 
     /**
+     * Returns the SQL to enable identity override mode.
+     * 
+     * @param table The table to enable the mode for
+     * @return The SQL
+     */
+    protected String getEnableIdentityOverrideSql(Table table)
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append(getQuotationOnStatement());
+        result.append("SET IDENTITY_INSERT ");
+        result.append(getDelimitedIdentifier(getTableName(table)));
+        result.append(" ON");
+
+        return result.toString();
+    }
+
+    /**
+     * Returns the SQL to disable identity override mode.
+     * 
+     * @param table The table to disable the mode for
+     * @return The SQL
+     */
+    protected String getDisableIdentityOverrideSql(Table table)
+    {
+        StringBuffer result = new StringBuffer();
+
+        result.append(getQuotationOnStatement());
+        result.append("SET IDENTITY_INSERT ");
+        result.append(getDelimitedIdentifier(getTableName(table)));
+        result.append(" OFF");
+
+        return result.toString();
+    }
+
+    /**
+     * Returns the statement that turns on the ability to write delimited identifiers.
+     * 
+     * @return The quotation-on statement
+     */
+    private String getQuotationOnStatement()
+    {
+        if (getPlatform().isDelimitedIdentifierModeOn())
+        {
+            return "SET quoted_identifier on";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    /**
      * Writes the statement that turns on the ability to write delimited identifiers.
      */
     private void writeQuotationOnStatement() throws IOException
     {
-        if (getPlatform().isDelimitedIdentifierModeOn())
-        {
-            print("SET quoted_identifier on");
-            printEndOfStatement();
-        }
+        print(getQuotationOnStatement());
+        printEndOfStatement();
     }
 
     /**

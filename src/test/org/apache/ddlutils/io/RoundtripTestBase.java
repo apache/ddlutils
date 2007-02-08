@@ -499,8 +499,8 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
             (expected.getTypeCode() == Types.DECIMAL))
         {
             assertEquals("Precision not the same for column "+actual.getName()+".",
-                         expected.getSize(),
-                         actual.getSize());
+                         expected.getSizeAsInt(),
+                         actual.getSizeAsInt());
             assertEquals("Scale not the same for column "+actual.getName()+".",
                          expected.getScale(),
                          actual.getScale());
