@@ -116,17 +116,26 @@ public class Db2Builder extends SqlBuilder
         }
         else
         {
+            String type = getSqlType(targetColumn);
+
             // DB2 has the limitation that it cannot convert numeric values
             // to VARCHAR, though it can convert them to CHAR
             if (TypeMap.isNumericType(sourceColumn.getTypeCode()) &&
                 "VARCHAR".equalsIgnoreCase(targetNativeType))
             {
-                targetNativeType = "CHAR";
+                Object sizeSpec = targetColumn.getSize();
+                
+                if (sizeSpec == null)
+                {
+                    sizeSpec = getPlatformInfo().getDefaultSize(targetColumn.getTypeCode());
+                }
+                type = "CHAR(" +sizeSpec.toString() + ")";
             }
 
-            print(targetNativeType);
-            print("(");
+            print("CAST(");
             printIdentifier(getColumnName(sourceColumn));
+            print(" AS ");
+            print(type);
             print(")");
         }
     }
