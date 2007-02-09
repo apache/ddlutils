@@ -89,7 +89,7 @@ public class TestMisc extends RoundtripTestBase
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
 
-        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
+        dataIO.writeDataToXML(getPlatform(), getModel(), stringWriter, "UTF-8");
 
         String    dataAsXml = stringWriter.toString();
         SAXReader reader    = new SAXReader();
@@ -128,7 +128,7 @@ public class TestMisc extends RoundtripTestBase
 
         StringReader stringReader = new StringReader(dataAsXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { stringReader });
 
         List beans = getRows("misc1");
 
@@ -188,7 +188,7 @@ public class TestMisc extends RoundtripTestBase
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
 
-        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
+        dataIO.writeDataToXML(getPlatform(), getModel(), stringWriter, "UTF-8");
 
         String    dataAsXml = stringWriter.toString();
         SAXReader reader    = new SAXReader();
@@ -229,7 +229,7 @@ public class TestMisc extends RoundtripTestBase
 
         StringReader stringReader = new StringReader(dataAsXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { stringReader });
 
         List beans = getRows("misc1");
 
@@ -278,7 +278,7 @@ public class TestMisc extends RoundtripTestBase
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
 
-        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
+        dataIO.writeDataToXML(getPlatform(), getModel(), stringWriter, "UTF-8");
 
         String    dataAsXml = stringWriter.toString();
         SAXReader reader    = new SAXReader();
@@ -310,7 +310,7 @@ public class TestMisc extends RoundtripTestBase
 
         StringReader stringReader = new StringReader(dataAsXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { stringReader });
 
         List beans = getRows("misc");
 
@@ -360,7 +360,7 @@ public class TestMisc extends RoundtripTestBase
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
 
-        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
+        dataIO.writeDataToXML(getPlatform(), getModel(), stringWriter, "UTF-8");
 
         String    dataAsXml = stringWriter.toString();
         SAXReader reader    = new SAXReader();
@@ -392,7 +392,7 @@ public class TestMisc extends RoundtripTestBase
 
         StringReader stringReader = new StringReader(dataAsXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { stringReader });
 
         List beans = getRows("misc");
 
@@ -452,7 +452,7 @@ public class TestMisc extends RoundtripTestBase
         DatabaseDataIO dataIO       = new DatabaseDataIO();
         StringReader   stringReader = new StringReader(dataXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { stringReader });
 
         List beans = getRows("misc", "id");
 
@@ -528,7 +528,7 @@ public class TestMisc extends RoundtripTestBase
         DatabaseDataIO dataIO       = new DatabaseDataIO();
         StringReader   stringReader = new StringReader(dataXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { stringReader });
 
         List beans = getRows("misc", "id");
 
@@ -638,7 +638,7 @@ public class TestMisc extends RoundtripTestBase
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
 
-        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
+        dataIO.writeDataToXML(getPlatform(), getModel(), stringWriter, "UTF-8");
 
         String dataAsXml = stringWriter.toString();
 
@@ -691,7 +691,7 @@ public class TestMisc extends RoundtripTestBase
 
         StringReader stringReader = new StringReader(dataAsXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { stringReader });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { stringReader });
 
         assertEquals(2, getRows("A").size());
         assertEquals(2, getRows("B").size());

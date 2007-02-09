@@ -121,7 +121,7 @@ public class TestDatatypes extends RoundtripTestBase
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
 
-        dataIO.writeDataToXML(getPlatform(), stringWriter, "UTF-8");
+        dataIO.writeDataToXML(getPlatform(), getModel(), stringWriter, "UTF-8");
 
         String dataSql = stringWriter.toString();
         
@@ -131,7 +131,7 @@ public class TestDatatypes extends RoundtripTestBase
 
         createDatabase(modelXml);
 
-        dataIO.writeDataToDatabase(getPlatform(), new Reader[] { new StringReader(dataSql) });
+        dataIO.writeDataToDatabase(getPlatform(), getModel(), new Reader[] { new StringReader(dataSql) });
 
         beans = getRows("roundtrip");
 

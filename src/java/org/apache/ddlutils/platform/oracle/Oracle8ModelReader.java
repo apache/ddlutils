@@ -91,6 +91,14 @@ public class Oracle8ModelReader extends JdbcModelReader
      */
     protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
+        String tableName = (String)values.get("TABLE_NAME");
+
+        // system table ?
+        if (tableName.indexOf('$') > 0)
+        {
+            return null;
+        }
+
         Table table = super.readTable(metaData, values);
 
         if (table != null)
