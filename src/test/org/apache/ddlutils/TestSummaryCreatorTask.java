@@ -20,6 +20,7 @@ package org.apache.ddlutils;
  */
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -283,7 +284,18 @@ public class TestSummaryCreatorTask extends Task
         }
         catch (Exception ex)
         {
-            throw new BuildException("Cannot load database properties from file " + jdbcPropertiesFile);
+            // not on the classpath ? let's try a file
+            File baseDir  = getProject().getBaseDir();
+            File propFile = new File(baseDir, jdbcPropertiesFile);
+
+            if (propFile.exists() && propFile.isFile() && propFile.canRead())
+            {
+                props.load(new FileInputStream(propFile));
+            }
+            else
+            {
+                throw new BuildException("Cannot load database properties from file " + jdbcPropertiesFile);
+            }
         }
 
         try
