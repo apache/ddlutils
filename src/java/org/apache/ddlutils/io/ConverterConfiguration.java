@@ -30,6 +30,7 @@ import org.apache.ddlutils.io.converters.TimeConverter;
 import org.apache.ddlutils.io.converters.TimestampConverter;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * Contains the configuration for converters, which convert between the Java data types
@@ -69,6 +70,10 @@ public class ConverterConfiguration
         registerConverter(Types.VARBINARY,     binaryConverter);
         registerConverter(Types.LONGVARBINARY, binaryConverter);
         registerConverter(Types.BLOB,          binaryConverter);
+        if (Jdbc3Utils.supportsJava14JdbcTypes())
+        {
+            registerConverter(Jdbc3Utils.determineBooleanTypeCode(), numberConverter);
+        }
     }
 
     /**
