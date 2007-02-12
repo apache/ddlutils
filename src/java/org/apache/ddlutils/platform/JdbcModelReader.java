@@ -638,7 +638,7 @@ public class JdbcModelReader
     protected void removeInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk) throws SQLException
     {
         List    columnNames  = new ArrayList();
-        boolean mustBeUnique = true;
+        boolean mustBeUnique = !getPlatformInfo().isSystemForeignKeyIndicesAlwaysNonUnique();
 
         for (int columnIdx = 0; columnIdx < fk.getReferenceCount(); columnIdx++)
         {
@@ -646,7 +646,7 @@ public class JdbcModelReader
             Column localColumn = table.findColumn(name,
                                                   getPlatform().isDelimitedIdentifierModeOn());
 
-            if (!localColumn.isPrimaryKey())
+            if (mustBeUnique && !localColumn.isPrimaryKey())
             {
                 mustBeUnique = false;
             }

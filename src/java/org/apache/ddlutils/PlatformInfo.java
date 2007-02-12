@@ -74,6 +74,10 @@ public class PlatformInfo
         reading a model from a database. */
     private boolean _systemIndicesReturned = true;
 
+    /** Whether system indices for foreign keys are always non-unique or can be
+        unique (i.e. if a primary key column is used to establish the foreign key). */
+    private boolean _systemForeignKeyIndicesAlwaysNonUnique = false;
+    
     /** Whether the database returns a synthetic default value for non-identity required columns. */ 
     private boolean _syntheticDefaultValueForRequiredReturned = false;
 
@@ -391,6 +395,30 @@ public class PlatformInfo
     public void setSystemIndicesReturned(boolean returningSystemIndices)
     {
         _systemIndicesReturned = returningSystemIndices;
+    }
+
+    /**
+     * Determines whether system indices for foreign keys are always non-unique or can be
+     * unique (i.e. if a primary key column is used to establish the foreign key).
+     * 
+     * @return <code>true</code> if system foreign key indices are always non-unique;
+     *         default is <code>false</code>
+     */
+    public boolean isSystemForeignKeyIndicesAlwaysNonUnique()
+    {
+        return _systemForeignKeyIndicesAlwaysNonUnique;
+    }
+
+    /**
+     * Specifies whether system indices for foreign keys are always non-unique or can be
+     * unique (i.e. if a primary key column is used to establish the foreign key).
+     * 
+     * @param alwaysNonUnique <code>true</code> if system foreign key indices are always
+     *                        non-unique
+     */
+    public void setSystemForeignKeyIndicesAlwaysNonUnique(boolean alwaysNonUnique)
+    {
+        _systemForeignKeyIndicesAlwaysNonUnique = alwaysNonUnique;
     }
 
     /**

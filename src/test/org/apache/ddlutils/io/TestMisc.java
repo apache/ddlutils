@@ -22,11 +22,14 @@ package org.apache.ddlutils.io;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -254,6 +257,12 @@ public class TestMisc extends RoundtripTestBase
      */
     public void testSelfReferenceIdentityOverrideOff() throws Exception
     {
+        // Hsqldb does not allow rows to reference themselves
+        if (HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            return;
+        }
+
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -662,27 +671,53 @@ public class TestMisc extends RoundtripTestBase
             pkColumnName = pkColumnName.toUpperCase();
         }
         assertEquals("1", ((Element)rows.get(0)).attributeValue(pkColumnName));
+
+        // we cannot be sure of the order in which the database returns the rows
+        // per table (some return them in pk order, some in insertion order)
+        // so we don't assume an order in this test
+        HashSet pkValues       = new HashSet();
+        HashSet expectedValues = new HashSet(Arrays.asList(new String[] { "1", "2" }));
+
         assertEquals(uppercase ? "G" : "g", ((Element)rows.get(1)).getName());
-        assertEquals("1", ((Element)rows.get(1)).attributeValue(pkColumnName));
         assertEquals(uppercase ? "G" : "g", ((Element)rows.get(2)).getName());
-        assertEquals("2", ((Element)rows.get(2)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(1)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(2)).attributeValue(pkColumnName));
+        assertEquals(pkValues, expectedValues);
+
+        pkValues.clear();
+        
         assertEquals(uppercase ? "A" : "a", ((Element)rows.get(3)).getName());
-        assertEquals("2", ((Element)rows.get(3)).attributeValue(pkColumnName));
         assertEquals(uppercase ? "A" : "a", ((Element)rows.get(4)).getName());
-        assertEquals("1", ((Element)rows.get(4)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(3)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(4)).attributeValue(pkColumnName));
+        assertEquals(pkValues, expectedValues);
+
+        pkValues.clear();
 
         assertEquals(uppercase ? "B" : "b", ((Element)rows.get(5)).getName());
-        assertEquals("2", ((Element)rows.get(5)).attributeValue(pkColumnName));
         assertEquals(uppercase ? "B" : "b", ((Element)rows.get(6)).getName());
-        assertEquals("1", ((Element)rows.get(6)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(5)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(6)).attributeValue(pkColumnName));
+        assertEquals(pkValues, expectedValues);
+
+        pkValues.clear();
+
         assertEquals(uppercase ? "C" : "c", ((Element)rows.get(7)).getName());
-        assertEquals("2", ((Element)rows.get(7)).attributeValue(pkColumnName));
         assertEquals(uppercase ? "C" : "c", ((Element)rows.get(8)).getName());
-        assertEquals("1", ((Element)rows.get(8)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(7)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(8)).attributeValue(pkColumnName));
+        assertEquals(pkValues, expectedValues);
+
+        pkValues.clear();
+
         assertEquals(uppercase ? "D" : "d", ((Element)rows.get(9)).getName());
-        assertEquals("2", ((Element)rows.get(9)).attributeValue(pkColumnName));
         assertEquals(uppercase ? "D" : "d", ((Element)rows.get(10)).getName());
-        assertEquals("1", ((Element)rows.get(10)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(9)).attributeValue(pkColumnName));
+        pkValues.add(((Element)rows.get(10)).attributeValue(pkColumnName));
+        assertEquals(pkValues, expectedValues);
+
+        pkValues.clear();
+
         assertEquals(uppercase ? "F" : "f", ((Element)rows.get(11)).getName());
         assertEquals("1", ((Element)rows.get(11)).attributeValue(pkColumnName));
 

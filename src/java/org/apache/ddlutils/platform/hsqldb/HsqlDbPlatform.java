@@ -51,6 +51,7 @@ public class HsqlDbPlatform extends PlatformImplBase
 
         info.setNonPKIdentityColumnsSupported(false);
         info.setIdentityOverrideAllowed(false);
+        info.setSystemForeignKeyIndicesAlwaysNonUnique(true);
 
         info.addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BLOB,        "LONGVARBINARY", Types.LONGVARBINARY);

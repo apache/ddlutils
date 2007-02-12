@@ -102,6 +102,6 @@ public class HsqlDbModelReader extends JdbcModelReader
     {
         String name = index.getName();
 
-        return (name != null) && name.startsWith("SYS_PK_");
+        return (name != null) && (name.startsWith("SYS_PK_") || name.startsWith("SYS_IDX_"));
     }
 }
