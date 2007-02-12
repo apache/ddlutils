@@ -162,10 +162,14 @@ public class TestSummaryCreatorTask extends Task
     		// we ignore the attribute name then
     		return ((Attribute)node).getValue();
     	}
-    	else
+    	else if (node != null)
     	{
     		return node.valueOf("@" + attrName);
     	}
+        else
+        {
+            return null;
+        }
     }
     
     /**
@@ -241,7 +245,7 @@ public class TestSummaryCreatorTask extends Task
                 String  testSuiteName = testSuiteNode.attributeValue("name");
 
                 // since tests have failed, we add it to the summary
-                for (Iterator it = testSuiteNode.elementIterator("testcase"); it.hasNext();)
+                for (Iterator it = testSuiteNode.selectNodes("testcase[failure or error]").iterator(); it.hasNext();)
                 {
                     Element failedTestElement = (Element)it.next();
                     Element newTestElement    = summaryDoc.getRootElement().addElement("failedTest");
