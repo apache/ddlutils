@@ -341,7 +341,7 @@ public class TestSummaryCreatorTask extends Task
             {
                 element.addAttribute("dbProductName", metaData.getDatabaseProductName());
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // we ignore it
             }
@@ -349,7 +349,7 @@ public class TestSummaryCreatorTask extends Task
             {
                 element.addAttribute("dbProductVersion", metaData.getDatabaseProductVersion());
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // we ignore it
             }
@@ -360,7 +360,7 @@ public class TestSummaryCreatorTask extends Task
 
                 element.addAttribute("dbVersion", databaseMajorVersion + "." + databaseMinorVersion);
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // we ignore it
             }
@@ -368,7 +368,7 @@ public class TestSummaryCreatorTask extends Task
             {
                 element.addAttribute("driverName", metaData.getDriverName());
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // we ignore it
             }
@@ -376,7 +376,7 @@ public class TestSummaryCreatorTask extends Task
             {
                 element.addAttribute("driverVersion", metaData.getDriverVersion());
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // we ignore it
             }
@@ -387,7 +387,7 @@ public class TestSummaryCreatorTask extends Task
 
                 element.addAttribute("jdbcVersion", jdbcMajorVersion + "." + jdbcMinorVersion);
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // we ignore it
             }
