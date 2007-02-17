@@ -43,6 +43,7 @@ public class Db2v8Platform extends Db2Platform
         // the number of bytes
         getPlatformInfo().setMaxIdentifierLength(128);
         getPlatformInfo().setMaxColumnNameLength(30);
+        getPlatformInfo().setMaxConstraintNameLength(18);
         getPlatformInfo().setMaxForeignKeyNameLength(18);
         setSqlBuilder(new Db2v8Builder(this));
     }

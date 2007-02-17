@@ -37,14 +37,4 @@ public class Db2v8Builder extends Db2Builder
     {
         super(platform);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int getMaxConstraintNameLength()
-    {
-        // In non-delimited identifier mode we can only use 18 characters apparently
-        return getPlatform().isDelimitedIdentifierModeOn() ? super.getMaxConstraintNameLength() : 18;
-    }
-
 }
