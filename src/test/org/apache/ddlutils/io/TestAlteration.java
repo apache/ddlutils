@@ -237,6 +237,11 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testChangeIndexColumnDatatype()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
