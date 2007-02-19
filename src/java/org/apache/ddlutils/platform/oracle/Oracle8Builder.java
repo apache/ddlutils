@@ -350,7 +350,7 @@ public class Oracle8Builder extends SqlBuilder
                 {
                     result.append(",");
                 }
-                result.append(getConstraintName("seq", table, columns[idx].getName(), null));
+                result.append(getDelimitedIdentifier(getConstraintName("seq", table, columns[idx].getName(), null)));
                 result.append(".currval");
             }
             result.append(" FROM dual");
