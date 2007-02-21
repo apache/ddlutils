@@ -193,7 +193,6 @@ public class SybaseBuilder extends SqlBuilder
     {
         StringBuffer result = new StringBuffer();
 
-        result.append(getQuotationOnStatement());
         result.append("SET IDENTITY_INSERT ");
         result.append(getDelimitedIdentifier(getTableName(table)));
         result.append(" ON");
@@ -211,7 +210,6 @@ public class SybaseBuilder extends SqlBuilder
     {
         StringBuffer result = new StringBuffer();
 
-        result.append(getQuotationOnStatement());
         result.append("SET IDENTITY_INSERT ");
         result.append(getDelimitedIdentifier(getTableName(table)));
         result.append(" OFF");
@@ -224,7 +222,7 @@ public class SybaseBuilder extends SqlBuilder
      * 
      * @return The quotation-on statement
      */
-    private String getQuotationOnStatement()
+    protected String getQuotationOnStatement()
     {
         if (getPlatform().isDelimitedIdentifierModeOn())
         {

@@ -147,7 +147,7 @@ public class SybasePlatform extends PlatformImplBase
 	{
         boolean useIdx = (columnName == null);
 
-        if (jdbcType == Types.LONGVARBINARY)
+        if ((jdbcType == Types.LONGVARBINARY) || (jdbcType == Types.BLOB))
 		{
 			InputStream stream = useIdx ? resultSet.getBinaryStream(columnIdx) : resultSet.getBinaryStream(columnName);
 
@@ -197,18 +197,23 @@ public class SybasePlatform extends PlatformImplBase
      */
 	protected void setStatementParameterValue(PreparedStatement statement, int sqlIndex, int typeCode, Object value) throws SQLException
 	{
-		if ((value instanceof byte[]) && ((typeCode == Types.LONGVARBINARY) || (typeCode == Types.BLOB)))
-		{
-			byte[] data = (byte[])value;
+        if ((typeCode == Types.BLOB) || (typeCode == Types.LONGVARBINARY))
+        {
+            // jConnect doesn't like the BLOB type, but works without problems with LONGVARBINARY
+            // even when using the Blob class
+            if (value instanceof byte[])
+            {
+                byte[] data = (byte[])value;
 
-			statement.setBinaryStream(sqlIndex, new ByteArrayInputStream(data), data.length);
-		}
-		else if (typeCode == Types.BLOB)
-		{
-			// Sybase doesn't like the BLOB type, but works without problems with LONGVARBINARY
-			// even when using the Blob class
-			super.setStatementParameterValue(statement, sqlIndex, Types.LONGVARBINARY, value);
-		}
+                statement.setBinaryStream(sqlIndex, new ByteArrayInputStream(data), data.length);
+            }
+            else
+            {
+                // Sybase doesn't like the BLOB type, but works without problems with LONGVARBINARY
+                // even when using the Blob class
+                super.setStatementParameterValue(statement, sqlIndex, Types.LONGVARBINARY, value);
+            }
+        }
 		else if (typeCode == Types.CLOB)
 		{
 			// Same for CLOB and LONGVARCHAR
@@ -277,9 +282,17 @@ public class SybasePlatform extends PlatformImplBase
     {
         if (useIdentityOverrideFor(table))
         {
-            SybaseBuilder builder = (SybaseBuilder)getSqlBuilder();
-    
-            connection.createStatement().execute(builder.getEnableIdentityOverrideSql(table));
+            SybaseBuilder builder          = (SybaseBuilder)getSqlBuilder();
+            String        quotationOn      = builder.getQuotationOnStatement();
+            String        identityInsertOn = builder.getEnableIdentityOverrideSql(table);
+            Statement     stmt             = connection.createStatement();
+
+            if (quotationOn.length() > 0)
+            {
+                stmt.execute(quotationOn);
+            }
+            stmt.execute(identityInsertOn);
+            stmt.close();
         }
     }
 
@@ -290,9 +303,17 @@ public class SybasePlatform extends PlatformImplBase
     {
         if (useIdentityOverrideFor(table))
         {
-            SybaseBuilder builder = (SybaseBuilder)getSqlBuilder();
-    
-            connection.createStatement().execute(builder.getDisableIdentityOverrideSql(table));
+            SybaseBuilder builder           = (SybaseBuilder)getSqlBuilder();
+            String        quotationOn       = builder.getQuotationOnStatement();
+            String        identityInsertOff = builder.getDisableIdentityOverrideSql(table);
+            Statement     stmt              = connection.createStatement();
+
+            if (quotationOn.length() > 0)
+            {
+                stmt.execute(quotationOn);
+            }
+            stmt.execute(identityInsertOff);
+            stmt.close();
         }
     }
 

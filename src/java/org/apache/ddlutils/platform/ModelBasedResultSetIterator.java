@@ -127,6 +127,11 @@ public class ModelBasedResultSetIterator implements Iterator
 
             if ((tableOfColumn != null) && (tableOfColumn.length() > 0))
             {
+                // jConnect might return a table name enclosed in quotes
+                if (tableOfColumn.startsWith("\"") && tableOfColumn.endsWith("\"") && (tableOfColumn.length() > 1))
+                {
+                    tableOfColumn = tableOfColumn.substring(1, tableOfColumn.length() - 1);
+                }
                 // the JDBC driver gave us enough meta data info
                 table = model.findTable(tableOfColumn, _caseSensitive);
             }
