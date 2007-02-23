@@ -22,6 +22,7 @@ package org.apache.ddlutils.io;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
+import org.apache.ddlutils.platform.sybase.SybasePlatform;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -63,31 +65,68 @@ public class TestMisc extends RoundtripTestBase
             // TODO: for testing these platforms, we need deleteRows
             return;
         }
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='misc1'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
-            "  </table>\n"+
-            "  <table name='misc2'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='fk' type='INTEGER' required='false'/>\n"+
-            "    <foreign-key name='test' foreignTable='misc1'>\n"+
-            "      <reference local='fk' foreign='pk'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
+
+        // Sybase does not like INTEGER auto-increment columns
+        boolean      isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String modelXml; 
+
+        if (isSybase)
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc1'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+                "  </table>\n"+
+                "  <table name='misc2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='fk' type='NUMERIC' size='12,0' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc1'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc1'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+                "  </table>\n"+
+                "  <table name='misc2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='fk' type='INTEGER' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc1'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
 
         createDatabase(modelXml);
 
         getPlatform().setIdentityOverrideOn(true);
 
-        insertRow("misc1", new Object[] { new Integer(10), new Integer(1) });
-        insertRow("misc1", new Object[] { new Integer(12), new Integer(2) });
-        insertRow("misc1", new Object[] { new Integer(13), new Integer(3) });
-        insertRow("misc2", new Object[] { new Integer(1), new Integer(10) });
-        insertRow("misc2", new Object[] { new Integer(2), new Integer(13) });
+        if (isSybase)
+        {
+            insertRow("misc1", new Object[] { new BigDecimal(10), new Integer(1) });
+            insertRow("misc1", new Object[] { new BigDecimal(12), new Integer(2) });
+            insertRow("misc1", new Object[] { new BigDecimal(13), new Integer(3) });
+            insertRow("misc2", new Object[] { new Integer(1), new BigDecimal(10) });
+            insertRow("misc2", new Object[] { new Integer(2), new BigDecimal(13) });
+        }
+        else
+        {
+            insertRow("misc1", new Object[] { new Integer(10), new Integer(1) });
+            insertRow("misc1", new Object[] { new Integer(12), new Integer(2) });
+            insertRow("misc1", new Object[] { new Integer(13), new Integer(3) });
+            insertRow("misc2", new Object[] { new Integer(1), new Integer(10) });
+            insertRow("misc2", new Object[] { new Integer(2), new Integer(13) });
+        }
 
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
@@ -135,19 +174,36 @@ public class TestMisc extends RoundtripTestBase
 
         List beans = getRows("misc1");
 
-        assertEquals(new Integer(10), beans.get(0), "pk");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(10), beans.get(0), "pk");
+            assertEquals(new BigDecimal(12), beans.get(1), "pk");
+            assertEquals(new BigDecimal(13), beans.get(2), "pk");
+        }
+        else
+        {
+            assertEquals(new Integer(10), beans.get(0), "pk");
+            assertEquals(new Integer(12), beans.get(1), "pk");
+            assertEquals(new Integer(13), beans.get(2), "pk");
+        }
         assertEquals(new Integer(1),  beans.get(0), "avalue");
-        assertEquals(new Integer(12), beans.get(1), "pk");
         assertEquals(new Integer(2),  beans.get(1), "avalue");
-        assertEquals(new Integer(13), beans.get(2), "pk");
         assertEquals(new Integer(3),  beans.get(2), "avalue");
 
         beans = getRows("misc2");
 
         assertEquals(new Integer(1),  beans.get(0), "pk");
-        assertEquals(new Integer(10), beans.get(0), "fk");
         assertEquals(new Integer(2),  beans.get(1), "pk");
-        assertEquals(new Integer(13), beans.get(1), "fk");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(10), beans.get(0), "fk");
+            assertEquals(new BigDecimal(13), beans.get(1), "fk");
+        }
+        else
+        {
+            assertEquals(new Integer(10), beans.get(0), "fk");
+            assertEquals(new Integer(13), beans.get(1), "fk");
+        }
     }
 
     /**
@@ -162,31 +218,67 @@ public class TestMisc extends RoundtripTestBase
             return;
         }
 
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='misc1'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
-            "  </table>\n"+
-            "  <table name='misc2'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='fk' type='INTEGER' required='false'/>\n"+
-            "    <foreign-key name='test' foreignTable='misc1'>\n"+
-            "      <reference local='fk' foreign='pk'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
+        // Sybase does not like INTEGER auto-increment columns
+        boolean      isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String modelXml; 
+
+        if (isSybase)
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc1'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+                "  </table>\n"+
+                "  <table name='misc2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='fk' type='NUMERIC' size='12,0' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc1'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc1'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+                "  </table>\n"+
+                "  <table name='misc2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='fk' type='INTEGER' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc1'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
 
         createDatabase(modelXml);
 
         getPlatform().setIdentityOverrideOn(true);
 
-        insertRow("misc1", new Object[] { new Integer(10), new Integer(1) });
-        insertRow("misc1", new Object[] { new Integer(12), new Integer(2) });
-        insertRow("misc1", new Object[] { new Integer(13), new Integer(3) });
-        insertRow("misc2", new Object[] { new Integer(1), new Integer(10) });
-        insertRow("misc2", new Object[] { new Integer(2), new Integer(13) });
+        if (isSybase)
+        {
+            insertRow("misc1", new Object[] { new BigDecimal(10), new Integer(1) });
+            insertRow("misc1", new Object[] { new BigDecimal(12), new Integer(2) });
+            insertRow("misc1", new Object[] { new BigDecimal(13), new Integer(3) });
+            insertRow("misc2", new Object[] { new Integer(1), new BigDecimal(10) });
+            insertRow("misc2", new Object[] { new Integer(2), new BigDecimal(13) });
+        }
+        else
+        {
+            insertRow("misc1", new Object[] { new Integer(10), new Integer(1) });
+            insertRow("misc1", new Object[] { new Integer(12), new Integer(2) });
+            insertRow("misc1", new Object[] { new Integer(13), new Integer(3) });
+            insertRow("misc2", new Object[] { new Integer(1), new Integer(10) });
+            insertRow("misc2", new Object[] { new Integer(2), new Integer(13) });
+        }
 
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
@@ -236,19 +328,36 @@ public class TestMisc extends RoundtripTestBase
 
         List beans = getRows("misc1");
 
-        assertEquals(new Integer(1), beans.get(0), "pk");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(1), beans.get(0), "pk");
+            assertEquals(new BigDecimal(2), beans.get(1), "pk");
+            assertEquals(new BigDecimal(3), beans.get(2), "pk");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk");
+            assertEquals(new Integer(2), beans.get(1), "pk");
+            assertEquals(new Integer(3), beans.get(2), "pk");
+        }
         assertEquals(new Integer(1), beans.get(0), "avalue");
-        assertEquals(new Integer(2), beans.get(1), "pk");
         assertEquals(new Integer(2), beans.get(1), "avalue");
-        assertEquals(new Integer(3), beans.get(2), "pk");
         assertEquals(new Integer(3), beans.get(2), "avalue");
 
         beans = getRows("misc2");
 
         assertEquals(new Integer(1), beans.get(0), "pk");
-        assertEquals(new Integer(1), beans.get(0), "fk");
         assertEquals(new Integer(2), beans.get(1), "pk");
-        assertEquals(new Integer(3), beans.get(1), "fk");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(1), beans.get(0), "fk");
+            assertEquals(new BigDecimal(3), beans.get(1), "fk");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "fk");
+            assertEquals(new Integer(3), beans.get(1), "fk");
+        }
     }
 
     /**
@@ -263,26 +372,57 @@ public class TestMisc extends RoundtripTestBase
             return;
         }
 
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='misc'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
-            "    <column name='fk' type='INTEGER' required='false'/>\n"+
-            "    <foreign-key name='test' foreignTable='misc'>\n"+
-            "      <reference local='fk' foreign='pk'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
+        // Sybase does not like INTEGER auto-increment columns
+        boolean      isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String modelXml;
+
+        if (isSybase)
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='fk' type='NUMERIC' size='12,0' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='fk' type='INTEGER' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
 
         createDatabase(modelXml);
 
         getPlatform().setIdentityOverrideOn(false);
 
-        insertRow("misc", new Object[] { new Integer(1), null });
-        insertRow("misc", new Object[] { new Integer(2), new Integer(1) });
-        insertRow("misc", new Object[] { new Integer(3), new Integer(2) });
-        insertRow("misc", new Object[] { new Integer(4), new Integer(4) });
+        if (isSybase)
+        {
+            insertRow("misc", new Object[] { new BigDecimal(1), null });
+            insertRow("misc", new Object[] { new BigDecimal(2), new BigDecimal(1) });
+            insertRow("misc", new Object[] { new BigDecimal(3), new BigDecimal(2) });
+            insertRow("misc", new Object[] { new BigDecimal(4), new BigDecimal(4) });
+        }
+        else
+        {
+            insertRow("misc", new Object[] { new Integer(1), null });
+            insertRow("misc", new Object[] { new Integer(2), new Integer(1) });
+            insertRow("misc", new Object[] { new Integer(3), new Integer(2) });
+            insertRow("misc", new Object[] { new Integer(4), new Integer(4) });
+        }
 
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
@@ -323,14 +463,28 @@ public class TestMisc extends RoundtripTestBase
 
         List beans = getRows("misc");
 
-        assertEquals(new Integer(1), beans.get(0), "pk");
-        assertNull(((DynaBean)beans.get(0)).get("fk"));
-        assertEquals(new Integer(2), beans.get(1), "pk");
-        assertEquals(new Integer(1), beans.get(1), "fk");
-        assertEquals(new Integer(3), beans.get(2), "pk");
-        assertEquals(new Integer(2), beans.get(2), "fk");
-        assertEquals(new Integer(4), beans.get(3), "pk");
-        assertEquals(new Integer(4), beans.get(3), "fk");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(1), beans.get(0), "pk");
+            assertNull(((DynaBean)beans.get(0)).get("fk"));
+            assertEquals(new BigDecimal(2), beans.get(1), "pk");
+            assertEquals(new BigDecimal(1), beans.get(1), "fk");
+            assertEquals(new BigDecimal(3), beans.get(2), "pk");
+            assertEquals(new BigDecimal(2), beans.get(2), "fk");
+            assertEquals(new BigDecimal(4), beans.get(3), "pk");
+            assertEquals(new BigDecimal(4), beans.get(3), "fk");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk");
+            assertNull(((DynaBean)beans.get(0)).get("fk"));
+            assertEquals(new Integer(2), beans.get(1), "pk");
+            assertEquals(new Integer(1), beans.get(1), "fk");
+            assertEquals(new Integer(3), beans.get(2), "pk");
+            assertEquals(new Integer(2), beans.get(2), "fk");
+            assertEquals(new Integer(4), beans.get(3), "pk");
+            assertEquals(new Integer(4), beans.get(3), "fk");
+        }
     }
 
     /**
@@ -345,26 +499,57 @@ public class TestMisc extends RoundtripTestBase
             return;
         }
 
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='misc'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
-            "    <column name='fk' type='INTEGER' required='false'/>\n"+
-            "    <foreign-key name='test' foreignTable='misc'>\n"+
-            "      <reference local='fk' foreign='pk'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
+        // Sybase does not like INTEGER auto-increment columns
+        boolean      isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String modelXml;
+
+        if (isSybase)
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='fk' type='NUMERIC' size='12,0' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='fk' type='INTEGER' required='false'/>\n"+
+                "    <foreign-key name='test' foreignTable='misc'>\n"+
+                "      <reference local='fk' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
 
         createDatabase(modelXml);
 
         getPlatform().setIdentityOverrideOn(true);
 
-        insertRow("misc", new Object[] { new Integer(10), null });
-        insertRow("misc", new Object[] { new Integer(11), new Integer(10) });
-        insertRow("misc", new Object[] { new Integer(12), new Integer(11) });
-        insertRow("misc", new Object[] { new Integer(13), new Integer(13) });
+        if (isSybase)
+        {
+            insertRow("misc", new Object[] { new BigDecimal(10), null });
+            insertRow("misc", new Object[] { new BigDecimal(11), new BigDecimal(10) });
+            insertRow("misc", new Object[] { new BigDecimal(12), new BigDecimal(11) });
+            insertRow("misc", new Object[] { new BigDecimal(13), new BigDecimal(13) });
+        }
+        else
+        {
+            insertRow("misc", new Object[] { new Integer(10), null });
+            insertRow("misc", new Object[] { new Integer(11), new Integer(10) });
+            insertRow("misc", new Object[] { new Integer(12), new Integer(11) });
+            insertRow("misc", new Object[] { new Integer(13), new Integer(13) });
+        }
 
         StringWriter   stringWriter = new StringWriter();
         DatabaseDataIO dataIO       = new DatabaseDataIO();
@@ -405,14 +590,28 @@ public class TestMisc extends RoundtripTestBase
 
         List beans = getRows("misc");
 
-        assertEquals(new Integer(10), beans.get(0), "pk");
-        assertNull(((DynaBean)beans.get(0)).get("fk"));
-        assertEquals(new Integer(11), beans.get(1), "pk");
-        assertEquals(new Integer(10), beans.get(1), "fk");
-        assertEquals(new Integer(12), beans.get(2), "pk");
-        assertEquals(new Integer(11), beans.get(2), "fk");
-        assertEquals(new Integer(13), beans.get(3), "pk");
-        assertEquals(new Integer(13), beans.get(3), "fk");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(10), beans.get(0), "pk");
+            assertNull(((DynaBean)beans.get(0)).get("fk"));
+            assertEquals(new BigDecimal(11), beans.get(1), "pk");
+            assertEquals(new BigDecimal(10), beans.get(1), "fk");
+            assertEquals(new BigDecimal(12), beans.get(2), "pk");
+            assertEquals(new BigDecimal(11), beans.get(2), "fk");
+            assertEquals(new BigDecimal(13), beans.get(3), "pk");
+            assertEquals(new BigDecimal(13), beans.get(3), "fk");
+        }
+        else
+        {
+            assertEquals(new Integer(10), beans.get(0), "pk");
+            assertNull(((DynaBean)beans.get(0)).get("fk"));
+            assertEquals(new Integer(11), beans.get(1), "pk");
+            assertEquals(new Integer(10), beans.get(1), "fk");
+            assertEquals(new Integer(12), beans.get(2), "pk");
+            assertEquals(new Integer(11), beans.get(2), "fk");
+            assertEquals(new Integer(13), beans.get(3), "pk");
+            assertEquals(new Integer(13), beans.get(3), "fk");
+        }
     }
 
     /**
@@ -426,17 +625,39 @@ public class TestMisc extends RoundtripTestBase
             return;
         }
 
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='misc'>\n"+
-            "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
-            "    <column name='parent_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
-            "    <foreign-key foreignTable='misc' name='misc_parent_fk'>\n"+
-            "      <reference local='parent_id' foreign='id'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
+        // Sybase does not like INTEGER auto-increment columns
+        boolean      isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String modelXml;
+
+        if (isSybase)
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='id' primaryKey='true' required='true' type='NUMERIC' size='10,0' autoIncrement='true'/>\n"+
+                "    <column name='parent_id' primaryKey='false' required='false' type='NUMERIC' size='10,0' autoIncrement='false'/>\n"+
+                "    <foreign-key foreignTable='misc' name='misc_parent_fk'>\n"+
+                "      <reference local='parent_id' foreign='id'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
+                "    <column name='parent_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
+                "    <foreign-key foreignTable='misc' name='misc_parent_fk'>\n"+
+                "      <reference local='parent_id' foreign='id'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+
         final String dataXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<data>\n"+
@@ -465,31 +686,62 @@ public class TestMisc extends RoundtripTestBase
 
         List beans = getRows("misc", "id");
 
-        assertEquals(12, beans.size());
-        assertEquals(new Integer(1),  beans.get(0), "id");
-        assertNull(((DynaBean)beans.get(0)).get("parent_id"));
-        assertEquals(new Integer(2),  beans.get(1), "id");
-        assertNull(((DynaBean)beans.get(1)).get("parent_id"));
-        assertEquals(new Integer(3),  beans.get(2), "id");
-        assertEquals(new Integer(2),  beans.get(2), "parent_id");
-        assertEquals(new Integer(4),  beans.get(3), "id");
-        assertEquals(new Integer(1),  beans.get(3), "parent_id");
-        assertEquals(new Integer(5),  beans.get(4), "id");
-        assertEquals(new Integer(3),  beans.get(4), "parent_id");
-        assertEquals(new Integer(6),  beans.get(5), "id");
-        assertNull(((DynaBean)beans.get(5)).get("parent_id"));
-        assertEquals(new Integer(7),  beans.get(6), "id");
-        assertEquals(new Integer(1),  beans.get(6), "parent_id");
-        assertEquals(new Integer(8),  beans.get(7), "id");
-        assertEquals(new Integer(7),  beans.get(7), "parent_id");
-        assertEquals(new Integer(9),  beans.get(8), "id");
-        assertEquals(new Integer(6),  beans.get(8), "parent_id");
-        assertEquals(new Integer(10), beans.get(9), "id");
-        assertEquals(new Integer(4),  beans.get(9), "parent_id");
-        assertEquals(new Integer(11), beans.get(10), "id");
-        assertNull(((DynaBean)beans.get(10)).get("parent_id"));
-        assertEquals(new Integer(12), beans.get(11), "id");
-        assertEquals(new Integer(11), beans.get(11), "parent_id");
+        if (isSybase)
+        {
+            assertEquals(12, beans.size());
+            assertEquals(new BigDecimal(1),  beans.get(0), "id");
+            assertNull(((DynaBean)beans.get(0)).get("parent_id"));
+            assertEquals(new BigDecimal(2),  beans.get(1), "id");
+            assertNull(((DynaBean)beans.get(1)).get("parent_id"));
+            assertEquals(new BigDecimal(3),  beans.get(2), "id");
+            assertEquals(new BigDecimal(2),  beans.get(2), "parent_id");
+            assertEquals(new BigDecimal(4),  beans.get(3), "id");
+            assertEquals(new BigDecimal(1),  beans.get(3), "parent_id");
+            assertEquals(new BigDecimal(5),  beans.get(4), "id");
+            assertEquals(new BigDecimal(3),  beans.get(4), "parent_id");
+            assertEquals(new BigDecimal(6),  beans.get(5), "id");
+            assertNull(((DynaBean)beans.get(5)).get("parent_id"));
+            assertEquals(new BigDecimal(7),  beans.get(6), "id");
+            assertEquals(new BigDecimal(1),  beans.get(6), "parent_id");
+            assertEquals(new BigDecimal(8),  beans.get(7), "id");
+            assertEquals(new BigDecimal(7),  beans.get(7), "parent_id");
+            assertEquals(new BigDecimal(9),  beans.get(8), "id");
+            assertEquals(new BigDecimal(6),  beans.get(8), "parent_id");
+            assertEquals(new BigDecimal(10), beans.get(9), "id");
+            assertEquals(new BigDecimal(4),  beans.get(9), "parent_id");
+            assertEquals(new BigDecimal(11), beans.get(10), "id");
+            assertNull(((DynaBean)beans.get(10)).get("parent_id"));
+            assertEquals(new BigDecimal(12), beans.get(11), "id");
+            assertEquals(new BigDecimal(11), beans.get(11), "parent_id");
+        }
+        else
+        {
+            assertEquals(12, beans.size());
+            assertEquals(new Integer(1),  beans.get(0), "id");
+            assertNull(((DynaBean)beans.get(0)).get("parent_id"));
+            assertEquals(new Integer(2),  beans.get(1), "id");
+            assertNull(((DynaBean)beans.get(1)).get("parent_id"));
+            assertEquals(new Integer(3),  beans.get(2), "id");
+            assertEquals(new Integer(2),  beans.get(2), "parent_id");
+            assertEquals(new Integer(4),  beans.get(3), "id");
+            assertEquals(new Integer(1),  beans.get(3), "parent_id");
+            assertEquals(new Integer(5),  beans.get(4), "id");
+            assertEquals(new Integer(3),  beans.get(4), "parent_id");
+            assertEquals(new Integer(6),  beans.get(5), "id");
+            assertNull(((DynaBean)beans.get(5)).get("parent_id"));
+            assertEquals(new Integer(7),  beans.get(6), "id");
+            assertEquals(new Integer(1),  beans.get(6), "parent_id");
+            assertEquals(new Integer(8),  beans.get(7), "id");
+            assertEquals(new Integer(7),  beans.get(7), "parent_id");
+            assertEquals(new Integer(9),  beans.get(8), "id");
+            assertEquals(new Integer(6),  beans.get(8), "parent_id");
+            assertEquals(new Integer(10), beans.get(9), "id");
+            assertEquals(new Integer(4),  beans.get(9), "parent_id");
+            assertEquals(new Integer(11), beans.get(10), "id");
+            assertNull(((DynaBean)beans.get(10)).get("parent_id"));
+            assertEquals(new Integer(12), beans.get(11), "id");
+            assertEquals(new Integer(11), beans.get(11), "parent_id");
+        }
     }
 
     /**
@@ -504,21 +756,47 @@ public class TestMisc extends RoundtripTestBase
             return;
         }
 
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='misc'>\n"+
-            "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
-            "    <column name='left_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
-            "    <column name='right_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
-            "    <foreign-key foreignTable='misc' name='misc_left_fk'>\n"+
-            "      <reference local='left_id' foreign='id'/>\n"+
-            "    </foreign-key>\n"+
-            "    <foreign-key foreignTable='misc' name='misc_right_fk'>\n"+
-            "      <reference local='right_id' foreign='id'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
+        // Sybase does not like INTEGER auto-increment columns
+        boolean      isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String modelXml;
+
+        if (isSybase)
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='id' primaryKey='true' required='true' type='NUMERIC' size='6,0' autoIncrement='true'/>\n"+
+                "    <column name='left_id' primaryKey='false' required='false' type='NUMERIC' size='6,0' autoIncrement='false'/>\n"+
+                "    <column name='right_id' primaryKey='false' required='false' type='NUMERIC' size='6,0' autoIncrement='false'/>\n"+
+                "    <foreign-key foreignTable='misc' name='misc_left_fk'>\n"+
+                "      <reference local='left_id' foreign='id'/>\n"+
+                "    </foreign-key>\n"+
+                "    <foreign-key foreignTable='misc' name='misc_right_fk'>\n"+
+                "      <reference local='right_id' foreign='id'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='misc'>\n"+
+                "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
+                "    <column name='left_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
+                "    <column name='right_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
+                "    <foreign-key foreignTable='misc' name='misc_left_fk'>\n"+
+                "      <reference local='left_id' foreign='id'/>\n"+
+                "    </foreign-key>\n"+
+                "    <foreign-key foreignTable='misc' name='misc_right_fk'>\n"+
+                "      <reference local='right_id' foreign='id'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+
         final String dataXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<data>\n"+
@@ -542,24 +820,48 @@ public class TestMisc extends RoundtripTestBase
         List beans = getRows("misc", "id");
 
         assertEquals(6, beans.size());
-        assertEquals(new Integer(1), beans.get(0), "id");
-        assertEquals(new Integer(2), beans.get(0), "left_id");
-        assertEquals(new Integer(3), beans.get(0), "right_id");
-        assertEquals(new Integer(2), beans.get(1), "id");
-        assertEquals(new Integer(5), beans.get(1), "left_id");
-        assertEquals(new Integer(4), beans.get(1), "right_id");
-        assertEquals(new Integer(3), beans.get(2), "id");
-        assertEquals(new Integer(2), beans.get(2), "left_id");
-        assertEquals(new Integer(4), beans.get(2), "right_id");
-        assertEquals(new Integer(4), beans.get(3), "id");
-        assertEquals(new Integer(6), beans.get(3), "left_id");
-        assertEquals((Object)null,   beans.get(3), "right_id");
-        assertEquals(new Integer(5), beans.get(4), "id");
-        assertEquals((Object)null,   beans.get(4), "left_id");
-        assertEquals(new Integer(6), beans.get(4), "right_id");
-        assertEquals(new Integer(6), beans.get(5), "id");
-        assertEquals((Object)null,   beans.get(5), "left_id");
-        assertEquals((Object)null,   beans.get(5), "right_id");
+        if (isSybase)
+        {
+            assertEquals(new BigDecimal(1), beans.get(0), "id");
+            assertEquals(new BigDecimal(2), beans.get(0), "left_id");
+            assertEquals(new BigDecimal(3), beans.get(0), "right_id");
+            assertEquals(new BigDecimal(2), beans.get(1), "id");
+            assertEquals(new BigDecimal(5), beans.get(1), "left_id");
+            assertEquals(new BigDecimal(4), beans.get(1), "right_id");
+            assertEquals(new BigDecimal(3), beans.get(2), "id");
+            assertEquals(new BigDecimal(2), beans.get(2), "left_id");
+            assertEquals(new BigDecimal(4), beans.get(2), "right_id");
+            assertEquals(new BigDecimal(4), beans.get(3), "id");
+            assertEquals(new BigDecimal(6), beans.get(3), "left_id");
+            assertEquals((Object)null,      beans.get(3), "right_id");
+            assertEquals(new BigDecimal(5), beans.get(4), "id");
+            assertEquals((Object)null,      beans.get(4), "left_id");
+            assertEquals(new BigDecimal(6), beans.get(4), "right_id");
+            assertEquals(new BigDecimal(6), beans.get(5), "id");
+            assertEquals((Object)null,      beans.get(5), "left_id");
+            assertEquals((Object)null,      beans.get(5), "right_id");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "id");
+            assertEquals(new Integer(2), beans.get(0), "left_id");
+            assertEquals(new Integer(3), beans.get(0), "right_id");
+            assertEquals(new Integer(2), beans.get(1), "id");
+            assertEquals(new Integer(5), beans.get(1), "left_id");
+            assertEquals(new Integer(4), beans.get(1), "right_id");
+            assertEquals(new Integer(3), beans.get(2), "id");
+            assertEquals(new Integer(2), beans.get(2), "left_id");
+            assertEquals(new Integer(4), beans.get(2), "right_id");
+            assertEquals(new Integer(4), beans.get(3), "id");
+            assertEquals(new Integer(6), beans.get(3), "left_id");
+            assertEquals((Object)null,   beans.get(3), "right_id");
+            assertEquals(new Integer(5), beans.get(4), "id");
+            assertEquals((Object)null,   beans.get(4), "left_id");
+            assertEquals(new Integer(6), beans.get(4), "right_id");
+            assertEquals(new Integer(6), beans.get(5), "id");
+            assertEquals((Object)null,   beans.get(5), "left_id");
+            assertEquals((Object)null,   beans.get(5), "right_id");
+        }
     }
 
     /**

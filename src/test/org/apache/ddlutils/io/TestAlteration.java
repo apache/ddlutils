@@ -625,9 +625,9 @@ public class TestAlteration extends RoundtripTestBase
             return;
         }
 
-        boolean isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
-        String  model1Xml; 
-        String  model2Xml;
+        boolean      isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String model1Xml; 
+        final String model2Xml;
 
         if (isSybase)
         {
@@ -731,15 +731,15 @@ public class TestAlteration extends RoundtripTestBase
     	}
 
         // we need special catering for Sybase which does not support identity for INTEGER columns
-        boolean isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
-        String  model1Xml = 
+        boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
-        String model2Xml;
+        final String model2Xml;
 
         if (isSybase)
         {
@@ -1045,15 +1045,15 @@ public class TestAlteration extends RoundtripTestBase
             return;
         }
 
-        boolean isSybase = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
-        String model2Xml = 
+        boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
+        final String model1Xml;
+        final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
-        String model1Xml; 
 
         if (isSybase)
         {
@@ -1964,19 +1964,37 @@ public class TestAlteration extends RoundtripTestBase
             "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip1'>\n"+
-            "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "  <table name='roundtrip2'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' autoIncrement='true' required='true'/>\n"+
-            "  </table>\n"+
-           "</database>";
+        final String model2Xml; 
 
+        // Sybase does not like INTEGER auto-increment columns
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            model2Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='roundtrip1'>\n"+
+                "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
+                "  </table>\n"+
+                "  <table name='roundtrip2'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' autoIncrement='true' required='true'/>\n"+
+                "  </table>\n"+
+               "</database>";
+        }
+        else
+        {
+            model2Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='roundtrip1'>\n"+
+                "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
+                "  </table>\n"+
+                "  <table name='roundtrip2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' autoIncrement='true' required='true'/>\n"+
+                "  </table>\n"+
+               "</database>";
+        }
         createDatabase(model1Xml);
-
+        
         insertRow("roundtrip1", new Object[] { "1" });
 
         alterDatabase(model2Xml);
@@ -2077,18 +2095,35 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testRemoveTable3()
     {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
-            "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
+        final String model1Xml;
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
             "</database>";
+
+        // Sybase does not like INTEGER auto-increment columns
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            model1Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            model1Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
 
         createDatabase(model1Xml);
 
