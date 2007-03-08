@@ -19,12 +19,14 @@ package org.apache.ddlutils.util;
  * under the License.
  */
 
+import java.sql.Statement;
 import java.sql.Types;
 
 import org.apache.ddlutils.model.TypeMap;
 
 /**
- * Little helper class providing functions for dealing with the newer JDBC functionality.
+ * Little helper class providing functions for dealing with the newer JDBC functionality
+ * in a way that is safe to compile with Java 1.3.
  * 
  * @version $Revision: 289996 $
  */
@@ -82,6 +84,65 @@ public abstract class Jdbc3Utils
         catch (Exception ex)
         {
             throw new UnsupportedOperationException("The jdbc type DATALINK is not supported");
+        }
+    }
+
+    /**
+     * Determines whether the system supports the Java 1.4 batch result codes.
+     *   
+     * @return <code>true</code> if SUCCESS_NO_INFO and EXECUTE_FAILED are available
+     *         in the {@link java.sql.Statement} class
+     */
+    public static boolean supportsJava14BatchResultCodes()
+    {
+        try
+        {
+            return (Statement.class.getField("SUCCESS_NO_INFO") != null) &&
+                   (Statement.class.getField("EXECUTE_FAILED") != null);
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Returns the logging message corresponding to the given result code of a batch message.
+     * Note that these code values are only available in JDBC 3 and newer (see
+     * {@link java.sql.Statement} for details).
+     * 
+     * @param tableName  The name of the table that the batch update/insert was performed on
+     * @param rowIdx     The index of the row within the batch for which this code is
+     * @param resultCode The code
+     * @return The string message or <code>null</code> if the code does not indicate an error
+     */
+    public static String getBatchResultMessage(String tableName, int rowIdx, int resultCode)
+    {
+        if (resultCode < 0)
+        {
+            try
+            {
+                if (resultCode == Statement.class.getField("SUCCESS_NO_INFO").getInt(null))
+                {
+                    return null;
+                }
+                else if (resultCode == Statement.class.getField("EXECUTE_FAILED").getInt(null))
+                {
+                    return "The batch insertion of row " + rowIdx + " into table " + tableName + " failed but the driver is able to continue processing";
+                }
+                else
+                {
+                    return "The batch insertion of row " + rowIdx + " into table " + tableName + " returned an undefined status value " + resultCode;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new UnsupportedOperationException("The batch result codes are not supported");
+            }
+        }
+        else
+        {
+            return null;
         }
     }
 }

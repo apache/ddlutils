@@ -1494,13 +1494,30 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                 closeStatement(statement);
                 afterInsert(connection, table);
 
-                int sum = 0;
+                boolean hasSum = true;
+                int     sum    = 0;
 
                 for (int idx = 0; (results != null) && (idx < results.length); idx++)
                 {
-                    sum += results[idx];
+                    if (results[idx] < 0)
+                    {
+                        hasSum = false;
+                        if (Jdbc3Utils.supportsJava14BatchResultCodes())
+                        {
+                            String msg = Jdbc3Utils.getBatchResultMessage(table.getName(), idx, results[idx]);
+
+                            if (msg != null)
+                            {
+                                _log.warn(msg);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        sum += results[idx];
+                    }
                 }
-                if (sum != numRows)
+                if (hasSum && (sum != numRows))
                 {
                     _log.warn("Attempted to insert " + numRows + " rows into table " + table.getName() + " but changed " + sum + " rows");
                 }
