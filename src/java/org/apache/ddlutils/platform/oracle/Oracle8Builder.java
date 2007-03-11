@@ -372,6 +372,27 @@ public class Oracle8Builder extends SqlBuilder
                                                 Map      parameters,
                                                 List     changes) throws IOException
     {
+        // While Oracle has an ALTER TABLE MODIFY statement, it is somewhat limited
+        // esp. if there is data in the table, so we don't use it
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof AddColumnChange)
+            {
+                AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                // Oracle can only add not insert columns
+                // Also, we cannot add NOT NULL columns unless they have a default value
+                if (!addColumnChange.isAtEnd() ||
+                    (addColumnChange.getNewColumn().isRequired() && (addColumnChange.getNewColumn().getDefaultValue() == null)))
+                {
+                    // we need to rebuild the full table
+                    return;
+                }
+            }
+        }
+
         // First we drop primary keys as necessary
         for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
         {
@@ -401,16 +422,8 @@ public class Oracle8Builder extends SqlBuilder
 
             if (change instanceof AddColumnChange)
             {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                // Oracle can only add not insert columns
-                // Also, we cannot add NOT NULL columns unless they have a default value
-                if (addColumnChange.isAtEnd() &&
-                    (!addColumnChange.getNewColumn().isRequired() || (addColumnChange.getNewColumn().getDefaultValue() != null)))
-                {
-                    processChange(currentModel, desiredModel, addColumnChange);
-                    changeIt.remove();
-                }
+                processChange(currentModel, desiredModel, (AddColumnChange)change);
+                changeIt.remove();
             }
             else if (change instanceof RemoveColumnChange)
             {

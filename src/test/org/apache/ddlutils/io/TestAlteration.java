@@ -2119,7 +2119,7 @@ public class TestAlteration extends RoundtripTestBase
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
                 "<database name='roundtriptest'>\n"+
                 "  <table name='roundtrip'>\n"+
-                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
                 "  </table>\n"+
                 "</database>";
@@ -2161,5 +2161,39 @@ public class TestAlteration extends RoundtripTestBase
         String alterationSql = getPlatform().getAlterTablesSql(catalog, schema, null, model);
 
         assertEqualsIgnoringWhitespaces("", alterationSql);
+    }
+
+    /**
+     * Test for DDLUTILS-159.
+     */
+    public void testRenamePK() throws Exception
+    {
+        final String model1Xml = 
+            "<?xml version='1.0'?>\n" +
+            "<database name='roundtriptest'>\n" +
+            "  <table name='roundtrip'>\n" +
+            "    <column name='id' primaryKey='true' required='true' type='INTEGER'/>\n" +
+            "    <column name='avalue' primaryKey='false' required='false' type='VARCHAR' size='40'/>\n" +
+            "  </table>\n" +
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0'?>\n" +
+            "<database name='roundtriptest'>\n" +
+            "  <table name='roundtrip'>\n" +
+            "    <column name='pk' primaryKey='true' required='true' type='INTEGER'/>\n" +
+            "    <column name='avalue' primaryKey='false' required='false' type='VARCHAR' size='40'/>\n" +
+            "  </table>\n" +
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        // note that we cannot do this test with values in the table because
+        // the primary key will be re-created and thus won't have values in it
+        // (no renaming)
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
     }
 }

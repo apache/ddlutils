@@ -98,6 +98,22 @@ public class SapDbBuilder extends SqlBuilder
                                                 Map      parameters,
                                                 List     changes) throws IOException
     {
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if (change instanceof AddColumnChange)
+            {
+                AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                // SapDB can only add not insert columns
+                if (!addColumnChange.isAtEnd())
+                {
+                    return;
+                }
+            }
+        }
+
         // First we drop primary keys as necessary
         for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
         {
@@ -126,14 +142,8 @@ public class SapDbBuilder extends SqlBuilder
 
             if (change instanceof AddColumnChange)
             {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                // SapDB can only add not insert columns
-                if (addColumnChange.isAtEnd())
-                {
-                    processChange(currentModel, desiredModel, addColumnChange);
-                    changeIt.remove();
-                }
+                processChange(currentModel, desiredModel, (AddColumnChange)change);
+                changeIt.remove();
             }
             else if (change instanceof ColumnDefaultValueChange)
             {
