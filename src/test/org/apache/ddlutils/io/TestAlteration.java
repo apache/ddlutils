@@ -2187,13 +2187,13 @@ public class TestAlteration extends RoundtripTestBase
 
         createDatabase(model1Xml);
 
-        // note that we cannot do this test with values in the table because
-        // the primary key will be re-created and thus won't have values in it
-        // (no renaming)
+        insertRow("roundtrip", new Object[] { new Integer(1), "test" });
 
         alterDatabase(model2Xml);
 
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
+
+        assertTrue(getRows("roundtrip").isEmpty());
     }
 }

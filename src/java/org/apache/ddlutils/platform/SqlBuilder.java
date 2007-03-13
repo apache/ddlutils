@@ -915,17 +915,49 @@ public abstract class SqlBuilder
 
         if (!changes.isEmpty())
         {
-            Table tempTable       = getTemporaryTableFor(desiredModel, targetTable);
+            // we can only copy the data if no required columns without default value and
+            // non-autoincrement have been added
+            boolean canMigrateData = true;
+
+            for (Iterator it = changes.iterator(); canMigrateData && it.hasNext();)
+            {
+                TableChange change = (TableChange)it.next();
+
+                if (change instanceof AddColumnChange)
+                {
+                    AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                    if (addColumnChange.getNewColumn().isRequired() &&
+                        !addColumnChange.getNewColumn().isAutoIncrement() &&
+                        (addColumnChange.getNewColumn().getDefaultValue() == null))
+                    {
+                        _log.warn("Data cannot be retained in table " + change.getChangedTable().getName() + 
+                                  " because of the addition of the required column " + addColumnChange.getNewColumn().getName());
+                        canMigrateData = false;
+                    }
+                }
+            }
+
             Table realTargetTable = getRealTargetTableFor(desiredModel, sourceTable, targetTable);
 
-            createTemporaryTable(desiredModel, tempTable, parameters);
-            writeCopyDataStatement(sourceTable, tempTable);
-            // Note that we don't drop the indices here because the DROP TABLE will take care of that
-            // Likewise, foreign keys have already been dropped as necessary
-            dropTable(sourceTable);
-            createTable(desiredModel, realTargetTable, parameters);
-            writeCopyDataStatement(tempTable, targetTable);
-            dropTemporaryTable(desiredModel, tempTable);
+            if (canMigrateData)
+            {
+                Table tempTable = getTemporaryTableFor(desiredModel, targetTable);
+    
+                createTemporaryTable(desiredModel, tempTable, parameters);
+                writeCopyDataStatement(sourceTable, tempTable);
+                // Note that we don't drop the indices here because the DROP TABLE will take care of that
+                // Likewise, foreign keys have already been dropped as necessary
+                dropTable(sourceTable);
+                createTable(desiredModel, realTargetTable, parameters);
+                writeCopyDataStatement(tempTable, targetTable);
+                dropTemporaryTable(desiredModel, tempTable);
+            }
+            else
+            {
+                dropTable(sourceTable);
+                createTable(desiredModel, realTargetTable, parameters);
+            }
         }
     }
 
