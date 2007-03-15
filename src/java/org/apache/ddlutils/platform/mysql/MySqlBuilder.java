@@ -183,17 +183,7 @@ public class MySqlBuilder extends SqlBuilder
 
             if (change instanceof AddColumnChange)
             {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                if (addColumnChange.getNewColumn().isRequired() &&
-                    (addColumnChange.getNewColumn().getDefaultValue() == null) &&
-                    !addColumnChange.getNewColumn().isAutoIncrement())
-                {
-                    // we're enforcing a full rebuild in case of the addition of a required
-                    // column without a default value that is not autoincrement
-                    return;
-                }
-                addColumnChanges.add(change);
+                addColumnChanges.add((AddColumnChange)change);
                 changeIt.remove();
             }
         }
