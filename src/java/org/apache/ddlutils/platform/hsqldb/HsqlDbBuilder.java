@@ -81,6 +81,18 @@ public class HsqlDbBuilder extends SqlBuilder
                                                 Map      parameters,
                                                 List     changes) throws IOException
     {
+        // HsqlDb can only drop columns that are not part of a primary key
+        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
+        {
+            TableChange change = (TableChange)changeIt.next();
+
+            if ((change instanceof RemoveColumnChange) && 
+                ((RemoveColumnChange)change).getColumn().isPrimaryKey())
+            {
+                return;
+            }
+        }
+
         // in order to utilize the ALTER TABLE ADD COLUMN BEFORE statement
         // we have to apply the add column changes in the correct order
         // thus we first gather all add column changes and then execute them
@@ -114,12 +126,8 @@ public class HsqlDbBuilder extends SqlBuilder
             {
                 RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
 
-                // HsqlDb can only drop columns that are not part of a primary key
-                if (!removeColumnChange.getColumn().isPrimaryKey())
-                {
-                    processChange(currentModel, desiredModel, removeColumnChange);
-                    changeIt.remove();
-                }
+                processChange(currentModel, desiredModel, removeColumnChange);
+                changeIt.remove();
             }
         }
     }
