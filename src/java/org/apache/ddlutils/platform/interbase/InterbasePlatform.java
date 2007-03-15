@@ -56,6 +56,7 @@ public class InterbasePlatform extends PlatformImplBase
         info.setMaxIdentifierLength(31);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
+        info.setSystemForeignKeyIndicesAlwaysNonUnique(true);
 
         // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);

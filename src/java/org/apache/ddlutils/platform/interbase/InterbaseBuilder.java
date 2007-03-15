@@ -198,7 +198,7 @@ public class InterbaseBuilder extends SqlBuilder
             for (int idx = 0; idx < columns.length; idx++)
             {
                 result.append("GEN_ID(");
-                result.append(getGeneratorName(table, columns[idx]));
+                result.append(getDelimitedIdentifier(getGeneratorName(table, columns[idx])));
                 result.append(", 0)");
             }
             result.append(" FROM RDB$DATABASE");

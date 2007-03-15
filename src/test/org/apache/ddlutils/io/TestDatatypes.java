@@ -34,6 +34,7 @@ import java.util.TreeSet;
 import junit.framework.Test;
 
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 
 /**
  * Performs roundtrip datatype tests.
@@ -710,8 +711,10 @@ public class TestDatatypes extends RoundtripTestBase
      */
     public void testLongVarCharWithDefault()
     {
-        if (!getPlatformInfo().isDefaultValuesForLongTypesSupported())
+        if (!getPlatformInfo().isDefaultValuesForLongTypesSupported() ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
+            // Some Interbase versions do not like default values for LOB objects
             return;
         }
 
