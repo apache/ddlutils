@@ -35,6 +35,7 @@ import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -73,6 +74,60 @@ public class SapDbBuilder extends SqlBuilder
     protected void writeColumnAutoIncrementStmt(Table table, Column column) throws IOException
     {
         print("DEFAULT SERIAL(1)");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeExternalPrimaryKeysCreateStmt(Table table, Column[] primaryKeyColumns) throws IOException
+    {
+        // Note that SapDB does not support the addition of named primary keys
+        if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
+        {
+            print("ALTER TABLE ");
+            printlnIdentifier(getTableName(table));
+            printIndent();
+            print("ADD ");
+            writePrimaryKeyStmt(table, primaryKeyColumns);
+            printEndOfStatement();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
+    {
+        if (key.getForeignTableName() == null)
+        {
+            _log.warn("Foreign key table is null for key " + key);
+        }
+        else
+        {
+            writeTableAlterStmt(table);
+
+            print(" ADD FOREIGN KEY ");
+            printIdentifier(getForeignKeyName(table, key));
+            print(" (");
+            writeLocalReferences(key);
+            print(") REFERENCES ");
+            printIdentifier(getTableName(database.findTable(key.getForeignTableName())));
+            print(" (");
+            writeForeignReferences(key);
+            print(")");
+            printEndOfStatement();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
+    {
+        writeTableAlterStmt(table);
+        print("DROP FOREIGN KEY ");
+        printIdentifier(getForeignKeyName(table, foreignKey));
+        printEndOfStatement();
     }
 
     /**

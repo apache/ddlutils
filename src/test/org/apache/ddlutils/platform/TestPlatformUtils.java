@@ -19,6 +19,8 @@ package org.apache.ddlutils.platform;
  * under the License.
  */
 
+import junit.framework.TestCase;
+
 import org.apache.ddlutils.PlatformUtils;
 import org.apache.ddlutils.platform.axion.AxionPlatform;
 import org.apache.ddlutils.platform.cloudscape.CloudscapePlatform;
@@ -27,15 +29,13 @@ import org.apache.ddlutils.platform.derby.DerbyPlatform;
 import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
-import org.apache.ddlutils.platform.maxdb.MaxDbPlatform;
 import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
 import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.oracle.Oracle8Platform;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
+import org.apache.ddlutils.platform.sapdb.SapDbPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
-
-import junit.framework.TestCase;
 
 /**
  * Tests the {@link org.apache.ddlutils.PlatformUtils} class.
@@ -372,20 +372,20 @@ public class TestPlatformUtils extends TestCase
     }
 
     /**
-     * Tests the determination of the MaxDb platform via its JDBC driver.
+     * Tests the determination of the SapDb platform via its JDBC driver.
      */
-    public void testMaxDbDriver()
+    public void testSapDbDriver()
     {
-        assertEquals(MaxDbPlatform.DATABASENAME,
+        assertEquals(SapDbPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType("com.sap.dbtech.jdbc.DriverSapDB", null));
     }
 
     /**
-     * Tests the determination of the MaxDb platform via JDBC connection urls.
+     * Tests the determination of the SapDb platform via JDBC connection urls.
      */
-    public void testMaxDbUrl()
+    public void testSapDbUrl()
     {
-        assertEquals(MaxDbPlatform.DATABASENAME,
+        assertEquals(SapDbPlatform.DATABASENAME,
                      _platformUtils.determineDatabaseType(null, "jdbc:sapdb://servermachine:9876/TST"));
     }
 

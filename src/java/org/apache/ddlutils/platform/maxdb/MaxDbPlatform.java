@@ -35,6 +35,16 @@ public class MaxDbPlatform extends SapDbPlatform
     public static final String DATABASENAME = "MaxDB";
 
     /**
+     * Creates a new platform instance.
+     */
+    public MaxDbPlatform()
+    {
+        super();
+        setSqlBuilder(new MaxDbBuilder(this));
+        setModelReader(new MaxDbModelReader(this));
+    }
+
+    /**
      * {@inheritDoc}
      */
     public String getName()

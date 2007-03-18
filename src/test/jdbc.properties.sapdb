@@ -1,9 +1,9 @@
-# JDBC properties for MaxDB
+# JDBC properties for SapDB
 # Note: Properties starting with "datasource." will be fed into the datasource instance of the
 # class configured via the datasource.class property
 
-# You need to use this property, otherwise DdlUtils will detect SapDB instead (since the JDBC driver is the same)
-ddlutils.platform=MaxDB
+# Use this property if ddlutils does not recognize the platform from the settings
+#ddlutils.platform=SapDB
 
 #
 # Using the plain DBCP datasource
@@ -12,5 +12,5 @@ ddlutils.platform=MaxDB
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=com.sap.dbtech.jdbc.DriverSapDB
 datasource.url=jdbc:sapdb://localhost/ddlutils
-datasource.username=ddlutils
-datasource.password=ddlutils
+datasource.username=dba
+datasource.password=dba
