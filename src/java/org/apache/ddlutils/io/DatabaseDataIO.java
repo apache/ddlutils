@@ -460,8 +460,8 @@ public class DatabaseDataIO
      * 
      * @param platform The platform
      * @param model    The database model
+     * @param table    The table 
      * @param writer   The data writer
-     * @param tableIdx 
      */
     private void writeDataForTableToXML(Platform platform, Database model, Table table, DataWriter writer)
     {
