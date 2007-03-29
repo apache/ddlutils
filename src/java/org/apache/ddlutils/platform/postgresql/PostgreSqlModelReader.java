@@ -117,6 +117,20 @@ public class PostgreSqlModelReader extends JdbcModelReader
                     column.setTypeCode(Types.LONGVARCHAR);
                 }
             }
+            // fix issue DDLUTILS-165 as postgresql-8.2-504-jdbc3.jar seems to return Integer.MAX_VALUE
+            // on columns defined as TEXT.
+            else if (column.getSizeAsInt() == Integer.MAX_VALUE)
+            {
+                column.setSize(null);
+                if (column.getTypeCode() == Types.VARCHAR)
+                {
+                    column.setTypeCode(Types.LONGVARCHAR);
+                }
+                else if (column.getTypeCode() == Types.BINARY)
+                {
+                    column.setTypeCode(Types.LONGVARBINARY);
+                }
+            }
         }
 
         String defaultValue = column.getDefaultValue();
