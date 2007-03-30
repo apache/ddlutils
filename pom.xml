@@ -87,6 +87,12 @@
       <email>tomdz@maven.org</email>
       <organization>ASF</organization>
     </developer>
+    <developer>
+      <id>mvdb</id>
+      <name>Martin van den Bemt</name>
+      <email>mvdb@apache.org</email>
+      <organization>ASF</organization>
+    </developer>
   </developers>
 
   <dependencies>
@@ -103,13 +109,9 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <!-- TODO: Move to a released version of Betwixt
-           Since version 0.8 doesn't exist yet, install 0.8-RC1 into the local repo
-           mvn install:install-file -DgroupId=commons-betwixt -DartifactId=commons-betwixt -Dversion=0.8-RC1 -Dpackaging=jar -Dfile=lib/commons-betwixt-0.8-RC1.jar -DgeneratePom=true
-      -->
       <groupId>commons-betwixt</groupId>
       <artifactId>commons-betwixt</artifactId>
-      <version>0.8-RC1</version>
+      <version>0.8</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
@@ -170,6 +172,13 @@
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.8</version>
+      <!-- Optional if you don't use the ant task. -->
+      <optional>true</optional>
     </dependency>
 
     <dependency>
