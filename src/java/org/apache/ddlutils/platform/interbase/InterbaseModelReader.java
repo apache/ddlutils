@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
@@ -320,6 +321,53 @@ public class InterbaseModelReader extends JdbcModelReader
             }
         }
         return pks;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Collection readForeignKeys(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
+    {
+        Map       fks    = new ListOrderedMap();
+        ResultSet fkData = null;
+
+        try
+        {
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                // Jaybird has a problem when delimited identifiers are used as
+                // it is not able to find the foreign key info for the table
+                // So we have to filter manually below
+                fkData = metaData.getForeignKeys(getDefaultTablePattern());
+                while (fkData.next())
+                {
+                    Map values = readColumns(fkData, getColumnsForFK());
+    
+                    if (tableName.equals(values.get("FKTABLE_NAME")))
+                    {
+                        readForeignKey(metaData, values, fks);
+                    }
+                }
+            }
+            else
+            {
+                fkData = metaData.getForeignKeys(tableName);
+                while (fkData.next())
+                {
+                    Map values = readColumns(fkData, getColumnsForFK());
+    
+                    readForeignKey(metaData, values, fks);
+                }
+            }
+        }
+        finally
+        {
+            if (fkData != null)
+            {
+                fkData.close();
+            }
+        }
+        return fks.values();
     }
 
     /**

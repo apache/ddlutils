@@ -128,7 +128,7 @@ public class InterbaseBuilder extends SqlBuilder
         printEndOfStatement();
 
         print("CREATE TRIGGER ");
-        printIdentifier(getConstraintName("trg", table, column.getName(), null));
+        printIdentifier(getTriggerName(table, column));
         print(" FOR ");
         printlnIdentifier(getTableName(table));
         println("ACTIVE BEFORE INSERT POSITION 0 AS");
@@ -151,12 +151,24 @@ public class InterbaseBuilder extends SqlBuilder
     private void writeAutoIncrementDropStmts(Table table, Column column) throws IOException
     {
         print("DROP TRIGGER ");
-        printIdentifier(getConstraintName("trg", table, column.getName(), null));
+        printIdentifier(getTriggerName(table, column));
         printEndOfStatement();
 
         print("DROP GENERATOR ");
         printIdentifier(getGeneratorName(table, column));
         printEndOfStatement();
+    }
+
+    /**
+     * Determines the name of the trigger for an auto-increment column.
+     * 
+     * @param table  The table
+     * @param column The auto-increment column
+     * @return The trigger name
+     */
+    protected String getTriggerName(Table table, Column column)
+    {
+        return getConstraintName("trg", table, column.getName(), null);
     }
 
     /**
