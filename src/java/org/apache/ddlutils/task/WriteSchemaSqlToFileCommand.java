@@ -178,14 +178,7 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
         }
         catch (Exception ex)
         {
-            if (isFailOnError())
-            {
-                throw new BuildException(ex);
-            }
-            else
-            {
-                _log.error(ex);
-            }
+            handleException(ex, ex.getMessage());
         }
     }
 }

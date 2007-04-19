@@ -61,7 +61,8 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
     }
 
     /**
-     * Determines whether to drop tables and the associated constraints if necessary.
+     * Determines whether to drop tables and the associated constraints before re-creating them
+     * (this implies <code>alterDatabase</code> is <code>false</code>).
      * 
      * @return <code>true</code> if drops shall be performed
      */
@@ -131,14 +132,7 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
         }
         catch (Exception ex)
         {
-            if (isFailOnError())
-            {
-                throw new BuildException(ex);
-            }
-            else
-            {
-                _log.error(ex);
-            }
+            handleException(ex, ex.getMessage());
         }
     }
 }

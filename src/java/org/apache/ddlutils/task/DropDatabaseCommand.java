@@ -68,19 +68,12 @@ public class DropDatabaseCommand extends DatabaseCommand
         }
         catch (UnsupportedOperationException ex)
         {
-            _log.info("Database platform " + platform.getName() + " does not support database dropping via JDBC",
-                      ex);
+            _log.error("Database platform " + platform.getName() + " does not support database dropping via JDBC",
+                       ex);
         }
         catch (Exception ex)
         {
-            if (isFailOnError())
-            {
-                throw new BuildException(ex);
-            }
-            else
-            {
-                _log.error(ex);
-            }
+            handleException(ex, ex.getMessage());
         }
     }
 }

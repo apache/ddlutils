@@ -20,8 +20,6 @@ package org.apache.ddlutils.task;
  */
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.Platform;
 import org.apache.tools.ant.BuildException;
 
@@ -31,15 +29,10 @@ import org.apache.tools.ant.BuildException;
  * @version $Revision: 289996 $
  * @ant.type ignore="true"
  */
-public abstract class DatabaseCommand implements Command
+public abstract class DatabaseCommand extends Command
 {
-    /** The log. */
-    protected final Log _log = LogFactory.getLog(getClass());
-
     /** The platform configuration. */
     private PlatformConfiguration _platformConf = new PlatformConfiguration();
-    /** Whether to stop execution upon an error. */
-    private boolean _failOnError = true;
 
     /**
      * Returns the database type.
@@ -89,28 +82,6 @@ public abstract class DatabaseCommand implements Command
     protected void setPlatformConfiguration(PlatformConfiguration platformConf)
     {
         _platformConf = platformConf;
-    }
-
-    /**
-     * Determines whether the command execution will be stopped upon an error.
-     * Default value is <code>true</code>.
-     *
-     * @return <code>true</code> if the execution stops in case of an error
-     */
-    public boolean isFailOnError()
-    {
-        return _failOnError;
-    }
-
-    /**
-     * Specifies whether the execution shall stop if an error has occurred during the task runs.
-     *
-     * @param failOnError <code>true</code> if the execution shall stop in case of an error
-     * @ant.not-required By default execution will be stopped when an error is encountered.
-     */
-    public void setFailOnError(boolean failOnError)
-    {
-        _failOnError = failOnError;
     }
 
     /**

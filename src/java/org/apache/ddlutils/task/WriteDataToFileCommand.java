@@ -91,7 +91,7 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
         }
         catch (Exception ex)
         {
-            throw new BuildException(ex);
+            handleException(ex, ex.getMessage());
         }
     }
 

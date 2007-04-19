@@ -22,8 +22,6 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.io.FileWriter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.io.DataDtdWriter;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
@@ -36,11 +34,8 @@ import org.apache.tools.ant.BuildException;
  * @version $Revision: 289996 $
  * @ant.task name="writeDtdToFile"
  */
-public class WriteDtdToFileCommand implements Command
+public class WriteDtdToFileCommand extends Command
 {
-    /** The log. */
-    private final Log _log = LogFactory.getLog(getClass());
-
     /** The file to output the DTD to. */
     private File _outputFile;
 
@@ -88,7 +83,7 @@ public class WriteDtdToFileCommand implements Command
         }
         catch (Exception ex)
         {
-            throw new BuildException("Failed to write to output file " + _outputFile.getAbsolutePath(), ex);
+            handleException(ex, "Failed to write to output file " + _outputFile.getAbsolutePath());
         }
     }
 }

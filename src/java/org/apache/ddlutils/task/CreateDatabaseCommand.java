@@ -93,14 +93,7 @@ public class CreateDatabaseCommand extends DatabaseCommand
         }
         catch (Exception ex)
         {
-            if (isFailOnError())
-            {
-                throw new BuildException(ex);
-            }
-            else
-            {
-                _log.error(ex);
-            }
+            handleException(ex, ex.getMessage());
         }
     }
 

@@ -178,14 +178,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
         }
         catch (Exception ex)
         {
-            if (ex instanceof BuildException)
-            {
-                throw (BuildException)ex;
-            }
-            else
-            {
-                throw new BuildException(ex);
-            }
+            handleException(ex, ex.getMessage());
         }
         finally
         {
@@ -203,7 +196,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
      * @param reader   The data reader
      * @param dataFile The schema file
      */
-    private void readSingleDataFile(Task task, DataReader reader, File dataFile)
+    private void readSingleDataFile(Task task, DataReader reader, File dataFile) throws BuildException
     {
         if (!dataFile.exists())
         {
@@ -226,15 +219,7 @@ public class WriteDataToDatabaseCommand extends ConvertingDatabaseCommand
             }
             catch (Exception ex)
             {
-                if (isFailOnError())
-                {
-                    throw new BuildException("Could not parse or write data file " + dataFile.getAbsolutePath(), ex);
-                }
-                else
-                {
-                    _log.error("Could not parse or write data file " + dataFile.getAbsolutePath(),
-                               ex);
-                }
+                handleException(ex, "Could not parse or write data file " + dataFile.getAbsolutePath());
             }
         }
     }
