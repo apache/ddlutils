@@ -255,6 +255,7 @@ public class ModelBasedResultSetIterator implements Iterator
                     {
                         curTable = (Table)_preparedQueryHints.get(_caseSensitive ? columnName : columnName.toLowerCase());
                     }
+
                     Object value = _platform.getObjectFromResultSet(_resultSet, columnName, curTable);
 
                     bean.set(propName, value);
@@ -267,6 +268,23 @@ public class ModelBasedResultSetIterator implements Iterator
                 cleanUp();
                 throw new DatabaseOperationException("Exception while reading the row from the resultset", ex);
             }
+        }
+    }
+
+    /**
+     * Advances the iterator without materializing the object. This is the same effect as calling
+     * {@link #next()} except that no object is created and nothing is read from the result set.
+     */
+    public void advance()
+    {
+        advanceIfNecessary();
+        if (_isAtEnd)
+        {
+            throw new NoSuchElementException("No more elements in the resultset");
+        }
+        else
+        {
+            _needsAdvancing = true;
         }
     }
     

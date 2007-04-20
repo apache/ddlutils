@@ -1001,11 +1001,15 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(model, resultSet, queryHints); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
+            for (ModelBasedResultSetIterator it = createResultSetIterator(model, resultSet, queryHints); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
                     result.add(it.next());
+                }
+                else
+                {
+                    it.advance();
                 }
             }
         }
@@ -1081,11 +1085,15 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
             int rowIdx = 0;
 
-            for (Iterator it = createResultSetIterator(model, resultSet, queryHints); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
+            for (ModelBasedResultSetIterator it = createResultSetIterator(model, resultSet, queryHints); ((end < 0) || (rowIdx <= end)) && it.hasNext(); rowIdx++)
             {
                 if (rowIdx >= start)
                 {
                     result.add(it.next());
+                }
+                else
+                {
+                    it.advance();
                 }
             }
         }
