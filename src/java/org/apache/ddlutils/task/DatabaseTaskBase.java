@@ -34,7 +34,6 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
-import org.apache.tools.ant.types.EnumeratedAttribute;
 
 /**
  * Base class for DdlUtils Ant tasks that operate on a database.
@@ -44,61 +43,6 @@ import org.apache.tools.ant.types.EnumeratedAttribute;
  */
 public abstract class DatabaseTaskBase extends Task
 {
-    /**
-     * Helper class that defines the possible values for the verbosity attribute.
-     * 
-     * @ant.task ignore="true"
-     */
-    public static class VerbosityLevel extends EnumeratedAttribute {
-        /** The possible levels. */
-        private static final String[] LEVELS = { Level.FATAL.toString().toUpperCase(),
-                                                 Level.ERROR.toString().toUpperCase(),
-                                                 Level.WARN.toString().toUpperCase(),
-                                                 Level.INFO.toString().toUpperCase(),
-                                                 Level.DEBUG.toString().toUpperCase(),
-                                                 Level.FATAL.toString().toLowerCase(),
-                                                 Level.ERROR.toString().toLowerCase(),
-                                                 Level.WARN.toString().toLowerCase(),
-                                                 Level.INFO.toString().toLowerCase(),
-                                                 Level.DEBUG.toString().toLowerCase() };
-
-        /**
-         * Creates an uninitialized verbosity level object.
-         */
-        public VerbosityLevel()
-        {
-            super();
-        }
-
-        /**
-         * Creates an initialized verbosity level object.
-         * 
-         * @param level The level
-         */
-        public VerbosityLevel(String level)
-        {
-            super();
-            setValue(level);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public String[] getValues() {
-            return LEVELS;
-        }
-
-        /**
-         * Determines whether this is DEBUG verbosity.
-         * 
-         * @return <code>true</code> if this is the DEBUG level
-         */
-        public boolean isDebug()
-        {
-            return Level.DEBUG.toString().equalsIgnoreCase(getValue());
-        }
-    }
-
     /** The log. */
     protected Log _log;
 
@@ -106,13 +50,29 @@ public abstract class DatabaseTaskBase extends Task
     private PlatformConfiguration _platformConf = new PlatformConfiguration();
     /** The sub tasks to execute. */
     private ArrayList _commands = new ArrayList();
+    /** Whether to use simple logging (that the Ant task configures itself via the {@link #_verbosity} setting. */
+    private boolean _simpleLogging = true;
     /** The verbosity of the task's debug output. */
-    private VerbosityLevel _verbosity = new VerbosityLevel(Level.INFO.toString());
+    private VerbosityLevel _verbosity = null;
 
     /**
-     * Specifies the verbosity of the task's debug output. Default is <code>INFO</code>.
+     * Specifies whether simple logging (configured by the task via the <code>verbosity</code>
+     * setting) shall be used, or whether logging is configured outside of the task
+     * (e.g. via a log4j properties file).
+     * 
+     * @param simpleLogging Whether to use simple logging or not
+     * @ant.not-required Per default, simple logging is enabled.
+     */
+    public void setSimpleLogging(boolean simpleLogging)
+    {
+        _simpleLogging = simpleLogging;
+    }
+
+    /**
+     * Specifies the verbosity of the task's debug output.
      * 
      * @param level The verbosity level
+     * @ant.not-required Default is <code>INFO</code>.
      */
     public void setVerbosity(VerbosityLevel level)
     {
@@ -340,8 +300,9 @@ public abstract class DatabaseTaskBase extends Task
     {
         // For Ant, we're forcing DdlUtils to do logging via log4j to the console
         Properties props = new Properties();
+        String     level = (_verbosity == null ? Level.INFO.toString() : _verbosity.getValue()).toUpperCase();
 
-        props.setProperty("log4j.rootCategory", _verbosity.getValue().toUpperCase() + ",A");
+        props.setProperty("log4j.rootCategory", level + ",A");
         props.setProperty("log4j.appender.A", "org.apache.log4j.ConsoleAppender");
         props.setProperty("log4j.appender.A.layout", "org.apache.log4j.PatternLayout");
         props.setProperty("log4j.appender.A.layout.ConversionPattern", "%m%n");
@@ -382,7 +343,9 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void execute() throws BuildException
     {
-        initLogging();
+        if (_simpleLogging) {
+            initLogging();
+        }
 
         if (!hasCommands())
         {
