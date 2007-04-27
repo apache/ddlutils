@@ -73,7 +73,79 @@ public class SybaseBuilder extends SqlBuilder
         super.createTable(database, table, parameters);
     }
 
-	/**
+    /**
+     * {@inheritDoc}
+     */
+	protected void writeTableCreationStmtEnding(Table table, Map parameters) throws IOException
+    {
+        if (parameters != null)
+        {
+            // We support
+            // - 'lock'
+            // - 'at'
+            // - 'external table at'
+            // - 'on'
+            // - with parameters as name value pairs
+
+            String lockValue            = (String)parameters.get("lock");
+            String atValue              = (String)parameters.get("at");
+            String externalTableAtValue = (String)parameters.get("external table at");
+            String onValue              = (String)parameters.get("on");
+
+            if (lockValue != null)
+            {
+                print(" lock ");
+                print(lockValue);
+            }
+
+            boolean writtenWithParameters = false;
+
+            for (Iterator it = parameters.entrySet().iterator(); it.hasNext();)
+            {
+                Map.Entry entry = (Map.Entry)it.next();
+                String    name  = entry.getKey().toString();
+
+                if (!"lock".equals(name) && !"at".equals(name) && !"external table at".equals(name) && !"on".equals(name))
+                {
+                    if (!writtenWithParameters)
+                    {
+                        print(" with ");
+                        writtenWithParameters = true;
+                    }
+                    else
+                    {
+                        print(", ");
+                    }
+                    print(name);
+                    if (entry.getValue() != null)
+                    {
+                        print("=");
+                        print(entry.getValue().toString());
+                    }
+                }
+            }
+            if (onValue != null)
+            {
+                print(" on ");
+                print(onValue);
+            }
+            if (externalTableAtValue != null)
+            {
+                print(" external table at \"");
+                print(externalTableAtValue);
+                print("\"");
+            }
+            else if (atValue != null)
+            {
+                print(" at \"");
+                print(atValue);
+                print("\"");
+            }
+        }
+        super.writeTableCreationStmtEnding(table, parameters);
+    }
+
+    /**
 	 * {@inheritDoc}
 	 */
 	protected void writeColumn(Table table, Column column) throws IOException
@@ -356,7 +428,7 @@ public class SybaseBuilder extends SqlBuilder
             {
                 AddColumnChange addColumnChange = (AddColumnChange)change;
 
-                // Oracle can only add not insert columns
+                // Sybase can only add not insert columns
                 if (addColumnChange.isAtEnd())
                 {
                     processChange(currentModel, desiredModel, addColumnChange);
