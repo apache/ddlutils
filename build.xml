@@ -268,7 +268,7 @@
   <!-- ================================================================== -->
   <!-- Build the src archive                                              -->
   <!-- ================================================================== -->
-  <target name="src-archive"
+  <target name="src-archive" depends="doc"
           description="Builds the source distribution archive.">
     <zip zipfile="${dist.dir}/${dist.src.filename.prefix}.zip"
          basedir="."
@@ -276,12 +276,24 @@
   	     excludes="${dist.src.excludes}"/>
   </target>
 
-	<!-- ================================================================== -->
+
+  <!-- ================================================================== -->
+  <!-- Build the bin archive                                              -->
+  <!-- ================================================================== -->
+  <target name="bin-archive" depends="jar,doc"
+          description="Builds the binary distribution archive.">
+    <zip zipfile="${dist.dir}/${dist.bin.filename.prefix}.zip"
+         basedir="."
+         includes="${dist.bin.includes}"
+         excludes="${dist.bin.excludes}"/>
+  </target>
+
+  <!-- ================================================================== -->
   <!-- Creates the DdlUtils distribution                                  -->
   <!-- ================================================================== -->
   <target name="dist"
           description="Creates the distribution"
-          depends="jar, doc-archive"/>
+          depends="jar, doc-archive, src-archive"/>
 
   <target name="compile-tests"
           description="Compiles the unit tests"
