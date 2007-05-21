@@ -125,5 +125,6 @@ to the file <code>data.xml</code>.
 <p>The DdlUtils tasks require Ant version 1.5 or newer.</p>
 <h3>Reference</h3>
 <p>The reference documentation for the Ant tasks can be found <a href="index.all.html">here</a>.</p>
+<p>&copy;2005-2007 Apache Software Foundation</p>
 </body>
 </html>

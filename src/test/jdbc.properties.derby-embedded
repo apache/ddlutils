@@ -1,4 +1,4 @@
-# JDBC properties for Mysql
+# JDBC properties for Derby >= 10.1.1.0
 
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -17,19 +17,20 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Note: Properties starting with "datasource." will be fed into the datasource instance of the
+# Use this property if ddlutils does not recognize the platform from the settings
+#ddlutils.platform=Derby
+
+# Properties starting with "datasource." will be fed into the datasource instance of the
 # class configured via the datasource.class property
 
-# Use this property if ddlutils does not recognize the platform from the settings
-#ddlutils.platform=MySQL
-
-#
-# Using the plain DBCP datasource
-#
-
 datasource.class=org.apache.commons.dbcp.BasicDataSource
-datasource.driverClassName=com.mysql.jdbc.Driver
-datasource.url=jdbc:mysql://10.21.21.33:3306/ddlutils
-datasource.username=root
-datasource.password=ddlutils
-datasource.maxConnections=200
+
+# Embedded mode
+
+datasource.driverClassName=org.apache.derby.jdbc.EmbeddedDriver
+datasource.url=jdbc:derby:target/database/ddlutils_derby;create=true
+
+# The default username for embedded Derby is app; for every other user the must be a corresponding
+# schema defined in the database; see http://db.apache.org/derby/faq.html#schema_exist for details
+datasource.username=app
+datasource.password=
