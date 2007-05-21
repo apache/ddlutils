@@ -260,12 +260,23 @@
   <!-- ================================================================== -->
   <target name="doc-archive" depends="doc"
           description="Builds the complete documentation archive.">
-    <zip zipfile="${dist.dir}/${dist.filename.prefix}-doc.zip"
+    <zip zipfile="${dist.dir}/${dist.doc.filename.prefix}.zip"
          basedir="."
-         includes="doc/**"/>
+         includes="${dist.doc.includes}"/>
   </target>
 
   <!-- ================================================================== -->
+  <!-- Build the src archive                                              -->
+  <!-- ================================================================== -->
+  <target name="src-archive"
+          description="Builds the source distribution archive.">
+    <zip zipfile="${dist.dir}/${dist.src.filename.prefix}.zip"
+         basedir="."
+         includes="${dist.src.includes}"
+  	     excludes="${dist.src.excludes}"/>
+  </target>
+
+	<!-- ================================================================== -->
   <!-- Creates the DdlUtils distribution                                  -->
   <!-- ================================================================== -->
   <target name="dist"
