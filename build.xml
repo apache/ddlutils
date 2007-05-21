@@ -69,6 +69,9 @@
       <fileset dir="${src.java.dir}"
                excludes="**/*.java"/>
     </copy>
+  	<mkdir dir="${build.java.dir}/META-INF"/>
+    <copy todir="${build.java.dir}/META-INF"
+  	      file="${basedir}/LICENSE.txt"/>
     <jar jarfile="${dist.dir}/${dist.filename.prefix}.jar"
          basedir="${build.java.dir}"
          excludes="**/package.html">
@@ -288,7 +291,7 @@
   <!-- ================================================================== -->
   <target name="dist"
           description="Creates the distribution"
-          depends="jar, doc-archive, src-archive"/>
+          depends="jar, doc-archive, src-archive, bin-archive"/>
 
   <target name="compile-tests"
           description="Compiles the unit tests"
@@ -297,8 +300,10 @@
     <javac srcdir="${src.test.dir}"
            destdir="${build.test.dir}"
            deprecation="true"
-           debug="true"
-           optimize="false">
+    	   debug="true"
+    	   source="1.2"
+    	   target="1.2"
+    	   optimize="false">
       <classpath refid="compilation-classpath"/>
     </javac>
   </target>
