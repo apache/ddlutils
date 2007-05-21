@@ -116,11 +116,6 @@
     <copy todir="${build.doc.dir}">
       <fileset dir="${src.doc.dir}"/>
     </copy>
-  	<!-- We're copying the contents of the ReleaseNotes.txt into
-  	     the corresponding documentation source file, otherwise we would loose the
-  	     menu when the user clicks on the corresponding menu entry -->
-    <loadfile property="release-notes.content" srcfile="${basedir}/ReleaseNotes.txt"/>
-    <replace file="${build.doc.dir}/src/documentation/content/xdocs/release-notes.xml" token="@@content@@" value="${release-notes.content}"/>
 
     <!-- Copy generated javadoc into the forrest structure in the temporary directory -->
     <antcall target="javadoc"/>

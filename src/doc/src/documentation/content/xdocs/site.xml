@@ -36,7 +36,7 @@ See http://forrest.apache.org/docs/linking.html for more info
 
   <about label="About">
     <index label="Home" href="index.html" description="Welcome to DdlUtils"/>
-    <changes label="Release Notes" href="release-notes.html" description="Release Notes" />
+    <changes label="Release Notes" href="ext:ddlutils/jira-changelog" description="Release Notes" />
     <mail-lists label="Mailing lists" href="mail-lists.html" description="Info about DdlUtils' mailing lists"/>
     <jira label="Bug database (JIRA)" href="ext:ddlutils/jira"/>
   </about>
@@ -79,6 +79,7 @@ See http://forrest.apache.org/docs/linking.html for more info
   <external-refs>
     <ddlutils>
       <jira href="http://issues.apache.org/jira/secure/BrowseProject.jspa?id=10731"/>
+      <jira-changelog href="http://issues.apache.org/jira/browse/DDLUTILS?report=com.atlassian.jira.plugin.system.project:changelog-panel"/>
       <javadoc href="api/">
         <model href="index.html?org/apache/ddlutils/model/package-summary.html"/>
         <converter href="org/apache/ddlutils/io/converters/SqlTypeConverter.html"/>
