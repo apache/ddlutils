@@ -216,7 +216,72 @@ public class TestDataReaderAndWriter extends TestCase
             public void end() throws DataSinkException
             {}
         });
-        // no need to call start/end as the don't do anything anyways
+        // no need to call start/end as they don't do anything anyways
+        dataReader.parse(new StringReader(dataXml));
+
+        assertEquals(1, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertEquals(testedValue,
+                     obj.get("value").toString());
+    }
+
+
+    /**
+     * Tests a cdata section (see DDLUTILS-174).
+     */
+    public void testCData() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
+            "<database name=\"test\">\n"+
+            "  <table name=\"test\">\n"+
+            "    <column name=\"id\" type=\"INTEGER\" primaryKey=\"true\" required=\"true\"/>\n"+
+            "    <column name=\"value\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testedValue = "<![CDATA[";
+
+        DatabaseIO modelIO = new DatabaseIO();
+
+        modelIO.setUseInternalDtd(true);
+        modelIO.setValidateXml(false);
+        
+        Database     model      = modelIO.read(new StringReader(testSchemaXml));
+        StringWriter output     = new StringWriter();
+        DataWriter   dataWriter = new DataWriter(output, "UTF-8");
+        SqlDynaBean  bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+        dataWriter.writeDocumentStart();
+        dataWriter.write(bean);
+        dataWriter.writeDocumentEnd();
+
+        String dataXml = output.toString();
+
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new DataSink() {
+            public void start() throws DataSinkException
+            {}
+
+            public void addBean(DynaBean bean) throws DataSinkException
+            {
+                readObjects.add(bean);
+            }
+
+            public void end() throws DataSinkException
+            {}
+        });
+        // no need to call start/end as they don't do anything anyways
         dataReader.parse(new StringReader(dataXml));
 
         assertEquals(1, readObjects.size());
