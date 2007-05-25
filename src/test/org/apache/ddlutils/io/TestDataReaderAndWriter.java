@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.model.Database;
 
@@ -242,10 +243,12 @@ public class TestDataReaderAndWriter extends TestCase
             "<database name=\"test\">\n"+
             "  <table name=\"test\">\n"+
             "    <column name=\"id\" type=\"INTEGER\" primaryKey=\"true\" required=\"true\"/>\n"+
-            "    <column name=\"value\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
+            "    <column name=\"value1\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
+            "    <column name=\"value2\" type=\"VARCHAR\" size=\"4000\" required=\"true\"/>\n"+
             "  </table>\n"+
             "</database>";
-        final String testedValue = "<![CDATA[";
+        final String testedValue1 = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><test><![CDATA[some text]]></test>";
+        final String testedValue2 = StringUtils.repeat("a ", 1000) + testedValue1;
 
         DatabaseIO modelIO = new DatabaseIO();
 
@@ -258,7 +261,8 @@ public class TestDataReaderAndWriter extends TestCase
         SqlDynaBean  bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
         bean.set("id", new Integer(1));
-        bean.set("value", testedValue);
+        bean.set("value1", testedValue1);
+        bean.set("value2", testedValue2);
         dataWriter.writeDocumentStart();
         dataWriter.write(bean);
         dataWriter.writeDocumentEnd();
@@ -292,7 +296,9 @@ public class TestDataReaderAndWriter extends TestCase
                      obj.getDynaClass().getName());
         assertEquals("1",
                      obj.get("id").toString());
-        assertEquals(testedValue,
-                     obj.get("value").toString());
+        assertEquals(testedValue1,
+                     obj.get("value1").toString());
+        assertEquals(testedValue2,
+                     obj.get("value2").toString());
     }
 }
