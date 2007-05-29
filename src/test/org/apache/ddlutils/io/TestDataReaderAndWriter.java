@@ -245,16 +245,18 @@ public class TestDataReaderAndWriter extends TestCase
             "    <column name=\"id\" type=\"INTEGER\" primaryKey=\"true\" required=\"true\"/>\n"+
             "    <column name=\"value1\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
             "    <column name=\"value2\" type=\"VARCHAR\" size=\"4000\" required=\"true\"/>\n"+
+            "    <column name=\"value3\" type=\"LONGVARCHAR\" size=\"4000\" required=\"true\"/>\n"+
             "  </table>\n"+
             "</database>";
         final String testedValue1 = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><test><![CDATA[some text]]></test>";
         final String testedValue2 = StringUtils.repeat("a ", 1000) + testedValue1;
+        final String testedValue3 = "<div>\n<h1><![CDATA[WfMOpen]]></h1>\n" + StringUtils.repeat("Make it longer\n", 99) +  "</div>";
 
         DatabaseIO modelIO = new DatabaseIO();
 
         modelIO.setUseInternalDtd(true);
         modelIO.setValidateXml(false);
-        
+
         Database     model      = modelIO.read(new StringReader(testSchemaXml));
         StringWriter output     = new StringWriter();
         DataWriter   dataWriter = new DataWriter(output, "UTF-8");
@@ -263,6 +265,7 @@ public class TestDataReaderAndWriter extends TestCase
         bean.set("id", new Integer(1));
         bean.set("value1", testedValue1);
         bean.set("value2", testedValue2);
+        bean.set("value3", testedValue3);
         dataWriter.writeDocumentStart();
         dataWriter.write(bean);
         dataWriter.writeDocumentEnd();
@@ -300,5 +303,7 @@ public class TestDataReaderAndWriter extends TestCase
                      obj.get("value1").toString());
         assertEquals(testedValue2,
                      obj.get("value2").toString());
+        assertEquals(testedValue3,
+                     obj.get("value3").toString());
     }
 }
