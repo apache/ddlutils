@@ -22,9 +22,11 @@ package org.apache.ddlutils.io;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -281,7 +283,7 @@ public class DataWriter
                 {
                     // we create an attribute only if the text is not too long
                     // and if it does not contain special characters
-                    if ((valueAsText.length() > MAX_ATTRIBUTE_LENGTH) || containsSpecialCharacters(valueAsText))
+                    if ((valueAsText.length() > MAX_ATTRIBUTE_LENGTH) || analyzeText(valueAsText, null))
                     {
                         // we defer writing the sub elements
                         subElements.put(column.getName(), valueAsText);
@@ -294,6 +296,8 @@ public class DataWriter
             }
             if (!subElements.isEmpty())
             {
+                List cutPoints = new ArrayList();
+
                 for (Iterator it = subElements.entrySet().iterator(); it.hasNext();)
                 {
                     Map.Entry entry     = (Map.Entry)it.next();
@@ -304,15 +308,39 @@ public class DataWriter
                     _writer.writeStartElement(entry.getKey().toString());
 
                     // if the content contains special characters, we have to apply base64 encoding to it
-                    // if the content is too short, then it has to contain special characters, otherwise we check
-                    if ((content.length() <= MAX_ATTRIBUTE_LENGTH) || containsSpecialCharacters(content))
+                    // if the content is too short, then it has to contain special characters (otherwise
+                    // it would have been written as an attribute already), otherwise we check
+                    cutPoints.clear();
+
+                    boolean writeBase64Encoded = analyzeText(content, cutPoints);
+
+                    if (writeBase64Encoded)
                     {
                         _writer.writeAttribute(DatabaseIO.BASE64_ATTR_NAME, "true");
                         _writer.writeCData(new String(Base64.encodeBase64(content.getBytes())));
                     }
                     else
                     {
-                        _writer.writeCData(content);
+                        if (cutPoints.isEmpty())
+                        {
+                            _writer.writeCData(content);
+                        }
+                        else
+                        {
+                            int lastPos = 0;
+
+                            for (Iterator cutPointIt = cutPoints.iterator(); cutPointIt.hasNext();)
+                            {
+                                int curPos = ((Integer)cutPointIt.next()).intValue();
+
+                                _writer.writeCData(content.substring(lastPos, curPos));
+                                lastPos = curPos;
+                            }
+                            if (lastPos < content.length())
+                            {
+                                _writer.writeCData(content.substring(lastPos));
+                            }
+                        }
                     }
 
                     _writer.writeEndElement();
@@ -335,14 +363,19 @@ public class DataWriter
 
     /**
      * Determines whether the given string contains special characters that cannot
-     * be used in XML.
+     * be used in XML, and if not, finds the cut points where to split the text
+     * when writing it in a CDATA section.
      * 
-     * @param text The text
+     * @param text      The text
+     * @param cutPoints Will be filled with cut points to split the text when writing it
+     *                  in a CDATA section (only if the method returns <code>false</code>)
      * @return <code>true</code> if the text contains special characters
      */
-    private boolean containsSpecialCharacters(String text)
+    private boolean analyzeText(String text, List cutPoints)
     {
-        int numChars = text.length();
+        List tmpCutPoints          = cutPoints == null ? null : new ArrayList();
+        int  numChars              = text.length();
+        int  numFoundCDataEndChars = 0;
 
         for (int charPos = 0; charPos < numChars; charPos++)
         {
@@ -352,6 +385,27 @@ public class DataWriter
             {
                 return true;
             }
+            else if (cutPoints != null)
+            {
+                if ((c == ']') && ((numFoundCDataEndChars == 0) || (numFoundCDataEndChars == 1)))
+                {
+                    numFoundCDataEndChars++;
+                }
+                else if ((c == '>') && (numFoundCDataEndChars == 2))
+                {
+                    // we have to split the CDATA right here before the '>' (see DDLUTILS-174)
+                    tmpCutPoints.add(new Integer(charPos));
+                    numFoundCDataEndChars = 0;
+                }
+                else
+                {
+                    numFoundCDataEndChars = 0;
+                }
+            }
+        }
+        if (cutPoints != null)
+        {
+            cutPoints.addAll(tmpCutPoints);
         }
         return false;
     }

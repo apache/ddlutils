@@ -246,11 +246,15 @@ public class TestDataReaderAndWriter extends TestCase
             "    <column name=\"value1\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
             "    <column name=\"value2\" type=\"VARCHAR\" size=\"4000\" required=\"true\"/>\n"+
             "    <column name=\"value3\" type=\"LONGVARCHAR\" size=\"4000\" required=\"true\"/>\n"+
+            "    <column name=\"value4\" type=\"LONGVARCHAR\" size=\"4000\" required=\"true\"/>\n"+
+            "    <column name=\"value5\" type=\"LONGVARCHAR\" size=\"4000\" required=\"true\"/>\n"+
             "  </table>\n"+
             "</database>";
         final String testedValue1 = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><test><![CDATA[some text]]></test>";
         final String testedValue2 = StringUtils.repeat("a ", 1000) + testedValue1;
         final String testedValue3 = "<div>\n<h1><![CDATA[WfMOpen]]></h1>\n" + StringUtils.repeat("Make it longer\n", 99) +  "</div>";
+        final String testedValue4 = "<![CDATA[" + StringUtils.repeat("b \n", 1000) +  "]]>";
+        final String testedValue5 = "<<![CDATA[" + StringUtils.repeat("b \n", 500) +  "]]>><![CDATA[" + StringUtils.repeat("c \n", 500) +  "]]>";
 
         DatabaseIO modelIO = new DatabaseIO();
 
@@ -266,6 +270,8 @@ public class TestDataReaderAndWriter extends TestCase
         bean.set("value1", testedValue1);
         bean.set("value2", testedValue2);
         bean.set("value3", testedValue3);
+        bean.set("value4", testedValue4);
+        bean.set("value5", testedValue5);
         dataWriter.writeDocumentStart();
         dataWriter.write(bean);
         dataWriter.writeDocumentEnd();
@@ -305,5 +311,9 @@ public class TestDataReaderAndWriter extends TestCase
                      obj.get("value2").toString());
         assertEquals(testedValue3,
                      obj.get("value3").toString());
+        assertEquals(testedValue4,
+                     obj.get("value4").toString());
+        assertEquals(testedValue5,
+                     obj.get("value5").toString());
     }
 }
