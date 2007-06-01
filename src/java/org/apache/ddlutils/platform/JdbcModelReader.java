@@ -615,7 +615,7 @@ public class JdbcModelReader
             columnNames.add(pks[columnIdx].getName());
         }
 
-        for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
+        for (int indexIdx = 0; indexIdx < table.getIndexCount();)
         {
             Index index = table.getIndex(indexIdx);
 
@@ -623,7 +623,10 @@ public class JdbcModelReader
                 isInternalPrimaryKeyIndex(metaData, table, index))
             {
                 table.removeIndex(indexIdx);
-                break;
+            }
+            else
+            {
+                indexIdx++;
             }
         }
     }
@@ -653,7 +656,7 @@ public class JdbcModelReader
             columnNames.add(name);
         }
 
-        for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
+        for (int indexIdx = 0; indexIdx < table.getIndexCount();)
         {
             Index index = table.getIndex(indexIdx);
 
@@ -662,7 +665,10 @@ public class JdbcModelReader
             {
                 fk.setAutoIndexPresent(true);
                 table.removeIndex(indexIdx);
-                break;
+            }
+            else
+            {
+                indexIdx++;
             }
         }
     }
