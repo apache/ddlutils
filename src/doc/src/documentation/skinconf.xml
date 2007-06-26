@@ -185,6 +185,12 @@ which will be used to configure the chosen Forrest skin.
         in the class attribute of a <p> node. 
         e.g. <p class="quote"/>
     -->
+
+body #banner td a, .app h3 a, .app h4 a {
+    color: #000 !important;
+    font-size: 2.5em;
+}
+
     p { 
       line-height: 1.4
     }

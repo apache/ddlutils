@@ -24,12 +24,58 @@
   </header> 
   <body> 
     <section>
-      <title>Where to download DdlUtils</title>
+      <title>DdlUtils' Releases</title>
+      <p>
+        These are the currently released artifacts:
+      </p>
+      <table>
+        <tr>
+          <th>Version</th>
+          <th>Binary</th>
+          <th>Library JAR</th>
+          <th>Source</th>
+          <th>Documentation</th>
+        </tr>
+        <tr>
+          <td>
+            <a href="http://www.apache.org/dyn/closer.cgi/db/ddlutils/ddlutils-1.0/">DdlUtils 1.0</a>
+          </td>
+          <td>
+            <a href="http://www.apache.org/dyn/closer.cgi/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0-bin.zip">ZIP</a><br/>
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0-bin.zip.asc">Signature</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0-bin.zip.md5">MD5</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0-bin.zip.sha">SHA1</a>&nbsp;
+          </td>
+          <td>
+            <a href="http://www.apache.org/dyn/closer.cgi/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0.jar">JAR</a><br/>
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0.jar.asc">Signature</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0.jar.md5">MD5</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/binaries/DdlUtils-1.0.jar.sha">SHA1</a>&nbsp;
+          </td>
+          <td>
+            <a href="http://www.apache.org/dyn/closer.cgi/db/ddlutils/ddlutils-1.0/source/DdlUtils-1.0-src.zip">ZIP</a><br/>
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/source/DdlUtils-1.0-src.zip.asc">Signature</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/source/DdlUtils-1.0-src.zip.md5">MD5</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/source/DdlUtils-1.0-src.zip.sha">SHA1</a>&nbsp;
+          </td>
+          <td>
+            <a href="http://www.apache.org/dyn/closer.cgi/db/ddlutils/ddlutils-1.0/doc/DdlUtils-1.0-doc.zip">ZIP</a><br/>
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/doc/DdlUtils-1.0-doc.zip.asc">Signature</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/doc/DdlUtils-1.0-doc.zip.md5">MD5</a>&nbsp;
+            <a href="http://www.apache.org/dist/db/ddlutils/ddlutils-1.0/doc/DdlUtils-1.0-doc.zip.sha">SHA1</a>&nbsp;
+          </td>
+        </tr>
+      </table>
+      <p>
+        You can find the KEYS file containing the public keys for verifying the signature here:
+        <a href="http://www.apache.org/dist/db/ddlutils/KEYS">KEYS</a><br/>
+      </p>
     </section>
-    <p>
-      DdlUtils has not yet released any binary or source releases. Therefore please get it
-      from the repository for the time being. Instructions on how to do that can be found
-      <a href="site:download/svn-info">here</a>.
-    </p>
+    <section>
+      <title>Getting the source from the source repository</title>
+      <p>
+        Instructions on how to access the DdlUtils' source repository can be found <a href="site:download/svn-info">here</a>.
+      </p>
+    </section>
   </body>
 </document>
