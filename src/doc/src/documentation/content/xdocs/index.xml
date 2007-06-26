@@ -21,9 +21,6 @@
 <document> 
   <header> 
     <title>Welcome to DdlUtils</title> 
-    <authors>
-      <person name="Thomas Dudziak" email="tomdz@apache.org"/>
-    </authors>
   </header> 
   <body> 
     <section id="What_is_DdlUtils">
