@@ -30,7 +30,7 @@
   <groupId>org.apache.ddlutils</groupId>
   <artifactId>ddlutils</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-RC2</version>
+  <version>1.0</version>
   <name>Apache DdlUtils</name>
   <description>
     DdlUtils is a small, easy-to-use component for working with Database Definition (DDL) files.
