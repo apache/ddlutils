@@ -19,9 +19,9 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
-import java.beans.IntrospectionException;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,13 +29,23 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.apache.commons.betwixt.io.BeanReader;
-import org.apache.commons.betwixt.io.BeanWriter;
-import org.apache.commons.betwixt.strategy.HyphenatedNameMapper;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.ForeignKey;
+import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.NonUniqueIndex;
+import org.apache.ddlutils.model.Reference;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.UniqueIndex;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * This class provides functions to read and write database models from/to XML.
@@ -48,11 +58,62 @@ public class DatabaseIO
         element uses Base64 encoding. */
     public static final String BASE64_ATTR_NAME = "base64";
 
+    /** The namespace used by DdlUtils. */
+    public static final String DDLUTILS_NAMESPACE = "http://db.apache.org/torque/";
+
+    /** Qualified name of the column element. */
+    public static final QName QNAME_ELEMENT_COLUMN        = new QName(DDLUTILS_NAMESPACE, "column");
+    /** Qualified name of the database element. */
+    public static final QName QNAME_ELEMENT_DATABASE      = new QName(DDLUTILS_NAMESPACE, "database");
+    /** Qualified name of the foreign-key element. */
+    public static final QName QNAME_ELEMENT_FOREIGN_KEY   = new QName(DDLUTILS_NAMESPACE, "foreign-key");
+    /** Qualified name of the index element. */
+    public static final QName QNAME_ELEMENT_INDEX         = new QName(DDLUTILS_NAMESPACE, "index");
+    /** Qualified name of the index-column element. */
+    public static final QName QNAME_ELEMENT_INDEX_COLUMN  = new QName(DDLUTILS_NAMESPACE, "index-column");
+    /** Qualified name of the reference element. */
+    public static final QName QNAME_ELEMENT_REFERENCE     = new QName(DDLUTILS_NAMESPACE, "reference");
+    /** Qualified name of the table element. */
+    public static final QName QNAME_ELEMENT_TABLE         = new QName(DDLUTILS_NAMESPACE, "table");
+    /** Qualified name of the unique element. */
+    public static final QName QNAME_ELEMENT_UNIQUE        = new QName(DDLUTILS_NAMESPACE, "unique");
+    /** Qualified name of the unique-column element. */
+    public static final QName QNAME_ELEMENT_UNIQUE_COLUMN = new QName(DDLUTILS_NAMESPACE, "unique-column");
+
+    /** Qualified name of the autoIncrement attribute. */
+    public static final QName QNAME_ATTRIBUTE_AUTO_INCREMENT    = new QName(DDLUTILS_NAMESPACE, "autoIncrement");
+    /** Qualified name of the default attribute. */
+    public static final QName QNAME_ATTRIBUTE_DEFAULT           = new QName(DDLUTILS_NAMESPACE, "default");
+    /** Qualified name of the defaultIdMethod attribute. */
+    public static final QName QNAME_ATTRIBUTE_DEFAULT_ID_METHOD = new QName(DDLUTILS_NAMESPACE, "defaultIdMethod");
+    /** Qualified name of the description attribute. */
+    public static final QName QNAME_ATTRIBUTE_DESCRIPTION       = new QName(DDLUTILS_NAMESPACE, "description");
+    /** Qualified name of the foreign attribute. */
+    public static final QName QNAME_ATTRIBUTE_FOREIGN           = new QName(DDLUTILS_NAMESPACE, "foreign");
+    /** Qualified name of the foreignTable attribute. */
+    public static final QName QNAME_ATTRIBUTE_FOREIGN_TABLE     = new QName(DDLUTILS_NAMESPACE, "foreignTable");
+    /** Qualified name of the javaName attribute. */
+    public static final QName QNAME_ATTRIBUTE_JAVA_NAME         = new QName(DDLUTILS_NAMESPACE, "javaName");
+    /** Qualified name of the local attribute. */
+    public static final QName QNAME_ATTRIBUTE_LOCAL             = new QName(DDLUTILS_NAMESPACE, "local");
+    /** Qualified name of the name attribute. */
+    public static final QName QNAME_ATTRIBUTE_NAME              = new QName(DDLUTILS_NAMESPACE, "name");
+    /** Qualified name of the primaryKey attribute. */
+    public static final QName QNAME_ATTRIBUTE_PRIMARY_KEY       = new QName(DDLUTILS_NAMESPACE, "primaryKey");
+    /** Qualified name of the required attribute. */
+    public static final QName QNAME_ATTRIBUTE_REQUIRED          = new QName(DDLUTILS_NAMESPACE, "required");
+    /** Qualified name of the size attribute. */
+    public static final QName QNAME_ATTRIBUTE_SIZE              = new QName(DDLUTILS_NAMESPACE, "size");
+    /** Qualified name of the type attribute. */
+    public static final QName QNAME_ATTRIBUTE_TYPE              = new QName(DDLUTILS_NAMESPACE, "type");
+    /** Qualified name of the version attribute. */
+    public static final QName QNAME_ATTRIBUTE_VERSION           = new QName(DDLUTILS_NAMESPACE, "version");
+
     /** Whether to validate the XML. */
     private boolean _validateXml = true;
     /** Whether to use the internal dtd that comes with DdlUtils. */
     private boolean _useInternalDtd = true;
-
+    
     /**
      * Returns whether XML is validated upon reading it.
      * 
@@ -94,66 +155,6 @@ public class DatabaseIO
     }
 
     /**
-     * Returns the commons-betwixt mapping file as an {@link org.xml.sax.InputSource} object.
-     * Per default, this will be classpath resource under the path <code>/mapping.xml</code>.
-     *  
-     * @return The input source for the mapping
-     */
-    protected InputSource getBetwixtMapping()
-    {
-        return new InputSource(getClass().getResourceAsStream("/mapping.xml"));
-    }
-    
-    /**
-     * Returns a new bean reader configured to read database models.
-     * 
-     * @return The reader
-     */
-    protected BeanReader getReader() throws IntrospectionException, SAXException, IOException
-    {
-        BeanReader reader = new BeanReader();
-
-        reader.getXMLIntrospector().getConfiguration().setAttributesForPrimitives(true);
-        reader.getXMLIntrospector().getConfiguration().setWrapCollectionsInElement(false);
-        reader.getXMLIntrospector().getConfiguration().setElementNameMapper(new HyphenatedNameMapper());
-        reader.setValidating(isValidateXml());
-        if (isUseInternalDtd())
-        {
-            reader.setEntityResolver(new LocalEntityResolver());
-        }
-        reader.registerMultiMapping(getBetwixtMapping());
-
-        return reader;
-    }
-
-    /**
-     * Returns a new bean writer configured to writer database models.
-     * 
-     * @param output The target output writer
-     * @return The writer
-     */
-    protected BeanWriter getWriter(Writer output) throws DdlUtilsException
-    {
-        try
-        {
-            BeanWriter writer = new BeanWriter(output);
-    
-            writer.getXMLIntrospector().register(getBetwixtMapping());
-            writer.getXMLIntrospector().getConfiguration().setAttributesForPrimitives(true);
-            writer.getXMLIntrospector().getConfiguration().setWrapCollectionsInElement(false);
-            writer.getXMLIntrospector().getConfiguration().setElementNameMapper(new HyphenatedNameMapper());
-            writer.getBindingConfiguration().setMapIDs(false);
-            writer.enablePrettyPrint();
-    
-            return writer;
-        }
-        catch (Exception ex)
-        {
-            throw new DdlUtilsException(ex);
-        }
-    }
-
-    /**
      * Reads the database model contained in the specified file.
      * 
      * @param filename The model file name
@@ -161,18 +162,14 @@ public class DatabaseIO
      */
     public Database read(String filename) throws DdlUtilsException
     {
-        Database model = null;
-
         try
         {
-            model = (Database)getReader().parse(filename);
+            return read(new FileReader(filename));
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
             throw new DdlUtilsException(ex);
         }
-        model.initialize();
-        return model;
     }
 
     /**
@@ -183,18 +180,14 @@ public class DatabaseIO
      */
     public Database read(File file) throws DdlUtilsException
     {
-        Database model = null;
-
         try
         {
-            model = (Database)getReader().parse(file);
+            return read(new FileReader(file));
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
             throw new DdlUtilsException(ex);
         }
-        model.initialize();
-        return model;
     }
 
     /**
@@ -205,18 +198,14 @@ public class DatabaseIO
      */
     public Database read(Reader reader) throws DdlUtilsException
     {
-        Database model = null;
-
         try
         {
-            model = (Database)getReader().parse(reader);
+            return read(getXMLInputFactory().createXMLStreamReader(reader));
         }
-        catch (Exception ex)
+        catch (XMLStreamException ex)
         {
             throw new DdlUtilsException(ex);
         }
-        model.initialize();
-        return model;
     }
 
     /**
@@ -227,18 +216,554 @@ public class DatabaseIO
      */
     public Database read(InputSource source) throws DdlUtilsException
     {
+        try
+        {
+            return read(getXMLInputFactory().createXMLStreamReader(source.getCharacterStream()));
+        }
+        catch (XMLStreamException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+    }
+
+    /**
+     * Creates a new, initialized XML input factory object.
+     * 
+     * @return The factory object
+     */
+    private XMLInputFactory getXMLInputFactory()
+    {
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+
+        factory.setProperty("javax.xml.stream.isCoalescing",     Boolean.TRUE);
+        factory.setProperty("javax.xml.stream.isNamespaceAware", Boolean.TRUE);
+        return factory;
+    }
+
+    /**
+     * Reads the database model from the given XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The database model
+     */
+    private Database read(XMLStreamReader xmlReader) throws DdlUtilsException
+    {
         Database model = null;
 
         try
         {
-            model = (Database)getReader().parse(source);
+            while (xmlReader.getEventType() != XMLStreamReader.START_ELEMENT)
+            {
+                if (xmlReader.next() == XMLStreamReader.END_DOCUMENT)
+                {
+                    return null;
+                }
+            }
+            if (isSameAs(xmlReader.getName(), QNAME_ELEMENT_DATABASE))
+            {
+                model = readDatabaseElement(xmlReader);
+            }
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
             throw new DdlUtilsException(ex);
         }
-        model.initialize();
+        catch (XMLStreamException ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        if (model != null)
+        {
+            model.initialize();
+        }
         return model;
+    }
+
+    /**
+     * Reads a database element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The database object
+     */
+    private Database readDatabaseElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        Database model = new Database();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
+            {
+                model.setName(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_DEFAULT_ID_METHOD))
+            {
+                model.setIdMethod(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_VERSION))
+            {
+                model.setVersion(xmlReader.getAttributeValue(idx));
+            }
+        }
+        readTableElements(xmlReader, model);
+        consumeRestOfElement(xmlReader);
+        return model;
+    }
+
+    /**
+     * Reads table elements from the XML stream reader and adds them to the given
+     * database model.
+     * 
+     * @param xmlReader The reader
+     * @param model     The database model to add the table objects to
+     */
+    private void readTableElements(XMLStreamReader xmlReader, Database model) throws XMLStreamException, IOException
+    {
+        int eventType = XMLStreamReader.START_ELEMENT;
+
+        while (eventType != XMLStreamReader.END_ELEMENT)
+        {
+            eventType = xmlReader.nextTag();
+            if (eventType == XMLStreamReader.START_ELEMENT)
+            {
+                if (isSameAs(xmlReader.getName(), QNAME_ELEMENT_TABLE)) {
+                    model.addTable(readTableElement(xmlReader));
+                }
+                else {
+                    readOverElement(xmlReader);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads a table element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The table object
+     */
+    private Table readTableElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        Table table = new Table();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
+            {
+                table.setName(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_DESCRIPTION))
+            {
+                table.setDescription(xmlReader.getAttributeValue(idx));
+            }
+        }
+        readTableSubElements(xmlReader, table);
+        consumeRestOfElement(xmlReader);
+        return table;
+    }
+
+    /**
+     * Reads table sub elements (column, foreign key, index) from the XML stream reader and adds
+     * them to the given table.
+     * 
+     * @param xmlReader The reader
+     * @param table     The table
+     */
+    private void readTableSubElements(XMLStreamReader xmlReader, Table table) throws XMLStreamException, IOException
+    {
+        int eventType = XMLStreamReader.START_ELEMENT;
+
+        while (eventType != XMLStreamReader.END_ELEMENT)
+        {
+            eventType = xmlReader.nextTag();
+            if (eventType == XMLStreamReader.START_ELEMENT)
+            {
+                QName elemQName = xmlReader.getName();
+
+                if (isSameAs(elemQName, QNAME_ELEMENT_COLUMN))
+                {
+                    table.addColumn(readColumnElement(xmlReader));
+                }
+                else if (isSameAs(elemQName, QNAME_ELEMENT_FOREIGN_KEY))
+                {
+                    table.addForeignKey(readForeignKeyElement(xmlReader));
+                }
+                else if (isSameAs(elemQName, QNAME_ELEMENT_INDEX))
+                {
+                    table.addIndex(readIndexElement(xmlReader));
+                }
+                else if (isSameAs(elemQName, QNAME_ELEMENT_UNIQUE))
+                {
+                    table.addIndex(readUniqueElement(xmlReader));
+                }
+                else {
+                    readOverElement(xmlReader);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads a column element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The column object
+     */
+    private Column readColumnElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        Column column = new Column();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
+            {
+                column.setName(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_PRIMARY_KEY))
+            {
+                column.setPrimaryKey(getAttributeValueAsBoolean(xmlReader, idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_REQUIRED))
+            {
+                column.setRequired(getAttributeValueAsBoolean(xmlReader, idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_TYPE))
+            {
+                column.setType(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_SIZE))
+            {
+                column.setSize(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_DEFAULT))
+            {
+                column.setDefaultValue(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_AUTO_INCREMENT))
+            {
+                column.setAutoIncrement(getAttributeValueAsBoolean(xmlReader, idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_DESCRIPTION))
+            {
+                column.setDescription(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_JAVA_NAME))
+            {
+                column.setJavaName(xmlReader.getAttributeValue(idx));
+            }
+        }
+        consumeRestOfElement(xmlReader);
+        return column;
+    }
+
+    /**
+     * Reads a foreign key element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The foreign key object
+     */
+    private ForeignKey readForeignKeyElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        ForeignKey foreignKey = new ForeignKey();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_FOREIGN_TABLE))
+            {
+                foreignKey.setForeignTableName(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
+            {
+                foreignKey.setName(xmlReader.getAttributeValue(idx));
+            }
+        }
+        readReferenceElements(xmlReader, foreignKey);
+        consumeRestOfElement(xmlReader);
+        return foreignKey;
+    }
+
+    /**
+     * Reads reference elements from the XML stream reader and adds them to the given
+     * foreign key.
+     * 
+     * @param xmlReader  The reader
+     * @param foreignKey The foreign key
+     */
+    private void readReferenceElements(XMLStreamReader xmlReader, ForeignKey foreignKey) throws XMLStreamException, IOException
+    {
+        int eventType = XMLStreamReader.START_ELEMENT;
+
+        while (eventType != XMLStreamReader.END_ELEMENT)
+        {
+            eventType = xmlReader.nextTag();
+            if (eventType == XMLStreamReader.START_ELEMENT)
+            {
+                QName elemQName = xmlReader.getName();
+
+                if (isSameAs(elemQName, QNAME_ELEMENT_REFERENCE))
+                {
+                    foreignKey.addReference(readReferenceElement(xmlReader));
+                }
+                else {
+                    readOverElement(xmlReader);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads a reference element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The reference object
+     */
+    private Reference readReferenceElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        Reference reference = new Reference();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_LOCAL))
+            {
+                reference.setLocalColumnName(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_FOREIGN))
+            {
+                reference.setForeignColumnName(xmlReader.getAttributeValue(idx));
+            }
+        }
+        consumeRestOfElement(xmlReader);
+        return reference;
+    }
+
+    /**
+     * Reads an index element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The index object
+     */
+    private Index readIndexElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        Index index = new NonUniqueIndex();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
+            {
+                index.setName(xmlReader.getAttributeValue(idx));
+            }
+        }
+        readIndexColumnElements(xmlReader, index);
+        consumeRestOfElement(xmlReader);
+        return index;
+    }
+
+    /**
+     * Reads an unique index element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The unique index object
+     */
+    private Index readUniqueElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        Index index = new UniqueIndex();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
+            {
+                index.setName(xmlReader.getAttributeValue(idx));
+            }
+        }
+        readUniqueColumnElements(xmlReader, index);
+        consumeRestOfElement(xmlReader);
+        return index;
+    }
+
+    /**
+     * Reads index column elements from the XML stream reader and adds them to the given
+     * index object.
+     * 
+     * @param xmlReader The reader
+     * @param index     The index object
+     */
+    private void readIndexColumnElements(XMLStreamReader xmlReader, Index index) throws XMLStreamException, IOException
+    {
+        int eventType = XMLStreamReader.START_ELEMENT;
+
+        while (eventType != XMLStreamReader.END_ELEMENT)
+        {
+            eventType = xmlReader.nextTag();
+            if (eventType == XMLStreamReader.START_ELEMENT)
+            {
+                QName elemQName = xmlReader.getName();
+
+                if (isSameAs(elemQName, QNAME_ELEMENT_INDEX_COLUMN))
+                {
+                    index.addColumn(readIndexColumnElement(xmlReader));
+                }
+                else {
+                    readOverElement(xmlReader);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads unique index column elements from the XML stream reader and adds them to the given
+     * index object.
+     * 
+     * @param xmlReader The reader
+     * @param index     The index object
+     */
+    private void readUniqueColumnElements(XMLStreamReader xmlReader, Index index) throws XMLStreamException, IOException
+    {
+        int eventType = XMLStreamReader.START_ELEMENT;
+
+        while (eventType != XMLStreamReader.END_ELEMENT)
+        {
+            eventType = xmlReader.nextTag();
+            if (eventType == XMLStreamReader.START_ELEMENT)
+            {
+                QName elemQName = xmlReader.getName();
+
+                if (isSameAs(elemQName, QNAME_ELEMENT_UNIQUE_COLUMN))
+                {
+                    index.addColumn(readIndexColumnElement(xmlReader));
+                }
+                else {
+                    readOverElement(xmlReader);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads an index column element from the XML stream reader.
+     * 
+     * @param xmlReader The reader
+     * @return The index column object
+     */
+    private IndexColumn readIndexColumnElement(XMLStreamReader xmlReader) throws XMLStreamException, IOException
+    {
+        IndexColumn indexColumn = new IndexColumn();
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
+            {
+                indexColumn.setName(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_SIZE))
+            {
+                indexColumn.setSize(xmlReader.getAttributeValue(idx));
+            }
+        }
+        consumeRestOfElement(xmlReader);
+        return indexColumn;
+    }
+
+    /**
+     * Compares the given qnames. This specifically ignores the namespace
+     * uri of the other qname if the namespace of the current element is
+     * empty.
+     * 
+     * @param curElemQName The qname of the current element
+     * @param qName        The qname to compare to
+     * @return <code>true</code> if they are the same
+     */
+    private boolean isSameAs(QName curElemQName, QName qName)
+    {
+        if (StringUtils.isEmpty(curElemQName.getNamespaceURI()))
+        {
+            return qName.getLocalPart().equals(curElemQName.getLocalPart());
+        }
+        else
+        {
+            return qName.equals(curElemQName);
+        }
+    }
+
+    /**
+     * Returns the value of the indicated attribute of the current element as a boolean.
+     * If the value is not a valid boolean, then an exception is thrown.
+     * 
+     * @param xmlReader    The xml reader
+     * @param attributeIdx The index of the attribute
+     * @return The attribute's value as a boolean
+     */
+    private boolean getAttributeValueAsBoolean(XMLStreamReader xmlReader, int attributeIdx) throws DdlUtilsException
+    {
+        String value = xmlReader.getAttributeValue(attributeIdx);
+
+        if ("true".equalsIgnoreCase(value))
+        {
+            return true;
+        }
+        else if ("false".equalsIgnoreCase(value))
+        {
+            return false;
+        }
+        else
+        {
+            throw new DdlUtilsException("Illegal boolean value '" + value +"' for attribute " + xmlReader.getAttributeLocalName(attributeIdx));
+        }
+    }
+
+    /**
+     * Consumes the rest of the current element. This assumes that the current XML stream
+     * event type is not START_ELEMENT.
+     * 
+     * @param reader The xml reader
+     */
+    private void consumeRestOfElement(XMLStreamReader reader) throws XMLStreamException
+    {
+        int eventType = reader.getEventType();
+
+        while ((eventType != XMLStreamReader.END_ELEMENT) && (eventType != XMLStreamReader.END_DOCUMENT))
+        {
+            eventType = reader.nextTag();
+        }
+    }
+
+    /**
+     * Reads over the current element. This assumes that the current XML stream event type is
+     * START_ELEMENT.
+     *  
+     * @param reader The xml reader
+     */
+    private void readOverElement(XMLStreamReader reader) throws XMLStreamException
+    {
+        int depth = 1;
+
+        while (depth > 0)
+        {
+            int eventType = reader.nextTag();
+
+            if (eventType == XMLStreamReader.START_ELEMENT)
+            {
+                depth++;
+            }
+            else if (eventType == XMLStreamReader.END_ELEMENT)
+            {
+                depth--;
+            }
+        }
     }
 
     /**
@@ -247,7 +772,7 @@ public class DatabaseIO
      * @param model    The database model
      * @param filename The model file name
      */
-    public void write(Database model, String filename) throws DdlUtilsException
+    public void write(Database model, String filename) throws DdlUtilsXMLException
     {
         try
         {
@@ -276,44 +801,222 @@ public class DatabaseIO
 
     /**
      * Writes the database model to the given output stream. Note that this method
-     * does not flush the stream.
+     * does not flush or close the stream.
      * 
      * @param model  The database model
      * @param output The output stream
      */
-    public void write(Database model, OutputStream output) throws DdlUtilsException
+    public void write(Database model, OutputStream output) throws DdlUtilsXMLException
     {
-        write(model, getWriter(new OutputStreamWriter(output)));
+        write(model, new OutputStreamWriter(output));
     }
 
     /**
      * Writes the database model to the given output writer. Note that this method
-     * does not flush the writer.
+     * does not flush or close the writer.
      * 
      * @param model  The database model
      * @param output The output writer
      */
-    public void write(Database model, Writer output) throws DdlUtilsException
+    public void write(Database model, Writer output) throws DdlUtilsXMLException
     {
-        write(model, getWriter(output));
+        PrettyPrintingXmlWriter xmlWriter = new PrettyPrintingXmlWriter(output, "UTF-8");
+
+        xmlWriter.setDefaultNamespace(DDLUTILS_NAMESPACE);
+        xmlWriter.writeDocumentStart();
+        writeDatabaseElement(model, xmlWriter);
+        xmlWriter.writeDocumentEnd();
     }
 
     /**
-     * Internal method that writes the database model using the given bean writer.
+     * Writes the database model to the given XML writer.
      * 
-     * @param model  The database model
-     * @param writer The bean writer
+     * @param model     The database model
+     * @param xmlWriter The XML writer
      */
-    private void write(Database model, BeanWriter writer) throws DdlUtilsException
+    private void writeDatabaseElement(Database model, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
     {
-        try
+        writeElementStart(xmlWriter, QNAME_ELEMENT_DATABASE);
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME,              model.getName());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_DEFAULT_ID_METHOD, model.getIdMethod());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_VERSION,           model.getVersion());
+        if (model.getTableCount() > 0)
         {
-            writer.writeXmlDeclaration("<?xml version=\"1.0\"?>\n<!DOCTYPE database SYSTEM \"" + LocalEntityResolver.DTD_PREFIX + "\">");
-            writer.write(model);
+            xmlWriter.printlnIfPrettyPrinting();
+            for (int idx = 0; idx < model.getTableCount(); idx++)
+            {
+                writeTableElement(model.getTable(idx), xmlWriter);
+            }
         }
-        catch (Exception ex)
+        writeElementEnd(xmlWriter);
+    }
+
+    /**
+     * Writes the table object to the given XML writer.
+     * 
+     * @param table     The table object
+     * @param xmlWriter The XML writer
+     */
+    private void writeTableElement(Table table, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
+    {
+        xmlWriter.indentIfPrettyPrinting(1);
+        writeElementStart(xmlWriter, QNAME_ELEMENT_TABLE);
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME,        table.getName());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_DESCRIPTION, table.getDescription());
+        if ((table.getColumnCount() > 0) || (table.getForeignKeyCount() > 0) || (table.getIndexCount() > 0))
         {
-            throw new DdlUtilsException(ex);
+            xmlWriter.printlnIfPrettyPrinting();
+            for (int idx = 0; idx < table.getColumnCount(); idx++)
+            {
+                writeColumnElement(table.getColumn(idx), xmlWriter);
+            }
+            for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
+            {
+                writeForeignKeyElement(table.getForeignKey(idx), xmlWriter);
+            }
+            for (int idx = 0; idx < table.getIndexCount(); idx++)
+            {
+                writeIndexElement(table.getIndex(idx), xmlWriter);
+            }
+            xmlWriter.indentIfPrettyPrinting(1);
         }
+        writeElementEnd(xmlWriter);
+    }
+
+    /**
+     * Writes the column object to the given XML writer.
+     * 
+     * @param column    The column object
+     * @param xmlWriter The XML writer
+     */
+    private void writeColumnElement(Column column, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
+    {
+        xmlWriter.indentIfPrettyPrinting(2);
+        writeElementStart(xmlWriter, QNAME_ELEMENT_COLUMN);
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME,           column.getName());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_PRIMARY_KEY,    String.valueOf(column.isPrimaryKey()));
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_REQUIRED,       String.valueOf(column.isRequired()));
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_TYPE,           column.getType());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_SIZE,           column.getSize());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_DEFAULT,        column.getDefaultValue());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_AUTO_INCREMENT, String.valueOf(column.isAutoIncrement()));
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_DESCRIPTION,    column.getDescription());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_JAVA_NAME,      column.getJavaName());
+        writeElementEnd(xmlWriter);
+    }
+
+    /**
+     * Writes the foreign key object to the given XML writer.
+     * 
+     * @param foreignKey The foreign key object
+     * @param xmlWriter  The XML writer
+     */
+    private void writeForeignKeyElement(ForeignKey foreignKey, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
+    {
+        xmlWriter.indentIfPrettyPrinting(2);
+        writeElementStart(xmlWriter, QNAME_ELEMENT_FOREIGN_KEY);
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_FOREIGN_TABLE, foreignKey.getForeignTableName());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME,          foreignKey.getName());
+        if (foreignKey.getReferenceCount() > 0)
+        {
+            xmlWriter.printlnIfPrettyPrinting();
+            for (int idx = 0; idx < foreignKey.getReferenceCount(); idx++)
+            {
+                writeReferenceElement(foreignKey.getReference(idx), xmlWriter);
+            }
+            xmlWriter.indentIfPrettyPrinting(2);
+        }
+        writeElementEnd(xmlWriter);
+    }
+
+    /**
+     * Writes the reference object to the given XML writer.
+     * 
+     * @param reference The reference object
+     * @param xmlWriter The XML writer
+     */
+    private void writeReferenceElement(Reference reference, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
+    {
+        xmlWriter.indentIfPrettyPrinting(3);
+        writeElementStart(xmlWriter, QNAME_ELEMENT_REFERENCE);
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_LOCAL,   reference.getLocalColumnName());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_FOREIGN, reference.getForeignColumnName());
+        writeElementEnd(xmlWriter);
+    }
+
+    /**
+     * Writes the index object to the given XML writer.
+     * 
+     * @param index     The index object
+     * @param xmlWriter The XML writer
+     */
+    private void writeIndexElement(Index index, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
+    {
+        xmlWriter.indentIfPrettyPrinting(2);
+        writeElementStart(xmlWriter, index.isUnique() ? QNAME_ELEMENT_UNIQUE : QNAME_ELEMENT_INDEX);
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME, index.getName());
+        if (index.getColumnCount() > 0)
+        {
+            xmlWriter.printlnIfPrettyPrinting();
+            for (int idx = 0; idx < index.getColumnCount(); idx++)
+            {
+                writeIndexColumnElement(index.getColumn(idx), index.isUnique(), xmlWriter);
+            }
+            xmlWriter.indentIfPrettyPrinting(2);
+        }
+        writeElementEnd(xmlWriter);
+    }
+
+    /**
+     * Writes the index column object to the given XML writer.
+     * 
+     * @param indexColumn The index column object
+     * @param isUnique    Whether the index that the index column belongs to, is unique
+     * @param xmlWriter   The XML writer
+     */
+    private void writeIndexColumnElement(IndexColumn indexColumn, boolean isUnique, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
+    {
+        xmlWriter.indentIfPrettyPrinting(3);
+        writeElementStart(xmlWriter, isUnique ? QNAME_ELEMENT_UNIQUE_COLUMN : QNAME_ELEMENT_INDEX_COLUMN);
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME, indexColumn.getName());
+        writeAttribute(xmlWriter, QNAME_ATTRIBUTE_SIZE, indexColumn.getSize());
+        writeElementEnd(xmlWriter);
+    }
+
+    /**
+     * Writes the start of the specified XML element to the given XML writer.
+     * 
+     * @param xmlWriter The xml writer
+     * @param qName     The qname of the XML element
+     */
+    private void writeElementStart(PrettyPrintingXmlWriter xmlWriter, QName qName) throws DdlUtilsXMLException
+    {
+        xmlWriter.writeElementStart(null, qName.getLocalPart());
+    }
+
+    /**
+     * Writes an attribute to the given XML writer.
+     * 
+     * @param xmlWriter The xml writer
+     * @param qName     The qname of the attribute
+     * @param value     The value; if empty, then nothing is written
+     */
+    private void writeAttribute(PrettyPrintingXmlWriter xmlWriter, QName qName, String value) throws DdlUtilsXMLException
+    {
+        if (!StringUtils.isEmpty(value))
+        {
+            xmlWriter.writeAttribute(null, qName.getLocalPart(), value);
+        }
+    }
+
+    /**
+     * Writes the end of the current XML element to the given XML writer.
+     * 
+     * @param xmlWriter The xml writer
+     */
+    private void writeElementEnd(PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
+    {
+        xmlWriter.writeElementEnd();
+        xmlWriter.printlnIfPrettyPrinting();
     }
 }

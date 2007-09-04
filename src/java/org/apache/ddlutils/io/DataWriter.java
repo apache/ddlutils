@@ -20,7 +20,6 @@ package org.apache.ddlutils.io;
  */
 
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,10 +27,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.codec.binary.Base64;
@@ -51,27 +46,17 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: 289996 $
  */
-public class DataWriter
+public class DataWriter extends PrettyPrintingXmlWriter
 {
     /** String values with a size not bigger than this value will be written to attributes;
         if their size is longer, then a sub element is generated instead. */ 
     private static final int MAX_ATTRIBUTE_LENGTH = 255;
-    /** The indentation string. */
-    private static final String INDENT_STRING = "  ";
 
     /** Our log. */
     private final Log _log = LogFactory.getLog(DataWriter.class);
 
     /** The converters. */
     private ConverterConfiguration _converterConf = new ConverterConfiguration();
-    /** The output stream. */
-    private PrintWriter _output;
-    /** The xml writer. */
-    private XMLStreamWriter _writer;
-    /** The output encoding. */
-    private String _encoding;
-    /** Whether we're pretty-printing. */
-    private boolean _prettyPrinting = true;
 
     /**
      * Creates a data writer instance using UTF-8 encoding.
@@ -91,26 +76,7 @@ public class DataWriter
      */
     public DataWriter(OutputStream output, String encoding) throws DataWriterException
     {
-        _output = new PrintWriter(output);
-        if ((encoding == null) || (encoding.length() == 0))
-        {
-            _encoding = "UTF-8";
-        }
-        else
-        {
-            _encoding = encoding;
-        }
-
-        try
-        {
-            XMLOutputFactory factory = XMLOutputFactory.newInstance();
-
-            _writer  = factory.createXMLStreamWriter(output, _encoding);
-        }
-        catch (XMLStreamException ex)
-        {
-            throw new DataWriterException(ex);
-        }
+        super(output, encoding);
     }
 
     /**
@@ -122,38 +88,15 @@ public class DataWriter
      */
     public DataWriter(Writer output, String encoding) throws DataWriterException
     {
-        _output   = new PrintWriter(output);
-        _encoding = encoding;
-        try
-        {
-            XMLOutputFactory factory = XMLOutputFactory.newInstance();
-
-            _writer = factory.createXMLStreamWriter(_output);
-        }
-        catch (XMLStreamException ex)
-        {
-            throw new DataWriterException(ex);
-        }
+        super(output, encoding);
     }
 
     /**
-     * Determines whether the output shall be pretty-printed.
-     *
-     * @return <code>true</code> if the output is pretty-printed
+     * {@inheritDoc}
      */
-    public boolean isPrettyPrinting()
+    protected void throwException(Exception baseEx) throws DdlUtilsXMLException
     {
-        return _prettyPrinting;
-    }
-
-    /**
-     * Specifies whether the output shall be pretty-printed.
-     *
-     * @param prettyPrinting <code>true</code> if the output is pretty-printed
-     */
-    public void setPrettyPrinting(boolean prettyPrinting)
-    {
-        _prettyPrinting = prettyPrinting;
+        throw new DataWriterException(baseEx);
     }
 
     /**
@@ -167,83 +110,25 @@ public class DataWriter
     }
 
     /**
-     * Prints a newline if we're pretty-printing.
+     * Writes the start of the XML document, including the start of the outermost
+     * XML element (<code>data</code>).
      */
-    private void printlnIfPrettyPrinting() throws DataWriterException
+    public void writeDocumentStart() throws DdlUtilsXMLException
     {
-        if (_prettyPrinting)
-        {
-            try
-            {
-                _writer.writeCharacters("\n");
-            }
-            catch (XMLStreamException ex)
-            {
-                throw new DataWriterException(ex);
-            }
-        }
+        super.writeDocumentStart();
+        writeElementStart(null, "data");
+        printlnIfPrettyPrinting();
     }
 
     /**
-     * Prints the indentation if we're pretty-printing.
-     * 
-     * @param level The indentation level
+     * Writes the end of the XML document, including the end of the outermost
+     * XML element (<code>data</code>).
      */
-    private void indentIfPrettyPrinting(int level) throws DataWriterException
+    public void writeDocumentEnd() throws DdlUtilsXMLException
     {
-        if (_prettyPrinting)
-        {
-            try
-            {
-                for (int idx = 0; idx < level; idx++)
-                {
-                    _writer.writeCharacters(INDENT_STRING);
-                }
-            }
-            catch (XMLStreamException ex)
-            {
-                throw new DataWriterException(ex);
-            }
-        }
-    }
-
-    /**
-     * Writes the start of the XML document, i.e. the "<?xml?>" section and the start of the
-     * root node.
-     */
-    public void writeDocumentStart() throws DataWriterException
-    {
-        try
-        {
-            _writer.writeStartDocument(_encoding, "1.0");
-            printlnIfPrettyPrinting();
-            _writer.writeStartElement("data");
-            printlnIfPrettyPrinting();
-        }
-        catch (XMLStreamException ex)
-        {
-            throw new DataWriterException(ex);
-        }
-    }
-
-    /**
-     * Writes the end of the XML document, i.e. end of the root node.
-     */
-    public void writeDocumentEnd() throws DataWriterException
-    {
-        try
-        {
-            _writer.writeEndElement();
-            printlnIfPrettyPrinting();
-            _writer.writeEndDocument();
-            _writer.flush();
-            _writer.close();
-            _output.close();
-        }
-        catch (XMLStreamException ex)
-        {
-            throw new DataWriterException(ex);
-        }
+        writeElementEnd();
+        printlnIfPrettyPrinting();
+        super.writeDocumentEnd();
     }
 
     /**
@@ -260,7 +145,7 @@ public class DataWriter
         try
         {
             indentIfPrettyPrinting(1);
-            _writer.writeStartElement(table.getName());
+            writeElementStart(null, table.getName());
             for (int idx = 0; idx < table.getColumnCount(); idx++)
             {
                 Column           column      = table.getColumn(idx);
@@ -290,7 +175,7 @@ public class DataWriter
                     }
                     else
                     {
-                        _writer.writeAttribute(column.getName(), valueAsText);
+                        writeAttribute(null, column.getName(), valueAsText);
                     }
                 }
             }
@@ -305,7 +190,7 @@ public class DataWriter
 
                     printlnIfPrettyPrinting();
                     indentIfPrettyPrinting(2);
-                    _writer.writeStartElement(entry.getKey().toString());
+                    writeElementStart(null, entry.getKey().toString());
 
                     // if the content contains special characters, we have to apply base64 encoding to it
                     // if the content is too short, then it has to contain special characters (otherwise
@@ -316,14 +201,14 @@ public class DataWriter
 
                     if (writeBase64Encoded)
                     {
-                        _writer.writeAttribute(DatabaseIO.BASE64_ATTR_NAME, "true");
-                        _writer.writeCData(new String(Base64.encodeBase64(content.getBytes())));
+                        writeAttribute(null, DatabaseIO.BASE64_ATTR_NAME, "true");
+                        writeCData(new String(Base64.encodeBase64(content.getBytes())));
                     }
                     else
                     {
                         if (cutPoints.isEmpty())
                         {
-                            _writer.writeCData(content);
+                            writeCData(content);
                         }
                         else
                         {
@@ -333,27 +218,23 @@ public class DataWriter
                             {
                                 int curPos = ((Integer)cutPointIt.next()).intValue();
 
-                                _writer.writeCData(content.substring(lastPos, curPos));
+                                writeCData(content.substring(lastPos, curPos));
                                 lastPos = curPos;
                             }
                             if (lastPos < content.length())
                             {
-                                _writer.writeCData(content.substring(lastPos));
+                                writeCData(content.substring(lastPos));
                             }
                         }
                     }
 
-                    _writer.writeEndElement();
+                    writeElementEnd();
                 }
                 printlnIfPrettyPrinting();
                 indentIfPrettyPrinting(1);
             }
-            _writer.writeEndElement();
+            writeElementEnd();
             printlnIfPrettyPrinting();
-        }
-        catch (XMLStreamException ex)
-        {
-            throw new DataWriterException(ex);
         }
         catch (ConversionException ex)
         {

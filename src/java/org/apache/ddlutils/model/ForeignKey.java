@@ -39,6 +39,10 @@ public class ForeignKey implements Cloneable
     private Table _foreignTable;
     /** The name of the foreign table. */
     private String _foreignTableName;
+    /** The action to perform when the value of the referenced column changes. */
+    private CascadeActionEnum _onUpdate = CascadeActionEnum.NONE;
+    /** The action to perform when the referenced row is deleted. */
+    private CascadeActionEnum _onDelete = CascadeActionEnum.NONE;
     /** The references between local and remote columns. */
     private ListOrderedSet _references = new ListOrderedSet();
     /** Whether this foreign key has an associated auto-generated index. */
@@ -127,6 +131,56 @@ public class ForeignKey implements Cloneable
             _foreignTable = null;
         }
         _foreignTableName = foreignTableName;
+    }
+
+    /**
+     * Returns the action for this foreignkey for when the referenced row is deleted.
+     * 
+     * @return The action
+     */
+    public CascadeActionEnum getOnDelete()
+    {
+        return _onDelete;
+    }
+
+    /**
+     * Sets the action for this foreignkey for when the referenced row is deleted.
+     * 
+     * @param onDelete The action
+     * @throws NullPointerException If <code>onDelete</code> is null
+     */
+    public void setOnDelete(CascadeActionEnum onDelete) throws NullPointerException
+    {
+        if (onDelete == null)
+        {
+            throw new NullPointerException("The onDelete action cannot be null");
+        }
+        _onDelete = onDelete;
+    }
+
+    /**
+     * Returns the action for this foreignkey for when the referenced row is changed.
+     * 
+     * @return The action
+     */
+    public CascadeActionEnum getOnUpdate()
+    {
+        return _onUpdate;
+    }
+
+    /**
+     * Sets the action for this foreignkey for when the referenced row is changed.
+     * 
+     * @param onUpdate The action
+     * @throws NullPointerException If <code>onUdate</code> is null
+     */
+    public void setOnUpdate(CascadeActionEnum onUpdate) throws NullPointerException
+    {
+        if (onUpdate == null)
+        {
+            throw new NullPointerException("The onUpdate action cannot be null");
+        }
+        _onUpdate = onUpdate;
     }
 
     /**
