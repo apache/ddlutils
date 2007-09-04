@@ -29,6 +29,7 @@
 
   <!-- These properties can be overriden on the commandline using -D --> 
   <property name="schemafiles" value="testmodel.xml"/>
+  <property name="schemafile" value="testmodel.xml"/>
   <property name="datafile" value="testdata.xml"/>
   <property name="catalogpattern" value=""/>
   <property name="schemapattern" value=""/>
@@ -90,6 +91,21 @@
     </ddlToDatabase> 
   </target>
 
+  <target name="readSchemaFromDb">
+    <databaseToDdl usedelimitedsqlidentifiers="${delimitedsqlidentifiers}"
+                   catalogpattern="${catalogpattern}"
+                   schemapattern="${schemapattern}"
+                   databasetype="${platform}"
+                   verbosity="${verbosity}">
+      <database driverclassname="${datasource.driverClassName}"
+                url="${datasource.url}"
+                username="${datasource.username}"
+                password="${datasource.password}"/> 
+
+      <writeschematofile outputfile="${schemafile}"/>
+    </databaseToDdl> 
+  </target>
+
   <target name="writeSchemaSqlToFile">
     <ddlToDatabase validatexml="false" 
                    usedelimitedsqlidentifiers="${delimitedsqlidentifiers}"
@@ -143,6 +159,7 @@
                 url="${datasource.url}"
                 username="${datasource.username}"
                 password="${datasource.password}"/> 
+
       <writedatatofile outputfile="${datafile}"/>
     </databaseToDdl> 
   </target>
