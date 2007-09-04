@@ -335,6 +335,10 @@ public class Database implements Serializable, Cloneable
                         fk.setForeignTable(targetTable);
                     }
                 }
+                if (fk.getReferenceCount() == 0)
+                {
+                    throw new ModelException("The foreignkey "+fkDesc+" in table "+curTable.getName()+" does not have any references");
+                }
                 for (int refIdx = 0; refIdx < fk.getReferenceCount(); refIdx++)
                 {
                     Reference ref = fk.getReference(refIdx);
@@ -381,6 +385,10 @@ public class Database implements Serializable, Cloneable
                         throw new ModelException("There are multiple indices in table "+curTable.getName()+" with the name "+indexName);
                     }
                     namesOfProcessedIndices.add(indexName);
+                }
+                if (index.getColumnCount() == 0)
+                {
+                    throw new ModelException("The index "+indexDesc+" in table "+curTable.getName()+" does not have any columns");
                 }
 
                 for (int indexColumnIdx = 0; indexColumnIdx < index.getColumnCount(); indexColumnIdx++)

@@ -20,8 +20,10 @@ package org.apache.ddlutils.model;
  */
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.ddlutils.util.Jdbc3Utils;
@@ -145,6 +147,23 @@ public abstract class TypeMap
         _typeNameToTypeCode.put("BOOLEANCHAR", new Integer(Types.CHAR));
     }
 
+    /**
+     * Returns all supported JDBC types.
+     * 
+     * @return The type codes ({@link java.sql.Types} constants)
+     */
+    public static int[] getSuportedJdbcTypes()
+    {
+        int[] typeCodes = new int[_typeCodeToTypeName.size()];
+        int   idx       = 0;
+
+        for (Iterator it = _typeCodeToTypeName.keySet().iterator(); it.hasNext(); idx++)
+        {
+            typeCodes[idx] = ((Integer)it.next()).intValue();
+        }
+        return typeCodes;
+    }
+    
     /**
      * Returns the JDBC type code (one of the {@link java.sql.Types} constants) that
      * corresponds to the given JDBC type name.
