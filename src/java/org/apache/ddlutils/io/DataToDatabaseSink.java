@@ -210,13 +210,16 @@ public class DataToDatabaseSink implements DataSink
     public void end() throws DataSinkException
     {
         purgeBatchQueue();
-        try
+        if (_connection != null)
         {
-            _connection.close();
-        }
-        catch (SQLException ex)
-        {
-            throw new DataSinkException(ex);
+            try
+            {
+                _connection.close();
+            }
+            catch (SQLException ex)
+            {
+                throw new DataSinkException(ex);
+            }
         }
         if (!_waitingObjects.isEmpty())
         {
