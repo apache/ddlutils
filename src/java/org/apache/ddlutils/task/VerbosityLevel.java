@@ -26,8 +26,10 @@ import org.apache.tools.ant.types.EnumeratedAttribute;
  * Helper class that defines the possible values for the verbosity attribute.
  * 
  * @ant.task ignore="true"
+ * @version $Revision: $
  */
-public class VerbosityLevel extends EnumeratedAttribute {
+public class VerbosityLevel extends EnumeratedAttribute
+{
     /** The possible levels. */
     private static final String[] LEVELS = { Level.FATAL.toString().toUpperCase(),
                                              Level.ERROR.toString().toUpperCase(),
