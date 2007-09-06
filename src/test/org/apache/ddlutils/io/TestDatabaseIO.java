@@ -22,6 +22,7 @@ package org.apache.ddlutils.io;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Types;
+import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -1034,6 +1035,344 @@ public class TestDatabaseIO extends TestCase
             "  </table>\n" +
             "</database>\n",
             model);
+    }
+
+    /**
+     * Tests a database model containing foreignkeys with onUpdate values.
+     */
+    public void testForeignkeysWithOnUpdate() throws Exception
+    {
+        StringBuffer modelXml = new StringBuffer();
+
+        modelXml.append("<database name='test'>\n");
+        modelXml.append("  <table name='SomeTable'\n");
+        modelXml.append("         description='Some table'>\n");
+        modelXml.append("    <column name='ID'\n");
+        modelXml.append("            type='VARCHAR'\n");
+        modelXml.append("            size='16'\n");
+        modelXml.append("            primaryKey='true'\n");
+        modelXml.append("            required='true'\n");
+        modelXml.append("            description='The primary key'/>\n");
+        modelXml.append("  </table>\n");
+        modelXml.append("  <table name='AnotherTable'\n");
+        modelXml.append("         description='And another table'>\n");
+        modelXml.append("    <column name='Some_ID'\n");
+        modelXml.append("            type='VARCHAR'\n");
+        modelXml.append("            size='16'\n");
+        modelXml.append("            description='The foreign key'/>\n");
+        for (Iterator it = CascadeActionEnum.iterator(); it.hasNext();)
+        {
+            CascadeActionEnum enumValue = (CascadeActionEnum)it.next();
+
+            modelXml.append("    <foreign-key name='foreignkey ");
+            modelXml.append(enumValue.getName());
+            modelXml.append("' foreignTable='SomeTable' onUpdate='");
+            modelXml.append(enumValue.getName());
+            modelXml.append("'>\n");
+            modelXml.append("       <reference local='Some_ID' foreign='ID'/>\n");
+            modelXml.append("    </foreign-key>\n");
+        }
+        modelXml.append("  </table>\n");
+        modelXml.append("</database>");
+
+        Database model = readModel(modelXml.toString());
+
+        assertEquals("test", model.getName());
+        assertEquals(2, model.getTableCount());
+
+        Table someTable = model.getTable(0);
+
+        assertEquals("SomeTable", "Some table", 1, 1, 0, 0, 0,
+                     someTable);
+        assertEquals("ID", Types.VARCHAR, 16, 0, null, "The primary key", null, true, true, false,
+                     someTable.getColumn(0));
+
+        Table anotherTable = model.getTable(1);
+
+        assertEquals("AnotherTable", "And another table", 1, 0, 0, CascadeActionEnum.getEnumList().size(), 0,
+                     anotherTable);
+        assertEquals("Some_ID", Types.VARCHAR, 16, 0, null, "The foreign key", null, false, false, false,
+                     anotherTable.getColumn(0));
+
+        int idx = 0;
+        
+        for (Iterator it = CascadeActionEnum.iterator(); it.hasNext(); idx++)
+        {
+            CascadeActionEnum enumValue = (CascadeActionEnum)it.next();
+            ForeignKey        fk        = anotherTable.getForeignKey(idx);
+
+            assertEquals("foreignkey " + enumValue.getName(), enumValue, CascadeActionEnum.NONE, someTable, 1, fk);
+            assertEquals(anotherTable.getColumn(0), someTable.getColumn(0), fk.getReference(0));
+        }
+
+        modelXml.setLength(0);
+        modelXml.append("<?xml version='1.0' encoding='UTF-8'?>\n");
+        modelXml.append("<database name=\"test\">\n");
+        modelXml.append("  <table name=\"SomeTable\" description=\"Some table\">\n");
+        modelXml.append("    <column name=\"ID\" primaryKey=\"true\" required=\"true\" type=\"VARCHAR\" size=\"16\" autoIncrement=\"false\" description=\"The primary key\" />\n");
+        modelXml.append("  </table>\n");
+        modelXml.append("  <table name=\"AnotherTable\" description=\"And another table\">\n");
+        modelXml.append("    <column name=\"Some_ID\" primaryKey=\"false\" required=\"false\" type=\"VARCHAR\" size=\"16\" autoIncrement=\"false\" description=\"The foreign key\" />\n");
+        for (Iterator it = CascadeActionEnum.iterator(); it.hasNext(); idx++)
+        {
+            CascadeActionEnum enumValue = (CascadeActionEnum)it.next();
+
+            modelXml.append("    <foreign-key foreignTable=\"SomeTable\" name=\"foreignkey ");
+            modelXml.append(enumValue.getName());
+            if (enumValue != CascadeActionEnum.NONE)
+            {
+                modelXml.append("\" onUpdate=\"");
+                modelXml.append(enumValue.getName());
+            }
+            modelXml.append("\">\n");
+            modelXml.append("      <reference local=\"Some_ID\" foreign=\"ID\" />\n");
+            modelXml.append("    </foreign-key>\n");
+        }
+        modelXml.append("  </table>\n");
+        modelXml.append("</database>\n");
+
+        assertEquals(modelXml.toString(), model);
+    }
+
+    /**
+     * Tests a database model containing foreignkeys with onDelete values.
+     */
+    public void testForeignkeysWithOnDelete() throws Exception
+    {
+        StringBuffer modelXml = new StringBuffer();
+
+        modelXml.append("<database name='test'>\n");
+        modelXml.append("  <table name='SomeTable'\n");
+        modelXml.append("         description='Some table'>\n");
+        modelXml.append("    <column name='ID'\n");
+        modelXml.append("            type='VARCHAR'\n");
+        modelXml.append("            size='16'\n");
+        modelXml.append("            primaryKey='true'\n");
+        modelXml.append("            required='true'\n");
+        modelXml.append("            description='The primary key'/>\n");
+        modelXml.append("  </table>\n");
+        modelXml.append("  <table name='AnotherTable'\n");
+        modelXml.append("         description='And another table'>\n");
+        modelXml.append("    <column name='Some_ID'\n");
+        modelXml.append("            type='VARCHAR'\n");
+        modelXml.append("            size='16'\n");
+        modelXml.append("            description='The foreign key'/>\n");
+        for (Iterator it = CascadeActionEnum.iterator(); it.hasNext();)
+        {
+            CascadeActionEnum enumValue = (CascadeActionEnum)it.next();
+
+            modelXml.append("    <foreign-key name='foreignkey ");
+            modelXml.append(enumValue.getName());
+            modelXml.append("' foreignTable='SomeTable' onDelete='");
+            modelXml.append(enumValue.getName());
+            modelXml.append("'>\n");
+            modelXml.append("       <reference local='Some_ID' foreign='ID'/>\n");
+            modelXml.append("    </foreign-key>\n");
+        }
+        modelXml.append("  </table>\n");
+        modelXml.append("</database>");
+
+        Database model = readModel(modelXml.toString());
+
+        assertEquals("test", model.getName());
+        assertEquals(2, model.getTableCount());
+
+        Table someTable = model.getTable(0);
+
+        assertEquals("SomeTable", "Some table", 1, 1, 0, 0, 0,
+                     someTable);
+        assertEquals("ID", Types.VARCHAR, 16, 0, null, "The primary key", null, true, true, false,
+                     someTable.getColumn(0));
+
+        Table anotherTable = model.getTable(1);
+
+        assertEquals("AnotherTable", "And another table", 1, 0, 0, CascadeActionEnum.getEnumList().size(), 0,
+                     anotherTable);
+        assertEquals("Some_ID", Types.VARCHAR, 16, 0, null, "The foreign key", null, false, false, false,
+                     anotherTable.getColumn(0));
+
+        int idx = 0;
+        
+        for (Iterator it = CascadeActionEnum.iterator(); it.hasNext(); idx++)
+        {
+            CascadeActionEnum enumValue = (CascadeActionEnum)it.next();
+            ForeignKey        fk        = anotherTable.getForeignKey(idx);
+
+            assertEquals("foreignkey " + enumValue.getName(), CascadeActionEnum.NONE, enumValue, someTable, 1, fk);
+            assertEquals(anotherTable.getColumn(0), someTable.getColumn(0), fk.getReference(0));
+        }
+
+        modelXml.setLength(0);
+        modelXml.append("<?xml version='1.0' encoding='UTF-8'?>\n");
+        modelXml.append("<database name=\"test\">\n");
+        modelXml.append("  <table name=\"SomeTable\" description=\"Some table\">\n");
+        modelXml.append("    <column name=\"ID\" primaryKey=\"true\" required=\"true\" type=\"VARCHAR\" size=\"16\" autoIncrement=\"false\" description=\"The primary key\" />\n");
+        modelXml.append("  </table>\n");
+        modelXml.append("  <table name=\"AnotherTable\" description=\"And another table\">\n");
+        modelXml.append("    <column name=\"Some_ID\" primaryKey=\"false\" required=\"false\" type=\"VARCHAR\" size=\"16\" autoIncrement=\"false\" description=\"The foreign key\" />\n");
+        for (Iterator it = CascadeActionEnum.iterator(); it.hasNext(); idx++)
+        {
+            CascadeActionEnum enumValue = (CascadeActionEnum)it.next();
+
+            modelXml.append("    <foreign-key foreignTable=\"SomeTable\" name=\"foreignkey ");
+            modelXml.append(enumValue.getName());
+            if (enumValue != CascadeActionEnum.NONE)
+            {
+                modelXml.append("\" onDelete=\"");
+                modelXml.append(enumValue.getName());
+            }
+            modelXml.append("\">\n");
+            modelXml.append("      <reference local=\"Some_ID\" foreign=\"ID\" />\n");
+            modelXml.append("    </foreign-key>\n");
+        }
+        modelXml.append("  </table>\n");
+        modelXml.append("</database>\n");
+
+        assertEquals(modelXml.toString(), model);
+    }
+
+    /**
+     * Tests a foreign key with an illegal onUpdate value.
+     */
+    public void testForeignKeyWithIllegalOnUpdateValue()
+    {
+        try
+        {
+            readModel(
+                "<database name='test'>\n" +
+                "  <table name='SomeTable'\n" +
+                "         description='Some table'>\n" +
+                "    <column name='ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            primaryKey='true'\n" +
+                "            required='true'\n" +
+                "            description='The primary key'/>\n" +
+                "  </table>\n" +
+                "  <table name='AnotherTable'\n" +
+                "         description='And another table'>\n" +
+                "    <column name='Some_ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            description='The foreign key'/>\n" +
+                "    <foreign-key foreignTable='SomeTable' onUpdate='illegal'>\n" +
+                "       <reference local='Some_ID' foreign='ID'/>\n" +
+                "    </foreign-key>\n" +
+                "  </table>\n" +
+                "</database>");
+
+            fail();
+        }
+        catch (DdlUtilsXMLException ex)
+        {}
+    }
+
+    /**
+     * Tests a foreign key with an empty onUpdate value.
+     */
+    public void testForeignKeyWithEmptyOnUpdateValue()
+    {
+        try
+        {
+            readModel(
+                "<database name='test'>\n" +
+                "  <table name='SomeTable'\n" +
+                "         description='Some table'>\n" +
+                "    <column name='ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            primaryKey='true'\n" +
+                "            required='true'\n" +
+                "            description='The primary key'/>\n" +
+                "  </table>\n" +
+                "  <table name='AnotherTable'\n" +
+                "         description='And another table'>\n" +
+                "    <column name='Some_ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            description='The foreign key'/>\n" +
+                "    <foreign-key foreignTable='SomeTable' onUpdate=''>\n" +
+                "       <reference local='Some_ID' foreign='ID'/>\n" +
+                "    </foreign-key>\n" +
+                "  </table>\n" +
+                "</database>");
+
+            fail();
+        }
+        catch (DdlUtilsXMLException ex)
+        {}
+    }
+
+    /**
+     * Tests a foreign key with an illegal onDelete value.
+     */
+    public void testForeignKeyWithIllegalOnDeleteValue()
+    {
+        try
+        {
+            readModel(
+                "<database name='test'>\n" +
+                "  <table name='SomeTable'\n" +
+                "         description='Some table'>\n" +
+                "    <column name='ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            primaryKey='true'\n" +
+                "            required='true'\n" +
+                "            description='The primary key'/>\n" +
+                "  </table>\n" +
+                "  <table name='AnotherTable'\n" +
+                "         description='And another table'>\n" +
+                "    <column name='Some_ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            description='The foreign key'/>\n" +
+                "    <foreign-key foreignTable='SomeTable' onDelete='illegal'>\n" +
+                "       <reference local='Some_ID' foreign='ID'/>\n" +
+                "    </foreign-key>\n" +
+                "  </table>\n" +
+                "</database>");
+
+            fail();
+        }
+        catch (DdlUtilsXMLException ex)
+        {}
+    }
+
+    /**
+     * Tests a foreign key with an empty onDelete value.
+     */
+    public void testForeignKeyWithEmptyOnDeleteValue()
+    {
+        try
+        {
+            readModel(
+                "<database name='test'>\n" +
+                "  <table name='SomeTable'\n" +
+                "         description='Some table'>\n" +
+                "    <column name='ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            primaryKey='true'\n" +
+                "            required='true'\n" +
+                "            description='The primary key'/>\n" +
+                "  </table>\n" +
+                "  <table name='AnotherTable'\n" +
+                "         description='And another table'>\n" +
+                "    <column name='Some_ID'\n" +
+                "            type='VARCHAR'\n" +
+                "            size='16'\n" +
+                "            description='The foreign key'/>\n" +
+                "    <foreign-key foreignTable='SomeTable' onDelete=''>\n" +
+                "       <reference local='Some_ID' foreign='ID'/>\n" +
+                "    </foreign-key>\n" +
+                "  </table>\n" +
+                "</database>");
+
+            fail();
+        }
+        catch (DdlUtilsXMLException ex)
+        {}
     }
 
     /**

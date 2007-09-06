@@ -35,7 +35,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -98,6 +98,10 @@ public class DatabaseIO
     public static final QName QNAME_ATTRIBUTE_LOCAL             = new QName(DDLUTILS_NAMESPACE, "local");
     /** Qualified name of the name attribute. */
     public static final QName QNAME_ATTRIBUTE_NAME              = new QName(DDLUTILS_NAMESPACE, "name");
+    /** Qualified name of the onDelete attribute. */
+    public static final QName QNAME_ATTRIBUTE_ON_DELETE         = new QName(DDLUTILS_NAMESPACE, "onDelete");
+    /** Qualified name of the onUpdate attribute. */
+    public static final QName QNAME_ATTRIBUTE_ON_UPDATE         = new QName(DDLUTILS_NAMESPACE, "onUpdate");
     /** Qualified name of the primaryKey attribute. */
     public static final QName QNAME_ATTRIBUTE_PRIMARY_KEY       = new QName(DDLUTILS_NAMESPACE, "primaryKey");
     /** Qualified name of the required attribute. */
@@ -160,7 +164,7 @@ public class DatabaseIO
      * @param filename The model file name
      * @return The database model
      */
-    public Database read(String filename) throws DdlUtilsException
+    public Database read(String filename) throws DdlUtilsXMLException
     {
         try
         {
@@ -168,7 +172,7 @@ public class DatabaseIO
         }
         catch (IOException ex)
         {
-            throw new DdlUtilsException(ex);
+            throw new DdlUtilsXMLException(ex);
         }
     }
 
@@ -178,7 +182,7 @@ public class DatabaseIO
      * @param file The model file
      * @return The database model
      */
-    public Database read(File file) throws DdlUtilsException
+    public Database read(File file) throws DdlUtilsXMLException
     {
         try
         {
@@ -186,7 +190,7 @@ public class DatabaseIO
         }
         catch (IOException ex)
         {
-            throw new DdlUtilsException(ex);
+            throw new DdlUtilsXMLException(ex);
         }
     }
 
@@ -196,7 +200,7 @@ public class DatabaseIO
      * @param reader The reader that returns the model XML
      * @return The database model
      */
-    public Database read(Reader reader) throws DdlUtilsException
+    public Database read(Reader reader) throws DdlUtilsXMLException
     {
         try
         {
@@ -204,7 +208,7 @@ public class DatabaseIO
         }
         catch (XMLStreamException ex)
         {
-            throw new DdlUtilsException(ex);
+            throw new DdlUtilsXMLException(ex);
         }
     }
 
@@ -214,7 +218,7 @@ public class DatabaseIO
      * @param source The input source
      * @return The database model
      */
-    public Database read(InputSource source) throws DdlUtilsException
+    public Database read(InputSource source) throws DdlUtilsXMLException
     {
         try
         {
@@ -222,7 +226,7 @@ public class DatabaseIO
         }
         catch (XMLStreamException ex)
         {
-            throw new DdlUtilsException(ex);
+            throw new DdlUtilsXMLException(ex);
         }
     }
 
@@ -246,7 +250,7 @@ public class DatabaseIO
      * @param xmlReader The reader
      * @return The database model
      */
-    private Database read(XMLStreamReader xmlReader) throws DdlUtilsException
+    private Database read(XMLStreamReader xmlReader) throws DdlUtilsXMLException
     {
         Database model = null;
 
@@ -266,11 +270,11 @@ public class DatabaseIO
         }
         catch (IOException ex)
         {
-            throw new DdlUtilsException(ex);
+            throw new DdlUtilsXMLException(ex);
         }
         catch (XMLStreamException ex)
         {
-            throw new DdlUtilsException(ex);
+            throw new DdlUtilsXMLException(ex);
         }
         if (model != null)
         {
@@ -482,6 +486,14 @@ public class DatabaseIO
             else if (isSameAs(attrQName, QNAME_ATTRIBUTE_NAME))
             {
                 foreignKey.setName(xmlReader.getAttributeValue(idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_ON_UPDATE))
+            {
+                foreignKey.setOnUpdate(getAttributeValueAsCascadeEnum(xmlReader, idx));
+            }
+            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_ON_DELETE))
+            {
+                foreignKey.setOnDelete(getAttributeValueAsCascadeEnum(xmlReader, idx));
             }
         }
         readReferenceElements(xmlReader, foreignKey);
@@ -707,7 +719,7 @@ public class DatabaseIO
      * @param attributeIdx The index of the attribute
      * @return The attribute's value as a boolean
      */
-    private boolean getAttributeValueAsBoolean(XMLStreamReader xmlReader, int attributeIdx) throws DdlUtilsException
+    private boolean getAttributeValueAsBoolean(XMLStreamReader xmlReader, int attributeIdx) throws DdlUtilsXMLException
     {
         String value = xmlReader.getAttributeValue(attributeIdx);
 
@@ -721,7 +733,30 @@ public class DatabaseIO
         }
         else
         {
-            throw new DdlUtilsException("Illegal boolean value '" + value +"' for attribute " + xmlReader.getAttributeLocalName(attributeIdx));
+            throw new DdlUtilsXMLException("Illegal boolean value '" + value +"' for attribute " + xmlReader.getAttributeLocalName(attributeIdx));
+        }
+    }
+
+    /**
+     * Returns the value of the indicated attribute of the current element as a boolean.
+     * If the value is not a valid boolean, then an exception is thrown.
+     * 
+     * @param xmlReader    The xml reader
+     * @param attributeIdx The index of the attribute
+     * @return The attribute's value as a boolean
+     */
+    private CascadeActionEnum getAttributeValueAsCascadeEnum(XMLStreamReader xmlReader, int attributeIdx) throws DdlUtilsXMLException
+    {
+        String            value     = xmlReader.getAttributeValue(attributeIdx);
+        CascadeActionEnum enumValue = value == null ? null : CascadeActionEnum.getEnum(value.toLowerCase());
+
+        if (enumValue == null)
+        {
+            throw new DdlUtilsXMLException("Illegal boolean value '" + value +"' for attribute " + xmlReader.getAttributeLocalName(attributeIdx));
+        }
+        else
+        {
+            return enumValue;
         }
     }
 
@@ -795,7 +830,7 @@ public class DatabaseIO
         }
         catch (Exception ex)
         {
-            throw new DdlUtilsException(ex);
+            throw new DdlUtilsXMLException(ex);
         }
     }
 
@@ -917,6 +952,14 @@ public class DatabaseIO
         writeElementStart(xmlWriter, QNAME_ELEMENT_FOREIGN_KEY);
         writeAttribute(xmlWriter, QNAME_ATTRIBUTE_FOREIGN_TABLE, foreignKey.getForeignTableName());
         writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME,          foreignKey.getName());
+        if (foreignKey.getOnUpdate() != CascadeActionEnum.NONE)
+        {
+            writeAttribute(xmlWriter, QNAME_ATTRIBUTE_ON_UPDATE, foreignKey.getOnUpdate().getName());
+        }
+        if (foreignKey.getOnDelete() != CascadeActionEnum.NONE)
+        {
+            writeAttribute(xmlWriter, QNAME_ATTRIBUTE_ON_DELETE, foreignKey.getOnDelete().getName());
+        }
         if (foreignKey.getReferenceCount() > 0)
         {
             xmlWriter.printlnIfPrettyPrinting();
