@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -228,6 +229,8 @@ public class JdbcModelReader
         result.add(new MetaDataColumnDescriptor("FKTABLE_NAME",  Types.VARCHAR));
         result.add(new MetaDataColumnDescriptor("KEY_SEQ",       Types.TINYINT, new Short((short)0)));
         result.add(new MetaDataColumnDescriptor("FK_NAME",       Types.VARCHAR));
+        result.add(new MetaDataColumnDescriptor("UPDATE_RULE",   Types.TINYINT));
+        result.add(new MetaDataColumnDescriptor("DELETE_RULE",   Types.TINYINT));
         result.add(new MetaDataColumnDescriptor("PKCOLUMN_NAME", Types.VARCHAR));
         result.add(new MetaDataColumnDescriptor("FKCOLUMN_NAME", Types.VARCHAR));
 
@@ -779,10 +782,15 @@ public class JdbcModelReader
         column.setName((String)values.get("COLUMN_NAME"));
         column.setDefaultValue((String)values.get("COLUMN_DEF"));
         column.setTypeCode(((Integer)values.get("DATA_TYPE")).intValue());
-        column.setPrecisionRadix(((Integer)values.get("NUM_PREC_RADIX")).intValue());
 
-        String size  = (String)values.get("COLUMN_SIZE");
-        int    scale = ((Integer)values.get("DECIMAL_DIGITS")).intValue();
+        Integer precision = (Integer)values.get("NUM_PREC_RADIX");
+
+        if (precision != null)
+        {
+            column.setPrecisionRadix(precision.intValue());
+        }
+
+        String size = (String)values.get("COLUMN_SIZE");
 
         if (size == null)
         {
@@ -791,11 +799,14 @@ public class JdbcModelReader
         // we're setting the size after the precision and radix in case
         // the database prefers to return them in the size value
         column.setSize(size);
-        if (scale != 0)
+
+        Integer scale = (Integer)values.get("DECIMAL_DIGITS");
+
+        if (scale != null)
         {
             // if there is a scale value, set it after the size (which probably did not contain
             // a scale specification)
-            column.setScale(scale);
+            column.setScale(scale.intValue());
         }
         column.setRequired("NO".equalsIgnoreCase(((String)values.get("IS_NULLABLE")).trim()));
         column.setDescription((String)values.get("REMARKS"));
@@ -895,6 +906,8 @@ public class JdbcModelReader
         {
             fk = new ForeignKey(fkName);
             fk.setForeignTableName((String)values.get("PKTABLE_NAME"));
+            fk.setOnUpdate(convertAction((Short)values.get("UPDATE_RULE")));
+            fk.setOnDelete(convertAction((Short)values.get("DELETE_RULE")));
             knownFks.put(fkName, fk);
         }
 
@@ -909,6 +922,38 @@ public class JdbcModelReader
         fk.addReference(ref);
     }
 
+    /**
+     * Converts the JDBC action value (one of the <code>importKey</code> constants in the
+     * {@link DatabaseMetaData} class) to a {@link CascadeActionEnum}.
+     * 
+     * @param jdbcActionValue The jdbc action value
+     * @return The enum value
+     */
+    protected CascadeActionEnum convertAction(Short jdbcActionValue)
+    {
+        CascadeActionEnum action = CascadeActionEnum.NONE;
+
+        if (jdbcActionValue != null)
+        {
+            switch (jdbcActionValue.shortValue())
+            {
+                case DatabaseMetaData.importedKeyCascade:
+                    action = CascadeActionEnum.CASCADE;
+                    break;
+                case DatabaseMetaData.importedKeySetNull:
+                    action = CascadeActionEnum.SET_NULL;
+                    break;
+                case DatabaseMetaData.importedKeySetDefault:
+                    action = CascadeActionEnum.SET_DEFAULT;
+                    break;
+                case DatabaseMetaData.importedKeyRestrict:
+                    action = CascadeActionEnum.RESTRICT;
+                    break;
+            }
+        }
+        return action;
+    }
+    
     /**
      * Determines the indices for the indicated table.
      * 

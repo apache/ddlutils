@@ -251,6 +251,7 @@ to another table.
                    <dt>cascade</dt><dd>Delete the local row.</dd>
                    <dt>setnull</dt><dd>Set the local column to <code>NULL</code> which 
                    effectively removes this specific foreign key relationship.</dd>
+                   <dt>setdefault</dt><dd>Set the local column to its default value.</dd>
                    <dt>restrict</dt><dd>Different databases may interpret this value
                    differently, but usually it is synonymous with <code>none</code>.</dd>
                    <dt>none</dt><dd>The value of the local column remains unchanged.</dd>
@@ -259,8 +260,8 @@ to another table.
 <!ATTLIST foreign-key
   foreignTable CDATA #REQUIRED
   name         CDATA #IMPLIED
-  onUpdate     (cascade | setnull | restrict | none) "none"
-  onDelete     (cascade | setnull | restrict | none) "none"
+  onUpdate     (cascade | setnull | setdefault | restrict | none) "none"
+  onDelete     (cascade | setnull | setdefault | restrict | none) "none"
 >
 
 <!--

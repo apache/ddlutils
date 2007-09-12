@@ -19,6 +19,8 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
@@ -438,5 +440,116 @@ public class TestConstraints extends RoundtripTestBase
             "</database>";
 
         performConstraintsTest(modelXml, true);
+    }
+
+    /**
+     * Tests two tables with a foreign key with a restrict onDelete action. 
+     */
+    public void testForeignKeyWithOnDeleteRestrict()
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1' onDelete='restrict'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+    }
+
+    /**
+     * Tests two tables with a foreign key with a cascade onDelete action. 
+     */
+    public void testForeignKeyWithOnDeleteCascade()
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1' onDelete='cascade'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+
+        insertRow("roundtrip_1", new Object[] { new Integer(1) });
+        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+
+        List beansTable1 = getRows("roundtrip_1");
+        List beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(1), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+
+        deleteRow("roundtrip_1", new Object[] { new Integer(1) });
+
+        beansTable1 = getRows("roundtrip_1");
+        beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(0, beansTable1.size());
+        assertEquals(0, beansTable2.size());
+    }
+
+    /**
+     * Tests two tables with a foreign key with a cascade onDelete action. 
+     */
+    public void testForeignKeyWithOnDeleteSetNull()
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1' onDelete='setnull'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+
+        insertRow("roundtrip_1", new Object[] { new Integer(1) });
+        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+
+        List beansTable1 = getRows("roundtrip_1");
+        List beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(1), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+
+        deleteRow("roundtrip_1", new Object[] { new Integer(1) });
+
+        beansTable1 = getRows("roundtrip_1");
+        beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(0, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals((Object)null, beansTable2.get(0), "avalue");
     }
 }

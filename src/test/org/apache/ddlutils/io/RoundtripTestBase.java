@@ -35,6 +35,7 @@ import org.apache.ddlutils.TestDatabaseWriterBase;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -148,6 +149,26 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
             bean.set(column.getName(), columnValues[idx]);
         }
         getPlatform().insert(getModel(), bean);
+    }
+
+
+    /**
+     * Deletes the specified row from the table.
+     * 
+     * @param tableName      The name of the table (case insensitive)
+     * @param pkColumnValues The values for the pk columns in order of definition
+     */
+    protected void deleteRow(String tableName, Object[] pkColumnValues)
+    {
+        Table    table     = getModel().findTable(tableName);
+        DynaBean bean      = getModel().createDynaBeanFor(table);
+        Column[] pkColumns = table.getPrimaryKeyColumns();
+
+        for (int idx = 0; (idx < pkColumns.length) && (idx < pkColumnValues.length); idx++)
+        {
+            bean.set(pkColumns[idx].getName(), pkColumnValues[idx]);
+        }
+        getPlatform().delete(getModel(), bean);
     }
 
     /**
@@ -541,6 +562,28 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
             assertEquals("Referenced table names do not match (ignoring case).",
                          getPlatform().getSqlBuilder().shortenName(expected.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()),
                          getPlatform().getSqlBuilder().shortenName(actual.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()));
+        }
+        if ((expected.getOnUpdate() == CascadeActionEnum.NONE) || (expected.getOnUpdate() == CascadeActionEnum.RESTRICT))
+        {
+            assertTrue("Not the same onUpdate setting in foreign key "+actual.getName()+".",
+                       (actual.getOnUpdate() == CascadeActionEnum.NONE) || (actual.getOnUpdate() == CascadeActionEnum.RESTRICT));
+        }
+        else
+        {
+            assertEquals("Not the same onUpdate setting in foreign key "+actual.getName()+".",
+                         expected.getOnUpdate(),
+                         actual.getOnUpdate());
+        }
+        if ((expected.getOnDelete() == CascadeActionEnum.NONE) || (expected.getOnDelete() == CascadeActionEnum.RESTRICT))
+        {
+            assertTrue("Not the same onDelete setting in foreign key "+actual.getName()+".",
+                       (actual.getOnDelete() == CascadeActionEnum.NONE) || (actual.getOnDelete() == CascadeActionEnum.RESTRICT));
+        }
+        else
+        {
+            assertEquals("Not the same onDelete setting in foreign key "+actual.getName()+".",
+                         expected.getOnDelete(),
+                         actual.getOnDelete());
         }
         assertEquals("Not the same number of references in foreign key "+actual.getName()+".",
                      expected.getReferenceCount(),

@@ -63,6 +63,7 @@ import org.apache.ddlutils.alteration.RemoveIndexChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.RemoveTableChange;
 import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -2466,11 +2467,11 @@ public abstract class SqlBuilder
     {
         for (int idx = 0; idx < table.getForeignKeyCount(); idx++)
         {
-            ForeignKey key = table.getForeignKey(idx);
+            ForeignKey foreignKey = table.getForeignKey(idx);
 
-            if (key.getForeignTableName() == null)
+            if (foreignKey.getForeignTableName() == null)
             {
-                _log.warn("Foreign key table is null for key " + key);
+                _log.warn("Foreign key table is null for key " + foreignKey);
             }
             else
             {
@@ -2478,16 +2479,18 @@ public abstract class SqlBuilder
                 if (getPlatformInfo().isEmbeddedForeignKeysNamed())
                 {
                     print("CONSTRAINT ");
-                    printIdentifier(getForeignKeyName(table, key));
+                    printIdentifier(getForeignKeyName(table, foreignKey));
                     print(" ");
                 }
                 print("FOREIGN KEY (");
-                writeLocalReferences(key);
+                writeLocalReferences(foreignKey);
                 print(") REFERENCES ");
-                printIdentifier(getTableName(database.findTable(key.getForeignTableName())));
+                printIdentifier(getTableName(database.findTable(foreignKey.getForeignTableName())));
                 print(" (");
-                writeForeignReferences(key);
+                writeForeignReferences(foreignKey);
                 print(")");
+                writeForeignKeyOnDeleteAction(table, foreignKey);
+                writeForeignKeyOnUpdateAction(table, foreignKey);
             }
         }
     }
@@ -2495,29 +2498,31 @@ public abstract class SqlBuilder
     /**
      * Writes a single foreign key constraint using a alter table statement.
      * 
-     * @param database The database model
-     * @param table    The table 
-     * @param key      The foreign key
+     * @param database   The database model
+     * @param table      The table 
+     * @param foreignKey The foreign key
      */
-    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
+    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey foreignKey) throws IOException
     {
-        if (key.getForeignTableName() == null)
+        if (foreignKey.getForeignTableName() == null)
         {
-            _log.warn("Foreign key table is null for key " + key);
+            _log.warn("Foreign key table is null for key " + foreignKey);
         }
         else
         {
             writeTableAlterStmt(table);
 
             print("ADD CONSTRAINT ");
-            printIdentifier(getForeignKeyName(table, key));
+            printIdentifier(getForeignKeyName(table, foreignKey));
             print(" FOREIGN KEY (");
-            writeLocalReferences(key);
+            writeLocalReferences(foreignKey);
             print(") REFERENCES ");
-            printIdentifier(getTableName(database.findTable(key.getForeignTableName())));
+            printIdentifier(getTableName(database.findTable(foreignKey.getForeignTableName())));
             print(" (");
-            writeForeignReferences(key);
+            writeForeignReferences(foreignKey);
             print(")");
+            writeForeignKeyOnDeleteAction(table, foreignKey);
+            writeForeignKeyOnUpdateAction(table, foreignKey);
             printEndOfStatement();
         }
     }
@@ -2553,6 +2558,70 @@ public abstract class SqlBuilder
                 print(", ");
             }
             printIdentifier(key.getReference(idx).getForeignColumnName());
+        }
+    }
+
+    /**
+     * Writes the onDelete action for the given foreign key.
+     *  
+     * @param table      The table
+     * @param foreignKey The foreignkey
+     */
+    private void writeForeignKeyOnDeleteAction(Table table, ForeignKey foreignKey) throws IOException
+    {
+        if (foreignKey.getOnDelete() != CascadeActionEnum.NONE)
+        {
+            print(" ON DELETE ");
+            switch (foreignKey.getOnDelete().getValue())
+            {
+                case CascadeActionEnum.VALUE_CASCADE:
+                    print("CASCADE");
+                    break;
+                case CascadeActionEnum.VALUE_SET_NULL:
+                    print("SET NULL");
+                    break;
+                case CascadeActionEnum.VALUE_RESTRICT:
+                    print("RESTRICT");
+                    break;
+                case CascadeActionEnum.VALUE_NONE:
+                    print("NO ACTION");
+                    break;
+                default:
+                    throw new ModelException("Unsupported cascade value '" + foreignKey.getOnDelete().getValue() +
+                                             "' for onDelete in foreign key in table " + table.getName());
+            }
+        }
+    }
+
+    /**
+     * Writes the onDelete action for the given foreign key.
+     *  
+     * @param table      The table
+     * @param foreignKey The foreignkey
+     */
+    private void writeForeignKeyOnUpdateAction(Table table, ForeignKey foreignKey) throws IOException
+    {
+        if (foreignKey.getOnUpdate() != CascadeActionEnum.NONE)
+        {
+            print(" ON UPDATE ");
+            switch (foreignKey.getOnUpdate().getValue())
+            {
+                case CascadeActionEnum.VALUE_CASCADE:
+                    print("CASCADE");
+                    break;
+                case CascadeActionEnum.VALUE_SET_NULL:
+                    print("SET NULL");
+                    break;
+                case CascadeActionEnum.VALUE_RESTRICT:
+                    print("RESTRICT");
+                    break;
+                case CascadeActionEnum.VALUE_NONE:
+                    print("NO ACTION");
+                    break;
+                default:
+                    throw new ModelException("Unsupported cascade value '" + foreignKey.getOnUpdate().getValue() +
+                                             "' for onUpdate in foreign key in table " + table.getName());
+            }
         }
     }
 
