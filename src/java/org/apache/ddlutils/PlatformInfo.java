@@ -56,6 +56,9 @@ public class PlatformInfo
     /** Whether embedded foreign key constraints are explicitly named. */
     private boolean _embeddedForeignKeysNamed = false;
 
+    /** Whether the set-default action is supportd for onDelete/onUpdate in a foreign key. */
+    private boolean _setDefaultActionSupported = true;
+
     /** Whether non-unique indices are supported. */
     private boolean _indicesSupported = true;
 
@@ -284,6 +287,28 @@ public class PlatformInfo
     public void setEmbeddedForeignKeysNamed(boolean embeddedForeignKeysNamed)
     {
         _embeddedForeignKeysNamed = embeddedForeignKeysNamed;
+    }
+
+    /**
+     * Determines whether the set-default action is supported for onUpdate/onDelete
+     * in foreign keys.
+     *
+     * @return <code>true</code> if set-default is supported
+     */
+    public boolean isSetDefaultActionSupported()
+    {
+        return _setDefaultActionSupported;
+    }
+
+    /**
+     * Specifies whether the set-default action is supported for onUpdate/onDelete
+     * in foreign keys.
+     *
+     * @param setDefaultActionSupported <code>true</code> if set-default is supported
+     */
+    public void setSetDefaultActionSupported(boolean setDefaultActionSupported)
+    {
+        _setDefaultActionSupported = setDefaultActionSupported;
     }
 
     /**
