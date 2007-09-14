@@ -21,7 +21,9 @@ package org.apache.ddlutils.io;
 
 import java.util.List;
 
+import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.lang.StringUtils;
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
@@ -463,6 +465,26 @@ public class TestConstraints extends RoundtripTestBase
             "</database>";
 
         performConstraintsTest(modelXml, true);
+
+        insertRow("roundtrip_1", new Object[] { new Integer(1) });
+        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+
+        List beansTable1 = getRows("roundtrip_1");
+        List beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(1), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+
+        try
+        {
+            deleteRow("roundtrip_1", new Object[] { new Integer(1) });
+            fail();
+        }
+        catch (DdlUtilsException ex)
+        {}
     }
 
     /**
@@ -598,6 +620,193 @@ public class TestConstraints extends RoundtripTestBase
             assertEquals(1, beansTable2.size());
             assertEquals(new Integer(5), beansTable2.get(0), "pk");
             assertEquals(new Integer(0), beansTable2.get(0), "avalue");
+        }
+    }
+
+    /**
+     * Tests two tables with a foreign key with a restrict onUpdate action. 
+     */
+    public void testForeignKeyWithOnUpdateRestrict()
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1' onUpdate='restrict'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+
+        insertRow("roundtrip_1", new Object[] { new Integer(1) });
+        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+
+        List beansTable1 = getRows("roundtrip_1");
+        List beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(1), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+
+        try
+        {
+            updateRow("roundtrip_1", (DynaBean)beansTable1.get(0), new Object[] { new Integer(5) });
+            fail();
+        }
+        catch (DdlUtilsException ex)
+        {}
+    }
+
+    /**
+     * Tests two tables with a foreign key with a cascade onUpdate action. 
+     */
+    public void testForeignKeyWithOnUpdateCascade()
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1' onUpdate='cascade'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+
+        insertRow("roundtrip_1", new Object[] { new Integer(1) });
+        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+
+        List beansTable1 = getRows("roundtrip_1");
+        List beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(1), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+
+        updateRow("roundtrip_1", (DynaBean)beansTable1.get(0), new Object[] { new Integer(2) });
+
+        beansTable1 = getRows("roundtrip_1");
+        beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(2), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals(new Integer(2), beansTable2.get(0), "avalue");
+    }
+
+    /**
+     * Tests two tables with a foreign key with a set-null onUpdate action. 
+     */
+    public void testForeignKeyWithOnUpdateSetNull()
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip_1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip_2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key foreignTable='roundtrip_1' onUpdate='setnull'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        performConstraintsTest(modelXml, true);
+
+        insertRow("roundtrip_1", new Object[] { new Integer(1) });
+        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+
+        List beansTable1 = getRows("roundtrip_1");
+        List beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(1), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+
+        updateRow("roundtrip_1", (DynaBean)beansTable1.get(0), new Object[] { new Integer(2) });
+
+        beansTable1 = getRows("roundtrip_1");
+        beansTable2 = getRows("roundtrip_2");
+
+        assertEquals(1, beansTable1.size());
+        assertEquals(1, beansTable2.size());
+        assertEquals(new Integer(2), beansTable1.get(0), "pk");
+        assertEquals(new Integer(5), beansTable2.get(0), "pk");
+        assertEquals((Object)null, beansTable2.get(0), "avalue");
+    }
+
+    /**
+     * Tests two tables with a foreign key with a det-default onUpdate action. 
+     */
+    public void testForeignKeyWithOnUpdateSetDefault()
+    {
+        if (getPlatformInfo().isSetDefaultActionSupported())
+        {
+            final String modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database name='roundtriptest'>\n"+
+                "  <table name='roundtrip_1'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "  </table>\n"+
+                "  <table name='roundtrip_2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='avalue' type='INTEGER' required='false' default='2'/>\n"+
+                "    <foreign-key foreignTable='roundtrip_1' onUpdate='setdefault'>\n"+
+                "      <reference local='avalue' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+
+            performConstraintsTest(modelXml, true);
+    
+            insertRow("roundtrip_1", new Object[] { new Integer(1) });
+            insertRow("roundtrip_1", new Object[] { new Integer(2) });
+            insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+    
+            List beansTable1 = getRows("roundtrip_1");
+            List beansTable2 = getRows("roundtrip_2");
+    
+            assertEquals(2, beansTable1.size());
+            assertEquals(1, beansTable2.size());
+            assertEquals(new Integer(1), beansTable1.get(0), "pk");
+            assertEquals(new Integer(2), beansTable1.get(1), "pk");
+            assertEquals(new Integer(5), beansTable2.get(0), "pk");
+            assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+    
+            updateRow("roundtrip_1", (DynaBean)beansTable1.get(0), new Object[] { new Integer(0) });
+    
+            beansTable1 = getRows("roundtrip_1");
+            beansTable2 = getRows("roundtrip_2");
+    
+            assertEquals(2, beansTable1.size());
+            assertEquals(1, beansTable2.size());
+            assertEquals(new Integer(0), beansTable1.get(0), "pk");
+            assertEquals(new Integer(2), beansTable1.get(1), "pk");
+            assertEquals(new Integer(5), beansTable2.get(0), "pk");
+            assertEquals(new Integer(2), beansTable2.get(0), "avalue");
         }
     }
 }

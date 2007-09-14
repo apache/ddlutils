@@ -841,6 +841,27 @@ public interface Platform
     public void update(Connection connection, Database model, DynaBean dynaBean) throws DatabaseOperationException;
 
     /**
+     * Updates the row identified by the given <code>oldDynaBean</code> in the database with the
+     * values in <code>newDynaBean</code>.
+     * 
+     * @param model       The database model to use
+     * @param oldDynaBean The bean identifying the row (which means the primary key fields need to be specified)
+     * @param newDynaBean The bean containing the new data
+     */
+    public void update(Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException;
+
+    /**
+     * Updates the row identified by the given <code>oldDynaBean</code> in the database with the
+     * values in <code>newDynaBean</code>.
+     * 
+     * @param connection  The database connection
+     * @param model       The database model to use
+     * @param oldDynaBean The bean identifying the row (which means the primary key fields need to be specified)
+     * @param newDynaBean The bean containing the new data
+     */
+    public void update(Connection connection, Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException;
+
+    /**
      * Returns the sql for deleting the given bean from the database.
      * 
      * @param model    The database model to use

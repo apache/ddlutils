@@ -1526,6 +1526,25 @@ public abstract class SqlBuilder
      */
     public String getUpdateSql(Table table, Map columnValues, boolean genPlaceholders)
     {
+        return getUpdateSql(table, columnValues, columnValues, genPlaceholders);
+    }
+
+    /**
+     * Creates the SQL for updating an object in the specified table.
+     * If values are given then a concrete update statement is created, otherwise an
+     * update statement usable in a prepared statement is build.
+     * 
+     * @param table           The table
+     * @param oldColumnValues Contains the column values to identify the row to update 
+     * @param columnValues    Contains the values for the columns to update, and should also
+     *                        contain the primary key values to identify the object to update
+     *                        in case <code>genPlaceholders</code> is <code>false</code> 
+     * @param genPlaceholders Whether to generate value placeholders for a
+     *                        prepared statement (both for the pk values and the object values)
+     * @return The update sql
+     */
+    public String getUpdateSql(Table table, Map oldColumnValues, Map newColumnValues, boolean genPlaceholders)
+    {
         StringBuffer buffer = new StringBuffer("UPDATE ");
         boolean      addSep = false;
 
@@ -1536,7 +1555,7 @@ public abstract class SqlBuilder
         {
             Column column = table.getColumn(idx);
 
-            if (!column.isPrimaryKey() && columnValues.containsKey(column.getName()))
+            if (!column.isPrimaryKey() && newColumnValues.containsKey(column.getName()))
             {
                 if (addSep)
                 {
@@ -1550,7 +1569,7 @@ public abstract class SqlBuilder
                 }
                 else
                 {
-                    buffer.append(getValueAsString(column, columnValues.get(column.getName())));
+                    buffer.append(getValueAsString(column, newColumnValues.get(column.getName())));
                 }
                 addSep = true;
             }
@@ -1561,7 +1580,7 @@ public abstract class SqlBuilder
         {
             Column column = table.getColumn(idx);
 
-            if (column.isPrimaryKey() && columnValues.containsKey(column.getName()))
+            if (column.isPrimaryKey() && oldColumnValues.containsKey(column.getName()))
             {
                 if (addSep)
                 {
@@ -1575,7 +1594,7 @@ public abstract class SqlBuilder
                 }
                 else
                 {
-                    buffer.append(getValueAsString(column, columnValues.get(column.getName())));
+                    buffer.append(getValueAsString(column, oldColumnValues.get(column.getName())));
                 }
                 addSep = true;
             }

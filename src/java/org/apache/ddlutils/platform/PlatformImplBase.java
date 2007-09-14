@@ -1618,6 +1618,87 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
+    public void update(Connection connection, Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException
+    {
+        SqlDynaClass      dynaClass   = model.getDynaClassFor(oldDynaBean);
+        SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
+
+        if (!dynaClass.getTable().equals(model.getDynaClassFor(newDynaBean)))
+        {
+            throw new DatabaseOperationException("The old and new dyna beans need to be for the same table");
+        }
+        if (primaryKeys.length == 0)
+        {
+            _log.info("Cannot update instances of type " + dynaClass + " because it has no primary keys");
+            return;
+        }
+
+        SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
+        String            sql        = createUpdateSql(model, dynaClass, primaryKeys, properties, null);
+        PreparedStatement statement  = null;
+
+        if (_log.isDebugEnabled())
+        {
+            _log.debug("About to execute SQL: " + sql);
+        }
+        try
+        {
+            beforeUpdate(connection, dynaClass.getTable());
+
+            statement = connection.prepareStatement(sql);
+
+            int sqlIndex = 1;
+
+            for (int idx = 0; idx < properties.length; idx++)
+            {
+                setObject(statement, sqlIndex++, newDynaBean, properties[idx]);
+            }
+            for (int idx = 0; idx < primaryKeys.length; idx++)
+            {
+                setObject(statement, sqlIndex++, oldDynaBean, primaryKeys[idx]);
+            }
+
+            int count = statement.executeUpdate();
+
+            afterUpdate(connection, dynaClass.getTable());
+
+            if (count != 1)
+            {
+                _log.warn("Attempted to insert a single row " + newDynaBean +
+                         " into table " + dynaClass.getTableName() +
+                         " but changed " + count + " row(s)");
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new DatabaseOperationException("Error while updating in the database", ex);
+        }
+        finally
+        {
+            closeStatement(statement);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void update(Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            update(connection, model, oldDynaBean, newDynaBean);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void update(Connection connection, Database model, DynaBean dynaBean) throws DatabaseOperationException
     {
         SqlDynaClass      dynaClass   = model.getDynaClassFor(dynaBean);

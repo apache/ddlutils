@@ -151,6 +151,26 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
         getPlatform().insert(getModel(), bean);
     }
 
+    /**
+     * Updates the row in the designated table.
+     * 
+     * @param tableName    The name of the table (case insensitive)
+     * @param oldBean      The bean representing the current row
+     * @param columnValues The values for the columns in order of definition
+     */
+    protected void updateRow(String tableName, DynaBean oldBean, Object[] columnValues)
+    {
+        Table    table = getModel().findTable(tableName);
+        DynaBean bean  = getModel().createDynaBeanFor(table);
+
+        for (int idx = 0; (idx < table.getColumnCount()) && (idx < columnValues.length); idx++)
+        {
+            Column column = table.getColumn(idx);
+
+            bean.set(column.getName(), columnValues[idx]);
+        }
+        getPlatform().update(getModel(), oldBean, bean);
+    }
 
     /**
      * Deletes the specified row from the table.
