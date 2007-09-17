@@ -815,7 +815,8 @@ public interface Platform
     public void insert(Connection connection, Database model, Collection dynaBeans) throws DatabaseOperationException;
 
     /**
-     * Returns the sql for updating the given bean in the database.
+     * Returns the sql for updating the given bean in the database. Note that this method can not be used to
+     * generate SQL for updating primary key columns. 
      * 
      * @param model    The database model to use
      * @param dynaBean The bean
@@ -824,7 +825,19 @@ public interface Platform
     public String getUpdateSql(Database model, DynaBean dynaBean);
 
     /**
-     * Updates the given bean in the database, assuming the primary key values are specified.
+     * Returns the sql for updating the given bean in the database. Note that this method can not be used to
+     * generate SQL for updating primary key columns. 
+     * 
+     * @param model       The database model to use
+     * @param oldDynaBean The bean identifying the row to update
+     * @param newDynaBean The bean containing the new values
+     * @return The update sql
+     */
+    public String getUpdateSql(Database model, DynaBean oldDynaBean, DynaBean newDynaBan);
+
+    /**
+     * Updates the given bean in the database, assuming the primary key values are specified. Note that this means
+     * that this method will not update the primary key columns.
      * 
      * @param model    The database model to use
      * @param dynaBean The bean
@@ -832,7 +845,8 @@ public interface Platform
     public void update(Database model, DynaBean dynaBean) throws DatabaseOperationException;
 
     /**
-     * Updates the row which maps to the given bean.
+     * Updates the row which maps to the given bean. Note that this means that this method will not update the
+     * primary key columns.
      * 
      * @param connection The database connection
      * @param model      The database model to use
@@ -842,7 +856,7 @@ public interface Platform
 
     /**
      * Updates the row identified by the given <code>oldDynaBean</code> in the database with the
-     * values in <code>newDynaBean</code>.
+     * values in <code>newDynaBean</code>. This method can be used to update primary key columns.
      * 
      * @param model       The database model to use
      * @param oldDynaBean The bean identifying the row (which means the primary key fields need to be specified)
@@ -852,7 +866,7 @@ public interface Platform
 
     /**
      * Updates the row identified by the given <code>oldDynaBean</code> in the database with the
-     * values in <code>newDynaBean</code>.
+     * values in <code>newDynaBean</code>. This method can be used to update primary key columns.
      * 
      * @param connection  The database connection
      * @param model       The database model to use

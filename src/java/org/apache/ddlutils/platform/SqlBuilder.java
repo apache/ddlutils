@@ -1526,7 +1526,61 @@ public abstract class SqlBuilder
      */
     public String getUpdateSql(Table table, Map columnValues, boolean genPlaceholders)
     {
-        return getUpdateSql(table, columnValues, columnValues, genPlaceholders);
+        StringBuffer buffer = new StringBuffer("UPDATE ");
+        boolean      addSep = false;
+
+        buffer.append(getDelimitedIdentifier(getTableName(table)));
+        buffer.append(" SET ");
+
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
+        {
+            Column column = table.getColumn(idx);
+
+            if (!column.isPrimaryKey() && columnValues.containsKey(column.getName()))
+            {
+                if (addSep)
+                {
+                    buffer.append(", ");
+                }
+                buffer.append(getDelimitedIdentifier(column.getName()));
+                buffer.append(" = ");
+                if (genPlaceholders)
+                {
+                    buffer.append("?");
+                }
+                else
+                {
+                    buffer.append(getValueAsString(column, columnValues.get(column.getName())));
+                }
+                addSep = true;
+            }
+        }
+        buffer.append(" WHERE ");
+        addSep = false;
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
+        {
+            Column column = table.getColumn(idx);
+
+            if (column.isPrimaryKey() && columnValues.containsKey(column.getName()))
+            {
+                if (addSep)
+                {
+                    buffer.append(" AND ");
+                }
+                buffer.append(getDelimitedIdentifier(column.getName()));
+                buffer.append(" = ");
+                if (genPlaceholders)
+                {
+                    buffer.append("?");
+                }
+                else
+                {
+                    buffer.append(getValueAsString(column, columnValues.get(column.getName())));
+                }
+                addSep = true;
+            }
+        }
+        return buffer.toString();
     }
 
     /**
@@ -1536,9 +1590,7 @@ public abstract class SqlBuilder
      * 
      * @param table           The table
      * @param oldColumnValues Contains the column values to identify the row to update 
-     * @param columnValues    Contains the values for the columns to update, and should also
-     *                        contain the primary key values to identify the object to update
-     *                        in case <code>genPlaceholders</code> is <code>false</code> 
+     * @param newColumnValues Contains the values for the columns to update 
      * @param genPlaceholders Whether to generate value placeholders for a
      *                        prepared statement (both for the pk values and the object values)
      * @return The update sql
@@ -1555,7 +1607,7 @@ public abstract class SqlBuilder
         {
             Column column = table.getColumn(idx);
 
-            if (!column.isPrimaryKey() && newColumnValues.containsKey(column.getName()))
+            if (newColumnValues.containsKey(column.getName()))
             {
                 if (addSep)
                 {
@@ -1580,7 +1632,7 @@ public abstract class SqlBuilder
         {
             Column column = table.getColumn(idx);
 
-            if (column.isPrimaryKey() && oldColumnValues.containsKey(column.getName()))
+            if (oldColumnValues.containsKey(column.getName()))
             {
                 if (addSep)
                 {
@@ -2599,6 +2651,9 @@ public abstract class SqlBuilder
                 case CascadeActionEnum.VALUE_SET_NULL:
                     print("SET NULL");
                     break;
+                case CascadeActionEnum.VALUE_SET_DEFAULT:
+                    print("SET DEFAULT");
+                    break;
                 case CascadeActionEnum.VALUE_RESTRICT:
                     print("RESTRICT");
                     break;
@@ -2630,6 +2685,9 @@ public abstract class SqlBuilder
                     break;
                 case CascadeActionEnum.VALUE_SET_NULL:
                     print("SET NULL");
+                    break;
+                case CascadeActionEnum.VALUE_SET_DEFAULT:
+                    print("SET DEFAULT");
                     break;
                 case CascadeActionEnum.VALUE_RESTRICT:
                     print("RESTRICT");

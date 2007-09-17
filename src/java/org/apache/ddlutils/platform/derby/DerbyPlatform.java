@@ -51,7 +51,6 @@ public class DerbyPlatform extends CloudscapePlatform
     public DerbyPlatform()
     {
         super();
-        getPlatformInfo().setSetDefaultActionSupported(false);
         getPlatformInfo().addNativeTypeMapping(Types.DOUBLE, "DOUBLE");
         getPlatformInfo().addNativeTypeMapping(Types.FLOAT,  "DOUBLE", Types.DOUBLE);
         setSqlBuilder(new DerbyBuilder(this));

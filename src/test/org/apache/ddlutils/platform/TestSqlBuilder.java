@@ -36,7 +36,7 @@ public class TestSqlBuilder extends TestBase
     /**
      * Tests the {@link SqlBuilder#getUpdateSql(Table, Map, boolean)} method.
      */
-    public void testUpdateSql()
+    public void testUpdateSql1()
     {
         final String modelXml =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
@@ -60,6 +60,39 @@ public class TestSqlBuilder extends TestBase
         String sql = sqlBuilder.getUpdateSql(database.getTable(0), map, false);
 
         assertEquals("UPDATE \"TestTable\" SET \"name\" = 'ddlutils' WHERE \"id\" = '0'",
+                     sql);
+    }
+
+    /**
+     * Tests the {@link SqlBuilder#getUpdateSql(Table, Map, Map, boolean)} method.
+     */
+    public void testUpdateSql2()
+    {
+        final String modelXml =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='id' autoIncrement='true' type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='name' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        TestPlatform platform   = new TestPlatform();
+        SqlBuilder   sqlBuilder = platform.getSqlBuilder();
+        Database     database   = parseDatabaseFromString(modelXml);
+        Map          oldMap     = new HashMap();
+        Map          newMap     = new HashMap();
+
+        oldMap.put("id", new Integer(0));
+
+        newMap.put("name", "ddlutils");
+        newMap.put("id", new Integer(1));
+
+        platform.setDelimitedIdentifierModeOn(true);
+        
+        String sql = sqlBuilder.getUpdateSql(database.getTable(0), oldMap, newMap, false);
+
+        assertEquals("UPDATE \"TestTable\" SET \"id\" = '1', \"name\" = 'ddlutils' WHERE \"id\" = '0'",
                      sql);
     }
 }

@@ -1599,100 +1599,71 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     }
 
     /**
-     * {@inheritDoc}
+     * Creates the SQL for updating an object of the given type. If a concrete bean is given,
+     * then a concrete update statement is created, otherwise an update statement usable in a
+     * prepared statement is build.
+     * 
+     * @param model       The database model
+     * @param dynaClass   The type
+     * @param primaryKeys The primary keys
+     * @param properties  The properties to write
+     * @param bean        Optionally the concrete bean to update
+     * @return The SQL required to update the instance
      */
-    public String getUpdateSql(Database model, DynaBean dynaBean)
+    protected String createUpdateSql(Database model, SqlDynaClass dynaClass, SqlDynaProperty[] primaryKeys, SqlDynaProperty[] properties, DynaBean oldBean, DynaBean newBean)
     {
-        SqlDynaClass      dynaClass   = model.getDynaClassFor(dynaBean);
-        SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
+        Table   table           = model.findTable(dynaClass.getTableName());
+        HashMap oldColumnValues = toColumnValues(primaryKeys, oldBean);
+        HashMap newColumnValues = toColumnValues(properties, newBean);
 
         if (primaryKeys.length == 0)
         {
             _log.info("Cannot update instances of type " + dynaClass + " because it has no primary keys");
             return null;
         }
-
-        return createUpdateSql(model, dynaClass, primaryKeys, dynaClass.getNonPrimaryKeyProperties(), dynaBean);
+        else
+        {
+            return _builder.getUpdateSql(table, oldColumnValues, newColumnValues, newBean == null);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public void update(Connection connection, Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException
+    public String getUpdateSql(Database model, DynaBean dynaBean)
     {
-        SqlDynaClass      dynaClass   = model.getDynaClassFor(oldDynaBean);
-        SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
+        SqlDynaClass      dynaClass      = model.getDynaClassFor(dynaBean);
+        SqlDynaProperty[] primaryKeys    = dynaClass.getPrimaryKeyProperties();
+        SqlDynaProperty[] nonPrimaryKeys = dynaClass.getNonPrimaryKeyProperties();
 
-        if (!dynaClass.getTable().equals(model.getDynaClassFor(newDynaBean)))
-        {
-            throw new DatabaseOperationException("The old and new dyna beans need to be for the same table");
-        }
         if (primaryKeys.length == 0)
         {
             _log.info("Cannot update instances of type " + dynaClass + " because it has no primary keys");
-            return;
+            return null;
         }
-
-        SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
-        String            sql        = createUpdateSql(model, dynaClass, primaryKeys, properties, null);
-        PreparedStatement statement  = null;
-
-        if (_log.isDebugEnabled())
+        else
         {
-            _log.debug("About to execute SQL: " + sql);
-        }
-        try
-        {
-            beforeUpdate(connection, dynaClass.getTable());
-
-            statement = connection.prepareStatement(sql);
-
-            int sqlIndex = 1;
-
-            for (int idx = 0; idx < properties.length; idx++)
-            {
-                setObject(statement, sqlIndex++, newDynaBean, properties[idx]);
-            }
-            for (int idx = 0; idx < primaryKeys.length; idx++)
-            {
-                setObject(statement, sqlIndex++, oldDynaBean, primaryKeys[idx]);
-            }
-
-            int count = statement.executeUpdate();
-
-            afterUpdate(connection, dynaClass.getTable());
-
-            if (count != 1)
-            {
-                _log.warn("Attempted to insert a single row " + newDynaBean +
-                         " into table " + dynaClass.getTableName() +
-                         " but changed " + count + " row(s)");
-            }
-        }
-        catch (SQLException ex)
-        {
-            throw new DatabaseOperationException("Error while updating in the database", ex);
-        }
-        finally
-        {
-            closeStatement(statement);
+            return createUpdateSql(model, dynaClass, primaryKeys, nonPrimaryKeys, dynaBean);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public void update(Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException
+    public String getUpdateSql(Database model, DynaBean oldDynaBean, DynaBean newDynaBean)
     {
-        Connection connection = borrowConnection();
+        SqlDynaClass      dynaClass      = model.getDynaClassFor(oldDynaBean);
+        SqlDynaProperty[] primaryKeys    = dynaClass.getPrimaryKeyProperties();
+        SqlDynaProperty[] nonPrimaryKeys = dynaClass.getNonPrimaryKeyProperties();
 
-        try
+        if (primaryKeys.length == 0)
         {
-            update(connection, model, oldDynaBean, newDynaBean);
+            _log.info("Cannot update instances of type " + dynaClass + " because it has no primary keys");
+            return null;
         }
-        finally
+        else
         {
-            returnConnection(connection);
+            return createUpdateSql(model, dynaClass, primaryKeys, nonPrimaryKeys, oldDynaBean, newDynaBean);
         }
     }
 
@@ -1766,6 +1737,87 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         try
         {
             update(connection, model, dynaBean);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void update(Connection connection, Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException
+    {
+        SqlDynaClass      dynaClass   = model.getDynaClassFor(oldDynaBean);
+        SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
+
+        if (!dynaClass.getTable().equals(model.getDynaClassFor(newDynaBean).getTable()))
+        {
+            throw new DatabaseOperationException("The old and new dyna beans need to be for the same table");
+        }
+        if (primaryKeys.length == 0)
+        {
+            _log.info("Cannot update instances of type " + dynaClass + " because it has no primary keys");
+            return;
+        }
+
+        SqlDynaProperty[] properties = dynaClass.getSqlDynaProperties();
+        String            sql        = createUpdateSql(model, dynaClass, primaryKeys, properties, null, null);
+        PreparedStatement statement  = null;
+
+        if (_log.isDebugEnabled())
+        {
+            _log.debug("About to execute SQL: " + sql);
+        }
+        try
+        {
+            beforeUpdate(connection, dynaClass.getTable());
+
+            statement = connection.prepareStatement(sql);
+
+            int sqlIndex = 1;
+
+            for (int idx = 0; idx < properties.length; idx++)
+            {
+                setObject(statement, sqlIndex++, newDynaBean, properties[idx]);
+            }
+            for (int idx = 0; idx < primaryKeys.length; idx++)
+            {
+                setObject(statement, sqlIndex++, oldDynaBean, primaryKeys[idx]);
+            }
+
+            int count = statement.executeUpdate();
+
+            afterUpdate(connection, dynaClass.getTable());
+
+            if (count != 1)
+            {
+                _log.warn("Attempted to insert a single row " + newDynaBean +
+                         " into table " + dynaClass.getTableName() +
+                         " but changed " + count + " row(s)");
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new DatabaseOperationException("Error while updating in the database", ex);
+        }
+        finally
+        {
+            closeStatement(statement);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void update(Database model, DynaBean oldDynaBean, DynaBean newDynaBean) throws DatabaseOperationException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            update(connection, model, oldDynaBean, newDynaBean);
         }
         finally
         {
