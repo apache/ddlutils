@@ -28,10 +28,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnSizeChange extends TableChangeImplBase implements ColumnChange
+public class ColumnSizeChange extends ColumnChangeImplBase
 {
-    /** The column. */
-    private Column _column;
     /** The new size. */
     private int _newSize;
     /** The new scale. */
@@ -47,20 +45,9 @@ public class ColumnSizeChange extends TableChangeImplBase implements ColumnChang
      */
     public ColumnSizeChange(Table table, Column column, int newSize, int newScale)
     {
-        super(table);
-        _column   = column;
+        super(table, column);
         _newSize  = newSize;
         _newScale = newScale;
-    }
-
-    /**
-     * Returns the column.
-     *
-     * @return The column
-     */
-    public Column getChangedColumn()
-    {
-        return _column;
     }
 
     /**
@@ -86,11 +73,8 @@ public class ColumnSizeChange extends TableChangeImplBase implements ColumnChang
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
-        Column column = table.findColumn(_column.getName(), caseSensitive);
-
-        column.setSizeAndScale(_newSize, _newScale);
+        findChangedColumn(model, caseSensitive).setSizeAndScale(_newSize, _newScale);
     }
 }

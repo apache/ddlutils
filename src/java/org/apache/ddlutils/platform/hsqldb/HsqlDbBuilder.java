@@ -87,7 +87,7 @@ public class HsqlDbBuilder extends SqlBuilder
             TableChange change = (TableChange)changeIt.next();
 
             if ((change instanceof RemoveColumnChange) && 
-                ((RemoveColumnChange)change).getColumn().isPrimaryKey())
+                ((RemoveColumnChange)change).getChangedColumn().isPrimaryKey())
             {
                 return;
             }
@@ -172,7 +172,7 @@ public class HsqlDbBuilder extends SqlBuilder
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         printEndOfStatement();
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }

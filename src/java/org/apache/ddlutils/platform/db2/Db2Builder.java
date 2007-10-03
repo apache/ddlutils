@@ -227,7 +227,7 @@ public class Db2Builder extends SqlBuilder
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         printEndOfStatement();
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }

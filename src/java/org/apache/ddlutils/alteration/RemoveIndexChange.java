@@ -28,11 +28,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class RemoveIndexChange extends TableChangeImplBase
+public class RemoveIndexChange extends IndexChangeImplBase
 {
-    /** The index to be removed. */
-    private Index _index;
-
     /**
      * Creates a new change object.
      * 
@@ -41,28 +38,14 @@ public class RemoveIndexChange extends TableChangeImplBase
      */
     public RemoveIndexChange(Table table, Index index)
     {
-        super(table);
-        _index = index;
-    }
-
-    /**
-     * Returns the index.
-     *
-     * @return The index
-     */
-    public Index getIndex()
-    {
-        return _index;
+        super(table, index);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
-        Index index = table.findIndex(_index.getName(), caseSensitive);
-
-        table.removeIndex(index);
+        findChangedTable(model, caseSensitive).removeIndex(findChangedIndex(model, caseSensitive));
     }
 }

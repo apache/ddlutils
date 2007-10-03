@@ -189,7 +189,7 @@ public class MckoiBuilder extends SqlBuilder
 
             if (change instanceof ColumnAutoIncrementChange)
             {
-                Column column = ((ColumnAutoIncrementChange)change).getColumn();
+                Column column = ((ColumnAutoIncrementChange)change).getChangedColumn();
 
                 // we have to defer removal of the sequences until they are no longer used
                 if (!column.isAutoIncrement())
@@ -197,7 +197,7 @@ public class MckoiBuilder extends SqlBuilder
                     ColumnAutoIncrementChange autoIncrChange = (ColumnAutoIncrementChange)change;
 
                     createAutoIncrementSequence(autoIncrChange.getChangedTable(),
-                                                autoIncrChange.getColumn());
+                                                autoIncrChange.getChangedColumn());
                 }
             }
             else if (change instanceof AddColumnChange)
@@ -221,24 +221,24 @@ public class MckoiBuilder extends SqlBuilder
     
             if (change instanceof ColumnAutoIncrementChange)
             {
-                Column column = ((ColumnAutoIncrementChange)change).getColumn();
+                Column column = ((ColumnAutoIncrementChange)change).getChangedColumn();
     
                 if (column.isAutoIncrement())
                 {
                     ColumnAutoIncrementChange autoIncrChange = (ColumnAutoIncrementChange)change;
         
                     dropAutoIncrementSequence(autoIncrChange.getChangedTable(),
-                                              autoIncrChange.getColumn());
+                                              autoIncrChange.getChangedColumn());
                 }
             }
             else if (change instanceof RemoveColumnChange)
             {
                 RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
 
-                if (removeColumnChange.getColumn().isAutoIncrement())
+                if (removeColumnChange.getChangedColumn().isAutoIncrement())
                 {
                     dropAutoIncrementSequence(removeColumnChange.getChangedTable(),
-                                              removeColumnChange.getColumn());
+                                              removeColumnChange.getChangedColumn());
                 }
             }
         }

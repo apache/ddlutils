@@ -111,12 +111,13 @@ public class AddColumnChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
         Column newColumn = null;
 
         try
         {
+        	// TODO: Cloning should not be necessary
             newColumn = (Column)_newColumn.clone();
         }
         catch (CloneNotSupportedException ex)
@@ -124,8 +125,9 @@ public class AddColumnChange extends TableChangeImplBase
             throw new DdlUtilsException(ex);
         }
 
-        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
+        Table table = findChangedTable(model, caseSensitive);
 
+        // TODO: change this !
         if ((_previousColumn != null) && (_nextColumn != null))
         {
             int idx = table.getColumnIndex(_previousColumn) + 1;

@@ -67,6 +67,7 @@ public class AddForeignKeyChange extends TableChangeImplBase
 
         try
         {
+        	// TODO: we should not have to clone here
             newFK = (ForeignKey)_newForeignKey.clone();
             newFK.setForeignTable(database.findTable(_newForeignKey.getForeignTableName(), caseSensitive));
         }
@@ -74,7 +75,7 @@ public class AddForeignKeyChange extends TableChangeImplBase
         {
             throw new DdlUtilsException(ex);
         }
-        database.findTable(getChangedTable().getName()).addForeignKey(newFK);
+        findChangedTable(database, caseSensitive).addForeignKey(newFK);
     }
 
 }

@@ -273,7 +273,7 @@ public class SapDbBuilder extends SqlBuilder
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         print(" RELEASE SPACE");
         printEndOfStatement();
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());

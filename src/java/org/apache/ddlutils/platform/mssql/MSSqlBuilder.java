@@ -413,11 +413,11 @@ public class MSSqlBuilder extends SqlBuilder
 
             if (change instanceof RemoveIndexChange)
             {
-                removedIndexes.add(((RemoveIndexChange)change).getIndex());
+                removedIndexes.add(((RemoveIndexChange)change).getChangedIndex());
             }
             else if (change instanceof RemoveForeignKeyChange)
             {
-                removedForeignKeys.add(((RemoveForeignKeyChange)change).getForeignKey());
+                removedForeignKeys.add(((RemoveForeignKeyChange)change).getChangedForeignKey());
             }
             else if (change instanceof RemovePrimaryKeyChange)
             {
@@ -626,7 +626,7 @@ public class MSSqlBuilder extends SqlBuilder
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         printEndOfStatement();
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }

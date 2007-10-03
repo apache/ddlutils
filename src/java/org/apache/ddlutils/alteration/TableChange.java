@@ -19,6 +19,7 @@ package org.apache.ddlutils.alteration;
  * under the License.
  */
 
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
 /**
@@ -34,4 +35,13 @@ public interface TableChange extends ModelChange
      * @return The affected table
      */
     public Table getChangedTable();
+
+    /**
+     * Finds the table object corresponding to the changed table in the given database model.
+     * 
+     * @param model         The database model
+     * @param caseSensitive Whether identifiers are case sensitive
+     * @return The table object or <code>null</code> if it could not be found
+     */
+    public Table findChangedTable(Database model, boolean caseSensitive);
 }

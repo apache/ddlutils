@@ -618,7 +618,7 @@ public abstract class SqlBuilder
                                  CreationParameters     params,
                                  RemoveForeignKeyChange change) throws IOException
     {
-        writeExternalForeignKeyDropStmt(change.getChangedTable(), change.getForeignKey());
+        writeExternalForeignKeyDropStmt(change.getChangedTable(), change.getChangedForeignKey());
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
@@ -636,7 +636,7 @@ public abstract class SqlBuilder
                                  CreationParameters params,
                                  RemoveIndexChange  change) throws IOException
     {
-        writeExternalIndexDropStmt(change.getChangedTable(), change.getIndex());
+        writeExternalIndexDropStmt(change.getChangedTable(), change.getChangedIndex());
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 

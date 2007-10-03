@@ -28,10 +28,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnDataTypeChange extends TableChangeImplBase implements ColumnChange
+public class ColumnDataTypeChange extends ColumnChangeImplBase
 {
-    /** The column. */
-    private Column _column;
     /** The JDBC type code of the new type. */
     private int _newTypeCode;
 
@@ -44,19 +42,8 @@ public class ColumnDataTypeChange extends TableChangeImplBase implements ColumnC
      */
     public ColumnDataTypeChange(Table table, Column column, int newTypeCode)
     {
-        super(table);
-        _column      = column;
+        super(table, column);
         _newTypeCode = newTypeCode;
-    }
-
-    /**
-     * Returns the column.
-     *
-     * @return The column
-     */
-    public Column getChangedColumn()
-    {
-        return _column;
     }
 
     /**
@@ -72,11 +59,8 @@ public class ColumnDataTypeChange extends TableChangeImplBase implements ColumnC
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
-        Column column = table.findColumn(_column.getName(), caseSensitive);
-
-        column.setTypeCode(_newTypeCode);
+        findChangedColumn(model, caseSensitive).setTypeCode(_newTypeCode);
     }
 }

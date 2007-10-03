@@ -20,41 +20,28 @@ package org.apache.ddlutils.alteration;
  */
 
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.ForeignKey;
 
 /**
- * Base class for change implementations.
+ * Represents a change to a foreign key of a table.
  * 
  * @version $Revision: $
  */
-public abstract class TableChangeImplBase implements TableChange
+public interface ForeignKeyChange extends TableChange
 {
-    /** The affected table. */
-    private Table _table;
-
     /**
-     * Creates a new change object.
+     * Returns the affected foreign key from the original model.
      * 
-     * @param table The table
+     * @return The affected foreign key
      */
-    public TableChangeImplBase(Table table)
-    {
-        _table = table;
-    }
+    public ForeignKey getChangedForeignKey();
 
     /**
-     * {@inheritDoc}
+     * Finds the foreign key object corresponding to the changed foreign key in the given database model.
+     * 
+     * @param model         The database model
+     * @param caseSensitive Whether identifiers are case sensitive
+     * @return The foreign key object or <code>null</code> if it could not be found
      */
-    public Table getChangedTable()
-    {
-        return _table;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Table findChangedTable(Database model, boolean caseSensitive)
-    {
-    	return model.findTable(_table.getName(), caseSensitive);
-    }
+    public ForeignKey findChangedForeignKey(Database model, boolean caseSensitive);
 }

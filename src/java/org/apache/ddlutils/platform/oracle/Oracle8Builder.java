@@ -489,16 +489,16 @@ public class Oracle8Builder extends SqlBuilder
                                  Database           desiredModel,
                                  RemoveColumnChange change) throws IOException
     {
-        if (change.getColumn().isAutoIncrement())
+        if (change.getChangedColumn().isAutoIncrement())
         {
-            dropAutoIncrementTrigger(change.getChangedTable(), change.getColumn());
-            dropAutoIncrementSequence(change.getChangedTable(), change.getColumn());
+            dropAutoIncrementTrigger(change.getChangedTable(), change.getChangedColumn());
+            dropAutoIncrementSequence(change.getChangedTable(), change.getChangedColumn());
         }
         print("ALTER TABLE ");
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         printEndOfStatement();
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }

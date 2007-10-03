@@ -20,41 +20,28 @@ package org.apache.ddlutils.alteration;
  */
 
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.Index;
 
 /**
- * Base class for change implementations.
+ * Represents a change to a index of a table.
  * 
  * @version $Revision: $
  */
-public abstract class TableChangeImplBase implements TableChange
+public interface IndexChange extends TableChange
 {
-    /** The affected table. */
-    private Table _table;
-
     /**
-     * Creates a new change object.
+     * Returns the affected index from the original model.
      * 
-     * @param table The table
+     * @return The affected index
      */
-    public TableChangeImplBase(Table table)
-    {
-        _table = table;
-    }
+    public Index getChangedIndex();
 
     /**
-     * {@inheritDoc}
+     * Finds the index object corresponding to the changed index in the given database model.
+     * 
+     * @param model         The database model
+     * @param caseSensitive Whether identifiers are case sensitive
+     * @return The index object or <code>null</code> if it could not be found
      */
-    public Table getChangedTable()
-    {
-        return _table;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Table findChangedTable(Database model, boolean caseSensitive)
-    {
-    	return model.findTable(_table.getName(), caseSensitive);
-    }
+    public Index findChangedIndex(Database model, boolean caseSensitive);
 }

@@ -39,13 +39,12 @@ public class PrimaryKeyChange extends TableChangeImplBase
      * Creates a new change object.
      * 
      * @param table                The table whose primary key is to be changed
-     * @param oldPrimaryKeyColumns The columns making up the original primary key
      * @param newPrimaryKeyColumns The columns making up the new primary key
      */
-    public PrimaryKeyChange(Table table, Column[] oldPrimaryKeyColumns, Column[] newPrimaryKeyColumns)
+    public PrimaryKeyChange(Table table, Column[] newPrimaryKeyColumns)
     {
         super(table);
-        _oldPrimaryKeyColumns = oldPrimaryKeyColumns;
+        _oldPrimaryKeyColumns = table.getPrimaryKeyColumns();
         _newPrimaryKeyColumns = newPrimaryKeyColumns;
     }
 
@@ -72,9 +71,9 @@ public class PrimaryKeyChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
+        Table table = findChangedTable(model, caseSensitive);
 
         for (int idx = 0; idx < _oldPrimaryKeyColumns.length; idx++)
         {

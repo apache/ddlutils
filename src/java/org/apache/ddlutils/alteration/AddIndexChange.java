@@ -59,7 +59,7 @@ public class AddIndexChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
         Index newIndex = null;
 
@@ -71,6 +71,6 @@ public class AddIndexChange extends TableChangeImplBase
         {
             throw new DdlUtilsException(ex);
         }
-        database.findTable(getChangedTable().getName(), caseSensitive).addIndex(newIndex);
+        findChangedTable(model, caseSensitive).addIndex(newIndex);
     }
 }

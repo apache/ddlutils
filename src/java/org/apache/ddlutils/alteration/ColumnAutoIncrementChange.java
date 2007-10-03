@@ -29,11 +29,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnAutoIncrementChange extends TableChangeImplBase
+public class ColumnAutoIncrementChange extends ColumnChangeImplBase
 {
-    /** The column. */
-    private Column _column;
-
     /**
      * Creates a new change object.
      * 
@@ -42,28 +39,14 @@ public class ColumnAutoIncrementChange extends TableChangeImplBase
      */
     public ColumnAutoIncrementChange(Table table, Column column)
     {
-        super(table);
-        _column = column;
-    }
-
-    /**
-     * Returns the column.
-     *
-     * @return The column
-     */
-    public Column getColumn()
-    {
-        return _column;
+        super(table, column);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
-        Column column = table.findColumn(_column.getName(), caseSensitive);
-
-        column.setAutoIncrement(!_column.isAutoIncrement());
+        findChangedColumn(model, caseSensitive).setAutoIncrement(!getChangedColumn().isAutoIncrement());
     }
 }

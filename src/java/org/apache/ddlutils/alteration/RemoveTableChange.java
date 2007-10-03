@@ -42,10 +42,10 @@ public class RemoveTableChange extends TableChangeImplBase
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
+        Table table = findChangedTable(model, caseSensitive);
 
-        database.removeTable(table);
+        model.removeTable(table);
     }
 }

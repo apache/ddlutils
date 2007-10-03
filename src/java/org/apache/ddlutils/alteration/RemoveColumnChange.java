@@ -28,11 +28,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class RemoveColumnChange extends TableChangeImplBase
+public class RemoveColumnChange extends ColumnChangeImplBase
 {
-    /** The column. */
-    private Column _column;
-
     /**
      * Creates a new change object.
      * 
@@ -41,28 +38,14 @@ public class RemoveColumnChange extends TableChangeImplBase
      */
     public RemoveColumnChange(Table table, Column column)
     {
-        super(table);
-        _column = column;
-    }
-
-    /**
-     * Returns the column.
-     *
-     * @return The column
-     */
-    public Column getColumn()
-    {
-        return _column;
+        super(table, column);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
-        Column column = table.findColumn(_column.getName(), caseSensitive);
-
-        table.removeColumn(column);
+        findChangedTable(model, caseSensitive).removeColumn(findChangedColumn(model, caseSensitive));
     }
 }

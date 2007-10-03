@@ -550,7 +550,7 @@ public class SybaseBuilder extends SqlBuilder
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         printEndOfStatement();
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }

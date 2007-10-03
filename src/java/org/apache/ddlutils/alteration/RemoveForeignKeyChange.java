@@ -30,11 +30,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class RemoveForeignKeyChange extends TableChangeImplBase
+public class RemoveForeignKeyChange extends ForeignKeyChangeImplBase
 {
-    /** The foreign key. */
-    private ForeignKey _foreignKey;
-
     /**
      * Creates a new change object.
      * 
@@ -43,27 +40,14 @@ public class RemoveForeignKeyChange extends TableChangeImplBase
      */
     public RemoveForeignKeyChange(Table table, ForeignKey foreignKey)
     {
-        super(table);
-        _foreignKey = foreignKey;
-    }
-
-    /**
-     * Returns the foreign key to be removed.
-     *
-     * @return The foreign key
-     */
-    public ForeignKey getForeignKey()
-    {
-        return _foreignKey;
+        super(table, foreignKey);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table table = database.findTable(getChangedTable().getName(), caseSensitive);
-
-        table.removeForeignKey(_foreignKey);
+        findChangedTable(model, caseSensitive).removeForeignKey(findChangedForeignKey(model, caseSensitive));
     }
 }

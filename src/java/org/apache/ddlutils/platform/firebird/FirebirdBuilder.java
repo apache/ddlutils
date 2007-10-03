@@ -257,7 +257,7 @@ public class FirebirdBuilder extends SqlBuilder
             	// TODO: we cannot drop primary key columns this way
             	//       because we would have to drop the pk first and then
             	//       add a new one afterwards which is not supported yet
-            	if (!removeColumnChange.getColumn().isPrimaryKey())
+            	if (!removeColumnChange.getChangedColumn().isPrimaryKey())
             	{
 	            	processChange(currentModel, desiredModel, removeColumnChange);
 	                changeIt.remove();
@@ -336,15 +336,15 @@ public class FirebirdBuilder extends SqlBuilder
                                  Database           desiredModel,
                                  RemoveColumnChange change) throws IOException
     {
-        if (change.getColumn().isAutoIncrement())
+        if (change.getChangedColumn().isAutoIncrement())
         {
-            writeAutoIncrementDropStmts(change.getChangedTable(), change.getColumn());
+            writeAutoIncrementDropStmts(change.getChangedTable(), change.getChangedColumn());
         }
         print("ALTER TABLE ");
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         printEndOfStatement();
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }

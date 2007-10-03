@@ -250,11 +250,11 @@ public class PostgreSqlBuilder extends SqlBuilder
         printlnIdentifier(getTableName(change.getChangedTable()));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getColumn()));
+        printIdentifier(getColumnName(change.getChangedColumn()));
         printEndOfStatement();
-        if (change.getColumn().isAutoIncrement())
+        if (change.getChangedColumn().isAutoIncrement())
         {
-            dropAutoIncrementSequence(change.getChangedTable(), change.getColumn());
+            dropAutoIncrementSequence(change.getChangedTable(), change.getChangedColumn());
         }
         change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }

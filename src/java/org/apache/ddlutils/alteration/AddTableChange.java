@@ -63,6 +63,7 @@ public class AddTableChange implements ModelChange
     {
         try
         {
+        	// TODO: we shouldn't have to clone here
             database.addTable((Table)_newTable.clone());
         }
         catch (CloneNotSupportedException ex)

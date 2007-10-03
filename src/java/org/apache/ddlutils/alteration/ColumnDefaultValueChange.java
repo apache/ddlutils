@@ -28,10 +28,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnDefaultValueChange extends TableChangeImplBase implements ColumnChange
+public class ColumnDefaultValueChange extends ColumnChangeImplBase
 {
-    /** The column. */
-    private Column _column;
     /** The new default value. */
     private String _newDefaultValue;
 
@@ -44,19 +42,8 @@ public class ColumnDefaultValueChange extends TableChangeImplBase implements Col
      */
     public ColumnDefaultValueChange(Table table, Column column, String newDefaultValue)
     {
-        super(table);
-        _column          = column;
+        super(table, column);
         _newDefaultValue = newDefaultValue;
-    }
-
-    /**
-     * Returns the column.
-     *
-     * @return The column
-     */
-    public Column getChangedColumn()
-    {
-        return _column;
     }
 
     /**
@@ -72,11 +59,8 @@ public class ColumnDefaultValueChange extends TableChangeImplBase implements Col
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
-        Column column = table.findColumn(_column.getName(), caseSensitive);
-
-        column.setDefaultValue(_newDefaultValue);
+        findChangedColumn(model, caseSensitive).setDefaultValue(_newDefaultValue);
     }
 }

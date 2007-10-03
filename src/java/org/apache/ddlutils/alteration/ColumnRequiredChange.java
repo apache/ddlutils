@@ -29,11 +29,8 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: $
  */
-public class ColumnRequiredChange extends TableChangeImplBase implements ColumnChange
+public class ColumnRequiredChange extends ColumnChangeImplBase
 {
-    /** The column. */
-    private Column _column;
-
     /**
      * Creates a new change object.
      * 
@@ -42,28 +39,14 @@ public class ColumnRequiredChange extends TableChangeImplBase implements ColumnC
      */
     public ColumnRequiredChange(Table table, Column column)
     {
-        super(table);
-        _column = column;
-    }
-
-    /**
-     * Returns the column.
-     *
-     * @return The column
-     */
-    public Column getChangedColumn()
-    {
-        return _column;
+        super(table, column);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void apply(Database database, boolean caseSensitive)
+    public void apply(Database model, boolean caseSensitive)
     {
-        Table  table  = database.findTable(getChangedTable().getName(), caseSensitive);
-        Column column = table.findColumn(_column.getName(), caseSensitive);
-
-        column.setRequired(!_column.isRequired());
+        findChangedColumn(model, caseSensitive).setRequired(!getChangedColumn().isRequired());
     }
 }

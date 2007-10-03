@@ -297,7 +297,7 @@ public class ModelComparator
                 {
                     _log.info("The primary key of table " + sourceTable.getName() + " needs to be changed");
                 }
-                changes.add(new PrimaryKeyChange(sourceTable, sourcePK, targetPK));
+                changes.add(new PrimaryKeyChange(sourceTable, targetPK));
             }
         }
         

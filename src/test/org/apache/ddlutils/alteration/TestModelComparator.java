@@ -298,7 +298,7 @@ public class TestModelComparator extends TestBase
         RemoveForeignKeyChange change = (RemoveForeignKeyChange)changes.get(0);
 
         assertEquals("TestFK",
-                     change.getForeignKey().getName());
+                     change.getChangedForeignKey().getName());
     }
 
     /**
@@ -346,7 +346,7 @@ public class TestModelComparator extends TestBase
         AddForeignKeyChange    change2 = (AddForeignKeyChange)changes.get(1);
 
         assertEquals("TestFK",
-                     change1.getForeignKey().getName());
+                     change1.getChangedForeignKey().getName());
         assertEquals("TESTFK",
                      change2.getNewForeignKey().getName());
     }
@@ -402,7 +402,7 @@ public class TestModelComparator extends TestBase
         AddForeignKeyChange    change2 = (AddForeignKeyChange)changes.get(1);
 
         assertEquals("TestFK",
-                     change1.getForeignKey().getName());
+                     change1.getChangedForeignKey().getName());
         assertEquals("TestFK",
                      change2.getNewForeignKey().getName());
     }
@@ -528,7 +528,7 @@ public class TestModelComparator extends TestBase
         RemoveIndexChange change = (RemoveIndexChange)changes.get(0);
 
         assertEquals("TestIndex",
-                     change.getIndex().getName());
+                     change.getChangedIndex().getName());
     }
 
     /**
@@ -570,7 +570,7 @@ public class TestModelComparator extends TestBase
         AddIndexChange    change2 = (AddIndexChange)changes.get(1);
 
         assertEquals("TestIndex",
-                     change1.getIndex().getName());
+                     change1.getChangedIndex().getName());
         assertEquals("TestIndex",
                      change2.getNewIndex().getName());
     }
@@ -618,7 +618,7 @@ public class TestModelComparator extends TestBase
         AddIndexChange    change2 = (AddIndexChange)changes.get(1);
 
         assertEquals("TestIndex",
-                     change1.getIndex().getName());
+                     change1.getChangedIndex().getName());
         assertEquals("TestIndex",
                      change2.getNewIndex().getName());
     }
@@ -665,7 +665,7 @@ public class TestModelComparator extends TestBase
         AddIndexChange    change2 = (AddIndexChange)changes.get(1);
 
         assertEquals("TestIndex",
-                     change1.getIndex().getName());
+                     change1.getChangedIndex().getName());
         assertEquals("TestIndex",
                      change2.getNewIndex().getName());
     }
@@ -712,7 +712,7 @@ public class TestModelComparator extends TestBase
         AddIndexChange    change2 = (AddIndexChange)changes.get(1);
 
         assertEquals("TestIndex",
-                     change1.getIndex().getName());
+                     change1.getChangedIndex().getName());
         assertEquals("TestIndex",
                      change2.getNewIndex().getName());
     }
@@ -982,7 +982,7 @@ public class TestModelComparator extends TestBase
         RemoveColumnChange change = (RemoveColumnChange)changes.get(0);
 
         assertEquals("Col1",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
     }
 
     /**
@@ -1306,6 +1306,6 @@ public class TestModelComparator extends TestBase
         ColumnAutoIncrementChange change = (ColumnAutoIncrementChange)changes.get(0);
 
         assertEquals("Col",
-                     change.getColumn().getName());
+                     change.getChangedColumn().getName());
     }
 }
