@@ -47,6 +47,9 @@ public class CloudscapePlatform extends PlatformImplBase
 
         info.setMaxIdentifierLength(128);
         info.setSystemForeignKeyIndicesAlwaysNonUnique(true);
+        info.setPrimaryKeyColumnAutomaticallyRequired(true);
+        info.setIdentityColumnAutomaticallyRequired(true);
+
         // BINARY and VARBINARY will also be handled by CloudscapeBuilder.getSqlType
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                     Types.BLOB);
         info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} FOR BIT DATA");

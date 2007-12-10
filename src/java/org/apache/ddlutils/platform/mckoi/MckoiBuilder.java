@@ -20,15 +20,9 @@ package org.apache.ddlutils.platform.mckoi;
  */
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.ColumnAutoIncrementChange;
-import org.apache.ddlutils.alteration.RemoveColumnChange;
-import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -172,77 +166,15 @@ public class MckoiBuilder extends SqlBuilder
     }
 
     /**
-     * {@inheritDoc}
+     * Writes the SQL to recreate a table.
+     * 
+     * @param model      The database model
+     * @param table      The table to recreate
+     * @param parameters The table creation parameters
      */
-    protected void processTableStructureChanges(Database currentModel,
-                                                Database desiredModel,
-                                                Table    sourceTable,
-                                                Table    targetTable,
-                                                Map      parameters,
-                                                List     changes) throws IOException
+    protected void writeRecreateTableStmt(Database model, Table table, Map parameters) throws IOException
     {
-        // McKoi has this nice ALTER CREATE TABLE statement which saves us a lot of work
-        // We only have to handle auto-increment changes manually
-        for (Iterator it = changes.iterator(); it.hasNext();)
-        {
-            TableChange change = (TableChange)it.next();
-
-            if (change instanceof ColumnAutoIncrementChange)
-            {
-                Column column = ((ColumnAutoIncrementChange)change).getChangedColumn();
-
-                // we have to defer removal of the sequences until they are no longer used
-                if (!column.isAutoIncrement())
-                {
-                    ColumnAutoIncrementChange autoIncrChange = (ColumnAutoIncrementChange)change;
-
-                    createAutoIncrementSequence(autoIncrChange.getChangedTable(),
-                                                autoIncrChange.getChangedColumn());
-                }
-            }
-            else if (change instanceof AddColumnChange)
-            {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                if (addColumnChange.getNewColumn().isAutoIncrement())
-                {
-                    createAutoIncrementSequence(addColumnChange.getChangedTable(),
-                                                addColumnChange.getNewColumn());
-                }
-            }
-        }
-
         print("ALTER ");
-        super.createTable(desiredModel, targetTable, parameters);
-
-        for (Iterator it = changes.iterator(); it.hasNext();)
-        {
-            TableChange change = (TableChange)it.next();
-    
-            if (change instanceof ColumnAutoIncrementChange)
-            {
-                Column column = ((ColumnAutoIncrementChange)change).getChangedColumn();
-    
-                if (column.isAutoIncrement())
-                {
-                    ColumnAutoIncrementChange autoIncrChange = (ColumnAutoIncrementChange)change;
-        
-                    dropAutoIncrementSequence(autoIncrChange.getChangedTable(),
-                                              autoIncrChange.getChangedColumn());
-                }
-            }
-            else if (change instanceof RemoveColumnChange)
-            {
-                RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
-
-                if (removeColumnChange.getChangedColumn().isAutoIncrement())
-                {
-                    dropAutoIncrementSequence(removeColumnChange.getChangedTable(),
-                                              removeColumnChange.getChangedColumn());
-                }
-            }
-        }
-        changes.clear();
+        super.createTable(model, table, parameters);
     }
 }
-

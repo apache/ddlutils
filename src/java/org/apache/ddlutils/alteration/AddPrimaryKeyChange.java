@@ -30,27 +30,27 @@ import org.apache.ddlutils.model.Table;
  */
 public class AddPrimaryKeyChange extends TableChangeImplBase
 {
-    /** The columns making up the primary key. */
-    private Column[] _primaryKeyColumns;
+    /** The names of the columns making up the primary key. */
+    private String[] _primaryKeyColumns;
 
     /**
      * Creates a new change object.
      * 
-     * @param table             The table to add the primary key to
-     * @param primaryKeyColumns The columns making up the primary key
+     * @param tableName         The name of the table to add the primary key to
+     * @param primaryKeyColumns The names of the columns making up the primary key
      */
-    public AddPrimaryKeyChange(Table table, Column[] primaryKeyColumns)
+    public AddPrimaryKeyChange(String tableName, String[] primaryKeyColumns)
     {
-        super(table);
+        super(tableName);
         _primaryKeyColumns = primaryKeyColumns;
     }
 
     /**
-     * Returns the primary key columns making up the new primary key.
+     * Returns the primary key column names making up the new primary key.
      *
-     * @return The primary key columns
+     * @return The primary key column names
      */
-    public Column[] getPrimaryKeyColumns()
+    public String[] getPrimaryKeyColumns()
     {
         return _primaryKeyColumns;
     }
@@ -64,7 +64,7 @@ public class AddPrimaryKeyChange extends TableChangeImplBase
 
         for (int idx = 0; idx < _primaryKeyColumns.length; idx++)
         {
-            Column column = table.findColumn(_primaryKeyColumns[idx].getName(), caseSensitive);
+            Column column = table.findColumn(_primaryKeyColumns[idx], caseSensitive);
 
             column.setPrimaryKey(true);
         }

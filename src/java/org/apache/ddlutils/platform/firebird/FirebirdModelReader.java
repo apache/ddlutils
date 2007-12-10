@@ -40,6 +40,7 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
+import org.apache.ddlutils.platform.MetaDataColumnDescriptor;
 
 /**
  * The Jdbc Model Reader for Firebird.
@@ -314,8 +315,8 @@ public class FirebirdModelReader extends JdbcModelReader
             {
                 Map values = readColumns(indexData, getColumnsForIndex());
 
-                // we have to reverse the meaning of the unique flag
-                values.put("NON_UNIQUE", Boolean.FALSE.equals(values.get("NON_UNIQUE")) ? Boolean.TRUE : Boolean.FALSE);
+                // we have to reverse the meaning of the unique flag; also, null means false
+                values.put("NON_UNIQUE", (values.get("NON_UNIQUE") == null) || Boolean.FALSE.equals(values.get("NON_UNIQUE")) ? Boolean.TRUE : Boolean.FALSE);
                 // and trim the names
                 values.put("INDEX_NAME",  ((String)values.get("INDEX_NAME")).trim());
                 values.put("TABLE_NAME",  ((String)values.get("TABLE_NAME")).trim());

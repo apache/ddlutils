@@ -27,9 +27,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.ModelComparator;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -172,4 +187,130 @@ public class InterbasePlatform extends PlatformImplBase
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    protected ModelComparator getModelComparator()
+    {
+        ModelComparator comparator = super.getModelComparator();
+
+        comparator.setCanDropPrimaryKeyColumns(false);
+        comparator.setGeneratePrimaryKeyChanges(false);
+        return comparator;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            public boolean areSupported(Table intermediateTable, List changes)
+            {
+                // Firebird does support adding a primary key, but only if none of the primary
+                // key columns have been added within the same session
+                if (super.areSupported(intermediateTable, changes))
+                {
+                    HashSet  addedColumns = new HashSet();
+                    String[] pkColNames   = null;
+
+                    for (Iterator it = changes.iterator(); it.hasNext();)
+                    {
+                        TableChange change = (TableChange)it.next();
+
+                        if (change instanceof AddColumnChange)
+                        {
+                            addedColumns.add(((AddColumnChange)change).getNewColumn().getName());
+                        }
+                        else if (change instanceof AddPrimaryKeyChange)
+                        {
+                            pkColNames = ((AddPrimaryKeyChange)change).getPrimaryKeyColumns();
+                        }
+                        else if (change instanceof PrimaryKeyChange)
+                        {
+                            pkColNames = ((PrimaryKeyChange)change).getNewPrimaryKeyColumns();
+                        }
+                    }
+                    if (pkColNames != null)
+                    {
+                        for (int colIdx = 0; colIdx < pkColNames.length; colIdx++)
+                        {
+                            if (addedColumns.contains(pkColNames[colIdx]))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                // Firebird cannot add columns to the primary key or drop columns from it but
+                // since we add/drop the primary key with separate changes anyways, this will
+                // no problem here
+                if ((change instanceof RemoveColumnChange) ||
+                    (change instanceof AddColumnChange))
+                {
+                    return true;
+                }
+                else
+                {
+                    return super.isSupported(intermediateTable, change);
+                }
+            }
+        };
+    }
+
+
+    /**
+     * Processes the addition of a column to a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              AddColumnChange    change) throws IOException
+    {
+        Table  changedTable = findChangedTable(currentModel, change);
+        Column prevColumn   = null;
+
+        if (change.getPreviousColumn() != null)
+        {
+            prevColumn = changedTable.findColumn(change.getPreviousColumn(), isDelimitedIdentifierModeOn());
+        }
+        ((InterbaseBuilder)getSqlBuilder()).insertColumn(currentModel,
+                                                         changedTable,
+                                                         change.getNewColumn(),
+                                                         prevColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveColumnChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column droppedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((InterbaseBuilder)getSqlBuilder()).dropColumn(changedTable, droppedColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
 }

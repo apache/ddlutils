@@ -29,7 +29,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * 
  * @version $Revision$
  */
-public class Reference implements Cloneable, Serializable
+public class Reference implements Serializable
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = 6062467640266171664L;
@@ -175,19 +175,6 @@ public class Reference implements Cloneable, Serializable
             _foreignColumn = null;
         }
         _foreignColumnName = foreignColumnName;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object clone() throws CloneNotSupportedException
-    {
-        Reference result = (Reference)super.clone();
-
-        result._localColumnName   = _localColumnName;
-        result._foreignColumnName = _foreignColumnName;
-
-        return result;
     }
 
     /**

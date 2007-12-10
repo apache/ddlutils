@@ -21,7 +21,6 @@ package org.apache.ddlutils.alteration;
 
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
-import org.apache.ddlutils.model.Table;
 
 /**
  * Represents the removal of an index from a table.
@@ -33,12 +32,12 @@ public class RemoveIndexChange extends IndexChangeImplBase
     /**
      * Creates a new change object.
      * 
-     * @param table The table to remove the index from
-     * @param index The index
+     * @param tableName The name of the table to remove the index from
+     * @param index     The index
      */
-    public RemoveIndexChange(Table table, Index index)
+    public RemoveIndexChange(String tableName, Index index)
     {
-        super(table, index);
+        super(tableName, index);
     }
 
     /**

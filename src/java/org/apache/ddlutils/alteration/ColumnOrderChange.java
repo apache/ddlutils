@@ -20,6 +20,7 @@ package org.apache.ddlutils.alteration;
  */
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.model.Column;
@@ -39,24 +40,43 @@ public class ColumnOrderChange extends TableChangeImplBase
     /**
      * Creates a new change object.
      * 
-     * @param table        The table whose primary key is to be changed
-     * @param newPositions The map containing the new positions keyed by the source columns
+     * @param tableName    The name of the table whose primary key is to be changed
+     * @param newPositions The map containing the new positions keyed by the source column names
      */
-    public ColumnOrderChange(Table table, Map newPositions)
+    public ColumnOrderChange(String tableName, Map newPositions)
     {
-        super(table);
+        super(tableName);
         _newPositions = newPositions;
     }
 
     /**
      * Returns the new position of the given source column.
      *
-     * @param sourceColumn The column
+     * @param sourceColumnName The column's name
+     * @param caseSensitive    Whether case of the column name matters
      * @return The new position or -1 if no position is marked for the column
      */
-    public int getNewPosition(Column sourceColumn)
+    public int getNewPosition(String sourceColumnName, boolean caseSensitive)
     {
-        Integer newPos = (Integer)_newPositions.get(sourceColumn);
+        Integer newPos = null;
+
+        if (caseSensitive)
+        {
+            newPos = (Integer)_newPositions.get(sourceColumnName);
+        }
+        else
+        {
+            for (Iterator it = _newPositions.entrySet().iterator(); it.hasNext();)
+            {
+                Map.Entry entry = (Map.Entry)it.next();
+
+                if (sourceColumnName.equalsIgnoreCase((String)entry.getKey()))
+                {
+                    newPos = (Integer)entry.getValue();
+                    break;
+                }
+            }
+        }
 
         return newPos == null ? -1 : newPos.intValue();
     }
@@ -66,20 +86,24 @@ public class ColumnOrderChange extends TableChangeImplBase
      */
     public void apply(Database database, boolean caseSensitive)
     {
-        Table     table      = database.findTable(getChangedTable().getName(), caseSensitive);
-        ArrayList newColumns = new ArrayList(table.getColumnCount());
+        Table     table      = findChangedTable(database, caseSensitive);
+        ArrayList newColumns = new ArrayList();
 
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
+        {
+             newColumns.add(table.getColumn(idx));
+        }        
         for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
             Column column = table.getColumn(idx);
-            int    newPos = getNewPosition(column);
+            int    newPos = getNewPosition(column.getName(), caseSensitive);
 
-            newColumns.set(newPos < 0 ? idx : newPos, column);
+            if (newPos >= 0)
+            {
+                newColumns.set(newPos, column);
+            }
         }
-        for (int idx = 0; idx < table.getColumnCount(); idx++)
-        {
-            table.removeColumn(idx);
-        }
+        table.removeAllColumns();
         table.addColumns(newColumns);
     }
 }

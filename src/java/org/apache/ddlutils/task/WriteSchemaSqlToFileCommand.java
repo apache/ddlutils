@@ -21,6 +21,7 @@ package org.apache.ddlutils.task;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -121,10 +122,11 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
         Platform           platform        = getPlatform();
         boolean            isCaseSensitive = platform.isDelimitedIdentifierModeOn();
         CreationParameters params          = getFilteredParameters(model, platform.getName(), isCaseSensitive);
+        FileWriter         writer          = null;
 
         try
         {
-            FileWriter writer = new FileWriter(_outputFile);
+            writer = new FileWriter(_outputFile);
 
             platform.setScriptModeOn(true);
             if (platform.getPlatformInfo().isSqlCommentsSupported())
@@ -132,7 +134,6 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
                 // we're generating SQL comments if possible
                 platform.setSqlCommentsOn(true);
             }
-            platform.getSqlBuilder().setWriter(writer);
 
             boolean shouldAlter = isAlterDatabase();
 
@@ -167,18 +168,31 @@ public class WriteSchemaSqlToFileCommand extends DatabaseCommandWithCreationPara
                                              platform.readModelFromDatabase("unnamed", getCatalogPattern(), getSchemaPattern(), null) :
                                              platform.readModelFromDatabase("unnamed");
 
-                platform.getSqlBuilder().alterDatabase(currentModel, model, params);
+                writer.write(platform.getAlterModelSql(currentModel, model, params));
             }
             else
             {
-                platform.getSqlBuilder().createTables(model, params, _doDrops);
+                writer.write(platform.getCreateModelSql(model, params, _doDrops, !isFailOnError()));
             }
-            writer.close();
             _log.info("Written schema SQL to " + _outputFile.getAbsolutePath());
         }
         catch (Exception ex)
         {
             handleException(ex, ex.getMessage());
+        }
+        finally
+        {
+            if (writer != null)
+            {
+                try
+                {
+                    writer.close();
+                }
+                catch (IOException ex)
+                {
+                    _log.error("Could not close file " + _outputFile.getAbsolutePath(), ex);
+                }
+            }
         }
     }
 }

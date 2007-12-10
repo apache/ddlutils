@@ -19,6 +19,7 @@ package org.apache.ddlutils.platform.hsqldb;
  * under the License.
  */
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,6 +27,16 @@ import java.sql.Types;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -52,6 +63,7 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.setNonPKIdentityColumnsSupported(false);
         info.setIdentityOverrideAllowed(false);
         info.setSystemForeignKeyIndicesAlwaysNonUnique(true);
+        info.setPrimaryKeyColumnAutomaticallyRequired(true);
 
         info.addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BLOB,        "LONGVARBINARY", Types.LONGVARBINARY);
@@ -105,5 +117,86 @@ public class HsqlDbPlatform extends PlatformImplBase
         {
             closeStatement(stmt);    
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                if (change instanceof RemoveColumnChange)
+                {
+                    Column column = intermediateTable.findColumn(((RemoveColumnChange)change).getChangedColumn(),
+                                                                 isDelimitedIdentifierModeOn());
+
+                    // HsqlDb can only drop columns that are not part of a primary key
+                    return !column.isPrimaryKey();
+                }
+                else if (change instanceof AddColumnChange)
+                {
+                    AddColumnChange addColumnChange = (AddColumnChange)change; 
+
+                    // adding IDENTITY columns is not supported without a table rebuild because they have to
+                    // be PK columns, but we add them to the PK later
+                    return addColumnChange.isAtEnd() &&
+                           (!addColumnChange.getNewColumn().isRequired() ||
+                            (addColumnChange.getNewColumn().getDefaultValue() != null));
+                }
+                else if (change instanceof AddPrimaryKeyChange)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        };
+    }
+
+    /**
+     * Processes the addition of a column to a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              AddColumnChange    change) throws IOException
+    {
+        Table  changedTable = findChangedTable(currentModel, change);
+        Column nextColumn   = null;
+
+        if (change.getNextColumn() != null)
+        {
+            nextColumn = changedTable.findColumn(change.getNextColumn(), isDelimitedIdentifierModeOn());
+        }
+        ((HsqlDbBuilder)getSqlBuilder()).insertColumn(changedTable, change.getNewColumn(), nextColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveColumnChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column removedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((HsqlDbBuilder)getSqlBuilder()).dropColumn(changedTable, removedColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
     }
 }

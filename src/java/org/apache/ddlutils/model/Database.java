@@ -40,7 +40,7 @@ import org.apache.ddlutils.dynabean.SqlDynaException;
  *
  * @version $Revision$
  */
-public class Database implements Serializable, Cloneable
+public class Database implements Serializable
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -3160443396757573868L;
@@ -64,22 +64,32 @@ public class Database implements Serializable, Cloneable
      */
     public void mergeWith(Database otherDb) throws ModelException
     {
-        for (Iterator it = otherDb._tables.iterator(); it.hasNext();)
+        CloneHelper cloneHelper = new CloneHelper();
+
+        for (int tableIdx = 0; tableIdx < otherDb.getTableCount(); tableIdx++)
         {
-            Table table = (Table)it.next();
+            Table table = otherDb.getTable(tableIdx);
 
             if (findTable(table.getName()) != null)
             {
                 // TODO: It might make more sense to log a warning and overwrite the table (or merge them) ?
                 throw new ModelException("Cannot merge the models because table "+table.getName()+" already defined in this model");
             }
-            try
+            else
             {
-                addTable((Table)table.clone());
+                addTable(cloneHelper.clone(table, true, false, this, true));
             }
-            catch (CloneNotSupportedException ex)
+        }
+        for (int tableIdx = 0; tableIdx < otherDb.getTableCount(); tableIdx++)
+        {
+            Table otherTable = otherDb.getTable(tableIdx);
+            Table localTable = findTable(otherTable.getName());
+
+            for (int fkIdx = 0; fkIdx < otherTable.getForeignKeyCount(); fkIdx++)
             {
-                // won't happen
+                ForeignKey fk = otherTable.getForeignKey(fkIdx);
+
+                localTable.addForeignKey(cloneHelper.clone(fk, localTable, this, false));
             }
         }
     }
@@ -292,7 +302,7 @@ public class Database implements Serializable, Cloneable
                 }
                 if (namesOfProcessedColumns.contains(column.getName()))
                 {
-                    throw new ModelException("There are multiple column with the name "+column.getName()+" in the table "+curTable.getName());
+                    throw new ModelException("There are multiple columns with the name "+column.getName()+" in the table "+curTable.getName());
                 }
                 namesOfProcessedColumns.add(column.getName());
 
@@ -526,21 +536,6 @@ public class Database implements Serializable, Cloneable
     public DynaBean createDynaBeanFor(String tableName, boolean caseSensitive) throws SqlDynaException
     {
         return getDynaClassCache().createNewInstance(findTable(tableName, caseSensitive));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object clone() throws CloneNotSupportedException
-    {
-        Database result = (Database)super.clone();
-
-        result._name     = _name;
-        result._idMethod = _idMethod;
-        result._version  = _version;
-        result._tables   = (ArrayList)_tables.clone();
-
-        return result;
     }
 
     /**

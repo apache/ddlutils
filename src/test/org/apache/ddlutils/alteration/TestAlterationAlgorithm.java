@@ -20,7 +20,6 @@ package org.apache.ddlutils.alteration;
  */
 
 import java.io.IOException;
-import java.io.StringWriter;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.TestBase;
@@ -36,17 +35,13 @@ public class TestAlterationAlgorithm extends TestBase
 {
     /** The tested platform. */
     private Platform _platform;
-    /** The writer that the builder of the platform writes to. */
-    private StringWriter _writer;
 
     /**
      * {@inheritDoc}
      */
     protected void setUp() throws Exception
     {
-        _writer   = new StringWriter();
         _platform = new TestPlatform();
-        _platform.getSqlBuilder().setWriter(_writer);
         _platform.setSqlCommentsOn(false);
         _platform.setDelimitedIdentifierModeOn(true);
     }
@@ -57,7 +52,6 @@ public class TestAlterationAlgorithm extends TestBase
     protected void tearDown() throws Exception
     {
         _platform = null;
-        _writer   = null;
     }
 
     /**
@@ -67,14 +61,12 @@ public class TestAlterationAlgorithm extends TestBase
      * @param desiredSchema The desired schema XML 
      * @return The sql
      */
-    protected String getAlterDatabaseSQL(String currentSchema, String desiredSchema) throws IOException
+    protected String getAlterModelSQL(String currentSchema, String desiredSchema) throws IOException
     {
         Database currentModel = parseDatabaseFromString(currentSchema);
         Database desiredModel = parseDatabaseFromString(desiredSchema);
 
-        _platform.getSqlBuilder().alterDatabase(currentModel, desiredModel, null);
-
-        return _writer.toString();
+        return _platform.getAlterModelSql(currentModel, desiredModel);
     }
 
     /**
@@ -102,7 +94,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "",
-            getAlterDatabaseSQL(modelXml, modelXml));
+            getAlterModelSQL(modelXml, modelXml));
     }
 
     /**
@@ -134,7 +126,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    \"COLPK\" INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -172,7 +164,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TABLEB\" (\"COL\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -210,7 +202,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TABLEB\" (\"COL\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -248,7 +240,7 @@ public class TestAlterationAlgorithm extends TestBase
             "    PRIMARY KEY (\"COLPK\")\n"+
             ");\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -294,7 +286,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"ColFK\") REFERENCES \"TABLEB\" (\"COLPK\");\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -322,7 +314,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE \"TableA\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -354,7 +346,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE \"TableA\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -387,7 +379,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TableA\" DROP CONSTRAINT \"TESTFK\";\n"+
             "DROP TABLE \"TableA\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -421,7 +413,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TableA\" DROP CONSTRAINT \"TESTFK\";\n"+
             "DROP TABLE \"TABLEB\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -457,7 +449,7 @@ public class TestAlterationAlgorithm extends TestBase
             "ALTER TABLE \"TABLEB\" DROP CONSTRAINT \"TESTFK\";\n"+
             "DROP TABLE \"TableA\";\n"+
             "DROP TABLE \"TABLEB\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -487,7 +479,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -517,7 +509,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "CREATE UNIQUE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -547,7 +539,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TestIndex\" ON \"TableA\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -577,7 +569,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TestIndex\" ON \"TableA\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -604,7 +596,7 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TableA_PK\" PRIMARY KEY (\"ColPK1\",\"ColPK2\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -631,25 +623,9 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "CREATE TABLE \"TableA_\"\n"+
-            "(\n"+
-            "    \"ColPK1\" INTEGER NOT NULL,\n"+
-            "    \"ColPK2\" VARCHAR(64) NOT NULL,\n"+
-            "    \"Col\" DOUBLE,\n"+
-            "    PRIMARY KEY (\"ColPK1\",\"ColPK2\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA_\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA\";\n"+
-            "DROP TABLE \"TableA\";\n"+
-            "CREATE TABLE \"TableA\"\n"+
-            "(\n"+
-            "    \"ColPK1\" INTEGER NOT NULL,\n"+
-            "    \"ColPK2\" VARCHAR(64) NOT NULL,\n"+
-            "    \"Col\" DOUBLE,\n"+
-            "    PRIMARY KEY (\"ColPK1\",\"ColPK2\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\",\"Col\") SELECT \"ColPK1\",\"ColPK2\",\"Col\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            "ALTER TABLE \"TableA\" ADD COLUMN \"Col\" DOUBLE;\n"+
+            "ALTER TABLE \"TableA\" ADD CONSTRAINT \"TableA_PK\" PRIMARY KEY (\"ColPK1\",\"ColPK2\");\n",
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -689,7 +665,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\", \"ColPK2\") SELECT \"ColPK1\", \"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -714,23 +690,8 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "CREATE TABLE \"TableA_\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA_\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA\";\n"+
-            "DROP TABLE \"TableA\";\n"+
-            "CREATE TABLE \"TableA\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA\" (\"ColPK\", \"Col\") SELECT \"ColPK\", \"Col\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            "ALTER TABLE \"TableA\" ADD COLUMN \"Col\" VARCHAR(64);\n",
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -769,7 +730,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -810,7 +771,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\", \"ColPK2\") SELECT \"ColPK1\", \"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -849,7 +810,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\") SELECT \"ColPK1\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -908,26 +869,9 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
-            "CREATE TABLE \"TABLEB_\"\n"+
-            "(\n"+
-            "    \"COLPK\" DOUBLE NOT NULL,\n"+
-            "    \"COLFK1\" INTEGER,\n"+
-            "    \"COLFK2\" DOUBLE,\n"+
-            "    PRIMARY KEY (\"COLPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TABLEB_\" (\"COLPK\",\"COLFK1\") SELECT \"COLPK\",\"COLFK1\" FROM \"TABLEB\";\n"+
-            "DROP TABLE \"TABLEB\";\n"+
-            "CREATE TABLE \"TABLEB\"\n"+
-            "(\n"+
-            "    \"COLPK\" DOUBLE NOT NULL,\n"+
-            "    \"COLFK1\" INTEGER,\n"+
-            "    \"COLFK2\" DOUBLE,\n"+
-            "    PRIMARY KEY (\"COLPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK1\",\"COLFK2\") SELECT \"COLPK\",\"COLFK1\",\"COLFK2\" FROM \"TABLEB_\";\n"+
-            "DROP TABLE \"TABLEB_\";\n"+
+            "ALTER TABLE \"TABLEB\" ADD COLUMN \"COLFK2\" DOUBLE;\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK1\",\"COLFK2\") REFERENCES \"TableA\" (\"ColPK1\",\"ColPK2\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1001,7 +945,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK1\") SELECT \"COLPK\",\"COLFK1\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK1\") REFERENCES \"TableA\" (\"ColPK1\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1036,26 +980,9 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TESTINDEX\" ON \"TableA\";\n"+
-            "CREATE TABLE \"TableA_\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col1\" DOUBLE,\n"+
-            "    \"Col2\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA_\" (\"ColPK\",\"Col1\") SELECT \"ColPK\",\"Col1\" FROM \"TableA\";\n"+
-            "DROP TABLE \"TableA\";\n"+
-            "CREATE TABLE \"TableA\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col1\" DOUBLE,\n"+
-            "    \"Col2\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\",\"Col2\") SELECT \"ColPK\",\"Col1\",\"Col2\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
+            "ALTER TABLE \"TableA\" ADD COLUMN \"Col2\" VARCHAR(64);\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\",\"Col2\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1107,7 +1034,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\") SELECT \"ColPK\",\"Col1\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1142,26 +1069,9 @@ public class TestAlterationAlgorithm extends TestBase
 
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TESTINDEX\" ON \"TableA\";\n"+
-            "CREATE TABLE \"TableA_\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col1\" DOUBLE,\n"+
-            "    \"Col2\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA_\" (\"ColPK\",\"Col1\") SELECT \"ColPK\",\"Col1\" FROM \"TableA\";\n"+
-            "DROP TABLE \"TableA\";\n"+
-            "CREATE TABLE \"TableA\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col1\" DOUBLE,\n"+
-            "    \"Col2\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\",\"Col2\") SELECT \"ColPK\",\"Col1\",\"Col2\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n"+
+            "ALTER TABLE \"TableA\" ADD COLUMN \"Col2\" VARCHAR(64);\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\",\"Col2\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1213,7 +1123,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\") SELECT \"ColPK\",\"Col1\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
 
@@ -1247,26 +1157,8 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "CREATE TABLE \"TableA_\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col1\" DOUBLE,\n"+
-            "    \"Col2\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TableA_\" (\"ColPK\",\"Col1\") SELECT \"ColPK\",\"Col1\" FROM \"TableA\";\n"+
-            "DROP TABLE \"TableA\";\n"+
-            "CREATE TABLE \"TableA\"\n"+
-            "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
-            "    \"Col1\" DOUBLE,\n"+
-            "    \"Col2\" VARCHAR(64),\n"+
-            "    PRIMARY KEY (\"ColPK\")\n"+
-            ");\n"+
-            "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n"+
-            "INSERT INTO \"TableA\" (\"ColPK\",\"Col1\",\"Col2\") SELECT \"ColPK\",\"Col1\",\"Col2\" FROM \"TableA_\";\n"+
-            "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            "ALTER TABLE \"TableA\" ADD COLUMN \"Col2\" VARCHAR(64);\n",
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1305,28 +1197,11 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
-            "ALTER TABLE \"TABLEB\" DROP CONSTRAINT \"TESTFK\";\n"+
-            "CREATE TABLE \"TABLEB_\"\n"+
-            "(\n"+
-            "    \"COLPK\" INTEGER NOT NULL,\n"+
-            "    \"COLFK\" INTEGER,\n"+
-            "    \"COL\" DOUBLE,\n"+
-            "    PRIMARY KEY (\"COLPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TABLEB_\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB\";\n"+
-            "DROP TABLE \"TABLEB\";\n"+
-            "CREATE TABLE \"TABLEB\"\n"+
-            "(\n"+
-            "    \"COLPK\" INTEGER NOT NULL,\n"+
-            "    \"COLFK\" INTEGER,\n"+
-            "    \"COL\" DOUBLE,\n"+
-            "    PRIMARY KEY (\"COLPK\")\n"+
-            ");\n"+
-            "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\",\"COL\") SELECT \"COLPK\",\"COLFK\",\"COL\" FROM \"TABLEB_\";\n"+
-            "DROP TABLE \"TABLEB_\";\n"+
-            "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            "ALTER TABLE \"TABLEB\" ADD COLUMN \"COL\" DOUBLE;\n",
+            getAlterModelSQL(model1Xml, model2Xml));
     }
+
+    // TODO: insert column (not add) into table (also with index/foreign key)
 
     /**
      * Tests the addition of a column to a table that is referenced by a foreign key.
@@ -1364,25 +1239,65 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
+            "ALTER TABLE \"TableA\" ADD COLUMN \"Col\" DOUBLE;\n",
+            getAlterModelSQL(model1Xml, model2Xml));
+    }
+
+    /**
+     * Tests the addition of a column to a table that is referenced by a foreign key.
+     */
+    public void testInsertColumnToTableReferencedByForeignKey() throws IOException
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='test'>\n" +
+            "  <table name='TableA'>\n" +
+            "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "  </table>\n" +
+            "  <table name='TABLEB'>\n" +
+            "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "    <column name='COLFK' type='INTEGER'/>\n" +
+            "    <foreign-key name='TESTFK' foreignTable='TableA'>\n" +
+            "      <reference local='COLFK' foreign='ColPK'/>\n" +
+            "    </foreign-key>\n" +
+            "  </table>\n" +
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='test'>\n" +
+            "  <table name='TableA'>\n" +
+            "    <column name='Col' type='DOUBLE'/>\n" +
+            "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "  </table>\n" +
+            "  <table name='TABLEB'>\n" +
+            "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
+            "    <column name='COLFK' type='INTEGER'/>\n" +
+            "    <foreign-key name='TESTFK' foreignTable='TableA'>\n" +
+            "      <reference local='COLFK' foreign='ColPK'/>\n" +
+            "    </foreign-key>\n" +
+            "  </table>\n" +
+            "</database>";
+
+        assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"TABLEB\" DROP CONSTRAINT \"TESTFK\";\n"+
             "CREATE TABLE \"TableA_\"\n"+
             "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
             "    \"Col\" DOUBLE,\n"+
+            "    \"ColPK\" INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
             "INSERT INTO \"TableA_\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA\";\n"+
             "DROP TABLE \"TableA\";\n"+
             "CREATE TABLE \"TableA\"\n"+
             "(\n"+
-            "    \"ColPK\" INTEGER NOT NULL,\n"+
             "    \"Col\" DOUBLE,\n"+
+            "    \"ColPK\" INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (\"ColPK\")\n"+
             ");\n"+
-            "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
+            "INSERT INTO \"TableA\" (\"Col\",\"ColPK\") SELECT \"Col\",\"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1424,7 +1339,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1466,7 +1381,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1527,7 +1442,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK2\",\"COLFK1\") REFERENCES \"TableA\" (\"ColPK1\",\"ColPK2\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1588,7 +1503,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK1\",\"ColPK2\") SELECT \"ColPK1\",\"ColPK2\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK2\") REFERENCES \"TableA\" (\"ColPK1\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1625,7 +1540,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TESTINDEX\" ON \"TableA\";\n"+
             "CREATE UNIQUE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\",\"Col2\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1662,7 +1577,7 @@ public class TestAlterationAlgorithm extends TestBase
         assertEqualsIgnoringWhitespaces(
             "DROP INDEX \"TESTINDEX\" ON \"TableA\";\n"+
             "CREATE INDEX \"TESTINDEX\" ON \"TableA\" (\"Col1\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1717,7 +1632,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1759,7 +1674,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1801,7 +1716,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1850,7 +1765,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1920,7 +1835,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -1962,7 +1877,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2004,7 +1919,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2053,7 +1968,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2123,7 +2038,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2165,7 +2080,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2207,7 +2122,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2256,7 +2171,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2326,7 +2241,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2368,7 +2283,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2410,7 +2325,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2459,7 +2374,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2514,7 +2429,7 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TableA\" (\"ColPK\") SELECT \"ColPK\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2556,7 +2471,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2598,7 +2513,7 @@ public class TestAlterationAlgorithm extends TestBase
             ");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2647,7 +2562,7 @@ public class TestAlterationAlgorithm extends TestBase
             "CREATE INDEX \"TestIndex\" ON \"TableA\" (\"Col\");\n"+
             "INSERT INTO \"TableA\" (\"ColPK\",\"Col\") SELECT \"ColPK\",\"Col\" FROM \"TableA_\";\n"+
             "DROP TABLE \"TableA_\";\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 
     /**
@@ -2718,6 +2633,6 @@ public class TestAlterationAlgorithm extends TestBase
             "INSERT INTO \"TABLEB\" (\"COLPK\",\"COLFK\") SELECT \"COLPK\",\"COLFK\" FROM \"TABLEB_\";\n"+
             "DROP TABLE \"TABLEB_\";\n"+
             "ALTER TABLE \"TABLEB\" ADD CONSTRAINT \"TESTFK\" FOREIGN KEY (\"COLFK\") REFERENCES \"TableA\" (\"ColPK\");\n",
-            getAlterDatabaseSQL(model1Xml, model2Xml));
+            getAlterModelSQL(model1Xml, model2Xml));
     }
 }

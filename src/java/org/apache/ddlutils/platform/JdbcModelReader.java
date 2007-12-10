@@ -663,7 +663,7 @@ public class JdbcModelReader
         {
             Index index = table.getIndex(indexIdx);
 
-            if ((mustBeUnique == index.isUnique()) && matches(index, columnNames) && 
+            if ((!mustBeUnique || index.isUnique()) && matches(index, columnNames) && 
                 isInternalForeignKeyIndex(metaData, table, fk, index))
             {
                 fk.setAutoIndexPresent(true);
@@ -1065,10 +1065,11 @@ public class JdbcModelReader
      */
     protected void determineAutoIncrementFromResultSetMetaData(Table table, Column[] columnsToCheck) throws SQLException
     {
-        if (columnsToCheck == null || columnsToCheck.length == 0)
+        if ((columnsToCheck == null) || (columnsToCheck.length == 0))
         {
             return;
         }
+
         StringBuffer query = new StringBuffer();
     
         query.append("SELECT ");

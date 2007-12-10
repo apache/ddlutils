@@ -32,11 +32,24 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.DatabaseOperationException;
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
+import org.apache.ddlutils.alteration.ModelComparator;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -67,6 +80,7 @@ public class SybasePlatform extends PlatformImplBase
 
         info.setMaxIdentifierLength(28);
         info.setNullAsDefaultValueRequired(true);
+        info.setIdentityColumnAutomaticallyRequired(true);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
 
@@ -331,5 +345,142 @@ public class SybasePlatform extends PlatformImplBase
     protected void afterUpdate(Connection connection, Table table) throws SQLException
     {
         afterInsert(connection, table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected ModelComparator getModelComparator()
+    {
+        ModelComparator comparator = super.getModelComparator();
+
+        comparator.setGeneratePrimaryKeyChanges(false);
+        comparator.setCanDropPrimaryKeyColumns(false);
+        return comparator;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                if ((change instanceof RemoveColumnChange) ||
+                    (change instanceof AddPrimaryKeyChange) ||
+                    (change instanceof RemovePrimaryKeyChange))
+                {
+                    return true;
+                }
+                else if (change instanceof AddColumnChange)
+                {
+                    AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                    // Sybase can only add not insert columns, and they cannot be IDENTITY columns
+                    // We also have to force recreation of the table if a required column is added
+                    // that is neither IDENTITY nor has a default value
+                    return (addColumnChange.getNextColumn() == null) &&
+                           !addColumnChange.getNewColumn().isAutoIncrement() &&
+                           (!addColumnChange.getNewColumn().isRequired() || !StringUtils.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
+                }
+                else if (change instanceof ColumnDefinitionChange)
+                {
+                    ColumnDefinitionChange columnChange = (ColumnDefinitionChange)change;
+                    Column                 oldColumn    = intermediateTable.findColumn(columnChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+                    // Sybase cannot change the IDENTITY state of a column via ALTER TABLE MODIFY
+                    return oldColumn.isAutoIncrement() == columnChange.getNewColumn().isAutoIncrement();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Database processChanges(Database model, Collection changes, CreationParameters params) throws IOException, DdlUtilsException
+    {
+        if (!changes.isEmpty())
+        {
+            ((SybaseBuilder)getSqlBuilder()).turnOnQuotation();
+        }
+
+        return super.processChanges(model, changes, params);
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveColumnChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column removedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((SybaseBuilder)getSqlBuilder()).dropColumn(changedTable, removedColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              RemovePrimaryKeyChange change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        ((SybaseBuilder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+
+    /**
+     * Processes the change of a column definition..
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              ColumnDefinitionChange change) throws IOException
+    {
+        Table         changedTable  = findChangedTable(currentModel, change);
+        Column        changedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+        Column        newColumn     = change.getNewColumn();
+        SybaseBuilder sqlBuilder    = (SybaseBuilder)getSqlBuilder();
+
+        // if we only change the default value, then we need to use different SQL
+        if (!ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), changedColumn, newColumn) &&
+            !ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), changedColumn, newColumn) &&
+            !ColumnDefinitionChange.isRequiredStatusChanged(changedColumn, newColumn) &&
+            !ColumnDefinitionChange.isAutoIncrementChanged(changedColumn, newColumn))
+        {
+            sqlBuilder.changeColumnDefaultValue(changedTable, changedColumn, newColumn.getDefaultValue());
+        }
+        else
+        {
+            sqlBuilder.changeColumn(changedTable, changedColumn, newColumn);
+        }
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
     }
 }

@@ -30,11 +30,11 @@ import org.apache.ddlutils.model.Database;
 public interface ColumnChange extends TableChange
 {
     /**
-     * Returns the affected column from the original model.
+     * Returns the name of the affected column from the original model.
      * 
-     * @return The affected column
+     * @return The name of the affected column
      */
-    public Column getChangedColumn();
+    public String getChangedColumn();
 
     /**
      * Finds the column object corresponding to the changed column in the given database model.

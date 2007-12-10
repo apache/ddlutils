@@ -29,7 +29,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * 
  * @version $Revision$
  */
-public class IndexColumn implements Cloneable, Serializable
+public class IndexColumn implements Serializable
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -5009366896427504739L;
@@ -42,8 +42,6 @@ public class IndexColumn implements Cloneable, Serializable
     protected String _name;
     /** The size of the column in the index. */
     protected String _size;
-
-    // TODO: It might be useful if the referenced column is directly acessible here ?
 
     /**
      * Creates a new index column object.
@@ -154,19 +152,7 @@ public class IndexColumn implements Cloneable, Serializable
     {
         _size = size;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object clone() throws CloneNotSupportedException
-    {
-        IndexColumn result = (IndexColumn)super.clone();
-
-        result._name = _name;
-        result._size = _size;
-        return result;
-    }
-
+    
     /**
      * {@inheritDoc}
      */

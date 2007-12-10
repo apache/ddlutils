@@ -30,40 +30,27 @@ import org.apache.ddlutils.model.Table;
  */
 public class PrimaryKeyChange extends TableChangeImplBase
 {
-    /** The columns making up the original primary key. */
-    private Column[] _oldPrimaryKeyColumns;
-    /** The columns making up the new primary key. */
-    private Column[] _newPrimaryKeyColumns;
+    /** The names of the columns making up the new primary key. */
+    private String[] _newPrimaryKeyColumns;
 
     /**
      * Creates a new change object.
      * 
-     * @param table                The table whose primary key is to be changed
-     * @param newPrimaryKeyColumns The columns making up the new primary key
+     * @param tableName            The name of the table whose primary key is to be changed
+     * @param newPrimaryKeyColumns The names of the columns making up the new primary key
      */
-    public PrimaryKeyChange(Table table, Column[] newPrimaryKeyColumns)
+    public PrimaryKeyChange(String tableName, String[] newPrimaryKeyColumns)
     {
-        super(table);
-        _oldPrimaryKeyColumns = table.getPrimaryKeyColumns();
+        super(tableName);
         _newPrimaryKeyColumns = newPrimaryKeyColumns;
     }
 
     /**
-     * Returns the columns making up the original primary key.
+     * Returns the names of the columns making up the new primary key.
      *
-     * @return The columns
+     * @return The column names
      */
-    public Column[] getOldPrimaryKeyColumns()
-    {
-        return _oldPrimaryKeyColumns;
-    }
-
-    /**
-     * Returns the columns making up the new primary key.
-     *
-     * @return The columns
-     */
-    public Column[] getNewPrimaryKeyColumns()
+    public String[] getNewPrimaryKeyColumns()
     {
         return _newPrimaryKeyColumns;
     }
@@ -73,17 +60,16 @@ public class PrimaryKeyChange extends TableChangeImplBase
      */
     public void apply(Database model, boolean caseSensitive)
     {
-        Table table = findChangedTable(model, caseSensitive);
+        Table    table  = findChangedTable(model, caseSensitive);
+        Column[] pkCols = table.getPrimaryKeyColumns();
 
-        for (int idx = 0; idx < _oldPrimaryKeyColumns.length; idx++)
+        for (int idx = 0; idx < pkCols.length; idx++)
         {
-            Column column = table.findColumn(_oldPrimaryKeyColumns[idx].getName(), caseSensitive);
-
-            column.setPrimaryKey(false);
+            pkCols[idx].setPrimaryKey(false);
         }
         for (int idx = 0; idx < _newPrimaryKeyColumns.length; idx++)
         {
-            Column column = table.findColumn(_newPrimaryKeyColumns[idx].getName(), caseSensitive);
+            Column column = table.findColumn(_newPrimaryKeyColumns[idx], caseSensitive);
 
             column.setPrimaryKey(true);
         }

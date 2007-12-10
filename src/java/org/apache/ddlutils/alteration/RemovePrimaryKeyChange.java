@@ -30,29 +30,14 @@ import org.apache.ddlutils.model.Table;
  */
 public class RemovePrimaryKeyChange extends TableChangeImplBase
 {
-    /** The columns making up the primary key. */
-    private Column[] _primaryKeyColumns;
-
     /**
      * Creates a new change object.
      * 
-     * @param table             The table to remove the primary key from
-     * @param primaryKeyColumns The columns making up the primary key
+     * @param tableName The name of he table to remove the primary key from
      */
-    public RemovePrimaryKeyChange(Table table, Column[] primaryKeyColumns)
+    public RemovePrimaryKeyChange(String tableName)
     {
-        super(table);
-        _primaryKeyColumns = primaryKeyColumns;
-    }
-
-    /**
-     * Returns the primary key columns making up the primary key.
-     *
-     * @return The primary key columns
-     */
-    public Column[] getPrimaryKeyColumns()
-    {
-        return _primaryKeyColumns;
+        super(tableName);
     }
 
     /**
@@ -60,13 +45,12 @@ public class RemovePrimaryKeyChange extends TableChangeImplBase
      */
     public void apply(Database model, boolean caseSensitive)
     {
-        Table table = findChangedTable(model, caseSensitive);
+        Table    table  = findChangedTable(model, caseSensitive);
+        Column[] pkCols = table.getPrimaryKeyColumns();
 
-        for (int idx = 0; idx < _primaryKeyColumns.length; idx++)
+        for (int idx = 0; idx < pkCols.length; idx++)
         {
-            Column column = table.findColumn(_primaryKeyColumns[idx].getName(), caseSensitive);
-
-            column.setPrimaryKey(false);
+            pkCols[idx].setPrimaryKey(false);
         }
     }
 }

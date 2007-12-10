@@ -20,13 +20,15 @@ package org.apache.ddlutils;
  */
 
 import org.apache.ddlutils.alteration.TestAlterationAlgorithm;
-import org.apache.ddlutils.alteration.TestModelComparator;
+import org.apache.ddlutils.alteration.TestModelComparison;
 import org.apache.ddlutils.dynabean.TestDynaSqlQueries;
+import org.apache.ddlutils.io.TestAddColumn;
 import org.apache.ddlutils.io.TestAlteration;
 import org.apache.ddlutils.io.TestConstraints;
 import org.apache.ddlutils.io.TestDataReaderAndWriter;
 import org.apache.ddlutils.io.TestDatabaseIO;
 import org.apache.ddlutils.io.TestDatatypes;
+import org.apache.ddlutils.io.TestDropColumn;
 import org.apache.ddlutils.io.TestMisc;
 import org.apache.ddlutils.io.converters.TestDateConverter;
 import org.apache.ddlutils.io.converters.TestTimeConverter;
@@ -116,7 +118,7 @@ public class RunAllTests extends TestCase
         suite.addTestSuite(TestPostgresqlPlatform.class);
         suite.addTestSuite(TestSapDbPlatform.class);
         suite.addTestSuite(TestSybasePlatform.class);
-        suite.addTestSuite(TestModelComparator.class);
+        suite.addTestSuite(TestModelComparison.class);
         suite.addTestSuite(TestAlterationAlgorithm.class);
 
         // tests that need a live database
@@ -126,6 +128,8 @@ public class RunAllTests extends TestCase
             suite.addTestSuite(TestDatatypes.class);
             suite.addTestSuite(TestConstraints.class);
             suite.addTestSuite(TestAlteration.class);
+            suite.addTestSuite(TestAddColumn.class);
+            suite.addTestSuite(TestDropColumn.class);
             suite.addTestSuite(TestMisc.class);
         }
 

@@ -19,7 +19,7 @@ package org.apache.ddlutils.alteration;
  * under the License.
  */
 
-import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -33,27 +33,25 @@ public class AddColumnChange extends TableChangeImplBase
 {
     /** The new column. */
     private Column _newColumn;
-    /** The column after which the new column should be added. */
-    private Column _previousColumn;
-    /** The column before which the new column should be added. */
-    private Column _nextColumn;
-    /** Whether the column is added at the end. */
-    private boolean _atEnd;
+    /** The name of the column after which the new column should be added. */
+    private String _previousColumnName;
+    /** The name of the column before which the new column should be added. */
+    private String _nextColumnName;
 
     /**
      * Creates a new change object.
      * 
-     * @param table          The table to add the column to
-     * @param newColumn      The new column
-     * @param previousColumn The column after which the new column should be added
-     * @param nextColumn     The column before which the new column should be added
+     * @param tableName          The name of the table to add the column to
+     * @param newColumn          The new column
+     * @param previousColumnName The name of the column after which the new column should be added
+     * @param nextColumnName     The name of the column before which the new column should be added
      */
-    public AddColumnChange(Table table, Column newColumn, Column previousColumn, Column nextColumn)
+    public AddColumnChange(String tableName, Column newColumn, String previousColumnName, String nextColumnName)
     {
-        super(table);
-        _newColumn      = newColumn;
-        _previousColumn = previousColumn;
-        _nextColumn     = nextColumn;
+        super(tableName);
+        _newColumn          = newColumn;
+        _previousColumnName = previousColumnName;
+        _nextColumnName     = nextColumnName;
     }
 
     /**
@@ -67,23 +65,23 @@ public class AddColumnChange extends TableChangeImplBase
     }
 
     /**
-     * Returns the column after which the new column should be added.
+     * Returns the name of the column after which the new column should be added.
      *
-     * @return The previous column
+     * @return The name of the previous column
      */
-    public Column getPreviousColumn()
+    public String getPreviousColumn()
     {
-        return _previousColumn;
+        return _previousColumnName;
     }
 
     /**
-     * Returns the column before which the new column should be added.
+     * Returns the name of the column before which the new column should be added.
      *
-     * @return The next column
+     * @return The name of the next column
      */
-    public Column getNextColumn()
+    public String getNextColumn()
     {
-        return _nextColumn;
+        return _nextColumnName;
     }
 
     /**
@@ -94,18 +92,7 @@ public class AddColumnChange extends TableChangeImplBase
      */
     public boolean isAtEnd()
     {
-        return _atEnd;
-    }
-
-    /**
-     * Specifies whether the column is added at the end (when applied in the order
-     * of creation of the changes).
-     * 
-     * @param atEnd <code>true</code> if the column is added at the end
-     */
-    public void setAtEnd(boolean atEnd)
-    {
-        _atEnd = atEnd;
+        return _nextColumnName == null;
     }
 
     /**
@@ -113,26 +100,19 @@ public class AddColumnChange extends TableChangeImplBase
      */
     public void apply(Database model, boolean caseSensitive)
     {
-        Column newColumn = null;
+        Table  table     = findChangedTable(model, caseSensitive);
+        Column newColumn = new CloneHelper().clone(_newColumn, true);
 
-        try
+        if (_previousColumnName != null)
         {
-        	// TODO: Cloning should not be necessary
-            newColumn = (Column)_newColumn.clone();
-        }
-        catch (CloneNotSupportedException ex)
-        {
-            throw new DdlUtilsException(ex);
-        }
-
-        Table table = findChangedTable(model, caseSensitive);
-
-        // TODO: change this !
-        if ((_previousColumn != null) && (_nextColumn != null))
-        {
-            int idx = table.getColumnIndex(_previousColumn) + 1;
+            Column prevColumn = table.findColumn(_previousColumnName, caseSensitive);
+            int    idx        = table.getColumnIndex(prevColumn) + 1;
 
             table.addColumn(idx, newColumn);
+        }
+        else if (_nextColumnName != null)
+        {
+            table.addColumn(0, newColumn);
         }
         else
         {

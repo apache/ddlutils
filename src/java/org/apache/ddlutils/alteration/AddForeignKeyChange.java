@@ -19,10 +19,8 @@ package org.apache.ddlutils.alteration;
  * under the License.
  */
 
-import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
-import org.apache.ddlutils.model.Table;
 
 /**
  * Represents the addition of a foreign key to a table. Note that for
@@ -39,12 +37,12 @@ public class AddForeignKeyChange extends TableChangeImplBase
     /**
      * Creates a new change object.
      * 
-     * @param table         The table to add the foreign key to
+     * @param tableName     The name of the table to add the foreign key to
      * @param newForeignKey The new foreign key
      */
-    public AddForeignKeyChange(Table table, ForeignKey newForeignKey)
+    public AddForeignKeyChange(String tableName, ForeignKey newForeignKey)
     {
-        super(table);
+        super(tableName);
         _newForeignKey = newForeignKey;
     }
 
@@ -63,19 +61,6 @@ public class AddForeignKeyChange extends TableChangeImplBase
      */
     public void apply(Database database, boolean caseSensitive)
     {
-        ForeignKey newFK = null;
-
-        try
-        {
-        	// TODO: we should not have to clone here
-            newFK = (ForeignKey)_newForeignKey.clone();
-            newFK.setForeignTable(database.findTable(_newForeignKey.getForeignTableName(), caseSensitive));
-        }
-        catch (CloneNotSupportedException ex)
-        {
-            throw new DdlUtilsException(ex);
-        }
-        findChangedTable(database, caseSensitive).addForeignKey(newFK);
+        findChangedTable(database, caseSensitive).addForeignKey(_newForeignKey);
     }
-
 }

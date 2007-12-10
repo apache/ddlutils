@@ -80,6 +80,15 @@ public interface Index extends Cloneable, Serializable
     public boolean hasColumn(Column column);
 
     /**
+     * Determines whether this index includes the indicated column.
+     * 
+     * @param columnName    The name of the column to check for
+     * @param caseSensitive Whether the case of the column name matters for the check
+     * @return <code>true</code> if the column is included in this index
+     */
+    public boolean hasColumn(String columnName, boolean caseSensitive);
+
+    /**
      * Adds a column that makes up this index.
      * 
      * @param column The column to add
@@ -107,6 +116,14 @@ public interface Index extends Cloneable, Serializable
      * @throws CloneNotSupportedException If the cloning did fail
      */
     public Object clone() throws CloneNotSupportedException;
+
+    /**
+     * Returns a clone of this index object. This is essentially the same method as
+     * {@link #clone()}, except that it does not throw a checked exception.
+     * 
+     * @return The clone
+     */
+    public Index getClone() throws ModelException;
 
     /**
      * Compares this index to the given one while ignoring the case of identifiers.

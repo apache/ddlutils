@@ -23,23 +23,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.util.StringUtils;
 
 /**
  * Compares two database models and creates change objects that express how to
  * adapt the first model so that it becomes the second one. Neither of the models
  * are changed in the process, however, it is also assumed that the models do not
  * change in between.
- * 
- * TODO: Add support and tests for the change of the column order 
  * 
  * @version $Revision: $
  */
@@ -50,19 +49,79 @@ public class ModelComparator
 
     /** The platform information. */
     private PlatformInfo _platformInfo;
+    /** The predicate that defines which changes are supported by the platform. */
+    private TableDefinitionChangesPredicate _tableDefCangePredicate;
+    /** The object clone helper. */
+    private CloneHelper _cloneHelper = new CloneHelper();
     /** Whether comparison is case sensitive. */
     private boolean _caseSensitive;
+    /** Whether the comparator should generate {@link PrimaryKeyChange} objects. */
+    private boolean _generatePrimaryKeyChanges = true;
+    /** Whether {@link RemoveColumnChange} objects for primary key columns are enough or
+        additional primary key change objects are necessary. */
+    private boolean _canDropPrimaryKeyColumns = true;
 
     /**
      * Creates a new model comparator object.
      * 
-     * @param platformInfo  The platform info
-     * @param caseSensitive Whether comparison is case sensitive
+     * @param platformInfo            The platform info
+     * @param tableDefChangePredicate The predicate that defines whether tables changes are supported
+     *                                by the platform or not; all changes are supported if this is null
+     * @param caseSensitive           Whether comparison is case sensitive
      */
-    public ModelComparator(PlatformInfo platformInfo, boolean caseSensitive)
+    public ModelComparator(PlatformInfo                    platformInfo,
+                           TableDefinitionChangesPredicate tableDefChangePredicate,
+                           boolean                         caseSensitive)
     {
-        _platformInfo  = platformInfo;
-        _caseSensitive = caseSensitive;
+        _platformInfo           = platformInfo;
+        _caseSensitive          = caseSensitive;
+        _tableDefCangePredicate = tableDefChangePredicate;
+    }
+
+    /**
+     * Specifies whether the comparator should generate {@link PrimaryKeyChange} objects or a
+     * pair of {@link RemovePrimaryKeyChange} and {@link AddPrimaryKeyChange} objects instead.
+     * The default value is <code>true</code>.
+     * 
+     * @param generatePrimaryKeyChanges Whether to create {@link PrimaryKeyChange} objects
+     */
+    public void setGeneratePrimaryKeyChanges(boolean generatePrimaryKeyChanges)
+    {
+        _generatePrimaryKeyChanges = generatePrimaryKeyChanges;
+    }
+
+    /**
+     * Specifies whether the {@link RemoveColumnChange} are fine even for primary key columns.
+     * If the platform cannot drop primary key columns, set this to <code>false</code> and the
+     * comparator will create additional primary key changes. 
+     * The default value is <code>true</code>.
+     * 
+     * @param canDropPrimaryKeyColumns Whether {@link RemoveColumnChange} objecs for primary
+     *                                 key columns are ok 
+     */
+    public void setCanDropPrimaryKeyColumns(boolean canDropPrimaryKeyColumns)
+    {
+        _canDropPrimaryKeyColumns = canDropPrimaryKeyColumns;
+    }
+
+    /**
+     * Returns the info object for the platform.
+     * 
+     * @return The platform info object
+     */
+    protected PlatformInfo getPlatformInfo()
+    {
+        return _platformInfo;
+    }
+
+    /**
+     * Determines whether comparison should be case sensitive.
+     * 
+     * @return <code>true</code> if case matters
+     */
+    protected boolean isCaseSensitive()
+    {
+        return _caseSensitive;
     }
 
     /**
@@ -75,53 +134,208 @@ public class ModelComparator
      */
     public List compare(Database sourceModel, Database targetModel)
     {
+        Database intermediateModel = _cloneHelper.clone(sourceModel);
+
+        return compareModels(sourceModel, intermediateModel, targetModel);
+    }
+
+    /**
+     * Compares the given source and target models and creates change objects to get from
+     * the source to the target one. These changes will be applied to the given
+     * intermediate model (the other two won't be changed), so that it will be equal to
+     * the target model after this model has finished.
+     * 
+     * @param sourceModel       The source model
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param targetModel       The target model
+     * @return The changes
+     */
+    protected List compareModels(Database sourceModel,
+                                 Database intermediateModel,
+                                 Database targetModel)
+    {
         ArrayList changes = new ArrayList();
+
+        changes.addAll(checkForRemovedForeignKeys(sourceModel, intermediateModel, targetModel));
+        changes.addAll(checkForRemovedTables(sourceModel, intermediateModel, targetModel));
+
+        for (int tableIdx = 0; tableIdx < intermediateModel.getTableCount(); tableIdx++)
+        {
+            Table intermediateTable = intermediateModel.getTable(tableIdx);
+            Table sourceTable       = sourceModel.findTable(intermediateTable.getName(), _caseSensitive);
+            Table targetTable       = targetModel.findTable(intermediateTable.getName(), _caseSensitive);
+            List  tableChanges      = compareTables(sourceModel, sourceTable,
+                                                    intermediateModel, intermediateTable,
+                                                    targetModel, targetTable);
+
+            changes.addAll(tableChanges);
+        }
+
+        changes.addAll(checkForAddedTables(sourceModel, intermediateModel, targetModel));
+        changes.addAll(checkForAddedForeignKeys(sourceModel, intermediateModel, targetModel));
+        return changes;
+    }
+
+    /**
+     * Creates change objects for foreign keys that are present in the given source model but are no longer in the target
+     * model, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param targetModel       The target model
+     * @return The changes
+     */
+    protected List checkForRemovedForeignKeys(Database sourceModel,
+                                              Database intermediateModel,
+                                              Database targetModel)
+    {
+        List changes = new ArrayList();
+
+        for (int tableIdx = 0; tableIdx < intermediateModel.getTableCount(); tableIdx++)
+        {
+            Table        intermediateTable = intermediateModel.getTable(tableIdx);
+            Table        targetTable       = targetModel.findTable(intermediateTable.getName(), _caseSensitive);
+            ForeignKey[] intermediateFks   = intermediateTable.getForeignKeys();
+
+            // Dropping foreign keys from tables to be removed might not be necessary, but some databases might require it
+            for (int fkIdx = 0; fkIdx < intermediateFks.length; fkIdx++)
+            {
+                ForeignKey sourceFk = intermediateFks[fkIdx];
+                ForeignKey targetFk = targetTable == null ? null : findCorrespondingForeignKey(targetTable, sourceFk);
+
+                if (targetFk == null)
+                {
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info("Foreign key " + sourceFk + " needs to be removed from table " + intermediateTable.getName());
+                    }
+
+                    RemoveForeignKeyChange fkChange = new RemoveForeignKeyChange(intermediateTable.getName(), sourceFk);
+
+                    changes.add(fkChange);
+                    fkChange.apply(intermediateModel, _caseSensitive);
+                }
+            }
+        }
+        return changes;
+    }
+
+    /**
+     * Creates change objects for foreign keys that are not present in the given source model but are in the target
+     * model, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param targetModel       The target model
+     * @return The changes
+     */
+    protected List checkForAddedForeignKeys(Database sourceModel,
+                                            Database intermediateModel,
+                                            Database targetModel)
+    {
+        List changes = new ArrayList();
 
         for (int tableIdx = 0; tableIdx < targetModel.getTableCount(); tableIdx++)
         {
-            Table targetTable = targetModel.getTable(tableIdx);
-            Table sourceTable = sourceModel.findTable(targetTable.getName(), _caseSensitive);
+            Table targetTable       = targetModel.getTable(tableIdx);
+            Table intermediateTable = intermediateModel.findTable(targetTable.getName(), _caseSensitive);
 
-            if (sourceTable == null)
+            for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
+            {
+                ForeignKey targetFk       = targetTable.getForeignKey(fkIdx);
+                ForeignKey intermediateFk = findCorrespondingForeignKey(intermediateTable, targetFk);
+
+                if (intermediateFk == null)
+                {
+                    if (_log.isInfoEnabled())
+                    {
+                        _log.info("Foreign key " + targetFk + " needs to be added to table " + intermediateTable.getName());
+                    }
+
+                    intermediateFk = _cloneHelper.clone(targetFk, intermediateTable, intermediateModel, _caseSensitive);
+
+                    AddForeignKeyChange fkChange = new AddForeignKeyChange(intermediateTable.getName(), intermediateFk);
+
+                    changes.add(fkChange);
+                    fkChange.apply(intermediateModel, _caseSensitive);
+                }
+            }
+        }
+        return changes;
+    }
+
+    /**
+     * Creates change objects for tables that are present in the given source model but are no longer in the target
+     * model, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param targetModel       The target model
+     * @return The changes
+     */
+    protected List checkForRemovedTables(Database sourceModel,
+                                         Database intermediateModel,
+                                         Database targetModel)
+    {
+        List    changes            = new ArrayList();
+        Table[] intermediateTables = intermediateModel.getTables();
+
+        for (int tableIdx = 0; tableIdx < intermediateTables.length; tableIdx++)
+        {
+            Table intermediateTable = intermediateTables[tableIdx];
+            Table targetTable       = targetModel.findTable(intermediateTable.getName(), _caseSensitive);
+
+            if (targetTable == null)
+            {
+                if (_log.isInfoEnabled())
+                {
+                    _log.info("Table " + intermediateTable.getName() + " needs to be removed");
+                }
+
+                RemoveTableChange tableChange = new RemoveTableChange(intermediateTable.getName());
+
+                changes.add(tableChange);
+                tableChange.apply(intermediateModel, _caseSensitive);
+            }
+        }
+        return changes;
+    }
+
+    /**
+     * Creates change objects for tables that are not present in the given source model but are in the target
+     * model, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param targetModel       The target model
+     * @return The changes
+     */
+    protected List checkForAddedTables(Database sourceModel,
+                                       Database intermediateModel,
+                                       Database targetModel)
+    {
+        List changes = new ArrayList();
+
+        for (int tableIdx = 0; tableIdx < targetModel.getTableCount(); tableIdx++)
+        {
+            Table targetTable       = targetModel.getTable(tableIdx);
+            Table intermediateTable = intermediateModel.findTable(targetTable.getName(), _caseSensitive);
+
+            if (intermediateTable == null)
             {
                 if (_log.isInfoEnabled())
                 {
                     _log.info("Table " + targetTable.getName() + " needs to be added");
                 }
-                changes.add(new AddTableChange(targetTable));
-                for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
-                {
-                    // we have to use target table's definition here because the
-                    // complete table is new
-                    changes.add(new AddForeignKeyChange(targetTable, targetTable.getForeignKey(fkIdx)));
-                }
-            }
-            else
-            {
-                changes.addAll(compareTables(sourceModel, sourceTable, targetModel, targetTable));
-            }
-        }
 
-        for (int tableIdx = 0; tableIdx < sourceModel.getTableCount(); tableIdx++)
-        {
-            Table sourceTable = sourceModel.getTable(tableIdx);
-            Table targetTable = targetModel.findTable(sourceTable.getName(), _caseSensitive);
+                // we're using a clone of the target table, and remove all foreign
+                // keys as these will be added later
+                intermediateTable = _cloneHelper.clone(targetTable, true, false, intermediateModel, _caseSensitive);
 
-            if ((targetTable == null) && (sourceTable.getName() != null) && (sourceTable.getName().length() > 0))
-            {
-                if (_log.isInfoEnabled())
-                {
-                    _log.info("Table " + sourceTable.getName() + " needs to be removed");
-                }
-                changes.add(new RemoveTableChange(sourceTable));
-                // we assume that the target model is sound, ie. that there are no longer any foreign
-                // keys to this table in the target model; thus we already have removeFK changes for
-                // these from the compareTables method and we only need to create changes for the fks
-                // originating from this table
-                for (int fkIdx = 0; fkIdx < sourceTable.getForeignKeyCount(); fkIdx++)
-                {
-                    changes.add(new RemoveForeignKeyChange(sourceTable, sourceTable.getForeignKey(fkIdx)));
-                }
+                AddTableChange tableChange = new AddTableChange(intermediateTable);
+
+                changes.add(tableChange);
+                tableChange.apply(intermediateModel, _caseSensitive);
             }
         }
         return changes;
@@ -131,161 +345,450 @@ public class ModelComparator
      * Compares the two tables and returns the changes necessary to create the second
      * table from the first one.
      *  
-     * @param sourceModel The source model which contains the source table
-     * @param sourceTable The source table
-     * @param targetModel The target model which contains the target table
-     * @param targetTable The target table
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to which the changes will be applied incrementally
+     * @param intermediateTable The table corresponding to the source table in the intermediate model
+     * @param targetModel       The target model which contains the target table
+     * @param targetTable       The target table
      * @return The changes
      */
-    public List compareTables(Database sourceModel,
-                              Table    sourceTable,
-                              Database targetModel,
-                              Table    targetTable)
+    protected List compareTables(Database sourceModel,
+                                 Table    sourceTable,
+                                 Database intermediateModel,
+                                 Table    intermediateTable,
+                                 Database targetModel,
+                                 Table    targetTable)
     {
         ArrayList changes = new ArrayList();
 
-        for (int fkIdx = 0; fkIdx < sourceTable.getForeignKeyCount(); fkIdx++)
-        {
-            ForeignKey sourceFk = sourceTable.getForeignKey(fkIdx);
-            ForeignKey targetFk = findCorrespondingForeignKey(targetTable, sourceFk);
+        changes.addAll(checkForRemovedIndexes(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
 
-            if (targetFk == null)
+        ArrayList tableDefinitionChanges = new ArrayList();
+        Table     tmpTable               = _cloneHelper.clone(intermediateTable, true, false, intermediateModel, _caseSensitive);
+
+        tableDefinitionChanges.addAll(checkForRemovedColumns(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
+        tableDefinitionChanges.addAll(checkForChangeOfColumnOrder(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
+        tableDefinitionChanges.addAll(checkForChangedColumns(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
+        tableDefinitionChanges.addAll(checkForAddedColumns(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
+        tableDefinitionChanges.addAll(checkForPrimaryKeyChanges(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
+
+        if (!tableDefinitionChanges.isEmpty())
+        {
+            if ((_tableDefCangePredicate == null) || _tableDefCangePredicate.areSupported(tmpTable, tableDefinitionChanges))
             {
-                if (_log.isInfoEnabled())
+                changes.addAll(tableDefinitionChanges);
+            }
+            else
+            {
+                // we need to recreate the table; for this to work we need to remove foreign keys to and from the table
+                // however, we don't have to add them back here as there is a check for added foreign keys/indexes
+                // later on anyways
+                // we also don't have to drop indexes on the original table
+
+                ForeignKey[] fks = intermediateTable.getForeignKeys();
+
+                for (int fkIdx = 0; fkIdx < fks.length; fkIdx++)
                 {
-                    _log.info("Foreign key " + sourceFk + " needs to be removed from table " + sourceTable.getName());
+                    RemoveForeignKeyChange fkChange = new RemoveForeignKeyChange(intermediateTable.getName(), fks[fkIdx]);
+
+                    changes.add(fkChange);
+                    fkChange.apply(intermediateModel, _caseSensitive);
                 }
-                changes.add(new RemoveForeignKeyChange(sourceTable, sourceFk));
+                for (int tableIdx = 0; tableIdx < intermediateModel.getTableCount(); tableIdx++)
+                {
+                    Table curTable = intermediateModel.getTable(tableIdx);
+
+                    if (curTable != intermediateTable)
+                    {
+                        ForeignKey[] curFks = curTable.getForeignKeys();
+
+                        for (int fkIdx = 0; fkIdx < curFks.length; fkIdx++)
+                        {
+                            if ((_caseSensitive  && curFks[fkIdx].getForeignTableName().equals(intermediateTable.getName())) ||
+                                (!_caseSensitive && curFks[fkIdx].getForeignTableName().equalsIgnoreCase(intermediateTable.getName())))
+                            {
+                                RemoveForeignKeyChange fkChange = new RemoveForeignKeyChange(curTable.getName(), curFks[fkIdx]);
+    
+                                changes.add(fkChange);
+                                fkChange.apply(intermediateModel, _caseSensitive);
+                            }
+                        }
+                    }
+                }
+
+                RecreateTableChange tableChange =  new RecreateTableChange(intermediateTable.getName(),
+                                                                           intermediateTable,
+                                                                           new ArrayList(tableDefinitionChanges));
+
+                changes.add(tableChange);
+                tableChange.apply(intermediateModel, _caseSensitive);
             }
         }
+        
+        changes.addAll(checkForAddedIndexes(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
 
-        for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
+        return changes;
+    }
+
+    /**
+     * Returns the names of the columns in the intermediate table corresponding to the given column objects.
+     * 
+     * @param columns           The column objects
+     * @param intermediateTable The intermediate table
+     * @return The column names
+     */
+    protected String[] getIntermediateColumnNamesFor(Column[] columns, Table intermediateTable)
+    {
+        String[] result = new String[columns.length];
+
+        for (int idx = 0; idx < columns.length; idx++)
         {
-            ForeignKey targetFk = targetTable.getForeignKey(fkIdx);
-            ForeignKey sourceFk = findCorrespondingForeignKey(sourceTable, targetFk);
-
-            if (sourceFk == null)
-            {
-                if (_log.isInfoEnabled())
-                {
-                    _log.info("Foreign key " + targetFk + " needs to be created for table " + sourceTable.getName());
-                }
-                // we have to use the target table here because the foreign key might
-                // reference a new column
-                changes.add(new AddForeignKeyChange(targetTable, targetFk));
-            }
+            result[idx] = intermediateTable.findColumn(columns[idx].getName(), _caseSensitive).getName();
         }
+        return result;
+    }
 
-        for (int indexIdx = 0; indexIdx < sourceTable.getIndexCount(); indexIdx++)
+    /**
+     * Creates change objects for indexes that are present in the given source table but are no longer in the target
+     * table, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param intermediateTable The table from the intermediate model corresponding to the source table
+     * @param targetModel       The target model
+     * @param targetTable       The target table
+     * @return The changes
+     */
+    protected List checkForRemovedIndexes(Database sourceModel,
+                                          Table    sourceTable,
+                                          Database intermediateModel,
+                                          Table    intermediateTable,
+                                          Database targetModel,
+                                          Table    targetTable)
+    {
+        List    changes = new ArrayList();
+        Index[] indexes = intermediateTable.getIndices();
+
+        for (int indexIdx = 0; indexIdx < indexes.length; indexIdx++)
         {
-            Index sourceIndex = sourceTable.getIndex(indexIdx);
+            Index sourceIndex = indexes[indexIdx];
             Index targetIndex = findCorrespondingIndex(targetTable, sourceIndex);
 
             if (targetIndex == null)
             {
                 if (_log.isInfoEnabled())
                 {
-                    _log.info("Index " + sourceIndex.getName() + " needs to be removed from table " + sourceTable.getName());
+                    _log.info("Index " + sourceIndex.getName() + " needs to be removed from table " + intermediateTable.getName());
                 }
-                changes.add(new RemoveIndexChange(sourceTable, sourceIndex));
+
+                RemoveIndexChange change = new RemoveIndexChange(intermediateTable.getName(), sourceIndex);
+
+                changes.add(change);
+                change.apply(intermediateModel, _caseSensitive);
             }
         }
+        return changes;
+    }
+
+    /**
+     * Creates change objects for indexes that are not present in the given source table but are in the target
+     * table, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param intermediateTable The table from the intermediate model corresponding to the source table
+     * @param targetModel       The target model
+     * @param targetTable       The target table
+     * @return The changes
+     */
+    protected List checkForAddedIndexes(Database sourceModel,
+                                        Table    sourceTable,
+                                        Database intermediateModel,
+                                        Table    intermediateTable,
+                                        Database targetModel,
+                                        Table    targetTable)
+    {
+        List changes = new ArrayList();
+
         for (int indexIdx = 0; indexIdx < targetTable.getIndexCount(); indexIdx++)
         {
             Index targetIndex = targetTable.getIndex(indexIdx);
-            Index sourceIndex = findCorrespondingIndex(sourceTable, targetIndex);
+            Index sourceIndex = findCorrespondingIndex(intermediateTable, targetIndex);
 
             if (sourceIndex == null)
             {
                 if (_log.isInfoEnabled())
                 {
-                    _log.info("Index " + targetIndex.getName() + " needs to be created for table " + sourceTable.getName());
+                    _log.info("Index " + targetIndex.getName() + " needs to be created for table " + intermediateTable.getName());
                 }
-                // we have to use the target table here because the index might
-                // reference a new column
-                changes.add(new AddIndexChange(targetTable, targetIndex));
+
+                Index          clonedIndex = _cloneHelper.clone(targetIndex, intermediateTable, _caseSensitive);
+                AddIndexChange change      = new AddIndexChange(intermediateTable.getName(), clonedIndex);
+
+                changes.add(change);
+                change.apply(intermediateModel, _caseSensitive);
             }
         }
+        return changes;
+    }
 
-        HashMap addColumnChanges = new HashMap();
+    /**
+     * Checks for changes in the column order between the given source and target table, creates change objects for these and
+     * applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param intermediateTable The table from the intermediate model corresponding to the source table
+     * @param targetModel       The target model
+     * @param targetTable       The target table
+     * @return The changes
+     */
+    protected List checkForChangeOfColumnOrder(Database sourceModel,
+                                               Table    sourceTable,
+                                               Database intermediateModel,
+                                               Table    intermediateTable,
+                                               Database targetModel,
+                                               Table    targetTable)
+    {
+        List changes       = new ArrayList();
+        List targetOrder   = new ArrayList();
+        int  numChangedPKs = 0;
 
         for (int columnIdx = 0; columnIdx < targetTable.getColumnCount(); columnIdx++)
         {
             Column targetColumn = targetTable.getColumn(columnIdx);
-            Column sourceColumn = sourceTable.findColumn(targetColumn.getName(), _caseSensitive);
+            Column sourceColumn = intermediateTable.findColumn(targetColumn.getName(), _caseSensitive);
 
-            if (sourceColumn == null)
+            if (sourceColumn != null)
+            {
+                targetOrder.add(sourceColumn);
+            }
+        }
+
+        HashMap newPositions = new HashMap();
+
+        for (int columnIdx = 0; columnIdx < intermediateTable.getColumnCount(); columnIdx++)
+        {
+            Column sourceColumn = intermediateTable.getColumn(columnIdx);
+            int    targetIdx    = targetOrder.indexOf(sourceColumn);
+
+            if ((targetIdx >= 0) && (targetIdx != columnIdx))
+            {
+                newPositions.put(sourceColumn.getName(), new Integer(targetIdx));
+                if (sourceColumn.isPrimaryKey())
+                {
+                    numChangedPKs++;
+                }
+            }
+        }
+
+        if (!newPositions.isEmpty())
+        {
+            ColumnOrderChange change = new ColumnOrderChange(intermediateTable.getName(), newPositions);
+
+            change.apply(intermediateModel, _caseSensitive);
+            if (numChangedPKs > 1)
+            {
+                // create pk change that only covers the order change
+                // fortunately, the order change will have adjusted the pk order already
+                changes.add(new PrimaryKeyChange(intermediateTable.getName(),
+                                                 getIntermediateColumnNamesFor(intermediateTable.getPrimaryKeyColumns(), intermediateTable)));
+            }
+            changes.add(change);
+        }
+        return changes;
+    }
+
+    /**
+     * Creates change objects for columns that are present in the given source table but are no longer in the target
+     * table, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param intermediateTable The table from the intermediate model corresponding to the source table
+     * @param targetModel       The target model
+     * @param targetTable       The target table
+     * @return The changes
+     */
+    protected List checkForRemovedColumns(Database sourceModel,
+                                          Table    sourceTable,
+                                          Database intermediateModel,
+                                          Table    intermediateTable,
+                                          Database targetModel,
+                                          Table    targetTable)
+    {
+        // if the platform does not support dropping pk columns, then the pk handling above will
+        // generate appropriate pk changes
+
+        List     changes = new ArrayList();
+        Column[] columns = intermediateTable.getColumns();
+
+        for (int columnIdx = 0; columnIdx < columns.length; columnIdx++)
+        {
+            Column sourceColumn = columns[columnIdx];
+            Column targetColumn = targetTable.findColumn(sourceColumn.getName(), _caseSensitive);
+
+            if (targetColumn == null)
             {
                 if (_log.isInfoEnabled())
                 {
-                    _log.info("Column " + targetColumn.getName() + " needs to be created for table " + sourceTable.getName());
+                    _log.info("Column " + sourceColumn.getName() + " needs to be removed from table " + intermediateTable.getName());
                 }
 
-                AddColumnChange change = new AddColumnChange(sourceTable,
-                                                             targetColumn,
-                                                             columnIdx > 0 ? targetTable.getColumn(columnIdx - 1) : null,
-                                                             columnIdx < targetTable.getColumnCount() - 1 ? targetTable.getColumn(columnIdx + 1) : null);
+                RemoveColumnChange change = new RemoveColumnChange(intermediateTable.getName(), sourceColumn.getName());
 
                 changes.add(change);
-                addColumnChanges.put(targetColumn, change);
-            }
-            else
-            {
-                changes.addAll(compareColumns(sourceTable, sourceColumn, targetTable, targetColumn));
+                change.apply(intermediateModel, _caseSensitive);
             }
         }
-        // if the last columns in the target table are added, then we note this at the changes
-        for (int columnIdx = targetTable.getColumnCount() - 1; columnIdx >= 0; columnIdx--)
+        return changes;
+    }
+
+    /**
+     * Creates change objects for columns that are not present in the given source table but are in the target
+     * table, and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param intermediateTable The table from the intermediate model corresponding to the source table
+     * @param targetModel       The target model
+     * @param targetTable       The target table
+     * @return The changes
+     */
+    protected List checkForAddedColumns(Database sourceModel,
+                                        Table    sourceTable,
+                                        Database intermediateModel,
+                                        Table    intermediateTable,
+                                        Database targetModel,
+                                        Table    targetTable)
+    {
+        List changes = new ArrayList();
+
+        for (int columnIdx = 0; columnIdx < targetTable.getColumnCount(); columnIdx++)
         {
-            Column          targetColumn = targetTable.getColumn(columnIdx);
-            AddColumnChange change       = (AddColumnChange)addColumnChanges.get(targetColumn);
+            Column targetColumn = targetTable.getColumn(columnIdx);
+            Column sourceColumn = intermediateTable.findColumn(targetColumn.getName(), _caseSensitive);
 
-            if (change == null)
+            if (sourceColumn == null)
             {
-                // column was not added, so we can ignore any columns before it that were added
-                break;
-            }
-            else
-            {
-                change.setAtEnd(true);
+                String          prevColumn   = (columnIdx > 0 ? intermediateTable.getColumn(columnIdx - 1).getName() : null);
+                String          nextColumn   = (columnIdx < intermediateTable.getColumnCount()  ? intermediateTable.getColumn(columnIdx).getName() : null);
+                Column          clonedColumn = _cloneHelper.clone(targetColumn, false);
+                AddColumnChange change       = new AddColumnChange(intermediateTable.getName(), clonedColumn, prevColumn, nextColumn);
+
+                changes.add(change);
+                change.apply(intermediateModel, _caseSensitive);
             }
         }
+        return changes;
+    }
 
+    /**
+     * Creates change objects for columns that have a different in the given source and target table, and applies them
+     * to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param intermediateTable The table from the intermediate model corresponding to the source table
+     * @param targetModel       The target model
+     * @param targetTable       The target table
+     * @return The changes
+     */
+    protected List checkForChangedColumns(Database sourceModel,
+                                          Table    sourceTable,
+                                          Database intermediateModel,
+                                          Table    intermediateTable,
+                                          Database targetModel,
+                                          Table    targetTable)
+    {
+        List changes = new ArrayList();
+
+        for (int columnIdx = 0; columnIdx < targetTable.getColumnCount(); columnIdx++)
+        {
+            Column targetColumn = targetTable.getColumn(columnIdx);
+            Column sourceColumn = intermediateTable.findColumn(targetColumn.getName(), _caseSensitive);
+
+            if (sourceColumn != null)
+            {
+                ColumnDefinitionChange change = compareColumns(intermediateTable, sourceColumn, targetTable, targetColumn);
+
+                if (change != null)
+                {
+                    changes.add(change);
+                    change.apply(intermediateModel, _caseSensitive);
+                }
+            }
+        }
+        return changes;
+    }
+
+    /**
+     * Creates change objects for primary key differences (primary key added/removed/changed), and applies them to the given intermediate model.
+     * 
+     * @param sourceModel       The source model
+     * @param sourceTable       The source table
+     * @param intermediateModel The intermediate model to apply the changes to
+     * @param intermediateTable The table from the intermediate model corresponding to the source table
+     * @param targetModel       The target model
+     * @param targetTable       The target table
+     * @return The changes
+     */
+    protected List checkForPrimaryKeyChanges(Database sourceModel,
+                                             Table    sourceTable,
+                                             Database intermediateModel,
+                                             Table    intermediateTable,
+                                             Database targetModel,
+                                             Table    targetTable)
+    {
+        List     changes  = new ArrayList();
         Column[] sourcePK = sourceTable.getPrimaryKeyColumns();
+        Column[] curPK    = intermediateTable.getPrimaryKeyColumns();
         Column[] targetPK = targetTable.getPrimaryKeyColumns();
 
-        if ((sourcePK.length == 0) && (targetPK.length > 0))
+        if ((curPK.length == 0) && (targetPK.length > 0))
         {
             if (_log.isInfoEnabled())
             {
-                _log.info("A primary key needs to be added to the table " + sourceTable.getName());
+                _log.info("A primary key needs to be added to the table " + intermediateTable.getName());
             }
-            // we have to use the target table here because the primary key might
-            // reference a new column
-            changes.add(new AddPrimaryKeyChange(targetTable, targetPK));
+
+            AddPrimaryKeyChange change = new AddPrimaryKeyChange(intermediateTable.getName(), getIntermediateColumnNamesFor(targetPK, intermediateTable));
+
+            changes.add(change);
+            change.apply(intermediateModel, _caseSensitive);
         }
-        else if ((targetPK.length == 0) && (sourcePK.length > 0))
+        else if ((targetPK.length == 0) && (curPK.length > 0))
         {
             if (_log.isInfoEnabled())
             {
-                _log.info("The primary key needs to be removed from the table " + sourceTable.getName());
+                _log.info("The primary key needs to be removed from the table " + intermediateTable.getName());
             }
-            changes.add(new RemovePrimaryKeyChange(sourceTable, sourcePK));
+
+            RemovePrimaryKeyChange change = new RemovePrimaryKeyChange(intermediateTable.getName());
+
+            changes.add(change);
+            change.apply(intermediateModel, _caseSensitive);
         }
-        else if ((sourcePK.length > 0) && (targetPK.length > 0))
+        else
         {
             boolean changePK = false;
 
-            if (sourcePK.length != targetPK.length)
+            if ((curPK.length != targetPK.length) || (!_canDropPrimaryKeyColumns && sourcePK.length > targetPK.length))
             {
                 changePK = true;
             }
-            else
+            else if ((curPK.length > 0) && (targetPK.length > 0))
             {
-                for (int pkColumnIdx = 0; (pkColumnIdx < sourcePK.length) && !changePK; pkColumnIdx++)
+                for (int pkColumnIdx = 0; (pkColumnIdx < curPK.length) && !changePK; pkColumnIdx++)
                 {
-                    if ((_caseSensitive  && !sourcePK[pkColumnIdx].getName().equals(targetPK[pkColumnIdx].getName())) ||
-                        (!_caseSensitive && !sourcePK[pkColumnIdx].getName().equalsIgnoreCase(targetPK[pkColumnIdx].getName())))
+                    if (!StringUtils.equals(curPK[pkColumnIdx].getName(), targetPK[pkColumnIdx].getName(), _caseSensitive))
                     {
                         changePK = true;
                     }
@@ -295,101 +798,66 @@ public class ModelComparator
             {
                 if (_log.isInfoEnabled())
                 {
-                    _log.info("The primary key of table " + sourceTable.getName() + " needs to be changed");
+                    _log.info("The primary key of table " + intermediateTable.getName() + " needs to be changed");
                 }
-                changes.add(new PrimaryKeyChange(sourceTable, targetPK));
-            }
-        }
-        
-        HashMap columnPosChanges = new HashMap();
-
-        for (int columnIdx = 0; columnIdx < sourceTable.getColumnCount(); columnIdx++)
-        {
-            Column sourceColumn = sourceTable.getColumn(columnIdx);
-            Column targetColumn = targetTable.findColumn(sourceColumn.getName(), _caseSensitive);
-
-            if (targetColumn == null)
-            {
-                if (_log.isInfoEnabled())
+                if (_generatePrimaryKeyChanges)
                 {
-                    _log.info("Column " + sourceColumn.getName() + " needs to be removed from table " + sourceTable.getName());
+                    PrimaryKeyChange change = new PrimaryKeyChange(intermediateTable.getName(),
+                                                                   getIntermediateColumnNamesFor(targetPK, intermediateTable));
+    
+                    changes.add(change);
+                    change.apply(intermediateModel, changePK);
                 }
-                changes.add(new RemoveColumnChange(sourceTable, sourceColumn));
-            }
-            else
-            {
-                int targetColumnIdx = targetTable.getColumnIndex(targetColumn);
-
-                if (targetColumnIdx != columnIdx)
+                else
                 {
-                    columnPosChanges.put(sourceColumn, new Integer(targetColumnIdx));
+                    RemovePrimaryKeyChange removePKChange = new RemovePrimaryKeyChange(intermediateTable.getName());
+                    AddPrimaryKeyChange    addPKChange    = new AddPrimaryKeyChange(intermediateTable.getName(),
+                                                                                    getIntermediateColumnNamesFor(targetPK, intermediateTable));
+
+                    changes.add(removePKChange);
+                    changes.add(addPKChange);
+                    removePKChange.apply(intermediateModel, _caseSensitive);
+                    addPKChange.apply(intermediateModel, _caseSensitive);
                 }
             }
         }
-        if (!columnPosChanges.isEmpty())
-        {
-            changes.add(new ColumnOrderChange(sourceTable, columnPosChanges));
-        }
-
         return changes;
     }
 
     /**
-     * Compares the two columns and returns the changes necessary to create the second
-     * column from the first one.
+     * Compares the two columns and returns the change necessary to create the second
+     * column from the first one if they differe.
      *  
      * @param sourceTable  The source table which contains the source column
      * @param sourceColumn The source column
      * @param targetTable  The target table which contains the target column
      * @param targetColumn The target column
-     * @return The changes
+     * @return The change or <code>null</code> if the columns are the same
      */
-    public List compareColumns(Table  sourceTable,
-                               Column sourceColumn,
-                               Table  targetTable,
-                               Column targetColumn)
+    protected ColumnDefinitionChange compareColumns(Table  sourceTable,
+                                                    Column sourceColumn,
+                                                    Table  targetTable,
+                                                    Column targetColumn)
     {
-        ArrayList changes = new ArrayList();
-
-        if (_platformInfo.getTargetJdbcType(targetColumn.getTypeCode()) != sourceColumn.getTypeCode())
+        if (ColumnDefinitionChange.isChanged(getPlatformInfo(), sourceColumn, targetColumn))
         {
-            changes.add(new ColumnDataTypeChange(sourceTable, sourceColumn, targetColumn.getTypeCode()));
+            Column  newColumnDef   = _cloneHelper.clone(sourceColumn, true);
+            int     targetTypeCode = _platformInfo.getTargetJdbcType(targetColumn.getTypeCode());
+            boolean sizeMatters    = _platformInfo.hasSize(targetTypeCode);
+            boolean scaleMatters   = _platformInfo.hasPrecisionAndScale(targetTypeCode);
+
+            newColumnDef.setTypeCode(targetColumn.getTypeCode());
+            newColumnDef.setSize(sizeMatters || scaleMatters ? targetColumn.getSize() : null);
+            newColumnDef.setAutoIncrement(targetColumn.isAutoIncrement());
+            newColumnDef.setRequired(targetColumn.isRequired());
+            newColumnDef.setDescription(targetColumn.getDescription());
+            newColumnDef.setDefaultValue(targetColumn.getDefaultValue());
+            return new ColumnDefinitionChange(sourceTable.getName(), sourceColumn.getName(), newColumnDef);
         }
-
-        boolean sizeMatters  = _platformInfo.hasSize(sourceColumn.getTypeCode());
-        boolean scaleMatters = _platformInfo.hasPrecisionAndScale(sourceColumn.getTypeCode());
-
-        if (sizeMatters &&
-            !StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize()))
+        else
         {
-            changes.add(new ColumnSizeChange(sourceTable, sourceColumn, targetColumn.getSizeAsInt(), targetColumn.getScale()));
+            return null;
         }
-        else if (scaleMatters &&
-            (!StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize()) ||
-             (sourceColumn.getScale() != targetColumn.getScale())))
-        {
-            changes.add(new ColumnSizeChange(sourceTable, sourceColumn, targetColumn.getSizeAsInt(), targetColumn.getScale()));
-        }
-
-        Object sourceDefaultValue = sourceColumn.getParsedDefaultValue();
-        Object targetDefaultValue = targetColumn.getParsedDefaultValue();
-
-        if (((sourceDefaultValue == null) && (targetDefaultValue != null)) ||
-            ((sourceDefaultValue != null) && !sourceDefaultValue.equals(targetDefaultValue)))
-        {
-            changes.add(new ColumnDefaultValueChange(sourceTable, sourceColumn, targetColumn.getDefaultValue()));
-        }
-
-        if (sourceColumn.isRequired() != targetColumn.isRequired())
-        {
-            changes.add(new ColumnRequiredChange(sourceTable, sourceColumn));
-        }
-        if (sourceColumn.isAutoIncrement() != targetColumn.isAutoIncrement())
-        {
-            changes.add(new ColumnAutoIncrementChange(sourceTable, sourceColumn));
-        }
-
-        return changes;
     }
 
     /**
@@ -403,7 +871,7 @@ public class ModelComparator
      * @param fk    The original foreign key
      * @return The corresponding foreign key if found
      */
-    private ForeignKey findCorrespondingForeignKey(Table table, ForeignKey fk)
+    protected ForeignKey findCorrespondingForeignKey(Table table, ForeignKey fk)
     {
         for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
         {
@@ -428,7 +896,7 @@ public class ModelComparator
      * @param index The original index
      * @return The corresponding index if found
      */
-    private Index findCorrespondingIndex(Table table, Index index)
+    protected Index findCorrespondingIndex(Table table, Index index)
     {
         for (int indexIdx = 0; indexIdx < table.getIndexCount(); indexIdx++)
         {

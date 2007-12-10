@@ -19,15 +19,28 @@ package org.apache.ddlutils.platform.mckoi;
  * under the License.
  */
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
+import org.apache.ddlutils.alteration.RecreateTableChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -147,7 +160,93 @@ public class MckoiPlatform extends PlatformImplBase
         }
         else
         {
-            throw new UnsupportedOperationException("Unable to create a Derby database via the driver "+jdbcDriverClassName);
+            throw new UnsupportedOperationException("Unable to create a McKoi database via the driver "+jdbcDriverClassName);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            public boolean areSupported(Table intermediateTable, List changes)
+            {
+                // McKoi has this nice ALTER CREATE TABLE statement which saves us a lot of work
+                // Thus, we reject all table level changes and instead redefine the handling of the
+                // RecreateTableChange
+                return false;
+            }
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void processChange(Database currentModel, CreationParameters params, RecreateTableChange change) throws IOException
+    {
+        // McKoi has this nice ALTER CREATE TABLE statement which saves us a lot of work
+        // We only have to handle auto-increment changes manually
+        MckoiBuilder sqlBuilder   = (MckoiBuilder)getSqlBuilder();
+        Table        changedTable = findChangedTable(currentModel, change);
+
+        for (Iterator it = change.getOriginalChanges().iterator(); it.hasNext();)
+        {
+            TableChange tableChange = (TableChange)it.next();
+
+            if (tableChange instanceof ColumnDefinitionChange)
+            {
+                ColumnDefinitionChange colChange  = (ColumnDefinitionChange)tableChange;
+                Column                 origColumn = changedTable.findColumn(colChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+                Column                 newColumn  = colChange.getNewColumn();
+
+                if (!origColumn.isAutoIncrement() && newColumn.isAutoIncrement())
+                {
+                    sqlBuilder.createAutoIncrementSequence(changedTable, origColumn);
+                }
+            }
+            else if (tableChange instanceof AddColumnChange)
+            {
+                AddColumnChange addColumnChange = (AddColumnChange)tableChange;
+
+                if (addColumnChange.getNewColumn().isAutoIncrement())
+                {
+                    sqlBuilder.createAutoIncrementSequence(changedTable, addColumnChange.getNewColumn());
+                }
+            }
+        }
+
+        Map parameters = (params == null ? null : params.getParametersFor(changedTable));
+        
+        sqlBuilder.writeRecreateTableStmt(currentModel, change.getTargetTable(), parameters);
+
+        // we have to defer removal of the sequences until they are no longer used
+        for (Iterator it = change.getOriginalChanges().iterator(); it.hasNext();)
+        {
+            TableChange tableChange = (TableChange)it.next();
+    
+            if (tableChange instanceof ColumnDefinitionChange)
+            {
+                ColumnDefinitionChange colChange  = (ColumnDefinitionChange)tableChange;
+                Column                 origColumn = changedTable.findColumn(colChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+                Column                 newColumn  = colChange.getNewColumn();
+
+                if (origColumn.isAutoIncrement() && !newColumn.isAutoIncrement())
+                {
+                    sqlBuilder.dropAutoIncrementSequence(changedTable, origColumn);
+                }
+            }
+            else if (tableChange instanceof RemoveColumnChange)
+            {
+                RemoveColumnChange removeColumnChange = (RemoveColumnChange)tableChange;
+                Column             removedColumn      = changedTable.findColumn(removeColumnChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+                if (removedColumn.isAutoIncrement())
+                {
+                    sqlBuilder.dropAutoIncrementSequence(changedTable, removedColumn);
+                }
+            }
         }
     }
 }

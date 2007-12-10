@@ -38,7 +38,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * 
  * @version $Revision$
  */
-public class Table implements Serializable, Cloneable
+public class Table implements Serializable
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -5541154961302342608L;
@@ -267,6 +267,16 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
+     * Removes all columns of this table. Note that this does not change
+     * indexes or foreign keys, so it might leave the table object in
+     * an illegal state.
+     */
+    public void removeAllColumns()
+    {
+        _columns.clear();
+    }
+
+    /**
      * Removes the indicated column.
      * 
      * @param idx The index of the column to remove
@@ -345,6 +355,14 @@ public class Table implements Serializable, Cloneable
         {
             addForeignKey((ForeignKey)it.next());
         }
+    }
+
+    /**
+     * Removes all foreign keys.
+     */
+    public void removeAllForeignKeys()
+    {
+        _foreignKeys.clear();
     }
 
     /**
@@ -708,6 +726,24 @@ public class Table implements Serializable, Cloneable
     }
 
     /**
+     * Returns the names of the primary key columns of this table.
+     * 
+     * @return The primary key column names
+     */
+    public String[] getPrimaryKeyColumnNames()
+    {
+        Column[] pkColumns = getPrimaryKeyColumns();
+        String[] names     = new String[pkColumns.length];
+
+        for (int colIdx = 0; colIdx < pkColumns.length; colIdx++)
+        {
+            names[colIdx] = pkColumns[colIdx].getName();
+        }
+
+        return names;
+    }
+
+    /**
      * Returns the auto increment columns in this table. If no incrementcolumns
      * are found, it will return an empty array.
      * 
@@ -752,24 +788,6 @@ public class Table implements Serializable, Cloneable
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    public Object clone() throws CloneNotSupportedException
-    {
-        Table result = (Table)super.clone();
-
-        result._catalog     = _catalog;
-        result._schema      = _schema;
-        result._name        = _name;
-        result._type        = _type;
-        result._columns     = (ArrayList)_columns.clone();
-        result._foreignKeys = (ArrayList)_foreignKeys.clone();
-        result._indices     = (ArrayList)_indices.clone();
-
-        return result;
-    }
-
     /**
      * {@inheritDoc}
      */

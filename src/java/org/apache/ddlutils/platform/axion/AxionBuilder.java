@@ -66,7 +66,7 @@ public class AxionBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    public void dropIndex(Table table, Index index) throws IOException
     {
         print("DROP INDEX ");
         printIdentifier(getIndexName(index));

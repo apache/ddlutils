@@ -30,13 +30,6 @@ import org.apache.ddlutils.model.ForeignKey;
 public interface ForeignKeyChange extends TableChange
 {
     /**
-     * Returns the affected foreign key from the original model.
-     * 
-     * @return The affected foreign key
-     */
-    public ForeignKey getChangedForeignKey();
-
-    /**
      * Finds the foreign key object corresponding to the changed foreign key in the given database model.
      * 
      * @param model         The database model

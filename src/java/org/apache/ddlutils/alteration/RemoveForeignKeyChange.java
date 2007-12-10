@@ -21,7 +21,6 @@ package org.apache.ddlutils.alteration;
 
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
-import org.apache.ddlutils.model.Table;
 
 /**
  * Represents the removal of a foreign key from a table. Note that for
@@ -35,12 +34,12 @@ public class RemoveForeignKeyChange extends ForeignKeyChangeImplBase
     /**
      * Creates a new change object.
      * 
-     * @param table      The table to remove the foreign key from
+     * @param tableName  The name of the table to remove the foreign key from
      * @param foreignKey The foreign key
      */
-    public RemoveForeignKeyChange(Table table, ForeignKey foreignKey)
+    public RemoveForeignKeyChange(String tableName, ForeignKey foreignKey)
     {
-        super(table, foreignKey);
+        super(tableName, foreignKey);
     }
 
     /**

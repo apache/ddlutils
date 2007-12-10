@@ -19,12 +19,29 @@ package org.apache.ddlutils.platform.mssql;
  * under the License.
  */
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
+import org.apache.ddlutils.alteration.ModelComparator;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -55,6 +72,8 @@ public class MSSqlPlatform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(128);
+        info.setPrimaryKeyColumnAutomaticallyRequired(true);
+        info.setIdentityColumnAutomaticallyRequired(true);
 
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE",         Types.LONGVARBINARY);
         // BIGINT will be mapped back to BIGINT by the model reader 
@@ -148,5 +167,148 @@ public class MSSqlPlatform extends PlatformImplBase
     protected void afterUpdate(Connection connection, Table table) throws SQLException
     {
         afterInsert(connection, table);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected ModelComparator getModelComparator()
+    {
+        return new MSSqlModelComparator(getPlatformInfo(), getTableDefinitionChangesPredicate(), isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                if ((change instanceof RemoveColumnChange) ||
+                    (change instanceof AddPrimaryKeyChange) ||
+                    (change instanceof PrimaryKeyChange) ||
+                    (change instanceof RemovePrimaryKeyChange))
+                {
+                    return true;
+                }
+                else if (change instanceof AddColumnChange)
+                {
+                    AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                    // Sql Server can only add not insert columns, and the cannot be requird unless also
+                    // auto increment or with a DEFAULT value
+                    return (addColumnChange.getNextColumn() == null) &&
+                           (!addColumnChange.getNewColumn().isRequired() ||
+                            addColumnChange.getNewColumn().isAutoIncrement() ||
+                            !StringUtils.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
+                }
+                else if (change instanceof ColumnDefinitionChange)
+                {
+                    ColumnDefinitionChange colDefChange = (ColumnDefinitionChange)change;
+                    Column                 curColumn    = intermediateTable.findColumn(colDefChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+                    // Sql Server has no way of adding or removing an IDENTITY constraint
+                    return curColumn.isAutoIncrement() == colDefChange.getNewColumn().isAutoIncrement();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected Database processChanges(Database model, Collection changes, CreationParameters params) throws IOException, DdlUtilsException
+    {
+        if (!changes.isEmpty())
+        {
+            ((MSSqlBuilder)getSqlBuilder()).turnOnQuotation();
+        }
+        return super.processChanges(model, changes, params);
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveColumnChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column removedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((MSSqlBuilder)getSqlBuilder()).dropColumn(changedTable, removedColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              RemovePrimaryKeyChange change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        ((MSSqlBuilder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the change of the column of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              ColumnDefinitionChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column changedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((MSSqlBuilder)getSqlBuilder()).recreateColumn(changedTable, changedColumn, change.getNewColumn());
+    }
+    
+    /**
+     * Processes the change of the primary key of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              PrimaryKeyChange   change) throws IOException
+    {
+        Table    changedTable     = findChangedTable(currentModel, change);
+        String[] newPKColumnNames = change.getNewPrimaryKeyColumns();
+        Column[] newPKColumns     = new Column[newPKColumnNames.length];
+
+        for (int colIdx = 0; colIdx < newPKColumnNames.length; colIdx++)
+        {
+            newPKColumns[colIdx] = changedTable.findColumn(newPKColumnNames[colIdx], isDelimitedIdentifierModeOn());
+        }
+        ((MSSqlBuilder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        getSqlBuilder().createPrimaryKey(changedTable, newPKColumns);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
     }
 }

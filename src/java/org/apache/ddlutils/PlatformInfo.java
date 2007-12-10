@@ -69,7 +69,13 @@ public class PlatformInfo
     private boolean _defaultValueUsedForIdentitySpec = false;
 
     // properties influencing the reading of models from live databases
-    
+
+    /** Whether primary key columns are automatically required. */
+    private boolean _primaryKeyColumnAutomaticallyRequired = false;
+
+    /** Whether identity columns are automatically required. */
+    private boolean _identityColumnAutomaticallyRequired = false;
+
     /** Whether system indices (database-generated indices for primary and foreign keys) are returned when
         reading a model from a database. */
     private boolean _systemIndicesReturned = true;
@@ -373,6 +379,48 @@ public class PlatformInfo
     }
 
     // properties influencing the reading of models from live databases
+
+    /**
+     * Determines whether the database will make a primary key column automatically required.
+     *  
+     * @return <code>true</code> if primary key columns are automatically required
+     */
+    public boolean isPrimaryKeyColumnAutomaticallyRequired()
+    {
+        return _primaryKeyColumnAutomaticallyRequired;
+    }
+
+    /**
+     * Specifies whether the database will make a primary key column automatically required.
+     * 
+     * @param primaryKeyAutomaticallyRequired <code>true</code> if primary key columns are
+     *                                        automatically required
+     */
+    public void setPrimaryKeyColumnAutomaticallyRequired(boolean primaryKeyAutomaticallyRequired)
+    {
+        _primaryKeyColumnAutomaticallyRequired = primaryKeyAutomaticallyRequired;
+    }
+
+    /**
+     * Determines whether the database will make an idenity column automatically required.
+     *  
+     * @return <code>true</code> if identity columns are automatically required
+     */
+    public boolean isIdentityColumnAutomaticallyRequired()
+    {
+        return _identityColumnAutomaticallyRequired;
+    }
+
+    /**
+     * Specifies whether the database will make a primary key column automatically required.
+     * 
+     * @param identityAutomaticallyRequired <code>true</code> if identity columns are
+     *                                      automatically required
+     */
+    public void setIdentityColumnAutomaticallyRequired(boolean identityAutomaticallyRequired)
+    {
+        _identityColumnAutomaticallyRequired = identityAutomaticallyRequired;
+    }
 
     /**
      * Determines whether database-generated indices for primary and foreign keys are

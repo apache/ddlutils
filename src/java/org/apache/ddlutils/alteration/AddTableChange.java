@@ -19,7 +19,7 @@ package org.apache.ddlutils.alteration;
  * under the License.
  */
 
-import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
@@ -37,7 +37,8 @@ public class AddTableChange implements ModelChange
     /**
      * Creates a new change object.
      * 
-     * @param newTable The new table
+     * @param newTable The new table; note that the change object will keep a reference to this table
+     *                 which means that the table should not be changed after creating this change object
      */
     public AddTableChange(Table newTable)
     {
@@ -61,15 +62,8 @@ public class AddTableChange implements ModelChange
      */
     public void apply(Database database, boolean caseSensitive)
     {
-        try
-        {
-        	// TODO: we shouldn't have to clone here
-            database.addTable((Table)_newTable.clone());
-        }
-        catch (CloneNotSupportedException ex)
-        {
-            throw new DdlUtilsException(ex);
-        }
-    }
+        Table table = new CloneHelper().clone(_newTable, true, false, database, caseSensitive);
 
+        database.addTable(table);
+    }
 }

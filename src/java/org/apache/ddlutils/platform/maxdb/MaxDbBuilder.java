@@ -48,7 +48,7 @@ public class MaxDbBuilder extends SapDbBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeExternalPrimaryKeysCreateStmt(Table table, Column[] primaryKeyColumns) throws IOException
+    public void createPrimaryKey(Table table, Column[] primaryKeyColumns) throws IOException
     {
         if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
         {
@@ -66,24 +66,24 @@ public class MaxDbBuilder extends SapDbBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeExternalForeignKeyCreateStmt(Database database, Table table, ForeignKey key) throws IOException
+    public void createForeignKey(Database database, Table table, ForeignKey foreignKey) throws IOException
     {
-        if (key.getForeignTableName() == null)
+        if (foreignKey.getForeignTableName() == null)
         {
-            _log.warn("Foreign key table is null for key " + key);
+            _log.warn("Foreign key table is null for key " + foreignKey);
         }
         else
         {
             writeTableAlterStmt(table);
 
             print("ADD CONSTRAINT ");
-            printIdentifier(getForeignKeyName(table, key));
+            printIdentifier(getForeignKeyName(table, foreignKey));
             print(" FOREIGN KEY (");
-            writeLocalReferences(key);
+            writeLocalReferences(foreignKey);
             print(") REFERENCES ");
-            printIdentifier(getTableName(database.findTable(key.getForeignTableName())));
+            printIdentifier(getTableName(database.findTable(foreignKey.getForeignTableName())));
             print(" (");
-            writeForeignReferences(key);
+            writeForeignReferences(foreignKey);
             print(")");
             printEndOfStatement();
         }
@@ -92,7 +92,7 @@ public class MaxDbBuilder extends SapDbBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
+    public void dropForeignKey(Table table, ForeignKey foreignKey) throws IOException
     {
         writeTableAlterStmt(table);
         print("DROP CONSTRAINT ");

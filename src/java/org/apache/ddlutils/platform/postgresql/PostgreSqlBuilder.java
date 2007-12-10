@@ -20,14 +20,9 @@ package org.apache.ddlutils.platform.postgresql;
  */
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.RemoveColumnChange;
-import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
@@ -81,7 +76,7 @@ public class PostgreSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    public void dropIndex(Table table, Index index) throws IOException
     {
         print("DROP INDEX ");
         printIdentifier(getIndexName(index));
@@ -173,89 +168,22 @@ public class PostgreSqlBuilder extends SqlBuilder
     }
 
     /**
-     * {@inheritDoc}
-     */
-    protected void processTableStructureChanges(Database currentModel,
-                                                Database desiredModel,
-                                                Table    sourceTable,
-                                                Table    targetTable,
-                                                Map      parameters,
-                                                List     changes) throws IOException
-    {
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof AddColumnChange)
-            {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                // We can only use PostgreSQL-specific SQL if
-                // * the column is not set to NOT NULL (the constraint would be applied immediately
-                //   which will not work if there is already data in the table)
-                // * the column has no default value (it would be applied after the change which
-                //   means that PostgreSQL would behave differently from other databases where the
-                //   default is applied to every column)
-                // * the column is added at the end of the table (PostgreSQL does not support
-                //   insertion of a column)
-                if (!addColumnChange.getNewColumn().isRequired() &&
-                    (addColumnChange.getNewColumn().getDefaultValue() == null) &&
-                    (addColumnChange.getNextColumn() == null))
-                {
-                    processChange(currentModel, desiredModel, addColumnChange);
-                    changeIt.remove();
-                }
-            }
-            else if (change instanceof RemoveColumnChange)
-            {
-                processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                changeIt.remove();
-            }
-        }
-        super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
-    }
-
-    /**
-     * Processes the addition of a column to a table.
+     * Writes the SQL to drop a column.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table  The table
+     * @param column The column to drop
      */
-    protected void processChange(Database        currentModel,
-                                 Database        desiredModel,
-                                 AddColumnChange change) throws IOException
+    public void dropColumn(Table table, Column column) throws IOException
     {
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
-        printIndent();
-        print("ADD COLUMN ");
-        writeColumn(change.getChangedTable(), change.getNewColumn());
-        printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
-    }
-
-    /**
-     * Processes the removal of a column from a table.
-     * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
-     */
-    protected void processChange(Database           currentModel,
-                                 Database           desiredModel,
-                                 RemoveColumnChange change) throws IOException
-    {
-        print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getChangedColumn()));
+        printIdentifier(getColumnName(column));
         printEndOfStatement();
-        if (change.getChangedColumn().isAutoIncrement())
+        if (column.isAutoIncrement())
         {
-            dropAutoIncrementSequence(change.getChangedTable(), change.getChangedColumn());
+            dropAutoIncrementSequence(table, column);
         }
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

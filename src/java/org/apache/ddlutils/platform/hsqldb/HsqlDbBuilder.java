@@ -20,17 +20,9 @@ package org.apache.ddlutils.platform.hsqldb;
  */
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.RemoveColumnChange;
-import org.apache.ddlutils.alteration.TableChange;
-import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -72,108 +64,41 @@ public class HsqlDbBuilder extends SqlBuilder
     }
 
     /**
-     * {@inheritDoc}
-     */
-    protected void processTableStructureChanges(Database currentModel,
-                                                Database desiredModel,
-                                                Table    sourceTable,
-                                                Table    targetTable,
-                                                Map      parameters,
-                                                List     changes) throws IOException
-    {
-        // HsqlDb can only drop columns that are not part of a primary key
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if ((change instanceof RemoveColumnChange) && 
-                ((RemoveColumnChange)change).getChangedColumn().isPrimaryKey())
-            {
-                return;
-            }
-        }
-
-        // in order to utilize the ALTER TABLE ADD COLUMN BEFORE statement
-        // we have to apply the add column changes in the correct order
-        // thus we first gather all add column changes and then execute them
-        // Since we get them in target table column order, we can simply
-        // iterate backwards
-        ArrayList addColumnChanges = new ArrayList();
-
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof AddColumnChange)
-            {
-                addColumnChanges.add(change);
-                changeIt.remove();
-            }
-        }
-        for (ListIterator changeIt = addColumnChanges.listIterator(addColumnChanges.size()); changeIt.hasPrevious();)
-        {
-            AddColumnChange addColumnChange = (AddColumnChange)changeIt.previous();
-
-            processChange(currentModel, desiredModel, addColumnChange);
-            changeIt.remove();
-        }
-
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof RemoveColumnChange) 
-            {
-                RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
-
-                processChange(currentModel, desiredModel, removeColumnChange);
-                changeIt.remove();
-            }
-        }
-    }
-
-    /**
-     * Processes the addition of a column to a table.
+     * Writes the SQL to add/insert a column.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table      The table
+     * @param newColumn  The new column
+     * @param nextColumn The column before which the new column shall be added; <code>null</code>
+     *                   if the new column is to be added instead of inserted
      */
-    protected void processChange(Database        currentModel,
-                                 Database        desiredModel,
-                                 AddColumnChange change) throws IOException
+    public void insertColumn(Table table, Column newColumn, Column nextColumn) throws IOException
     {
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("ADD COLUMN ");
-        writeColumn(change.getChangedTable(), change.getNewColumn());
-        if (change.getNextColumn() != null)
+        writeColumn(table, newColumn);
+        if (nextColumn != null)
         {
             print(" BEFORE ");
-            printIdentifier(getColumnName(change.getNextColumn()));
+            printIdentifier(getColumnName(nextColumn));
         }
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
-     * Processes the removal of a column from a table.
+     * Writes the SQL to drop a column.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table  The table
+     * @param column The column to drop
      */
-    protected void processChange(Database           currentModel,
-                                 Database           desiredModel,
-                                 RemoveColumnChange change) throws IOException
+    public void dropColumn(Table table, Column column) throws IOException
     {
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getChangedColumn()));
+        printIdentifier(getColumnName(column));
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }

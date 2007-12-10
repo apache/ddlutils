@@ -19,9 +19,23 @@ package org.apache.ddlutils.platform.oracle;
  * under the License.
  */
 
+import java.io.IOException;
 import java.sql.Types;
+import java.util.Map;
 
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -56,6 +70,7 @@ public class Oracle8Platform extends PlatformImplBase
 
         info.setMaxIdentifierLength(30);
         info.setIdentityStatusReadingSupported(false);
+        info.setPrimaryKeyColumnAutomaticallyRequired(true);
 
         // Note that the back-mappings are partially done by the model reader, not the driver
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",             Types.BLOB);
@@ -100,5 +115,109 @@ public class Oracle8Platform extends PlatformImplBase
     public String getName()
     {
         return DATABASENAME;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        // While Oracle has an ALTER TABLE MODIFY statement, it is somewhat limited
+        // esp. if there is data in the table, so we don't use it
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                if ((change instanceof AddPrimaryKeyChange) ||
+                    (change instanceof RemovePrimaryKeyChange))
+                {
+                    return true;
+                }
+                else if (change instanceof RemoveColumnChange)
+                {
+                    // TODO: for now we trigger recreating the table, but ideally we should simply add the necessary pk changes
+                    RemoveColumnChange removeColumnChange = (RemoveColumnChange)change;
+                    Column             column             = intermediateTable.findColumn(removeColumnChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+                    return !column.isPrimaryKey();
+                }
+                else if (change instanceof AddColumnChange)
+                {
+                    AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                    // Oracle can only add not insert columns
+                    // Also, we cannot add NOT NULL columns unless they have a default value
+                    return addColumnChange.isAtEnd() &&
+                           (!addColumnChange.getNewColumn().isRequired() || (addColumnChange.getNewColumn().getDefaultValue() != null));
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        };
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveColumnChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column removedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((Oracle8Builder)getSqlBuilder()).dropColumn(changedTable, removedColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              RemovePrimaryKeyChange change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        ((Oracle8Builder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the change of the primary key of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              PrimaryKeyChange   change) throws IOException
+    {
+        Table    changedTable     = findChangedTable(currentModel, change);
+        String[] newPKColumnNames = change.getNewPrimaryKeyColumns();
+        Column[] newPKColumns     = new Column[newPKColumnNames.length];
+
+        for (int colIdx = 0; colIdx < newPKColumnNames.length; colIdx++)
+        {
+            newPKColumns[colIdx] = changedTable.findColumn(newPKColumnNames[colIdx], isDelimitedIdentifierModeOn());
+        }
+        
+        ((Oracle8Builder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        getSqlBuilder().createPrimaryKey(changedTable, newPKColumns);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
     }
 }

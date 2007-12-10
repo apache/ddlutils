@@ -25,6 +25,7 @@ import org.apache.ddlutils.model.Table;
 /**
  * Represents the removal of a table from a model.
  * 
+ * TODO: this should be a model change
  * @version $Revision: $
  */
 public class RemoveTableChange extends TableChangeImplBase
@@ -32,11 +33,11 @@ public class RemoveTableChange extends TableChangeImplBase
     /**
      * Creates a new change object.
      * 
-     * @param table The table
+     * @param tableName The name of the table to be removed
      */
-    public RemoveTableChange(Table table)
+    public RemoveTableChange(String tableName)
     {
-        super(table);
+        super(tableName);
     }
 
     /**

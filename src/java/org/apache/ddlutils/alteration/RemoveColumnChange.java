@@ -19,9 +19,7 @@ package org.apache.ddlutils.alteration;
  * under the License.
  */
 
-import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.model.Table;
 
 /**
  * Represents the removal of a column from a table.
@@ -33,12 +31,12 @@ public class RemoveColumnChange extends ColumnChangeImplBase
     /**
      * Creates a new change object.
      * 
-     * @param table  The table to remove the column from
-     * @param column The column
+     * @param tableName  The name of the table to remove the column from
+     * @param columnName The column's name
      */
-    public RemoveColumnChange(Table table, Column column)
+    public RemoveColumnChange(String tableName, String columnName)
     {
-        super(table, column);
+        super(tableName, columnName);
     }
 
     /**

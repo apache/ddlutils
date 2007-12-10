@@ -30,13 +30,6 @@ import org.apache.ddlutils.model.Index;
 public interface IndexChange extends TableChange
 {
     /**
-     * Returns the affected index from the original model.
-     * 
-     * @return The affected index
-     */
-    public Index getChangedIndex();
-
-    /**
      * Finds the index object corresponding to the changed index in the given database model.
      * 
      * @param model         The database model

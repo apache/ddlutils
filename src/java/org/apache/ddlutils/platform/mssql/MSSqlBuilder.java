@@ -23,33 +23,15 @@ import java.io.IOException;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.AddForeignKeyChange;
-import org.apache.ddlutils.alteration.AddIndexChange;
-import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
-import org.apache.ddlutils.alteration.ColumnAutoIncrementChange;
-import org.apache.ddlutils.alteration.ColumnChange;
-import org.apache.ddlutils.alteration.ColumnDataTypeChange;
-import org.apache.ddlutils.alteration.ColumnSizeChange;
-import org.apache.ddlutils.alteration.PrimaryKeyChange;
-import org.apache.ddlutils.alteration.RemoveColumnChange;
-import org.apache.ddlutils.alteration.RemoveForeignKeyChange;
-import org.apache.ddlutils.alteration.RemoveIndexChange;
-import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
-import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.SqlBuilder;
 import org.apache.ddlutils.util.Jdbc3Utils;
 
@@ -81,7 +63,7 @@ public class MSSqlBuilder extends SqlBuilder
      */
     public void createTable(Database database, Table table, Map parameters) throws IOException
     {
-        writeQuotationOnStatement();
+        turnOnQuotation();
         super.createTable(database, table, parameters);
     }
 
@@ -94,7 +76,7 @@ public class MSSqlBuilder extends SqlBuilder
         String tableNameVar      = "tn" + createUniqueIdentifier();
         String constraintNameVar = "cn" + createUniqueIdentifier();
 
-        writeQuotationOnStatement();
+        turnOnQuotation();
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = ");
         printAlwaysSingleQuotedIdentifier(tableName);
         println(")");
@@ -123,10 +105,10 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void dropExternalForeignKeys(Table table) throws IOException
+    public void dropForeignKeys(Table table) throws IOException
     {
-        writeQuotationOnStatement();
-        super.dropExternalForeignKeys(table);
+        turnOnQuotation();
+        super.dropForeignKeys(table);
     }
 
     /**
@@ -227,7 +209,7 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    public void dropIndex(Table table, Index index) throws IOException
     {
         print("DROP INDEX ");
         printIdentifier(getTableName(table));
@@ -239,7 +221,7 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
+    public void dropForeignKey(Table table, ForeignKey foreignKey) throws IOException
     {
         String constraintName = getForeignKeyName(table, foreignKey);
 
@@ -272,9 +254,9 @@ public class MSSqlBuilder extends SqlBuilder
     }
 
     /**
-     * Writes the statement that turns on the ability to write delimited identifiers.
+     * If quotation mode is on, then this writes the statement that turns on the ability to write delimited identifiers.
      */
-    private void writeQuotationOnStatement() throws IOException
+    protected void turnOnQuotation() throws IOException
     {
         print(getQuotationOnStatement());
     }
@@ -365,7 +347,7 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeCopyDataStatement(Table sourceTable, Table targetTable) throws IOException
+    protected void copyData(Table sourceTable, Table targetTable) throws IOException
     {
         // Sql Server per default does not allow us to insert values explicitly into
         // identity columns. However, we can change this behavior
@@ -378,7 +360,7 @@ public class MSSqlBuilder extends SqlBuilder
             print(" ON");
             printEndOfStatement();
         }
-        super.writeCopyDataStatement(sourceTable, targetTable);
+        super.copyData(sourceTable, targetTable);
         // We have to turn it off ASAP because it can be on only for one table per session
         if (hasIdentityColumns)
         {
@@ -392,259 +374,110 @@ public class MSSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void processChanges(Database currentModel, Database desiredModel, List changes, CreationParameters params) throws IOException
-    {
-        if (!changes.isEmpty())
-        {
-            writeQuotationOnStatement();
-        }
-        // For column data type and size changes, we need to drop and then re-create indexes
-        // and foreign keys using the column, as well as any primary keys containg
-        // these columns
-        // However, if the index/foreign key/primary key is already slated for removal or
-        // change, then we don't want to generate change duplication
-        HashSet removedIndexes     = new HashSet();
-        HashSet removedForeignKeys = new HashSet();
-        HashSet removedPKs         = new HashSet();
-
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            Object change = changeIt.next();
-
-            if (change instanceof RemoveIndexChange)
-            {
-                removedIndexes.add(((RemoveIndexChange)change).getChangedIndex());
-            }
-            else if (change instanceof RemoveForeignKeyChange)
-            {
-                removedForeignKeys.add(((RemoveForeignKeyChange)change).getChangedForeignKey());
-            }
-            else if (change instanceof RemovePrimaryKeyChange)
-            {
-                removedPKs.add(((RemovePrimaryKeyChange)change).getChangedTable());
-            }
-        }
-
-        ArrayList additionalChanges = new ArrayList();
-
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            Object change = changeIt.next();
-
-            if ((change instanceof ColumnDataTypeChange) ||
-                (change instanceof ColumnSizeChange))
-            {
-                Column column = ((ColumnChange)change).getChangedColumn();
-                Table  table  = ((ColumnChange)change).getChangedTable();
-
-                if (column.isPrimaryKey() && !removedPKs.contains(table))
-                {
-                    Column[] pk = table.getPrimaryKeyColumns();
-
-                    additionalChanges.add(new RemovePrimaryKeyChange(table, pk));
-                    additionalChanges.add(new AddPrimaryKeyChange(table, pk));
-                    removedPKs.add(table);
-                }
-                for (int idx = 0; idx < table.getIndexCount(); idx++)
-                {
-                    Index index = table.getIndex(idx);
-
-                    if (index.hasColumn(column) && !removedIndexes.contains(index))
-                    {
-                        additionalChanges.add(new RemoveIndexChange(table, index));
-                        additionalChanges.add(new AddIndexChange(table, index));
-                        removedIndexes.add(index);
-                    }
-                }
-                for (int tableIdx = 0; tableIdx < currentModel.getTableCount(); tableIdx++)
-                {
-                    Table curTable = currentModel.getTable(tableIdx);
-
-                    for (int fkIdx = 0; fkIdx < curTable.getForeignKeyCount(); fkIdx++)
-                    {
-                        ForeignKey curFk = curTable.getForeignKey(fkIdx);
-
-                        if ((curFk.hasLocalColumn(column) || curFk.hasForeignColumn(column)) &&
-                            !removedForeignKeys.contains(curFk))
-                        {
-                            additionalChanges.add(new RemoveForeignKeyChange(curTable, curFk));
-                            additionalChanges.add(new AddForeignKeyChange(curTable, curFk));
-                            removedForeignKeys.add(curFk);
-                        }
-                    }
-                }
-            }
-        }
-        changes.addAll(additionalChanges);
-        super.processChanges(currentModel, desiredModel, changes, params);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected void processTableStructureChanges(Database currentModel,
-                                                Database desiredModel,
-                                                Table    sourceTable,
-                                                Table    targetTable,
-                                                Map      parameters,
-                                                List     changes) throws IOException
-    {
-        // First we drop primary keys as necessary
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof RemovePrimaryKeyChange)
-            {
-                processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                changeIt.remove();
-            }
-            else if (change instanceof PrimaryKeyChange)
-            {
-                PrimaryKeyChange       pkChange       = (PrimaryKeyChange)change;
-                RemovePrimaryKeyChange removePkChange = new RemovePrimaryKeyChange(pkChange.getChangedTable(),
-                                                                                   pkChange.getOldPrimaryKeyColumns());
-
-                processChange(currentModel, desiredModel, removePkChange);
-            }
-        }
-
-        ArrayList columnChanges = new ArrayList();
-
-        // Next we add/remove columns
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof AddColumnChange)
-            {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                // Sql Server can only add not insert columns
-                if (addColumnChange.isAtEnd())
-                {
-                    processChange(currentModel, desiredModel, addColumnChange);
-                    changeIt.remove();
-                }
-            }
-            else if (change instanceof RemoveColumnChange)
-            {
-                processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                changeIt.remove();
-            }
-            else if (change instanceof ColumnAutoIncrementChange)
-            {
-                // Sql Server has no way of adding or removing an IDENTITY constraint
-                // Thus we have to rebuild the table anyway and can ignore all the other 
-                // column changes
-                columnChanges = null;
-            }
-            else if ((change instanceof ColumnChange) && (columnChanges != null))
-            {
-                // we gather all changed columns because we can use the ALTER TABLE ALTER COLUMN
-                // statement for them
-                columnChanges.add(change);
-            }
-        }
-        if (columnChanges != null)
-        {
-            HashSet processedColumns = new HashSet();
-
-            for (Iterator changeIt = columnChanges.iterator(); changeIt.hasNext();)
-            {
-                ColumnChange change       = (ColumnChange)changeIt.next();
-                Column       sourceColumn = change.getChangedColumn();
-                Column       targetColumn = targetTable.findColumn(sourceColumn.getName(), getPlatform().isDelimitedIdentifierModeOn());
-
-                if (!processedColumns.contains(targetColumn))
-                {
-                    processColumnChange(sourceTable,
-                                        targetTable,
-                                        sourceColumn,
-                                        targetColumn,
-                                        (change instanceof ColumnDataTypeChange) || (change instanceof ColumnSizeChange));
-                    processedColumns.add(targetColumn);
-                }
-                changes.remove(change);
-                change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
-            }
-        }
-        // Finally we add primary keys
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof AddPrimaryKeyChange)
-            {
-                processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                changeIt.remove();
-            }
-            else if (change instanceof PrimaryKeyChange)
-            {
-                PrimaryKeyChange    pkChange    = (PrimaryKeyChange)change;
-                AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange(pkChange.getChangedTable(),
-                                                                          pkChange.getNewPrimaryKeyColumns());
-
-                processChange(currentModel, desiredModel, addPkChange);
-                changeIt.remove();
-            }
-        }
-    }
-
-    /**
-     * Processes the addition of a column to a table.
-     * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
-     */
-    protected void processChange(Database        currentModel,
-                                 Database        desiredModel,
-                                 AddColumnChange change) throws IOException
+    public void addColumn(Table table, Column newColumn) throws IOException
     {
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("ADD ");
-        writeColumn(change.getChangedTable(), change.getNewColumn());
+        writeColumn(table, newColumn);
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
-     * Processes the removal of a column from a table.
+     * Generates the SQL to drop a column from a table.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table  The table where to drop the column from
+     * @param column The column to drop
      */
-    protected void processChange(Database           currentModel,
-                                 Database           desiredModel,
-                                 RemoveColumnChange change) throws IOException
+    public void dropColumn(Table table, Column column) throws IOException
     {
+        if (!StringUtils.isEmpty(column.getDefaultValue()))
+        {
+            writeDropConstraintStatement(table, column, "D");
+        }
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("DROP COLUMN ");
-        printIdentifier(getColumnName(change.getChangedColumn()));
+        printIdentifier(getColumnName(column));
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
-     * Processes the removal of a primary key from a table.
+     * Writes the SQL for dropping the primary key of the given table.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table The table
      */
-    protected void processChange(Database               currentModel,
-                                 Database               desiredModel,
-                                 RemovePrimaryKeyChange change) throws IOException
+    public void dropPrimaryKey(Table table) throws IOException
     {
-        // TODO: this would be easier when named primary keys are supported
-        //       because then we can use ALTER TABLE DROP
-        String tableName         = getTableName(change.getChangedTable());
+        // this would be easier if named primary keys are supported
+        // because for named pks we could use ALTER TABLE DROP
+        writeDropConstraintStatement(table, null, "PK");
+    }
+
+    /**
+     * Writes the SQL to recreate a column, e.g. using a different type or similar.
+     * 
+     * @param table     The table
+     * @param curColumn The current column definition
+     * @param newColumn The new column definition
+     */
+    public void recreateColumn(Table table, Column curColumn, Column newColumn) throws IOException
+    {
+        boolean hasDefault       = curColumn.getParsedDefaultValue() != null;
+        boolean shallHaveDefault = newColumn.getParsedDefaultValue() != null;
+        String  newDefault       = newColumn.getDefaultValue();
+
+        // Sql Server does not like it if there is a default spec in the ALTER TABLE ALTER COLUMN
+        // statement; thus we have to change the default manually
+        if (newDefault != null)
+        {
+            newColumn.setDefaultValue(null);
+        }
+        if (hasDefault)
+        {
+            // we're dropping the old default
+            writeDropConstraintStatement(table, curColumn, "D");
+        }
+
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(table));
+        printIndent();
+        print("ALTER COLUMN ");
+        writeColumn(table, newColumn);
+        printEndOfStatement();
+
+        if (shallHaveDefault)
+        {
+            newColumn.setDefaultValue(newDefault);
+
+            // if the column shall have a default, then we have to add it as a constraint
+            print("ALTER TABLE ");
+            printlnIdentifier(getTableName(table));
+            printIndent();
+            print("ADD CONSTRAINT ");
+            printIdentifier(getConstraintName("DF", table, curColumn.getName(), null));
+            writeColumnDefaultValueStmt(table, newColumn);
+            print(" FOR ");
+            printIdentifier(getColumnName(curColumn));
+            printEndOfStatement();
+        }
+    }
+
+    /**
+     * Writes the SQL to drop a constraint, e.g. a primary key or default value constraint.
+     * 
+     * @param table          The table that the constraint is on
+     * @param column         The column that the constraint is on; <code>null</code> for table-level
+     *                       constraints
+     * @param typeIdentifier The constraint type identifier as is specified for the
+     *                       <code>sysobjects</code> system table
+     */
+    protected void writeDropConstraintStatement(Table table, Column column, String typeIdentifier) throws IOException
+    {
+        String tableName         = getTableName(table);
+        String columnName        = column == null ? null : getColumnName(column);
         String tableNameVar      = "tn" + createUniqueIdentifier();
         String constraintNameVar = "cn" + createUniqueIdentifier();
 
@@ -653,7 +486,18 @@ public class MSSqlBuilder extends SqlBuilder
         println("  DECLARE refcursor CURSOR FOR");
         println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
         println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
-        print("    WHERE objs.xtype = 'PK' AND object_name(objs.parent_obj) = ");
+        print("    WHERE objs.xtype = '");
+        print(typeIdentifier);
+        println("' AND");
+        if (columnName != null)
+        {
+            print("          cons.colid = (SELECT colid FROM syscolumns WHERE id = object_id(");
+            printAlwaysSingleQuotedIdentifier(tableName);
+            print(") AND name = ");
+            printAlwaysSingleQuotedIdentifier(columnName);
+            println(") AND");
+        }
+        print("          object_name(objs.parent_obj) = ");
         printAlwaysSingleQuotedIdentifier(tableName);
         println("  OPEN refcursor");
         println("  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
@@ -666,89 +510,5 @@ public class MSSqlBuilder extends SqlBuilder
         println("  DEALLOCATE refcursor");
         print("END");
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
-    }
-
-    /**
-     * Processes a change to a column.
-     * 
-     * @param sourceTable  The current table
-     * @param targetTable  The desired table
-     * @param sourceColumn The current column
-     * @param targetColumn The desired column
-     * @param typeChange   Whether this is a type change
-     */
-    protected void processColumnChange(Table   sourceTable,
-                                       Table   targetTable,
-                                       Column  sourceColumn,
-                                       Column  targetColumn,
-                                       boolean typeChange) throws IOException
-    {
-        boolean hasDefault       = sourceColumn.getParsedDefaultValue() != null;
-        boolean shallHaveDefault = targetColumn.getParsedDefaultValue() != null;
-        String  newDefault       = targetColumn.getDefaultValue();
-
-        // Sql Server does not like it if there is a default spec in the ALTER TABLE ALTER COLUMN
-        // statement; thus we have to change the default manually
-        if (newDefault != null)
-        {
-            targetColumn.setDefaultValue(null);
-        }
-        if (hasDefault)
-        {
-            // we're dropping the old default
-            String tableName         = getTableName(sourceTable);
-            String columnName        = getColumnName(sourceColumn);
-            String tableNameVar      = "tn" + createUniqueIdentifier();
-            String constraintNameVar = "cn" + createUniqueIdentifier();
-
-            println("BEGIN");
-            println("  DECLARE @" + tableNameVar + " nvarchar(256), @" + constraintNameVar + " nvarchar(256)");
-            println("  DECLARE refcursor CURSOR FOR");
-            println("  SELECT object_name(objs.parent_obj) tablename, objs.name constraintname");
-            println("    FROM sysobjects objs JOIN sysconstraints cons ON objs.id = cons.constid");
-            println("    WHERE objs.xtype = 'D' AND");
-            print("          cons.colid = (SELECT colid FROM syscolumns WHERE id = object_id(");
-            printAlwaysSingleQuotedIdentifier(tableName);
-            print(") AND name = ");
-            printAlwaysSingleQuotedIdentifier(columnName);
-            println(") AND");
-            print("          object_name(objs.parent_obj) = ");
-            printAlwaysSingleQuotedIdentifier(tableName);
-            println("  OPEN refcursor");
-            println("  FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
-            println("  WHILE @@FETCH_STATUS = 0");
-            println("    BEGIN");
-            println("      EXEC ('ALTER TABLE '+@" + tableNameVar + "+' DROP CONSTRAINT '+@" + constraintNameVar + ")");
-            println("      FETCH NEXT FROM refcursor INTO @" + tableNameVar + ", @" + constraintNameVar);
-            println("    END");
-            println("  CLOSE refcursor");
-            println("  DEALLOCATE refcursor");
-            print("END");
-            printEndOfStatement();
-        }
-
-        print("ALTER TABLE ");
-        printlnIdentifier(getTableName(sourceTable));
-        printIndent();
-        print("ALTER COLUMN ");
-        writeColumn(sourceTable, targetColumn);
-        printEndOfStatement();
-
-        if (shallHaveDefault)
-        {
-            targetColumn.setDefaultValue(newDefault);
-
-            // if the column shall have a default, then we have to add it as a constraint
-            print("ALTER TABLE ");
-            printlnIdentifier(getTableName(sourceTable));
-            printIndent();
-            print("ADD CONSTRAINT ");
-            printIdentifier(getConstraintName("DF", sourceTable, sourceColumn.getName(), null));
-            writeColumnDefaultValueStmt(sourceTable, targetColumn);
-            print(" FOR ");
-            printIdentifier(getColumnName(sourceColumn));
-            printEndOfStatement();
-        }
     }
 }

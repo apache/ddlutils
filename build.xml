@@ -179,6 +179,10 @@
              author="false"
              version="true"
              packagenames="org.*">
+      <tag name="ant.type" scope="types" description="Marks an ant type"/>
+      <tag name="ant.task" scope="types" description="Marks an ant task"/>
+      <tag name="ant.required" scope="methods" description="Marks a required task property"/>
+      <tag name="ant.not-required" scope="methods" description="Marks an optional task property"/>
       <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/> 
       <link href="http://jakarta.apache.org/commons/lang/apidocs/"/>
       <link href="http://jakarta.apache.org/commons/beanutils/apidocs/"/>

@@ -19,10 +19,24 @@ package org.apache.ddlutils.platform.db2;
  * under the License.
  */
 
+import java.io.IOException;
 import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.ModelComparator;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
+import org.apache.ddlutils.util.StringUtils;
 
 /**
  * The DB2 platform implementation.
@@ -58,6 +72,7 @@ public class Db2Platform extends PlatformImplBase
         PlatformInfo info = getPlatformInfo();
 
         info.setMaxIdentifierLength(18);
+        info.setIdentityColumnAutomaticallyRequired(true);
 
         // the BINARY types are also handled by Db2Builder.getSqlType(Column)
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                      Types.BLOB);
@@ -90,5 +105,110 @@ public class Db2Platform extends PlatformImplBase
     public String getName()
     {
         return DATABASENAME;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected ModelComparator getModelComparator()
+    {
+        ModelComparator comparator = super.getModelComparator();
+
+        comparator.setCanDropPrimaryKeyColumns(false);
+        comparator.setGeneratePrimaryKeyChanges(false);
+        return comparator;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                if ((change instanceof RemoveColumnChange) ||
+                    (change instanceof PrimaryKeyChange) ||
+                    (change instanceof RemovePrimaryKeyChange))
+                {
+                    return true;
+                }
+                else if (change instanceof AddColumnChange)
+                {
+                    AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                    // DB2 cannot add IDENTITY columns, and required columns need a default value
+                    return !addColumnChange.getNewColumn().isAutoIncrement() &&
+                           (!addColumnChange.getNewColumn().isRequired() || !StringUtils.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        };
+    }
+
+    /**
+     * Processes a change representing the addition of a column.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveColumnChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column removedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((Db2Builder)getSqlBuilder()).dropColumn(changedTable, removedColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              RemovePrimaryKeyChange change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        ((Db2Builder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+    
+    /**
+     * Processes the change of the primary key of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              PrimaryKeyChange   change) throws IOException
+    {
+        Table    changedTable     = findChangedTable(currentModel, change);
+        String[] newPKColumnNames = change.getNewPrimaryKeyColumns();
+        Column[] newPKColumns     = new Column[newPKColumnNames.length];
+
+        for (int colIdx = 0; colIdx < newPKColumnNames.length; colIdx++)
+        {
+            newPKColumns[colIdx] = changedTable.findColumn(newPKColumnNames[colIdx], isDelimitedIdentifierModeOn());
+        }
+        ((Db2Builder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        getSqlBuilder().createPrimaryKey(changedTable, newPKColumns);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
     }
 }

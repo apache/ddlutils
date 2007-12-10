@@ -27,6 +27,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.DatabaseOperationException;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.cloudscape.CloudscapePlatform;
 
 /**
@@ -130,5 +135,28 @@ public class DerbyPlatform extends CloudscapePlatform
         {
             throw new UnsupportedOperationException("Unable to create a Derby database via the driver "+jdbcDriverClassName);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                // Derby cannot add IDENTITY columns
+                if ((change instanceof AddColumnChange) &&
+                    ((AddColumnChange)change).getNewColumn().isAutoIncrement())
+                {
+                    return false;
+                }
+                else
+                {
+                    return super.isSupported(intermediateTable, change);
+                }
+            }
+        };
     }
 }

@@ -19,20 +19,24 @@ package org.apache.ddlutils.model;
  * under the License.
  */
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.ddlutils.util.StringUtils;
 
 /**
  * Represents a database foreign key.
  * 
  * @version $Revision$
  */
-public class ForeignKey implements Cloneable
+public class ForeignKey implements Serializable
 {
+    /** Unique ID for serialization purposes. */
+    private static final long serialVersionUID = 7833254626253719913L;
     /** The name of the foreign key, may be <code>null</code>. */
     private String _name;
     /** The target table. */
@@ -292,6 +296,28 @@ public class ForeignKey implements Cloneable
     }
 
     /**
+     * Determines whether this foreign key uses the indicated column as a local
+     * column in a reference. This method assumes that the caller checked
+     * already that the column is a column in the table owning this foreign key.
+     * 
+     * @param columnName    The name of the column to check
+     * @param caseSensitive Whether case matters when checking for the column's name
+     * @return <code>true</code> if a reference uses the column as a local
+     *         column
+     */
+    public boolean hasLocalColumn(String columnName, boolean caseSensitive)
+    {
+        for (int idx = 0; idx < getReferenceCount(); idx++)
+        {
+            if (StringUtils.equals(columnName, getReference(idx).getLocalColumnName(), caseSensitive))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Determines whether this foreign key uses the given column as a foreign
      * column in a reference.
      * 
@@ -310,9 +336,32 @@ public class ForeignKey implements Cloneable
         }
         return false;
     }
+
+    /**
+     * Determines whether this foreign key uses the given column as a foreign
+     * column in a reference. This method assumes that the caller already checked
+     * whether this foreign key references the tale owning the indicate column.
+     * 
+     * @param columnName    The name of the column to check
+     * @param caseSensitive Whether case matters when checking for the column's name
+     * @return <code>true</code> if a reference uses the column as a foreign
+     *         column
+     */
+    public boolean hasForeignColumn(String columnName, boolean caseSensitive)
+    {
+        for (int idx = 0; idx < getReferenceCount(); idx++)
+        {
+            if (StringUtils.equals(columnName, getReference(idx).getForeignColumnName(), caseSensitive))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     
     /**
-     * Determines whether this foreign key has an auto-generated associated index.
+     * Determines whether this foreign key has an auto-generated associated index. Note that
+     * this is a hint for the platform and has no relevancy to the model itself.
      * 
      * @return <code>true</code> if an auto-generated index exists
      */
@@ -322,32 +371,14 @@ public class ForeignKey implements Cloneable
     }
 
     /**
-     * Specifies whether this foreign key has an auto-generated associated index.
+     * Specifies whether this foreign key has an auto-generated associated index. Note that
+     * this is a hint set by the model reader and has no relevancy to the model itself.
      * 
      * @param autoIndexPresent <code>true</code> if an auto-generated index exists
      */
     public void setAutoIndexPresent(boolean autoIndexPresent)
     {
         _autoIndexPresent = autoIndexPresent;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object clone() throws CloneNotSupportedException
-    {
-        ForeignKey result = (ForeignKey)super.clone();
-
-        result._name             = _name;
-        result._foreignTableName = _foreignTableName;
-        result._references       = new ListOrderedSet();
-
-        for (Iterator it = _references.iterator(); it.hasNext();)
-        {
-            result._references.add(((Reference)it.next()).clone());
-        }
-
-        return result;
     }
 
     /**

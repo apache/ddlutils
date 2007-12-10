@@ -19,8 +19,10 @@ package org.apache.ddlutils.platform.db2;
  * under the License.
  */
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashSet;
 import java.util.Map;
@@ -98,7 +100,7 @@ public class Db2ModelReader extends JdbcModelReader
         if (table != null)
         {
             // Db2 does not return the auto-increment status via the database metadata
-            determineAutoIncrementFromResultSetMetaData(table, table.getColumns());
+            determineAutoIncrementColumns(table);
         }
         return table;
 	}
@@ -173,6 +175,42 @@ public class Db2ModelReader extends JdbcModelReader
 		}
 		return column;
 	}
+    /**
+     * Helper method that determines the auto increment status using Firebird's system tables.
+     *
+     * @param table The table
+     */
+    protected void determineAutoIncrementColumns(Table table) throws SQLException
+    {
+        PreparedStatement stmt = null;
+
+        try
+        {
+            stmt = getConnection().prepareStatement("SELECT COLNAME FROM SYSCAT.COLUMNS WHERE TABNAME = ? AND IDENTITY = 'Y' AND HIDDEN != 'S'");
+            stmt.setString(1, table.getName());
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next())
+            {
+                String colName = rs.getString(1).trim();
+                Column column  = table.findColumn(colName, getPlatform().isDelimitedIdentifierModeOn());
+
+                if (column != null)
+                {
+                    column.setAutoIncrement(true);
+                }
+            }
+            rs.close();
+        }
+        finally
+        {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+        }
+    }
 
 	/**
      * {@inheritDoc}

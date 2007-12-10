@@ -22,6 +22,7 @@ package org.apache.ddlutils.platform;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -35,6 +36,8 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -50,10 +53,34 @@ import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddForeignKeyChange;
+import org.apache.ddlutils.alteration.AddIndexChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.AddTableChange;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
+import org.apache.ddlutils.alteration.ColumnOrderChange;
+import org.apache.ddlutils.alteration.ForeignKeyChange;
+import org.apache.ddlutils.alteration.IndexChange;
+import org.apache.ddlutils.alteration.ModelChange;
+import org.apache.ddlutils.alteration.ModelComparator;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RecreateTableChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemoveForeignKeyChange;
+import org.apache.ddlutils.alteration.RemoveIndexChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveTableChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
+import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.ForeignKey;
+import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.ModelException;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.util.Jdbc3Utils;
@@ -402,11 +429,59 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void createTables(Database model, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
     {
+        createModel(model, dropTablesFirst, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createTables(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
+    {
+        createModel(model, params, dropTablesFirst, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createTables(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
+    {
+        createModel(connection, model, dropTablesFirst, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createTables(Connection connection, Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
+    {
+        createModel(connection, model, params, dropTablesFirst, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getCreateTablesSql(Database model, boolean dropTablesFirst, boolean continueOnError)
+    {
+        return getCreateTablesSql(model, dropTablesFirst, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getCreateTablesSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError)
+    {
+        return getCreateTablesSql(model, params, dropTablesFirst, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createModel(Database model, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
+    {
         Connection connection = borrowConnection();
 
         try
         {
-            createTables(connection, model, dropTablesFirst, continueOnError);
+            createModel(connection, model, dropTablesFirst, continueOnError);
         }
         finally
         {
@@ -417,9 +492,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void createTables(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
+    public void createModel(Connection connection, Database model, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
     {
-        String sql = getCreateTablesSql(model, dropTablesFirst, continueOnError);
+        String sql = getCreateModelSql(model, dropTablesFirst, continueOnError);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -427,7 +502,34 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getCreateTablesSql(Database model, boolean dropTablesFirst, boolean continueOnError)
+    public void createModel(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            createModel(connection, model, params, dropTablesFirst, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createModel(Connection connection, Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
+    {
+        String sql = getCreateModelSql(model, params, dropTablesFirst, continueOnError);
+
+        evaluateBatch(connection, sql, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getCreateModelSql(Database model, boolean dropTablesFirst, boolean continueOnError)
     {
         String sql = null;
 
@@ -449,34 +551,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void createTables(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
-    {
-        Connection connection = borrowConnection();
-
-        try
-        {
-            createTables(connection, model, params, dropTablesFirst, continueOnError);
-        }
-        finally
-        {
-            returnConnection(connection);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void createTables(Connection connection, Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError) throws DatabaseOperationException
-    {
-        String sql = getCreateTablesSql(model, params, dropTablesFirst, continueOnError);
-
-        evaluateBatch(connection, sql, continueOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getCreateTablesSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError)
+    public String getCreateModelSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError)
     {
         String sql = null;
 
@@ -496,15 +571,100 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     }
 
     /**
+     * Returns the model comparator to be used for this platform. This method is intendeded
+     * to be redefined by platforms that need to customize the model reader.
+     * 
+     * @return The model comparator
+     */
+    protected ModelComparator getModelComparator()
+    {
+        return new ModelComparator(getPlatformInfo(),
+                                   getTableDefinitionChangesPredicate(),
+                                   isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Returns the predicate that defines which changes are supported by the platform.
+     * 
+     * @return The predicate
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate();
+    }
+    
+    /**
      * {@inheritDoc}
      */
-    public void alterTables(Database desiredDb, boolean continueOnError) throws DatabaseOperationException
+    public List getChanges(Database currentModel, Database desiredModel)
+    {
+        List changes = getModelComparator().compare(currentModel, desiredModel);
+
+        return sortChanges(changes);
+    }
+
+    /**
+     * Sorts the changes so that they can be executed by the database. E.g. tables need to be created before
+     * they can be referenced by foreign keys, indexes should be dropped before a table is dropped etc.
+     * 
+     * @param changes The original changes
+     * @return The sorted changes - this can be the original list object or a new one
+     */
+    protected List sortChanges(List changes)
+    {
+        final Map typeOrder = new HashMap();
+
+        typeOrder.put(RemoveForeignKeyChange.class, new Integer(0));
+        typeOrder.put(RemoveIndexChange.class,      new Integer(1));
+        typeOrder.put(RemoveTableChange.class,      new Integer(2));
+        typeOrder.put(RecreateTableChange.class,    new Integer(3));
+        typeOrder.put(RemovePrimaryKeyChange.class, new Integer(3));
+        typeOrder.put(RemoveColumnChange.class,     new Integer(4));
+        typeOrder.put(ColumnDefinitionChange.class, new Integer(5));
+        typeOrder.put(ColumnOrderChange.class,      new Integer(5));
+        typeOrder.put(AddColumnChange.class,        new Integer(5));
+        typeOrder.put(PrimaryKeyChange.class,       new Integer(5));
+        typeOrder.put(AddPrimaryKeyChange.class,    new Integer(6));
+        typeOrder.put(AddTableChange.class,         new Integer(7));
+        typeOrder.put(AddIndexChange.class,         new Integer(8));
+        typeOrder.put(AddForeignKeyChange.class,    new Integer(9));
+
+        Collections.sort(changes, new Comparator()
+        {
+            public int compare(Object objA, Object objB)
+            {
+                Integer orderValueA = (Integer)typeOrder.get(objA.getClass());
+                Integer orderValueB = (Integer)typeOrder.get(objB.getClass());
+
+                if (orderValueA == null)
+                {
+                    return (orderValueB == null ? 0 : 1);
+                }
+                else if (orderValueB == null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return orderValueA.compareTo(orderValueB);
+                }
+            }
+        });
+    	return changes;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void alterTables(Database desiredModel, boolean continueOnError) throws DatabaseOperationException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, desiredDb, continueOnError);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
+
+            alterModel(currentModel, desiredModel, continueOnError);
         }
         finally
         {
@@ -515,13 +675,15 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(Database desiredDb) throws DatabaseOperationException
+    public void alterTables(Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            return getAlterTablesSql(connection, desiredDb);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
+
+            alterModel(currentModel, desiredModel, params, continueOnError);
         }
         finally
         {
@@ -532,13 +694,15 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void alterTables(Database desiredDb, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
+    public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, boolean continueOnError) throws DatabaseOperationException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, desiredDb, params, continueOnError);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+            alterModel(currentModel, desiredModel, continueOnError);
         }
         finally
         {
@@ -549,13 +713,15 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(Database desiredDb, CreationParameters params) throws DatabaseOperationException
+    public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
     {
         Connection connection = borrowConnection();
 
         try
         {
-            return getAlterTablesSql(connection, desiredDb, params);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+            alterModel(currentModel, desiredModel, params, continueOnError);
         }
         finally
         {
@@ -568,32 +734,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void alterTables(Connection connection, Database desiredModel, boolean continueOnError) throws DatabaseOperationException
     {
-        String sql = getAlterTablesSql(connection, desiredModel);
-
-        evaluateBatch(connection, sql, continueOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getAlterTablesSql(Connection connection, Database desiredModel) throws DatabaseOperationException
-    {
-        String   sql          = null;
         Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
 
-        try
-        {
-            StringWriter buffer = new StringWriter();
-
-            getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, null);
-            sql = buffer.toString();
-        }
-        catch (IOException ex)
-        {
-            // won't happen because we're using a string writer
-        }
-        return sql;
+        alterModel(currentModel, desiredModel, continueOnError);
     }
 
     /**
@@ -601,86 +744,89 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void alterTables(Connection connection, Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
     {
-        String sql = getAlterTablesSql(connection, desiredModel, params);
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
 
-        evaluateBatch(connection, sql, continueOnError);
+        alterModel(currentModel, desiredModel, params, continueOnError);
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getAlterTablesSql(Connection connection, Database desiredModel, CreationParameters params) throws DatabaseOperationException
+    public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, boolean continueOnError) throws DatabaseOperationException
     {
-        String   sql          = null;
-        Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
 
-        try
-        {
-            StringWriter buffer = new StringWriter();
-
-            getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, params);
-            sql = buffer.toString();
-        }
-        catch (IOException ex)
-        {
-            // won't happen because we're using a string writer
-        }
-        return sql;
+        alterModel(currentModel, desiredModel, continueOnError);
     }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, boolean continueOnError) throws DatabaseOperationException
-	{
+    public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
+    {
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+        alterModel(currentModel, desiredModel, params, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getAlterTablesSql(Database desiredModel) throws DatabaseOperationException
+    {
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, catalog, schema, tableTypes, desiredModel, continueOnError);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
+
+            return getAlterModelSql(currentModel, desiredModel);
         }
         finally
         {
             returnConnection(connection);
         }
-	}
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel) throws DatabaseOperationException
-	{
+    public String getAlterTablesSql(Database desiredModel, CreationParameters params) throws DatabaseOperationException
+    {
         Connection connection = borrowConnection();
 
         try
         {
-            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
+
+            return getAlterModelSql(currentModel, desiredModel, params);
         }
         finally
         {
             returnConnection(connection);
         }
-	}
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public void alterTables(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
-	{
+    public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel) throws DatabaseOperationException
+    {
         Connection connection = borrowConnection();
 
         try
         {
-            alterTables(connection, catalog, schema, tableTypes, desiredModel, params, continueOnError);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+            return getAlterModelSql(currentModel, desiredModel);
         }
         finally
         {
             returnConnection(connection);
         }
-	}
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public String getAlterTablesSql(String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params) throws DatabaseOperationException
@@ -689,38 +835,78 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
         try
         {
-            return getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params);
+            Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+            return getAlterModelSql(currentModel, desiredModel, params);
         }
         finally
         {
             returnConnection(connection);
         }
-	}
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, boolean continueOnError) throws DatabaseOperationException
+    public String getAlterTablesSql(Connection connection, Database desiredModel) throws DatabaseOperationException
     {
-        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel);
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
 
-        evaluateBatch(connection, sql, continueOnError);
-	}
+        return getAlterModelSql(currentModel, desiredModel);
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel) throws DatabaseOperationException
-	{
-        String   sql          = null;
+    public String getAlterTablesSql(Connection connection, Database desiredModel, CreationParameters params) throws DatabaseOperationException
+    {
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName());
+
+        return getAlterModelSql(currentModel, desiredModel, params);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel) throws DatabaseOperationException
+    {
         Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+        return getAlterModelSql(currentModel, desiredModel);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params) throws DatabaseOperationException
+    {
+        Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+
+        return getAlterModelSql(currentModel, desiredModel, params);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getAlterModelSql(Database currentModel, Database desiredModel) throws DatabaseOperationException
+    {
+        return getAlterModelSql(currentModel, desiredModel, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getAlterModelSql(Database currentModel, Database desiredModel, CreationParameters params) throws DatabaseOperationException
+    {
+        List   changes = getChanges(currentModel, desiredModel);
+        String sql     = null;
 
         try
         {
             StringWriter buffer = new StringWriter();
 
             getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, null);
+            processChanges(currentModel, changes, params);
             sql = buffer.toString();
         }
         catch (IOException ex)
@@ -728,40 +914,61 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             // won't happen because we're using a string writer
         }
         return sql;
-	}
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public void alterTables(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
-	{
-        String sql = getAlterTablesSql(connection, catalog, schema, tableTypes, desiredModel, params);
-
-        evaluateBatch(connection, sql, continueOnError);
-	}
-
-	/**
-     * {@inheritDoc}
-     */
-	public String getAlterTablesSql(Connection connection, String catalog, String schema, String[] tableTypes, Database desiredModel, CreationParameters params) throws DatabaseOperationException
-	{
-        String   sql          = null;
-        Database currentModel = readModelFromDatabase(connection, desiredModel.getName(), catalog, schema, tableTypes);
+    public void alterModel(Database currentModel, Database desiredModel, boolean continueOnError) throws DatabaseOperationException
+    {
+        Connection connection = borrowConnection();
 
         try
         {
-            StringWriter buffer = new StringWriter();
-
-            getSqlBuilder().setWriter(buffer);
-            getSqlBuilder().alterDatabase(currentModel, desiredModel, params);
-            sql = buffer.toString();
+            alterModel(connection, currentModel, desiredModel, continueOnError);
         }
-        catch (IOException ex)
+        finally
         {
-            // won't happen because we're using a string writer
+            returnConnection(connection);
         }
-        return sql;
-	}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void alterModel(Database currentModel, Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
+    {
+        Connection connection = borrowConnection();
+
+        try
+        {
+            alterModel(connection, currentModel, desiredModel, params, continueOnError);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void alterModel(Connection connection, Database currentModel, Database desiredModel, boolean continueOnError) throws DatabaseOperationException
+    {
+        String sql = getAlterModelSql(currentModel, desiredModel);
+
+        evaluateBatch(connection, sql, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void alterModel(Connection connection, Database currentModel, Database desiredModel, CreationParameters params, boolean continueOnError) throws DatabaseOperationException
+    {
+        String sql = getAlterModelSql(currentModel, desiredModel, params);
+
+        evaluateBatch(connection, sql, continueOnError);
+    }
 
 	/**
      * {@inheritDoc}
@@ -817,11 +1024,35 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public void dropTables(Database model, boolean continueOnError) throws DatabaseOperationException
     {
+        dropModel(model, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void dropTables(Connection connection, Database model, boolean continueOnError) throws DatabaseOperationException
+    {
+        dropModel(connection, model, continueOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDropTablesSql(Database model, boolean continueOnError)
+    {
+        return getDropModelSql(model);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void dropModel(Database model, boolean continueOnError) throws DatabaseOperationException
+    {
         Connection connection = borrowConnection();
 
         try
         {
-            dropTables(connection, model, continueOnError);
+            dropModel(connection, model, continueOnError);
         }
         finally
         {
@@ -832,9 +1063,9 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public void dropTables(Connection connection, Database model, boolean continueOnError) throws DatabaseOperationException 
+    public void dropModel(Connection connection, Database model, boolean continueOnError) throws DatabaseOperationException 
     {
-        String sql = getDropTablesSql(model, continueOnError);
+        String sql = getDropModelSql(model);
 
         evaluateBatch(connection, sql, continueOnError);
     }
@@ -842,7 +1073,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     /**
      * {@inheritDoc}
      */
-    public String getDropTablesSql(Database model, boolean continueOnError) 
+    public String getDropModelSql(Database model) 
     {
         String sql = null;
 
@@ -859,6 +1090,405 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             // won't happen because we're using a string writer
         }
         return sql;
+    }
+
+    /**
+     * Processes the given changes in the specified order. Basically, this method finds the
+     * appropriate handler method (one of the <code>processChange</code> methods) defined in
+     * the concrete sql builder for each change, and invokes it.
+     * 
+     * @param model   The database model; this object is not going to be changed by this method
+     * @param changes The changes
+     * @param params  The parameters used in the creation of new tables. Note that for existing
+     *                tables, the parameters won't be applied
+     * @return The changed database model
+     */
+    protected Database processChanges(Database           model,
+                                      Collection         changes,
+                                      CreationParameters params) throws IOException, DdlUtilsException
+    {
+        Database currentModel = new CloneHelper().clone(model);
+
+        for (Iterator it = changes.iterator(); it.hasNext();)
+        {
+            invokeChangeHandler(currentModel, params, (ModelChange)it.next());
+        }
+        return currentModel;
+    }
+
+    /**
+     * Invokes the change handler (one of the <code>processChange</code> methods) for the given
+     * change object.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    private void invokeChangeHandler(Database           currentModel,
+                                     CreationParameters params,
+                                     ModelChange        change) throws IOException
+    {
+        Class curClass = getClass();
+
+        // find the handler for the change
+        while ((curClass != null) && !Object.class.equals(curClass))
+        {
+            try
+            {
+                Method method = null;
+
+                try
+                {
+                    method = curClass.getDeclaredMethod("processChange",
+                                                        new Class[] { Database.class,
+                                                                      CreationParameters.class,
+                                                                      change.getClass() });
+                }
+                catch (NoSuchMethodException ex)
+                {
+                    // we actually expect this one
+                }
+
+                if (method != null)
+                {
+                    method.invoke(this, new Object[] { currentModel, params, change });
+                    return;
+                }
+                else
+                {
+                    curClass = curClass.getSuperclass();
+                }
+            }
+            catch (InvocationTargetException ex)
+            {
+                if (ex.getTargetException() instanceof IOException)
+                {
+                    throw (IOException)ex.getTargetException();
+                }
+                else
+                {
+                    throw new DdlUtilsException(ex.getTargetException());
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new DdlUtilsException(ex);
+            }
+        }
+        throw new DdlUtilsException("No handler for change of type " + change.getClass().getName() + " defined");
+    }
+
+    /**
+     * Finds the table changed by the change object in the given model.
+     *  
+     * @param currentModel The model to find the table in
+     * @param change       The table change
+     * @return The table
+     * @throws ModelException If the table could not be found
+     */
+    protected Table findChangedTable(Database currentModel, TableChange change) throws ModelException
+    {
+        Table table = currentModel.findTable(change.getChangedTable(),
+                                             getPlatformInfo().isDelimitedIdentifiersSupported());
+
+        if (table == null)
+        {
+            throw new ModelException("Could not find table " + change.getChangedTable() + " in the given model");
+        }
+        else
+        {
+            return table;
+        }
+    }
+
+    /**
+     * Finds the index changed by the change object in the given model.
+     *  
+     * @param currentModel The model to find the index in
+     * @param change       The index change
+     * @return The index
+     * @throws ModelException If the index could not be found
+     */
+    protected Index findChangedIndex(Database currentModel, IndexChange change) throws ModelException
+    {
+        Index index = change.findChangedIndex(currentModel,
+                                              getPlatformInfo().isDelimitedIdentifiersSupported());
+
+        if (index == null)
+        {
+            throw new ModelException("Could not find the index to change in table " + change.getChangedTable() + " in the given model");
+        }
+        else
+        {
+            return index;
+        }
+    }
+
+    /**
+     * Finds the foreign key changed by the change object in the given model.
+     *  
+     * @param currentModel The model to find the foreign key in
+     * @param change       The foreign key change
+     * @return The foreign key
+     * @throws ModelException If the foreign key could not be found
+     */
+    protected ForeignKey findChangedForeignKey(Database currentModel, ForeignKeyChange change) throws ModelException
+    {
+        ForeignKey fk = change.findChangedForeignKey(currentModel,
+                                                     getPlatformInfo().isDelimitedIdentifiersSupported());
+
+        if (fk == null)
+        {
+            throw new ModelException("Could not find the foreign key to change in table " + change.getChangedTable() + " in the given model");
+        }
+        else
+        {
+            return fk;
+        }
+    }
+
+    /**
+     * Processes a change representing the addition of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              AddTableChange     change) throws IOException
+    {
+        getSqlBuilder().createTable(currentModel,
+                                    change.getNewTable(),
+                                    params == null ? null : params.getParametersFor(change.getNewTable()));
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the removal of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveTableChange  change) throws IOException, ModelException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        getSqlBuilder().dropTable(changedTable);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the addition of a foreign key.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database            currentModel,
+                              CreationParameters  params,
+                              AddForeignKeyChange change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        getSqlBuilder().createForeignKey(currentModel,
+                                         changedTable,
+                                         change.getNewForeignKey());
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the removal of a foreign key.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              RemoveForeignKeyChange change) throws IOException, ModelException
+    {
+        Table      changedTable = findChangedTable(currentModel, change);
+        ForeignKey changedFk    = findChangedForeignKey(currentModel, change);
+
+        getSqlBuilder().dropForeignKey(changedTable, changedFk);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the addition of an index.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              AddIndexChange     change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        getSqlBuilder().createIndex(changedTable, change.getNewIndex());
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the removal of an index.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveIndexChange  change) throws IOException, ModelException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+        Index changedIndex = findChangedIndex(currentModel, change);
+
+        getSqlBuilder().dropIndex(changedTable, changedIndex);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the addition of a column.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              AddColumnChange    change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        getSqlBuilder().addColumn(changedTable, change.getNewColumn());
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the addition of a primary key.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database            currentModel,
+                              CreationParameters  params,
+                              AddPrimaryKeyChange change) throws IOException
+    {
+        Table    changedTable  = findChangedTable(currentModel, change);
+        String[] pkColumnNames = change.getPrimaryKeyColumns();
+        Column[] pkColumns     = new Column[pkColumnNames.length];
+
+        for (int colIdx = 0; colIdx < pkColumns.length; colIdx++)
+        {
+            pkColumns[colIdx] = changedTable.findColumn(pkColumnNames[colIdx], isDelimitedIdentifierModeOn());
+        }
+        getSqlBuilder().createPrimaryKey(changedTable, pkColumns);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes a change representing the recreation of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database            currentModel,
+                              CreationParameters  params,
+                              RecreateTableChange change) throws IOException
+    {
+        // we can only copy the data if no required columns without default value and
+        // non-autoincrement have been added
+        boolean canMigrateData = true;
+
+        for (Iterator it = change.getOriginalChanges().iterator(); canMigrateData && it.hasNext();)
+        {
+            TableChange curChange = (TableChange)it.next();
+
+            if (curChange instanceof AddColumnChange)
+            {
+                AddColumnChange addColumnChange = (AddColumnChange)curChange;
+
+                if (addColumnChange.getNewColumn().isRequired() &&
+                    !addColumnChange.getNewColumn().isAutoIncrement() &&
+                    (addColumnChange.getNewColumn().getDefaultValue() == null))
+                {
+                    _log.warn("Data cannot be retained in table " + change.getChangedTable() + 
+                              " because of the addition of the required column " + addColumnChange.getNewColumn().getName());
+                    canMigrateData = false;
+                }
+            }
+        }
+
+        Table changedTable = findChangedTable(currentModel, change);
+        Table targetTable  = change.getTargetTable();
+        Map   parameters   = (params == null ? null : params.getParametersFor(targetTable));
+
+        if (canMigrateData)
+        {
+            Table tempTable = getTemporaryTableFor(targetTable);
+
+            getSqlBuilder().createTemporaryTable(currentModel, tempTable, parameters);
+            getSqlBuilder().copyData(changedTable, tempTable);
+            // Note that we don't drop the indices here because the DROP TABLE will take care of that
+            // Likewise, foreign keys have already been dropped as necessary
+            getSqlBuilder().dropTable(changedTable);
+            getSqlBuilder().createTable(currentModel, targetTable, parameters);
+            getSqlBuilder().copyData(tempTable, targetTable);
+            getSqlBuilder().dropTemporaryTable(currentModel, tempTable);
+        }
+        else
+        {
+            getSqlBuilder().dropTable(changedTable);
+            getSqlBuilder().createTable(currentModel, targetTable, params.getParametersFor(targetTable));
+        }
+
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+    
+    /**
+     * Creates a temporary table object that corresponds to the given table.
+     * Database-specific implementations may redefine this method if e.g. the
+     * database directly supports temporary tables. The default implementation
+     * simply appends an underscore to the table name and uses that as the
+     * table name.  
+     * 
+     * @param targetTable The target table
+     * @return The temporary table
+     */
+    protected Table getTemporaryTableFor(Table targetTable)
+    {
+        CloneHelper cloneHelper = new CloneHelper();
+        Table       table       = new Table();
+
+        table.setCatalog(targetTable.getCatalog());
+        table.setSchema(targetTable.getSchema());
+        table.setName(targetTable.getName() + "_");
+        table.setType(targetTable.getType());
+        for (int idx = 0; idx < targetTable.getColumnCount(); idx++)
+        {
+            // TODO: clone PK status ?
+            table.addColumn(cloneHelper.clone(targetTable.getColumn(idx), true));
+        }
+
+        return table;
     }
 
     /**
@@ -1607,7 +2237,8 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      * @param dynaClass   The type
      * @param primaryKeys The primary keys
      * @param properties  The properties to write
-     * @param bean        Optionally the concrete bean to update
+     * @param oldBean     Contains column values to identify the rows to update (i.e. for the WHERE clause)
+     * @param newBean     Contains the new column values to write
      * @return The SQL required to update the instance
      */
     protected String createUpdateSql(Database model, SqlDynaClass dynaClass, SqlDynaProperty[] primaryKeys, SqlDynaProperty[] properties, DynaBean oldBean, DynaBean newBean)

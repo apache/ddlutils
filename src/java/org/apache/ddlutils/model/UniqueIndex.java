@@ -30,7 +30,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
  * 
  * @version $Revision$
  */
-public class UniqueIndex extends IndexImpBase
+public class UniqueIndex extends IndexImplBase
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -4097003126550294993L;
@@ -47,6 +47,14 @@ public class UniqueIndex extends IndexImpBase
      * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
+    {
+        return getClone();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Index getClone() throws ModelException
     {
         UniqueIndex result = new UniqueIndex();
 

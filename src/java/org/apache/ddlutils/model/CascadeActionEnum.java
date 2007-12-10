@@ -26,8 +26,8 @@ import java.util.Map;
 import org.apache.commons.lang.enums.ValuedEnum;
 
 /**
- * Represents the different cascade actions for {@link ForeignKey#onDelete} and
- * {@link ForeignKey#onUdate}.
+ * Represents the different cascade actions for the <code>onDelete</code> and
+ * <code>onUpdate</code> properties of {@link ForeignKey}.
  * 
  * @version $Revision: $
  */

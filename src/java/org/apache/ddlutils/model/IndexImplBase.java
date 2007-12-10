@@ -21,12 +21,14 @@ package org.apache.ddlutils.model;
 
 import java.util.ArrayList;
 
+import org.apache.ddlutils.util.StringUtils;
+
 /**
- * Base class for indices.
+ * Base class for indexes.
  * 
  * @version $Revision: $
  */
-public abstract class IndexImpBase implements Index
+public abstract class IndexImplBase implements Index
 {
     /** The name of the index. */
     protected String    _name;
@@ -83,6 +85,23 @@ public abstract class IndexImpBase implements Index
             IndexColumn curColumn = getColumn(idx);
 
             if (column.equals(curColumn.getColumn()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasColumn(String columnName, boolean caseSensitive)
+    {
+        for (int idx = 0; idx < _columns.size(); idx++)
+        {
+            IndexColumn curColumn = getColumn(idx);
+
+            if (StringUtils.equals(columnName, curColumn.getName(), caseSensitive))
             {
                 return true;
             }

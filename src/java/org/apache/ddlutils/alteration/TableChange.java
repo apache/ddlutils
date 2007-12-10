@@ -30,11 +30,11 @@ import org.apache.ddlutils.model.Table;
 public interface TableChange extends ModelChange
 {
     /**
-     * Returns the affected table from the original model.
+     * Returns the name of the affected table from the original model.
      * 
-     * @return The affected table
+     * @return The name of the affected table
      */
-    public Table getChangedTable();
+    public String getChangedTable();
 
     /**
      * Finds the table object corresponding to the changed table in the given database model.

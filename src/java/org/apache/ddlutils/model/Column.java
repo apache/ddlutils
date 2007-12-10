@@ -36,7 +36,7 @@ import org.apache.ddlutils.util.Jdbc3Utils;
  * 
  * @version $Revision$
  */
-public class Column implements Cloneable, Serializable
+public class Column implements Serializable
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -6226348998874210093L;
@@ -478,29 +478,6 @@ public class Column implements Cloneable, Serializable
     public void setDefaultValue(String defaultValue)
     {
         _defaultValue = defaultValue;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object clone() throws CloneNotSupportedException
-    {
-        Column result = (Column)super.clone();
-
-        result._name            = _name;
-        result._javaName        = _javaName;
-        result._primaryKey      = _primaryKey;
-        result._required        = _required;
-        result._autoIncrement   = _autoIncrement;
-        result._typeCode        = _typeCode;
-        result._type            = _type;
-        result._size            = _size;
-        result._defaultValue    = _defaultValue;
-        result._scale           = _scale;
-        result._size            = _size;
-        result._sizeAsInt       = _sizeAsInt;
-
-        return result;
     }
 
     /**

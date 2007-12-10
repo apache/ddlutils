@@ -36,6 +36,7 @@ import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
 import org.apache.ddlutils.model.CascadeActionEnum;
+import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -268,88 +269,89 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected Database getAdjustedModel()
     {
-        try
+        Database model = new CloneHelper().clone(getModel());
+
+        for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
         {
-            Database model = (Database)getModel().clone();
+            Table table = model.getTable(tableIdx);
 
-            for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+            for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
             {
-                Table table = model.getTable(tableIdx);
+                Column column     = table.getColumn(columnIdx);
+                int    origType   = column.getTypeCode();
+                int    targetType = getPlatformInfo().getTargetJdbcType(origType);
 
-                for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
+                // we adjust the column types if the native type would back-map to a
+                // different jdbc type
+                if (targetType != origType)
                 {
-                    Column column     = table.getColumn(columnIdx);
-                    int    origType   = column.getTypeCode();
-                    int    targetType = getPlatformInfo().getTargetJdbcType(origType);
-
-                    // we adjust the column types if the native type would back-map to a
-                    // different jdbc type
-                    if (targetType != origType)
+                    column.setTypeCode(targetType);
+                    // we should also adapt the default value
+                    if (column.getDefaultValue() != null)
                     {
-                        column.setTypeCode(targetType);
-                        // we should also adapt the default value
-                        if (column.getDefaultValue() != null)
-                        {
-                            DefaultValueHelper helper = getPlatform().getSqlBuilder().getDefaultValueHelper();
+                        DefaultValueHelper helper = getPlatform().getSqlBuilder().getDefaultValueHelper();
 
-                            column.setDefaultValue(helper.convert(column.getDefaultValue(), origType, targetType));
-                        }
-                    }
-                    // we also promote the default size if the column has no size
-                    // spec of its own
-                    if ((column.getSize() == null) && getPlatformInfo().hasSize(targetType))
-                    {
-                        Integer defaultSize = getPlatformInfo().getDefaultSize(targetType);
-
-                        if (defaultSize != null)
-                        {
-                            column.setSize(defaultSize.toString());
-                        }
-                    }
-                    // finally the platform might return a synthetic default value if the column
-                    // is a primary key column
-                    if (getPlatformInfo().isSyntheticDefaultValueForRequiredReturned() &&
-                        (column.getDefaultValue() == null) && column.isRequired() && !column.isAutoIncrement())
-                    {
-                        switch (column.getTypeCode())
-                        {
-                            case Types.TINYINT:
-                            case Types.SMALLINT:
-                            case Types.INTEGER:
-                            case Types.BIGINT:
-                                column.setDefaultValue("0");
-                                break;
-                            case Types.REAL:
-                            case Types.FLOAT:
-                            case Types.DOUBLE:
-                                column.setDefaultValue("0.0");
-                                break;
-                            case Types.BIT:
-                                column.setDefaultValue("false");
-                                break;
-                            default:
-                                column.setDefaultValue("");
-                                break;
-                        }
+                        column.setDefaultValue(helper.convert(column.getDefaultValue(), origType, targetType));
                     }
                 }
-                // we also add the default names to foreign keys that are initially unnamed
-                for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+                // we also promote the default size if the column has no size
+                // spec of its own
+                if ((column.getSize() == null) && getPlatformInfo().hasSize(targetType))
                 {
-                    ForeignKey fk = table.getForeignKey(fkIdx);
+                    Integer defaultSize = getPlatformInfo().getDefaultSize(targetType);
 
-                    if (fk.getName() == null)
+                    if (defaultSize != null)
                     {
-                        fk.setName(getPlatform().getSqlBuilder().getForeignKeyName(table, fk));
+                        column.setSize(defaultSize.toString());
                     }
+                }
+                // finally the platform might return a synthetic default value if the column
+                // is a primary key column
+                if (getPlatformInfo().isSyntheticDefaultValueForRequiredReturned() &&
+                    (column.getDefaultValue() == null) && column.isRequired() && !column.isAutoIncrement())
+                {
+                    switch (column.getTypeCode())
+                    {
+                        case Types.TINYINT:
+                        case Types.SMALLINT:
+                        case Types.INTEGER:
+                        case Types.BIGINT:
+                            column.setDefaultValue("0");
+                            break;
+                        case Types.REAL:
+                        case Types.FLOAT:
+                        case Types.DOUBLE:
+                            column.setDefaultValue("0.0");
+                            break;
+                        case Types.BIT:
+                            column.setDefaultValue("false");
+                            break;
+                        default:
+                            column.setDefaultValue("");
+                            break;
+                    }
+                }
+                if (column.isPrimaryKey() && getPlatformInfo().isPrimaryKeyColumnAutomaticallyRequired())
+                {
+                    column.setRequired(true);
+                }
+                if (column.isAutoIncrement() && getPlatformInfo().isIdentityColumnAutomaticallyRequired())
+                {
+                    column.setRequired(true);
                 }
             }
-            return model;
+            // we also add the default names to foreign keys that are initially unnamed
+            for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+            {
+                ForeignKey fk = table.getForeignKey(fkIdx);
+
+                if (fk.getName() == null)
+                {
+                    fk.setName(getPlatform().getSqlBuilder().getForeignKeyName(table, fk));
+                }
+            }
         }
-        catch (CloneNotSupportedException ex)
-        {
-            throw new RuntimeException(ex);
-        }
+        return model;
     }
 
     /**

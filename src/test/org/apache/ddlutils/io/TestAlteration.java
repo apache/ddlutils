@@ -27,11 +27,20 @@ import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
+import org.apache.ddlutils.platform.mysql.MySql50Platform;
+import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
  * Performs tests for the alteration of databases.
- * 
+ *
+ * TODO: add more tests, esp. combining multiple changes
+ *       - change datatype/size and add to/remove from pk
+ *       - change datatype/size and add/remove pk that uses the column
+ *       - change type of column in index and foreign key
+ *       - drop index with columns in a foreign key
+ *       - ...
  * @version $Revision: $
  */
 public class TestAlteration extends RoundtripTestBase
@@ -177,6 +186,56 @@ public class TestAlteration extends RoundtripTestBase
             bean.set("fk", ((String)bean.get("fk")).trim());
         }
         assertEquals((Object)"1", bean, "fk");
+    }
+
+    /**
+     * Tests the alteration of the sizes of PK and FK columns.
+     */
+    public void testChangePKAndFKSizes()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='VARCHAR' size='32' required='false'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='VARCHAR' size='128' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='VARCHAR' size='128' required='false'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { "test" });
+        insertRow("roundtrip2", new Object[] { new Integer(1), "test" });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List     beans = getRows("roundtrip2");
+        DynaBean bean  = (DynaBean)beans.get(0);
+
+        assertEquals((Object)"test", bean, "fk");
     }
 
     /**
@@ -686,276 +745,6 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of a column.
-     */
-    public void testAddColumn()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1) });
-
-    	alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        assertEquals((Object)null, beans.get(0), "avalue");
-    }
-
-    /**
-     * Tests the addition of an auto-increment column.
-     */
-    public void testAddAutoIncrementColumn()
-    {
-    	if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
-    	{
-    		return;
-    	}
-
-        // we need special catering for Sybase which does not support identity for INTEGER columns
-        boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml;
-
-        if (isSybase)
-        {
-            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
-                        "  <table name='roundtrip'>\n"+
-                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-                        "    <column name='avalue' type='NUMERIC' size='12,0' autoIncrement='true' required='true'/>\n"+
-                        "  </table>\n"+
-                        "</database>";
-        }
-        else
-        {
-            model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
-                        "  <table name='roundtrip'>\n"+
-                        "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-                        "    <column name='avalue' type='INTEGER' autoIncrement='true' required='true'/>\n"+
-                        "  </table>\n"+
-                        "</database>";
-        }
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1) });
-
-    	alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        if (isSybase)
-        {
-            assertEquals(new BigDecimal(1), beans.get(0), "avalue");
-        }
-        else
-        {
-            Object avalue = ((DynaBean)beans.get(0)).get("avalue");
-
-            assertTrue((avalue == null) || new Integer(1).equals(avalue));
-        }
-    }
-
-    /**
-     * Tests the addition of several columns.
-     */
-    public void testAddColumns()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
-            "    <column name='avalue2' type='INTEGER'/>\n"+
-            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
-            "    <column name='avalue4' type='VARCHAR' size='16'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1), new Double(3.0) });
-
-        alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        assertEquals((Object)null, beans.get(0), "avalue1");
-        assertEquals((Object)null, beans.get(0), "avalue2");
-        assertEquals(new Double(3.0), beans.get(0), "avalue3");
-        assertEquals((Object)null, beans.get(0), "avalue4");
-    }
-
-    /**
-     * Tests the addition of several columns at the end of the table.
-     */
-    public void testAddColumnsAtTheEnd()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
-            "    <column name='avalue2' type='INTEGER'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
-            "    <column name='avalue2' type='INTEGER'/>\n"+
-            "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
-            "    <column name='avalue4' type='VARCHAR' size='16'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1), "test", new Integer(3) });
-
-        alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        assertEquals((Object)"test", beans.get(0), "avalue1");
-        assertEquals(new Integer(3), beans.get(0), "avalue2");
-
-        // we cannot be sure whether the default algorithm is used (which will apply the
-        // default value even to existing columns with NULL in it) or the database supports
-        // it dircetly (in which case it might still be NULL)
-        Object avalue3 = ((DynaBean)beans.get(0)).get("avalue3");
-
-        assertTrue((avalue3 == null) || new Double(1.0).equals(avalue3));
-        
-        assertEquals((Object)null, beans.get(0), "avalue4");
-    }
-
-    /**
-     * Tests the addition of a column with a default value. Note that depending
-     * on whether the database supports this via a statement, this test may fail.
-     * For instance, Sql Server has a statement for this which means that the
-     * existing value in column avalue won't be changed and thus the test fails.
-     */
-    public void testAddColumnWithDefault()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' default='2'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1) });
-
-        alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        // we cannot be sure whether the default algorithm is used (which will apply the
-        // default value even to existing columns with NULL in it) or the database supports
-        // it dircetly (in which case it might still be NULL)
-        Object avalue = ((DynaBean)beans.get(0)).get("avalue");
-
-        assertTrue((avalue == null) || new Integer(2).equals(avalue));
-    }
-
-    /**
-     * Tests the addition of a column that is set to NOT NULL.
-     */
-    public void testAddRequiredColumn()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' default='2' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1) });
-
-        alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        assertEquals(new Integer(2), beans.get(0), "avalue");
-    }
-
-    /**
      * Tests the change of the order of the columns of a table.
      */
     public void testChangeColumnOrder()
@@ -1163,116 +952,6 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of a pk column.
-     */
-    public void testAddPKColumn()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' default='0' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1) });
-
-    	alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        assertEquals(new Integer(0), beans.get(0), "avalue");
-    }
-
-    /**
-     * Tests the addition of a primary key and a column.
-     */
-    public void testAddPKAndColumn()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' default='0'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1) });
-
-        alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        // we cannot be sure whether the default algorithm is used (which will apply the
-        // default value even to existing columns with NULL in it) or the database supports
-        // it dircetly (in which case it might still be NULL)
-        Object avalue = ((DynaBean)beans.get(0)).get("avalue");
-
-        assertTrue((avalue == null) || new Integer(0).equals(avalue));
-    }
-
-    /**
-     * Tests the addition of a primary key and a primary key column.
-     */
-    public void testAddPKAndPKColumn()
-    {
-        final String model1Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' required='true'/>\n"+
-            "  </table>\n"+
-            "</database>";
-        final String model2Xml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' primaryKey='true' required='true' default='0'/>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        createDatabase(model1Xml);
-
-        insertRow("roundtrip", new Object[] { new Integer(1) });
-
-        alterDatabase(model2Xml);
-
-        assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
-
-        List beans = getRows("roundtrip");
-
-        assertEquals(new Integer(0), beans.get(0), "avalue");
-    }
-
-    /**
      * Tests the removal of a pk column.
      */
     public void testDropPKColumn()
@@ -1443,54 +1122,137 @@ public class TestAlteration extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of a column to an index.
+     * Tests the removal of an index that has column that are also used by foreign keys. This is a
+     * test esp. for the handling of http://bugs.mysql.com/bug.php?id=21395.
      */
-    public void testAddColumnToIndex()
+    public void testDropIndexOverlappingWithForeignKeys()
     {
-        if (!getPlatformInfo().isIndicesSupported())
-        {
-            return;
-        }
-
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
+            "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue1' type='DOUBLE'/>\n"+
-            "    <column name='avalue2' type='VARCHAR' size='40'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='VARCHAR' size='50' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip3'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='INTEGER'/>\n"+
+            "    <column name='avalue2' type='VARCHAR' size='50'/>\n"+
             "    <index name='test_index'>\n"+
+            "      <index-column name='avalue2'/>\n"+
             "      <index-column name='avalue1'/>\n"+
             "    </index>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue1' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key foreignTable='roundtrip2'>\n"+
+            "      <reference local='avalue2' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
-            "  <table name='roundtrip'>\n"+
+            "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue1' type='DOUBLE'/>\n"+
-            "    <column name='avalue2' type='VARCHAR' size='40'/>\n"+
-            "    <index name='test_index'>\n"+
-            "      <index-column name='avalue1'/>\n"+
-            "      <index-column name='avalue2'/>\n"+
-            "    </index>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='VARCHAR' size='50' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip3'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='INTEGER'/>\n"+
+            "    <column name='avalue2' type='VARCHAR' size='50'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue1' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key foreignTable='roundtrip2'>\n"+
+            "      <reference local='avalue2' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
 
         createDatabase(model1Xml);
 
-        insertRow("roundtrip", new Object[] { new Integer(1), new Double(2.0), "test" });
+        insertRow("roundtrip1", new Object[] { new Integer(1) });
+        insertRow("roundtrip2", new Object[] { "test" });
+        insertRow("roundtrip3", new Object[] { new Integer(1), new Integer(1), "test" });
 
-    	alterDatabase(model2Xml);
+        alterDatabase(model2Xml);
 
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
+        List beans1 = getRows("roundtrip1");
+        List beans2 = getRows("roundtrip2");
+        List beans3 = getRows("roundtrip3");
 
-        assertEquals(new Double(2.0), beans.get(0), "avalue1");
-        assertEquals((Object)"test", beans.get(0), "avalue2");
+        assertEquals(new Integer(1), beans1.get(0), "pk");
+        assertEquals((Object)"test", beans2.get(0), "pk");
+        assertEquals(new Integer(1), beans3.get(0), "pk");
+        assertEquals(new Integer(1), beans3.get(0), "avalue1");
+        assertEquals((Object)"test", beans3.get(0), "avalue2");
+    }
+
+    /**
+     * Tests the removal of an index that has column that are also referenced by a remote foreign key. 
+     */
+    public void testDropIndexOverlappingWithRemoteForeignKey()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='VARCHAR' size='50'/>\n"+
+            "    <index name='test_index'>\n"+
+            "      <index-column name='pk'/>\n"+
+            "      <index-column name='avalue'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='VARCHAR' size='50'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue' type='INTEGER'/>\n"+
+            "    <foreign-key foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1), "test" });
+        insertRow("roundtrip2", new Object[] { new Integer(1), new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans1 = getRows("roundtrip1");
+        List beans2 = getRows("roundtrip2");
+
+        assertEquals(new Integer(1), beans1.get(0), "pk");
+        assertEquals((Object)"test", beans1.get(0), "avalue");
+        assertEquals(new Integer(1), beans2.get(0), "pk");
+        assertEquals(new Integer(1), beans2.get(0), "avalue");
     }
 
     /**
@@ -1635,6 +1397,265 @@ public class TestAlteration extends RoundtripTestBase
         insertRow("roundtrip2", new Object[] { new Integer(2), new Double(2.0), new Integer(1) });
 
     	alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans1 = getRows("roundtrip1");
+        List beans2 = getRows("roundtrip2");
+
+        assertEquals(new Integer(1), beans1.get(0), "pk1");
+        assertEquals(new Double(2.0), beans1.get(0), "pk2");
+        assertEquals(new Integer(2), beans2.get(0), "pk");
+        assertEquals(new Double(2.0), beans2.get(0), "avalue1");
+        assertEquals(new Integer(1), beans2.get(0), "avalue2");
+    }
+
+    /**
+     * Tests removing a foreign key and an index that has the same name and same column.
+     */
+    public void testDropFKAndCorrespondingIndex()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "    <index name='test'>\n"+
+            "      <index-column name='avalue2'/>\n"+
+            "      <index-column name='avalue1'/>\n"+
+            "    </index>\n"+
+            "    <foreign-key name='test' foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue2' foreign='pk1'/>\n"+
+            "      <reference local='avalue1' foreign='pk2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1), new Double(2.0) });
+        insertRow("roundtrip2", new Object[] { new Integer(2), new Double(2.0), new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans1 = getRows("roundtrip1");
+        List beans2 = getRows("roundtrip2");
+
+        assertEquals(new Integer(1), beans1.get(0), "pk1");
+        assertEquals(new Double(2.0), beans1.get(0), "pk2");
+        assertEquals(new Integer(2), beans2.get(0), "pk");
+        assertEquals(new Double(2.0), beans2.get(0), "avalue1");
+        assertEquals(new Integer(1), beans2.get(0), "avalue2");
+    }
+
+    /**
+     * Tests removing a foreign key but not the index that has the same name and same column.
+     */
+    public void testDropFKButNotCorrespondingIndex()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "    <index name='test'>\n"+
+            "      <index-column name='avalue2'/>\n"+
+            "      <index-column name='avalue1'/>\n"+
+            "    </index>\n"+
+            "    <foreign-key name='test' foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue2' foreign='pk1'/>\n"+
+            "      <reference local='avalue1' foreign='pk2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "    <index name='test'>\n"+
+            "      <index-column name='avalue2'/>\n"+
+            "      <index-column name='avalue1'/>\n"+
+            "    </index>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1), new Double(2.0) });
+        insertRow("roundtrip2", new Object[] { new Integer(2), new Double(2.0), new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans1 = getRows("roundtrip1");
+        List beans2 = getRows("roundtrip2");
+
+        assertEquals(new Integer(1), beans1.get(0), "pk1");
+        assertEquals(new Double(2.0), beans1.get(0), "pk2");
+        assertEquals(new Integer(2), beans2.get(0), "pk");
+        assertEquals(new Double(2.0), beans2.get(0), "avalue1");
+        assertEquals(new Integer(1), beans2.get(0), "avalue2");
+    }
+
+    /**
+     * Tests removing a foreign key and an index that has the same name but different columns.
+     */
+    public void testDropFKAndDifferentIndexWithSameName()
+    {
+        // MySql/InnoDB doesn't allow the creation of a foreign key and index with the same name
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            return;
+        }
+
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "    <index name='test'>\n"+
+            "      <index-column name='avalue1'/>\n"+
+            "    </index>\n"+
+            "    <foreign-key name='test' foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue2' foreign='pk1'/>\n"+
+            "      <reference local='avalue1' foreign='pk2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1), new Double(2.0) });
+        insertRow("roundtrip2", new Object[] { new Integer(2), new Double(2.0), new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans1 = getRows("roundtrip1");
+        List beans2 = getRows("roundtrip2");
+
+        assertEquals(new Integer(1), beans1.get(0), "pk1");
+        assertEquals(new Double(2.0), beans1.get(0), "pk2");
+        assertEquals(new Integer(2), beans2.get(0), "pk");
+        assertEquals(new Double(2.0), beans2.get(0), "avalue1");
+        assertEquals(new Integer(1), beans2.get(0), "avalue2");
+    }
+
+    /**
+     * Tests removing a foreign key but not the index that has the same name but different columns.
+     */
+    public void testDropFKButNotDifferentIndexWithSameName()
+    {
+        // MySql/InnoDB doesn't allow the creation of a foreign key and index with the same name
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            return;
+        }
+
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "    <index name='test'>\n"+
+            "      <index-column name='avalue1'/>\n"+
+            "    </index>\n"+
+            "    <foreign-key name='test' foreignTable='roundtrip1'>\n"+
+            "      <reference local='avalue2' foreign='pk1'/>\n"+
+            "      <reference local='avalue1' foreign='pk2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "    <index name='test'>\n"+
+            "      <index-column name='avalue1'/>\n"+
+            "    </index>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1), new Double(2.0) });
+        insertRow("roundtrip2", new Object[] { new Integer(2), new Double(2.0), new Integer(1) });
+
+        alterDatabase(model2Xml);
 
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
@@ -2194,6 +2215,24 @@ public class TestAlteration extends RoundtripTestBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        assertTrue(getRows("roundtrip").isEmpty());
+        List beans = getRows("roundtrip");
+
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // McKoi can actually handle this, though interestingly it will result in a null value for the pk
+            assertEquals((Object)null,   beans.get(0), "pk");
+            assertEquals((Object)"test", beans.get(0), "avalue");
+        }
+        else if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+                 MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // Same with MySql except it uses the default value for the datatype
+            assertEquals(new Integer(0), beans.get(0), "pk");
+            assertEquals((Object)"test", beans.get(0), "avalue");
+        }
+        else
+        {
+            assertTrue(beans.isEmpty());
+        }
     }
 }

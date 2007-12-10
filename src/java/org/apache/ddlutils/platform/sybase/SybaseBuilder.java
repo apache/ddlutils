@@ -21,30 +21,18 @@ package org.apache.ddlutils.platform.sybase;
 
 import java.io.IOException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
-import org.apache.ddlutils.alteration.ColumnAutoIncrementChange;
-import org.apache.ddlutils.alteration.ColumnChange;
-import org.apache.ddlutils.alteration.ColumnDefaultValueChange;
-import org.apache.ddlutils.alteration.PrimaryKeyChange;
-import org.apache.ddlutils.alteration.RemoveColumnChange;
-import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
-import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.SqlBuilder;
 import org.apache.ddlutils.util.Jdbc3Utils;
+import org.apache.ddlutils.util.StringUtils;
 
 /**
  * The SQL Builder for Sybase.
@@ -69,7 +57,7 @@ public class SybaseBuilder extends SqlBuilder
      */
     public void createTable(Database database, Table table, Map parameters) throws IOException
     {
-        writeQuotationOnStatement();
+        turnOnQuotation();
         super.createTable(database, table, parameters);
     }
 
@@ -196,7 +184,7 @@ public class SybaseBuilder extends SqlBuilder
      */
     public void dropTable(Table table) throws IOException
     {
-        writeQuotationOnStatement();
+        turnOnQuotation();
         print("IF EXISTS (SELECT 1 FROM sysobjects WHERE type = 'U' AND name = ");
         printAlwaysSingleQuotedIdentifier(getTableName(table));
         println(")");
@@ -211,7 +199,7 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeExternalForeignKeyDropStmt(Table table, ForeignKey foreignKey) throws IOException
+    public void dropForeignKey(Table table, ForeignKey foreignKey) throws IOException
     {
         String constraintName = getForeignKeyName(table, foreignKey);
 
@@ -229,7 +217,7 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    public void dropIndex(Table table, Index index) throws IOException
     {
         print("DROP INDEX ");
         printIdentifier(getTableName(table));
@@ -241,10 +229,10 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void dropExternalForeignKeys(Table table) throws IOException
+    public void dropForeignKeys(Table table) throws IOException
     {
-        writeQuotationOnStatement();
-        super.dropExternalForeignKeys(table);
+        turnOnQuotation();
+        super.dropForeignKeys(table);
     }
 
     /**
@@ -309,9 +297,36 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * Writes the statement that turns on the ability to write delimited identifiers.
      */
-    private void writeQuotationOnStatement() throws IOException
+    public void turnOnQuotation() throws IOException
     {
-        print(getQuotationOnStatement());
+        String quotationStmt = getQuotationOnStatement();
+
+        if (!StringUtils.isEmpty(quotationStmt))
+        {
+            print(quotationStmt);
+            printEndOfStatement();
+        }
+    }
+
+    /**
+     * Writes the statement that turns on identity override mode.
+     * 
+     * @param table The table to enable the mode for
+     */
+    public void turnOnIdentityOverride(Table table) throws IOException
+    {
+        print(getEnableIdentityOverrideSql(table));
+        printEndOfStatement();
+    }
+
+    /**
+     * Writes the statement that turns off identity override mode.
+     * 
+     * @param table The table to disable the mode for
+     */
+    public void turnOffIdentityOverride(Table table) throws IOException
+    {
+        print(getDisableIdentityOverrideSql(table));
         printEndOfStatement();
     }
 
@@ -331,23 +346,30 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void writeCopyDataStatement(Table sourceTable, Table targetTable) throws IOException
+    protected void copyData(Table sourceTable, Table targetTable) throws IOException
     {
-        boolean hasIdentity = targetTable.getAutoIncrementColumns().length > 0;
+        // We need to turn on identity override except when the identity column was added to the column
+        Column[] targetAutoIncrCols   = targetTable.getAutoIncrementColumns();
+        boolean  needIdentityOverride = false;
 
-        if (hasIdentity)
+        if (targetAutoIncrCols.length > 0)
         {
-            print("SET IDENTITY_INSERT ");
-            printIdentifier(getTableName(targetTable));
-            print(" ON");
+            needIdentityOverride = true;
+            // Sybase only allows for one identity column per table
+            if (sourceTable.findColumn(targetAutoIncrCols[0].getName(), getPlatform().isDelimitedIdentifierModeOn()) == null)
+            {
+                needIdentityOverride = false;
+            }
+        }
+        if (needIdentityOverride)
+        {
+            print(getEnableIdentityOverrideSql(targetTable));
             printEndOfStatement();
         }
-        super.writeCopyDataStatement(sourceTable, targetTable);
-        if (hasIdentity)
+        super.copyData(sourceTable, targetTable);
+        if (needIdentityOverride)
         {
-            print("SET IDENTITY_INSERT ");
-            printIdentifier(getTableName(targetTable));
-            print(" OFF");
+            print(getDisableIdentityOverrideSql(targetTable));
             printEndOfStatement();
         }
     }
@@ -377,198 +399,42 @@ public class SybaseBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    protected void processChanges(Database currentModel, Database desiredModel, List changes, CreationParameters params) throws IOException
-    {
-        if (!changes.isEmpty())
-        {
-            writeQuotationOnStatement();
-        }
-        super.processChanges(currentModel, desiredModel, changes, params);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected void processTableStructureChanges(Database currentModel,
-                                                Database desiredModel,
-                                                Table    sourceTable,
-                                                Table    targetTable,
-                                                Map      parameters,
-                                                List     changes) throws IOException
-    {
-        // First we drop primary keys as necessary
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof RemovePrimaryKeyChange)
-            {
-                processChange(currentModel, desiredModel, (RemovePrimaryKeyChange)change);
-                changeIt.remove();
-            }
-            else if (change instanceof PrimaryKeyChange)
-            {
-                PrimaryKeyChange       pkChange       = (PrimaryKeyChange)change;
-                RemovePrimaryKeyChange removePkChange = new RemovePrimaryKeyChange(pkChange.getChangedTable(),
-                                                                                   pkChange.getOldPrimaryKeyColumns());
-
-                processChange(currentModel, desiredModel, removePkChange);
-            }
-        }
-
-
-        HashMap columnChanges = new HashMap();
-
-        // Next we add/remove columns
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof AddColumnChange)
-            {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                // Sybase can only add not insert columns
-                if (addColumnChange.isAtEnd())
-                {
-                    processChange(currentModel, desiredModel, addColumnChange);
-                    changeIt.remove();
-                }
-            }
-            else if (change instanceof RemoveColumnChange)
-            {
-                processChange(currentModel, desiredModel, (RemoveColumnChange)change);
-                changeIt.remove();
-            }
-            else if (change instanceof ColumnAutoIncrementChange)
-            {
-                // Sybase has no way of adding or removing an IDENTITY constraint
-                // Thus we have to rebuild the table anyway and can ignore all the other 
-                // column changes
-                columnChanges = null;
-            }
-            else if ((change instanceof ColumnChange) && (columnChanges != null))
-            {
-                // we gather all changed columns because we can use the ALTER TABLE ALTER COLUMN
-                // statement for them
-                ColumnChange columnChange     = (ColumnChange)change;
-                ArrayList    changesPerColumn = (ArrayList)columnChanges.get(columnChange.getChangedColumn());
-
-                if (changesPerColumn == null)
-                {
-                    changesPerColumn = new ArrayList();
-                    columnChanges.put(columnChange.getChangedColumn(), changesPerColumn);
-                }
-                changesPerColumn.add(change);
-            }
-        }
-        if (columnChanges != null)
-        {
-            for (Iterator changesPerColumnIt = columnChanges.entrySet().iterator(); changesPerColumnIt.hasNext();)
-            {
-                Map.Entry entry            = (Map.Entry)changesPerColumnIt.next();
-                Column    sourceColumn     = (Column)entry.getKey();
-                ArrayList changesPerColumn = (ArrayList)entry.getValue();
-
-                // Sybase does not like us to use the ALTER TABLE ALTER statement if we don't actually
-                // change the datatype or the required constraint but only the default value
-                // Thus, if we only have to change the default, we use a different handler
-                if ((changesPerColumn.size() == 1) && (changesPerColumn.get(0) instanceof ColumnDefaultValueChange))
-                {
-                    processChange(currentModel,
-                                  desiredModel,
-                                  (ColumnDefaultValueChange)changesPerColumn.get(0));
-                }
-                else
-                {
-                    Column targetColumn = targetTable.findColumn(sourceColumn.getName(),
-                                                                 getPlatform().isDelimitedIdentifierModeOn());
-
-                    processColumnChange(sourceTable, targetTable, sourceColumn, targetColumn);
-                }
-                for (Iterator changeIt = changesPerColumn.iterator(); changeIt.hasNext();)
-                {
-                    ((ColumnChange)changeIt.next()).apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
-                }
-            }
-        }
-        // Finally we add primary keys
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof AddPrimaryKeyChange)
-            {
-                processChange(currentModel, desiredModel, (AddPrimaryKeyChange)change);
-                changeIt.remove();
-            }
-            else if (change instanceof PrimaryKeyChange)
-            {
-                PrimaryKeyChange    pkChange    = (PrimaryKeyChange)change;
-                AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange(pkChange.getChangedTable(),
-                                                                          pkChange.getNewPrimaryKeyColumns());
-
-                processChange(currentModel, desiredModel, addPkChange);
-                changeIt.remove();
-            }
-        }
-    }
-
-
-    /**
-     * Processes the addition of a column to a table.
-     * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
-     */
-    protected void processChange(Database        currentModel,
-                                 Database        desiredModel,
-                                 AddColumnChange change) throws IOException
+    public void addColumn(Table table, Column newColumn) throws IOException
     {
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("ADD ");
-        writeColumn(change.getChangedTable(), change.getNewColumn());
+        writeColumn(table, newColumn);
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
-     * Processes the removal of a column from a table.
+     * Writes the SQL to drop a column.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table  The table
+     * @param column The column to drop
      */
-    protected void processChange(Database           currentModel,
-                                 Database           desiredModel,
-                                 RemoveColumnChange change) throws IOException
+    public void dropColumn(Table table, Column column) throws IOException
     {
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("DROP ");
-        printIdentifier(getColumnName(change.getChangedColumn()));
+        printIdentifier(getColumnName(column));
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
-     * Processes the removal of a primary key from a table.
+     * Writes the SQL to drop the primary key of the given table.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table The table
      */
-    protected void processChange(Database               currentModel,
-                                 Database               desiredModel,
-                                 RemovePrimaryKeyChange change) throws IOException
+    public void dropPrimaryKey(Table table) throws IOException
     {
-        // TODO: this would be easier when named primary keys are supported
-        //       because then we can use ALTER TABLE DROP
-        String tableName         = getTableName(change.getChangedTable());
+        // this would be easier when named primary keys are supported
+        // because then we can use ALTER TABLE DROP
+        String tableName         = getTableName(table);
         String tableNameVar      = "tn" + createUniqueIdentifier();
         String constraintNameVar = "cn" + createUniqueIdentifier();
 
@@ -589,96 +455,87 @@ public class SybaseBuilder extends SqlBuilder
         println("  END");
         print("END");
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
-     * Processes the change of the default value of a column. Note that this method is only
-     * used if it is the only change to that column.
+     * Writes the SQL to set the default value of the given column.
      * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
+     * @param table           The table
+     * @param column          The column to change
+     * @param newDefaultValue The new default value
      */
-    protected void processChange(Database                 currentModel,
-                                 Database                 desiredModel,
-                                 ColumnDefaultValueChange change) throws IOException
+    public void changeColumnDefaultValue(Table table, Column column, String newDefaultValue) throws IOException
     {
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("REPLACE ");
-        printIdentifier(getColumnName(change.getChangedColumn()));
-
-        Table  curTable  = currentModel.findTable(change.getChangedTable().getName(), getPlatform().isDelimitedIdentifierModeOn());
-        Column curColumn = curTable.findColumn(change.getChangedColumn().getName(), getPlatform().isDelimitedIdentifierModeOn());
-
+        printIdentifier(getColumnName(column));
         print(" DEFAULT ");
-        if (isValidDefaultValue(change.getNewDefaultValue(), curColumn.getTypeCode()))
+        if (isValidDefaultValue(newDefaultValue, column.getTypeCode()))
         {
-            printDefaultValue(change.getNewDefaultValue(), curColumn.getTypeCode());
+            printDefaultValue(newDefaultValue, column.getTypeCode());
         }
         else
         {
             print("NULL");
         }
         printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 
     /**
-     * Processes a change to a column.
+     * Writes the SQL to change the given column.
      * 
-     * @param sourceTable  The current table
-     * @param targetTable  The desired table
-     * @param sourceColumn The current column
-     * @param targetColumn The desired column
+     * @param table     The table
+     * @param column    The column to change
+     * @param newColumn The new column definition
      */
-    protected void processColumnChange(Table  sourceTable,
-                                       Table  targetTable,
-                                       Column sourceColumn,
-                                       Column targetColumn) throws IOException
+    public void changeColumn(Table table, Column column, Column newColumn) throws IOException
     {
-        Object oldParsedDefault = sourceColumn.getParsedDefaultValue();
-        Object newParsedDefault = targetColumn.getParsedDefaultValue();
-        String newDefault       = targetColumn.getDefaultValue();
+        Object oldParsedDefault = column.getParsedDefaultValue();
+        Object newParsedDefault = newColumn.getParsedDefaultValue();
+        String newDefault       = newColumn.getDefaultValue();
         boolean defaultChanges  = ((oldParsedDefault == null) && (newParsedDefault != null)) ||
                                   ((oldParsedDefault != null) && !oldParsedDefault.equals(newParsedDefault));
 
         // Sybase does not like it if there is a default spec in the ALTER TABLE ALTER
         // statement; thus we have to change the default afterwards
-        if (newDefault != null)
-        {
-            targetColumn.setDefaultValue(null);
-        }
         if (defaultChanges)
         {
             // we're first removing the default as it might make problems when the
             // datatype changes
             print("ALTER TABLE ");
-            printlnIdentifier(getTableName(sourceTable));
+            printlnIdentifier(getTableName(table));
             printIndent();
             print("REPLACE ");
-            printIdentifier(getColumnName(sourceColumn));
+            printIdentifier(getColumnName(column));
             print(" DEFAULT NULL");
             printEndOfStatement();
         }
         print("ALTER TABLE ");
-        printlnIdentifier(getTableName(sourceTable));
+        printlnIdentifier(getTableName(table));
         printIndent();
         print("MODIFY ");
-        writeColumn(sourceTable, targetColumn);
+        if (newDefault != null)
+        {
+            newColumn.setDefaultValue(null);
+        }
+        writeColumn(table, newColumn);
+        if (newDefault != null)
+        {
+            newColumn.setDefaultValue(newDefault);
+        }
         printEndOfStatement();
         if (defaultChanges)
         {
             print("ALTER TABLE ");
-            printlnIdentifier(getTableName(sourceTable));
+            printlnIdentifier(getTableName(table));
             printIndent();
             print("REPLACE ");
-            printIdentifier(getColumnName(sourceColumn));
+            printIdentifier(getColumnName(column));
             if (newDefault != null)
             {
-                writeColumnDefaultValueStmt(sourceTable, targetColumn);
+                writeColumnDefaultValueStmt(table, newColumn);
             }
             else
             {

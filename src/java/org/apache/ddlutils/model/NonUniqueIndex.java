@@ -29,7 +29,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * 
  * @version $Revision: 289996 $
  */
-public class NonUniqueIndex extends IndexImpBase
+public class NonUniqueIndex extends IndexImplBase
 {
     /** Unique ID for serialization purposes. */
     private static final long serialVersionUID = -3591499395114850301L;
@@ -46,6 +46,14 @@ public class NonUniqueIndex extends IndexImpBase
      * {@inheritDoc}
      */
     public Object clone() throws CloneNotSupportedException
+    {
+        return getClone();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Index getClone() throws ModelException
     {
         NonUniqueIndex result = new NonUniqueIndex();
 

@@ -22,7 +22,6 @@ package org.apache.ddlutils.alteration;
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
-import org.apache.ddlutils.model.Table;
 
 /**
  * Represents the addition of an index to a table.
@@ -37,12 +36,12 @@ public class AddIndexChange extends TableChangeImplBase
     /**
      * Creates a new change object.
      * 
-     * @param table    The table to add the index to
-     * @param newIndex The new index
+     * @param tableName The name of the table to add the index to
+     * @param newIndex  The new index
      */
-    public AddIndexChange(Table table, Index newIndex)
+    public AddIndexChange(String tableName, Index newIndex)
     {
-        super(table);
+        super(tableName);
         _newIndex = newIndex;
     }
 

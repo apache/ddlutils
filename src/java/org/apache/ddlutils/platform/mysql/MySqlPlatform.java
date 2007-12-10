@@ -19,9 +19,24 @@ package org.apache.ddlutils.platform.mysql;
  * under the License.
  */
 
+import java.io.IOException;
 import java.sql.Types;
 
 import org.apache.ddlutils.PlatformInfo;
+import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
+import org.apache.ddlutils.alteration.ModelComparator;
+import org.apache.ddlutils.alteration.PrimaryKeyChange;
+import org.apache.ddlutils.alteration.RemoveColumnChange;
+import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
+import org.apache.ddlutils.alteration.TableChange;
+import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
 
 /**
@@ -54,6 +69,7 @@ public class MySqlPlatform extends PlatformImplBase
         info.setNonPKIdentityColumnsSupported(false);
         // MySql returns synthetic default values for pk columns
         info.setSyntheticDefaultValueForRequiredReturned(true);
+        info.setPrimaryKeyColumnAutomaticallyRequired(true);
         info.setCommentPrefix("#");
         // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
         info.setDelimiterToken("`");
@@ -97,5 +113,143 @@ public class MySqlPlatform extends PlatformImplBase
     public String getName()
     {
         return DATABASENAME;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected ModelComparator getModelComparator()
+    {
+        return new MySqlModelComparator(getPlatformInfo(), getTableDefinitionChangesPredicate(), isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected TableDefinitionChangesPredicate getTableDefinitionChangesPredicate()
+    {
+        return new DefaultTableDefinitionChangesPredicate()
+        {
+            protected boolean isSupported(Table intermediateTable, TableChange change)
+            {
+                if (change instanceof AddColumnChange)
+                {
+                    AddColumnChange addColumnChange = (AddColumnChange)change;
+
+                    return !addColumnChange.getNewColumn().isAutoIncrement();
+                }
+                else
+                {
+                    return (change instanceof ColumnDefinitionChange) ||
+                           (change instanceof RemoveColumnChange) ||
+                           (change instanceof AddPrimaryKeyChange) ||
+                           (change instanceof PrimaryKeyChange) ||
+                           (change instanceof RemovePrimaryKeyChange);
+                }
+            }
+        };
+    }
+
+    /**
+     * Processes the addition of a column to a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              AddColumnChange    change) throws IOException
+    {
+        Table  changedTable = findChangedTable(currentModel, change);
+        Column prevColumn   = null;
+
+        if (change.getPreviousColumn() != null)
+        {
+            prevColumn = changedTable.findColumn(change.getPreviousColumn(), isDelimitedIdentifierModeOn());
+        }
+        ((MySqlBuilder)getSqlBuilder()).insertColumn(changedTable, change.getNewColumn(), prevColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the change of the column of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              ColumnDefinitionChange change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        ((MySqlBuilder)getSqlBuilder()).recreateColumn(changedTable, change.getNewColumn());
+    }
+
+    /**
+     * Processes the removal of a column from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              RemoveColumnChange change) throws IOException
+    {
+        Table  changedTable  = findChangedTable(currentModel, change);
+        Column removedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+        ((MySqlBuilder)getSqlBuilder()).dropColumn(changedTable, removedColumn);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the removal of a primary key from a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database               currentModel,
+                              CreationParameters     params,
+                              RemovePrimaryKeyChange change) throws IOException
+    {
+        Table changedTable = findChangedTable(currentModel, change);
+
+        ((MySqlBuilder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
+    }
+
+    /**
+     * Processes the change of the primary key of a table.
+     * 
+     * @param currentModel The current database schema
+     * @param params       The parameters used in the creation of new tables. Note that for existing
+     *                     tables, the parameters won't be applied
+     * @param change       The change object
+     */
+    public void processChange(Database           currentModel,
+                              CreationParameters params,
+                              PrimaryKeyChange   change) throws IOException
+    {
+        Table    changedTable     = findChangedTable(currentModel, change);
+        String[] newPKColumnNames = change.getNewPrimaryKeyColumns();
+        Column[] newPKColumns     = new Column[newPKColumnNames.length];
+
+        for (int colIdx = 0; colIdx < newPKColumnNames.length; colIdx++)
+        {
+            newPKColumns[colIdx] = changedTable.findColumn(newPKColumnNames[colIdx], isDelimitedIdentifierModeOn());
+        }
+        
+        ((MySqlBuilder)getSqlBuilder()).dropPrimaryKey(changedTable);
+        getSqlBuilder().createPrimaryKey(changedTable, newPKColumns);
+        change.apply(currentModel, isDelimitedIdentifierModeOn());
     }
 }

@@ -21,15 +21,9 @@ package org.apache.ddlutils.platform.derby;
 
 import java.io.IOException;
 import java.sql.Types;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.alteration.AddColumnChange;
-import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Column;
-import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
@@ -80,7 +74,7 @@ public class DerbyBuilder extends CloudscapeBuilder
     /**
      * {@inheritDoc}
      */
-    public void writeExternalIndexDropStmt(Table table, Index index) throws IOException
+    public void dropIndex(Table table, Index index) throws IOException
     {
         // Index names in Derby are unique to a schema and hence Derby does not
         // use the ON <tablename> clause
@@ -116,52 +110,5 @@ public class DerbyBuilder extends CloudscapeBuilder
             printIdentifier(getColumnName(sourceColumn));
             print(")");
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected void processTableStructureChanges(Database currentModel, Database desiredModel, Table sourceTable, Table targetTable, Map parameters, List changes) throws IOException
-    {
-        // Derby provides a way to alter the size of a column but it is limited
-        // (no pk or fk columns, only for VARCHAR columns), so we don't use it
-        for (Iterator changeIt = changes.iterator(); changeIt.hasNext();)
-        {
-            TableChange change = (TableChange)changeIt.next();
-
-            if (change instanceof AddColumnChange)
-            {
-                AddColumnChange addColumnChange = (AddColumnChange)change;
-
-                // Derby can only add not insert columns, and the columns
-                // cannot be identity columns
-                if (addColumnChange.isAtEnd() && !addColumnChange.getNewColumn().isAutoIncrement())
-                {
-                    processChange(currentModel, desiredModel, addColumnChange);
-                    changeIt.remove();
-                }
-            }
-        }
-        super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
-    }
-
-    /**
-     * Processes the addition of a column to a table.
-     * 
-     * @param currentModel The current database schema
-     * @param desiredModel The desired database schema
-     * @param change       The change object
-     */
-    protected void processChange(Database        currentModel,
-                                 Database        desiredModel,
-                                 AddColumnChange change) throws IOException
-    {
-        print("ALTER TABLE ");
-        printlnIdentifier(getTableName(change.getChangedTable()));
-        printIndent();
-        print("ADD COLUMN ");
-        writeColumn(change.getChangedTable(), change.getNewColumn());
-        printEndOfStatement();
-        change.apply(currentModel, getPlatform().isDelimitedIdentifierModeOn());
     }
 }
