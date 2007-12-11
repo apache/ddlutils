@@ -63,6 +63,7 @@ public class SapDbPlatform extends PlatformImplBase
 
         info.setMaxIdentifierLength(32);
         info.setPrimaryKeyColumnAutomaticallyRequired(true);
+        info.setMultipleIdentityColumnsSupported(false);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
 

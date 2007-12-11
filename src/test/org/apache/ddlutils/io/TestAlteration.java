@@ -27,6 +27,7 @@ import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
@@ -1416,6 +1417,12 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testDropFKAndCorrespondingIndex()
     {
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // Firebird does not allow an index and a foreign key in the same table to have the same name
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -1476,6 +1483,12 @@ public class TestAlteration extends RoundtripTestBase
      */
     public void testDropFKButNotCorrespondingIndex()
     {
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // Firebird does not allow an index and a foreign key in the same table to have the same name
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -1541,8 +1554,11 @@ public class TestAlteration extends RoundtripTestBase
     public void testDropFKAndDifferentIndexWithSameName()
     {
         // MySql/InnoDB doesn't allow the creation of a foreign key and index with the same name
+        // unless the index can be used as the FK's index
+        // Firebird does not allow an index and a foreign key in the same table to have the same name at all
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             return;
         }
@@ -1607,8 +1623,11 @@ public class TestAlteration extends RoundtripTestBase
     public void testDropFKButNotDifferentIndexWithSameName()
     {
         // MySql/InnoDB doesn't allow the creation of a foreign key and index with the same name
+        // unless the index can be used as the FK's index
+        // Firebird does not allow an index and a foreign key in the same table to have the same name at all
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             return;
         }

@@ -22,11 +22,18 @@ package org.apache.ddlutils;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
+
+import junit.framework.AssertionFailedError;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
@@ -36,6 +43,8 @@ import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
+import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 
 /**
  * Base class for database writer tests.
@@ -233,12 +242,19 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected void tearDown() throws Exception
     {
-        if (_model != null)
+        try
         {
-            dropDatabase();
-            _model = null;
+            if (_model != null)
+            {
+                dropDatabase();
+                _model = null;
+            }
         }
-        super.tearDown();
+        finally
+        {
+            assertAndEnsureClearDatabase();
+            super.tearDown();
+        }
     }
 
     /**
@@ -267,7 +283,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             _model = model;
 
             getPlatform().setSqlCommentsOn(false);
-            getPlatform().createTables(_model, getTableCreationParameters(_model), false, false);
+            getPlatform().createModel(_model, getTableCreationParameters(_model), false, false);
         }
         catch (Exception ex)
         {
@@ -292,21 +308,19 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     /**
      * Alters the database to match the given model.
      * 
-     * @param model The model
+     * @param desiredModel The model
      */
-    protected void alterDatabase(Database model) throws DatabaseOperationException
+    protected void alterDatabase(Database desiredModel) throws DatabaseOperationException
     {
-        Properties props   = getTestProperties();
-        String     catalog = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
-        String     schema  = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
-
         try
         {
-            _model = model;
+            _model = desiredModel;
             _model.resetDynaClassCache();
 
+            Database liveModel = readModelFromDatabase(desiredModel.getName());
+
             getPlatform().setSqlCommentsOn(false);
-            getPlatform().alterTables(catalog, schema, null, _model, getTableCreationParameters(_model), false);
+            getPlatform().alterModel(liveModel, _model, getTableCreationParameters(_model), false);
         }
         catch (Exception ex)
         {
@@ -344,9 +358,170 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected void dropDatabase() throws DatabaseOperationException
     {
-        getPlatform().dropTables(_model, true);
+        getPlatform().dropModel(_model, true);
     }
 
+    /**
+     * Checks that the database is clear, and if not clears it (no tables, sequences etc. left) and
+     * throws an {@link AssertionFailedError}.
+     */
+    protected void assertAndEnsureClearDatabase()
+    {
+        Database liveModel = readModelFromDatabase("tmp");
+        boolean  hasStuff  = false;
+
+        if (liveModel.getTableCount() > 0)
+        {
+            hasStuff = true;
+            try
+            {
+                getPlatform().dropModel(liveModel, true);
+            }
+            catch (Exception ex)
+            {
+                getLog().error("Could not clear database", ex);
+            }
+        }
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            Connection connection = null;
+
+            try
+            {
+                connection = getPlatform().borrowConnection();
+
+                hasStuff = hasStuff | dropTriggers(connection);
+                hasStuff = hasStuff | dropGenerators(connection);
+            }
+            catch (Exception ex)
+            {
+                getLog().error("Could not clear database", ex);
+            }
+            finally
+            {
+                getPlatform().returnConnection(connection);
+            }
+        }
+        // TODO: Check for sequences
+        if (hasStuff)
+        {
+            fail("Database is not empty after test");
+        }
+    }
+
+    /**
+     * Drops generators left by a test in a Firebird/Interbase database.
+     * 
+     * @param connection The database connection
+     * @return Whether generators were dropped
+     */
+    private boolean dropGenerators(Connection connection)
+    {
+        Statement stmt          = null;
+        boolean   hasGenerators = false;
+
+        try
+        {
+            stmt = connection.createStatement();
+
+            ResultSet rs    = stmt.executeQuery("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME NOT LIKE '%$%'");
+            List      names = new ArrayList();
+    
+            while (rs.next())
+            {
+                names.add(rs.getString(1));
+            }
+            rs.close();
+    
+            for (Iterator it = names.iterator(); it.hasNext();)
+            {
+                String name = (String)it.next();
+
+                if (name.toLowerCase().startsWith("gen_"))
+                {
+                    hasGenerators = true;
+                    stmt.execute("DROP GENERATOR " + name);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            getLog().error("Error while dropping the remaining generators", ex);
+        }
+        finally
+        {
+            if (stmt != null)
+            {
+                try
+                {
+                    stmt.close();
+                }
+                catch (Exception ex)
+                {
+                    getLog().error("Error while clearing the database", ex);
+                }
+            }
+        }
+        return hasGenerators;
+    }
+
+    /**
+     * Drops triggers left by a test in a Firebird/Interbase database.
+     * 
+     * @param connection The database connection
+     * @return Whether triggers were dropped
+     */
+    private boolean dropTriggers(Connection connection)
+    {
+        Statement stmt        = null;
+        boolean   hasTriggers = false;
+
+        try
+        {
+            stmt = connection.createStatement();
+
+            ResultSet rs    = stmt.executeQuery("SELECT * FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0");
+            List      names = new ArrayList();
+    
+            while (rs.next())
+            {
+                names.add(rs.getString(1));
+            }
+            rs.close();
+    
+            for (Iterator it = names.iterator(); it.hasNext();)
+            {
+                String name = (String)it.next();
+
+                if (name.toLowerCase().startsWith("trg_"))
+                {
+                    hasTriggers = true;
+                    stmt.execute("DROP TRIGGER " + name);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            getLog().error("Error while dropping the remaining triggers", ex);
+        }
+        finally
+        {
+            if (stmt != null)
+            {
+                try
+                {
+                    stmt.close();
+                }
+                catch (Exception ex)
+                {
+                    getLog().error("Error while clearing the database", ex);
+                }
+            }
+        }
+        return hasTriggers;
+    }
+    
     /**
      * Reads the database model from a live database.
      * 
@@ -370,11 +545,9 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected String getAlterTablesSql(Database desiredModel)
     {
-    	Properties props   = getTestProperties();
-        String     catalog = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
-        String     schema  = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
+        Database liveModel = readModelFromDatabase(desiredModel.getName());
 
-        return getPlatform().getAlterTablesSql(catalog, schema, null, desiredModel);
+        return getPlatform().getAlterModelSql(liveModel, desiredModel, getTableCreationParameters(desiredModel));
     }
 
     /**

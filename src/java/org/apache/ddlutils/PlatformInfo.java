@@ -65,6 +65,9 @@ public class PlatformInfo
     /** Whether identity specification is supported for non-primary key columns. */
     private boolean _nonPKIdentityColumnsSupported = true;
 
+    /** Whether multiple identity columns in the same table are supported. */
+    private boolean _multipleIdentityColumnsSupported = true;
+
     /** Whether the auto-increment definition is done via the DEFAULT part of the column definition. */
     private boolean _defaultValueUsedForIdentitySpec = false;
 
@@ -353,6 +356,27 @@ public class PlatformInfo
     public void setNonPKIdentityColumnsSupported(boolean supportingNonPKIdentityColumns)
     {
         _nonPKIdentityColumnsSupported = supportingNonPKIdentityColumns;
+    }
+
+    /**
+     * Determines whether multiple columns in the same table can be auto-incrementing (IDENTITY columns).
+     *
+     * @return <code>true</code> if multiple columns can be auto-incrementing in the same table
+     */
+    public boolean isMultipleIdentityColumnsSupported()
+    {
+        return _multipleIdentityColumnsSupported;
+    }
+
+    /**
+     * Specifies whether multiple columns in the same table can be auto-incrementing (IDENTITY columns).
+     *
+     * @param supportingMultipleIdentityColumns <code>true</code> if multiple columns can be auto-incrementing
+     *                                          in the same table
+     */
+    public void setMultipleIdentityColumnsSupported(boolean supportingMultipleIdentityColumns)
+    {
+        _multipleIdentityColumnsSupported = supportingMultipleIdentityColumns;
     }
 
     /**

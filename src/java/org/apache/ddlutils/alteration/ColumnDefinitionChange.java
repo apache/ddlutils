@@ -113,8 +113,8 @@ public class ColumnDefinitionChange extends ColumnChangeImplBase
             return true;
         }
         else if (scaleMatters &&
-                 (sourceColumn.getPrecisionRadix() != targetColumn.getPrecisionRadix()) ||
-                  (sourceColumn.getScale() != targetColumn.getScale()))
+                 ((sourceColumn.getPrecisionRadix() != targetColumn.getPrecisionRadix()) ||
+                  (sourceColumn.getScale() != targetColumn.getScale())))
         {
             return true;
         }

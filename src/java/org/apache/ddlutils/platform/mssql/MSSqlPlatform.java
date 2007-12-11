@@ -74,6 +74,7 @@ public class MSSqlPlatform extends PlatformImplBase
         info.setMaxIdentifierLength(128);
         info.setPrimaryKeyColumnAutomaticallyRequired(true);
         info.setIdentityColumnAutomaticallyRequired(true);
+        info.setMultipleIdentityColumnsSupported(false);
 
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE",         Types.LONGVARBINARY);
         // BIGINT will be mapped back to BIGINT by the model reader 

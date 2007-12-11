@@ -40,7 +40,6 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
-import org.apache.ddlutils.platform.MetaDataColumnDescriptor;
 
 /**
  * The Jdbc Model Reader for Firebird.
@@ -174,7 +173,7 @@ public class FirebirdModelReader extends JdbcModelReader
 
     	try
     	{
-            ResultSet rs = stmt.executeQuery("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS");
+            ResultSet rs = stmt.executeQuery("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME NOT LIKE '%$%'");
 
             while (rs.next())
             {

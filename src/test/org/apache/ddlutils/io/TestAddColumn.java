@@ -27,12 +27,11 @@ import junit.framework.Test;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.platform.db2.Db2Platform;
 import org.apache.ddlutils.platform.db2.Db2v8Platform;
+import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
-import org.apache.ddlutils.platform.maxdb.MaxDbPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
-import org.apache.ddlutils.platform.sapdb.SapDbPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
@@ -158,11 +157,9 @@ public class TestAddColumn extends RoundtripTestBase
     public void testAddSecondAutoIncrementColumn()
     {
         if (!getPlatformInfo().isNonPKIdentityColumnsSupported() ||
-            SybasePlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            SapDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            !getPlatformInfo().isMultipleIdentityColumnsSupported())
         {
-            // Sybase and MaxDb/SapDb does not support more than one identity column per table
+            // Some databases do not support more than one identity column per table
             return;
         }
 
@@ -468,12 +465,14 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             // MySql uses an empty string to initialize the new pk column
             assertEquals((Object)"",     beans.get(0), "pk");
             assertEquals(new Integer(1), beans.get(0), "avalue");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -531,6 +530,10 @@ public class TestAddColumn extends RoundtripTestBase
         {
             assertEquals(new BigDecimal(1), beans.get(0), "pk");
         }
+        else if (HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(0), beans.get(0), "pk");
+        }
         else
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
@@ -545,7 +548,8 @@ public class TestAddColumn extends RoundtripTestBase
         if (Db2Platform.DATABASENAME.equals(getPlatform().getName()) ||
             Db2v8Platform.DATABASENAME.equals(getPlatform().getName()) ||
             SybasePlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName())) {
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
             // Db2, Sybase, Interbase require that all primary key columns be required, but they don't make them so automatically
             return;
         }
@@ -580,13 +584,15 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(0),  beans.get(0), "pk1");
             assertEquals((Object)"",      beans.get(0), "pk2");
             assertEquals(new Double(2.0), beans.get(0), "pk3");
             assertEquals(new Integer(1),  beans.get(0), "avalue");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -626,13 +632,15 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(0),  beans.get(0), "pk1");
             assertEquals((Object)"",      beans.get(0), "pk2");
             assertEquals(new Double(2.0), beans.get(0), "pk3");
             assertEquals(new Integer(1),  beans.get(0), "avalue");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -713,12 +721,14 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1),  beans.get(0), "pk1");
             assertEquals(new Integer(0),  beans.get(0), "pk2");
             assertEquals(new Integer(2),  beans.get(0), "avalue");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -830,13 +840,15 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1),  beans.get(0), "pk1");
             assertEquals((Object)"",      beans.get(0), "pk2");
             assertEquals(new Double(0.0), beans.get(0), "pk3");
             assertEquals((Object)null,    beans.get(0), "avalue");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -1055,16 +1067,19 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1),    beans.get(0), "pk");
             assertEquals(new BigDecimal(0), beans.get(0), "avalue");
         }
-        else if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals((Object)null,   beans.get(0), "avalue");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -1153,7 +1168,8 @@ public class TestAddColumn extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals((Object)null,   beans.get(0), "avalue");
@@ -1251,18 +1267,21 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(1), beans.get(0), "avalue1");
             assertEquals((Object)"",     beans.get(0), "avalue2");
         }
-        else if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals((Object)null,   beans.get(0), "avalue1");
             assertEquals((Object)null,   beans.get(0), "avalue2");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -1397,11 +1416,18 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) 
+        {
             assertEquals(new Integer(1),    beans.get(0), "pk");
             assertEquals(new BigDecimal(0), beans.get(0), "avalue");
         }
-        else {
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk");
+            assertEquals((Object)null,   beans.get(0), "avalue");
+        }
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -1490,7 +1516,15 @@ public class TestAddColumn extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        assertEquals(new Integer(1), beans.get(0), "avalue");
+        assertEquals(new Integer(1), beans.get(0), "pk");
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals((Object)null, beans.get(0), "avalue");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "avalue");
+        }
     }
 
     /**
@@ -1580,12 +1614,20 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(1), beans.get(0), "avalue1");
             assertEquals((Object)"",     beans.get(0), "avalue2");
         }
-        else {
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk");
+            assertEquals((Object)null,   beans.get(0), "avalue1");
+            assertEquals((Object)null,   beans.get(0), "avalue2");
+        }
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -1633,12 +1675,20 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(1), beans.get(0), "avalue1");
             assertEquals((Object)"",     beans.get(0), "avalue2");
         }
-        else {
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk");
+            assertEquals(new Integer(1), beans.get(0), "avalue1");
+            assertEquals((Object)null,   beans.get(0), "avalue2");
+        }
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -1791,18 +1841,21 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1),    beans.get(0), "pk");
             assertEquals(new Integer(2),    beans.get(0), "avalue1");
             assertEquals(new BigDecimal(0), beans.get(0), "avalue2");
         }
-        else if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(2), beans.get(0), "avalue1");
             assertEquals((Object)null,   beans.get(0), "avalue2");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -1904,7 +1957,8 @@ public class TestAddColumn extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
-        if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(2), beans.get(0), "avalue1");
@@ -2017,20 +2071,23 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1),  beans.get(0), "pk");
             assertEquals(new Integer(2),  beans.get(0), "avalue1");
             assertEquals(new Integer(3),  beans.get(0), "avalue2");
             assertEquals(new Double(0.0), beans.get(0), "avalue3");
         }
-        else if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(2), beans.get(0), "avalue1");
             assertEquals((Object)null,   beans.get(0), "avalue2");
             assertEquals((Object)null,   beans.get(0), "avalue3");
         }
-        else {
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -2185,14 +2242,22 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             // MySql uses the default value for the column's type to initialize
             // the new column for existing rows
             assertEquals(new Integer(1),    beans.get(0), "pk");
             assertEquals(new Integer(2),    beans.get(0), "avalue1");
             assertEquals(new BigDecimal(0), beans.get(0), "avalue2");
         }
-        else {
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk");
+            assertEquals(new Integer(2), beans.get(0), "avalue1");
+            assertEquals((Object)null,   beans.get(0), "avalue2");
+        }
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -2294,8 +2359,16 @@ public class TestAddColumn extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
+        assertEquals(new Integer(1), beans.get(0), "pk");
         assertEquals(new Integer(2), beans.get(0), "avalue1");
-        assertEquals(new Integer(1), beans.get(0), "avalue2");
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals((Object)null, beans.get(0), "avalue2");
+        }
+        else
+        {
+            assertEquals(new Integer(1), beans.get(0), "avalue2");
+        }
     }
 
     /**
@@ -2398,13 +2471,22 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1),  beans.get(0), "pk");
             assertEquals(new Integer(2),  beans.get(0), "avalue1");
             assertEquals(new Integer(3),  beans.get(0), "avalue2");
             assertEquals(new Double(0.0), beans.get(0), "avalue3");
         }
-        else {
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1),  beans.get(0), "pk");
+            assertEquals(new Integer(2),  beans.get(0), "avalue1");
+            assertEquals((Object)null,    beans.get(0), "avalue2");
+            assertEquals((Object)null,    beans.get(0), "avalue3");
+        }
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -2458,13 +2540,22 @@ public class TestAddColumn extends RoundtripTestBase
         List beans = getRows("roundtrip");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) {
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
             assertEquals(new Integer(1),  beans.get(0), "pk");
             assertEquals(new Integer(2),  beans.get(0), "avalue1");
             assertEquals(new Integer(3),  beans.get(0), "avalue2");
             assertEquals(new Double(0.0), beans.get(0), "avalue3");
         }
-        else {
+        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1),  beans.get(0), "pk");
+            assertEquals(new Integer(2),  beans.get(0), "avalue1");
+            assertEquals(new Integer(3),  beans.get(0), "avalue2");
+            assertEquals((Object)null,    beans.get(0), "avalue3");
+        }
+        else
+        {
             assertTrue(beans.isEmpty());
         }
     }
@@ -2576,6 +2667,14 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddFKAndLocalRequiredColumn()
     {
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql does not allow adding a required column to a fk without a default value
+            // or as an IDENTITY column
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -2615,7 +2714,8 @@ public class TestAddColumn extends RoundtripTestBase
         List beans2 = getRows("roundtrip2");
 
         assertEquals(new BigDecimal(1), beans1.get(0), "pk");
-        if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(2), beans2.get(0), "pk");
             assertEquals((Object)null,   beans2.get(0), "avalue");
@@ -2725,7 +2825,8 @@ public class TestAddColumn extends RoundtripTestBase
 
         assertEquals(new Integer(1), beans1.get(0), "pk");
         assertEquals(new Integer(2), beans2.get(0), "pk");
-        if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals((Object)null, beans2.get(0), "avalue");
         }
@@ -2788,6 +2889,14 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddFKAndMultipleLocalColumns()
     {
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql does not allow adding a required column to a fk without a default value
+            // or as an IDENTITY column
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database name='roundtriptest'>\n"+
@@ -2832,7 +2941,8 @@ public class TestAddColumn extends RoundtripTestBase
 
         assertEquals(new Integer(1), beans1.get(0), "pk1");
         assertEquals(new Double(2),  beans1.get(0), "pk2");
-        if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(3), beans2.get(0), "pk");
             assertEquals((Object)null,   beans2.get(0), "avalue1");
@@ -3302,7 +3412,8 @@ public class TestAddColumn extends RoundtripTestBase
         assertEquals(new Integer(1), beans1.get(0), "pk2");
         assertEquals(new Integer(2), beans2.get(0), "pk");
         assertEquals(new Integer(1), beans2.get(0), "avalue1");
-        if (InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals((Object)null, beans2.get(0), "avalue2");
         }
