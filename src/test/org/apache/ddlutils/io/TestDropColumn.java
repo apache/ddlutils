@@ -82,7 +82,7 @@ public class TestDropColumn extends RoundtripTestBase
      */
     public void testDropAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -266,7 +266,7 @@ public class TestDropColumn extends RoundtripTestBase
      */
     public void testDropMultipleColumnsInclAutoIncrement()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }

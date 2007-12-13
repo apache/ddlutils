@@ -72,6 +72,7 @@ public class InterbasePlatform extends PlatformImplBase
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
         info.setSystemForeignKeyIndicesAlwaysNonUnique(true);
+        info.setPrimaryKeyColumnsHaveToBeRequired(true);
 
         // BINARY and VARBINARY are also handled by the InterbaseBuilder.getSqlType method
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);

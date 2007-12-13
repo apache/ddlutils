@@ -62,7 +62,7 @@ public class PostgreSqlModelReader extends JdbcModelReader
 
         if (table != null)
         {
-            // PostgreSQL also returns unique indics for non-pk auto-increment columns
+            // PostgreSQL also returns unique indexes for pk and non-pk auto-increment columns
             // which are of the form "[table]_[column]_key"
             HashMap uniquesByName = new HashMap();
     
@@ -78,7 +78,8 @@ public class PostgreSqlModelReader extends JdbcModelReader
             for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
             {
                 Column column = table.getColumn(columnIdx);
-                if (column.isAutoIncrement() && !column.isPrimaryKey())
+
+                if (column.isAutoIncrement())
                 {
                     String indexName = table.getName() + "_" + column.getName() + "_key";
     

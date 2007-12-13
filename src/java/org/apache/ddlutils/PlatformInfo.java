@@ -49,7 +49,13 @@ public class PlatformInfo
     
     /** Whether primary key constraints are embedded inside the create table statement. */
     private boolean _primaryKeyEmbedded = true;
-    
+
+    /** Whether primary key columns have to be required, too. */
+    private boolean _primaryKeyColumnsHaveToBeRequired = false;
+
+    /** Whether mixed identity and non-identity columns in a primary key is supported. */
+    private boolean _mixingIdentityAndNormalPrimaryKeyColumnsSupported = true;
+
     /** Whether foreign key constraints are embedded inside the create table statement. */
     private boolean _foreignKeysEmbedded = false;
 
@@ -63,7 +69,7 @@ public class PlatformInfo
     private boolean _indicesEmbedded = false;
 
     /** Whether identity specification is supported for non-primary key columns. */
-    private boolean _nonPKIdentityColumnsSupported = true;
+    private boolean _nonPrimaryKeyIdentityColumnsSupported = true;
 
     /** Whether multiple identity columns in the same table are supported. */
     private boolean _multipleIdentityColumnsSupported = true;
@@ -253,6 +259,47 @@ public class PlatformInfo
     }
 
     /**
+     * Determines whether the primary key constraints have to be required, as well.
+     * 
+     * @return <code>true</code> if pk constraints have to be required
+     */
+    public boolean isPrimaryKeyColumnsHaveToBeRequired()
+    {
+        return _primaryKeyColumnsHaveToBeRequired;
+    }
+
+    /**
+     * Specifies whether the primary key constraints have to be required, as well.
+     * 
+     * @param primaryKeyColumnsHaveToBeRequired Whether pk constraints need to be required
+     */
+    public void setPrimaryKeyColumnsHaveToBeRequired(boolean primaryKeyColumnsHaveToBeRequired)
+    {
+        _primaryKeyColumnsHaveToBeRequired = primaryKeyColumnsHaveToBeRequired;
+    }
+
+    /**
+     * Determines whether primary key can contain identity and non-identity columns at the same time.
+     * 
+     * @return <code>true</code> if idenity and non-identity columns can be mixed in the pk
+     */
+    public boolean isMixingIdentityAndNormalPrimaryKeyColumnsSupported()
+    {
+        return _mixingIdentityAndNormalPrimaryKeyColumnsSupported;
+    }
+
+    /**
+     * Specifies whether primary key can contain identity and non-identity columns at the same time.
+     * 
+     * @param mixingIdentityAndNormalPrimaryKeyColumnsSupported Whether idenity and non-identity columns
+     *                                                          can be mixed in the pk
+     */
+    public void setMixingIdentityAndNormalPrimaryKeyColumnsSupported(boolean mixingIdentityAndNormalPrimaryKeyColumnsSupported)
+    {
+        _mixingIdentityAndNormalPrimaryKeyColumnsSupported = mixingIdentityAndNormalPrimaryKeyColumnsSupported;
+    }
+    
+    /**
      * Determines whether foreign key constraints are embedded in the create 
      * table clause or as seperate alter table statements. Per default,
      * foreign keys are external.
@@ -342,9 +389,9 @@ public class PlatformInfo
      *
      * @return <code>true</code> if normal non-PK columns can be auto-incrementing
      */
-    public boolean isNonPKIdentityColumnsSupported()
+    public boolean isNonPrimaryKeyIdentityColumnsSupported()
     {
-        return _nonPKIdentityColumnsSupported;
+        return _nonPrimaryKeyIdentityColumnsSupported;
     }
 
     /**
@@ -353,9 +400,9 @@ public class PlatformInfo
      * @param supportingNonPKIdentityColumns <code>true</code> if normal non-PK columns can
      *                                       be auto-incrementing
      */
-    public void setNonPKIdentityColumnsSupported(boolean supportingNonPKIdentityColumns)
+    public void setNonPrimaryKeyIdentityColumnsSupported(boolean supportingNonPKIdentityColumns)
     {
-        _nonPKIdentityColumnsSupported = supportingNonPKIdentityColumns;
+        _nonPrimaryKeyIdentityColumnsSupported = supportingNonPKIdentityColumns;
     }
 
     /**

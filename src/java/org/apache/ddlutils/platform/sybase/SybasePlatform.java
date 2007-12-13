@@ -82,6 +82,7 @@ public class SybasePlatform extends PlatformImplBase
         info.setNullAsDefaultValueRequired(true);
         info.setIdentityColumnAutomaticallyRequired(true);
         info.setMultipleIdentityColumnsSupported(false);
+        info.setPrimaryKeyColumnsHaveToBeRequired(true);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
 

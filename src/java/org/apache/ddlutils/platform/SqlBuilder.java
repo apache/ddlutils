@@ -1361,7 +1361,7 @@ public abstract class SqlBuilder
         }
         if (column.isAutoIncrement() && !getPlatformInfo().isDefaultValueUsedForIdentitySpec())
         {
-            if (!getPlatformInfo().isNonPKIdentityColumnsSupported() && !column.isPrimaryKey())
+            if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() && !column.isPrimaryKey())
             {
                 throw new ModelException("Column "+column.getName()+" in table "+table.getName()+" is auto-incrementing but not a primary key column, which is not supported by the platform");
             }

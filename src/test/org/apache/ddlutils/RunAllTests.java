@@ -24,6 +24,7 @@ import org.apache.ddlutils.alteration.TestModelComparison;
 import org.apache.ddlutils.dynabean.TestDynaSqlQueries;
 import org.apache.ddlutils.io.TestAddColumn;
 import org.apache.ddlutils.io.TestAlteration;
+import org.apache.ddlutils.io.TestChangeColumn;
 import org.apache.ddlutils.io.TestConstraints;
 import org.apache.ddlutils.io.TestDataReaderAndWriter;
 import org.apache.ddlutils.io.TestDatabaseIO;
@@ -129,6 +130,7 @@ public class RunAllTests extends TestCase
             suite.addTestSuite(TestConstraints.class);
             suite.addTestSuite(TestAlteration.class);
             suite.addTestSuite(TestAddColumn.class);
+            suite.addTestSuite(TestChangeColumn.class);
             suite.addTestSuite(TestDropColumn.class);
             suite.addTestSuite(TestMisc.class);
         }

@@ -84,7 +84,7 @@ public class TestInsertColumn extends RoundtripTestBase
      */
     public void testInsertAutoIncrementColumn()
     {
-    	if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+    	if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
     	{
     		return;
     	}
@@ -227,7 +227,7 @@ public class TestInsertColumn extends RoundtripTestBase
      */
     public void testInsertRequiredAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }

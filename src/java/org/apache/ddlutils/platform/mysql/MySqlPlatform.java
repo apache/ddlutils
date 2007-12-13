@@ -66,7 +66,9 @@ public class MySqlPlatform extends PlatformImplBase
         info.setNullAsDefaultValueRequired(true);
         info.setDefaultValuesForLongTypesSupported(false);
         // see http://dev.mysql.com/doc/refman/4.1/en/example-auto-increment.html
-        info.setNonPKIdentityColumnsSupported(false);
+        info.setNonPrimaryKeyIdentityColumnsSupported(false);
+        info.setMultipleIdentityColumnsSupported(false);
+        info.setMixingIdentityAndNormalPrimaryKeyColumnsSupported(false);
         // MySql returns synthetic default values for pk columns
         info.setSyntheticDefaultValueForRequiredReturned(true);
         info.setPrimaryKeyColumnAutomaticallyRequired(true);

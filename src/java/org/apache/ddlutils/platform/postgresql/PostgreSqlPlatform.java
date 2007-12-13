@@ -33,6 +33,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.alteration.AddColumnChange;
+import org.apache.ddlutils.alteration.ModelComparator;
 import org.apache.ddlutils.alteration.RemoveColumnChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
@@ -65,6 +66,7 @@ public class PostgreSqlPlatform extends PlatformImplBase
     {
         PlatformInfo info = getPlatformInfo();
 
+        info.setPrimaryKeyColumnAutomaticallyRequired(true);
         // this is the default length though it might be changed when building PostgreSQL
         // in file src/include/postgres_ext.h
         info.setMaxIdentifierLength(31);
@@ -249,6 +251,17 @@ public class PostgreSqlPlatform extends PlatformImplBase
         {
             super.setObject(statement, sqlIndex, dynaBean, property);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected ModelComparator getModelComparator()
+    {
+        ModelComparator comparator = super.getModelComparator();
+
+        comparator.setCanDropPrimaryKeyColumns(false);
+        return comparator;
     }
 
     /**

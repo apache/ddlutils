@@ -215,7 +215,7 @@ public class TestConstraints extends RoundtripTestBase
     public void testAutoIncrementIntegerColumn()
     {
         // only test this if the platform supports it
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }

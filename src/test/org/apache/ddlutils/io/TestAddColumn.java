@@ -25,11 +25,10 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.ddlutils.platform.db2.Db2Platform;
-import org.apache.ddlutils.platform.db2.Db2v8Platform;
 import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
+import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
@@ -91,7 +90,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddAutoIncrementColumn()
     {
-    	if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+    	if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
     	{
     		return;
     	}
@@ -156,10 +155,9 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddSecondAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported() ||
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
             !getPlatformInfo().isMultipleIdentityColumnsSupported())
         {
-            // Some databases do not support more than one identity column per table
             return;
         }
 
@@ -232,10 +230,7 @@ public class TestAddColumn extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of a column with a default value. Note that depending
-     * on whether the database supports this via a statement, this test may fail.
-     * For instance, Sql Server has a statement for this which means that the
-     * existing value in column avalue won't be changed and thus the test fails.
+     * Tests the addition of a column with a default value.
      */
     public void testAddColumnWithDefault()
     {
@@ -264,11 +259,7 @@ public class TestAddColumn extends RoundtripTestBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
-
-        // we cannot be sure whether the default algorithm is used (which will apply the
-        // default value even to existing columns with NULL in it) or the database supports
-        // it directly (in which case it might still be NULL)
+        List   beans  = getRows("roundtrip");
         Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
         assertTrue((avalue == null) || new Double(2).equals(avalue));
@@ -279,7 +270,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddRequiredAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -340,10 +331,7 @@ public class TestAddColumn extends RoundtripTestBase
     }
 
     /**
-     * Tests the addition of a column with a default value. Note that depending
-     * on whether the database supports this via a statement, this test may fail.
-     * For instance, Sql Server has a statement for this which means that the
-     * existing value in column avalue won't be changed and thus the test fails.
+     * Tests the addition of a column with a default value.
      */
     public void testAddRequiredColumnWithDefault()
     {
@@ -372,11 +360,7 @@ public class TestAddColumn extends RoundtripTestBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
-
-        // we cannot be sure whether the default algorithm is used (which will apply the
-        // default value even to existing columns with NULL in it) or the database supports
-        // it directly (in which case it might still be NULL)
+        List   beans  = getRows("roundtrip");
         Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
         assertTrue((avalue == null) || "sometext".equals(avalue));
@@ -417,18 +401,12 @@ public class TestAddColumn extends RoundtripTestBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
+        List   beans   = getRows("roundtrip");
+        Object avalue3 = ((DynaBean)beans.get(0)).get("avalue3");
 
         assertEquals((Object)"test", beans.get(0), "avalue1");
         assertEquals(new Integer(3), beans.get(0), "avalue2");
-
-        // we cannot be sure whether the default algorithm is used (which will apply the
-        // default value even to existing columns with NULL in it) or the database supports
-        // it dircetly (in which case it might still be NULL)
-        Object avalue3 = ((DynaBean)beans.get(0)).get("avalue3");
-
         assertTrue((avalue3 == null) || new Double(1.0).equals(avalue3));
-        
         assertEquals((Object)null, beans.get(0), "avalue4");
     }
 
@@ -469,6 +447,12 @@ public class TestAddColumn extends RoundtripTestBase
         {
             // MySql uses an empty string to initialize the new pk column
             assertEquals((Object)"",     beans.get(0), "pk");
+            assertEquals(new Integer(1), beans.get(0), "avalue");
+        }
+        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // Mckoi uses null to initialize the new pk column
+            assertEquals((Object)null,   beans.get(0), "pk");
             assertEquals(new Integer(1), beans.get(0), "avalue");
         }
         else
@@ -545,12 +529,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddPKAndMultipleColumns()
     {
-        if (Db2Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            Db2v8Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            SybasePlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (getPlatformInfo().isPrimaryKeyColumnsHaveToBeRequired())
         {
-            // Db2, Sybase, Interbase require that all primary key columns be required, but they don't make them so automatically
             return;
         }
 
@@ -588,6 +568,13 @@ public class TestAddColumn extends RoundtripTestBase
         {
             assertEquals(new Integer(0),  beans.get(0), "pk1");
             assertEquals((Object)"",      beans.get(0), "pk2");
+            assertEquals(new Double(2.0), beans.get(0), "pk3");
+            assertEquals(new Integer(1),  beans.get(0), "avalue");
+        }
+        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals((Object)null,    beans.get(0), "pk1");
+            assertEquals((Object)null,    beans.get(0), "pk2");
             assertEquals(new Double(2.0), beans.get(0), "pk3");
             assertEquals(new Integer(1),  beans.get(0), "avalue");
         }
@@ -639,6 +626,13 @@ public class TestAddColumn extends RoundtripTestBase
             assertEquals(new Double(2.0), beans.get(0), "pk3");
             assertEquals(new Integer(1),  beans.get(0), "avalue");
         }
+        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals((Object)null,    beans.get(0), "pk1");
+            assertEquals((Object)null,    beans.get(0), "pk2");
+            assertEquals(new Double(2.0), beans.get(0), "pk3");
+            assertEquals(new Integer(1),  beans.get(0), "avalue");
+        }
         else
         {
             assertTrue(beans.isEmpty());
@@ -650,9 +644,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddPKAndMultipleColumnsInclAutoIncrement()
     {
-        if (HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (!getPlatformInfo().isMixingIdentityAndNormalPrimaryKeyColumnsSupported())
         {
-            // the IDENTITY column has to be the only PK column
             return;
         }
 
@@ -683,7 +676,19 @@ public class TestAddColumn extends RoundtripTestBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        assertTrue(getRows("roundtrip").isEmpty());
+        List beans = getRows("roundtrip");
+
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk1");
+            assertEquals((Object)null,   beans.get(0), "pk2");
+            assertEquals((Object)null,   beans.get(0), "pk3");
+            assertEquals(new Integer(1), beans.get(0), "avalue");
+        }
+        else
+        {
+            assertTrue(beans.isEmpty());
+        }
     }
 
     /**
@@ -727,6 +732,12 @@ public class TestAddColumn extends RoundtripTestBase
             assertEquals(new Integer(0),  beans.get(0), "pk2");
             assertEquals(new Integer(2),  beans.get(0), "avalue");
         }
+        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk1");
+            assertEquals((Object)null,   beans.get(0), "pk2");
+            assertEquals(new Integer(2), beans.get(0), "avalue");
+        }
         else
         {
             assertTrue(beans.isEmpty());
@@ -738,11 +749,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddAutoIncrementColumnIntoPK()
     {
-        if (HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        if (!getPlatformInfo().isMixingIdentityAndNormalPrimaryKeyColumnsSupported())
         {
-            // the IDENTITY column has to be the only PK column
             return;
         }
 
@@ -847,6 +855,13 @@ public class TestAddColumn extends RoundtripTestBase
             assertEquals(new Double(0.0), beans.get(0), "pk3");
             assertEquals((Object)null,    beans.get(0), "avalue");
         }
+        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk1");
+            assertEquals((Object)null,   beans.get(0), "pk2");
+            assertEquals((Object)null,   beans.get(0), "pk3");
+            assertEquals((Object)null,   beans.get(0), "avalue");
+        }
         else
         {
             assertTrue(beans.isEmpty());
@@ -858,11 +873,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddMultipleColumnsIntoPKWithAutoIncrement()
     {
-        if (HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        if (!getPlatformInfo().isMixingIdentityAndNormalPrimaryKeyColumnsSupported())
         {
-            // the IDENTITY column has to be the only PK column
             return;
         }
 
@@ -887,14 +899,26 @@ public class TestAddColumn extends RoundtripTestBase
 
         createDatabase(model1Xml);
 
-        insertRow("roundtrip", new Object[] { new Integer(1) });
+        insertRow("roundtrip", new Object[] { null, new Integer(1) });
 
         alterDatabase(model2Xml);
 
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        assertTrue(getRows("roundtrip").isEmpty());
+        List beans = getRows("roundtrip");
+
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk1");
+            assertEquals((Object)null,   beans.get(0), "pk2");
+            assertEquals((Object)null,   beans.get(0), "pk3");
+            assertEquals(new Integer(1), beans.get(0), "avalue");
+        }
+        else
+        {
+            assertTrue(beans.isEmpty());
+        }
     }
 
     /**
@@ -902,9 +926,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddMultipleColumnsInclAutoIncrementIntoPK()
     {
-        if (HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (!getPlatformInfo().isMixingIdentityAndNormalPrimaryKeyColumnsSupported())
         {
-            // the IDENTITY column has to be the only PK column
             return;
         }
 
@@ -936,7 +959,19 @@ public class TestAddColumn extends RoundtripTestBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        assertTrue(getRows("roundtrip").isEmpty());
+        List beans = getRows("roundtrip");
+
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(1), beans.get(0), "pk1");
+            assertEquals((Object)"text", beans.get(0), "pk2");
+            assertEquals((Object)null,   beans.get(0), "pk3");
+            assertEquals(new Integer(1), beans.get(0), "avalue");
+        }
+        else
+        {
+            assertTrue(beans.isEmpty());
+        }
     }
 
     /**
@@ -987,7 +1022,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddNonUniqueIndexAndAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isIndicesSupported() || !getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isIndicesSupported() ||
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -1133,7 +1169,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddNonUniqueIndexAndRequiredAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isIndicesSupported() || !getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isIndicesSupported() ||
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -1292,6 +1329,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddUniqueIndexAndColumn()
     {
+        // TODO
         if (!getPlatformInfo().isIndicesSupported() ||
             InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
@@ -1336,7 +1374,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddUniqueIndexAndAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isIndicesSupported() || !getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isIndicesSupported() ||
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -1481,7 +1520,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddUniqueIndexAndRequiredAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isIndicesSupported() || !getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isIndicesSupported() ||
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -1575,6 +1615,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddUniqueIndexAndMultipleColumns()
     {
+        // TODO
         if (!getPlatformInfo().isIndicesSupported() ||
             InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
@@ -1748,7 +1789,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddAutoIncrementColumnIntoNonUniqueIndex()
     {
-        if (!getPlatformInfo().isIndicesSupported() || !getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isIndicesSupported() ||
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -1916,7 +1958,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddRequiredAutoIncrementColumnIntoNonUniqueIndex()
     {
-        if (!getPlatformInfo().isIndicesSupported() || !getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isIndicesSupported() ||
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -2097,6 +2140,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddColumnIntoUniqueIndex()
     {
+        // TODO
         if (!getPlatformInfo().isIndicesSupported() ||
             InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
@@ -2149,7 +2193,7 @@ public class TestAddColumn extends RoundtripTestBase
     public void testAddAutoIncrementColumnIntoUniqueIndex()
     {
         if (!getPlatformInfo().isIndicesSupported() ||
-            !getPlatformInfo().isNonPKIdentityColumnsSupported())
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -2241,6 +2285,7 @@ public class TestAddColumn extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
+        // TODO
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
         {
@@ -2318,7 +2363,8 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddRequiredAutoIncrementColumnIntoUniqueIndex()
     {
-        if (!getPlatformInfo().isIndicesSupported() || !getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isIndicesSupported() ||
+            !getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -2426,6 +2472,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddMultipleColumnsIntoUniqueIndex()
     {
+        // TODO
         if (!getPlatformInfo().isIndicesSupported() ||
             InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
@@ -2613,7 +2660,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddFKAndLocalAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -2667,11 +2714,11 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddFKAndLocalRequiredColumn()
     {
+        // TODO
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
         {
             // MySql does not allow adding a required column to a fk without a default value
-            // or as an IDENTITY column
             return;
         }
 
@@ -2715,7 +2762,8 @@ public class TestAddColumn extends RoundtripTestBase
 
         assertEquals(new BigDecimal(1), beans1.get(0), "pk");
         if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(2), beans2.get(0), "pk");
             assertEquals((Object)null,   beans2.get(0), "avalue");
@@ -2780,7 +2828,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddFKAndLocalRequiredAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -2889,11 +2937,11 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddFKAndMultipleLocalColumns()
     {
+        // TODO
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
         {
             // MySql does not allow adding a required column to a fk without a default value
-            // or as an IDENTITY column
             return;
         }
 
@@ -2948,6 +2996,12 @@ public class TestAddColumn extends RoundtripTestBase
             assertEquals((Object)null,   beans2.get(0), "avalue1");
             assertEquals((Object)null,   beans2.get(0), "avalue2");
         }
+        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            assertEquals(new Integer(3), beans2.get(0), "pk");
+            assertEquals(new Integer(1), beans2.get(0), "avalue1");
+            assertEquals((Object)null,   beans2.get(0), "avalue2");
+        }
         else
         {
             assertTrue(beans2.isEmpty());
@@ -2999,7 +3053,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddFKAndForeignAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -3195,7 +3249,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddAutoIncrementColumnIntoFK()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }
@@ -3358,7 +3412,7 @@ public class TestAddColumn extends RoundtripTestBase
      */
     public void testAddRequiredAutoIncrementColumnIntoFK()
     {
-        if (!getPlatformInfo().isNonPKIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
         {
             return;
         }

@@ -168,6 +168,18 @@ public class PostgreSqlBuilder extends SqlBuilder
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public void addColumn(Table table, Column newColumn) throws IOException
+    {
+        if (newColumn.isAutoIncrement())
+        {
+            createAutoIncrementSequence(table, newColumn);
+        }
+        super.addColumn(table, newColumn);
+    }
+
+    /**
      * Writes the SQL to drop a column.
      * 
      * @param table  The table
