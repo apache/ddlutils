@@ -809,7 +809,13 @@ public class JdbcModelReader
             column.setScale(scale.intValue());
         }
         column.setRequired("NO".equalsIgnoreCase(((String)values.get("IS_NULLABLE")).trim()));
-        column.setDescription((String)values.get("REMARKS"));
+
+        String description = (String)values.get("REMARKS");
+
+        if (!org.apache.ddlutils.util.StringUtils.isEmpty(description))
+        {
+            column.setDescription(description);
+        }
         return column;
     }
 

@@ -1046,7 +1046,7 @@ public class DatabaseIO
      */
     private void writeAttribute(PrettyPrintingXmlWriter xmlWriter, QName qName, String value) throws DdlUtilsXMLException
     {
-        if (!StringUtils.isEmpty(value))
+        if (value != null)
         {
             xmlWriter.writeAttribute(null, qName.getLocalPart(), value);
         }
