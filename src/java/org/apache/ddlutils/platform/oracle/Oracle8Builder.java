@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
@@ -32,6 +33,7 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
 import org.apache.ddlutils.util.Jdbc3Utils;
+import org.apache.ddlutils.util.StringUtils;
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternCompiler;
@@ -405,5 +407,38 @@ public class Oracle8Builder extends SqlBuilder
         printIndent();
         print("DROP PRIMARY KEY");
         printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
+    {
+        boolean sizeChanged = TypeMap.isTextType(targetColumn.getTypeCode()) &&
+                              ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn) &&
+                              !StringUtils.isEmpty(targetColumn.getSize());
+
+        if (sizeChanged)
+        {
+            print("SUBSTR(");
+        }
+        if (ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn))
+        {
+            print("CAST (");
+            printIdentifier(getColumnName(sourceColumn));
+            print(" AS ");
+            print(getSqlType(targetColumn));
+            print(")");
+        }
+        else
+        {
+            printIdentifier(getColumnName(sourceColumn));
+        }
+        if (sizeChanged)
+        {
+            print(",0,");
+            print(targetColumn.getSize());
+            print(")");
+        }
     }
 }

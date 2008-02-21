@@ -20,14 +20,18 @@ package org.apache.ddlutils.platform.mysql;
  */
 
 import java.io.IOException;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The SQL Builder for MySQL.
@@ -223,5 +227,83 @@ public class MySqlBuilder extends SqlBuilder
         print("MODIFY COLUMN ");
         writeColumn(table, column);
         printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
+    {
+        boolean sizeChanged = ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+        boolean typeChanged = ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+
+        if (sizeChanged || typeChanged)
+        {
+            String targetNativeType = getNativeType(targetColumn);
+
+            switch (targetColumn.getTypeCode())
+            {
+                case Types.BIT:
+                case Types.TINYINT:
+                case Types.SMALLINT:
+                case Types.INTEGER:
+                case Types.BIGINT:
+                    targetNativeType = "SIGNED";
+                    break;
+                case Types.FLOAT:
+                case Types.REAL:
+                case Types.DOUBLE:
+                    targetNativeType = "SIGNED"; // ?
+                    break;
+                case Types.DECIMAL:
+                case Types.NUMERIC:
+                    targetNativeType = "DECIMAL";
+                    break;
+                case Types.DATE:
+                    targetNativeType = "DATE";
+                    break;
+                case Types.TIMESTAMP:
+                    targetNativeType = "DATETIME";
+                    break;
+                case Types.CHAR:
+                case Types.VARCHAR:
+                case Types.LONGVARCHAR:
+                case Types.CLOB:
+                    targetNativeType = "CHAR";
+                    break;
+                default:
+                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
+                        (targetColumn.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode()))
+                    {
+                        targetNativeType = "SIGNED";
+                    }
+                    else
+                    {
+                        targetNativeType = "BINARY";
+                    }
+                    break;
+            }
+
+            print("CAST(");
+            if (TypeMap.isTextType(sourceColumn.getTypeCode()) && TypeMap.isTextType(targetColumn.getTypeCode()) && sizeChanged)
+            {
+                print("LEFT(");
+                printIdentifier(getColumnName(sourceColumn));
+                print(",");
+                print(targetColumn.getSize());
+                print(")");
+            }
+            else
+            {
+                printIdentifier(getColumnName(sourceColumn));
+            }
+            print(" AS ");
+            print(getSqlType(targetColumn, targetNativeType));
+            print(")");
+        }
+        else
+        {
+            printIdentifier(getColumnName(sourceColumn));
+        }
     }
 }

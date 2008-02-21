@@ -60,6 +60,7 @@ public class HsqlDbPlatform extends PlatformImplBase
     {
         PlatformInfo info = getPlatformInfo();
 
+        info.setDefaultValueUsedForIdentitySpec(true);
         info.setNonPrimaryKeyIdentityColumnsSupported(false);
         info.setIdentityOverrideAllowed(false);
         info.setSystemForeignKeyIndicesAlwaysNonUnique(true);

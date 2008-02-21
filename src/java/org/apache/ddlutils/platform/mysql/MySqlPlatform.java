@@ -140,10 +140,17 @@ public class MySqlPlatform extends PlatformImplBase
 
                     return !addColumnChange.getNewColumn().isAutoIncrement();
                 }
+                else if (change instanceof ColumnDefinitionChange)
+                {
+                    ColumnDefinitionChange colDefChange = (ColumnDefinitionChange)change;
+                    Column                 sourceColumn = intermediateTable.findColumn(colDefChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+
+                    return !ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, colDefChange.getNewColumn()) &&
+                           !ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, colDefChange.getNewColumn());
+                }
                 else
                 {
-                    return (change instanceof ColumnDefinitionChange) ||
-                           (change instanceof RemoveColumnChange) ||
+                    return (change instanceof RemoveColumnChange) ||
                            (change instanceof AddPrimaryKeyChange) ||
                            (change instanceof PrimaryKeyChange) ||
                            (change instanceof RemovePrimaryKeyChange);

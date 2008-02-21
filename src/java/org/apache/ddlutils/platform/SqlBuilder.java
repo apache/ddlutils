@@ -1379,9 +1379,21 @@ public abstract class SqlBuilder
      */
     protected String getSqlType(Column column)
     {
-        String       nativeType = getNativeType(column);
-        int          sizePos    = nativeType.indexOf(SIZE_PLACEHOLDER);
-        StringBuffer sqlType    = new StringBuffer();
+        return getSqlType(column, getNativeType(column));
+    }
+
+    /**
+     * Returns the full SQL type specification (including size and precision/scale) for the
+     * given column.
+     * 
+     * @param column     The column
+     * @param nativeType Overrides the native type of the column; can include the size placeholder
+     * @return The full SQL type string including the size
+     */
+    protected String getSqlType(Column column, String nativeType)
+    {
+        int          sizePos = nativeType.indexOf(SIZE_PLACEHOLDER);
+        StringBuffer sqlType = new StringBuffer();
 
         sqlType.append(sizePos >= 0 ? nativeType.substring(0, sizePos) : nativeType);
 

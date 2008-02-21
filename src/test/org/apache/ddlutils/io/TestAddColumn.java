@@ -1454,6 +1454,7 @@ public class TestAddColumn extends RoundtripTestBase
 
         List beans = getRows("roundtrip");
 
+        // TODO
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName())) 
         {

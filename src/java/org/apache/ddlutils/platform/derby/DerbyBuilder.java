@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.sql.Types;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -88,15 +89,11 @@ public class DerbyBuilder extends CloudscapeBuilder
      */
     protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
     {
-        String sourceNativeType = getBareNativeType(sourceColumn);
-        String targetNativeType = getBareNativeType(targetColumn);
+        if (ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn) ||
+            ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn))
+        {
+            String targetNativeType = getNativeType(targetColumn);
 
-        if (sourceNativeType.equals(targetNativeType))
-        {
-            printIdentifier(getColumnName(sourceColumn));
-        }
-        else
-        {
             // Derby currently has the limitation that it cannot convert numeric values
             // to VARCHAR, though it can convert them to CHAR
             if (TypeMap.isNumericType(sourceColumn.getTypeCode()) &&
@@ -105,10 +102,15 @@ public class DerbyBuilder extends CloudscapeBuilder
                 targetNativeType = "CHAR";
             }
 
-            print(targetNativeType);
-            print("(");
+            print("CAST (");
             printIdentifier(getColumnName(sourceColumn));
+            print(" AS ");
+            print(getSqlType(targetColumn, targetNativeType));
             print(")");
+        }
+        else
+        {
+            printIdentifier(getColumnName(sourceColumn));
         }
     }
 }

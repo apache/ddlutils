@@ -44,6 +44,7 @@ public class MySql50Platform extends MySqlPlatform
         // which is different from the MySql 4 behaviour
         info.setSyntheticDefaultValueForRequiredReturned(false);
 
+        setSqlBuilder(new MySql50Builder(this));
         setModelReader(new MySql50ModelReader(this));
     }
 
