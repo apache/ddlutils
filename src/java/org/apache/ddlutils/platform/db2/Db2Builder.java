@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.sql.Types;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -130,7 +131,8 @@ public class Db2Builder extends SqlBuilder
         String sourceNativeType = getBareNativeType(sourceColumn);
         String targetNativeType = getBareNativeType(targetColumn);
 
-        if (sourceNativeType.equals(targetNativeType))
+        if (sourceNativeType.equals(targetNativeType) &&
+            !ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn))
         {
             printIdentifier(getColumnName(sourceColumn));
         }

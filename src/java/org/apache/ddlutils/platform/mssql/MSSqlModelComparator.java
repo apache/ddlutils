@@ -36,6 +36,7 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.util.StringUtils;
 

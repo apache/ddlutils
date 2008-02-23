@@ -239,13 +239,15 @@ public class ModelComparator
         {
             Table targetTable       = targetModel.getTable(tableIdx);
             Table intermediateTable = intermediateModel.findTable(targetTable.getName(), _caseSensitive);
+            Table sourceTable       = sourceModel.findTable(targetTable.getName(), _caseSensitive);
 
             for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
             {
                 ForeignKey targetFk       = targetTable.getForeignKey(fkIdx);
                 ForeignKey intermediateFk = findCorrespondingForeignKey(intermediateTable, targetFk);
+                ForeignKey sourceFk       = sourceTable == null ? null : findCorrespondingForeignKey(sourceTable, targetFk);
 
-                if (intermediateFk == null)
+                if ((sourceFk == null) && (intermediateFk == null))
                 {
                     if (_log.isInfoEnabled())
                     {
@@ -515,10 +517,11 @@ public class ModelComparator
 
         for (int indexIdx = 0; indexIdx < targetTable.getIndexCount(); indexIdx++)
         {
-            Index targetIndex = targetTable.getIndex(indexIdx);
-            Index sourceIndex = findCorrespondingIndex(intermediateTable, targetIndex);
+            Index targetIndex       = targetTable.getIndex(indexIdx);
+            Index intermediateIndex = findCorrespondingIndex(intermediateTable, targetIndex);
+            Index sourceIndex       = findCorrespondingIndex(sourceTable, targetIndex);
 
-            if (sourceIndex == null)
+            if ((sourceIndex == null) && (intermediateIndex == null))
             {
                 if (_log.isInfoEnabled())
                 {

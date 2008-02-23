@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
@@ -196,6 +197,28 @@ public class PostgreSqlBuilder extends SqlBuilder
         if (column.isAutoIncrement())
         {
             dropAutoIncrementSequence(table, column);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
+    {
+        boolean sizeChanged = ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+        boolean typeChanged = ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+
+        if (sizeChanged || typeChanged)
+        {
+            print("CAST(");
+            printIdentifier(getColumnName(sourceColumn));
+            print(" AS ");
+            print(getSqlType(targetColumn));
+            print(")");
+        }
+        else
+        {
+            printIdentifier(getColumnName(sourceColumn));
         }
     }
 }

@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -510,5 +511,27 @@ public class MSSqlBuilder extends SqlBuilder
         println("  DEALLOCATE refcursor");
         print("END");
         printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
+    {
+        boolean sizeChanged = ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+        boolean typeChanged = ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+
+        if (sizeChanged || typeChanged)
+        {
+            print("CAST(");
+            printIdentifier(getColumnName(sourceColumn));
+            print(" AS ");
+            print(getSqlType(targetColumn));
+            print(")");
+        }
+        else
+        {
+            printIdentifier(getColumnName(sourceColumn));
+        }
     }
 }

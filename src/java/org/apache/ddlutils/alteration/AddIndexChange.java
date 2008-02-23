@@ -19,9 +19,11 @@ package org.apache.ddlutils.alteration;
  * under the License.
  */
 
-import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.Table;
 
 /**
  * Represents the addition of an index to a table.
@@ -60,16 +62,15 @@ public class AddIndexChange extends TableChangeImplBase
      */
     public void apply(Database model, boolean caseSensitive)
     {
-        Index newIndex = null;
+        Table table = findChangedTable(model, caseSensitive);
 
-        try
+        table.addIndex(_newIndex);
+        for (int idx = 0; idx < _newIndex.getColumnCount(); idx++)
         {
-            newIndex = (Index)_newIndex.clone();
+            IndexColumn idxColumn = _newIndex.getColumn(idx);
+            Column      tmpColumn = idxColumn.getColumn();
+
+            idxColumn.setColumn(table.findColumn(tmpColumn.getName(), caseSensitive));
         }
-        catch (CloneNotSupportedException ex)
-        {
-            throw new DdlUtilsException(ex);
-        }
-        findChangedTable(model, caseSensitive).addIndex(newIndex);
     }
 }

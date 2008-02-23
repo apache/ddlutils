@@ -20,7 +20,6 @@ package org.apache.ddlutils.io;
  */
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Date;
@@ -3107,6 +3106,9 @@ public class TestChangeColumn extends RoundtripTestBase
         Object    value = isSybase ? (Object)new BigDecimal("0") : new Integer(0);
         Timestamp time  = new Timestamp(new Date().getTime());
 
+        // to avoid problems with the database's time resolution
+        time.setNanos(0);
+
         insertRow("roundtrip", new Object[] { new Integer(1), value, time });
 
         alterDatabase(model2Xml);
@@ -3288,6 +3290,9 @@ public class TestChangeColumn extends RoundtripTestBase
         createDatabase(model1Xml);
 
         Timestamp time  = new Timestamp(new Date().getTime());
+
+        // to avoid problems with the database's time resolution
+        time.setNanos(0);
 
         insertRow("roundtrip", new Object[] { new Integer(1), null, time });
 
