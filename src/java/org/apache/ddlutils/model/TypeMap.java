@@ -20,13 +20,10 @@ package org.apache.ddlutils.model;
  */
 
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * A class that maps SQL type names to their JDBC type ID found in
@@ -111,8 +108,10 @@ public abstract class TypeMap
         registerJdbcType(Types.BINARY,        BINARY,        JdbcTypeCategoryEnum.BINARY);
         registerJdbcType(Types.BIT,           BIT,           JdbcTypeCategoryEnum.NUMERIC);
         registerJdbcType(Types.BLOB,          BLOB,          JdbcTypeCategoryEnum.BINARY);
+        registerJdbcType(Types.BOOLEAN,       BOOLEAN,       JdbcTypeCategoryEnum.NUMERIC);
         registerJdbcType(Types.CHAR,          CHAR,          JdbcTypeCategoryEnum.TEXTUAL);
         registerJdbcType(Types.CLOB,          CLOB,          JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.DATALINK,      DATALINK,      JdbcTypeCategoryEnum.SPECIAL);
         registerJdbcType(Types.DATE,          DATE,          JdbcTypeCategoryEnum.DATETIME);
         registerJdbcType(Types.DECIMAL,       DECIMAL,       JdbcTypeCategoryEnum.NUMERIC);
         registerJdbcType(Types.DISTINCT,      DISTINCT,      JdbcTypeCategoryEnum.SPECIAL);
@@ -134,13 +133,6 @@ public abstract class TypeMap
         registerJdbcType(Types.TINYINT,       TINYINT,       JdbcTypeCategoryEnum.NUMERIC);
         registerJdbcType(Types.VARBINARY,     VARBINARY,     JdbcTypeCategoryEnum.BINARY);
         registerJdbcType(Types.VARCHAR,       VARCHAR,       JdbcTypeCategoryEnum.TEXTUAL);
-
-        // only available in JDK 1.4 and above:
-        if (Jdbc3Utils.supportsJava14JdbcTypes())
-        {
-            registerJdbcType(Jdbc3Utils.determineBooleanTypeCode(),  BOOLEAN,  JdbcTypeCategoryEnum.NUMERIC);
-            registerJdbcType(Jdbc3Utils.determineDatalinkTypeCode(), DATALINK, JdbcTypeCategoryEnum.SPECIAL);
-        }
 
         // Torque/Turbine extensions which we only support when reading from an XML schema
         _typeNameToTypeCode.put("BOOLEANINT",  new Integer(Types.TINYINT));

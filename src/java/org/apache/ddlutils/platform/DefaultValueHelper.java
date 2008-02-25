@@ -27,7 +27,6 @@ import java.sql.Types;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.ddlutils.model.TypeMap;
-import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * Helper class for dealing with default values, e.g. converting them to other types.
@@ -54,6 +53,7 @@ public class DefaultValueHelper
             switch (originalTypeCode)
             {
                 case Types.BIT:
+                case Types.BOOLEAN:
                     result = convertBoolean(defaultValue, targetTypeCode).toString();
                     break;
                 case Types.DATE:
@@ -82,13 +82,6 @@ public class DefaultValueHelper
                 		{}
                 	}
                     break;
-                default:
-                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-                        (originalTypeCode == Jdbc3Utils.determineBooleanTypeCode()))
-                    {
-                        result = convertBoolean(defaultValue, targetTypeCode).toString();
-                    }
-                    break;
             }
         }
         return result;
@@ -115,8 +108,7 @@ public class DefaultValueHelper
             return defaultValue;
         }
         
-        if ((targetTypeCode == Types.BIT) ||
-            (Jdbc3Utils.supportsJava14JdbcTypes() && (targetTypeCode == Jdbc3Utils.determineBooleanTypeCode())))
+        if ((targetTypeCode == Types.BIT) || (targetTypeCode == Types.BOOLEAN))
         {
             result = value;
         }

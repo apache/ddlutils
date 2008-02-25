@@ -38,7 +38,7 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * The SapDB platform implementation.
@@ -70,30 +70,29 @@ public class SapDbPlatform extends PlatformImplBase
         // BIGINT is also handled by the model reader
         // Unfortunately there is no way to distinguish between REAL, and FLOAT/DOUBLE when
         // reading back via JDBC, because they all have the same size of 8
-        info.addNativeTypeMapping(Types.ARRAY,         "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.ARRAY,         "LONG BYTE",       Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIGINT,        "FIXED(38,0)");
         info.addNativeTypeMapping(Types.BINARY,        "CHAR{0} BYTE");
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
-        info.addNativeTypeMapping(Types.BLOB,          "LONG BYTE", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.CLOB,          "LONG",      Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.BLOB,          "LONG BYTE",       Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "BOOLEAN",         Types.BIT);
+        info.addNativeTypeMapping(Types.CLOB,          "LONG",            Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DATALINK,      "LONG BYTE",       Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DECIMAL,       "FIXED");
-        info.addNativeTypeMapping(Types.DISTINCT,      "LONG BYTE", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.DOUBLE,        "FLOAT(38)", Types.FLOAT);
+        info.addNativeTypeMapping(Types.DISTINCT,      "LONG BYTE",       Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.DOUBLE,        "FLOAT(38)",       Types.FLOAT);
         info.addNativeTypeMapping(Types.FLOAT,         "FLOAT(38)");
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "LONG BYTE", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "LONG BYTE",       Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG BYTE");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG");
-        info.addNativeTypeMapping(Types.NULL,          "LONG BYTE", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.NUMERIC,       "FIXED",     Types.DECIMAL);
-        info.addNativeTypeMapping(Types.OTHER,         "LONG BYTE", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.REAL,          "FLOAT(16)", Types.FLOAT);
-        info.addNativeTypeMapping(Types.REF,           "LONG BYTE", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.STRUCT,        "LONG BYTE", Types.LONGVARBINARY);
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",  Types.SMALLINT);
+        info.addNativeTypeMapping(Types.NULL,          "LONG BYTE",       Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.NUMERIC,       "FIXED",           Types.DECIMAL);
+        info.addNativeTypeMapping(Types.OTHER,         "LONG BYTE",       Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.REAL,          "FLOAT(16)",       Types.FLOAT);
+        info.addNativeTypeMapping(Types.REF,           "LONG BYTE",       Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,        "LONG BYTE",       Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",        Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR{0} BYTE");
-
-        info.addNativeTypeMapping("BOOLEAN",  "BOOLEAN",   "BIT");
-        info.addNativeTypeMapping("DATALINK", "LONG BYTE", "LONGVARBINARY");
 
         info.setDefaultSize(Types.CHAR,      254);
         info.setDefaultSize(Types.VARCHAR,   254);
@@ -150,7 +149,7 @@ public class SapDbPlatform extends PlatformImplBase
                     // a default value or be IDENTITY
                     return (addColumnChange.getNextColumn() == null) &&
                            (!addColumnChange.getNewColumn().isRequired() ||
-                            !StringUtils.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
+                            !StringUtilsExt.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
                 }
                 else if (change instanceof ColumnDefinitionChange)
                 {
@@ -163,7 +162,7 @@ public class SapDbPlatform extends PlatformImplBase
 
                     // we can however handle the change if only the default value or the required status was changed
                     return ((curColumn.getTypeCode() == newColumn.getTypeCode()) &&
-                           (!getPlatformInfo().hasSize(curColumn.getTypeCode()) || StringUtils.equals(curColumn.getSize(), newColumn.getSize())) &&
+                           (!getPlatformInfo().hasSize(curColumn.getTypeCode()) || StringUtilsExt.equals(curColumn.getSize(), newColumn.getSize())) &&
                            (curColumn.isAutoIncrement() == newColumn.isAutoIncrement()));
                 }
                 else
@@ -252,7 +251,7 @@ public class SapDbPlatform extends PlatformImplBase
         Table  changedTable  = findChangedTable(currentModel, change);
         Column changedColumn = changedTable.findColumn(change.getChangedColumn(), isDelimitedIdentifierModeOn());
 
-        if (!StringUtils.equals(changedColumn.getDefaultValue(), change.getNewColumn().getDefaultValue()))
+        if (!StringUtilsExt.equals(changedColumn.getDefaultValue(), change.getNewColumn().getDefaultValue()))
         {
             ((SapDbBuilder)getSqlBuilder()).changeColumnDefaultValue(changedTable,
                                                                   changedColumn,

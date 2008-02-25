@@ -69,15 +69,15 @@ public class MckoiPlatform extends PlatformImplBase
         info.setDefaultValueUsedForIdentitySpec(true);
         info.setAutoCommitModeForLastIdentityValueReading(false);
 
-        info.addNativeTypeMapping(Types.ARRAY,    "BLOB",   Types.BLOB);
-        info.addNativeTypeMapping(Types.DISTINCT, "BLOB",   Types.BLOB);
-        info.addNativeTypeMapping(Types.FLOAT,    "DOUBLE", Types.DOUBLE);
-        info.addNativeTypeMapping(Types.NULL,     "BLOB",   Types.BLOB);
-        info.addNativeTypeMapping(Types.OTHER,    "BLOB",   Types.BLOB);
-        info.addNativeTypeMapping(Types.REF,      "BLOB",   Types.BLOB);
-        info.addNativeTypeMapping(Types.STRUCT,   "BLOB",   Types.BLOB);
-        info.addNativeTypeMapping("BIT",      "BOOLEAN", "BOOLEAN");
-        info.addNativeTypeMapping("DATALINK", "BLOB",    "BLOB");
+        info.addNativeTypeMapping(Types.ARRAY,    "BLOB",    Types.BLOB);
+        info.addNativeTypeMapping(Types.BIT,      "BOOLEAN", Types.BOOLEAN);
+        info.addNativeTypeMapping(Types.DATALINK, "BLOB",    Types.BLOB);
+        info.addNativeTypeMapping(Types.DISTINCT, "BLOB",    Types.BLOB);
+        info.addNativeTypeMapping(Types.FLOAT,    "DOUBLE",  Types.DOUBLE);
+        info.addNativeTypeMapping(Types.NULL,     "BLOB",    Types.BLOB);
+        info.addNativeTypeMapping(Types.OTHER,    "BLOB",    Types.BLOB);
+        info.addNativeTypeMapping(Types.REF,      "BLOB",    Types.BLOB);
+        info.addNativeTypeMapping(Types.STRUCT,   "BLOB",    Types.BLOB);
 
         info.setDefaultSize(Types.CHAR,      1024);
         info.setDefaultSize(Types.VARCHAR,   1024);

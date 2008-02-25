@@ -83,7 +83,6 @@ import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.ModelException;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
-import org.apache.ddlutils.util.Jdbc3Utils;
 import org.apache.ddlutils.util.JdbcSupport;
 import org.apache.ddlutils.util.SqlTokenizer;
 
@@ -461,7 +460,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public String getCreateTablesSql(Database model, boolean dropTablesFirst, boolean continueOnError)
     {
-        return getCreateTablesSql(model, dropTablesFirst, continueOnError);
+        return getCreateModelSql(model, dropTablesFirst, continueOnError);
     }
 
     /**
@@ -469,7 +468,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
      */
     public String getCreateTablesSql(Database model, CreationParameters params, boolean dropTablesFirst, boolean continueOnError)
     {
-        return getCreateTablesSql(model, params, dropTablesFirst, continueOnError);
+        return getCreateModelSql(model, params, dropTablesFirst, continueOnError);
     }
 
     /**
@@ -2140,14 +2139,13 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
                     if (results[idx] < 0)
                     {
                         hasSum = false;
-                        if (Jdbc3Utils.supportsJava14BatchResultCodes())
+                        if (results[idx] == Statement.EXECUTE_FAILED)
                         {
-                            String msg = Jdbc3Utils.getBatchResultMessage(table.getName(), idx, results[idx]);
-
-                            if (msg != null)
-                            {
-                                _log.warn(msg);
-                            }
+                            _log.warn("The batch insertion of row " + idx + " into table " + table.getName() + " failed but the driver is able to continue processing");
+                        }
+                        else if (results[idx] != Statement.SUCCESS_NO_INFO)
+                        {
+                            _log.warn("The batch insertion of row " + idx + " into table " + table.getName() + " returned an undefined status value " + results[idx]);
                         }
                     }
                     else
@@ -2936,6 +2934,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 		        value = useIdx ? resultSet.getBigDecimal(columnIdx) : resultSet.getBigDecimal(columnName);
 		        break;
 		    case Types.BIT:
+            case Types.BOOLEAN:
 		        value = new Boolean(useIdx ? resultSet.getBoolean(columnIdx) : resultSet.getBoolean(columnName));
 		        break;
 		    case Types.TINYINT:
@@ -3030,16 +3029,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 		        value = useIdx ? resultSet.getRef(columnIdx) : resultSet.getRef(columnName);
 		        break;
 		    default:
-		        // special handling for Java 1.4/JDBC 3 types
-		        if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-		            (jdbcType == Jdbc3Utils.determineBooleanTypeCode()))
-		        {
-		            value = new Boolean(useIdx ? resultSet.getBoolean(columnIdx) : resultSet.getBoolean(columnName));
-		        }
-		        else
-		        {
-		            value = useIdx ? resultSet.getObject(columnIdx) : resultSet.getObject(columnName);
-		        }
+	            value = useIdx ? resultSet.getObject(columnIdx) : resultSet.getObject(columnName);
 		        break;
 		}
         return resultSet.wasNull() ? null : value;

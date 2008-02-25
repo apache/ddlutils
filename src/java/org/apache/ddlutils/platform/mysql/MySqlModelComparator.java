@@ -38,7 +38,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * A model comparator customized for MySql.
@@ -157,7 +157,7 @@ public class MySqlModelComparator extends ModelComparator
 
                     for (Iterator colNameIt = columnNames.iterator(); colNameIt.hasNext();)
                     {
-                        if (StringUtils.equals(ref.getLocalColumnName(), (String)colNameIt.next(), isCaseSensitive()))
+                        if (StringUtilsExt.equals(ref.getLocalColumnName(), (String)colNameIt.next(), isCaseSensitive()))
                         {
                             newChanges.add(new RemoveForeignKeyChange(intermediateTable.getName(), intermediateFk));
                             newChanges.add(new AddForeignKeyChange(intermediateTable.getName(), intermediateFk));

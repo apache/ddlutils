@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.sql.Types;
 
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * Converts between the various number types (including boolean types) and {@link java.lang.String}.
@@ -43,7 +42,7 @@ public class NumberConverter implements SqlTypeConverter
         }
         else
         {
-            Class  targetClass = null;
+            Class targetClass = null;
 
             switch (sqlTypeCode)
             {
@@ -51,6 +50,7 @@ public class NumberConverter implements SqlTypeConverter
                     targetClass = Long.class;
                     break;
                 case Types.BIT:
+                case Types.BOOLEAN:
                     targetClass = Boolean.class;
                     break;
                 case Types.DECIMAL:
@@ -70,13 +70,6 @@ public class NumberConverter implements SqlTypeConverter
                 case Types.SMALLINT:
                 case Types.TINYINT:
                     targetClass = Short.class;
-                    break;
-                default:
-                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-                        (sqlTypeCode == Jdbc3Utils.determineBooleanTypeCode()))
-                    {
-                        targetClass = Boolean.class;
-                    }
                     break;
             }
             return targetClass == null ? textRep : ConvertUtils.convert(textRep, targetClass);

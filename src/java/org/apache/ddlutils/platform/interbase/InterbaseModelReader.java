@@ -123,10 +123,7 @@ public class InterbaseModelReader extends JdbcModelReader
         }
         finally
         {
-            if (columnData != null)
-            {
-                columnData.close();
-            }
+            closeResultSet(columnData);
         }
     }
 
@@ -137,16 +134,16 @@ public class InterbaseModelReader extends JdbcModelReader
      */
     protected void determineExtraColumnInfo(Table table) throws SQLException
     {
-        StringBuffer query   = new StringBuffer();
-        
-        query.append("SELECT a.RDB$FIELD_NAME, a.RDB$DEFAULT_SOURCE, b.RDB$FIELD_PRECISION, b.RDB$FIELD_SCALE,");
-        query.append(" b.RDB$FIELD_TYPE, b.RDB$FIELD_SUB_TYPE FROM RDB$RELATION_FIELDS a, RDB$FIELDS b");
-        query.append(" WHERE a.RDB$RELATION_NAME=? AND a.RDB$FIELD_SOURCE=b.RDB$FIELD_NAME");
+        final String query =
+            "SELECT a.RDB$FIELD_NAME, a.RDB$DEFAULT_SOURCE, b.RDB$FIELD_PRECISION, b.RDB$FIELD_SCALE," +
+            " b.RDB$FIELD_TYPE, b.RDB$FIELD_SUB_TYPE FROM RDB$RELATION_FIELDS a, RDB$FIELDS b" +
+            " WHERE a.RDB$RELATION_NAME=? AND a.RDB$FIELD_SOURCE=b.RDB$FIELD_NAME";
 
-        PreparedStatement prepStmt = getConnection().prepareStatement(query.toString());
+        PreparedStatement prepStmt = null;
 
         try
         {
+            prepStmt = getConnection().prepareStatement(query);
             prepStmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? table.getName() : table.getName().toUpperCase());
 
             ResultSet rs = prepStmt.executeQuery();
@@ -191,11 +188,10 @@ public class InterbaseModelReader extends JdbcModelReader
                     }
                 }
             }
-            rs.close();
         }
         finally
         {
-            prepStmt.close();
+            closeStatement(prepStmt);
         }
     }
 
@@ -208,6 +204,8 @@ public class InterbaseModelReader extends JdbcModelReader
     {
         // Since for long table and column names, the generator name will be shortened
         // we have to determine for each column whether there is a generator for it
+        final String query = "SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS";
+
         InterbaseBuilder builder = (InterbaseBuilder)getPlatform().getSqlBuilder();
         Column[]         columns = table.getColumns();
         HashMap          names   = new HashMap();
@@ -223,11 +221,13 @@ public class InterbaseModelReader extends JdbcModelReader
             names.put(name, columns[idx]);
         }
 
-        Statement stmt = getConnection().createStatement();
+        Statement stmt = null;
 
         try
         {
-            ResultSet rs = stmt.executeQuery("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS");
+            stmt = getConnection().createStatement();
+
+            ResultSet rs = stmt.executeQuery(query);
 
             while (rs.next())
             {
@@ -239,11 +239,10 @@ public class InterbaseModelReader extends JdbcModelReader
                     column.setAutoIncrement(true);
                 }
             }
-            rs.close();
         }
         finally
         {
-            stmt.close();
+            closeStatement(stmt);
         }
     }
 
@@ -315,10 +314,7 @@ public class InterbaseModelReader extends JdbcModelReader
         }
         finally
         {
-            if (pkData != null)
-            {
-                pkData.close();
-            }
+            closeResultSet(pkData);
         }
         return pks;
     }
@@ -362,10 +358,7 @@ public class InterbaseModelReader extends JdbcModelReader
         }
         finally
         {
-            if (fkData != null)
-            {
-                fkData.close();
-            }
+            closeResultSet(fkData);
         }
         return fks.values();
     }
@@ -375,16 +368,17 @@ public class InterbaseModelReader extends JdbcModelReader
      */
     protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index) throws SQLException
     {
-        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
-        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
-        StringBuffer query     = new StringBuffer();
+        final String query =
+            "SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS " +
+            "WHERE RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$INDEX_NAME=?";
 
-        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$INDEX_NAME=?");
-
-        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
+        String            tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String            indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        PreparedStatement stmt      = null;
 
         try 
         {
+            stmt = getConnection().prepareStatement(query);
             stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
             stmt.setString(2, "PRIMARY KEY");
             stmt.setString(3, indexName);
@@ -395,10 +389,7 @@ public class InterbaseModelReader extends JdbcModelReader
         }
         finally
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
+            closeStatement(stmt);
         }
     }
 
@@ -407,17 +398,18 @@ public class InterbaseModelReader extends JdbcModelReader
      */
     protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index) throws SQLException
     {
-        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
-        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
-        String       fkName    = getPlatform().getSqlBuilder().getForeignKeyName(table, fk);
-        StringBuffer query     = new StringBuffer();
+        final String query =
+            "SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS " +
+            "WHERE RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$CONSTRAINT_NAME=? AND RDB$INDEX_NAME=?";
 
-        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$CONSTRAINT_NAME=? AND RDB$INDEX_NAME=?");
-
-        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
+        String            tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String            indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        String            fkName    = getPlatform().getSqlBuilder().getForeignKeyName(table, fk);
+        PreparedStatement stmt      = null;
 
         try 
         {
+            stmt = getConnection().prepareStatement(query);
             stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
             stmt.setString(2, "FOREIGN KEY");
             stmt.setString(3, fkName);
@@ -429,10 +421,7 @@ public class InterbaseModelReader extends JdbcModelReader
         }
         finally
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
+            closeStatement(stmt);
         }
     }
 
@@ -511,14 +500,8 @@ public class InterbaseModelReader extends JdbcModelReader
         }
         finally
         {
-            if (columnData != null)
-            {
-                columnData.close();
-            }
-            if (tableData != null)
-            {
-                tableData.close();
-            }
+            closeResultSet(columnData);
+            closeResultSet(tableData);
         }
     }
 }

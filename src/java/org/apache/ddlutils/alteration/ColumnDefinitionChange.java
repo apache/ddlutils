@@ -22,7 +22,7 @@ package org.apache.ddlutils.alteration;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * Represents the change of one or more aspects of the definition of a column, such as
@@ -108,7 +108,7 @@ public class ColumnDefinitionChange extends ColumnChangeImplBase
         boolean sizeMatters    = platformInfo.hasSize(targetTypeCode);
         boolean scaleMatters   = platformInfo.hasPrecisionAndScale(targetTypeCode);
 
-        if (sizeMatters && !StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize()))
+        if (sizeMatters && !StringUtilsExt.equals(sourceColumn.getSize(), targetColumn.getSize()))
         {
             return true;
         }

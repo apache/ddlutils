@@ -78,7 +78,7 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "    \"COL_VARBINARY\"       VARCHAR(15) BYTE,\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
             ");\n",
-            createTestDatabase(COLUMN_TEST_SCHEMA));
+            getColumnTestDatabaseCreationSql());
     }
 
     /**
@@ -98,7 +98,7 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "    \"COL_AUTO_INCR\"        FIXED(38,0) DEFAULT SERIAL(1),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
+            getConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -138,7 +138,7 @@ public class TestMaxDbPlatform extends TestPlatformBase
             ");\n"+
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_FK_COL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
-            createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+            getTableConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -154,6 +154,6 @@ public class TestMaxDbPlatform extends TestPlatformBase
             "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'',\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n",
-            createTestDatabase(TestSapDbPlatform.COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+            getCharEscapingTestDatabaseCreationSql());
     }
 }

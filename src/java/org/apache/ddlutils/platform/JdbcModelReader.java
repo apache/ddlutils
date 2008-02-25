@@ -61,7 +61,7 @@ import org.apache.ddlutils.model.UniqueIndex;
 public class JdbcModelReader
 {
     /** The Log to which logging calls will be made. */
-    private final Log _log = LogFactory.getLog(JdbcModelReader.class);
+    private final Log _log = LogFactory.getLog(getClass());
 
     /** The descriptors for the relevant columns in the table meta data. */
     private final List _columnsForTable;
@@ -121,6 +121,16 @@ public class JdbcModelReader
         _columnsForIndex  = initColumnsForIndex();
     }
 
+    /**
+     * Returns the log used by the model reader.
+     * 
+     * @return The log
+     */
+    protected Log getLog()
+    {
+        return _log;
+    }
+    
     /**
      * Returns the platform that this model reader belongs to.
      * 
@@ -347,7 +357,17 @@ public class JdbcModelReader
      */
     public String[] getDefaultTableTypes()
     {
-        return _defaultTableTypes;
+        if (_defaultTableTypes == null)
+        {
+            return null;
+        }
+        else
+        {
+            String[] result = new String[_defaultTableTypes.length];
+
+            System.arraycopy(_defaultTableTypes, 0, result, 0, _defaultTableTypes.length);
+            return result;
+        }
     }
 
     /**
@@ -358,7 +378,16 @@ public class JdbcModelReader
      */
     public void setDefaultTableTypes(String[] types)
     {
-        _defaultTableTypes = types;
+        if (types == null)
+        {
+            _defaultTableTypes = null;
+        }
+        else
+        {
+            _defaultTableTypes = new String[types.length];
+
+            System.arraycopy(types, 0, types, 0, types.length);
+        }
     }
 
     /**
@@ -536,10 +565,7 @@ public class JdbcModelReader
         }
         finally
         {
-            if (tableData != null)
-            {
-                tableData.close();
-            }
+            closeResultSet(tableData);
         }
     }
 
@@ -761,10 +787,7 @@ public class JdbcModelReader
         }
         finally
         {
-            if (columnData != null)
-            {
-                columnData.close();
-            }
+            closeResultSet(columnData);
         }
     }
 
@@ -812,7 +835,7 @@ public class JdbcModelReader
 
         String description = (String)values.get("REMARKS");
 
-        if (!org.apache.ddlutils.util.StringUtils.isEmpty(description))
+        if (!org.apache.ddlutils.util.StringUtilsExt.isEmpty(description))
         {
             column.setDescription(description);
         }
@@ -843,10 +866,7 @@ public class JdbcModelReader
         }
         finally
         {
-            if (pkData != null)
-            {
-                pkData.close();
-            }
+            closeResultSet(pkData);
         }
         return pks;
     }
@@ -888,10 +908,7 @@ public class JdbcModelReader
         }
         finally
         {
-            if (fkData != null)
-            {
-                fkData.close();
-            }
+            closeResultSet(fkData);
         }
         return fks.values();
     }
@@ -985,10 +1002,7 @@ public class JdbcModelReader
         }
         finally
         {
-            if (indexData != null)
-            {
-                indexData.close();
-            }
+            closeResultSet(indexData);
         }
         return indices.values();
     }
@@ -1126,10 +1140,7 @@ public class JdbcModelReader
         }
         finally
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
+            closeStatement(stmt);
         }
     }
 
@@ -1246,13 +1257,37 @@ public class JdbcModelReader
         }
         finally
         {
-            if (columnData != null)
+            closeResultSet(columnData);
+            closeResultSet(tableData);
+        }
+    }
+
+    protected void closeResultSet(ResultSet resultSet)
+    {
+        if (resultSet != null)
+        {
+            try
             {
-                columnData.close();
+                resultSet.close();
             }
-            if (tableData != null)
+            catch (SQLException ex)
             {
-                tableData.close();
+                _log.warn("Error while closing result set", ex);
+            }
+        }
+    }
+
+    protected void closeStatement(Statement stmt)
+    {
+        if (stmt != null)
+        {
+            try
+            {
+                stmt.close();
+            }
+            catch (SQLException ex)
+            {
+                _log.warn("Error while closing statement", ex);
             }
         }
     }

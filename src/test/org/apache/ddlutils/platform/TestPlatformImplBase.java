@@ -22,7 +22,7 @@ package org.apache.ddlutils.platform;
 import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.ddlutils.TestPlatformBase;
+import org.apache.ddlutils.TestBase;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.model.Database;
@@ -33,39 +33,23 @@ import org.apache.ddlutils.model.Table;
  * 
  * @version $Revision: 279421 $
  */
-public class TestPlatformImplBase extends TestPlatformBase 
+public class TestPlatformImplBase extends TestBase 
 {
-    /** The tested model. */
-    private static final String TESTED_MODEL =
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-        "<database name='ddlutils'>\n"+
-        "  <table name='TestTable'>\n"+
-        "    <column name='id' autoIncrement='true' type='INTEGER' primaryKey='true'/>\n"+
-        "    <column name='name' type='VARCHAR' size='15'/>\n"+
-        "  </table>\n"+
-        "</database>";
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setUp()
-    {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected String getDatabaseName()
-    {
-        return null;
-    }
-
     /**
      * Test the toColumnValues method.
      */
     public void testToColumnValues()
     {
-        Database         database = parseDatabaseFromString(TESTED_MODEL);
+        final String schema =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='id' autoIncrement='true' type='INTEGER' primaryKey='true'/>\n"+
+            "    <column name='name' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        Database         database = parseDatabaseFromString(schema);
         PlatformImplBase platform = new TestPlatform();
         Table            table    = database.getTable(0);
         SqlDynaClass     clz      = SqlDynaClass.newInstance(table);

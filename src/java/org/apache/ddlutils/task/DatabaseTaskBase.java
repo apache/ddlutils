@@ -19,6 +19,8 @@ package org.apache.ddlutils.task;
  * under the License.
  */
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
@@ -353,12 +355,26 @@ public abstract class DatabaseTaskBase extends Task
             return;
         }
 
-        ClassLoader    sysClassLoader = Thread.currentThread().getContextClassLoader();
-        AntClassLoader newClassLoader = new AntClassLoader(getClass().getClassLoader(), true);
+        ClassLoader sysClassLoader = (ClassLoader)AccessController.doPrivileged(new PrivilegedAction()
+        {
+            public Object run()
+            {
+                try
+                {
+                    ClassLoader    contextClassLoader = Thread.currentThread().getContextClassLoader();
+                    AntClassLoader newClassLoader     = new AntClassLoader(getClass().getClassLoader(), true);
 
-        // we're changing the thread classloader so that we can access resources
-        // from the classpath used to load this task's class
-        Thread.currentThread().setContextClassLoader(newClassLoader);
+                    // we're changing the thread classloader so that we can access resources
+                    // from the classpath used to load this task's class
+                    Thread.currentThread().setContextClassLoader(newClassLoader);
+                    return contextClassLoader;
+                }
+                catch (SecurityException ex)
+                {
+                    throw new BuildException("Could not change the context clas loader", ex);
+                }
+            }
+        });
 
         try
         {

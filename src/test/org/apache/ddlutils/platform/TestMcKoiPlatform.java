@@ -29,52 +29,6 @@ import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
  */
 public class TestMcKoiPlatform extends TestPlatformBase
 {
-    /** The database schema for testing table constraints, ie. foreign keys and indices.
-        This schema is adapted for McKoi which does not support non-unique indices. */
-    public static final String TABLE_CONSTRAINT_TEST_SCHEMA =
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-        "<database name='tableconstraintstest'>\n" +
-        "  <table name='table1'>\n" +
-        "    <column name='COL_PK_1' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n" +
-        "    <column name='COL_PK_2' type='INTEGER' primaryKey='true'/>\n" +
-        "    <column name='COL_INDEX_1' type='BINARY' size='100' required='true'/>\n" +
-        "    <column name='COL_INDEX_2' type='DOUBLE' required='true'/>\n" +
-        "    <column name='COL_INDEX_3' type='CHAR' size='4'/>\n" +
-        "    <unique name='testindex1'>\n" +
-        "      <unique-column name='COL_INDEX_2'/>\n" +
-        "    </unique>\n" +
-        "    <unique name='testindex2'>\n" +
-        "      <unique-column name='COL_INDEX_3'/>\n" +
-        "      <unique-column name='COL_INDEX_1'/>\n" +
-        "    </unique>\n" +
-        "  </table>\n" +
-        "  <table name='table2'>\n" +
-        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
-        "    <column name='COL_FK_1' type='INTEGER'/>\n" +
-        "    <column name='COL_FK_2' type='VARCHAR' size='32' required='true'/>\n" +
-        "    <foreign-key foreignTable='table1'>\n" +
-        "      <reference local='COL_FK_1' foreign='COL_PK_2'/>\n" +
-        "      <reference local='COL_FK_2' foreign='COL_PK_1'/>\n" +
-        "    </foreign-key>\n" +
-        "  </table>\n" +
-        "  <table name='table3'>\n" +
-        "    <column name='COL_PK' type='VARCHAR' size='16' primaryKey='true'/>\n" +
-        "    <column name='COL_FK' type='INTEGER' required='true'/>\n" +
-        "    <foreign-key name='testfk' foreignTable='table2'>\n" +
-        "      <reference local='COL_FK' foreign='COL_PK'/>\n" +
-        "    </foreign-key>\n" +
-        "  </table>\n" +
-        "</database>";
-    /** The database schema for testing escaping of character sequences. */
-    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-        "<database name='escapetest'>\n" +
-        "  <table name='escapedcharacters'>\n" +
-        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
-        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39; \\'/>\n" +
-        "  </table>\n" +
-        "</database>";
-
     /**
      * {@inheritDoc}
      */
@@ -124,7 +78,7 @@ public class TestMcKoiPlatform extends TestPlatformBase
             "    \"COL_VARBINARY\"       VARBINARY(15),\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
             ");\n",
-            createTestDatabase(COLUMN_TEST_SCHEMA));
+            getColumnTestDatabaseCreationSql());
     }
 
     /**
@@ -150,7 +104,7 @@ public class TestMcKoiPlatform extends TestPlatformBase
             "    \"COL_AUTO_INCR\"        BIGINT DEFAULT NEXTVAL('seq_constraints_COL_AUTO_INCR'),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
+            getConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -158,6 +112,43 @@ public class TestMcKoiPlatform extends TestPlatformBase
      */
     public void testTableConstraints() throws Exception
     {
+        // The database schema for testing table constraints, ie. foreign keys and indices.
+        // This schema is adapted for McKoi which does not support non-unique indices
+        final String schema =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='tableconstraintstest'>\n" +
+            "  <table name='table1'>\n" +
+            "    <column name='COL_PK_1' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n" +
+            "    <column name='COL_PK_2' type='INTEGER' primaryKey='true'/>\n" +
+            "    <column name='COL_INDEX_1' type='BINARY' size='100' required='true'/>\n" +
+            "    <column name='COL_INDEX_2' type='DOUBLE' required='true'/>\n" +
+            "    <column name='COL_INDEX_3' type='CHAR' size='4'/>\n" +
+            "    <unique name='testindex1'>\n" +
+            "      <unique-column name='COL_INDEX_2'/>\n" +
+            "    </unique>\n" +
+            "    <unique name='testindex2'>\n" +
+            "      <unique-column name='COL_INDEX_3'/>\n" +
+            "      <unique-column name='COL_INDEX_1'/>\n" +
+            "    </unique>\n" +
+            "  </table>\n" +
+            "  <table name='table2'>\n" +
+            "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+            "    <column name='COL_FK_1' type='INTEGER'/>\n" +
+            "    <column name='COL_FK_2' type='VARCHAR' size='32' required='true'/>\n" +
+            "    <foreign-key foreignTable='table1'>\n" +
+            "      <reference local='COL_FK_1' foreign='COL_PK_2'/>\n" +
+            "      <reference local='COL_FK_2' foreign='COL_PK_1'/>\n" +
+            "    </foreign-key>\n" +
+            "  </table>\n" +
+            "  <table name='table3'>\n" +
+            "    <column name='COL_PK' type='VARCHAR' size='16' primaryKey='true'/>\n" +
+            "    <column name='COL_FK' type='INTEGER' required='true'/>\n" +
+            "    <foreign-key name='testfk' foreignTable='table2'>\n" +
+            "      <reference local='COL_FK' foreign='COL_PK'/>\n" +
+            "    </foreign-key>\n" +
+            "  </table>\n" +
+            "</database>";
+
         assertEqualsIgnoringWhitespaces(
             "ALTER TABLE \"table3\" DROP CONSTRAINT \"testfk\";\n"+
             "ALTER TABLE \"table2\" DROP CONSTRAINT \"table2_FK_COL_FK_1_COL_FK_2_table1\";\n"+
@@ -188,7 +179,7 @@ public class TestMcKoiPlatform extends TestPlatformBase
             ");\n"+
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_FK_1_COL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
-            createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+            getDatabaseCreationSql(schema));
     }
 
     /**
@@ -196,6 +187,16 @@ public class TestMcKoiPlatform extends TestPlatformBase
      */
     public void testCharacterEscaping() throws Exception
     {
+        // McKoi-specific schema
+        final String schema =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='escapetest'>\n" +
+            "  <table name='escapedcharacters'>\n" +
+            "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+            "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39; \\'/>\n" +
+            "  </table>\n" +
+            "</database>";
+
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE IF EXISTS \"escapedcharacters\";\n"+
             "CREATE TABLE \"escapedcharacters\"\n"+
@@ -204,6 +205,6 @@ public class TestMcKoiPlatform extends TestPlatformBase
             "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\\\' \\\\',\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+            getDatabaseCreationSql(schema));
     }
 }

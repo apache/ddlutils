@@ -30,16 +30,6 @@ import org.apache.ddlutils.platform.mysql.MySqlPlatform;
  */
 public class TestMySqlPlatform extends TestPlatformBase
 {
-    /** The database schema for testing escaping of character sequences. */
-    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-        "<database name='escapetest'>\n" +
-        "  <table name='escapedcharacters'>\n" +
-        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
-        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='_ &#39; \" &#10; &#13; &#09; \\ &#37;'/>\n" +
-        "  </table>\n" +
-        "</database>";
-
     /**
      * {@inheritDoc}
      */
@@ -89,7 +79,7 @@ public class TestMySqlPlatform extends TestPlatformBase
             "    `COL_VARBINARY`       VARBINARY(15) NULL,\n"+
             "    `COL_VARCHAR`         VARCHAR(15) NULL\n"+
             ");\n",
-            createTestDatabase(COLUMN_TEST_SCHEMA));
+            getColumnTestDatabaseCreationSql());
     }
 
     /**
@@ -97,13 +87,20 @@ public class TestMySqlPlatform extends TestPlatformBase
      */
     public void testColumnConstraints() throws Exception
     {
-        Database testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        // MySql-specfic schema
+        final String schema =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='columnconstraintstest'>\n" +
+            "  <table name='constraints'>\n" +
+            "    <column name='COL_PK' type='VARCHAR' size='32' primaryKey='true'/>\n" +
+            "    <column name='COL_PK_AUTO_INCR' type='INTEGER' primaryKey='true'/>\n" +
+            "    <column name='COL_NOT_NULL' type='BINARY' size='100' required='true'/>\n" +
+            "    <column name='COL_NOT_NULL_DEFAULT' type='DOUBLE' required='true' default='-2.0'/>\n" +
+            "    <column name='COL_DEFAULT' type='CHAR' size='4' default='test'/>\n" +
+            "    <column name='COL_AUTO_INCR' type='BIGINT'/>\n" +
+            "  </table>\n" +
+            "</database>";
 
-        testDb.findTable("constraints").findColumn("COL_AUTO_INCR").setAutoIncrement(false);
-        testDb.findTable("constraints").findColumn("COL_PK_AUTO_INCR").setAutoIncrement(false);
-
-        getPlatform().setSqlCommentsOn(false);
-        getPlatform().getSqlBuilder().createTables(testDb, true);
 
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE IF EXISTS `constraints`;\n" +
@@ -117,7 +114,7 @@ public class TestMySqlPlatform extends TestPlatformBase
             "    `COL_AUTO_INCR`        BIGINT,\n"+
             "    PRIMARY KEY (`COL_PK`, `COL_PK_AUTO_INCR`)\n"+
             ");\n",
-            getBuilderOutput());
+            getDatabaseCreationSql(schema));
     }
 
     /**
@@ -157,7 +154,7 @@ public class TestMySqlPlatform extends TestPlatformBase
             ");\n"+
             "ALTER TABLE `table2` ADD CONSTRAINT `table2_FK_COL_FK_1_COL_FK_2_table1` FOREIGN KEY (`COL_FK_1`, `COL_FK_2`) REFERENCES `table1` (`COL_PK_2`, `COL_PK_1`);\n"+
             "ALTER TABLE `table3` ADD CONSTRAINT `testfk` FOREIGN KEY (`COL_FK`) REFERENCES `table2` (`COL_PK`);\n",
-            createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+            getTableConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -165,11 +162,21 @@ public class TestMySqlPlatform extends TestPlatformBase
      */
     public void testCreationParameters1() throws Exception
     {
-        Database testDb = parseDatabaseFromString(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        // MySql-specfic schema
+        final String schema =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='columnconstraintstest'>\n" +
+            "  <table name='constraints'>\n" +
+            "    <column name='COL_PK' type='VARCHAR' size='32' primaryKey='true'/>\n" +
+            "    <column name='COL_PK_AUTO_INCR' type='INTEGER' primaryKey='true'/>\n" +
+            "    <column name='COL_NOT_NULL' type='BINARY' size='100' required='true'/>\n" +
+            "    <column name='COL_NOT_NULL_DEFAULT' type='DOUBLE' required='true' default='-2.0'/>\n" +
+            "    <column name='COL_DEFAULT' type='CHAR' size='4' default='test'/>\n" +
+            "    <column name='COL_AUTO_INCR' type='BIGINT'/>\n" +
+            "  </table>\n" +
+            "</database>";
 
-        testDb.findTable("constraints").findColumn("COL_AUTO_INCR").setAutoIncrement(false);
-        testDb.findTable("constraints").findColumn("COL_PK_AUTO_INCR").setAutoIncrement(false);
-
+        Database           testDb = parseDatabaseFromString(schema);
         CreationParameters params = new CreationParameters();
 
         params.addParameter(testDb.getTable(0),
@@ -202,6 +209,16 @@ public class TestMySqlPlatform extends TestPlatformBase
      */
     public void testCharacterEscaping() throws Exception
     {
+        // MySql-specific schema
+        final String schema =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='escapetest'>\n" +
+            "  <table name='escapedcharacters'>\n" +
+            "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+            "    <column name='COL_TEXT' type='VARCHAR' size='128' default='_ &#39; \" &#10; &#13; &#09; \\ &#37;'/>\n" +
+            "  </table>\n" +
+            "</database>";
+
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE IF EXISTS `escapedcharacters`;\n"+
             "CREATE TABLE `escapedcharacters`\n"+
@@ -210,6 +227,6 @@ public class TestMySqlPlatform extends TestPlatformBase
             "    `COL_TEXT` VARCHAR(128) DEFAULT '\\_ \\\' \\\" \\n \\r \\t \\\\ \\%' NULL,\n"+
             "    PRIMARY KEY (`COL_PK`)\n"+
             ");\n",
-            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+            getDatabaseCreationSql(schema));
     }
 }

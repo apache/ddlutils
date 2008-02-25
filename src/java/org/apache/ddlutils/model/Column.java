@@ -29,7 +29,6 @@ import java.sql.Types;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * Represents a column in the database model.
@@ -446,14 +445,8 @@ public class Column implements Serializable
                     case Types.TIMESTAMP:
                         return Timestamp.valueOf(_defaultValue);
                     case Types.BIT:
+                    case Types.BOOLEAN:
                         return ConvertUtils.convert(_defaultValue, Boolean.class);
-                    default:
-                        if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-                            (_typeCode == Jdbc3Utils.determineBooleanTypeCode()))
-                        {
-                            return ConvertUtils.convert(_defaultValue, Boolean.class);
-                        }
-                        break;
                 }
             }
             catch (NumberFormatException ex)

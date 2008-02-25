@@ -31,7 +31,6 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
-import org.apache.ddlutils.util.Jdbc3Utils;
 
 /**
  * The SQL Builder for MySQL.
@@ -244,6 +243,7 @@ public class MySqlBuilder extends SqlBuilder
             switch (targetColumn.getTypeCode())
             {
                 case Types.BIT:
+                case Types.BOOLEAN:
                 case Types.TINYINT:
                 case Types.SMALLINT:
                 case Types.INTEGER:
@@ -272,15 +272,7 @@ public class MySqlBuilder extends SqlBuilder
                     targetNativeType = "CHAR";
                     break;
                 default:
-                    if (Jdbc3Utils.supportsJava14JdbcTypes() &&
-                        (targetColumn.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode()))
-                    {
-                        targetNativeType = "SIGNED";
-                    }
-                    else
-                    {
-                        targetNativeType = "BINARY";
-                    }
+                    targetNativeType = "BINARY";
                     break;
             }
 

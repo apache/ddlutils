@@ -52,12 +52,14 @@ public class Oracle10ModelReader extends Oracle8ModelReader
 	{
 		// Oracle 10 added the recycle bin which contains dropped database objects not yet purged
 		// Since we don't want entries from the recycle bin, we filter them out
-        PreparedStatement stmt       = null;
+	    final String query = "SELECT * FROM RECYCLEBIN WHERE OBJECT_NAME=?";
+
+	    PreparedStatement stmt       = null;
         boolean           deletedObj = false;
 
         try
         {
-        	stmt = getConnection().prepareStatement("SELECT * FROM RECYCLEBIN WHERE OBJECT_NAME=?");
+        	stmt = getConnection().prepareStatement(query);
         	stmt.setString(1, (String)values.get("TABLE_NAME"));
         	
         	ResultSet rs = stmt.executeQuery();
@@ -67,14 +69,10 @@ public class Oracle10ModelReader extends Oracle8ModelReader
         		// we found the table in the recycle bin, so its a deleted one which we ignore
         		deletedObj = true;
         	}
-        	rs.close();
         }
         finally
         {
-        	if (stmt != null)
-        	{
-        		stmt.close();
-        	}
+            closeStatement(stmt);
         }
 
         return deletedObj ? null : super.readTable(metaData, values);

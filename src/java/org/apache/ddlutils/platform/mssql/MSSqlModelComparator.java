@@ -38,7 +38,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * A model comparator customized for Sql Server.
@@ -304,12 +304,12 @@ public class MSSqlModelComparator extends ModelComparator
                 }
                 else
                 {
-                    if (sizeMatters && !StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize()))
+                    if (sizeMatters && !StringUtilsExt.equals(sourceColumn.getSize(), targetColumn.getSize()))
                     {
                         hasChange = true;
                     }
                     else if (scaleMatters &&
-                             (!StringUtils.equals(sourceColumn.getSize(), targetColumn.getSize()) ||
+                             (!StringUtilsExt.equals(sourceColumn.getSize(), targetColumn.getSize()) ||
                               (sourceColumn.getScale() != targetColumn.getScale())))
                     {
                         hasChange = true;

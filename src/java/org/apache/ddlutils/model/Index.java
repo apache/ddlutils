@@ -26,7 +26,7 @@ import java.io.Serializable;
  * 
  * @version $Revision$
  */
-public interface Index extends Cloneable, Serializable
+public interface Index extends Serializable
 {
     /**
      * Determines whether this index is unique or not.
@@ -108,14 +108,6 @@ public interface Index extends Cloneable, Serializable
      * @param idx The position of the index column to remove
      */
     public void removeColumn(int idx);
-
-    /**
-     * Clones this index.
-     * 
-     * @return The clone
-     * @throws CloneNotSupportedException If the cloning did fail
-     */
-    public Object clone() throws CloneNotSupportedException;
 
     /**
      * Returns a clone of this index object. This is essentially the same method as

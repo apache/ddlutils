@@ -75,7 +75,9 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.BINARY,        "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
         info.addNativeTypeMapping(Types.BLOB,          "BYTEA",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "BOOLEAN",          Types.BIT);
         info.addNativeTypeMapping(Types.CLOB,          "TEXT",             Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DATALINK,      "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DECIMAL,       "NUMERIC",          Types.NUMERIC);
         info.addNativeTypeMapping(Types.DISTINCT,      "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
@@ -89,8 +91,6 @@ public class PostgreSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,        "BYTEA",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "BYTEA",            Types.LONGVARBINARY);
-        info.addNativeTypeMapping("BOOLEAN",  "BOOLEAN", "BIT");
-        info.addNativeTypeMapping("DATALINK", "BYTEA",   "LONGVARBINARY");
 
         info.setDefaultSize(Types.CHAR,    254);
         info.setDefaultSize(Types.VARCHAR, 254);

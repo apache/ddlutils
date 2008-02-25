@@ -80,7 +80,9 @@ public class MSSqlPlatform extends PlatformImplBase
         // BIGINT will be mapped back to BIGINT by the model reader 
         info.addNativeTypeMapping(Types.BIGINT,        "DECIMAL(19,0)");
         info.addNativeTypeMapping(Types.BLOB,          "IMAGE",         Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "BIT",           Types.BIT);
         info.addNativeTypeMapping(Types.CLOB,          "TEXT",          Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DATALINK,      "IMAGE",         Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DATE,          "DATETIME",      Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE",         Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "FLOAT",         Types.FLOAT);
@@ -95,8 +97,6 @@ public class MSSqlPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.TIME,          "DATETIME",      Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME");
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",      Types.SMALLINT);
-        info.addNativeTypeMapping("BOOLEAN",  "BIT",   "BIT");
-        info.addNativeTypeMapping("DATALINK", "IMAGE", "LONGVARBINARY");
 
         info.setDefaultSize(Types.CHAR,       254);
         info.setDefaultSize(Types.VARCHAR,    254);

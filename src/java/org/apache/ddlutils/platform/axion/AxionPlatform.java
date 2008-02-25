@@ -54,16 +54,16 @@ public class AxionPlatform extends PlatformImplBase
         info.setDelimitedIdentifiersSupported(false);
         info.setSqlCommentsSupported(false);
         info.setLastIdentityValueReadable(false);
-        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",      Types.BLOB);
-        info.addNativeTypeMapping(Types.BIT,           "BOOLEAN");
-        info.addNativeTypeMapping(Types.DISTINCT,      "VARBINARY", Types.VARBINARY);
-        info.addNativeTypeMapping(Types.NULL,          "VARBINARY", Types.VARBINARY);
-        info.addNativeTypeMapping(Types.OTHER,         "BLOB",      Types.BLOB);
-        info.addNativeTypeMapping(Types.REAL,          "REAL",      Types.FLOAT);
-        info.addNativeTypeMapping(Types.REF,           "VARBINARY", Types.VARBINARY);
-        info.addNativeTypeMapping(Types.STRUCT,        "VARBINARY", Types.VARBINARY);
-        info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",  Types.SMALLINT);
-        info.addNativeTypeMapping("DATALINK", "VARBINARY", "VARBINARY");
+        info.addNativeTypeMapping(Types.ARRAY,    "BLOB",      Types.BLOB);
+        info.addNativeTypeMapping(Types.BIT,      "BOOLEAN");
+        info.addNativeTypeMapping(Types.DATALINK, "VARBINARY", Types.VARBINARY);
+        info.addNativeTypeMapping(Types.DISTINCT, "VARBINARY", Types.VARBINARY);
+        info.addNativeTypeMapping(Types.NULL,     "VARBINARY", Types.VARBINARY);
+        info.addNativeTypeMapping(Types.OTHER,    "BLOB",      Types.BLOB);
+        info.addNativeTypeMapping(Types.REAL,     "REAL",      Types.FLOAT);
+        info.addNativeTypeMapping(Types.REF,      "VARBINARY", Types.VARBINARY);
+        info.addNativeTypeMapping(Types.STRUCT,   "VARBINARY", Types.VARBINARY);
+        info.addNativeTypeMapping(Types.TINYINT,  "SMALLINT",  Types.SMALLINT);
 
         setSqlBuilder(new AxionBuilder(this));
         setModelReader(new AxionModelReader(this));

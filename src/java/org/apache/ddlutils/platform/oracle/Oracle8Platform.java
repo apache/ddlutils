@@ -77,6 +77,8 @@ public class Oracle8Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.BIGINT,        "NUMBER(38)");
         info.addNativeTypeMapping(Types.BINARY,        "RAW",              Types.VARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "NUMBER(1)");
+        info.addNativeTypeMapping(Types.BOOLEAN,       "NUMBER(1)",        Types.BIT);
+        info.addNativeTypeMapping(Types.DATALINK,      "BLOB",             Types.BLOB);
         info.addNativeTypeMapping(Types.DATE,          "DATE",             Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.DECIMAL,       "NUMBER");
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",             Types.BLOB);
@@ -96,9 +98,6 @@ public class Oracle8Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.TINYINT,       "NUMBER(3)");
         info.addNativeTypeMapping(Types.VARBINARY,     "RAW");
         info.addNativeTypeMapping(Types.VARCHAR,       "VARCHAR2");
-
-        info.addNativeTypeMapping("BOOLEAN",  "NUMBER(1)", "BIT");
-        info.addNativeTypeMapping("DATALINK", "BLOB",      "BLOB");
 
         info.setDefaultSize(Types.CHAR,       254);
         info.setDefaultSize(Types.VARCHAR,    254);

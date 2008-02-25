@@ -32,8 +32,7 @@ import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
-import org.apache.ddlutils.util.Jdbc3Utils;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternCompiler;
@@ -286,10 +285,9 @@ public class Oracle8Builder extends SqlBuilder
      */
     protected String getNativeDefaultValue(Column column)
     {
-        if ((column.getTypeCode() == Types.BIT) ||
-            (Jdbc3Utils.supportsJava14JdbcTypes() && (column.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode())))
+        if ((column.getTypeCode() == Types.BIT) || (column.getTypeCode() == Types.BOOLEAN))
         {
-            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
+            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT);
         }
     	// Oracle does not accept ISO formats, so we have to convert an ISO spec if we find one
     	// But these are the only formats that we make sure work, every other format has to be database-dependent
@@ -416,7 +414,7 @@ public class Oracle8Builder extends SqlBuilder
     {
         boolean sizeChanged = TypeMap.isTextType(targetColumn.getTypeCode()) &&
                               ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn) &&
-                              !StringUtils.isEmpty(targetColumn.getSize());
+                              !StringUtilsExt.isEmpty(targetColumn.getSize());
 
         if (sizeChanged)
         {

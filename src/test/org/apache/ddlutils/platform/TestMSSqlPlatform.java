@@ -35,16 +35,6 @@ import org.apache.oro.text.regex.Perl5Matcher;
  */
 public class TestMSSqlPlatform extends TestPlatformBase
 {
-    /** The database schema for testing escaping of character sequences. */
-    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-        "<database name='escapetest'>\n" +
-        "  <table name='escapedcharacters'>\n" +
-        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
-        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +
-        "  </table>\n" +
-        "</database>";
-
     /**
      * {@inheritDoc}
      */
@@ -58,7 +48,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
      */
     public void testColumnTypes() throws Exception
     {
-        String sql = createTestDatabase(COLUMN_TEST_SCHEMA);
+        String sql = getColumnTestDatabaseCreationSql();
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL
@@ -136,7 +126,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
      */
     public void testColumnConstraints() throws Exception
     {
-        String sql = createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA);
+        String sql = getConstraintTestDatabaseCreationSql();
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL
@@ -190,7 +180,7 @@ public class TestMSSqlPlatform extends TestPlatformBase
      */
     public void testTableConstraints() throws Exception
     {
-        String sql = createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA);
+        String sql = getTableConstraintTestDatabaseCreationSql();
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL
@@ -303,11 +293,11 @@ public class TestMSSqlPlatform extends TestPlatformBase
     }
 
     /**
-     * Tests the proper escaping of character sequences where Cloudscape requires it.
+     * Tests the proper escaping of character sequences where Sql Server requires it.
      */
     public void testCharacterEscaping() throws Exception
     {
-        String sql = createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE);
+        String sql = getCharEscapingTestDatabaseCreationSql();
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL

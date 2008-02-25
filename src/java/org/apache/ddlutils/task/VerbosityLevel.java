@@ -64,8 +64,12 @@ public class VerbosityLevel extends EnumeratedAttribute
     /**
      * {@inheritDoc}
      */
-    public String[] getValues() {
-        return LEVELS;
+    public String[] getValues()
+    {
+        String[] result = new String[LEVELS.length];
+
+        System.arraycopy(LEVELS, 0, result, 0, LEVELS.length);
+        return result;
     }
 
     /**

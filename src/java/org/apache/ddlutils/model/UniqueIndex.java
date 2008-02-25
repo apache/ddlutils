@@ -46,14 +46,6 @@ public class UniqueIndex extends IndexImplBase
     /**
      * {@inheritDoc}
      */
-    public Object clone() throws CloneNotSupportedException
-    {
-        return getClone();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public Index getClone() throws ModelException
     {
         UniqueIndex result = new UniqueIndex();

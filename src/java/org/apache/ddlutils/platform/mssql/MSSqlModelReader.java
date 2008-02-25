@@ -146,26 +146,26 @@ public class MSSqlModelReader extends JdbcModelReader
      * @param name     The pk name
      * @return <code>true</code> if there is such a pk
      */
-    private boolean existsPKWithName(DatabaseMetaDataWrapper metaData, Table table, String name)
+    private boolean existsPKWithName(DatabaseMetaDataWrapper metaData, Table table, String name) throws SQLException
     {
+        ResultSet pks = null;
+
         try
         {
-            ResultSet pks   = metaData.getPrimaryKeys(table.getName());
-            boolean   found = false;
-    
-            while (pks.next() && !found)
+            pks = metaData.getPrimaryKeys(table.getName());
+
+            while (pks.next())
             {
                 if (name.equals(pks.getString("PK_NAME")))
                 {
-                    found = true;
+                    return true;
                 }
             }
-            pks.close();
-            return found;
+            return false;
         }
-        catch (SQLException ex)
+        finally
         {
-            throw new DdlUtilsException(ex);
+            closeResultSet(pks);
         }
     }
     

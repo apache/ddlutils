@@ -82,7 +82,9 @@ public class InterbasePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.BINARY,        "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.BLOB,          "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT");
+        info.addNativeTypeMapping(Types.DATALINK,      "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",   Types.DOUBLE);
@@ -96,8 +98,6 @@ public class InterbasePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "BLOB",               Types.LONGVARBINARY);
-        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
         info.setDefaultSize(Types.CHAR,    254);
         info.setDefaultSize(Types.VARCHAR, 254);
@@ -154,10 +154,12 @@ public class InterbasePlatform extends PlatformImplBase
             case Types.BINARY:
             case Types.VARBINARY:
             case Types.BLOB:
+                BufferedInputStream input = null;
+
                 try
                 {
-                    BufferedInputStream input = new BufferedInputStream(useIdx ? resultSet.getBinaryStream(columnIdx) : resultSet.getBinaryStream(columnName));
-        
+                    input = new BufferedInputStream(useIdx ? resultSet.getBinaryStream(columnIdx) : resultSet.getBinaryStream(columnName));
+
                     if (resultSet.wasNull())
                     {
                         return null;
@@ -177,6 +179,20 @@ public class InterbasePlatform extends PlatformImplBase
                 catch (IOException ex)
                 {
                     throw new DdlUtilsException(ex);
+                }
+                finally
+                {
+                    if (input != null)
+                    {
+                        try
+                        {
+                            input.close();
+                        }
+                        catch (IOException ex)
+                        {
+                            getLog().error("Could not close binary stream read from result set", ex);
+                        }
+                    }
                 }
             case Types.LONGVARCHAR:
             case Types.CLOB:

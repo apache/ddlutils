@@ -71,9 +71,11 @@ public class FirebirdPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BINARY,        "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",           Types.SMALLINT);
-        info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT", Types.LONGVARCHAR);
-        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BLOB,          "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "SMALLINT",           Types.SMALLINT);
+        info.addNativeTypeMapping(Types.CLOB,          "BLOB SUB_TYPE TEXT", Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DATALINK,      "BLOB",               Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
         info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",   Types.DOUBLE);
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",               Types.LONGVARBINARY);
@@ -87,9 +89,6 @@ public class FirebirdPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",               Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",           Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "BLOB",               Types.LONGVARBINARY);
-        
-        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "BLOB",     "LONGVARBINARY");
 
         info.setDefaultSize(Types.VARCHAR, 254);
         info.setDefaultSize(Types.CHAR,    254);

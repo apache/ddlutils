@@ -68,8 +68,10 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.setMixingIdentityAndNormalPrimaryKeyColumnsSupported(false);
 
         info.addNativeTypeMapping(Types.ARRAY,       "LONGVARBINARY", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BIT,         "BOOLEAN",       Types.BOOLEAN);
         info.addNativeTypeMapping(Types.BLOB,        "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.CLOB,        "LONGVARCHAR",   Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DATALINK,    "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DISTINCT,    "LONGVARBINARY", Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.FLOAT,       "DOUBLE",        Types.DOUBLE);
         info.addNativeTypeMapping(Types.JAVA_OBJECT, "OBJECT");
@@ -78,9 +80,6 @@ public class HsqlDbPlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,      "LONGVARBINARY", Types.LONGVARBINARY);
         // JDBC's TINYINT requires a value range of -255 to 255, but HsqlDb's is only -128 to 127
         info.addNativeTypeMapping(Types.TINYINT,     "SMALLINT",      Types.SMALLINT);
-
-        info.addNativeTypeMapping("BIT",      "BOOLEAN",       "BOOLEAN");
-        info.addNativeTypeMapping("DATALINK", "LONGVARBINARY", "LONGVARBINARY");
 
         info.setDefaultSize(Types.CHAR,      Integer.MAX_VALUE);
         info.setDefaultSize(Types.VARCHAR,   Integer.MAX_VALUE);

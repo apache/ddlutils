@@ -92,7 +92,9 @@ public class SybasePlatform extends PlatformImplBase
         // we're not using the native BIT type because it is rather limited (cannot be NULL, cannot be indexed)
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.BLOB,          "IMAGE",            Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "SMALLINT",         Types.SMALLINT);
         info.addNativeTypeMapping(Types.CLOB,          "TEXT",             Types.LONGVARCHAR);
+        info.addNativeTypeMapping(Types.DATALINK,      "IMAGE",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DATE,          "DATETIME",         Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.DISTINCT,      "IMAGE",            Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
@@ -108,8 +110,6 @@ public class SybasePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.TIME,          "DATETIME",         Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.TIMESTAMP,     "DATETIME",         Types.TIMESTAMP);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",         Types.SMALLINT);
-        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT", "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "IMAGE",    "LONGVARBINARY");
 
         info.setDefaultSize(Types.BINARY,    254);
         info.setDefaultSize(Types.VARBINARY, 254);

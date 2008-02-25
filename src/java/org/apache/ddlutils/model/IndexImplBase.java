@@ -21,7 +21,7 @@ package org.apache.ddlutils.model;
 
 import java.util.ArrayList;
 
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * Base class for indexes.
@@ -101,7 +101,7 @@ public abstract class IndexImplBase implements Index
         {
             IndexColumn curColumn = getColumn(idx);
 
-            if (StringUtils.equals(columnName, curColumn.getName(), caseSensitive))
+            if (StringUtilsExt.equals(columnName, curColumn.getName(), caseSensitive))
             {
                 return true;
             }
@@ -145,9 +145,4 @@ public abstract class IndexImplBase implements Index
     {
         _columns.remove(idx);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public abstract Object clone() throws CloneNotSupportedException;
 }

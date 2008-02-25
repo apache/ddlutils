@@ -19,13 +19,15 @@ package org.apache.ddlutils.platform.mckoi;
  * under the License.
  */
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
@@ -40,6 +42,9 @@ import org.apache.ddlutils.platform.JdbcModelReader;
  */
 public class MckoiModelReader extends JdbcModelReader
 {
+    /** The log. */
+    protected Log _log = LogFactory.getLog(MckoiModelReader.class);
+
     /**
      * Creates a new model reader for Mckoi databases.
      * 
@@ -57,40 +62,48 @@ public class MckoiModelReader extends JdbcModelReader
      */
     protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
     {
+        // Mckoi does not currently return unique indices in the metadata so we have to query
+        // internal tables to get this info
+        final String query =
+            "SELECT uniqueColumns.column, uniqueColumns.seq_no, uniqueInfo.name" +
+            " FROM SYS_INFO.sUSRUniqueColumns uniqueColumns, SYS_INFO.sUSRUniqueInfo uniqueInfo" +
+            " WHERE uniqueColumns.un_id = uniqueInfo.id AND uniqueInfo.table = ?";
+        final String queryWithSchema =
+            query + " AND uniqueInfo.schema = ?";
+
         Table table = super.readTable(metaData, values);
 
         if (table != null)
         {
-            // Mckoi does not currently return unique indices in the metadata so we have to query
-            // internal tables to get this info
-            StringBuffer query = new StringBuffer();
-        
-            query.append("SELECT uniqueColumns.column, uniqueColumns.seq_no, uniqueInfo.name");
-            query.append(" FROM SYS_INFO.sUSRUniqueColumns uniqueColumns, SYS_INFO.sUSRUniqueInfo uniqueInfo");
-            query.append(" WHERE uniqueColumns.un_id = uniqueInfo.id AND uniqueInfo.table = '");
-            query.append(table.getName());
-            if (table.getSchema() != null)
+            Map               indices = new ListOrderedMap();
+            PreparedStatement stmt    = null;
+
+            try
             {
-                query.append("' AND uniqueInfo.schema = '");
-                query.append(table.getSchema());
+                stmt = getConnection().prepareStatement(table.getSchema() == null ? query : queryWithSchema);
+                stmt.setString(1, table.getName());
+                if (table.getSchema() != null)
+                {
+                    stmt.setString(2, table.getSchema());
+                }
+    
+                ResultSet  resultSet   = stmt.executeQuery();
+                Map        indexValues = new HashMap();
+            
+                indexValues.put("NON_UNIQUE", Boolean.FALSE);
+                while (resultSet.next())
+                {
+                    indexValues.put("COLUMN_NAME",      resultSet.getString(1));
+                    indexValues.put("ORDINAL_POSITION", new Short(resultSet.getShort(2)));
+                    indexValues.put("INDEX_NAME",       resultSet.getString(3));
+            
+                    readIndex(metaData, indexValues, indices);
+                }
             }
-            query.append("'");
-        
-            Statement stmt        = getConnection().createStatement();
-            ResultSet resultSet   = stmt.executeQuery(query.toString());
-            Map       indices     = new ListOrderedMap();
-            Map       indexValues = new HashMap();
-        
-            indexValues.put("NON_UNIQUE", Boolean.FALSE);
-            while (resultSet.next())
+            finally
             {
-                indexValues.put("COLUMN_NAME",      resultSet.getString(1));
-                indexValues.put("ORDINAL_POSITION", new Short(resultSet.getShort(2)));
-                indexValues.put("INDEX_NAME",       resultSet.getString(3));
-        
-                readIndex(metaData, indexValues, indices);
+                closeStatement(stmt);
             }
-            resultSet.close();
         
             table.addIndices(indices.values());
         }

@@ -36,7 +36,7 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.PlatformImplBase;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * The DB2 platform implementation.
@@ -79,6 +79,7 @@ public class Db2Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} FOR BIT DATA");
         info.addNativeTypeMapping(Types.BIT,           "SMALLINT",                  Types.SMALLINT);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "SMALLINT",                  Types.SMALLINT);
         info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE",                    Types.DOUBLE);
         info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
@@ -89,7 +90,6 @@ public class Db2Platform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",                  Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} FOR BIT DATA");
-        info.addNativeTypeMapping("BOOLEAN", "SMALLINT", "SMALLINT");
 
         info.setDefaultSize(Types.CHAR,      254);
         info.setDefaultSize(Types.VARCHAR,   254);
@@ -141,7 +141,7 @@ public class Db2Platform extends PlatformImplBase
 
                     // DB2 cannot add IDENTITY columns, and required columns need a default value
                     return !addColumnChange.getNewColumn().isAutoIncrement() &&
-                           (!addColumnChange.getNewColumn().isRequired() || !StringUtils.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
+                           (!addColumnChange.getNewColumn().isRequired() || !StringUtilsExt.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
                 }
                 else
                 {

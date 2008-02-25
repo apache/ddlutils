@@ -32,7 +32,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * Compares two database models and creates change objects that express how to
@@ -239,15 +239,13 @@ public class ModelComparator
         {
             Table targetTable       = targetModel.getTable(tableIdx);
             Table intermediateTable = intermediateModel.findTable(targetTable.getName(), _caseSensitive);
-            Table sourceTable       = sourceModel.findTable(targetTable.getName(), _caseSensitive);
 
             for (int fkIdx = 0; fkIdx < targetTable.getForeignKeyCount(); fkIdx++)
             {
                 ForeignKey targetFk       = targetTable.getForeignKey(fkIdx);
                 ForeignKey intermediateFk = findCorrespondingForeignKey(intermediateTable, targetFk);
-                ForeignKey sourceFk       = sourceTable == null ? null : findCorrespondingForeignKey(sourceTable, targetFk);
 
-                if ((sourceFk == null) && (intermediateFk == null))
+                if (intermediateFk == null)
                 {
                     if (_log.isInfoEnabled())
                     {
@@ -791,7 +789,7 @@ public class ModelComparator
             {
                 for (int pkColumnIdx = 0; (pkColumnIdx < curPK.length) && !changePK; pkColumnIdx++)
                 {
-                    if (!StringUtils.equals(curPK[pkColumnIdx].getName(), targetPK[pkColumnIdx].getName(), _caseSensitive))
+                    if (!StringUtilsExt.equals(curPK[pkColumnIdx].getName(), targetPK[pkColumnIdx].getName(), _caseSensitive))
                     {
                         changePK = true;
                     }

@@ -31,8 +31,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.SqlBuilder;
-import org.apache.ddlutils.util.Jdbc3Utils;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * The SQL Builder for Sybase.
@@ -168,10 +167,9 @@ public class SybaseBuilder extends SqlBuilder
      */
     protected String getNativeDefaultValue(Column column)
     {
-        if ((column.getTypeCode() == Types.BIT) ||
-            (Jdbc3Utils.supportsJava14JdbcTypes() && (column.getTypeCode() == Jdbc3Utils.determineBooleanTypeCode())))
+        if ((column.getTypeCode() == Types.BIT) || (column.getTypeCode() == Types.BOOLEAN))
         {
-            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT).toString();
+            return getDefaultValueHelper().convert(column.getDefaultValue(), column.getTypeCode(), Types.SMALLINT);
         }
         else
         {
@@ -301,7 +299,7 @@ public class SybaseBuilder extends SqlBuilder
     {
         String quotationStmt = getQuotationOnStatement();
 
-        if (!StringUtils.isEmpty(quotationStmt))
+        if (!StringUtilsExt.isEmpty(quotationStmt))
         {
             print(quotationStmt);
             printEndOfStatement();

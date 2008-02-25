@@ -120,10 +120,7 @@ public class FirebirdModelReader extends JdbcModelReader
         }
         finally
         {
-            if (columnData != null)
-            {
-                columnData.close();
-            }
+            closeResultSet(columnData);
         }
     }
 
@@ -154,7 +151,9 @@ public class FirebirdModelReader extends JdbcModelReader
     {
     	// Since for long table and column names, the generator name will be shortened
     	// we have to determine for each column whether there is a generator for it
-    	FirebirdBuilder builder = (FirebirdBuilder)getPlatform().getSqlBuilder();
+        final String query = "SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME NOT LIKE '%$%'";
+
+        FirebirdBuilder builder = (FirebirdBuilder)getPlatform().getSqlBuilder();
     	Column[]        columns = table.getColumns();
     	HashMap         names   = new HashMap();
         String          name;
@@ -169,11 +168,13 @@ public class FirebirdModelReader extends JdbcModelReader
     		names.put(name, columns[idx]);
     	}
 
-    	Statement stmt = getConnection().createStatement();
+    	Statement stmt = null;
 
     	try
     	{
-            ResultSet rs = stmt.executeQuery("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME NOT LIKE '%$%'");
+    	    stmt = getConnection().createStatement();
+
+    	    ResultSet rs = stmt.executeQuery(query);
 
             while (rs.next())
             {
@@ -185,11 +186,10 @@ public class FirebirdModelReader extends JdbcModelReader
                     column.setAutoIncrement(true);
                 }
             }
-    		rs.close();
     	}
         finally
         {
-            stmt.close();
+            closeStatement(stmt);
         }
     }
 
@@ -232,10 +232,7 @@ public class FirebirdModelReader extends JdbcModelReader
         }
         finally
         {
-            if (pkData != null)
-            {
-                pkData.close();
-            }
+            closeResultSet(pkData);
         }
         return pks;
     }
@@ -279,10 +276,7 @@ public class FirebirdModelReader extends JdbcModelReader
         }
         finally
         {
-            if (fkData != null)
-            {
-                fkData.close();
-            }
+            closeResultSet(fkData);
         }
         return fks.values();
     }
@@ -294,21 +288,21 @@ public class FirebirdModelReader extends JdbcModelReader
     {
         // Jaybird is not able to read indices when delimited identifiers are turned on,
         // so we gather the data manually using Firebird's system tables
-        Map          indices = new ListOrderedMap();
-        StringBuffer query   = new StringBuffer();
-        
-        query.append("SELECT a.RDB$INDEX_NAME INDEX_NAME, b.RDB$RELATION_NAME TABLE_NAME, b.RDB$UNIQUE_FLAG NON_UNIQUE,");
-        query.append(" a.RDB$FIELD_POSITION ORDINAL_POSITION, a.RDB$FIELD_NAME COLUMN_NAME, 3 INDEX_TYPE");
-        query.append(" FROM RDB$INDEX_SEGMENTS a, RDB$INDICES b WHERE a.RDB$INDEX_NAME=b.RDB$INDEX_NAME AND b.RDB$RELATION_NAME = ?");
+        final String query =
+            "SELECT a.RDB$INDEX_NAME INDEX_NAME, b.RDB$RELATION_NAME TABLE_NAME, b.RDB$UNIQUE_FLAG NON_UNIQUE, " +
+            "a.RDB$FIELD_POSITION ORDINAL_POSITION, a.RDB$FIELD_NAME COLUMN_NAME, 3 INDEX_TYPE " +
+            "FROM RDB$INDEX_SEGMENTS a, RDB$INDICES b WHERE a.RDB$INDEX_NAME=b.RDB$INDEX_NAME AND b.RDB$RELATION_NAME = ?";
 
-        PreparedStatement stmt      = getConnection().prepareStatement(query.toString());
-        ResultSet         indexData = null;
+        Map               indices = new ListOrderedMap();
+        PreparedStatement stmt    = null;
 
-        stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
-
-        try 
+        try
         {
-        	indexData = stmt.executeQuery();
+            stmt = getConnection().prepareStatement(query);
+
+            stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
+
+            ResultSet indexData = stmt.executeQuery();
 
             while (indexData.next())
             {
@@ -325,10 +319,7 @@ public class FirebirdModelReader extends JdbcModelReader
         }
         finally
         {
-            if (indexData != null)
-            {
-                indexData.close();
-            }
+            closeStatement(stmt);
         }
         return indices.values();
     }
@@ -338,16 +329,17 @@ public class FirebirdModelReader extends JdbcModelReader
      */
     protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index) throws SQLException
     {
-        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
-        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
-        StringBuffer query     = new StringBuffer();
+        final String query =
+            "SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS " +
+            "WHERE RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$INDEX_NAME=?";
 
-        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$INDEX_NAME=?");
-
-        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
+        String            tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String            indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        PreparedStatement stmt      = null;
 
         try 
         {
+            stmt = getConnection().prepareStatement(query);
             stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
             stmt.setString(2, "PRIMARY KEY");
             stmt.setString(3, indexName);
@@ -358,10 +350,7 @@ public class FirebirdModelReader extends JdbcModelReader
         }
         finally
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
+            closeStatement(stmt);
         }
     }
 
@@ -370,17 +359,18 @@ public class FirebirdModelReader extends JdbcModelReader
      */
     protected boolean isInternalForeignKeyIndex(DatabaseMetaDataWrapper metaData, Table table, ForeignKey fk, Index index) throws SQLException
     {
-        String       tableName = getPlatform().getSqlBuilder().getTableName(table);
-        String       indexName = getPlatform().getSqlBuilder().getIndexName(index);
-        String       fkName    = getPlatform().getSqlBuilder().getForeignKeyName(table, fk);
-        StringBuffer query     = new StringBuffer();
+        final String query =
+            "SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS " +
+            "WHERE RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$CONSTRAINT_NAME=? AND RDB$INDEX_NAME=?";
 
-        query.append("SELECT RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS where RDB$RELATION_NAME=? AND RDB$CONSTRAINT_TYPE=? AND RDB$CONSTRAINT_NAME=? AND RDB$INDEX_NAME=?");
-
-        PreparedStatement stmt = getConnection().prepareStatement(query.toString());
+        String            tableName = getPlatform().getSqlBuilder().getTableName(table);
+        String            indexName = getPlatform().getSqlBuilder().getIndexName(index);
+        String            fkName    = getPlatform().getSqlBuilder().getForeignKeyName(table, fk);
+        PreparedStatement stmt      = null;
 
         try 
         {
+            stmt = getConnection().prepareStatement(query);
             stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
             stmt.setString(2, "FOREIGN KEY");
             stmt.setString(3, fkName);
@@ -392,10 +382,7 @@ public class FirebirdModelReader extends JdbcModelReader
         }
         finally
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
+            closeStatement(stmt);
         }
     }
 
@@ -466,7 +453,7 @@ public class FirebirdModelReader extends JdbcModelReader
                             found = false;
                         }
                     }
-                    columnData.close();
+                    closeResultSet(columnData);
                     columnData = null;
                 }
             }
@@ -474,14 +461,8 @@ public class FirebirdModelReader extends JdbcModelReader
         }
         finally
         {
-            if (columnData != null)
-            {
-                columnData.close();
-            }
-            if (tableData != null)
-            {
-                tableData.close();
-            }
+            closeResultSet(columnData);
+            closeResultSet(tableData);
         }
     }
 }

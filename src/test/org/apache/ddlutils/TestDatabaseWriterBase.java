@@ -20,6 +20,7 @@ package org.apache.ddlutils;
  */
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.sql.Connection;
@@ -101,14 +102,18 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
 	        {
 	        	throw new RuntimeException("Please specify the properties file via the jdbc.properties.file environment variable");
 	        }
+
+	        InputStream propStream = null;
+
 	        try
 	        {
-	            InputStream propStream = getClass().getResourceAsStream(propFile);
-	
+	            propStream = TestDatabaseWriterBase.class.getResourceAsStream(propFile);
+
 	            if (propStream == null)
 	            {
 	                propStream = new FileInputStream(propFile);
 	            }
+
 	            Properties props = new Properties();
 
 	            props.load(propStream);
@@ -117,6 +122,20 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
 	        catch (Exception ex)
 	        {
 	        	throw new RuntimeException(ex);
+	        }
+	        finally
+	        {
+	            if (propStream != null)
+	            {
+	                try
+	                {
+	                    propStream.close();
+	                }
+	                catch (IOException ex)
+	                {
+	                    getLog().error("Could not close the stream used to read the test jdbc properties", ex);
+	                }
+	            }
 	        }
     	}
     	return _testProps;

@@ -52,13 +52,15 @@ public class CloudscapePlatform extends PlatformImplBase
         info.setMultipleIdentityColumnsSupported(false);
 
         // BINARY and VARBINARY will also be handled by CloudscapeBuilder.getSqlType
-        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                     Types.BLOB);
+        info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.BINARY,        "CHAR {0} FOR BIT DATA");
-        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",                 Types.SMALLINT);
-        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",                     Types.BLOB);
+        info.addNativeTypeMapping(Types.BIT,           "SMALLINT",                  Types.SMALLINT);
+        info.addNativeTypeMapping(Types.BOOLEAN,       "SMALLINT",                  Types.SMALLINT);
+        info.addNativeTypeMapping(Types.DATALINK,      "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
+        info.addNativeTypeMapping(Types.DISTINCT,      "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.DOUBLE,        "DOUBLE PRECISION");
-        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",         Types.DOUBLE);
-        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",                     Types.BLOB);
+        info.addNativeTypeMapping(Types.FLOAT,         "DOUBLE PRECISION",          Types.DOUBLE);
+        info.addNativeTypeMapping(Types.JAVA_OBJECT,   "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
         info.addNativeTypeMapping(Types.LONGVARCHAR,   "LONG VARCHAR");
         info.addNativeTypeMapping(Types.NULL,          "LONG VARCHAR FOR BIT DATA", Types.LONGVARBINARY);
@@ -67,8 +69,6 @@ public class CloudscapePlatform extends PlatformImplBase
         info.addNativeTypeMapping(Types.STRUCT,        "BLOB",                      Types.BLOB);
         info.addNativeTypeMapping(Types.TINYINT,       "SMALLINT",                  Types.SMALLINT);
         info.addNativeTypeMapping(Types.VARBINARY,     "VARCHAR {0} FOR BIT DATA");
-        info.addNativeTypeMapping("BOOLEAN",  "SMALLINT",                  "SMALLINT");
-        info.addNativeTypeMapping("DATALINK", "LONG VARCHAR FOR BIT DATA", "LONGVARBINARY");
 
         info.setDefaultSize(Types.BINARY,    254);
         info.setDefaultSize(Types.CHAR,      254);

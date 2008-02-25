@@ -22,7 +22,6 @@ package org.apache.ddlutils.platform.db2;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashSet;
 import java.util.Map;
@@ -182,11 +181,13 @@ public class Db2ModelReader extends JdbcModelReader
      */
     protected void determineAutoIncrementColumns(Table table) throws SQLException
     {
+        final String query = "SELECT COLNAME FROM SYSCAT.COLUMNS WHERE TABNAME = ? AND IDENTITY = 'Y' AND HIDDEN != 'S'";
+
         PreparedStatement stmt = null;
 
         try
         {
-            stmt = getConnection().prepareStatement("SELECT COLNAME FROM SYSCAT.COLUMNS WHERE TABNAME = ? AND IDENTITY = 'Y' AND HIDDEN != 'S'");
+            stmt = getConnection().prepareStatement(query);
             stmt.setString(1, table.getName());
 
             ResultSet rs = stmt.executeQuery();
@@ -201,14 +202,10 @@ public class Db2ModelReader extends JdbcModelReader
                     column.setAutoIncrement(true);
                 }
             }
-            rs.close();
         }
         finally
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
+            closeStatement(stmt);
         }
     }
 
@@ -251,10 +248,7 @@ public class Db2ModelReader extends JdbcModelReader
             }
             finally
             {
-                if (pkData != null)
-                {
-                    pkData.close();
-                }
+                closeResultSet(pkData);
             }
 
             return pkNames.contains(index.getName());

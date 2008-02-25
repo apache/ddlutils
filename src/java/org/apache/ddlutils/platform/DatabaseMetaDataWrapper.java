@@ -106,7 +106,17 @@ public class DatabaseMetaDataWrapper
      */
     public String[] getTableTypes()
     {
-        return _tableTypes;
+        if (_tableTypes == null)
+        {
+            return null;
+        }
+        else
+        {
+            String[] result = new String[_tableTypes.length];
+
+            System.arraycopy(_tableTypes, 0, result, 0, _tableTypes.length);
+            return result;
+        }
     }
 
     /**
@@ -116,7 +126,16 @@ public class DatabaseMetaDataWrapper
      */
     public void setTableTypes(String[] types)
     {
-        _tableTypes = types;
+        if (types == null)
+        {
+            _tableTypes = null;
+        }
+        else
+        {
+            _tableTypes = new String[types.length];
+
+            System.arraycopy(types, 0, _tableTypes, 0, types.length);
+        }
     }
 
     /**

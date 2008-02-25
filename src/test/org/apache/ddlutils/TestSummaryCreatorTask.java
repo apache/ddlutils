@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -235,9 +236,9 @@ public class TestSummaryCreatorTask extends Task
             totalNumErrors   += numErrors;
             totalNumFailures += numFailures;
 
-            generalElement.addAttribute("tests", String.valueOf(totalNumTests));
-            generalElement.addAttribute("errors", String.valueOf(totalNumErrors));
-            generalElement.addAttribute("failures", String.valueOf(totalNumErrors));
+            generalElement.addAttribute("tests",    String.valueOf(totalNumTests));
+            generalElement.addAttribute("errors",   String.valueOf(totalNumErrors));
+            generalElement.addAttribute("failures", String.valueOf(totalNumFailures));
 
             if ((numErrors > 0) || (numFailures > 0))
             {
@@ -266,7 +267,7 @@ public class TestSummaryCreatorTask extends Task
     }
 
     /**
-     * Reads the database properties from the used properties file.
+     * Adds the data from the test jdbc propertis file to the document.
      * 
      * @param element            The element to add the relevant database properties to
      * @param jdbcPropertiesFile The path of the properties file
@@ -278,29 +279,9 @@ public class TestSummaryCreatorTask extends Task
             return;
         }
 
-        Properties       props    = new Properties();
+        Properties       props    = readProperties(jdbcPropertiesFile);
         Connection       conn     = null;
         DatabaseMetaData metaData = null;
-
-        try
-        {
-            props.load(getClass().getResourceAsStream(jdbcPropertiesFile));
-        }
-        catch (Exception ex)
-        {
-            // not on the classpath ? let's try a file
-            File baseDir  = getProject().getBaseDir();
-            File propFile = new File(baseDir, jdbcPropertiesFile);
-
-            if (propFile.exists() && propFile.isFile() && propFile.canRead())
-            {
-                props.load(new FileInputStream(propFile));
-            }
-            else
-            {
-                throw new BuildException("Cannot load database properties from file " + jdbcPropertiesFile);
-            }
-        }
 
         try
         {
@@ -411,7 +392,64 @@ public class TestSummaryCreatorTask extends Task
             }
         }
     }
-    
+
+    /**
+     * Reads the database properties from the used properties file.
+     * 
+     * @param jdbcPropertiesFile The path of the properties file
+     * @return The properties
+     */
+    private Properties readProperties(String jdbcPropertiesFile)
+    {
+        Properties  props      = new Properties();
+        InputStream propStream = null;
+
+        try
+        {
+            propStream = TestSummaryCreatorTask.class.getResourceAsStream(jdbcPropertiesFile);
+            if (propStream == null)
+            {
+                // not on the classpath ? let's try a file
+                File baseDir  = getProject().getBaseDir();
+                File propFile = new File(baseDir, jdbcPropertiesFile);
+
+                if (propFile.exists() && propFile.isFile() && propFile.canRead())
+                {
+                    propStream = new FileInputStream(propFile);
+                }
+                else
+                {
+                    throw new BuildException("Cannot load test jdbc properties from file " + jdbcPropertiesFile);
+                }
+            }
+            props.load(propStream);
+        }
+        catch (BuildException ex)
+        {
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            throw new BuildException("Cannot load test jdbc properties from file " + jdbcPropertiesFile, ex);
+        }
+        finally
+        {
+            if (propStream != null)
+            {
+                try
+                {
+                    propStream.close();
+                }
+                catch (IOException ex)
+                {
+                    log("Could not close the stream used to read the test jdbc properties", Project.MSG_WARN);
+                }
+            }
+        }
+        return props;
+    }
+
+
     /**
      * {@inheritDoc}
      */

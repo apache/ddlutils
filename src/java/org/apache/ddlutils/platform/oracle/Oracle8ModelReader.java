@@ -251,6 +251,9 @@ public class Oracle8ModelReader extends JdbcModelReader
         //       But once sequence/trigger support is in place, it might be possible to 'parse' the
         //       trigger body (via SELECT trigger_name, trigger_body FROM user_triggers) in order to
         //       determine whether it fits our auto-increment definition
+        final String triggerQuery  = "SELECT * FROM user_triggers WHERE trigger_name = ?";
+        final String sequenceQuery = "SELECT * FROM user_sequences WHERE sequence_name = ?";
+
         PreparedStatement prepStmt    = null;
         String            triggerName = getPlatform().getSqlBuilder().getConstraintName("trg", table, column.getName(), null);
         String            seqName     = getPlatform().getSqlBuilder().getConstraintName("seq", table, column.getName(), null);
@@ -262,7 +265,7 @@ public class Oracle8ModelReader extends JdbcModelReader
         }
         try
         {
-            prepStmt = getConnection().prepareStatement("SELECT * FROM user_triggers WHERE trigger_name = ?");
+            prepStmt = getConnection().prepareStatement(triggerQuery);
             prepStmt.setString(1, triggerName);
 
             ResultSet resultSet = prepStmt.executeQuery();
@@ -272,9 +275,9 @@ public class Oracle8ModelReader extends JdbcModelReader
                 return false;
             }
             // we have a trigger, so lets check the sequence
-            prepStmt.close();
+            closeStatement(prepStmt);
 
-            prepStmt = getConnection().prepareStatement("SELECT * FROM user_sequences WHERE sequence_name = ?");
+            prepStmt = getConnection().prepareStatement(sequenceQuery);
             prepStmt.setString(1, seqName);
 
             resultSet = prepStmt.executeQuery();
@@ -282,10 +285,7 @@ public class Oracle8ModelReader extends JdbcModelReader
         }
         finally
         {
-            if (prepStmt != null)
-            {
-                prepStmt.close();
-            }
+            closeStatement(prepStmt);
         }
     }
 
@@ -301,26 +301,19 @@ public class Oracle8ModelReader extends JdbcModelReader
         // having GENERATED='Y' in the query result, or by their index names being equal to the
         // name of the primary key of the table
 
-		StringBuffer query = new StringBuffer();
-
-		query.append("SELECT a.INDEX_NAME, a.INDEX_TYPE, a.UNIQUENESS, b.COLUMN_NAME, b.COLUMN_POSITION FROM USER_INDEXES a, USER_IND_COLUMNS b WHERE ");
-		query.append("a.TABLE_NAME=? AND a.GENERATED=? AND a.TABLE_TYPE=? AND a.TABLE_NAME=b.TABLE_NAME AND a.INDEX_NAME=b.INDEX_NAME AND ");
-        query.append("a.INDEX_NAME NOT IN (SELECT DISTINCT c.CONSTRAINT_NAME FROM USER_CONSTRAINTS c WHERE c.CONSTRAINT_TYPE=? AND c.TABLE_NAME=a.TABLE_NAME");
-		if (metaData.getSchemaPattern() != null)
-		{
-			query.append(" AND c.OWNER LIKE ?) AND a.TABLE_OWNER LIKE ?");
-		}
-        else
-        {
-            query.append(")");
-        }
+		final String query =
+		    "SELECT a.INDEX_NAME, a.INDEX_TYPE, a.UNIQUENESS, b.COLUMN_NAME, b.COLUMN_POSITION FROM USER_INDEXES a, USER_IND_COLUMNS b WHERE " +
+		    "a.TABLE_NAME=? AND a.GENERATED=? AND a.TABLE_TYPE=? AND a.TABLE_NAME=b.TABLE_NAME AND a.INDEX_NAME=b.INDEX_NAME AND " +
+		    "a.INDEX_NAME NOT IN (SELECT DISTINCT c.CONSTRAINT_NAME FROM USER_CONSTRAINTS c WHERE c.CONSTRAINT_TYPE=? AND c.TABLE_NAME=a.TABLE_NAME)";
+		final String queryWithSchema =
+		    query.substring(query.length() - 1) + " AND c.OWNER LIKE ?) AND a.TABLE_OWNER LIKE ?";
 
         Map               indices = new ListOrderedMap();
 		PreparedStatement stmt    = null;
 
         try
         {
-    		stmt = getConnection().prepareStatement(query.toString());
+    		stmt = getConnection().prepareStatement(metaData.getSchemaPattern() == null ? query : queryWithSchema);
     		stmt.setString(1, getPlatform().isDelimitedIdentifierModeOn() ? tableName : tableName.toUpperCase());
     		stmt.setString(2, "N");
     		stmt.setString(3, "TABLE");
@@ -347,10 +340,7 @@ public class Oracle8ModelReader extends JdbcModelReader
         }
         finally
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
+            closeStatement(stmt);
         }
 		return indices.values();
 	}

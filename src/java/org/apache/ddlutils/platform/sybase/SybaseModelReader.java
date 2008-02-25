@@ -23,7 +23,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -55,7 +54,7 @@ import org.apache.oro.text.regex.Perl5Matcher;
  */
 public class SybaseModelReader extends JdbcModelReader
 {
-	/** The regular expression pattern for the ISO dates. */
+    /** The regular expression pattern for the ISO dates. */
 	private Pattern _isoDatePattern;
 	/** The regular expression pattern for the ISO times. */
 	private Pattern _isoTimePattern;
@@ -174,29 +173,29 @@ public class SybaseModelReader extends JdbcModelReader
     {
         // Sybase (or jConnect) does not return the foreign key names, thus we have to
         // read the foreign keys manually from the system tables
-        StringBuffer query = new StringBuffer();
+        final String colQuery = 
+            "SELECT refobjs.name, localtables.id, remotetables.name, remotetables.id," +
+            "       refs.fokey1, refs.refkey1, refs.fokey2, refs.refkey2, refs.fokey3, refs.refkey3, refs.fokey4, refs.refkey4," +
+            "       refs.fokey5, refs.refkey5, refs.fokey6, refs.refkey6, refs.fokey7, refs.refkey7, refs.fokey8, refs.refkey8," +
+            "       refs.fokey9, refs.refkey9, refs.fokey10, refs.refkey10, refs.fokey11, refs.refkey11, refs.fokey12, refs.refkey12," +
+            "       refs.fokey13, refs.refkey13, refs.fokey14, refs.refkey14, refs.fokey15, refs.refkey15, refs.fokey16, refs.refkey16," +
+            " FROM sysreferences refs, sysobjects refobjs, sysobjects localtables, sysobjects remotetables" +
+            " WHERE refobjs.type = 'RI' AND refs.constrid = refobjs.id AND" +
+            "       localtables.type = 'U' AND refs.tableid = localtables.id AND localtables.name = ?" +
+            "   AND remotetables.type = 'U' AND refs.reftabid = remotetables.id";
+        final String refObjQuery = 
+            "SELECT name FROM syscolumns WHERE id = ? AND colid = ?";
 
-        query.append("SELECT refobjs.name, localtables.id, remotetables.name, remotetables.id");
-        for (int idx = 1; idx <= 16; idx++)
-        {
-            query.append(", refs.fokey");
-            query.append(idx);
-            query.append(", refs.refkey");
-            query.append(idx);
-        }
-        query.append(" FROM sysreferences refs, sysobjects refobjs, sysobjects localtables, sysobjects remotetables");
-        query.append(" WHERE refobjs.type = 'RI' AND refs.constrid = refobjs.id AND");
-        query.append(" localtables.type = 'U' AND refs.tableid = localtables.id AND localtables.name = '");
-        query.append(tableName);
-        query.append("' AND remotetables.type = 'U' AND refs.reftabid = remotetables.id");
-
-        Statement         stmt     = getConnection().createStatement();
-        PreparedStatement prepStmt = getConnection().prepareStatement("SELECT name FROM syscolumns WHERE id = ? AND colid = ?");
-        ArrayList         result   = new ArrayList();
+        PreparedStatement colStmt    = null;
+        PreparedStatement refObjStmt = null;
+        ArrayList         result     = new ArrayList();
 
         try
         {
-            ResultSet fkRs = stmt.executeQuery(query.toString());
+            colStmt    = getConnection().prepareStatement(colQuery);
+            refObjStmt = getConnection().prepareStatement(refObjQuery);
+
+            ResultSet fkRs = colStmt.executeQuery();
 
             while (fkRs.next())
             {
@@ -216,10 +215,10 @@ public class SybaseModelReader extends JdbcModelReader
                         break;
                     }
 
-                    prepStmt.setInt(1, localTableId);
-                    prepStmt.setShort(2, fkColIdx);
+                    refObjStmt.setInt(1, localTableId);
+                    refObjStmt.setShort(2, fkColIdx);
 
-                    ResultSet colRs = prepStmt.executeQuery();
+                    ResultSet colRs = refObjStmt.executeQuery();
 
                     if (colRs.next())
                     {
@@ -227,10 +226,10 @@ public class SybaseModelReader extends JdbcModelReader
                     }
                     colRs.close();
 
-                    prepStmt.setInt(1, remoteTableId);
-                    prepStmt.setShort(2, pkColIdx);
+                    refObjStmt.setInt(1, remoteTableId);
+                    refObjStmt.setShort(2, pkColIdx);
 
-                    colRs = prepStmt.executeQuery();
+                    colRs = refObjStmt.executeQuery();
 
                     if (colRs.next())
                     {
@@ -242,13 +241,11 @@ public class SybaseModelReader extends JdbcModelReader
                 }
                 result.add(fk);
             }
-
-            fkRs.close();
         }
         finally
         {
-            stmt.close();
-            prepStmt.close();
+            closeStatement(colStmt);
+            closeStatement(refObjStmt);
         }
 
         return result;
@@ -260,27 +257,25 @@ public class SybaseModelReader extends JdbcModelReader
     protected boolean isInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table, Index index) throws SQLException
     {
         // We can simply check the sysindexes table where a specific flag is set for pk indexes
-        StringBuffer query = new StringBuffer();
+        final String query = "SELECT name = sysindexes.name FROM sysindexes, sysobjects WHERE sysobjects.name = ? " +
+        		             "AND sysindexes.name = ? AND sysobjects.id = sysindexes.id AND (sysindexes.status & 2048) > 0";
 
-        query.append("SELECT name = sysindexes.name FROM sysindexes, sysobjects WHERE sysobjects.name = '");
-        query.append(table.getName());
-        query.append("' AND sysindexes.name = '");
-        query.append(index.getName());
-        query.append("' AND sysobjects.id = sysindexes.id AND (sysindexes.status & 2048) > 0");
-        
-        Statement stmt = getConnection().createStatement();
+        PreparedStatement stmt = null;
 
         try
         {
-            ResultSet rs     = stmt.executeQuery(query.toString());
-            boolean   result = rs.next();
+            stmt = getConnection().prepareStatement(query);
 
-            rs.close();
-            return result;
+            stmt.setString(1, table.getName());
+            stmt.setString(2, index.getName());
+            
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.next();
         }
         finally
         {
-            stmt.close();
+            closeStatement(stmt);
         }
     }
 }

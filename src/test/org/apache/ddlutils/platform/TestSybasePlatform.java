@@ -29,16 +29,6 @@ import org.apache.ddlutils.platform.sybase.SybasePlatform;
  */
 public class TestSybasePlatform extends TestPlatformBase
 {
-    /** The database schema for testing escaping of character sequences. */
-    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-        "<database name='escapetest'>\n" +
-        "  <table name='escapedcharacters'>\n" +
-        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
-        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +
-        "  </table>\n" +
-        "</database>";
-
     /**
      * {@inheritDoc}
      */
@@ -94,7 +84,7 @@ public class TestSybasePlatform extends TestPlatformBase
             "    \"COL_VARBINARY\"       VARBINARY(15) NULL,\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15) NULL\n"+
             ");\n",
-            createTestDatabase(COLUMN_TEST_SCHEMA));
+            getColumnTestDatabaseCreationSql());
     }
 
     /**
@@ -121,7 +111,7 @@ public class TestSybasePlatform extends TestPlatformBase
             "    \"COL_AUTO_INCR\"        DECIMAL(19,0) IDENTITY,\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
+            getConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -181,7 +171,7 @@ public class TestSybasePlatform extends TestPlatformBase
             ");\n"+
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_L_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
-            createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+            getTableConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -203,6 +193,6 @@ public class TestSybasePlatform extends TestPlatformBase
             "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\'\'' NULL,\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+            getCharEscapingTestDatabaseCreationSql());
     }
 }

@@ -45,14 +45,6 @@ public class NonUniqueIndex extends IndexImplBase
     /**
      * {@inheritDoc}
      */
-    public Object clone() throws CloneNotSupportedException
-    {
-        return getClone();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public Index getClone() throws ModelException
     {
         NonUniqueIndex result = new NonUniqueIndex();

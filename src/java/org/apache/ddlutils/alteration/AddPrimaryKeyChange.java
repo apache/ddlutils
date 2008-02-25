@@ -42,7 +42,16 @@ public class AddPrimaryKeyChange extends TableChangeImplBase
     public AddPrimaryKeyChange(String tableName, String[] primaryKeyColumns)
     {
         super(tableName);
-        _primaryKeyColumns = primaryKeyColumns;
+        if (primaryKeyColumns == null)
+        {
+            _primaryKeyColumns = new String[0];
+        }
+        else
+        {
+            _primaryKeyColumns = new String[primaryKeyColumns.length];
+
+            System.arraycopy(primaryKeyColumns, 0, _primaryKeyColumns, 0, primaryKeyColumns.length);
+        }
     }
 
     /**
@@ -52,7 +61,10 @@ public class AddPrimaryKeyChange extends TableChangeImplBase
      */
     public String[] getPrimaryKeyColumns()
     {
-        return _primaryKeyColumns;
+        String[] result = new String[_primaryKeyColumns.length];
+
+        System.arraycopy(_primaryKeyColumns, 0, result, 0, _primaryKeyColumns.length);
+        return result;
     }
 
     /**

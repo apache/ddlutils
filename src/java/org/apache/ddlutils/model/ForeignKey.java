@@ -26,7 +26,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.ddlutils.util.StringUtils;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * Represents a database foreign key.
@@ -309,7 +309,7 @@ public class ForeignKey implements Serializable
     {
         for (int idx = 0; idx < getReferenceCount(); idx++)
         {
-            if (StringUtils.equals(columnName, getReference(idx).getLocalColumnName(), caseSensitive))
+            if (StringUtilsExt.equals(columnName, getReference(idx).getLocalColumnName(), caseSensitive))
             {
                 return true;
             }
@@ -351,7 +351,7 @@ public class ForeignKey implements Serializable
     {
         for (int idx = 0; idx < getReferenceCount(); idx++)
         {
-            if (StringUtils.equals(columnName, getReference(idx).getForeignColumnName(), caseSensitive))
+            if (StringUtilsExt.equals(columnName, getReference(idx).getForeignColumnName(), caseSensitive))
             {
                 return true;
             }

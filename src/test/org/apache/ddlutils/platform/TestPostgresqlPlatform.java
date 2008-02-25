@@ -29,16 +29,6 @@ import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
  */
 public class TestPostgresqlPlatform extends TestPlatformBase
 {
-    /** The database schema for testing escaping of character sequences. */
-    public static final String COLUMN_CHAR_SEQUENCES_TO_ESCAPE =
-        "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-        "<database name='escapetest'>\n" +
-        "  <table name='escapedcharacters'>\n" +
-        "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
-        "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39; &#09; &#10; &#13; \\'/>\n" +
-        "  </table>\n" +
-        "</database>";
-
     /**
      * {@inheritDoc}
      */
@@ -88,7 +78,7 @@ public class TestPostgresqlPlatform extends TestPlatformBase
             "    \"COL_VARBINARY\"       BYTEA,\n"+
             "    \"COL_VARCHAR\"         VARCHAR(15)\n"+
             ");\n",
-            createTestDatabase(COLUMN_TEST_SCHEMA));
+            getColumnTestDatabaseCreationSql());
     }
 
     /**
@@ -112,7 +102,7 @@ public class TestPostgresqlPlatform extends TestPlatformBase
             "    \"COL_AUTO_INCR\"        BIGINT UNIQUE DEFAULT nextval('constraints_COL_AUTO_INCR_seq'),\n"+
             "    PRIMARY KEY (\"COL_PK\", \"COL_PK_AUTO_INCR\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CONSTRAINT_TEST_SCHEMA));
+            getConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -152,7 +142,7 @@ public class TestPostgresqlPlatform extends TestPlatformBase
             ");\n"+
             "ALTER TABLE \"table2\" ADD CONSTRAINT \"table2_FK_COL_F_COL_FK_2_table1\" FOREIGN KEY (\"COL_FK_1\", \"COL_FK_2\") REFERENCES \"table1\" (\"COL_PK_2\", \"COL_PK_1\");\n"+
             "ALTER TABLE \"table3\" ADD CONSTRAINT \"testfk\" FOREIGN KEY (\"COL_FK\") REFERENCES \"table2\" (\"COL_PK\");\n",
-            createTestDatabase(TABLE_CONSTRAINT_TEST_SCHEMA));
+            getTableConstraintTestDatabaseCreationSql());
     }
 
     /**
@@ -160,6 +150,16 @@ public class TestPostgresqlPlatform extends TestPlatformBase
      */
     public void testCharacterEscaping() throws Exception
     {
+        // PostgreSql specific database schema for testing escaping of character sequences
+        final String schema =
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+            "<database name='escapetest'>\n" +
+            "  <table name='escapedcharacters'>\n" +
+            "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
+            "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39; &#09; &#10; &#13; \\'/>\n" +
+            "  </table>\n" +
+            "</database>";
+
         assertEqualsIgnoringWhitespaces(
             "DROP TABLE \"escapedcharacters\" CASCADE;\n"+
             "CREATE TABLE \"escapedcharacters\"\n"+
@@ -168,6 +168,6 @@ public class TestPostgresqlPlatform extends TestPlatformBase
             "    \"COL_TEXT\" VARCHAR(128) DEFAULT '\\\' \\t \\n \\r \\\\',\n"+
             "    PRIMARY KEY (\"COL_PK\")\n"+
             ");\n",
-            createTestDatabase(COLUMN_CHAR_SEQUENCES_TO_ESCAPE));
+            getDatabaseCreationSql(schema));
     }
 }
