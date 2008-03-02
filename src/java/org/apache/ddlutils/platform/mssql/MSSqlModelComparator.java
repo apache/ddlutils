@@ -27,6 +27,7 @@ import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.alteration.AddForeignKeyChange;
 import org.apache.ddlutils.alteration.AddIndexChange;
 import org.apache.ddlutils.alteration.AddPrimaryKeyChange;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.alteration.ModelComparator;
 import org.apache.ddlutils.alteration.RemoveForeignKeyChange;
 import org.apache.ddlutils.alteration.RemoveIndexChange;
@@ -36,9 +37,7 @@ import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
-import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * A model comparator customized for Sql Server.
@@ -293,29 +292,10 @@ public class MSSqlModelComparator extends ModelComparator
 
             if (sourceColumn != null)
             {
-                boolean hasChange      = false;
-                int     targetTypeCode = getPlatformInfo().getTargetJdbcType(targetColumn.getTypeCode());
-                boolean sizeMatters    = getPlatformInfo().hasSize(targetTypeCode);
-                boolean scaleMatters   = getPlatformInfo().hasPrecisionAndScale(targetTypeCode);
+                int targetTypeCode = getPlatformInfo().getTargetJdbcType(targetColumn.getTypeCode());
 
-                if (targetTypeCode != sourceColumn.getTypeCode())
-                {
-                    hasChange = true;
-                }
-                else
-                {
-                    if (sizeMatters && !StringUtilsExt.equals(sourceColumn.getSize(), targetColumn.getSize()))
-                    {
-                        hasChange = true;
-                    }
-                    else if (scaleMatters &&
-                             (!StringUtilsExt.equals(sourceColumn.getSize(), targetColumn.getSize()) ||
-                              (sourceColumn.getScale() != targetColumn.getScale())))
-                    {
-                        hasChange = true;
-                    }
-                }
-                if (hasChange)
+                if ((targetTypeCode != sourceColumn.getTypeCode()) ||
+                    ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn))
                 {
                     result.add(targetColumn);
                 }

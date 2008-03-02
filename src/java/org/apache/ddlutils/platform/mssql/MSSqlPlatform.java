@@ -209,12 +209,13 @@ public class MSSqlPlatform extends PlatformImplBase
                 {
                     ColumnDefinitionChange colDefChange = (ColumnDefinitionChange)change;
                     Column                 curColumn    = intermediateTable.findColumn(colDefChange.getChangedColumn(), isDelimitedIdentifierModeOn());
+                    Column                 newColumn    = colDefChange.getNewColumn();
 
                     // Sql Server has no way of adding or removing an IDENTITY constraint
-                    // Also, reducing the size of a column should be handled by recreation to avoid truncation errors 
+                    // Also, Sql Server cannot handle reducing the size (even with the CAST in place)
                     return (curColumn.isAutoIncrement() == colDefChange.getNewColumn().isAutoIncrement()) &&
-                           (ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), curColumn, colDefChange.getNewColumn()) ||
-                           !ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), curColumn, colDefChange.getNewColumn()));
+                           (curColumn.isRequired() || (curColumn.isRequired() == newColumn.isRequired())) &&
+                           !ColumnDefinitionChange.isSizeReduced(getPlatformInfo(), curColumn, newColumn);
                 }
                 else
                 {

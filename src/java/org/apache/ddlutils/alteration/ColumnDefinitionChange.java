@@ -125,6 +125,41 @@ public class ColumnDefinitionChange extends ColumnChangeImplBase
     }
 
     /**
+     * Determines whether the size or precision/scale of the given target column is smaller than that of the given source column.
+     * If size and precision/scale do not matter for the target column's type, then <code>false</code> is returned. Note that for
+     * columns with precision & scale, it also counted as being smaller if the scale of the target column is smaller than the
+     * one of the source column, regardless of whether the precision of the target column is smaller than precision of the source
+     * column or equal to it or even bigger. The reason for this is that the reduced scale would still potentially lead to truncation
+     * errors.
+     * 
+     * @param platformInfo The info object for the current platform
+     * @param sourceColumn The source column
+     * @param targetColumn The target column
+     * @return <code>true</code> if the size of the target column is smaller
+     */
+    public static boolean isSizeReduced(PlatformInfo platformInfo, Column sourceColumn, Column targetColumn)
+    {
+        int     targetTypeCode = platformInfo.getTargetJdbcType(targetColumn.getTypeCode());
+        boolean sizeMatters    = platformInfo.hasSize(targetTypeCode);
+        boolean scaleMatters   = platformInfo.hasPrecisionAndScale(targetTypeCode);
+
+        if (sizeMatters && (sourceColumn.getSizeAsInt() > targetColumn.getSizeAsInt()))
+        {
+            return true;
+        }
+        else if (scaleMatters &&
+                 ((sourceColumn.getPrecisionRadix() > targetColumn.getPrecisionRadix()) ||
+                  (sourceColumn.getScale() > targetColumn.getScale())))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
      * Determines whether the default value of the given target column is different from the one of the given source column.
      * This method compares the parsed default values instead of their representations in the columns.
      * 

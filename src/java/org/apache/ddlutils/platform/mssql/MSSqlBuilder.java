@@ -33,6 +33,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
 
 /**
@@ -521,11 +522,25 @@ public class MSSqlBuilder extends SqlBuilder
 
         if (sizeChanged || typeChanged)
         {
-            print("CAST(");
-            printIdentifier(getColumnName(sourceColumn));
-            print(" AS ");
-            print(getSqlType(targetColumn));
-            print(")");
+            if (TypeMap.isTextType(targetColumn.getTypeCode()) &&
+                sizeChanged && (sourceColumn.getSizeAsInt() > targetColumn.getSizeAsInt()))
+            {
+                print("SUBSTRING(CAST(");
+                printIdentifier(getColumnName(sourceColumn));
+                print(" AS ");
+                print(getNativeType(targetColumn));
+                print("),1,");
+                print(targetColumn.getSize());
+                print(")");
+            }
+            else
+            {
+                print("CAST(");
+                printIdentifier(getColumnName(sourceColumn));
+                print(" AS ");
+                print(getSqlType(targetColumn));
+                print(")");
+            }
         }
         else
         {
