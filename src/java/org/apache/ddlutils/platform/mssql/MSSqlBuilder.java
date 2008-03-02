@@ -530,7 +530,7 @@ public class MSSqlBuilder extends SqlBuilder
                 print(" AS ");
                 print(getNativeType(targetColumn));
                 print("),1,");
-                print(targetColumn.getSize());
+                print(getSizeSpec(targetColumn));
                 print(")");
             }
             else

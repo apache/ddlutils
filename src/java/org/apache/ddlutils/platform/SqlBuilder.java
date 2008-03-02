@@ -45,6 +45,7 @@ import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.ModelException;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * This class is a collection of Strategy methods for creating the DDL required to create and drop 
@@ -1397,28 +1398,13 @@ public abstract class SqlBuilder
 
         sqlType.append(sizePos >= 0 ? nativeType.substring(0, sizePos) : nativeType);
 
-        Object sizeSpec = column.getSize();
+        String sizeSpec = getSizeSpec(column);
         
-        if (sizeSpec == null)
+        if (!StringUtilsExt.isEmpty(sizeSpec))
         {
-            sizeSpec = getPlatformInfo().getDefaultSize(column.getTypeCode());
-        }
-        if (sizeSpec != null)
-        {
-            if (getPlatformInfo().hasSize(column.getTypeCode()))
-            {
-                sqlType.append("(");
-                sqlType.append(sizeSpec.toString());
-                sqlType.append(")");
-            }
-            else if (getPlatformInfo().hasPrecisionAndScale(column.getTypeCode()))
-            {
-                sqlType.append("(");
-                sqlType.append(column.getSizeAsInt());
-                sqlType.append(",");
-                sqlType.append(column.getScale());
-                sqlType.append(")");
-            }
+            sqlType.append("(");
+            sqlType.append(sizeSpec);
+            sqlType.append(")");
         }
         sqlType.append(sizePos >= 0 ? nativeType.substring(sizePos + SIZE_PLACEHOLDER.length()) : "");
 
@@ -1450,6 +1436,39 @@ public abstract class SqlBuilder
         int    sizePos    = nativeType.indexOf(SIZE_PLACEHOLDER);
 
         return sizePos >= 0 ? nativeType.substring(0, sizePos) : nativeType;
+    }
+
+    /**
+     * Returns the size specification for the given column. If the column is of a type that has size
+     * or precision and scale, and no size is defined for the column itself, then the default size
+     * or precision/scale for that type and platform is used instead.
+     * 
+     * @param column The column
+     * @return The size spec
+     */
+    protected String getSizeSpec(Column column)
+    {
+        StringBuffer result   = new StringBuffer();
+        Object       sizeSpec = column.getSize();
+        
+        if (sizeSpec == null)
+        {
+            sizeSpec = getPlatformInfo().getDefaultSize(column.getTypeCode());
+        }
+        if (sizeSpec != null)
+        {
+            if (getPlatformInfo().hasSize(column.getTypeCode()))
+            {
+                result.append(sizeSpec.toString());
+            }
+            else if (getPlatformInfo().hasPrecisionAndScale(column.getTypeCode()))
+            {
+                result.append(column.getSizeAsInt());
+                result.append(",");
+                result.append(column.getScale());
+            }
+        }
+        return result.toString();
     }
 
     /**
