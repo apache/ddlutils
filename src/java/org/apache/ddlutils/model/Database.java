@@ -57,6 +57,22 @@ public class Database implements Serializable
     private transient DynaClassCache _dynaClassCache = null;
 
     /**
+     * Creates an empty model without a name.
+     */
+    public Database()
+    {}
+
+    /**
+     * Creates an empty model with the given name.
+     * 
+     * @param name The name
+     */
+    public Database(String name)
+    {
+        _name = name;
+    }
+
+    /**
      * Adds all tables from the other database to this database.
      * Note that the other database is not changed.
      * 

@@ -140,6 +140,16 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     }
 
     /**
+     * Adds the "drop tables"-command.
+     * 
+     * @param command The command
+     */
+    public void addDropTables(DropTablesCommand command)
+    {
+        addCommand(command);
+    }
+
+    /**
      * Returns the table types to recognize.
      * 
      * @return The table types
