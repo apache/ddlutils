@@ -104,25 +104,13 @@ public class WriteSchemaToDatabaseCommand extends DatabaseCommandWithCreationPar
         {
             if (isAlterDatabase())
             {
-                if ((getCatalogPattern() != null) || (getSchemaPattern() != null))
-                {
-                    platform.alterTables(getCatalogPattern(),
-                                         getSchemaPattern(),
-                                         null,
-                                         model,
-                                         params,
-                                         true);
-                }
-                else
-                {
-                    platform.alterTables(model,
-                                         params,
-                                         true);
-                }
+                Database currentModel = platform.readModelFromDatabase(model.getName(), getCatalogPattern(), getSchemaPattern(), null);
+
+                platform.alterModel(currentModel, model, params, true);
             }
             else
             {
-                platform.createTables(model,
+                platform.createModel(model,
                                       params,
                                       _doDrops,
                                       true);
