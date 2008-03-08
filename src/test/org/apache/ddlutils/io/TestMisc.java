@@ -19,6 +19,8 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -30,6 +32,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 import org.dom4j.Document;
@@ -1067,5 +1070,87 @@ public class TestMisc extends RoundtripTestBase
 
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
+    }
+
+    /**
+     * Test for DDLUTILS-179.
+     */
+    public void testDdlUtils179() throws Exception
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='roundtriptest'>\n"+
+            "  <table name='A'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='AtoA' foreignTable='A'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='B'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk1' type='INTEGER' required='false'/>\n"+
+            "    <column name='fk2' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='BtoB' foreignTable='B'>\n"+
+            "      <reference local='fk1' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "    <foreign-key name='BtoG' foreignTable='G'>\n"+
+            "      <reference local='fk2' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='C'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='CtoD' foreignTable='D'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='D'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='DtoF' foreignTable='F'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='E'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='F'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='fk' type='INTEGER' required='false'/>\n"+
+            "    <foreign-key name='FtoC' foreignTable='C'>\n"+
+            "      <reference local='fk' foreign='pk'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "  <table name='G'>\n"+
+            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(modelXml);
+
+        Database readModel = readModelFromDatabase("roundtriptest");
+        
+        assertEquals(getAdjustedModel(),
+                     readModel);
+
+        File tmpFile = File.createTempFile("model", ".xml"); 
+
+        try
+        {
+            DatabaseIO       dbIO = new DatabaseIO();
+            FileOutputStream out  = new FileOutputStream(tmpFile);
+    
+            dbIO.write(readModel, out);
+            out.flush();
+            out.close(); 
+
+            assertEquals(getAdjustedModel(),
+                         dbIO.read(tmpFile));
+        }
+        finally
+        {
+            tmpFile.delete();
+        }
     }
 }
