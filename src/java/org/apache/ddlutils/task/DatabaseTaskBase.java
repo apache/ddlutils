@@ -300,20 +300,22 @@ public abstract class DatabaseTaskBase extends Task
      */
     private void initLogging()
     {
-        // For Ant, we're forcing DdlUtils to do logging via log4j to the console
-        Properties props = new Properties();
-        String     level = (_verbosity == null ? Level.INFO.toString() : _verbosity.getValue()).toUpperCase();
-
-        props.setProperty("log4j.rootCategory", level + ",A");
-        props.setProperty("log4j.appender.A", "org.apache.log4j.ConsoleAppender");
-        props.setProperty("log4j.appender.A.layout", "org.apache.log4j.PatternLayout");
-        props.setProperty("log4j.appender.A.layout.ConversionPattern", "%m%n");
-        // we don't want debug logging from Digester/Betwixt
-        props.setProperty("log4j.logger.org.apache.commons", "WARN");
-
-        LogManager.resetConfiguration();
-        PropertyConfigurator.configure(props);
-
+        if (_simpleLogging)
+        {
+            // For Ant, we're forcing DdlUtils to do logging via log4j to the console
+            Properties props = new Properties();
+            String     level = (_verbosity == null ? Level.INFO.toString() : _verbosity.getValue()).toUpperCase();
+    
+            props.setProperty("log4j.rootCategory", level + ",A");
+            props.setProperty("log4j.appender.A", "org.apache.log4j.ConsoleAppender");
+            props.setProperty("log4j.appender.A.layout", "org.apache.log4j.PatternLayout");
+            props.setProperty("log4j.appender.A.layout.ConversionPattern", "%m%n");
+            // we don't want debug logging from Digester
+            props.setProperty("log4j.logger.org.apache.commons", "WARN");
+    
+            LogManager.resetConfiguration();
+            PropertyConfigurator.configure(props);
+        }
         _log = LogFactory.getLog(getClass());
     }
 
@@ -345,9 +347,7 @@ public abstract class DatabaseTaskBase extends Task
      */
     public void execute() throws BuildException
     {
-        if (_simpleLogging) {
-            initLogging();
-        }
+        initLogging();
 
         if (!hasCommands())
         {
