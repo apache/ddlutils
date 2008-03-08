@@ -744,10 +744,10 @@ public class Table implements Serializable
     }
 
     /**
-     * Returns the auto increment columns in this table. If no incrementcolumns
-     * are found, it will return an empty array.
+     * Returns the auto increment columns in this table. If none are found,
+     * then an empty array will be returned.
      * 
-     * @return The columns
+     * @return The auto increment columns
      */
     public Column[] getAutoIncrementColumns()
     {
@@ -758,6 +758,23 @@ public class Table implements Serializable
         });
 
         return (Column[])autoIncrColumns.toArray(new Column[autoIncrColumns.size()]);
+    }
+
+    /**
+     * Returns the required (not-nullable) columns in this table. If none are found,
+     * then an empty array will be returned.
+     * 
+     * @return The required columns
+     */
+    public Column[] getRequiredColumns()
+    {
+        Collection requiredColumns = CollectionUtils.select(_columns, new Predicate() {
+            public boolean evaluate(Object input) {
+                return ((Column)input).isRequired();
+            }
+        });
+
+        return (Column[])requiredColumns.toArray(new Column[requiredColumns.size()]);
     }
 
     /**
