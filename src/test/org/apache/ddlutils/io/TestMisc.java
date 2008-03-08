@@ -1039,4 +1039,33 @@ public class TestMisc extends RoundtripTestBase
         assertEquals(2, getRows("G").size());
     }
 
+    /**
+     * Test for DDLUTILS-178.
+     */
+    public void testDdlUtils178() throws Exception
+    {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "  <database name='roundtriptest'>\n"+
+            "    <table name='ad_sequence_no'>\n"+
+            "      <column name='ad_sequence_id' required='true' type='NUMERIC' size='10'/>\n"+
+            "      <column name='year' required='true' type='VARCHAR' size='4' default='0000'/>\n"+
+            "      <column name='ad_client_id' required='true' type='NUMERIC' size='10'/>\n"+
+            "      <unique name='ad_sequence_no_key'>\n"+
+            "        <unique-column name='ad_sequence_id'/>\n"+
+            "        <unique-column name='year'/>\n"+
+            "      </unique>\n"+
+            "    </table>\n"+
+            "</database>";
+
+        createDatabase(modelXml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+    }
 }
