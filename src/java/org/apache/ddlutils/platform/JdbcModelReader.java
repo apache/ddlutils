@@ -1262,6 +1262,11 @@ public class JdbcModelReader
         }
     }
 
+    /**
+     * Closes the given result set. Any exceptions are logged on warn level but otherwise swallowed.
+     * 
+     * @param resultSet The result set
+     */
     protected void closeResultSet(ResultSet resultSet)
     {
         if (resultSet != null)
@@ -1277,6 +1282,11 @@ public class JdbcModelReader
         }
     }
 
+    /**
+     * Closes the given statement. Any exceptions are logged on warn level but otherwise swallowed.
+     * 
+     * @param stmt The statement
+     */
     protected void closeStatement(Statement stmt)
     {
         if (stmt != null)

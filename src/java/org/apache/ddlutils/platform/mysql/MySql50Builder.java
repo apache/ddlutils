@@ -1,10 +1,5 @@
 package org.apache.ddlutils.platform.mysql;
 
-import java.io.IOException;
-
-import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.model.Table;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,6 +18,11 @@ import org.apache.ddlutils.model.Table;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import java.io.IOException;
+
+import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.model.Table;
 
 /**
  * The SQL Builder for MySQL version 5 and above.

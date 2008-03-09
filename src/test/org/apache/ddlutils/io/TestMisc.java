@@ -1150,7 +1150,10 @@ public class TestMisc extends RoundtripTestBase
         }
         finally
         {
-            tmpFile.delete();
+            if (!tmpFile.delete())
+            {
+                getLog().warn("Could not delete the temporary file " + tmpFile.getAbsolutePath());
+            }
         }
     }
 }
