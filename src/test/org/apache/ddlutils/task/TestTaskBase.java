@@ -21,6 +21,8 @@ package org.apache.ddlutils.task;
 
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.TestDatabaseWriterBase;
 import org.apache.tools.ant.Project;
@@ -49,11 +51,16 @@ public abstract class TestTaskBase extends TestDatabaseWriterBase
      */
     protected DatabaseToDdlTask getDatabaseToDdlTaskInstance()
     {
-        DatabaseToDdlTask task    = new DatabaseToDdlTask();
-        Properties        props   = getTestProperties();
-        String            catalog = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
-        String            schema  = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
+        DatabaseToDdlTask task       = new DatabaseToDdlTask();
+        Properties        props      = getTestProperties();
+        String            catalog    = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
+        String            schema     = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
+        DataSource        dataSource = getDataSource();
 
+        if (!(dataSource instanceof BasicDataSource))
+        {
+            fail("Datasource needs to be of type " + BasicDataSource.class.getName());
+        }
         task.setProject(new Project());
         task.addConfiguredDatabase((BasicDataSource)getDataSource());
         task.setCatalogPattern(catalog);
