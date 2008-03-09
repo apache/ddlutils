@@ -39,7 +39,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -64,7 +65,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -89,7 +91,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -122,7 +125,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -155,7 +159,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -183,7 +188,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -215,7 +221,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -250,7 +257,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -295,7 +303,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -332,7 +341,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -384,7 +394,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     true);
     }
 
     /**
@@ -428,7 +439,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     true);
     }
 
     /**
@@ -480,7 +492,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     true);
     }
 
     /**
@@ -532,7 +545,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     true);
     }
 
     /**
@@ -576,7 +590,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(new Database("roundtriptest"),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -613,7 +628,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -658,7 +674,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -710,7 +727,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     true);
     }
 
     /**
@@ -764,7 +782,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     true);
     }
 
     /**
@@ -823,7 +842,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(adjustModel(parseDatabaseFromString(model2Xml)),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     true);
     }
 
     /**
@@ -860,7 +880,8 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 
     /**
@@ -897,6 +918,7 @@ public class TestDropTablesCommand extends TestTaskBase
         task.execute();
 
         assertEquals(getAdjustedModel(),
-                     readModelFromDatabase("roundtriptest"));
+                     readModelFromDatabase("roundtriptest"),
+                     false);
     }
 }

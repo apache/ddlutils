@@ -19,10 +19,8 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
-import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.sql.Types;
 import java.util.List;
 
 import junit.framework.TestSuite;
@@ -32,10 +30,6 @@ import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.TestDatabaseWriterBase;
-import org.apache.ddlutils.dynabean.SqlDynaBean;
-import org.apache.ddlutils.dynabean.SqlDynaClass;
-import org.apache.ddlutils.dynabean.SqlDynaProperty;
-import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
@@ -43,7 +37,6 @@ import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
-import org.apache.ddlutils.model.TypeMap;
 
 /**
  * Base class for database roundtrip (creation & reconstruction from the database).
@@ -260,38 +253,6 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
     }
 
     /**
-     * Compares the specified attribute value of the given bean with the expected object.
-     * 
-     * @param expected The expected object
-     * @param bean     The bean
-     * @param attrName The attribute name
-     */
-    protected void assertEquals(Object expected, Object bean, String attrName)
-    {
-        DynaBean dynaBean = (DynaBean)bean;
-        Object   value    = dynaBean.get(attrName);
-
-        if ((value instanceof byte[]) && !(expected instanceof byte[]) && (dynaBean instanceof SqlDynaBean))
-        {
-            SqlDynaClass dynaClass = (SqlDynaClass)((SqlDynaBean)dynaBean).getDynaClass();
-            Column       column    = ((SqlDynaProperty)dynaClass.getDynaProperty(attrName)).getColumn();
-
-            if (TypeMap.isBinaryType(column.getTypeCode()))
-            {
-                value = new BinaryObjectsHelper().deserialize((byte[])value);
-            }
-        }
-        if (expected == null)
-        {
-            assertNull(value);
-        }
-        else
-        {
-            assertEquals(expected, value);
-        }
-    }
-
-    /**
      * Asserts that the two given database models are equal, and if not, writes both of them
      * in XML form to <code>stderr</code>.
      * 
@@ -300,43 +261,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected void assertEquals(Database expected, Database actual)
     {
-        try
-        {
-            assertEquals("Model names do not match.",
-                         expected.getName(),
-                         actual.getName());
-            assertEquals("Not the same number of tables.",
-                         expected.getTableCount(),
-                         actual.getTableCount());
-            for (int tableIdx = 0; tableIdx < actual.getTableCount(); tableIdx++)
-            {
-                assertEquals(expected.getTable(tableIdx),
-                             actual.getTable(tableIdx));
-            }
-        }
-        catch (Throwable ex)
-        {
-            StringWriter writer = new StringWriter();
-            DatabaseIO   dbIo   = new DatabaseIO();
-
-            dbIo.write(expected, writer);
-
-            getLog().error("Expected model:\n" + writer.toString());
-
-            writer = new StringWriter();
-            dbIo.write(actual, writer);
-
-            getLog().error("Actual model:\n" + writer.toString());
-
-            if (ex instanceof Error)
-            {
-                throw (Error)ex;
-            }
-            else
-            {
-                throw new DdlUtilsException(ex);
-            }
-        }
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
     }
 
     /**
@@ -347,55 +272,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected void assertEquals(Table expected, Table actual)
     {
-        if (_useDelimitedIdentifiers)
-        {
-            assertEquals("Table names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxTableNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxTableNameLength()));
-        }
-        else
-        {
-            assertEquals("Table names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()));
-        }
-        assertEquals("Not the same number of columns in table "+actual.getName()+".",
-                     expected.getColumnCount(),
-                     actual.getColumnCount());
-        for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
-        {
-            assertEquals(expected.getColumn(columnIdx),
-                         actual.getColumn(columnIdx));
-        }
-        assertEquals("Not the same number of foreign keys in table "+actual.getName()+".",
-                     expected.getForeignKeyCount(),
-                     actual.getForeignKeyCount());
-        // order is not assumed with the way foreignkeys are returned.
-        for (int expectedFkIdx = 0; expectedFkIdx < expected.getForeignKeyCount(); expectedFkIdx++)
-        {
-            ForeignKey expectedFk   = expected.getForeignKey(expectedFkIdx);
-            String     expectedName = getPlatform().getSqlBuilder().shortenName(expectedFk.getName(), getSqlBuilder().getMaxForeignKeyNameLength());
-
-            for (int actualFkIdx = 0; actualFkIdx < actual.getForeignKeyCount(); actualFkIdx++)
-            {
-                ForeignKey actualFk   = actual.getForeignKey(actualFkIdx);
-                String     actualName = getPlatform().getSqlBuilder().shortenName(actualFk.getName(), getSqlBuilder().getMaxForeignKeyNameLength());
-
-                if ((_useDelimitedIdentifiers  && expectedName.equals(actualName)) ||
-                    (!_useDelimitedIdentifiers && expectedName.equalsIgnoreCase(actualName)))
-                {
-                    assertEquals(expectedFk, actualFk);
-                }
-            }
-        }
-        assertEquals("Not the same number of indices in table "+actual.getName()+".",
-                     expected.getIndexCount(),
-                     actual.getIndexCount());
-        for (int indexIdx = 0; indexIdx < actual.getIndexCount(); indexIdx++)
-        {
-            assertEquals(expected.getIndex(indexIdx),
-                         actual.getIndex(indexIdx));
-        }
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
     }
 
     /**
@@ -406,62 +283,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected void assertEquals(Column expected, Column actual)
     {
-        if (_useDelimitedIdentifiers)
-        {
-            assertEquals("Column names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxColumnNameLength()));
-        }
-        else
-        {
-            assertEquals("Column names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
-        }
-        assertEquals("Primary key status not the same for column "+actual.getName()+".",
-                     expected.isPrimaryKey(),
-                     actual.isPrimaryKey());
-        assertEquals("Required status not the same for column "+actual.getName()+".",
-                     expected.isRequired(),
-                     actual.isRequired());
-        if (getPlatformInfo().getIdentityStatusReadingSupported())
-        {
-        	// we're only comparing this if the platform can actually read the
-        	// auto-increment status back from an existing database
-	        assertEquals("Auto-increment status not the same for column "+actual.getName()+".",
-	                     expected.isAutoIncrement(),
-	                     actual.isAutoIncrement());
-        }
-        assertEquals("Type not the same for column "+actual.getName()+".",
-                     expected.getType(),
-                     actual.getType());
-        assertEquals("Type code not the same for column "+actual.getName()+".",
-                     expected.getTypeCode(),
-                     actual.getTypeCode());
-        assertEquals("Parsed default values do not match for column "+actual.getName()+".",
-                     expected.getParsedDefaultValue(),
-                     actual.getParsedDefaultValue());
-
-        // comparing the size makes only sense for types where it is relevant
-        if ((expected.getTypeCode() == Types.NUMERIC) ||
-            (expected.getTypeCode() == Types.DECIMAL))
-        {
-            assertEquals("Precision not the same for column "+actual.getName()+".",
-                         expected.getSizeAsInt(),
-                         actual.getSizeAsInt());
-            assertEquals("Scale not the same for column "+actual.getName()+".",
-                         expected.getScale(),
-                         actual.getScale());
-        }
-        else if ((expected.getTypeCode() == Types.CHAR) ||
-                 (expected.getTypeCode() == Types.VARCHAR) ||
-                 (expected.getTypeCode() == Types.BINARY) ||
-                 (expected.getTypeCode() == Types.VARBINARY))
-        {
-            assertEquals("Size not the same for column "+actual.getName()+".",
-                         expected.getSize(),
-                         actual.getSize());
-        }
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
     }
 
     /**
@@ -472,54 +294,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected void assertEquals(ForeignKey expected, ForeignKey actual)
     {
-        if (_useDelimitedIdentifiers)
-        {
-            assertEquals("Foreign key names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxForeignKeyNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxForeignKeyNameLength()));
-            assertEquals("Referenced table names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getForeignTableName(), getSqlBuilder().getMaxTableNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getForeignTableName(), getSqlBuilder().getMaxTableNameLength()));
-        }
-        else
-        {
-            assertEquals("Foreign key names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxForeignKeyNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxForeignKeyNameLength()));
-            assertEquals("Referenced table names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()));
-        }
-        if ((expected.getOnUpdate() == CascadeActionEnum.NONE) || (expected.getOnUpdate() == CascadeActionEnum.RESTRICT))
-        {
-            assertTrue("Not the same onUpdate setting in foreign key "+actual.getName()+".",
-                       (actual.getOnUpdate() == CascadeActionEnum.NONE) || (actual.getOnUpdate() == CascadeActionEnum.RESTRICT));
-        }
-        else
-        {
-            assertEquals("Not the same onUpdate setting in foreign key "+actual.getName()+".",
-                         expected.getOnUpdate(),
-                         actual.getOnUpdate());
-        }
-        if ((expected.getOnDelete() == CascadeActionEnum.NONE) || (expected.getOnDelete() == CascadeActionEnum.RESTRICT))
-        {
-            assertTrue("Not the same onDelete setting in foreign key "+actual.getName()+".",
-                       (actual.getOnDelete() == CascadeActionEnum.NONE) || (actual.getOnDelete() == CascadeActionEnum.RESTRICT));
-        }
-        else
-        {
-            assertEquals("Not the same onDelete setting in foreign key "+actual.getName()+".",
-                         expected.getOnDelete(),
-                         actual.getOnDelete());
-        }
-        assertEquals("Not the same number of references in foreign key "+actual.getName()+".",
-                     expected.getReferenceCount(),
-                     actual.getReferenceCount());
-        for (int refIdx = 0; refIdx < actual.getReferenceCount(); refIdx++)
-        {
-            assertEquals(expected.getReference(refIdx),
-                         actual.getReference(refIdx));
-        }
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
     }
 
     /**
@@ -530,24 +305,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected void assertEquals(Reference expected, Reference actual)
     {
-        if (_useDelimitedIdentifiers)
-        {
-            assertEquals("Local column names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getLocalColumnName(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getLocalColumnName(), getSqlBuilder().getMaxColumnNameLength()));
-            assertEquals("Foreign column names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getForeignColumnName(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getForeignColumnName(), getSqlBuilder().getMaxColumnNameLength()));
-        }
-        else
-        {
-            assertEquals("Local column names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getLocalColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getLocalColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
-            assertEquals("Foreign column names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getForeignColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getForeignColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
-        }
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
     }
 
     /**
@@ -558,29 +316,7 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected void assertEquals(Index expected, Index actual)
     {
-        if (_useDelimitedIdentifiers)
-        {
-            assertEquals("Index names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxConstraintNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxConstraintNameLength()));
-        }
-        else
-        {
-            assertEquals("Index names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxConstraintNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxConstraintNameLength()));
-        }
-        assertEquals("Unique status not the same for index "+actual.getName()+".",
-                     expected.isUnique(),
-                     actual.isUnique());
-        assertEquals("Not the same number of columns in index "+actual.getName()+".",
-                     expected.getColumnCount(),
-                     actual.getColumnCount());
-        for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
-        {
-            assertEquals(expected.getColumn(columnIdx),
-                         actual.getColumn(columnIdx));
-        }
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
     }
 
     /**
@@ -591,20 +327,6 @@ public abstract class RoundtripTestBase extends TestDatabaseWriterBase
      */
     protected void assertEquals(IndexColumn expected, IndexColumn actual)
     {
-        if (_useDelimitedIdentifiers)
-        {
-            assertEquals("Index column names do not match.",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxColumnNameLength()));
-        }
-        else
-        {
-            assertEquals("Index column names do not match (ignoring case).",
-                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
-                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
-        }
-        assertEquals("Size not the same for index column "+actual.getName()+".",
-                     expected.getSize(),
-                     actual.getSize());
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
     }
 }

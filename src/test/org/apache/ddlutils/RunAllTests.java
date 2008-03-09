@@ -53,6 +53,7 @@ import org.apache.ddlutils.platform.TestPostgresqlPlatform;
 import org.apache.ddlutils.platform.TestSapDbPlatform;
 import org.apache.ddlutils.platform.TestSqlBuilder;
 import org.apache.ddlutils.platform.TestSybasePlatform;
+import org.apache.ddlutils.task.TestDropTablesCommand;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -133,6 +134,7 @@ public class RunAllTests extends TestCase
             suite.addTestSuite(TestChangeColumn.class);
             suite.addTestSuite(TestDropColumn.class);
             suite.addTestSuite(TestMisc.class);
+            suite.addTestSuite(TestDropTablesCommand.class);
         }
 
         return suite;

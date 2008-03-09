@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -41,17 +42,28 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.ddlutils.dynabean.SqlDynaBean;
+import org.apache.ddlutils.dynabean.SqlDynaClass;
+import org.apache.ddlutils.dynabean.SqlDynaProperty;
+import org.apache.ddlutils.io.BinaryObjectsHelper;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
+import org.apache.ddlutils.io.DatabaseIO;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
+import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.IndexColumn;
+import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.DefaultValueHelper;
 import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * Base class for database writer tests.
@@ -707,5 +719,368 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
             }
             throw new IllegalArgumentException("The bean has no property with the name "+propName);
         }
+    }
+
+
+    /**
+     * Compares the specified attribute value of the given bean with the expected object.
+     * 
+     * @param expected The expected object
+     * @param bean     The bean
+     * @param attrName The attribute name
+     */
+    protected void assertEquals(Object expected, Object bean, String attrName)
+    {
+        DynaBean dynaBean = (DynaBean)bean;
+        Object   value    = dynaBean.get(attrName);
+
+        if ((value instanceof byte[]) && !(expected instanceof byte[]) && (dynaBean instanceof SqlDynaBean))
+        {
+            SqlDynaClass dynaClass = (SqlDynaClass)((SqlDynaBean)dynaBean).getDynaClass();
+            Column       column    = ((SqlDynaProperty)dynaClass.getDynaProperty(attrName)).getColumn();
+
+            if (TypeMap.isBinaryType(column.getTypeCode()))
+            {
+                value = new BinaryObjectsHelper().deserialize((byte[])value);
+            }
+        }
+        if (expected == null)
+        {
+            assertNull(value);
+        }
+        else
+        {
+            assertEquals(expected, value);
+        }
+    }
+
+    /**
+     * Asserts that the two given database models are equal, and if not, writes both of them
+     * in XML form to <code>stderr</code>.
+     * 
+     * @param expected      The expected model
+     * @param actual        The actual model
+     * @param caseSensitive Whether case matters when comparing
+     */
+    protected void assertEquals(Database expected, Database actual, boolean caseSensitive)
+    {
+        try
+        {
+            assertEquals("Model names do not match.",
+                         expected.getName(),
+                         actual.getName());
+            assertEquals("Not the same number of tables.",
+                         expected.getTableCount(),
+                         actual.getTableCount());
+            for (int tableIdx = 0; tableIdx < actual.getTableCount(); tableIdx++)
+            {
+                assertEquals(expected.getTable(tableIdx),
+                             actual.getTable(tableIdx),
+                             caseSensitive);
+            }
+        }
+        catch (Throwable ex)
+        {
+            StringWriter writer = new StringWriter();
+            DatabaseIO   dbIo   = new DatabaseIO();
+
+            dbIo.write(expected, writer);
+
+            getLog().error("Expected model:\n" + writer.toString());
+
+            writer = new StringWriter();
+            dbIo.write(actual, writer);
+
+            getLog().error("Actual model:\n" + writer.toString());
+
+            if (ex instanceof Error)
+            {
+                throw (Error)ex;
+            }
+            else
+            {
+                throw new DdlUtilsException(ex);
+            }
+        }
+    }
+
+    /**
+     * Asserts that the two given database tables are equal.
+     * 
+     * @param expected      The expected table
+     * @param actual        The actual table
+     * @param caseSensitive Whether case matters when comparing
+     */
+    protected void assertEquals(Table expected, Table actual, boolean caseSensitive)
+    {
+        if (caseSensitive)
+        {
+            assertEquals("Table names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxTableNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxTableNameLength()));
+        }
+        else
+        {
+            assertEquals("Table names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()));
+        }
+        assertEquals("Not the same number of columns in table "+actual.getName()+".",
+                     expected.getColumnCount(),
+                     actual.getColumnCount());
+        for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
+        {
+            assertEquals(expected.getColumn(columnIdx),
+                         actual.getColumn(columnIdx),
+                         caseSensitive);
+        }
+        assertEquals("Not the same number of foreign keys in table "+actual.getName()+".",
+                     expected.getForeignKeyCount(),
+                     actual.getForeignKeyCount());
+        // order is not assumed with the way foreignkeys are returned.
+        for (int expectedFkIdx = 0; expectedFkIdx < expected.getForeignKeyCount(); expectedFkIdx++)
+        {
+            ForeignKey expectedFk   = expected.getForeignKey(expectedFkIdx);
+            String     expectedName = getPlatform().getSqlBuilder().shortenName(expectedFk.getName(), getSqlBuilder().getMaxForeignKeyNameLength());
+
+            for (int actualFkIdx = 0; actualFkIdx < actual.getForeignKeyCount(); actualFkIdx++)
+            {
+                ForeignKey actualFk   = actual.getForeignKey(actualFkIdx);
+                String     actualName = getPlatform().getSqlBuilder().shortenName(actualFk.getName(), getSqlBuilder().getMaxForeignKeyNameLength());
+
+                if (StringUtilsExt.equals(expectedName, actualName, caseSensitive))
+                {
+                    assertEquals(expectedFk,
+                                 actualFk,
+                                 caseSensitive);
+                }
+            }
+        }
+        assertEquals("Not the same number of indices in table "+actual.getName()+".",
+                     expected.getIndexCount(),
+                     actual.getIndexCount());
+        for (int indexIdx = 0; indexIdx < actual.getIndexCount(); indexIdx++)
+        {
+            assertEquals(expected.getIndex(indexIdx),
+                         actual.getIndex(indexIdx),
+                         caseSensitive);
+        }
+    }
+
+    /**
+     * Asserts that the two given columns are equal.
+     * 
+     * @param expected      The expected column
+     * @param actual        The actual column
+     * @param caseSensitive Whether case matters when comparing
+     */
+    protected void assertEquals(Column expected, Column actual, boolean caseSensitive)
+    {
+        if (caseSensitive)
+        {
+            assertEquals("Column names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxColumnNameLength()));
+        }
+        else
+        {
+            assertEquals("Column names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
+        }
+        assertEquals("Primary key status not the same for column "+actual.getName()+".",
+                     expected.isPrimaryKey(),
+                     actual.isPrimaryKey());
+        assertEquals("Required status not the same for column "+actual.getName()+".",
+                     expected.isRequired(),
+                     actual.isRequired());
+        if (getPlatformInfo().getIdentityStatusReadingSupported())
+        {
+            // we're only comparing this if the platform can actually read the
+            // auto-increment status back from an existing database
+            assertEquals("Auto-increment status not the same for column "+actual.getName()+".",
+                         expected.isAutoIncrement(),
+                         actual.isAutoIncrement());
+        }
+        assertEquals("Type not the same for column "+actual.getName()+".",
+                     expected.getType(),
+                     actual.getType());
+        assertEquals("Type code not the same for column "+actual.getName()+".",
+                     expected.getTypeCode(),
+                     actual.getTypeCode());
+        assertEquals("Parsed default values do not match for column "+actual.getName()+".",
+                     expected.getParsedDefaultValue(),
+                     actual.getParsedDefaultValue());
+
+        // comparing the size makes only sense for types where it is relevant
+        if ((expected.getTypeCode() == Types.NUMERIC) ||
+            (expected.getTypeCode() == Types.DECIMAL))
+        {
+            assertEquals("Precision not the same for column "+actual.getName()+".",
+                         expected.getSizeAsInt(),
+                         actual.getSizeAsInt());
+            assertEquals("Scale not the same for column "+actual.getName()+".",
+                         expected.getScale(),
+                         actual.getScale());
+        }
+        else if ((expected.getTypeCode() == Types.CHAR) ||
+                 (expected.getTypeCode() == Types.VARCHAR) ||
+                 (expected.getTypeCode() == Types.BINARY) ||
+                 (expected.getTypeCode() == Types.VARBINARY))
+        {
+            assertEquals("Size not the same for column "+actual.getName()+".",
+                         expected.getSize(),
+                         actual.getSize());
+        }
+    }
+
+    /**
+     * Asserts that the two given foreign keys are equal.
+     * 
+     * @param expected      The expected foreign key
+     * @param actual        The actual foreign key
+     * @param caseSensitive Whether case matters when comparing
+     */
+    protected void assertEquals(ForeignKey expected, ForeignKey actual, boolean caseSensitive)
+    {
+        if (caseSensitive)
+        {
+            assertEquals("Foreign key names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxForeignKeyNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxForeignKeyNameLength()));
+            assertEquals("Referenced table names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getForeignTableName(), getSqlBuilder().getMaxTableNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getForeignTableName(), getSqlBuilder().getMaxTableNameLength()));
+        }
+        else
+        {
+            assertEquals("Foreign key names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxForeignKeyNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxForeignKeyNameLength()));
+            assertEquals("Referenced table names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()));
+        }
+        if ((expected.getOnUpdate() == CascadeActionEnum.NONE) || (expected.getOnUpdate() == CascadeActionEnum.RESTRICT))
+        {
+            assertTrue("Not the same onUpdate setting in foreign key "+actual.getName()+".",
+                       (actual.getOnUpdate() == CascadeActionEnum.NONE) || (actual.getOnUpdate() == CascadeActionEnum.RESTRICT));
+        }
+        else
+        {
+            assertEquals("Not the same onUpdate setting in foreign key "+actual.getName()+".",
+                         expected.getOnUpdate(),
+                         actual.getOnUpdate());
+        }
+        if ((expected.getOnDelete() == CascadeActionEnum.NONE) || (expected.getOnDelete() == CascadeActionEnum.RESTRICT))
+        {
+            assertTrue("Not the same onDelete setting in foreign key "+actual.getName()+".",
+                       (actual.getOnDelete() == CascadeActionEnum.NONE) || (actual.getOnDelete() == CascadeActionEnum.RESTRICT));
+        }
+        else
+        {
+            assertEquals("Not the same onDelete setting in foreign key "+actual.getName()+".",
+                         expected.getOnDelete(),
+                         actual.getOnDelete());
+        }
+        assertEquals("Not the same number of references in foreign key "+actual.getName()+".",
+                     expected.getReferenceCount(),
+                     actual.getReferenceCount());
+        for (int refIdx = 0; refIdx < actual.getReferenceCount(); refIdx++)
+        {
+            assertEquals(expected.getReference(refIdx),
+                         actual.getReference(refIdx),
+                         caseSensitive);
+        }
+    }
+
+    /**
+     * Asserts that the two given references are equal.
+     * 
+     * @param expected      The expected reference
+     * @param actual        The actual reference
+     * @param caseSensitive Whether case matters when comparing
+     */
+    protected void assertEquals(Reference expected, Reference actual, boolean caseSensitive)
+    {
+        if (caseSensitive)
+        {
+            assertEquals("Local column names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getLocalColumnName(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getLocalColumnName(), getSqlBuilder().getMaxColumnNameLength()));
+            assertEquals("Foreign column names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getForeignColumnName(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getForeignColumnName(), getSqlBuilder().getMaxColumnNameLength()));
+        }
+        else
+        {
+            assertEquals("Local column names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getLocalColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getLocalColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
+            assertEquals("Foreign column names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getForeignColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getForeignColumnName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
+        }
+    }
+
+    /**
+     * Asserts that the two given indices are equal.
+     * 
+     * @param expected      The expected index
+     * @param actual        The actual index
+     * @param caseSensitive Whether case matters when comparing
+     */
+    protected void assertEquals(Index expected, Index actual, boolean caseSensitive)
+    {
+        if (caseSensitive)
+        {
+            assertEquals("Index names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxConstraintNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxConstraintNameLength()));
+        }
+        else
+        {
+            assertEquals("Index names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxConstraintNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxConstraintNameLength()));
+        }
+        assertEquals("Unique status not the same for index "+actual.getName()+".",
+                     expected.isUnique(),
+                     actual.isUnique());
+        assertEquals("Not the same number of columns in index "+actual.getName()+".",
+                     expected.getColumnCount(),
+                     actual.getColumnCount());
+        for (int columnIdx = 0; columnIdx < actual.getColumnCount(); columnIdx++)
+        {
+            assertEquals(expected.getColumn(columnIdx),
+                         actual.getColumn(columnIdx),
+                         caseSensitive);
+        }
+    }
+
+    /**
+     * Asserts that the two given index columns are equal.
+     * 
+     * @param expected      The expected index column
+     * @param actual        The actual index column
+     * @param caseSensitive Whether case matters when comparing
+     */
+    protected void assertEquals(IndexColumn expected, IndexColumn actual, boolean caseSensitive)
+    {
+        if (caseSensitive)
+        {
+            assertEquals("Index column names do not match.",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName(), getSqlBuilder().getMaxColumnNameLength()));
+        }
+        else
+        {
+            assertEquals("Index column names do not match (ignoring case).",
+                         getPlatform().getSqlBuilder().shortenName(expected.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()),
+                         getPlatform().getSqlBuilder().shortenName(actual.getName().toUpperCase(), getSqlBuilder().getMaxColumnNameLength()));
+        }
+        assertEquals("Size not the same for index column "+actual.getName()+".",
+                     expected.getSize(),
+                     actual.getSize());
     }
 }
