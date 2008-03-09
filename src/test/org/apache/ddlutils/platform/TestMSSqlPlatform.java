@@ -19,14 +19,11 @@ package org.apache.ddlutils.platform;
  * under the License.
  */
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.ddlutils.TestPlatformBase;
 import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
-import org.apache.oro.text.regex.MatchResult;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.PatternMatcherInput;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Tests the Microsoft SQL Server platform.
@@ -52,15 +49,15 @@ public class TestMSSqlPlatform extends TestPlatformBase
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL
-        Pattern        declarePattern    = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
-        PatternMatcher matcher           = new Perl5Matcher();
-        String         tableNameVar      = "tablename";
-        String         constraintNameVar = "constraintname";
+        Pattern declarePattern    = Pattern.compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        Matcher matcher           = declarePattern.matcher(sql);
+        String  tableNameVar      = "tablename";
+        String  constraintNameVar = "constraintname";
 
-        if (matcher.contains(sql, declarePattern))
+        if (matcher.find())
         {
-            tableNameVar      = matcher.getMatch().group(1);
-            constraintNameVar = matcher.getMatch().group(2);
+            tableNameVar      = matcher.group(1);
+            constraintNameVar = matcher.group(2);
         }
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
@@ -130,15 +127,15 @@ public class TestMSSqlPlatform extends TestPlatformBase
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL
-        Pattern        declarePattern    = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
-        PatternMatcher matcher           = new Perl5Matcher();
-        String         tableNameVar      = "tablename";
-        String         constraintNameVar = "constraintname";
+        Pattern declarePattern    = Pattern.compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        Matcher matcher           = declarePattern.matcher(sql);
+        String  tableNameVar      = "tablename";
+        String  constraintNameVar = "constraintname";
 
-        if (matcher.contains(sql, declarePattern))
+        if (matcher.find())
         {
-            tableNameVar      = matcher.getMatch().group(1);
-            constraintNameVar = matcher.getMatch().group(2);
+            tableNameVar      = matcher.group(1);
+            constraintNameVar = matcher.group(2);
         }
         // Note that this is not valid SQL as a table can have only one identity column at most 
         assertEqualsIgnoringWhitespaces(
@@ -184,19 +181,17 @@ public class TestMSSqlPlatform extends TestPlatformBase
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL
-        Pattern             declarePattern     = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
-        PatternMatcherInput input              = new PatternMatcherInput(sql);
-        PatternMatcher      matcher            = new Perl5Matcher();
-        String[]            tableNameVars      = { "tablename", "tablename", "tablename" };
-        String[]            constraintNameVars = { "constraintname", "constraintname", "constraintname" };
+        Pattern  declarePattern     = Pattern.compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        Matcher  matcher            = declarePattern.matcher(sql);
+        int      startPos           = 0;
+        String[] tableNameVars      = { "tablename", "tablename", "tablename" };
+        String[] constraintNameVars = { "constraintname", "constraintname", "constraintname" };
 
-        for (int idx = 0; (idx < 3) && matcher.contains(input, declarePattern); idx++)
+        for (int idx = 0; (idx < 3) && matcher.find(startPos); idx++)
         {
-            MatchResult result = matcher.getMatch();
-
-            tableNameVars[idx]      = result.group(1);
-            constraintNameVars[idx] = result.group(2);
-            input.setCurrentOffset(result.endOffset(2));
+            tableNameVars[idx]      = matcher.group(1);
+            constraintNameVars[idx] = matcher.group(2);
+            startPos                = matcher.end();
         }
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+
@@ -301,15 +296,15 @@ public class TestMSSqlPlatform extends TestPlatformBase
 
         // Since we have no way of knowing the auto-generated variables in the SQL,
         // we simply try to extract it from the SQL
-        Pattern        declarePattern    = new Perl5Compiler().compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
-        PatternMatcher matcher           = new Perl5Matcher();
-        String         tableNameVar      = "tablename";
-        String         constraintNameVar = "constraintname";
+        Pattern declarePattern    = Pattern.compile("DECLARE @([\\S]+) [^@]+@([\\S]+)");
+        Matcher matcher           = declarePattern.matcher(sql);
+        String  tableNameVar      = "tablename";
+        String  constraintNameVar = "constraintname";
 
-        if (matcher.contains(sql, declarePattern))
+        if (matcher.find())
         {
-            tableNameVar      = matcher.getMatch().group(1);
-            constraintNameVar = matcher.getMatch().group(2);
+            tableNameVar      = matcher.group(1);
+            constraintNameVar = matcher.group(2);
         }
         assertEqualsIgnoringWhitespaces(
             "SET quoted_identifier on;\n"+

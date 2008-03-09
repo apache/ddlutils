@@ -30,6 +30,9 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.ddlutils.DdlUtilsException;
@@ -39,12 +42,6 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Reads a database model from an Oracle 8 database.
@@ -72,15 +69,13 @@ public class Oracle8ModelReader extends JdbcModelReader
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");
 
-        PatternCompiler compiler = new Perl5Compiler();
-
     	try
     	{
-    		_oracleIsoDatePattern      = compiler.compile("TO_DATE\\('([^']*)'\\, 'YYYY\\-MM\\-DD'\\)");
-    		_oracleIsoTimePattern      = compiler.compile("TO_DATE\\('([^']*)'\\, 'HH24:MI:SS'\\)");
-    		_oracleIsoTimestampPattern = compiler.compile("TO_DATE\\('([^']*)'\\, 'YYYY\\-MM\\-DD HH24:MI:SS'\\)");
+    		_oracleIsoDatePattern      = Pattern.compile("TO_DATE\\('([^']*)'\\, 'YYYY\\-MM\\-DD'\\)");
+    		_oracleIsoTimePattern      = Pattern.compile("TO_DATE\\('([^']*)'\\, 'HH24:MI:SS'\\)");
+    		_oracleIsoTimestampPattern = Pattern.compile("TO_DATE\\('([^']*)'\\, 'YYYY\\-MM\\-DD HH24:MI:SS'\\)");
         }
-    	catch (MalformedPatternException ex)
+    	catch (PatternSyntaxException ex)
         {
         	throw new DdlUtilsException(ex);
         }
@@ -189,26 +184,34 @@ public class Oracle8ModelReader extends JdbcModelReader
 			// we also reverse the ISO-format adaptation, and adjust the default value to timestamp
 			if (column.getDefaultValue() != null)
 			{
-				PatternMatcher matcher   = new Perl5Matcher();
-				Timestamp      timestamp = null;
+				Matcher   matcher   = _oracleIsoTimestampPattern.matcher(column.getDefaultValue());
+				Timestamp timestamp = null;
 	
-				if (matcher.matches(column.getDefaultValue(), _oracleIsoTimestampPattern))
+				if (matcher.matches())
 				{
-					String timestampVal = matcher.getMatch().group(1);
+					String timestampVal = matcher.group(1);
 
 					timestamp = Timestamp.valueOf(timestampVal);
 				}
-				else if (matcher.matches(column.getDefaultValue(), _oracleIsoDatePattern))
+				else
 				{
-					String dateVal = matcher.getMatch().group(1);
+				    matcher = _oracleIsoDatePattern.matcher(column.getDefaultValue());
+	                if (matcher.matches())
+	                {
+	                    String dateVal = matcher.group(1);
 
-					timestamp = new Timestamp(Date.valueOf(dateVal).getTime());
-				}
-				else if (matcher.matches(column.getDefaultValue(), _oracleIsoTimePattern))
-				{
-					String timeVal = matcher.getMatch().group(1);
+	                    timestamp = new Timestamp(Date.valueOf(dateVal).getTime());
+	                }
+	                else
+	                {
+	                    matcher = _oracleIsoTimePattern.matcher(column.getDefaultValue());
+	                    if (matcher.matches())
+	                    {
+	                        String timeVal = matcher.group(1);
 
-					timestamp = new Timestamp(Time.valueOf(timeVal).getTime());
+	                        timestamp = new Timestamp(Time.valueOf(timeVal).getTime());
+	                    }
+	                }
 				}
 				if (timestamp != null)
 				{
@@ -306,7 +309,7 @@ public class Oracle8ModelReader extends JdbcModelReader
 		    "a.TABLE_NAME=? AND a.GENERATED=? AND a.TABLE_TYPE=? AND a.TABLE_NAME=b.TABLE_NAME AND a.INDEX_NAME=b.INDEX_NAME AND " +
 		    "a.INDEX_NAME NOT IN (SELECT DISTINCT c.CONSTRAINT_NAME FROM USER_CONSTRAINTS c WHERE c.CONSTRAINT_TYPE=? AND c.TABLE_NAME=a.TABLE_NAME)";
 		final String queryWithSchema =
-		    query.substring(query.length() - 1) + " AND c.OWNER LIKE ?) AND a.TABLE_OWNER LIKE ?";
+		    query.substring(0, query.length() - 1) + " AND c.OWNER LIKE ?) AND a.TABLE_OWNER LIKE ?";
 
         Map               indices = new ListOrderedMap();
 		PreparedStatement stmt    = null;

@@ -22,6 +22,8 @@ package org.apache.ddlutils.platform.oracle;
 import java.io.IOException;
 import java.sql.Types;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
@@ -33,11 +35,6 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
 import org.apache.ddlutils.util.StringUtilsExt;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * The SQL Builder for Oracle.
@@ -63,15 +60,13 @@ public class Oracle8Builder extends SqlBuilder
         super(platform);
         addEscapedCharSequence("'", "''");
 
-        PatternCompiler compiler = new Perl5Compiler();
-
     	try
     	{
-            _isoDatePattern      = compiler.compile("\\d{4}\\-\\d{2}\\-\\d{2}");
-            _isoTimePattern      = compiler.compile("\\d{2}:\\d{2}:\\d{2}");
-            _isoTimestampPattern = compiler.compile("\\d{4}\\-\\d{2}\\-\\d{2} \\d{2}:\\d{2}:\\d{2}[\\.\\d{1,8}]?");
+            _isoDatePattern      = Pattern.compile("\\d{4}\\-\\d{2}\\-\\d{2}");
+            _isoTimePattern      = Pattern.compile("\\d{2}:\\d{2}:\\d{2}");
+            _isoTimestampPattern = Pattern.compile("\\d{4}\\-\\d{2}\\-\\d{2} \\d{2}:\\d{2}:\\d{2}[\\.\\d{1,8}]?");
         }
-    	catch (MalformedPatternException ex)
+    	catch (PatternSyntaxException ex)
         {
         	throw new DdlUtilsException(ex);
         }
@@ -294,21 +289,21 @@ public class Oracle8Builder extends SqlBuilder
     	// and thus the user has to ensure that it is correct
         else if (column.getTypeCode() == Types.DATE)
         {
-            if (new Perl5Matcher().matches(column.getDefaultValue(), _isoDatePattern))
+            if (_isoDatePattern.matcher(column.getDefaultValue()).matches())
             {
             	return "TO_DATE('"+column.getDefaultValue()+"', 'YYYY-MM-DD')";
             }
         }
         else if (column.getTypeCode() == Types.TIME)
         {
-            if (new Perl5Matcher().matches(column.getDefaultValue(), _isoTimePattern))
+            if (_isoTimePattern.matcher(column.getDefaultValue()).matches())
             {
             	return "TO_DATE('"+column.getDefaultValue()+"', 'HH24:MI:SS')";
             }
         }
         else if (column.getTypeCode() == Types.TIMESTAMP)
         {
-            if (new Perl5Matcher().matches(column.getDefaultValue(), _isoTimestampPattern))
+            if (_isoTimestampPattern.matcher(column.getDefaultValue()).matches())
             {
             	return "TO_DATE('"+column.getDefaultValue()+"', 'YYYY-MM-DD HH24:MI:SS')";
             }

@@ -22,14 +22,11 @@ package org.apache.ddlutils.io.converters;
 import java.sql.Time;
 import java.sql.Types;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.MatchResult;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Converts between {@link java.sql.Time} and {@link java.lang.String} using the standard
@@ -49,13 +46,11 @@ public class TimeConverter implements SqlTypeConverter
 	 */
 	public TimeConverter()
 	{
-        PatternCompiler compiler = new Perl5Compiler();
-
         try
         {
-            _timePattern = compiler.compile("(?:\\d{4}\\-\\d{2}\\-\\d{2}\\s)?(\\d{2})(?::(\\d{2}))?(?::(\\d{2}))?(?:\\..*)?");
+            _timePattern = Pattern.compile("(?:\\d{4}\\-\\d{2}\\-\\d{2}\\s)?(\\d{2})(?::(\\d{2}))?(?::(\\d{2}))?(?:\\..*)?");
         }
-        catch (MalformedPatternException ex)
+        catch (PatternSyntaxException ex)
         {
             throw new DdlUtilsException(ex);
         }
@@ -77,26 +72,25 @@ public class TimeConverter implements SqlTypeConverter
         {
             // we're not using {@link java.sql.Time#valueOf(String)} as this method is too strict
             // it only parses the full spec "hh:mm:ss"
-            Perl5Matcher matcher = new Perl5Matcher();
-            int          hours   = 0;
-            int          minutes = 0;
-            int          seconds = 0;
+            Matcher matcher = _timePattern.matcher(textRep);
+            int     hours   = 0;
+            int     minutes = 0;
+            int     seconds = 0;
 
-            if (matcher.matches(textRep, _timePattern))
+            if (matcher.matches())
             {
-                MatchResult match     = matcher.getMatch();
-                int         numGroups = match.groups();
+                int numGroups = matcher.groupCount();
 
                 try
                 {
-                    hours = Integer.parseInt(match.group(1));
-                    if ((numGroups > 2) && (match.group(2) != null))
+                    hours = Integer.parseInt(matcher.group(1));
+                    if ((numGroups >= 2) && (matcher.group(2) != null))
                     {
-                        minutes = Integer.parseInt(match.group(2));
+                        minutes = Integer.parseInt(matcher.group(2));
                     }
-                    if ((numGroups > 3) && (match.group(3) != null))
+                    if ((numGroups >= 3) && (matcher.group(3) != null))
                     {
-                        seconds = Integer.parseInt(match.group(3));
+                        seconds = Integer.parseInt(matcher.group(3));
                     }
                 }
                 catch (NumberFormatException ex)

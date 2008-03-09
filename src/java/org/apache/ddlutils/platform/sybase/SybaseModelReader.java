@@ -29,6 +29,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
@@ -40,12 +43,6 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Reads a database model from a Sybase database.
@@ -71,14 +68,12 @@ public class SybaseModelReader extends JdbcModelReader
         setDefaultSchemaPattern(null);
         setDefaultTablePattern("%");
 
-        PatternCompiler compiler = new Perl5Compiler();
-
     	try
     	{
-            _isoDatePattern = compiler.compile("'(\\d{4}\\-\\d{2}\\-\\d{2})'");
-            _isoTimePattern = compiler.compile("'(\\d{2}:\\d{2}:\\d{2})'");
+            _isoDatePattern = Pattern.compile("'(\\d{4}\\-\\d{2}\\-\\d{2})'");
+            _isoTimePattern = Pattern.compile("'(\\d{2}:\\d{2}:\\d{2})'");
         }
-    	catch (MalformedPatternException ex)
+    	catch (PatternSyntaxException ex)
         {
         	throw new DdlUtilsException(ex);
         }
@@ -117,17 +112,21 @@ public class SybaseModelReader extends JdbcModelReader
     		{
     			// Sybase maintains the default values for DATE/TIME jdbc types, so we have to
     			// migrate the default value to TIMESTAMP
-    			PatternMatcher matcher   = new Perl5Matcher();
-    			Timestamp      timestamp = null;
+    			Matcher   matcher   = _isoDatePattern.matcher(column.getDefaultValue());
+    			Timestamp timestamp = null;
     
-    			if (matcher.matches(column.getDefaultValue(), _isoDatePattern))
+    			if (matcher.matches())
     			{
-    				timestamp = new Timestamp(Date.valueOf(matcher.getMatch().group(1)).getTime());
+    				timestamp = new Timestamp(Date.valueOf(matcher.group(1)).getTime());
     			}
-    			else if (matcher.matches(column.getDefaultValue(), _isoTimePattern))
-    			{
-    				timestamp = new Timestamp(Time.valueOf(matcher.getMatch().group(1)).getTime());
-    			}
+    			else
+			    {
+    			    matcher = _isoTimePattern.matcher(column.getDefaultValue());
+    			    if (matcher.matches())
+                    {
+                        timestamp = new Timestamp(Time.valueOf(matcher.group(1)).getTime());
+                    }
+			    }
     			if (timestamp != null)
     			{
     				column.setDefaultValue(timestamp.toString());

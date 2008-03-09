@@ -22,14 +22,11 @@ package org.apache.ddlutils.io.converters;
 import java.sql.Date;
 import java.sql.Types;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.ddlutils.DdlUtilsException;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.MatchResult;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Converts between {@link java.sql.Date} and {@link java.lang.String} using the standard
@@ -49,13 +46,11 @@ public class DateConverter implements SqlTypeConverter
 	 */
 	public DateConverter()
 	{
-        PatternCompiler compiler = new Perl5Compiler();
-
         try
         {
-            _datePattern = compiler.compile("(\\d{2,4})(?:\\-(\\d{2}))?(?:\\-(\\d{2}))?.*");
+            _datePattern = Pattern.compile("(\\d{2,4})(?:\\-(\\d{2}))?(?:\\-(\\d{2}))?.*");
         }
-        catch (MalformedPatternException ex)
+        catch (PatternSyntaxException ex)
         {
             throw new DdlUtilsException(ex);
         }
@@ -77,26 +72,25 @@ public class DateConverter implements SqlTypeConverter
         {
             // we're not using {@link java.sql.Date#valueOf(String)} as this method is too strict
             // it only parses the full spec "yyyy-mm-dd"
-            Perl5Matcher matcher = new Perl5Matcher();
-            int          year    = 1970;
-            int          month   = 1;
-            int          day     = 1;
+            Matcher matcher = _datePattern.matcher(textRep);
+            int     year    = 1970;
+            int     month   = 1;
+            int     day     = 1;
 
-            if (matcher.matches(textRep, _datePattern))
+            if (matcher.matches())
             {
-                MatchResult match     = matcher.getMatch();
-                int         numGroups = match.groups();
+                int numGroups = matcher.groupCount();
 
                 try
                 {
-                    year = Integer.parseInt(match.group(1));
-                    if ((numGroups > 2) && (match.group(2) != null))
+                    year = Integer.parseInt(matcher.group(1));
+                    if ((numGroups >= 2) && (matcher.group(2) != null))
                     {
-                        month = Integer.parseInt(match.group(2));
+                        month = Integer.parseInt(matcher.group(2));
                     }
-                    if ((numGroups > 3) && (match.group(3) != null))
+                    if ((numGroups >= 3) && (matcher.group(3) != null))
                     {
-                        day = Integer.parseInt(match.group(3));
+                        day = Integer.parseInt(matcher.group(3));
                     }
                 }
                 catch (NumberFormatException ex)

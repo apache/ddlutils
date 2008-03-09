@@ -25,6 +25,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
@@ -34,12 +37,6 @@ import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.JdbcModelReader;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Reads a database model from a Db2 UDB database.
@@ -66,14 +63,12 @@ public class Db2ModelReader extends JdbcModelReader
         setDefaultCatalogPattern(null);
         setDefaultSchemaPattern(null);
 
-        PatternCompiler compiler = new Perl5Compiler();
-
     	try
     	{
-    		_db2TimePattern      = compiler.compile("'(\\d{2}).(\\d{2}).(\\d{2})'");
-    		_db2TimestampPattern = compiler.compile("'(\\d{4}\\-\\d{2}\\-\\d{2})\\-(\\d{2}).(\\d{2}).(\\d{2})(\\.\\d{1,8})?'");
+    		_db2TimePattern      = Pattern.compile("'(\\d{2}).(\\d{2}).(\\d{2})'");
+    		_db2TimestampPattern = Pattern.compile("'(\\d{4}\\-\\d{2}\\-\\d{2})\\-(\\d{2}).(\\d{2}).(\\d{2})(\\.\\d{1,8})?'");
         }
-    	catch (MalformedPatternException ex)
+    	catch (PatternSyntaxException ex)
         {
         	throw new DdlUtilsException(ex);
         }
@@ -115,22 +110,22 @@ public class Db2ModelReader extends JdbcModelReader
 		{
 			if (column.getTypeCode() == Types.TIME)
 			{
-				PatternMatcher matcher = new Perl5Matcher();
+				Matcher matcher = _db2TimePattern.matcher(column.getDefaultValue());
 
 				// Db2 returns "HH24.MI.SS"
-				if (matcher.matches(column.getDefaultValue(), _db2TimePattern))
+				if (matcher.matches())
 				{
 					StringBuffer newDefault = new StringBuffer();
 
 					newDefault.append("'");
 					// the hour
-					newDefault.append(matcher.getMatch().group(1));
+					newDefault.append(matcher.group(1));
 					newDefault.append(":");
 					// the minute
-					newDefault.append(matcher.getMatch().group(2));
+					newDefault.append(matcher.group(2));
 					newDefault.append(":");
 					// the second
-					newDefault.append(matcher.getMatch().group(3));
+					newDefault.append(matcher.group(3));
 					newDefault.append("'");
 
 					column.setDefaultValue(newDefault.toString());
@@ -138,29 +133,29 @@ public class Db2ModelReader extends JdbcModelReader
 			}
 			else if (column.getTypeCode() == Types.TIMESTAMP)
 			{
-				PatternMatcher matcher = new Perl5Matcher();
+                Matcher matcher = _db2TimestampPattern.matcher(column.getDefaultValue());
 
 				// Db2 returns "YYYY-MM-DD-HH24.MI.SS.FF"
-				if (matcher.matches(column.getDefaultValue(), _db2TimestampPattern))
+				if (matcher.matches())
 				{
 					StringBuffer newDefault = new StringBuffer();
 
 					newDefault.append("'");
 					// group 1 is the date which has the correct format
-					newDefault.append(matcher.getMatch().group(1));
+					newDefault.append(matcher.group(1));
 					newDefault.append(" ");
 					// the hour
-					newDefault.append(matcher.getMatch().group(2));
+					newDefault.append(matcher.group(2));
 					newDefault.append(":");
 					// the minute
-					newDefault.append(matcher.getMatch().group(3));
+					newDefault.append(matcher.group(3));
 					newDefault.append(":");
 					// the second
-					newDefault.append(matcher.getMatch().group(4));
+					newDefault.append(matcher.group(4));
 					// optionally, the fraction
-					if ((matcher.getMatch().groups() > 4) && (matcher.getMatch().group(4) != null))
+					if ((matcher.groupCount() >= 5) && (matcher.group(5) != null))
 					{
-						newDefault.append(matcher.getMatch().group(5));
+						newDefault.append(matcher.group(5));
 					}
 					newDefault.append("'");
 
