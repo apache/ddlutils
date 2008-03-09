@@ -74,6 +74,7 @@ public class Db2Platform extends PlatformImplBase
         info.setMaxIdentifierLength(18);
         info.setIdentityColumnAutomaticallyRequired(true);
         info.setPrimaryKeyColumnsHaveToBeRequired(true);
+        info.setMultipleIdentityColumnsSupported(false);
 
         // the BINARY types are also handled by Db2Builder.getSqlType(Column)
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                      Types.BLOB);
