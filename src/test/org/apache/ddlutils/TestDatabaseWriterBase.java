@@ -26,6 +26,7 @@ import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -42,8 +43,13 @@ import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.io.DataReader;
 import org.apache.ddlutils.io.DataToDatabaseSink;
+import org.apache.ddlutils.model.CloneHelper;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.ForeignKey;
+import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.CreationParameters;
+import org.apache.ddlutils.platform.DefaultValueHelper;
 import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 
@@ -555,7 +561,112 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
 
     	return getPlatform().readModelFromDatabase(databaseName, catalog, schema, null);
     }
-    
+
+    /**
+     * Returns a copy of the given model adjusted for type changes because of the native type mappings
+     * which when read back from the database will map to different types.
+     * 
+     * @param sourceModel The source model
+     * @return The adjusted model
+     */
+    protected Database adjustModel(Database sourceModel)
+    {
+        Database model = new CloneHelper().clone(sourceModel);
+
+        for (int tableIdx = 0; tableIdx < model.getTableCount(); tableIdx++)
+        {
+            Table table = model.getTable(tableIdx);
+
+            for (int columnIdx = 0; columnIdx < table.getColumnCount(); columnIdx++)
+            {
+                Column column     = table.getColumn(columnIdx);
+                int    origType   = column.getTypeCode();
+                int    targetType = getPlatformInfo().getTargetJdbcType(origType);
+
+                // we adjust the column types if the native type would back-map to a
+                // different jdbc type
+                if (targetType != origType)
+                {
+                    column.setTypeCode(targetType);
+                    // we should also adapt the default value
+                    if (column.getDefaultValue() != null)
+                    {
+                        DefaultValueHelper helper = getPlatform().getSqlBuilder().getDefaultValueHelper();
+
+                        column.setDefaultValue(helper.convert(column.getDefaultValue(), origType, targetType));
+                    }
+                }
+                // we also promote the default size if the column has no size
+                // spec of its own
+                if ((column.getSize() == null) && getPlatformInfo().hasSize(targetType))
+                {
+                    Integer defaultSize = getPlatformInfo().getDefaultSize(targetType);
+
+                    if (defaultSize != null)
+                    {
+                        column.setSize(defaultSize.toString());
+                    }
+                }
+                // finally the platform might return a synthetic default value if the column
+                // is a primary key column
+                if (getPlatformInfo().isSyntheticDefaultValueForRequiredReturned() &&
+                    (column.getDefaultValue() == null) && column.isRequired() && !column.isAutoIncrement())
+                {
+                    switch (column.getTypeCode())
+                    {
+                        case Types.TINYINT:
+                        case Types.SMALLINT:
+                        case Types.INTEGER:
+                        case Types.BIGINT:
+                            column.setDefaultValue("0");
+                            break;
+                        case Types.REAL:
+                        case Types.FLOAT:
+                        case Types.DOUBLE:
+                            column.setDefaultValue("0.0");
+                            break;
+                        case Types.BIT:
+                            column.setDefaultValue("false");
+                            break;
+                        default:
+                            column.setDefaultValue("");
+                            break;
+                    }
+                }
+                if (column.isPrimaryKey() && getPlatformInfo().isPrimaryKeyColumnAutomaticallyRequired())
+                {
+                    column.setRequired(true);
+                }
+                if (column.isAutoIncrement() && getPlatformInfo().isIdentityColumnAutomaticallyRequired())
+                {
+                    column.setRequired(true);
+                }
+            }
+            // we also add the default names to foreign keys that are initially unnamed
+            for (int fkIdx = 0; fkIdx < table.getForeignKeyCount(); fkIdx++)
+            {
+                ForeignKey fk = table.getForeignKey(fkIdx);
+
+                if (fk.getName() == null)
+                {
+                    fk.setName(getPlatform().getSqlBuilder().getForeignKeyName(table, fk));
+                }
+            }
+        }
+        return model;
+    }
+
+    /**
+     * Returns the original model adjusted for type changes because of the native type mappings
+     * which when read back from the database will map to different types.
+     * 
+     * @return The adjusted model
+     */
+    protected Database getAdjustedModel()
+    {
+        return adjustModel(getModel());
+    }
+
     /**
      * Returns the SQL for altering the live database so that it matches the given model.
      * 

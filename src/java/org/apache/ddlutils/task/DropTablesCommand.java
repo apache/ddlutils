@@ -19,8 +19,12 @@ package org.apache.ddlutils.task;
  * under the License.
  */
 
+import java.util.ArrayList;
+
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.RemoveTablesChange;
+import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
 
@@ -32,6 +36,73 @@ import org.apache.tools.ant.BuildException;
  */
 public class DropTablesCommand extends DatabaseCommand
 {
+    /** The names of the tables to be dropped. */
+    private String[] _tableNames; 
+    /** The regular expression matching the names of the tables to be dropped. */
+    private String _tableNameRegExp;
+
+    /**
+     * Sets the names of the tables to be removed, as a comma-separated list. Escape a
+     * comma via '\,' if it is part of the table name. Please note that table names are
+     * not trimmed which means that whitespace characters should only be present in
+     * this string if they are actually part of the table name (i.e. in delimited
+     * identifer mode).
+     * 
+     * @param tableNameList The comma-separated list of table names
+     * @ant.not-required If no table filter is specified, then all tables will be dropped.
+     */
+    public void setTableNames(String tableNameList)
+    {
+        String[]  tmpTableNames = tableNameList.split(",");
+        ArrayList tableNames    = new ArrayList();
+        String    last          = null;
+
+        for (int idx = 0; idx < tmpTableNames.length; idx++)
+        {
+            String  str         = tmpTableNames[idx];
+            int     strLen      = str.length();
+            boolean endsInSlash = (strLen > 0) && (str.charAt(strLen - 1) == '\\') &&
+                                  ((strLen == 1) || (str.charAt(strLen - 2) != '\\'));
+
+            if (last != null)
+            {
+                last += "," + str;
+                if (!endsInSlash)
+                {
+                    tableNames.add(last);
+                    last = null;
+                }
+            }
+            else if (endsInSlash)
+            {
+                last = str.substring(0, strLen - 1);
+            }
+            else
+            {
+                tableNames.add(str);
+            }
+        }
+        if (last != null)
+        {
+            tableNames.add(last + ",");
+        }
+        _tableNames = (String[])tableNames.toArray(new String[tableNames.size()]);
+    }
+
+    /**
+     * Sets the regular expression matching the names of the tables to be removed.
+     * For case insensitive matching, an uppercase name can be assumed. If no
+     * regular expressionis specified
+     * 
+     * @param tableNameRegExp The regular expression; see {@link java.util.regex.Pattern}
+     *                        for details
+     * @ant.not-required If no table filter is specified, then all tables will be dropped.
+     */
+    public void setTableNameRegExp(String tableNameRegExp)
+    {
+        _tableNameRegExp = tableNameRegExp;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -55,6 +126,15 @@ public class DropTablesCommand extends DatabaseCommand
         Platform platform    = getPlatform();
         Database targetModel = new Database();
 
+        if ((_tableNames != null) || (_tableNameRegExp != null))
+        {
+            RemoveTablesChange change = _tableNames != null ? new RemoveTablesChange(_tableNames)
+                                                            : new RemoveTablesChange(_tableNameRegExp);
+
+            targetModel = new CloneHelper().clone(model);
+            targetModel.initialize();
+            change.apply(targetModel, task.isUseDelimitedSqlIdentifiers());
+        }
         try
         {
             platform.alterModel(model, targetModel, isFailOnError());
