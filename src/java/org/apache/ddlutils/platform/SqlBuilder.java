@@ -1201,6 +1201,11 @@ public abstract class SqlBuilder
      */
     public String shortenName(String name, int desiredLength)
     {
+        if (name == null)
+        {
+            return null;
+        }
+
         // TODO: Find an algorithm that generates unique names
         int originalLength = name.length();
 

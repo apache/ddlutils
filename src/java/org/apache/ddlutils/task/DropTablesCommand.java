@@ -19,13 +19,12 @@ package org.apache.ddlutils.task;
  * under the License.
  */
 
-import java.util.ArrayList;
-
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.alteration.RemoveTablesChange;
 import org.apache.ddlutils.model.CloneHelper;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.ModelHelper;
+import org.apache.ddlutils.model.Table;
 import org.apache.tools.ant.BuildException;
 
 /**
@@ -51,42 +50,9 @@ public class DropTablesCommand extends DatabaseCommand
      * @param tableNameList The comma-separated list of table names
      * @ant.not-required If no table filter is specified, then all tables will be dropped.
      */
-    public void setTableNames(String tableNameList)
+    public void setTables(String tableNameList)
     {
-        String[]  tmpTableNames = tableNameList.split(",");
-        ArrayList tableNames    = new ArrayList();
-        String    last          = null;
-
-        for (int idx = 0; idx < tmpTableNames.length; idx++)
-        {
-            String  str         = tmpTableNames[idx];
-            int     strLen      = str.length();
-            boolean endsInSlash = (strLen > 0) && (str.charAt(strLen - 1) == '\\') &&
-                                  ((strLen == 1) || (str.charAt(strLen - 2) != '\\'));
-
-            if (last != null)
-            {
-                last += "," + str;
-                if (!endsInSlash)
-                {
-                    tableNames.add(last);
-                    last = null;
-                }
-            }
-            else if (endsInSlash)
-            {
-                last = str.substring(0, strLen - 1);
-            }
-            else
-            {
-                tableNames.add(str);
-            }
-        }
-        if (last != null)
-        {
-            tableNames.add(last + ",");
-        }
-        _tableNames = (String[])tableNames.toArray(new String[tableNames.size()]);
+        _tableNames = new TaskHelper().parseCommaSeparatedStringList(tableNameList);
     }
 
     /**
@@ -98,7 +64,7 @@ public class DropTablesCommand extends DatabaseCommand
      *                        for details
      * @ant.not-required If no table filter is specified, then all tables will be dropped.
      */
-    public void setTableNameRegExp(String tableNameRegExp)
+    public void setTableFilter(String tableNameRegExp)
     {
         _tableNameRegExp = tableNameRegExp;
     }
@@ -128,12 +94,14 @@ public class DropTablesCommand extends DatabaseCommand
 
         if ((_tableNames != null) || (_tableNameRegExp != null))
         {
-            RemoveTablesChange change = _tableNames != null ? new RemoveTablesChange(_tableNames)
-                                                            : new RemoveTablesChange(_tableNameRegExp);
-
             targetModel = new CloneHelper().clone(model);
             targetModel.initialize();
-            change.apply(targetModel, task.isUseDelimitedSqlIdentifiers());
+
+            Table[] tables = _tableNames != null ? targetModel.findTables(_tableNames, task.isUseDelimitedSqlIdentifiers())
+                                                 : targetModel.findTables(_tableNameRegExp, task.isUseDelimitedSqlIdentifiers());
+
+            new ModelHelper().removeForeignKeysToAndFromTables(targetModel, tables);
+            targetModel.removeTables(tables);
         }
         try
         {

@@ -298,7 +298,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("roundtrip1");
+        subTask.setTables("roundtrip1");
         task.addDropTables(subTask);
         task.execute();
 
@@ -336,7 +336,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("roundtrip1,roundtrip2,roundtrip3");
+        subTask.setTables("roundtrip1,roundtrip2,roundtrip3");
         task.addDropTables(subTask);
         task.execute();
 
@@ -388,7 +388,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("Roundtrip 1");
+        subTask.setTables("Roundtrip 1");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -433,7 +433,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("Roundtrip 2,Roundtrip 1");
+        subTask.setTables("Roundtrip 2,Roundtrip 1");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -486,7 +486,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("Roundtrip\\, 2");
+        subTask.setTables("Roundtrip\\, 2");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -539,7 +539,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("Roundtrip 2\\,");
+        subTask.setTables("Roundtrip 2\\,");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -584,7 +584,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("Roundtrip\\, 1,Roundtrip 2\\,");
+        subTask.setTables("Roundtrip\\, 1,Roundtrip 2\\,");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -623,7 +623,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNames("");
+        subTask.setTables("");
         task.addDropTables(subTask);
         task.execute();
 
@@ -669,7 +669,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNameRegExp(".*2");
+        subTask.setTableFilter(".*2");
         task.addDropTables(subTask);
         task.execute();
 
@@ -721,7 +721,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNameRegExp(".*\\s[2|3]");
+        subTask.setTableFilter(".*\\s[2|3]");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -776,7 +776,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNameRegExp(".*trip.*");
+        subTask.setTableFilter(".*trip.*");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -836,7 +836,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNameRegExp(".*\\d");
+        subTask.setTableFilter(".*\\d");
         task.addDropTables(subTask);
         task.setUseDelimitedSqlIdentifiers(true);
         task.execute();
@@ -875,7 +875,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNameRegExp(".*\\s\\D");
+        subTask.setTableFilter(".*\\s\\D");
         task.addDropTables(subTask);
         task.execute();
 
@@ -913,7 +913,7 @@ public class TestDropTablesCommand extends TestTaskBase
         DatabaseToDdlTask task    = getDatabaseToDdlTaskInstance();
         DropTablesCommand subTask = new DropTablesCommand();
 
-        subTask.setTableNameRegExp("");
+        subTask.setTableFilter("");
         task.addDropTables(subTask);
         task.execute();
 

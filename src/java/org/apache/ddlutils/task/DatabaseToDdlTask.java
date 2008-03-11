@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.ModelHelper;
+import org.apache.ddlutils.model.Table;
 import org.apache.tools.ant.BuildException;
 
 /**
@@ -60,6 +62,14 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     private String _tableTypes;
     /** The name of the model read from the database. */
     private String _modelName = "unnamed";
+    /** The names of the tables to read. */
+    private String[] _includeTableNames; 
+    /** The regular expression matching the names of the tables to read. */
+    private String _includeTableNameRegExp;
+    /** The names of the tables to ignore. */
+    private String[] _excludeTableNames; 
+    /** The regular expression matching the names of the tables to ignore. */
+    private String _excludeTableNameRegExp;
 
     /**
      * Specifies the table types to be processed. More precisely, all tables that are of a
@@ -87,6 +97,70 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
     public void setModelName(String modelName)
     {
         _modelName = modelName;
+    }
+
+    /**
+     * Sets the names of the tables that shall be read, as a comma-separated list. Escape a
+     * comma via '\,' if it is part of the table name. Please note that table names are
+     * not trimmed which means that whitespace characters should only be present in
+     * this string if they are actually part of the table name (i.e. in delimited
+     * identifer mode).
+     * 
+     * @param tableNameList The comma-separated list of table names
+     * @ant.not-required If no table filter is specified, then all tables will be read unless
+     *                   <code>excludeTables</code> or <code>excludeTableFilter</code> is
+     *                   specifed
+     */
+    public void setIncludeTables(String tableNameList)
+    {
+        _includeTableNames = new TaskHelper().parseCommaSeparatedStringList(tableNameList);
+    }
+
+    /**
+     * Sets the regular expression matching the names of the tables that shall be read.
+     * For case insensitive matching, an uppercase name can be assumed.
+     * 
+     * @param tableNameRegExp The regular expression; see {@link java.util.regex.Pattern}
+     *                        for details
+     * @ant.not-required If no table filter is specified, then all tables will be read unless
+     *                   <code>excludeTables</code> or <code>excludeTableFilter</code> is
+     *                   specifed
+     */
+    public void setIncludeTableFilter(String tableNameRegExp)
+    {
+        _includeTableNameRegExp = tableNameRegExp;
+    }
+
+    /**
+     * Sets the names of the tables that shall be ignored, as a comma-separated list. Escape a
+     * comma via '\,' if it is part of the table name. Please note that table names are
+     * not trimmed which means that whitespace characters should only be present in
+     * this string if they are actually part of the table name (i.e. in delimited
+     * identifer mode).
+     * 
+     * @param tableNameList The comma-separated list of table names
+     * @ant.not-required If no table filter is specified, then all tables will be read unless
+     *                   <code>includeTables</code> or <code>includeTableFilter</code> is
+     *                   specifed
+     */
+    public void setExcludeTables(String tableNameList)
+    {
+        _excludeTableNames = new TaskHelper().parseCommaSeparatedStringList(tableNameList);
+    }
+
+    /**
+     * Sets the regular expression matching the names of the tables that shall be ignored.
+     * For case insensitive matching, an uppercase name can be assumed.
+     * 
+     * @param tableNameRegExp The regular expression; see {@link java.util.regex.Pattern}
+     *                        for details
+     * @ant.not-required If no table filter is specified, then all tables will be read unless
+     *                   <code>includeTables</code> or <code>includeTableFilter</code> is
+     *                   specifed
+     */
+    public void setExcludeTableFilter(String tableNameRegExp)
+    {
+        _excludeTableNameRegExp = tableNameRegExp;
     }
 
     /**
@@ -188,10 +262,46 @@ public class DatabaseToDdlTask extends DatabaseTaskBase
 
         try
         {
-            return getPlatform().readModelFromDatabase(_modelName,
-                                                       getPlatformConfiguration().getCatalogPattern(),
-                                                       getPlatformConfiguration().getSchemaPattern(),
-                                                       getTableTypes());
+            Database model = getPlatform().readModelFromDatabase(_modelName,
+                                                                 getPlatformConfiguration().getCatalogPattern(),
+                                                                 getPlatformConfiguration().getSchemaPattern(),
+                                                                 getTableTypes());
+
+            if ((_includeTableNames != null) || (_includeTableNameRegExp != null) ||
+                (_excludeTableNames != null) || (_excludeTableNameRegExp != null))
+            {
+                ModelHelper helper = new ModelHelper();
+
+                if (_includeTableNames != null)
+                {
+                    Table[] tables = model.findTables(_includeTableNames, getPlatformConfiguration().isUseDelimitedSqlIdentifiers());
+
+                    helper.checkForForeignKeysToAndFromTables(model, tables);
+                    model.removeAllTablesExcept(tables);
+                }
+                else if (_includeTableNameRegExp != null)
+                {
+                    Table[] tables = model.findTables(_includeTableNameRegExp, getPlatformConfiguration().isUseDelimitedSqlIdentifiers());
+
+                    helper.checkForForeignKeysToAndFromTables(model, tables);
+                    model.removeAllTablesExcept(tables);
+                }
+                if (_excludeTableNames != null)
+                {
+                    Table[] tables = model.findTables(_excludeTableNames, getPlatformConfiguration().isUseDelimitedSqlIdentifiers());
+
+                    helper.checkForForeignKeysToAndFromTables(model, tables);
+                    model.removeTables(tables);
+                }
+                else if (_excludeTableNameRegExp != null)
+                {
+                    Table[] tables = model.findTables(_excludeTableNameRegExp, getPlatformConfiguration().isUseDelimitedSqlIdentifiers());
+
+                    helper.checkForForeignKeysToAndFromTables(model, tables);
+                    model.removeTables(tables);
+                }
+            }
+            return model;
         }
         catch (Exception ex)
         {

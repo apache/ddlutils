@@ -22,9 +22,12 @@ package org.apache.ddlutils.model;
 import java.io.Serializable;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -243,7 +246,7 @@ public class Database implements Serializable
     }
 
     /**
-     * Removes the given table.
+     * Removes the given table. This method does not check whether there are foreign keys to the table.
      * 
      * @param table The table to remove
      */
@@ -256,13 +259,37 @@ public class Database implements Serializable
     }
 
     /**
-     * Removes the indicated table.
+     * Removes the indicated table. This method does not check whether there are foreign keys to the table.
      * 
      * @param idx The index of the table to remove
      */
     public void removeTable(int idx)
     {
         _tables.remove(idx);
+    }
+
+    /**
+     * Removes the given tables. This method does not check whether there are foreign keys to the tables.
+     * 
+     * @param tables The tables to remove
+     */
+    public void removeTables(Table[] tables)
+    {
+        _tables.removeAll(Arrays.asList(tables));
+    }
+
+    /**
+     * Removes all but the given tables. This method does not check whether there are foreign keys to the
+     * removed tables.
+     * 
+     * @param tables The tables to keep
+     */
+    public void removeAllTablesExcept(Table[] tables)
+    {
+        ArrayList allTables = new ArrayList(_tables);
+
+        allTables.removeAll(Arrays.asList(tables));
+        _tables.removeAll(allTables);
     }
 
     // Helper methods
@@ -479,6 +506,67 @@ public class Database implements Serializable
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the indicated tables.
+     * 
+     * @param tableNames    The names of the tables
+     * @param caseSensitive Whether the case of the table names matters
+     * @return The tables
+     */
+    public Table[] findTables(String[] tableNames, boolean caseSensitive)
+    {
+        ArrayList tables = new ArrayList();
+
+        if (tableNames != null)
+        {
+            for (int idx = 0; idx < tableNames.length; idx++)
+            {
+                Table table = findTable(tableNames[idx], caseSensitive);
+
+                if (table != null)
+                {
+                    tables.add(table);
+                }
+            }
+        }
+        return (Table[])tables.toArray(new Table[tables.size()]);
+    }
+
+    /**
+     * Finds the tables whose names match the given regular expression.
+     * 
+     * @param tableNameRegExp The table name regular expression
+     * @param caseSensitive   Whether the case of the table names matters; if not, then the regular expression should
+     *                        assume that the table names are all-uppercase
+     * @return The tables
+     * @throws PatternSyntaxException If the regular expression is invalid
+     */
+    public Table[] findTables(String tableNameRegExp, boolean caseSensitive) throws PatternSyntaxException
+    {
+        ArrayList tables = new ArrayList();
+
+        if (tableNameRegExp != null)
+        {
+            Pattern pattern = Pattern.compile(tableNameRegExp);
+
+            for (Iterator tableIt = _tables.iterator(); tableIt.hasNext();)
+            {
+                Table  table     = (Table)tableIt.next();
+                String tableName = table.getName();
+
+                if (!caseSensitive)
+                {
+                    tableName = tableName.toUpperCase();
+                }
+                if (pattern.matcher(tableName).matches())
+                {
+                    tables.add(table);
+                }
+            }
+        }
+        return (Table[])tables.toArray(new Table[tables.size()]);
     }
 
     /**
