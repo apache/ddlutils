@@ -19,6 +19,7 @@ package org.apache.ddlutils.task;
  * under the License.
  */
 
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 
 /**
@@ -50,7 +51,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -76,7 +77,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -107,7 +108,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -141,7 +142,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -170,7 +171,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -199,7 +200,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -232,7 +233,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -268,7 +269,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -286,7 +287,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
@@ -314,7 +315,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -357,7 +358,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -375,7 +376,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
@@ -410,7 +411,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -455,7 +456,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip, 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -473,7 +474,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip, 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -508,7 +509,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -526,7 +527,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -561,7 +562,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip, 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -601,7 +602,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -639,7 +640,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -657,7 +658,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -690,7 +691,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -708,7 +709,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -738,7 +739,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -763,7 +764,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrap3'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
@@ -798,7 +799,7 @@ public class TestDropTablesCommand extends TestTaskBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip 1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -823,7 +824,7 @@ public class TestDropTablesCommand extends TestTaskBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='Roundtrip A'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
@@ -853,7 +854,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -891,7 +892,7 @@ public class TestDropTablesCommand extends TestTaskBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+

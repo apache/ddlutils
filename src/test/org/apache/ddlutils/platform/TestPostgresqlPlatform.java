@@ -20,6 +20,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
 
 /**
@@ -153,7 +154,7 @@ public class TestPostgresqlPlatform extends TestPlatformBase
         // PostgreSql specific database schema for testing escaping of character sequences
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='escapetest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='escapetest'>\n" +
             "  <table name='escapedcharacters'>\n" +
             "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
             "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39; &#09; &#10; &#13; \\'/>\n" +

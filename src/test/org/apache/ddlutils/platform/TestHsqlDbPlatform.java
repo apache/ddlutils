@@ -20,6 +20,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 
 /**
@@ -89,7 +90,7 @@ public class TestHsqlDbPlatform extends TestPlatformBase
         // adapted version for HsqlDb of the schema used for getColumnTestDatabaseCreationSql
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='columnconstraintstest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='columnconstraintstest'>\n" +
             "  <table name='constraints'>\n" +
             "    <column name='COL_PK' type='VARCHAR' size='32' primaryKey='true'/>\n" +
             "    <column name='COL_PK_AUTO_INCR' type='INTEGER' primaryKey='true' autoIncrement='true'/>\n" +

@@ -20,6 +20,7 @@ package org.apache.ddlutils.platform;
  */
 
 import org.apache.ddlutils.TestPlatformBase;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
 
@@ -89,7 +90,7 @@ public class TestMySql50Platform extends TestPlatformBase
         // MySql-specfic schema
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='columnconstraintstest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='columnconstraintstest'>\n" +
             "  <table name='constraints'>\n" +
             "    <column name='COL_PK' type='VARCHAR' size='32' primaryKey='true'/>\n" +
             "    <column name='COL_PK_AUTO_INCR' type='INTEGER' primaryKey='true'/>\n" +
@@ -163,7 +164,7 @@ public class TestMySql50Platform extends TestPlatformBase
         // MySql-specfic schema
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='columnconstraintstest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='columnconstraintstest'>\n" +
             "  <table name='constraints'>\n" +
             "    <column name='COL_PK' type='VARCHAR' size='32' primaryKey='true'/>\n" +
             "    <column name='COL_PK_AUTO_INCR' type='INTEGER' primaryKey='true'/>\n" +
@@ -210,7 +211,7 @@ public class TestMySql50Platform extends TestPlatformBase
         // MySql-specific schema
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='escapetest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='escapetest'>\n" +
             "  <table name='escapedcharacters'>\n" +
             "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
             "    <column name='COL_TEXT' type='VARCHAR' size='128' default='_ &#39; \" &#10; &#13; &#09; \\ &#37;'/>\n" +

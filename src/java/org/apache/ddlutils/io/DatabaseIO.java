@@ -27,12 +27,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.model.CascadeActionEnum;
@@ -59,7 +61,7 @@ public class DatabaseIO
     public static final String BASE64_ATTR_NAME = "base64";
 
     /** The namespace used by DdlUtils. */
-    public static final String DDLUTILS_NAMESPACE = "http://db.apache.org/torque/";
+    public static final String DDLUTILS_NAMESPACE = "http://db.apache.org/ddlutils/schema/1.1";
 
     /** Qualified name of the column element. */
     public static final QName QNAME_ELEMENT_COLUMN        = new QName(DDLUTILS_NAMESPACE, "column");
@@ -168,6 +170,10 @@ public class DatabaseIO
     {
         try
         {
+            if (_validateXml)
+            {
+                new ModelValidator().validate(new StreamSource(new FileReader(filename)));
+            }
             return read(new FileReader(filename));
         }
         catch (IOException ex)
@@ -186,6 +192,10 @@ public class DatabaseIO
     {
         try
         {
+            if (_validateXml)
+            {
+                new ModelValidator().validate(new StreamSource(new FileReader(file)));
+            }
             return read(new FileReader(file));
         }
         catch (IOException ex)
@@ -204,9 +214,33 @@ public class DatabaseIO
     {
         try
         {
-            return read(getXMLInputFactory().createXMLStreamReader(reader));
+            if (_validateXml)
+            {
+                StringBuffer tmpXml = new StringBuffer();
+                char[]       buf    = new char[4096];
+                int          len;
+
+                while ((len = reader.read(buf)) >= 0)
+                {
+                    if (tmpXml.length() > 0)
+                    {
+                        tmpXml.append("\n");
+                    }
+                    tmpXml.append(buf, 0, len);
+                }
+                new ModelValidator().validate(new StreamSource(new StringReader(tmpXml.toString())));
+                return read(getXMLInputFactory().createXMLStreamReader(new StringReader(tmpXml.toString())));
+            }
+            else
+            {
+                return read(getXMLInputFactory().createXMLStreamReader(reader));
+            }
         }
         catch (XMLStreamException ex)
+        {
+            throw new DdlUtilsXMLException(ex);
+        }
+        catch (IOException ex)
         {
             throw new DdlUtilsXMLException(ex);
         }
@@ -220,14 +254,7 @@ public class DatabaseIO
      */
     public Database read(InputSource source) throws DdlUtilsXMLException
     {
-        try
-        {
-            return read(getXMLInputFactory().createXMLStreamReader(source.getCharacterStream()));
-        }
-        catch (XMLStreamException ex)
-        {
-            throw new DdlUtilsXMLException(ex);
-        }
+        return read(source.getCharacterStream());
     }
 
     /**
@@ -872,6 +899,7 @@ public class DatabaseIO
     private void writeDatabaseElement(Database model, PrettyPrintingXmlWriter xmlWriter) throws DdlUtilsXMLException
     {
         writeElementStart(xmlWriter, QNAME_ELEMENT_DATABASE);
+        xmlWriter.writeNamespace(null, DDLUTILS_NAMESPACE);
         writeAttribute(xmlWriter, QNAME_ATTRIBUTE_NAME,              model.getName());
         writeAttribute(xmlWriter, QNAME_ATTRIBUTE_DEFAULT_ID_METHOD, model.getIdMethod());
         writeAttribute(xmlWriter, QNAME_ATTRIBUTE_VERSION,           model.getVersion());
@@ -1034,7 +1062,7 @@ public class DatabaseIO
      */
     private void writeElementStart(PrettyPrintingXmlWriter xmlWriter, QName qName) throws DdlUtilsXMLException
     {
-        xmlWriter.writeElementStart(null, qName.getLocalPart());
+        xmlWriter.writeElementStart(qName.getNamespaceURI(), qName.getLocalPart());
     }
 
     /**

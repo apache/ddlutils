@@ -61,7 +61,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
@@ -72,7 +72,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
@@ -106,7 +106,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50'/>\n"+
@@ -114,7 +114,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -148,7 +148,7 @@ public class TestAlteration extends RoundtripTestBase
         final String model1Xml;
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -157,7 +157,7 @@ public class TestAlteration extends RoundtripTestBase
         if (isSybase)
         {
             model1Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
                         "    <column name='avalue' type='NUMERIC' size='12,0' required='true' autoIncrement='true'/>\n"+
@@ -167,7 +167,7 @@ public class TestAlteration extends RoundtripTestBase
         else
         {
             model1Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
                         "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
@@ -196,7 +196,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50' required='true'/>\n"+
@@ -204,7 +204,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50' primaryKey='true' required='true'/>\n"+
@@ -232,7 +232,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50' primaryKey='true' required='true'/>\n"+
@@ -240,7 +240,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50' primaryKey='false' required='true'/>\n"+
@@ -268,7 +268,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50' primaryKey='true' required='true'/>\n"+
@@ -276,7 +276,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -308,7 +308,7 @@ public class TestAlteration extends RoundtripTestBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='50'/>\n"+
@@ -317,7 +317,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='50'/>\n"+
@@ -356,7 +356,7 @@ public class TestAlteration extends RoundtripTestBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -364,7 +364,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -395,7 +395,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='DOUBLE'/>\n"+
@@ -408,7 +408,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='DOUBLE'/>\n"+
@@ -439,7 +439,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -464,7 +464,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -513,7 +513,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50'/>\n"+
@@ -532,7 +532,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='50'/>\n"+
@@ -577,7 +577,7 @@ public class TestAlteration extends RoundtripTestBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='DOUBLE'/>\n"+
@@ -590,7 +590,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='DOUBLE'/>\n"+
@@ -623,7 +623,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -634,7 +634,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -672,7 +672,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -689,7 +689,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -735,7 +735,7 @@ public class TestAlteration extends RoundtripTestBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -756,7 +756,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -802,7 +802,7 @@ public class TestAlteration extends RoundtripTestBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -823,19 +823,19 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
-            "    <index name='test'>\n"+
-            "      <index-column name='avalue2'/>\n"+
-            "      <index-column name='avalue1'/>\n"+
-            "    </index>\n"+
             "  <table name='roundtrip2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='DOUBLE' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' required='true'/>\n"+
+            "    <index name='test'>\n"+
+            "      <index-column name='avalue2'/>\n"+
+            "      <index-column name='avalue1'/>\n"+
+            "    </index>\n"+
             "  </table>\n"+
             "</database>";
 
@@ -877,7 +877,7 @@ public class TestAlteration extends RoundtripTestBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -897,7 +897,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -947,7 +947,7 @@ public class TestAlteration extends RoundtripTestBase
 
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -967,7 +967,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -1009,7 +1009,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1041,7 +1041,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1094,7 +1094,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1108,7 +1108,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' default='0.0' primaryKey='true' required='true'/>\n"+
@@ -1151,7 +1151,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='VARCHAR' size='12' primaryKey='true' required='true'/>\n"+
@@ -1168,7 +1168,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1206,14 +1206,14 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
            "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1247,7 +1247,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32' required='true'/>\n"+
@@ -1255,7 +1255,7 @@ public class TestAlteration extends RoundtripTestBase
            "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32' required='true'/>\n"+
@@ -1267,7 +1267,7 @@ public class TestAlteration extends RoundtripTestBase
            "</database>";
         final String model3Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32' required='true'/>\n"+
@@ -1312,7 +1312,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1324,7 +1324,7 @@ public class TestAlteration extends RoundtripTestBase
         {
             model2Xml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='roundtrip1'>\n"+
                 "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
                 "  </table>\n"+
@@ -1337,7 +1337,7 @@ public class TestAlteration extends RoundtripTestBase
         {
             model2Xml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='roundtrip1'>\n"+
                 "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
                 "  </table>\n"+
@@ -1367,7 +1367,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1378,7 +1378,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1406,7 +1406,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='20' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1420,7 +1420,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
@@ -1451,7 +1451,7 @@ public class TestAlteration extends RoundtripTestBase
         final String model1Xml;
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "</database>";
 
         // Sybase does not like INTEGER auto-increment columns
@@ -1459,7 +1459,7 @@ public class TestAlteration extends RoundtripTestBase
         {
             model1Xml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='roundtrip'>\n"+
                 "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
@@ -1470,7 +1470,7 @@ public class TestAlteration extends RoundtripTestBase
         {
             model1Xml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='roundtrip'>\n"+
                 "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='avalue' type='VARCHAR' size='20' required='true'/>\n"+
@@ -1495,7 +1495,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='coltype'>\n" +
             "    <column name='COL_FLOAT' primaryKey='false' required='false' type='FLOAT'/>\n" +
             "    <column name='COL_BOOLEAN' primaryKey='false' required='false' type='BOOLEAN'/>\n" +
@@ -1523,7 +1523,7 @@ public class TestAlteration extends RoundtripTestBase
     {
         final String model1Xml = 
             "<?xml version='1.0'?>\n" +
-            "<database name='roundtriptest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n" +
             "  <table name='roundtrip'>\n" +
             "    <column name='id' primaryKey='true' required='true' type='INTEGER'/>\n" +
             "    <column name='avalue' primaryKey='false' required='false' type='VARCHAR' size='40'/>\n" +
@@ -1531,7 +1531,7 @@ public class TestAlteration extends RoundtripTestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0'?>\n" +
-            "<database name='roundtriptest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n" +
             "  <table name='roundtrip'>\n" +
             "    <column name='pk' primaryKey='true' required='true' type='INTEGER'/>\n" +
             "    <column name='avalue' primaryKey='false' required='false' type='VARCHAR' size='40'/>\n" +

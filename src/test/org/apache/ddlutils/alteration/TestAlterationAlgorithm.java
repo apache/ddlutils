@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.TestBase;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.TestPlatform;
 
@@ -76,7 +77,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -104,14 +105,14 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -136,14 +137,14 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -174,14 +175,14 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -212,14 +213,14 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -250,11 +251,11 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColFK' type='DOUBLE'/>\n" +
@@ -296,7 +297,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -306,7 +307,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEB'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -324,7 +325,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -338,7 +339,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEB'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -356,7 +357,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColFK' type='VARCHAR' size='64'/>\n" +
@@ -370,7 +371,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEB'>\n" +
             "    <column name='COLPK' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -389,7 +390,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColFK' type='VARCHAR' size='64'/>\n" +
@@ -403,7 +404,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColFK' type='VARCHAR' size='64'/>\n" +
@@ -423,7 +424,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColFK' type='DOUBLE'/>\n" +
@@ -441,7 +442,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "</database>";
 
         assertEqualsIgnoringWhitespaces(
@@ -459,7 +460,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -467,7 +468,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -489,7 +490,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -497,7 +498,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -519,7 +520,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -530,7 +531,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -549,7 +550,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -560,7 +561,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -579,7 +580,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' size='64' required='true'/>\n" +
@@ -587,7 +588,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
@@ -606,7 +607,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' size='64' required='true'/>\n" +
@@ -614,7 +615,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
@@ -635,7 +636,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
@@ -643,7 +644,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' size='64' required='true'/>\n" +
@@ -675,14 +676,14 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -701,7 +702,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64'/>\n" +
@@ -709,7 +710,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -740,14 +741,14 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' primaryKey='true' size='64'/>\n" +
@@ -781,7 +782,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='VARCHAR' primaryKey='true' size='64'/>\n" +
@@ -789,7 +790,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -821,7 +822,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -835,7 +836,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true'/>\n" +
@@ -882,7 +883,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true'/>\n" +
@@ -899,7 +900,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -955,7 +956,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -966,7 +967,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -992,7 +993,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1005,7 +1006,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1044,7 +1045,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1055,7 +1056,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1081,7 +1082,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1094,7 +1095,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1134,7 +1135,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1145,7 +1146,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1168,7 +1169,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1182,7 +1183,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1210,7 +1211,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1224,7 +1225,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE'/>\n" +
@@ -1250,7 +1251,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1264,7 +1265,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='Col' type='DOUBLE'/>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
@@ -1307,7 +1308,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' required='true'/>\n" +
@@ -1315,7 +1316,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true' required='true'/>\n" +
@@ -1349,7 +1350,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true' required='true'/>\n" +
@@ -1357,7 +1358,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true' required='true'/>\n" +
@@ -1391,7 +1392,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' required='true'/>\n" +
@@ -1407,7 +1408,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true' required='true'/>\n" +
@@ -1452,7 +1453,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' primaryKey='true' required='true'/>\n" +
@@ -1469,7 +1470,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK1' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColPK2' type='DOUBLE' required='true'/>\n" +
@@ -1513,7 +1514,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1525,7 +1526,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1550,7 +1551,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1563,7 +1564,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1587,7 +1588,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE'/>\n" +
@@ -1602,7 +1603,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1642,7 +1643,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -1650,7 +1651,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE' required='true'/>\n" +
@@ -1684,7 +1685,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -1692,7 +1693,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='DOUBLE' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -1726,7 +1727,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -1737,7 +1738,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE' required='true'/>\n" +
@@ -1775,7 +1776,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1789,7 +1790,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='DOUBLE' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1845,7 +1846,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32' required='true'/>\n" +
@@ -1853,7 +1854,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='64' required='true'/>\n" +
@@ -1887,7 +1888,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='DECIMAL' size='15,2' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -1895,7 +1896,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='DECIMAL' size='30,4' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -1929,7 +1930,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DECIMAL' size='10,4' required='true'/>\n" +
@@ -1940,7 +1941,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DECIMAL' size='15,2' required='true'/>\n" +
@@ -1978,7 +1979,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1992,7 +1993,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='VARCHAR' size='64' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -2048,7 +2049,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32' default='test 1' required='true'/>\n" +
@@ -2056,7 +2057,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32' default='test 2' required='true'/>\n" +
@@ -2090,7 +2091,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='DECIMAL' size='15,2' default='2.0' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2098,7 +2099,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='DECIMAL' size='15,2' default='4.0' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2132,7 +2133,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DATE' default='2000-01-02' required='true'/>\n" +
@@ -2143,7 +2144,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DATE' default='2001-02-03' required='true'/>\n" +
@@ -2181,7 +2182,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' default='0' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -2195,7 +2196,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' default='1' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -2251,7 +2252,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' autoIncrement='true' required='true'/>\n" +
@@ -2259,7 +2260,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' autoIncrement='false' required='true'/>\n" +
@@ -2293,7 +2294,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' autoIncrement='false' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2301,7 +2302,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' autoIncrement='true' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2335,7 +2336,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' autoIncrement='false' required='true'/>\n" +
@@ -2346,7 +2347,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' autoIncrement='true' required='true'/>\n" +
@@ -2385,7 +2386,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' autoIncrement='true' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -2399,7 +2400,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' autoIncrement='false' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -2439,7 +2440,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2447,7 +2448,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='false'/>\n" +
@@ -2481,7 +2482,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2489,7 +2490,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='false'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2523,7 +2524,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='false'/>\n" +
@@ -2534,7 +2535,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -2573,7 +2574,7 @@ public class TestAlterationAlgorithm extends TestBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='false'/>\n" +
             "  </table>\n" +
@@ -2587,7 +2588,7 @@ public class TestAlterationAlgorithm extends TestBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +

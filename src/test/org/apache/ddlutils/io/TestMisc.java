@@ -77,7 +77,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc1'>\n"+
                 "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='avalue' type='INTEGER' required='false'/>\n"+
@@ -95,7 +95,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc1'>\n"+
                 "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='avalue' type='INTEGER' required='false'/>\n"+
@@ -229,7 +229,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc1'>\n"+
                 "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='avalue' type='INTEGER' required='false'/>\n"+
@@ -247,7 +247,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc1'>\n"+
                 "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='avalue' type='INTEGER' required='false'/>\n"+
@@ -383,7 +383,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='fk' type='NUMERIC' size='12,0' required='false'/>\n"+
@@ -397,7 +397,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='fk' type='INTEGER' required='false'/>\n"+
@@ -510,7 +510,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='fk' type='NUMERIC' size='12,0' required='false'/>\n"+
@@ -524,7 +524,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                 "    <column name='fk' type='INTEGER' required='false'/>\n"+
@@ -636,7 +636,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='id' primaryKey='true' required='true' type='NUMERIC' size='10,0' autoIncrement='true'/>\n"+
                 "    <column name='parent_id' primaryKey='false' required='false' type='NUMERIC' size='10,0' autoIncrement='false'/>\n"+
@@ -650,7 +650,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
                 "    <column name='parent_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
@@ -767,7 +767,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='id' primaryKey='true' required='true' type='NUMERIC' size='6,0' autoIncrement='true'/>\n"+
                 "    <column name='left_id' primaryKey='false' required='false' type='NUMERIC' size='6,0' autoIncrement='false'/>\n"+
@@ -785,7 +785,7 @@ public class TestMisc extends RoundtripTestBase
         {
             modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                "<database name='roundtriptest'>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                 "  <table name='misc'>\n"+
                 "    <column name='id' primaryKey='true' required='true' type='SMALLINT' size='2' autoIncrement='true'/>\n"+
                 "    <column name='left_id' primaryKey='false' required='false' type='SMALLINT' size='2' autoIncrement='false'/>\n"+
@@ -883,7 +883,7 @@ public class TestMisc extends RoundtripTestBase
 
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='A'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='fk' type='INTEGER' required='false'/>\n"+
@@ -1054,7 +1054,7 @@ public class TestMisc extends RoundtripTestBase
 
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "  <database name='roundtriptest'>\n"+
+            "  <database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "    <table name='ad_sequence_no'>\n"+
             "      <column name='ad_sequence_id' required='true' type='NUMERIC' size='10'/>\n"+
             "      <column name='year' required='true' type='VARCHAR' size='4' default='0000'/>\n"+
@@ -1079,7 +1079,7 @@ public class TestMisc extends RoundtripTestBase
     {
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='A'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='fk' type='INTEGER' required='false'/>\n"+

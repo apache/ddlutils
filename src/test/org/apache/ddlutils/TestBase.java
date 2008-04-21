@@ -59,7 +59,7 @@ public abstract class TestBase extends TestCase
         DatabaseIO dbIO = new DatabaseIO();
         
         dbIO.setUseInternalDtd(true);
-        dbIO.setValidateXml(false);
+        dbIO.setValidateXml(true);
         return dbIO.read(new StringReader(dbDef));
     }
 

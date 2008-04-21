@@ -22,6 +22,7 @@ package org.apache.ddlutils;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.SqlBuilder;
 
@@ -132,7 +133,7 @@ public abstract class TestPlatformBase extends TestBase
     {
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='datatypetest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='datatypetest'>\n" +
             "  <table name='coltype'>\n" +
             "    <column name='COL_ARRAY'           type='ARRAY'/>\n" +
             "    <column name='COL_BIGINT'          type='BIGINT'/>\n" +
@@ -180,7 +181,7 @@ public abstract class TestPlatformBase extends TestBase
     {
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='columnconstraintstest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='columnconstraintstest'>\n" +
             "  <table name='constraints'>\n" +
             "    <column name='COL_PK' type='VARCHAR' size='32' primaryKey='true'/>\n" +
             "    <column name='COL_PK_AUTO_INCR' type='INTEGER' primaryKey='true' autoIncrement='true'/>\n" +
@@ -203,7 +204,7 @@ public abstract class TestPlatformBase extends TestBase
     {
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='tableconstraintstest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='tableconstraintstest'>\n" +
             "  <table name='table1'>\n" +
             "    <column name='COL_PK_1' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n" +
             "    <column name='COL_PK_2' type='INTEGER' primaryKey='true'/>\n" +
@@ -248,7 +249,7 @@ public abstract class TestPlatformBase extends TestBase
     {
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='escapetest'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='escapetest'>\n" +
             "  <table name='escapedcharacters'>\n" +
             "    <column name='COL_PK' type='INTEGER' primaryKey='true'/>\n" +
             "    <column name='COL_TEXT' type='VARCHAR' size='128' default='&#39;'/>\n" +

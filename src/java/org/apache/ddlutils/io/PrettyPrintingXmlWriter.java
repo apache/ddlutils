@@ -234,6 +234,31 @@ public class PrettyPrintingXmlWriter
     }
 
     /**
+     * Writes a xmlns attribute to the stream.
+     * 
+     * @param prefix       The prefix for the namespace, use <code>null</code> or an empty string for the default namespace
+     * @param namespaceUri The namespace uri, can be <code>null</code>
+     */
+    public void writeNamespace(String prefix, String namespaceUri) throws DdlUtilsXMLException
+    {
+        try
+        {
+            if ((prefix == null) || (prefix.length() == 0))
+            {
+                _writer.writeDefaultNamespace(namespaceUri);
+            }
+            else
+            {
+                _writer.writeNamespace(prefix, namespaceUri);
+            }
+        }
+        catch (XMLStreamException ex)
+        {
+            throwException(ex);
+        }
+    }
+    
+    /**
      * Writes the start of the indicated XML element.
      * 
      * @param namespaceUri The namespace uri, can be <code>null</code>
