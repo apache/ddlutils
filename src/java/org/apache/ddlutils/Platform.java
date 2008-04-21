@@ -949,6 +949,27 @@ public interface Platform
     public List fetch(Database model, String sql, Collection parameters, Table[] queryHints, int start, int end) throws DatabaseOperationException;
 
     /**
+     * Determines whether the given dyna bean is stored in the database. Note that this checks only
+     * checks the primary key, not the other attributes.
+     * 
+     * @param model    The database model to use
+     * @param dynaBean The bean
+     * @return <code>true</code> if a bean with this primary key exists in the database
+     */
+    public boolean exists(Database model, DynaBean dynaBean);
+
+    /**
+     * Determines whether the given dyna bean is stored in the database. Note that this checks only
+     * checks the primary key, not the other attributes.
+     * 
+     * @param connection The connection
+     * @param model      The database model to use
+     * @param dynaBean   The bean
+     * @return <code>true</code> if a bean with this primary key exists in the database
+     */
+    public boolean exists(Connection connection, Database model, DynaBean dynaBean);
+
+    /**
      * Stores the given bean in the database, inserting it if there is no primary key
      * otherwise the bean is updated in the database.
      * 
@@ -956,6 +977,16 @@ public interface Platform
      * @param dynaBean The bean to store
      */
     public void store(Database model, DynaBean dynaBean) throws DatabaseOperationException;
+
+    /**
+     * Stores the given bean in the database, inserting it if there is no primary key
+     * otherwise the bean is updated in the database.
+     * 
+     * @param connection The connection
+     * @param model      The database model to use
+     * @param dynaBean   The bean to store
+     */
+    public void store(Connection connection, Database model, DynaBean dynaBean) throws DatabaseOperationException;
 
     /**
      * Returns the sql for inserting the given bean.

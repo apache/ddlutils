@@ -19,6 +19,7 @@ package org.apache.ddlutils.dynabean;
  * under the License.
  */
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
@@ -310,5 +311,267 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
 
         assertFalse(it.hasNext());
         assertFalse(it.isConnectionOpen());
+    }
+
+    /**
+     * Tests the insert method.
+     */
+    public void testInsertSingle() throws Exception
+    {
+        createDatabase(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>");
+
+        SqlDynaClass dynaClass = SqlDynaClass.newInstance(getModel().getTable(0));
+        DynaBean     dynaBean  = new SqlDynaBean(dynaClass);
+
+        dynaBean.set("TheId", new Integer(1));
+        dynaBean.set("TheText", "Text 1"); 
+
+        getPlatform().insert(getModel(), dynaBean);
+
+        List beans = getPlatform().fetch(getModel(),
+                                         "SELECT * FROM TestTable",
+                                         new Table[] { getModel().getTable(0) });
+
+        assertEquals(1,
+                     beans.size());
+
+        DynaBean bean = (DynaBean)beans.get(0);
+
+        assertEquals(new Integer(1),
+                     getPropertyValue(bean, "TheId"));
+        assertEquals("Text 1",
+                     getPropertyValue(bean, "TheText"));
+    }
+
+    /**
+     * Tests the insert method.
+     */
+    public void testInsertMultiple() throws Exception
+    {
+        createDatabase(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>");
+
+        SqlDynaClass dynaClass = SqlDynaClass.newInstance(getModel().getTable(0));
+        DynaBean     dynaBean1 = new SqlDynaBean(dynaClass);
+        DynaBean     dynaBean2 = new SqlDynaBean(dynaClass);
+        DynaBean     dynaBean3 = new SqlDynaBean(dynaClass);
+
+        dynaBean1.set("TheId", new Integer(1));
+        dynaBean1.set("TheText", "Text 1");
+        dynaBean2.set("TheId", new Integer(2));
+        dynaBean2.set("TheText", "Text 2");
+        dynaBean3.set("TheId", new Integer(3));
+        dynaBean3.set("TheText", "Text 3");
+
+        List dynaBeans = new ArrayList();
+
+        dynaBeans.add(dynaBean1);
+        dynaBeans.add(dynaBean2);
+        dynaBeans.add(dynaBean3);
+
+        getPlatform().insert(getModel(), dynaBeans);
+
+        List beans = getPlatform().fetch(getModel(),
+                                         "SELECT * FROM TestTable",
+                                         new Table[] { getModel().getTable(0) });
+
+        assertEquals(3,
+                     beans.size());
+
+        DynaBean bean = (DynaBean)beans.get(0);
+
+        assertEquals(new Integer(1),
+                     getPropertyValue(bean, "TheId"));
+        assertEquals("Text 1",
+                     getPropertyValue(bean, "TheText"));
+        
+        bean = (DynaBean)beans.get(1);
+
+        assertEquals(new Integer(2),
+                     getPropertyValue(bean, "TheId"));
+        assertEquals("Text 2",
+                     getPropertyValue(bean, "TheText"));
+
+        bean = (DynaBean)beans.get(2);
+
+        assertEquals(new Integer(3),
+                     getPropertyValue(bean, "TheId"));
+        assertEquals("Text 3",
+                     getPropertyValue(bean, "TheText"));
+    }
+
+    /**
+     * Tests the update method.
+     */
+    public void testUpdate() throws Exception
+    {
+        createDatabase(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>");
+
+        insertData(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<data>\n"+
+            "  <TestTable TheId='1' TheText='Text 1'/>\n"+
+            "</data>");
+
+        SqlDynaClass dynaClass = SqlDynaClass.newInstance(getModel().getTable(0));
+        DynaBean     dynaBean  = new SqlDynaBean(dynaClass);
+
+        dynaBean.set("TheId", new Integer(1));
+        dynaBean.set("TheText", "Text 10"); 
+
+        getPlatform().update(getModel(), dynaBean);
+
+        List beans = getPlatform().fetch(getModel(),
+                                         "SELECT * FROM TestTable",
+                                         new Table[] { getModel().getTable(0) });
+
+        assertEquals(1,
+                     beans.size());
+
+        DynaBean bean = (DynaBean)beans.get(0);
+
+        assertEquals(new Integer(1),
+                     getPropertyValue(bean, "TheId"));
+        assertEquals("Text 10",
+                     getPropertyValue(bean, "TheText"));
+    }
+
+    /**
+     * Tests the exists method.
+     */
+    public void testExists() throws Exception
+    {
+        createDatabase(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>");
+
+        insertData(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<data>\n"+
+            "  <TestTable TheId='1' TheText='Text 1'/>\n"+
+            "  <TestTable TheId='3' TheText='Text 3'/>\n"+
+            "</data>");
+
+        SqlDynaClass dynaClass = SqlDynaClass.newInstance(getModel().getTable(0));
+        DynaBean     dynaBean1 = new SqlDynaBean(dynaClass);
+        DynaBean     dynaBean2 = new SqlDynaBean(dynaClass);
+        DynaBean     dynaBean3 = new SqlDynaBean(dynaClass);
+
+        dynaBean1.set("TheId", new Integer(1));
+        dynaBean1.set("TheText", "Text 1"); 
+        dynaBean2.set("TheId", new Integer(2));
+        dynaBean2.set("TheText", "Text 2"); 
+        dynaBean3.set("TheId", new Integer(3));
+        dynaBean3.set("TheText", "Text 30"); 
+
+        assertTrue(getPlatform().exists(getModel(), dynaBean1));
+        assertFalse(getPlatform().exists(getModel(), dynaBean2));
+        assertTrue(getPlatform().exists(getModel(), dynaBean3));
+    }
+
+
+    /**
+     * Tests the store method.
+     */
+    public void testStoreNew() throws Exception
+    {
+        createDatabase(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>");
+
+        SqlDynaClass dynaClass = SqlDynaClass.newInstance(getModel().getTable(0));
+        DynaBean     dynaBean  = new SqlDynaBean(dynaClass);
+
+        dynaBean.set("TheId", new Integer(1));
+        dynaBean.set("TheText", "Text 1"); 
+
+        getPlatform().store(getModel(), dynaBean);
+
+        List beans = getPlatform().fetch(getModel(),
+                                         "SELECT * FROM TestTable",
+                                         new Table[] { getModel().getTable(0) });
+
+        assertEquals(1,
+                     beans.size());
+
+        DynaBean bean = (DynaBean)beans.get(0);
+
+        assertEquals(new Integer(1),
+                     getPropertyValue(bean, "TheId"));
+        assertEquals("Text 1",
+                     getPropertyValue(bean, "TheText"));
+    }
+
+    /**
+     * Tests the store method.
+     */
+    public void testStoreExisting() throws Exception
+    {
+        createDatabase(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database name='ddlutils'>\n"+
+            "  <table name='TestTable'>\n"+
+            "    <column name='TheId' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='TheText' type='VARCHAR' size='15'/>\n"+
+            "  </table>\n"+
+            "</database>");
+
+        insertData(
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<data>\n"+
+            "  <TestTable TheId='1' TheText='Text 1'/>\n"+
+            "</data>");
+
+        SqlDynaClass dynaClass = SqlDynaClass.newInstance(getModel().getTable(0));
+        DynaBean     dynaBean  = new SqlDynaBean(dynaClass);
+
+        dynaBean.set("TheId", new Integer(1));
+        dynaBean.set("TheText", "Text 10"); 
+
+        getPlatform().store(getModel(), dynaBean);
+
+        List beans = getPlatform().fetch(getModel(),
+                                         "SELECT * FROM TestTable",
+                                         new Table[] { getModel().getTable(0) });
+
+        assertEquals(1,
+                     beans.size());
+
+        DynaBean bean = (DynaBean)beans.get(0);
+
+        assertEquals(new Integer(1),
+                     getPropertyValue(bean, "TheId"));
+        assertEquals("Text 10",
+                     getPropertyValue(bean, "TheText"));
     }
 }

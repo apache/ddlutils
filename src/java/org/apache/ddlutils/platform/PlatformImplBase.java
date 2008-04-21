@@ -24,6 +24,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.sql.BatchUpdateException;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -2160,7 +2161,16 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
             }
             catch (SQLException ex)
             {
-                throw new DatabaseOperationException("Error while inserting into the database", ex);
+                if (ex instanceof BatchUpdateException)
+                {
+                    SQLException sqlEx = ((BatchUpdateException)ex).getNextException();
+
+                    throw new DatabaseOperationException("Error while inserting into the database", sqlEx);
+                }
+                else
+                {
+                    throw new DatabaseOperationException("Error while inserting into the database", ex);
+                }
             }
         }
     }
@@ -2477,16 +2487,77 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     }
 
     /**
-     * Determines whether the given dyna bean is stored in the database.
-     * 
-     * @param dynaBean   The bean
-     * @param connection The connection
-     * @return <code>true</code> if this dyna bean has a primary key
+     * {@inheritDoc}
      */
-    protected boolean exists(Connection connection, DynaBean dynaBean)
+    public boolean exists(Database model, DynaBean dynaBean)
     {
-        // TODO: check for the pk value, and if present, query against database
-        return false;
+        Connection connection = borrowConnection();
+
+        try
+        {
+            return exists(connection, model, dynaBean);
+        }
+        finally
+        {
+            returnConnection(connection);
+        }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean exists(Connection connection, Database model, DynaBean dynaBean)
+    {
+        SqlDynaClass      dynaClass   = model.getDynaClassFor(dynaBean);
+        SqlDynaProperty[] primaryKeys = dynaClass.getPrimaryKeyProperties();
+        
+        if (primaryKeys.length == 0)
+        {
+            return false;
+        }
+
+        PreparedStatement stmt = null;
+
+        try
+        {
+            StringBuffer sql = new StringBuffer();
+
+            sql.append("SELECT * FROM ");
+            sql.append(_builder.getDelimitedIdentifier(dynaClass.getTable().getName()));
+            sql.append(" WHERE ");
+
+            for (int idx = 0; idx < primaryKeys.length; idx++)
+            {
+                String key = primaryKeys[idx].getColumn().getName();
+
+                if (idx > 0)
+                {
+                    sql.append(" AND ");
+                }
+                sql.append(_builder.getDelimitedIdentifier(key));
+                sql.append("=?");
+            }
+
+            stmt = connection.prepareStatement(sql.toString());
+
+            for (int idx = 0; idx < primaryKeys.length; idx++)
+            {
+                setObject(stmt, idx + 1, dynaBean, primaryKeys[idx]);
+            }
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            return resultSet.next();
+        }
+        catch (SQLException ex)
+        {
+            throw new DatabaseOperationException("Error while reading from the database", ex);
+        }
+        finally
+        {
+            closeStatement(stmt);
+        }
     }
 
     /**
@@ -2498,18 +2569,26 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
 
         try
         {
-            if (exists(connection, dynaBean))
-            {
-                update(connection, model, dynaBean);
-            }
-            else
-            {
-                insert(connection, model, dynaBean);
-            }
+            store(connection, model, dynaBean);
         }
         finally
         {
             returnConnection(connection);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void store(Connection connection, Database model, DynaBean dynaBean) throws DatabaseOperationException
+    {
+        if (exists(connection, model, dynaBean))
+        {
+            update(connection, model, dynaBean);
+        }
+        else
+        {
+            insert(connection, model, dynaBean);
         }
     }
 
