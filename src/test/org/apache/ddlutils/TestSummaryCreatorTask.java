@@ -285,7 +285,7 @@ public class TestSummaryCreatorTask extends Task
 
         try
         {
-            String     dataSourceClass = props.getProperty(TestDatabaseWriterBase.DATASOURCE_PROPERTY_PREFIX + "class", BasicDataSource.class.getName());
+            String     dataSourceClass = props.getProperty(TestAgainstLiveDatabaseBase.DATASOURCE_PROPERTY_PREFIX + "class", BasicDataSource.class.getName());
             DataSource dataSource      = (DataSource)Class.forName(dataSourceClass).newInstance();
     
             for (Iterator it = props.entrySet().iterator(); it.hasNext();)
@@ -293,15 +293,15 @@ public class TestSummaryCreatorTask extends Task
                 Map.Entry entry    = (Map.Entry)it.next();
                 String    propName = (String)entry.getKey();
     
-                if (propName.startsWith(TestDatabaseWriterBase.DATASOURCE_PROPERTY_PREFIX) && !propName.equals(TestDatabaseWriterBase.DATASOURCE_PROPERTY_PREFIX +"class"))
+                if (propName.startsWith(TestAgainstLiveDatabaseBase.DATASOURCE_PROPERTY_PREFIX) && !propName.equals(TestAgainstLiveDatabaseBase.DATASOURCE_PROPERTY_PREFIX +"class"))
                 {
                     BeanUtils.setProperty(dataSource,
-                                          propName.substring(TestDatabaseWriterBase.DATASOURCE_PROPERTY_PREFIX.length()),
+                                          propName.substring(TestAgainstLiveDatabaseBase.DATASOURCE_PROPERTY_PREFIX.length()),
                                           entry.getValue());
                 }
             }
 
-            String platformName = props.getProperty(TestDatabaseWriterBase.DDLUTILS_PLATFORM_PROPERTY);
+            String platformName = props.getProperty(TestAgainstLiveDatabaseBase.DDLUTILS_PLATFORM_PROPERTY);
 
             if (platformName == null)
             {

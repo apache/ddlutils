@@ -25,12 +25,14 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
+
 /**
  * Tests database alterations that drop columns.
  * 
  * @version $Revision: $
  */
-public class TestDropColumn extends RoundtripTestBase
+public class TestDropColumn extends TestAgainstLiveDatabaseBase
 {
     /**
      * Parameterized test case pattern.

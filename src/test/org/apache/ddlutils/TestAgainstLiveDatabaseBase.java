@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -37,11 +39,13 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import junit.framework.AssertionFailedError;
+import junit.framework.TestSuite;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
 import org.apache.ddlutils.dynabean.SqlDynaProperty;
@@ -66,11 +70,11 @@ import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
- * Base class for database writer tests.
+ * Base class tests that are executed against a live database.
  * 
  * @version $Revision: 289996 $
  */
-public abstract class TestDatabaseWriterBase extends TestPlatformBase
+public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
 {
     /** The name of the property that specifies properties file with the settings for the connection to test against. */
     public static final String JDBC_PROPERTIES_PROPERTY = "jdbc.properties.file";
@@ -87,97 +91,141 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     /** The prefix for table creation properties. */
     public static final String DDLUTILS_TABLE_CREATION_PREFIX = DDLUTILS_PROPERTY_PREFIX + "tableCreation.";
 
-    /** The test properties as defined by an external properties file. */
-    private static Properties _testProps;
-    /** The data source to test against. */
-    private static DataSource _dataSource;
-    /** The database name. */
-    private static String _databaseName;
-    /** The database model. */
-    private Database _model;
-
     /**
-     * Creates a new test case instance.
-     */
-    public TestDatabaseWriterBase()
-    {
-        super();
-        init();
-    }
-
-    /**
-     * Returns the test properties.
+     * Creates the test suite for the given test class which must be a sub class of
+     * {@link RoundtripTestBase}. If the platform supports it, it will be tested
+     * with both delimited and undelimited identifiers.
      * 
-     * @return The properties
+     * @param testedClass The tested class
+     * @return The tests
      */
-    protected Properties getTestProperties()
+    protected static TestSuite getTests(Class testedClass)
     {
-    	if (_testProps == null)
-    	{
-    		String propFile = System.getProperty(JDBC_PROPERTIES_PROPERTY);
-	
-	        if (propFile == null)
-	        {
-	        	throw new RuntimeException("Please specify the properties file via the jdbc.properties.file environment variable");
-	        }
-
-	        InputStream propStream = null;
-
-	        try
-	        {
-	            propStream = TestDatabaseWriterBase.class.getResourceAsStream(propFile);
-
-	            if (propStream == null)
-	            {
-	                propStream = new FileInputStream(propFile);
-	            }
-
-	            Properties props = new Properties();
-
-	            props.load(propStream);
-	            _testProps = props;
-	        }
-	        catch (Exception ex)
-	        {
-	        	throw new RuntimeException(ex);
-	        }
-	        finally
-	        {
-	            if (propStream != null)
-	            {
-	                try
-	                {
-	                    propStream.close();
-	                }
-	                catch (IOException ex)
-	                {
-	                    getLog().error("Could not close the stream used to read the test jdbc properties", ex);
-	                }
-	            }
-	        }
-    	}
-    	return _testProps;
-    }
-    
-    /**
-     * Initializes the test datasource and the platform.
-     */
-    private void init()
-    {
-        // the data source won't change during the tests, hence
-        // it is static and needs to be initialized only once
-        if (_dataSource != null)
+        if (!TestAgainstLiveDatabaseBase.class.isAssignableFrom(testedClass) ||
+            Modifier.isAbstract(testedClass.getModifiers()))
         {
-            return;
+            throw new DdlUtilsException("Cannot create parameterized tests for class "+testedClass.getName());
         }
 
-        Properties props = getTestProperties();
+        TestSuite  suite      = new TestSuite();
+        Properties props      = readTestProperties();
+
+        if (props == null)
+        {
+            return suite;
+        }
+
+        DataSource dataSource   = initDataSourceFromProperties(props);
+        String     databaseName = determineDatabaseName(props, dataSource);
 
         try
         {
-            String dataSourceClass = props.getProperty(DATASOURCE_PROPERTY_PREFIX + "class", BasicDataSource.class.getName());
+            Method[]               methods = testedClass.getMethods();
+            PlatformInfo           info    = null;
+            TestAgainstLiveDatabaseBase newTest;
+    
+            for (int idx = 0; (methods != null) && (idx < methods.length); idx++)
+            {
+                if (methods[idx].getName().startsWith("test") &&
+                    ((methods[idx].getParameterTypes() == null) || (methods[idx].getParameterTypes().length == 0)))
+                {
+                    newTest = (TestAgainstLiveDatabaseBase)testedClass.newInstance();
+                    newTest.setName(methods[idx].getName());
+                    newTest.setTestProperties(props);
+                    newTest.setDataSource(dataSource);
+                    newTest.setDatabaseName(databaseName);
+                    newTest.setUseDelimitedIdentifiers(false);
+                    suite.addTest(newTest);
 
-            _dataSource = (DataSource)Class.forName(dataSourceClass).newInstance();
+                    if (info == null)
+                    {
+                        info = PlatformFactory.createNewPlatformInstance(newTest.getDatabaseName()).getPlatformInfo();
+                    }
+                    if (info.isDelimitedIdentifiersSupported())
+                    {
+                        newTest = (TestAgainstLiveDatabaseBase)testedClass.newInstance();
+                        newTest.setName(methods[idx].getName());
+                        newTest.setTestProperties(props);
+                        newTest.setDataSource(dataSource);
+                        newTest.setDatabaseName(databaseName);
+                        newTest.setUseDelimitedIdentifiers(true);
+                        suite.addTest(newTest);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new DdlUtilsException(ex);
+        }
+        
+        return suite;
+    }
+
+    /**
+     * Reads the test properties as specified by the property.
+     * 
+     * @return The properties or <code>null</code> if no properties have been specified
+     */
+    protected static Properties readTestProperties()
+    {
+        String propFile = System.getProperty(JDBC_PROPERTIES_PROPERTY);
+
+        if (propFile == null)
+        {
+            return null;
+        }
+
+        InputStream propStream = null;
+
+        try
+        {
+            propStream = TestAgainstLiveDatabaseBase.class.getResourceAsStream(propFile);
+
+            if (propStream == null)
+            {
+                propStream = new FileInputStream(propFile);
+            }
+
+            Properties props = new Properties();
+
+            props.load(propStream);
+            return props;
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(ex);
+        }
+        finally
+        {
+            if (propStream != null)
+            {
+                try
+                {
+                    propStream.close();
+                }
+                catch (IOException ex)
+                {
+                    LogFactory.getLog(TestAgainstLiveDatabaseBase.class).error("Could not close the stream used to read the test jdbc properties", ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * Initializes the test datasource and the platform.
+     */
+    private static DataSource initDataSourceFromProperties(Properties props)
+    {
+        if (props == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            String     dataSourceClass = props.getProperty(DATASOURCE_PROPERTY_PREFIX + "class", BasicDataSource.class.getName());
+            DataSource dataSource      = (DataSource)Class.forName(dataSourceClass).newInstance();
 
             for (Iterator it = props.entrySet().iterator(); it.hasNext();)
             {
@@ -186,27 +234,73 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
 
                 if (propName.startsWith(DATASOURCE_PROPERTY_PREFIX) && !propName.equals(DATASOURCE_PROPERTY_PREFIX +"class"))
                 {
-                    BeanUtils.setProperty(_dataSource,
+                    BeanUtils.setProperty(dataSource,
                                           propName.substring(DATASOURCE_PROPERTY_PREFIX.length()),
                                           entry.getValue());
                 }
             }
+            return dataSource;
         }
         catch (Exception ex)
         {
             throw new DatabaseOperationException(ex);
         }
+    }
 
-        _databaseName = props.getProperty(DDLUTILS_PLATFORM_PROPERTY);
-        if (_databaseName == null)
+    /**
+     * Determines the name of the platform to use from the properties or the data source if no
+     * platform is specified in the properties.
+     * 
+     * @param props      The test properties
+     * @param dataSource The data source
+     * @return The name of the platform
+     */
+    private static String determineDatabaseName(Properties props, DataSource dataSource)
+    {
+        String platformName = props.getProperty(DDLUTILS_PLATFORM_PROPERTY);
+
+        if (platformName == null)
         {
             // property not set, then try to determine
-            _databaseName = new PlatformUtils().determineDatabaseType(_dataSource);
-            if (_databaseName == null)
+            platformName = new PlatformUtils().determineDatabaseType(dataSource);
+            if (platformName == null)
             {
                 throw new DatabaseOperationException("Could not determine platform from datasource, please specify it in the jdbc.properties via the ddlutils.platform property");
             }
         }
+        return platformName;
+    }
+
+
+    /** The test properties as defined by an external properties file. */
+    private Properties _testProps;
+    /** The data source to test against. */
+    private DataSource _dataSource;
+    /** The database name. */
+    private String _databaseName;
+    /** The database model. */
+    private Database _model;
+    /** Whether to use delimited identifiers for the test. */
+    private boolean _useDelimitedIdentifiers;
+
+    /**
+     * Returns the test properties.
+     * 
+     * @return The properties
+     */
+    protected Properties getTestProperties()
+    {
+        return _testProps;
+    }
+
+    /**
+     * Sets the test properties.
+     * 
+     * @param props The properties
+     */
+    private void setTestProperties(Properties props)
+    {
+        _testProps = props;
     }
 
     /**
@@ -238,6 +332,16 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
 
     /**
+     * Specifies whether the test shall use delimited identifiers.
+     * 
+     * @param useDelimitedIdentifiers Whether to use delimited identifiers
+     */
+    protected void setUseDelimitedIdentifiers(boolean useDelimitedIdentifiers)
+    {
+        _useDelimitedIdentifiers = useDelimitedIdentifiers;
+    }
+
+    /**
      * Returns the data source.
      * 
      * @return The data source
@@ -248,11 +352,31 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     }
 
     /**
+     * Sets the data source.
+     * 
+     * @param dataSource The data source
+     */
+    private void setDataSource(DataSource dataSource)
+    {
+        _dataSource = dataSource;
+    }
+
+    /**
      * {@inheritDoc}
      */
     protected String getDatabaseName()
     {
         return _databaseName;
+    }
+
+    /**
+     * Sets the database name.
+     * 
+     * @param databaseName The name of the database
+     */
+    private void setDatabaseName(String databaseName)
+    {
+        _databaseName = databaseName;
     }
 
     /**
@@ -272,6 +396,7 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     {
         super.setUp();
         getPlatform().setDataSource(getDataSource());
+        getPlatform().setDelimitedIdentifierModeOn(_useDelimitedIdentifiers);
     }
 
     /**
@@ -302,10 +427,10 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
      */
     protected Database createDatabase(String schemaXml) throws DatabaseOperationException
     {
-    	Database model = parseDatabaseFromString(schemaXml);
+        Database model = parseDatabaseFromString(schemaXml);
 
-    	createDatabase(model);
-    	return model;
+        createDatabase(model);
+        return model;
     }
 
     /**
@@ -396,6 +521,135 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
     protected void dropDatabase() throws DatabaseOperationException
     {
         getPlatform().dropModel(_model, true);
+    }
+
+    /**
+     * Inserts a row into the designated table.
+     * 
+     * @param tableName    The name of the table (case insensitive)
+     * @param columnValues The values for the columns in order of definition
+     */
+    protected void insertRow(String tableName, Object[] columnValues)
+    {
+        Table    table = getModel().findTable(tableName);
+        DynaBean bean  = getModel().createDynaBeanFor(table);
+
+        for (int idx = 0; (idx < table.getColumnCount()) && (idx < columnValues.length); idx++)
+        {
+            Column column = table.getColumn(idx);
+
+            bean.set(column.getName(), columnValues[idx]);
+        }
+        getPlatform().insert(getModel(), bean);
+    }
+
+    /**
+     * Updates the row in the designated table.
+     * 
+     * @param tableName    The name of the table (case insensitive)
+     * @param oldBean      The bean representing the current row
+     * @param columnValues The values for the columns in order of definition
+     */
+    protected void updateRow(String tableName, DynaBean oldBean, Object[] columnValues)
+    {
+        Table    table = getModel().findTable(tableName);
+        DynaBean bean  = getModel().createDynaBeanFor(table);
+
+        for (int idx = 0; (idx < table.getColumnCount()) && (idx < columnValues.length); idx++)
+        {
+            Column column = table.getColumn(idx);
+
+            bean.set(column.getName(), columnValues[idx]);
+        }
+        getPlatform().update(getModel(), oldBean, bean);
+    }
+
+    /**
+     * Deletes the specified row from the table.
+     * 
+     * @param tableName      The name of the table (case insensitive)
+     * @param pkColumnValues The values for the pk columns in order of definition
+     */
+    protected void deleteRow(String tableName, Object[] pkColumnValues)
+    {
+        Table    table     = getModel().findTable(tableName);
+        DynaBean bean      = getModel().createDynaBeanFor(table);
+        Column[] pkColumns = table.getPrimaryKeyColumns();
+
+        for (int idx = 0; (idx < pkColumns.length) && (idx < pkColumnValues.length); idx++)
+        {
+            bean.set(pkColumns[idx].getName(), pkColumnValues[idx]);
+        }
+        getPlatform().delete(getModel(), bean);
+    }
+
+    /**
+     * Returns a "SELECT * FROM [table name]" statement. It also takes
+     * delimited identifier mode into account if enabled.
+     *  
+     * @param table       The table
+     * @param orderColumn The column to order the rows by (can be <code>null</code>)
+     * @return The statement
+     */
+    protected String getSelectQueryForAllString(Table table, String orderColumn)
+    {
+        StringBuffer query = new StringBuffer();
+
+        query.append("SELECT * FROM ");
+        if (getPlatform().isDelimitedIdentifierModeOn())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        query.append(table.getName());
+        if (getPlatform().isDelimitedIdentifierModeOn())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        if (orderColumn != null)
+        {
+            query.append(" ORDER BY ");
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+            query.append(orderColumn);
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+        }
+        return query.toString();
+    }
+
+    /**
+     * Retrieves all rows from the given table.
+     * 
+     * @param tableName The table
+     * @return The rows
+     */
+    protected List getRows(String tableName)
+    {
+        Table table = getModel().findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        
+        return getPlatform().fetch(getModel(),
+                                   getSelectQueryForAllString(table, null),
+                                   new Table[] { table });
+    }
+
+    /**
+     * Retrieves all rows from the given table.
+     * 
+     * @param tableName   The table
+     * @param orderColumn The column to order the rows by
+     * @return The rows
+     */
+    protected List getRows(String tableName, String orderColumn)
+    {
+        Table table = getModel().findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
+        
+        return getPlatform().fetch(getModel(),
+                                   getSelectQueryForAllString(table, orderColumn),
+                                   new Table[] { table });
     }
 
     /**
@@ -721,6 +975,83 @@ public abstract class TestDatabaseWriterBase extends TestPlatformBase
         }
     }
 
+    /**
+     * Asserts that the two given database models are equal, and if not, writes both of them
+     * in XML form to <code>stderr</code>.
+     * 
+     * @param expected The expected model
+     * @param actual   The actual model
+     */
+    protected void assertEquals(Database expected, Database actual)
+    {
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
+    }
+
+    /**
+     * Asserts that the two given database tables are equal.
+     * 
+     * @param expected The expected table
+     * @param actual   The actual table
+     */
+    protected void assertEquals(Table expected, Table actual)
+    {
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
+    }
+
+    /**
+     * Asserts that the two given columns are equal.
+     * 
+     * @param expected The expected column
+     * @param actual   The actual column
+     */
+    protected void assertEquals(Column expected, Column actual)
+    {
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
+    }
+
+    /**
+     * Asserts that the two given foreign keys are equal.
+     * 
+     * @param expected The expected foreign key
+     * @param actual   The actual foreign key
+     */
+    protected void assertEquals(ForeignKey expected, ForeignKey actual)
+    {
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
+    }
+
+    /**
+     * Asserts that the two given references are equal.
+     * 
+     * @param expected The expected reference
+     * @param actual   The actual reference
+     */
+    protected void assertEquals(Reference expected, Reference actual)
+    {
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
+    }
+
+    /**
+     * Asserts that the two given indices are equal.
+     * 
+     * @param expected The expected index
+     * @param actual   The actual index
+     */
+    protected void assertEquals(Index expected, Index actual)
+    {
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
+    }
+
+    /**
+     * Asserts that the two given index columns are equal.
+     * 
+     * @param expected The expected index column
+     * @param actual   The actual index column
+     */
+    protected void assertEquals(IndexColumn expected, IndexColumn actual)
+    {
+        assertEquals(expected, actual, _useDelimitedIdentifiers);
+    }
 
     /**
      * Compares the specified attribute value of the given bean with the expected object.

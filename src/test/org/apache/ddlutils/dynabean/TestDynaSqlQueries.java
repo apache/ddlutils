@@ -22,9 +22,12 @@ package org.apache.ddlutils.dynabean;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.ddlutils.TestDatabaseWriterBase;
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.io.DatabaseIO;
+import org.apache.ddlutils.io.TestAlteration;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.ModelBasedResultSetIterator;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
@@ -34,15 +37,34 @@ import org.apache.ddlutils.platform.sybase.SybasePlatform;
  * 
  * @version $Revision: 289996 $
  */
-public class TestDynaSqlQueries extends TestDatabaseWriterBase
+public class TestDynaSqlQueries extends TestAgainstLiveDatabaseBase
 {
     /**
-     * {@inheritDoc}
+     * Parameterized test case pattern.
+     * 
+     * @return The tests
      */
-    protected void setUp() throws Exception
+    public static Test suite() throws Exception
     {
-        super.setUp();
-        getPlatform().setDelimitedIdentifierModeOn(false);
+        return getTests(TestAlteration.class);
+    }
+
+    /**
+     * Returns the SQL to select all rows from the indicated table.
+     * 
+     * @param tableName The name of the table to query
+     * @return The SQL
+     */
+    private String asIdentifier(String name)
+    {
+        if (getPlatform().isDelimitedIdentifierModeOn())
+        {
+            return getPlatformInfo().getDelimiterToken() + name + getPlatformInfo().getDelimiterToken();
+        }
+        else
+        {
+            return name;
+        }
     }
 
     /**
@@ -68,7 +90,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "</data>");
 
         ModelBasedResultSetIterator it = (ModelBasedResultSetIterator)getPlatform().query(getModel(),
-                                                                                          "SELECT * FROM TestTable",
+                                                                                          "SELECT * FROM " + asIdentifier("TestTable"),
                                                                                           new Table[] { getModel().getTable(0) });
 
         assertTrue(it.hasNext());
@@ -127,7 +149,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "</data>");
 
         List beans = getPlatform().fetch(getModel(),
-                                         "SELECT * FROM TestTable",
+                                         "SELECT * FROM " + asIdentifier("TestTable"),
                                          new Table[] { getModel().getTable(0) });
 
         assertEquals(3,
@@ -223,7 +245,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         }
 
         List beans = getPlatform().fetch(getModel(),
-                                         "SELECT * FROM TestTable",
+                                         "SELECT * FROM " + asIdentifier("TestTable"),
                                          new Table[] { getModel().getTable(0) });
 
         assertEquals(3,
@@ -297,8 +319,23 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
             "  <TestTable2 Id='3' Avalue='Text 3'/>"+
             "</data>");
 
+        StringBuffer sql = new StringBuffer();
+
+        sql.append("SELECT ");
+        sql.append(asIdentifier("Id1"));
+        sql.append(",");
+        sql.append(asIdentifier("Avalue"));
+        sql.append(" FROM ");
+        sql.append(asIdentifier("TestTable1"));
+        sql.append(",");
+        sql.append(asIdentifier("TestTable2"));
+        sql.append(" WHERE ");
+        sql.append(asIdentifier("Id2"));
+        sql.append("=");
+        sql.append(asIdentifier("Id"));
+
         ModelBasedResultSetIterator it = (ModelBasedResultSetIterator)getPlatform().query(getModel(),
-                                                                                          "SELECT Id1, Avalue FROM TestTable1, TestTable2 WHERE Id2 = Id",
+                                                                                          sql.toString(),
                                                                                           new Table[] { getModel().getTable(0), getModel().getTable(1) });
 
         assertTrue(it.hasNext());
@@ -337,7 +374,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         getPlatform().insert(getModel(), dynaBean);
 
         List beans = getPlatform().fetch(getModel(),
-                                         "SELECT * FROM TestTable",
+                                         "SELECT * FROM " + asIdentifier("TestTable"),
                                          new Table[] { getModel().getTable(0) });
 
         assertEquals(1,
@@ -386,7 +423,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         getPlatform().insert(getModel(), dynaBeans);
 
         List beans = getPlatform().fetch(getModel(),
-                                         "SELECT * FROM TestTable",
+                                         "SELECT * FROM " + asIdentifier("TestTable"),
                                          new Table[] { getModel().getTable(0) });
 
         assertEquals(3,
@@ -443,7 +480,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         getPlatform().update(getModel(), dynaBean);
 
         List beans = getPlatform().fetch(getModel(),
-                                         "SELECT * FROM TestTable",
+                                         "SELECT * FROM " + asIdentifier("TestTable"),
                                          new Table[] { getModel().getTable(0) });
 
         assertEquals(1,
@@ -519,7 +556,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         getPlatform().store(getModel(), dynaBean);
 
         List beans = getPlatform().fetch(getModel(),
-                                         "SELECT * FROM TestTable",
+                                         "SELECT * FROM " + asIdentifier("TestTable"),
                                          new Table[] { getModel().getTable(0) });
 
         assertEquals(1,
@@ -562,7 +599,7 @@ public class TestDynaSqlQueries extends TestDatabaseWriterBase
         getPlatform().store(getModel(), dynaBean);
 
         List beans = getPlatform().fetch(getModel(),
-                                         "SELECT * FROM TestTable",
+                                         "SELECT * FROM " + asIdentifier("TestTable"),
                                          new Table[] { getModel().getTable(0) });
 
         assertEquals(1,

@@ -29,7 +29,7 @@
 
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=org.postgresql.Driver
-datasource.url=jdbc:postgresql://localhost/ddlutils
+datasource.url=jdbc:postgresql://192.168.55.129/ddlutils
 datasource.username=ddlutils
 datasource.password=ddlutils
 

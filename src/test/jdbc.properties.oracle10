@@ -27,21 +27,21 @@ ddlutils.platform=Oracle10
 # Using the plain DBCP datasource
 #
 
-#datasource.class=org.apache.commons.dbcp.BasicDataSource
-#datasource.driverClassName=oracle.jdbc.driver.OracleDriver
-#datasource.url=jdbc:oracle:thin:@localhost:1521:test
-#datasource.username=ddlutils
-#datasource.password=ddlutils
+datasource.class=org.apache.commons.dbcp.BasicDataSource
+datasource.driverClassName=oracle.jdbc.driver.OracleDriver
+datasource.url=jdbc:oracle:thin:@192.168.55.129:1521:XE
+datasource.username=ddlutils
+datasource.password=ddlutils
 
 #
 # Or the Oracle datasource
 #
 
-datasource.class=oracle.jdbc.pool.OracleDataSource
-datasource.URL=jdbc:oracle:thin:@localhost:1521:test
-datasource.user=ddlutils
-datasource.password=ddlutils
-datasource.connectionCachingEnabled=true
+#datasource.class=oracle.jdbc.pool.OracleDataSource
+#datasource.URL=jdbc:oracle:thin:@192.168.55.129:1521:XE
+#datasource.user=ddlutils
+#datasource.password=ddlutils
+#datasource.connectionCachingEnabled=true
 
 
 # For oracle, we should limit the schema to the one of the user

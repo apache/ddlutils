@@ -32,6 +32,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
@@ -45,7 +46,7 @@ import org.xml.sax.InputSource;
  * 
  * @version $Revision: $
  */
-public class TestMisc extends RoundtripTestBase
+public class TestMisc extends TestAgainstLiveDatabaseBase
 {
     /**
      * Parameterized test case pattern.

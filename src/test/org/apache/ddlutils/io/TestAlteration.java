@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
@@ -42,7 +43,7 @@ import org.apache.ddlutils.platform.sybase.SybasePlatform;
  *       - ...
  * @version $Revision: $
  */
-public class TestAlteration extends RoundtripTestBase
+public class TestAlteration extends TestAgainstLiveDatabaseBase
 {
     /**
      * Parameterized test case pattern.

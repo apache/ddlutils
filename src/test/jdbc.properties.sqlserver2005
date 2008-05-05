@@ -26,7 +26,7 @@
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 
 datasource.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver
-datasource.url=jdbc:sqlserver://localhost;databaseName=ddlutils;selectMethod=cursor
+datasource.url=jdbc:sqlserver://192.168.55.129;databaseName=ddlutils;selectMethod=cursor
 
 datasource.username=ddlutils
 datasource.password=ddlutils

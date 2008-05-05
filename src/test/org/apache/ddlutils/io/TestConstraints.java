@@ -21,21 +21,22 @@ package org.apache.ddlutils.io;
 
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.DdlUtilsException;
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.derby.DerbyPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
-
-import junit.framework.Test;
 
 /**
  * Performs the constraint tests.
  * 
  * @version $Revision: 289996 $
  */
-public class TestConstraints extends RoundtripTestBase
+public class TestConstraints extends TestAgainstLiveDatabaseBase
 {
     /**
      * Parameterized test case pattern.

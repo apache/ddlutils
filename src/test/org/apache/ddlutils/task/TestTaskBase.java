@@ -24,7 +24,7 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.ddlutils.TestDatabaseWriterBase;
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.tools.ant.Project;
 
 /**
@@ -32,17 +32,8 @@ import org.apache.tools.ant.Project;
  * 
  * @version $Revision: $
  */
-public abstract class TestTaskBase extends TestDatabaseWriterBase
+public abstract class TestTaskBase extends TestAgainstLiveDatabaseBase
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected void setUp() throws Exception
-    {
-        super.setUp();
-        getPlatform().setDelimitedIdentifierModeOn(false);
-    }
-
     /**
      * Returns an instance of the {@link DatabaseToDdlTask}, already configured with
      * a project and the tested database.
@@ -65,6 +56,7 @@ public abstract class TestTaskBase extends TestDatabaseWriterBase
         task.addConfiguredDatabase((BasicDataSource)getDataSource());
         task.setCatalogPattern(catalog);
         task.setSchemaPattern(schema);
+        task.setUseDelimitedSqlIdentifiers(getPlatform().isDelimitedIdentifierModeOn());
         return task;
     }
 }

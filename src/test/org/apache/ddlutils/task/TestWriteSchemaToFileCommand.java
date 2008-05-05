@@ -22,6 +22,8 @@ package org.apache.ddlutils.task;
 import java.io.File;
 import java.io.IOException;
 
+import junit.framework.Test;
+
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.tools.ant.BuildException;
@@ -33,6 +35,16 @@ import org.apache.tools.ant.BuildException;
  */
 public class TestWriteSchemaToFileCommand extends TestTaskBase
 {
+    /**
+     * Parameterized test case pattern.
+     * 
+     * @return The tests
+     */
+    public static Test suite() throws Exception
+    {
+        return getTests(TestWriteSchemaToFileCommand.class);
+    }
+
     /**
      * Adds the writeSchemaToFile sub task to the given task, executes it, and checks its output.
      *

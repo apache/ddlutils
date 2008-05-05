@@ -25,6 +25,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
@@ -38,7 +39,7 @@ import org.apache.ddlutils.platform.sybase.SybasePlatform;
  * 
  * @version $Revision: $
  */
-public class TestAddColumn extends RoundtripTestBase
+public class TestAddColumn extends TestAgainstLiveDatabaseBase
 {
     /**
      * Parameterized test case pattern.

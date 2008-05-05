@@ -18,14 +18,14 @@
 # under the License.
 
 # Use this property if ddlutils does not recognize the platform from the settings
-#ddlutils.platform=Db2
+ddlutils.platform=Db2v8
 
 # Properties starting with "datasource." will be fed into the datasource instance of the
 # class configured via the datasource.class property
 
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 
-datasource.driverClassName=COM.ibm.db2.jdbc.net.DB2Driver
-datasource.url=jdbc:db2://localhost:6789/ddlutils
+datasource.driverClassName=com.ibm.db2.jcc.DB2Driver
+datasource.url=jdbc:db2://192.168.55.129:50000/ddlutils
 datasource.username=ddlutils
 datasource.password=ddlutils

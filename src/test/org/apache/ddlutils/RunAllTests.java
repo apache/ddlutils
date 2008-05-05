@@ -82,7 +82,7 @@ public class RunAllTests extends TestCase
      * 
      * @param args The invocation arguments
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception
     {
         junit.textui.TestRunner.run(suite());
     }
@@ -92,7 +92,7 @@ public class RunAllTests extends TestCase
      * 
      * @return The test suite
      */
-    public static Test suite()
+    public static Test suite() throws Exception
     {
         TestSuite suite = new TestSuite("DdlUtils tests");
 
@@ -123,21 +123,16 @@ public class RunAllTests extends TestCase
         suite.addTestSuite(TestSybasePlatform.class);
         suite.addTestSuite(TestModelComparison.class);
         suite.addTestSuite(TestAlterationAlgorithm.class);
-
-        // tests that need a live database
-        if (System.getProperty(TestDatabaseWriterBase.JDBC_PROPERTIES_PROPERTY) != null)
-        {
-            suite.addTestSuite(TestDynaSqlQueries.class);
-            suite.addTestSuite(TestDatatypes.class);
-            suite.addTestSuite(TestConstraints.class);
-            suite.addTestSuite(TestAlteration.class);
-            suite.addTestSuite(TestAddColumn.class);
-            suite.addTestSuite(TestChangeColumn.class);
-            suite.addTestSuite(TestDropColumn.class);
-            suite.addTestSuite(TestMisc.class);
-            suite.addTestSuite(TestDropTablesCommand.class);
-            suite.addTestSuite(TestWriteSchemaToFileCommand.class);
-        }
+        suite.addTest(TestDynaSqlQueries.suite());
+        suite.addTest(TestDatatypes.suite());
+        suite.addTest(TestConstraints.suite());
+        suite.addTest(TestAlteration.suite());
+        suite.addTest(TestAddColumn.suite());
+        suite.addTest(TestChangeColumn.suite());
+        suite.addTest(TestDropColumn.suite());
+        suite.addTest(TestMisc.suite());
+        suite.addTest(TestDropTablesCommand.suite());
+        suite.addTest(TestWriteSchemaToFileCommand.suite());
 
         return suite;
     }

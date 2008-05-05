@@ -33,6 +33,6 @@ datasource.driverClassName=org.hsqldb.jdbcDriver
 
 # Server mode
 
-datasource.url=jdbc:hsqldb:hsql://localhost
+datasource.url=jdbc:hsqldb:hsql://localhost/ddlutils
 datasource.username=sa
 datasource.password=

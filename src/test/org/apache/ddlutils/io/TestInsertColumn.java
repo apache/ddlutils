@@ -25,6 +25,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
@@ -32,7 +33,7 @@ import org.apache.ddlutils.platform.sybase.SybasePlatform;
  * 
  * @version $Revision: $
  */
-public class TestInsertColumn extends RoundtripTestBase
+public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 {
     /**
      * Parameterized test case pattern.

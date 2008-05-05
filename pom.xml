@@ -30,7 +30,7 @@
   <groupId>org.apache.ddlutils</groupId>
   <artifactId>ddlutils</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>1.1</version>
   <name>Apache DdlUtils</name>
   <description>
     DdlUtils is a small, easy-to-use component for working with Database Definition (DDL) files.
@@ -118,11 +118,6 @@
       <version>1.7.0</version>
     </dependency>
     <dependency>
-      <groupId>commons-betwixt</groupId>
-      <artifactId>commons-betwixt</artifactId>
-      <version>0.8</version>
-    </dependency>
-    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.3</version>
@@ -185,18 +180,13 @@
       <version>1.0.1</version>
     </dependency>
     <dependency>
-      <groupId>oro</groupId>
-      <artifactId>oro</artifactId>
-      <version>2.0.8</version>
-    </dependency>
-    <dependency>
       <groupId>woodstox</groupId>
       <artifactId>wstx-asl</artifactId>
       <version>3.0.2</version>
       <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
-
+<!-- 
     <dependency>
       <groupId>axion</groupId>
       <artifactId>axion</artifactId>
@@ -233,12 +223,9 @@
       <version>8.1-404.jdbc3</version>
       <scope>test</scope>
     </dependency>
+ -->
     <!-- NB: No public driver for DB2, interbase, sapdb, oracle, sqlserver -->
   </dependencies>
-
-  <properties>
-    <jdbc.properties.file>/jdbc.properties.hsqldb</jdbc.properties.file>
-  </properties>
 
   <build>
     <sourceDirectory>src/java</sourceDirectory>
@@ -248,6 +235,7 @@
         <includes>
           <include>**.dtd</include>
           <include>**.xml</include>
+          <include>**.xsd</include>
         </includes>
       </resource>
     </resources>
@@ -260,21 +248,40 @@
         </includes>
       </testResource>
     </testResources>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <!-- TODO Need user configuration and review all tests for all platforms -->
-          <skip>true</skip>
-          <systemProperties>
-            <property>
-              <name>jdbc.properties.file</name>
-              <value>${jdbc.properties.file}</value>
-            </property>
-          </systemProperties>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <activation>
+        <property>
+          <name>testDb</name>
+          <value>hsqldb</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>hsqldb</groupId>
+          <artifactId>hsqldb</artifactId>
+          <version>1.8.0.4</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+	  <build>
+	    <plugins>
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-surefire-plugin</artifactId>
+	        <configuration>
+	          <systemProperties>
+	            <property>
+	              <name>jdbc.properties.file</name>
+	              <value>/jdbc.properties.hsqldb</value>
+	            </property>
+	          </systemProperties>
+	        </configuration>
+	      </plugin>
+	    </plugins>
+	  </build>
+    </profile>
+  </profiles>
 </project>

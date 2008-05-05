@@ -33,6 +33,7 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
+import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 
@@ -41,7 +42,7 @@ import org.apache.ddlutils.platform.interbase.InterbasePlatform;
  * 
  * @version $Revision: $
  */
-public class TestDatatypes extends RoundtripTestBase
+public class TestDatatypes extends TestAgainstLiveDatabaseBase
 {
     // TODO: special columns (java_object, array, distinct, ...)
 
