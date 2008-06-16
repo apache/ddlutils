@@ -616,7 +616,8 @@ public class Table implements Serializable
     }
 
     /**
-     * Finds the index with the specified name, using case insensitive matching.
+     * Finds the index with the specified name, using case sensitive or insensitive
+     * matching depending on the <code>caseSensitive</code> parameter.
      * Note that this method is not called getIndex to avoid introspection
      * problems.
      * 
@@ -626,23 +627,60 @@ public class Table implements Serializable
      */
     public Index findIndex(String name, boolean caseSensitive)
     {
+        if (name == null)
+        {
+            throw new NullPointerException("The index name to search for cannot be null");
+        }
         for (int idx = 0; idx < getIndexCount(); idx++)
         {
             Index index = getIndex(idx);
 
-            if (caseSensitive)
+            if ((caseSensitive  && name.equals(index.getName())) ||
+                (!caseSensitive && name.equalsIgnoreCase(index.getName())))
             {
-                if (index.getName().equals(name))
-                {
-                    return index;
-                }
+                return index;
             }
-            else
+        }
+        return null;
+    }
+
+    /**
+     * Finds the foreign key with the specified name, using case insensitive matching.
+     * Note that this method is not called getForeignKey to avoid introspection
+     * problems.
+     * 
+     * @param name The name of the foreign key
+     * @return The foreign key or <code>null</code> if there is no such foreigb key
+     */
+    public ForeignKey findForeignKey(String name)
+    {
+        return findForeignKey(name, false);
+    }
+
+    /**
+     * Finds the foreign key with the specified name, using case sensitive or insensitive
+     * matching depending on the <code>caseSensitive</code> parameter.
+     * Note that this method is not called getForeignKey to avoid introspection
+     * problems.
+     * 
+     * @param name          The name of the foreign key
+     * @param caseSensitive Whether case matters for the names
+     * @return The foreign key or <code>null</code> if there is no such foreign key
+     */
+    public ForeignKey findForeignKey(String name, boolean caseSensitive)
+    {
+        if (name == null)
+        {
+            throw new NullPointerException("The foreign key name to search for cannot be null");
+        }
+        for (int idx = 0; idx < getForeignKeyCount(); idx++)
+        {
+            ForeignKey foreignKey = getForeignKey(idx);
+
+            if ((caseSensitive  && name.equals(foreignKey.getName())) ||
+                (!caseSensitive && name.equalsIgnoreCase(foreignKey.getName())))
             {
-                if (index.getName().equalsIgnoreCase(name))
-                {
-                    return index;
-                }
+                return foreignKey;
             }
         }
         return null;
