@@ -469,7 +469,7 @@ public class DatabaseIO
             }
             else if (isSameAs(attrQName, QNAME_ATTRIBUTE_SIZE))
             {
-                column.setSize(xmlReader.getAttributeValue(idx));
+                column.setSize(getAttributeValueBeingNullAware(xmlReader, idx));
             }
             else if (isSameAs(attrQName, QNAME_ATTRIBUTE_DEFAULT))
             {
@@ -710,7 +710,7 @@ public class DatabaseIO
             }
             else if (isSameAs(attrQName, QNAME_ATTRIBUTE_SIZE))
             {
-                indexColumn.setSize(xmlReader.getAttributeValue(idx));
+                indexColumn.setSize(getAttributeValueBeingNullAware(xmlReader, idx));
             }
         }
         consumeRestOfElement(xmlReader);
@@ -736,6 +736,21 @@ public class DatabaseIO
         {
             return qName.equals(curElemQName);
         }
+    }
+
+    /**
+     * Returns the value of the indicated attribute of the current element as a string.
+     * This method can handle "null" in which case it returns a null object.
+     * 
+     * @param xmlReader    The xml reader
+     * @param attributeIdx The index of the attribute
+     * @return The attribute's value
+     */
+    private String getAttributeValueBeingNullAware(XMLStreamReader xmlReader, int attributeIdx) throws DdlUtilsXMLException
+    {
+        String value = xmlReader.getAttributeValue(attributeIdx);
+
+        return "null".equalsIgnoreCase(value) ? null : value;
     }
 
     /**

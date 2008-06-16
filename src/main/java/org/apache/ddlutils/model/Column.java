@@ -311,6 +311,7 @@ public class Column implements Serializable
     /**
      * Sets the size of the column. This is either a simple integer value or
      * a comma-separated pair of integer values specifying the size and scale.
+     * I.e. "size" or "precision,scale".
      * 
      * @param size The size
      */
@@ -320,16 +321,16 @@ public class Column implements Serializable
         {
             int pos = size.indexOf(",");
 
-            _size  = size;
+            _size = size;
             if (pos < 0)
             {
                 _scale     = 0;
-                _sizeAsInt = new Integer(_size);
+                _sizeAsInt = new Integer(_size.trim());
             }
             else
             {
-                _sizeAsInt = new Integer(size.substring(0, pos));
-                _scale     = Integer.parseInt(size.substring(pos + 1));
+                _sizeAsInt = new Integer(size.substring(0, pos).trim());
+                _scale     = Integer.parseInt(size.substring(pos + 1).trim());
             }
         }
         else
