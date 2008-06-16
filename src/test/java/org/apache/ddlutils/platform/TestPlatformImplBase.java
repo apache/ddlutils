@@ -25,6 +25,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestBase;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
@@ -42,7 +43,7 @@ public class TestPlatformImplBase extends TestBase
     {
         final String schema =
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='ddlutils'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='ddlutils'>\n"+
             "  <table name='TestTable'>\n"+
             "    <column name='id' autoIncrement='true' type='INTEGER' primaryKey='true'/>\n"+
             "    <column name='name' type='VARCHAR' size='15'/>\n"+

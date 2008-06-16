@@ -52,14 +52,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -94,7 +94,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -104,7 +104,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         if (isSybase)
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='avalue' type='NUMERIC' size='12,0' autoIncrement='true'/>\n"+
                         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -114,7 +114,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         else
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
                         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -152,14 +152,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='NUMERIC' size='12,0' default='2' required='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -190,14 +190,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='DOUBLE' default='2'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -237,7 +237,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -247,7 +247,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         if (isSybase)
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='avalue' type='NUMERIC' size='12,0' autoIncrement='true' required='true'/>\n"+
                         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -257,7 +257,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         else
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='avalue' type='INTEGER' autoIncrement='true' required='true'/>\n"+
                         "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -298,14 +298,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='CHAR' size='8' default='text' required='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -338,7 +338,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
@@ -346,7 +346,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
@@ -380,14 +380,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -415,7 +415,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -425,7 +425,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         if (isSybase)
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                         "    <column name='avalue' type='INTEGER'/>\n"+
@@ -435,7 +435,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         else
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
                         "    <column name='avalue' type='INTEGER'/>\n"+
@@ -471,14 +471,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
             "    <column name='pk2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
@@ -507,7 +507,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -515,7 +515,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -544,7 +544,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -555,7 +555,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         if (isSybase)
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
                         "    <column name='pk2' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
@@ -566,7 +566,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         else
         {
             model2Xml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-                        "<database name='roundtriptest'>\n"+
+                        "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
                         "  <table name='roundtrip'>\n"+
                         "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
                         "    <column name='pk2' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
@@ -604,7 +604,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -612,7 +612,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
             "    <column name='pk2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
@@ -640,14 +640,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -678,14 +678,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -716,14 +716,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='NUMERIC' size='12,0' required='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -752,14 +752,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='DOUBLE' default='2'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -790,14 +790,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='INTEGER' required='true' autoIncrement='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -828,14 +828,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='CHAR' size='8' required='true' default='text'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -866,14 +866,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue1' type='INTEGER' default='1'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -905,14 +905,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -943,14 +943,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='INTEGER' autoIncrement='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -981,14 +981,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='NUMERIC' size='12,0' required='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -1017,14 +1017,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='DOUBLE' default='2'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -1055,14 +1055,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='INTEGER' required='true' autoIncrement='true'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -1093,14 +1093,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue' type='CHAR' size='8' required='true' default='text'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -1131,14 +1131,14 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='avalue1' type='INTEGER' default='1'/>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -1169,7 +1169,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1180,7 +1180,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='VARCHAR' size='32'/>\n"+
@@ -1214,7 +1214,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1225,7 +1225,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' autoIncrement='true'/>\n"+
@@ -1259,7 +1259,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1270,7 +1270,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='NUMERIC' size='12,0' required='true'/>\n"+
@@ -1301,7 +1301,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1312,7 +1312,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='DOUBLE' default='2'/>\n"+
@@ -1346,7 +1346,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1357,7 +1357,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' autoIncrement='true' required='true'/>\n"+
@@ -1391,7 +1391,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1402,7 +1402,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='CHAR' size='8' default='text' required='true'/>\n"+
@@ -1436,7 +1436,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1447,7 +1447,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' default='3'/>\n"+
@@ -1480,7 +1480,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1491,7 +1491,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='VARCHAR' size='32'/>\n"+
@@ -1525,7 +1525,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1536,7 +1536,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' autoIncrement='true'/>\n"+
@@ -1570,7 +1570,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1581,7 +1581,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='NUMERIC' size='12,0' required='true'/>\n"+
@@ -1612,7 +1612,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1623,7 +1623,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='DOUBLE' default='2'/>\n"+
@@ -1657,7 +1657,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1668,7 +1668,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' autoIncrement='true' required='true'/>\n"+
@@ -1702,7 +1702,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1713,7 +1713,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='CHAR' size='8' default='text' required='true'/>\n"+
@@ -1747,7 +1747,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue1' type='INTEGER'/>\n"+
@@ -1758,7 +1758,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue2' type='INTEGER' default='3'/>\n"+
@@ -1791,7 +1791,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1801,7 +1801,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1839,7 +1839,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1849,7 +1849,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1887,7 +1887,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1897,7 +1897,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1934,7 +1934,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='DOUBLE' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1944,7 +1944,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='DOUBLE' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1982,7 +1982,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -1992,7 +1992,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2030,7 +2030,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='CHAR' size='8' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2040,7 +2040,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='CHAR' size='8' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2078,7 +2078,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -2089,7 +2089,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
@@ -2130,7 +2130,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -2141,7 +2141,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
@@ -2170,7 +2170,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -2181,7 +2181,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' autoIncrement='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -2221,7 +2221,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -2232,7 +2232,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk' type='DOUBLE' primaryKey='true' required='true' default='1'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -2272,7 +2272,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -2284,7 +2284,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' required='true' default='1'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
@@ -2316,7 +2316,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2330,7 +2330,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk2' type='VARCHAR' size='32' primaryKey='true'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -2361,7 +2361,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2375,7 +2375,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk2' type='INTEGER' primaryKey='true' autoIncrement='true'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -2418,7 +2418,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2432,7 +2432,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk2' type='NUMERIC' size='12,0' primaryKey='true' required='true'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -2463,7 +2463,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2477,7 +2477,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk2' type='DOUBLE' primaryKey='true' default='2'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -2517,7 +2517,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2531,7 +2531,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk2' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -2574,7 +2574,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2588,7 +2588,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk2' type='CHAR' size='8' primaryKey='true' required='true' default='text'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
@@ -2628,7 +2628,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
     {
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
@@ -2642,7 +2642,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "</database>";
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database name='roundtriptest'>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk3' type='DOUBLE' primaryKey='true' required='true'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+

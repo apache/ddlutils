@@ -20,7 +20,11 @@ package org.apache.ddlutils;
  */
 
 import org.apache.ddlutils.alteration.TestAlterationAlgorithm;
+import org.apache.ddlutils.alteration.TestForeignKeyComparison;
+import org.apache.ddlutils.alteration.TestIndexComparison;
 import org.apache.ddlutils.alteration.TestModelComparison;
+import org.apache.ddlutils.alteration.TestPrimaryKeyComparison;
+import org.apache.ddlutils.alteration.TestTableComparison;
 import org.apache.ddlutils.dynabean.TestDynaSqlQueries;
 import org.apache.ddlutils.io.TestAddColumn;
 import org.apache.ddlutils.io.TestAlteration;
@@ -30,6 +34,7 @@ import org.apache.ddlutils.io.TestDataReaderAndWriter;
 import org.apache.ddlutils.io.TestDatabaseIO;
 import org.apache.ddlutils.io.TestDatatypes;
 import org.apache.ddlutils.io.TestDropColumn;
+import org.apache.ddlutils.io.TestInsertColumn;
 import org.apache.ddlutils.io.TestMisc;
 import org.apache.ddlutils.io.converters.TestDateConverter;
 import org.apache.ddlutils.io.converters.TestTimeConverter;
@@ -123,11 +128,17 @@ public class RunAllTests extends TestCase
         suite.addTestSuite(TestSybasePlatform.class);
         suite.addTestSuite(TestModelComparison.class);
         suite.addTestSuite(TestAlterationAlgorithm.class);
+        suite.addTestSuite(TestModelComparison.class);
+        suite.addTestSuite(TestTableComparison.class);
+        suite.addTestSuite(TestPrimaryKeyComparison.class);
+        suite.addTestSuite(TestIndexComparison.class);
+        suite.addTestSuite(TestForeignKeyComparison.class);
         suite.addTest(TestDynaSqlQueries.suite());
         suite.addTest(TestDatatypes.suite());
         suite.addTest(TestConstraints.suite());
         suite.addTest(TestAlteration.suite());
         suite.addTest(TestAddColumn.suite());
+        suite.addTest(TestInsertColumn.suite());
         suite.addTest(TestChangeColumn.suite());
         suite.addTest(TestDropColumn.suite());
         suite.addTest(TestMisc.suite());

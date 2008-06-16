@@ -22,6 +22,7 @@ package org.apache.ddlutils.alteration;
 import java.sql.Types;
 import java.util.List;
 
+import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 
 /**
@@ -38,14 +39,14 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -77,14 +78,14 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColA' type='INTEGER' autoIncrement='true'/>\n" +
@@ -116,14 +117,14 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='ColA' type='INTEGER' required='true'/>\n" +
@@ -155,14 +156,14 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COLA' type='VARCHAR' size='32' default='text'/>\n" +
@@ -194,7 +195,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='false'/>\n" +
@@ -202,7 +203,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='INTEGER' required='true'/>\n" +
@@ -231,7 +232,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true'/>\n" +
@@ -239,7 +240,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='INTEGER' required='false'/>\n" +
@@ -268,7 +269,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' autoIncrement='false'/>\n" +
@@ -276,7 +277,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='INTEGER' autoIncrement='true'/>\n" +
@@ -305,7 +306,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' autoIncrement='true'/>\n" +
@@ -313,7 +314,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='INTEGER' autoIncrement='false'/>\n" +
@@ -342,7 +343,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE'/>\n" +
@@ -350,7 +351,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER'/>\n" +
@@ -379,7 +380,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE'/>\n" +
@@ -387,7 +388,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32'/>\n" +
@@ -416,7 +417,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE'/>\n" +
@@ -424,7 +425,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='NUMERIC' size='10,5'/>\n" +
@@ -453,7 +454,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32'/>\n" +
@@ -461,7 +462,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='CHAR' size='32'/>\n" +
@@ -490,7 +491,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32'/>\n" +
@@ -498,7 +499,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='NUMERIC' size='32,5'/>\n" +
@@ -527,7 +528,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DECIMAL' size='10,5'/>\n" +
@@ -535,7 +536,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32'/>\n" +
@@ -564,7 +565,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='32'/>\n" +
@@ -572,7 +573,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='FLOAT'/>\n" +
@@ -601,7 +602,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DECIMAL' size='10,5'/>\n" +
@@ -609,7 +610,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='TIMESTAMP'/>\n" +
@@ -640,7 +641,7 @@ public class TestTableComparison extends TestComparisonBase
         // expect a change for it because the size is not relevant for this type
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' size='8' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='16'/>\n" +
@@ -648,7 +649,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='VARCHAR' size='32'/>\n" +
@@ -677,7 +678,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DECIMAL' size='16,5'/>\n" +
@@ -685,7 +686,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='DECIMAL' size='32,7'/>\n" +
@@ -714,7 +715,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='NUMERIC' size='32,0'/>\n" +
@@ -722,7 +723,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='NUMERIC' size='32,5'/>\n" +
@@ -755,7 +756,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' size='8'/>\n" +
@@ -763,7 +764,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='INTEGER'/>\n" +
@@ -784,7 +785,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER'/>\n" +
@@ -792,7 +793,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' default='0'/>\n" +
@@ -821,7 +822,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' default='1'/>\n" +
@@ -829,7 +830,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' default='2'/>\n" +
@@ -859,7 +860,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='DOUBLE' default='10'/>\n" +
@@ -867,7 +868,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TABLEA'>\n" +
             "    <column name='COLPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='COL' type='DOUBLE' default='1e+1'/>\n" +
@@ -888,7 +889,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='16' default='1'/>\n" +
@@ -896,7 +897,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='16'/>\n" +
@@ -925,7 +926,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER'/>\n" +
@@ -933,7 +934,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='INTEGER' required='true' default='0'/>\n" +
@@ -962,7 +963,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='16' default='1' required='true'/>\n" +
@@ -970,7 +971,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col' type='VARCHAR' size='16'/>\n" +
@@ -999,7 +1000,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1009,7 +1010,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col3' type='VARCHAR' size='32'/>\n" +
@@ -1044,7 +1045,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1053,7 +1054,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col3' type='VARCHAR' size='32'/>\n" +
@@ -1096,7 +1097,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col3' type='VARCHAR' size='32'/>\n" +
@@ -1106,7 +1107,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col2' type='INTEGER' required='true'/>\n" +
@@ -1146,7 +1147,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='DOUBLE'/>\n" +
@@ -1154,7 +1155,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1182,7 +1183,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='INTEGER' autoIncrement='true'/>\n" +
@@ -1190,7 +1191,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
@@ -1218,7 +1219,7 @@ public class TestTableComparison extends TestComparisonBase
     {
         final String MODEL1 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "    <column name='Col1' type='INTEGER' required='true'/>\n" +
@@ -1226,7 +1227,7 @@ public class TestTableComparison extends TestComparisonBase
             "</database>";
         final String MODEL2 = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-            "<database name='test'>\n" +
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='TableA'>\n" +
             "    <column name='ColPK' type='INTEGER' primaryKey='true' required='true'/>\n" +
             "  </table>\n" +
