@@ -1457,7 +1457,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
         else
         {
             getSqlBuilder().dropTable(changedTable);
-            getSqlBuilder().createTable(currentModel, targetTable, params.getParametersFor(targetTable));
+            getSqlBuilder().createTable(currentModel, targetTable, parameters);
         }
 
         change.apply(currentModel, isDelimitedIdentifierModeOn());
