@@ -37,6 +37,8 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -115,6 +117,9 @@ public class DatabaseIO
     /** Qualified name of the version attribute. */
     public static final QName QNAME_ATTRIBUTE_VERSION           = new QName(DDLUTILS_NAMESPACE, "version");
 
+    /** The log. */
+    private final Log _log = LogFactory.getLog(DatabaseIO.class);
+
     /** Whether to validate the XML. */
     private boolean _validateXml = true;
     /** Whether to use the internal dtd that comes with DdlUtils. */
@@ -144,6 +149,7 @@ public class DatabaseIO
      * Returns whether the internal dtd that comes with DdlUtils is used.
      * 
      * @return <code>true</code> if parsing uses the internal dtd
+     * @deprecated Switched to XML schema, and the internal XML schema should always be used 
      */
     public boolean isUseInternalDtd()
     {
@@ -153,7 +159,8 @@ public class DatabaseIO
     /**
      * Specifies whether the internal dtd is to be used.
      *
-     * @param useInternalDtd Whether to use the internal dtd 
+     * @param useInternalDtd Whether to use the internal dtd
+     * @deprecated Switched to XML schema, and the internal XML schema should always be used 
      */
     public void setUseInternalDtd(boolean useInternalDtd)
     {
@@ -168,18 +175,7 @@ public class DatabaseIO
      */
     public Database read(String filename) throws DdlUtilsXMLException
     {
-        try
-        {
-            if (_validateXml)
-            {
-                new ModelValidator().validate(new StreamSource(new FileReader(filename)));
-            }
-            return read(new FileReader(filename));
-        }
-        catch (IOException ex)
-        {
-            throw new DdlUtilsXMLException(ex);
-        }
+        return read(new File(filename));
     }
 
     /**
@@ -190,22 +186,68 @@ public class DatabaseIO
      */
     public Database read(File file) throws DdlUtilsXMLException
     {
+        FileReader reader = null;
+
+        if (_validateXml)
+        {
+            try
+            {
+                reader = new FileReader(file);
+                new ModelValidator().validate(new StreamSource(reader));
+            }
+            catch (IOException ex)
+            {
+                throw new DdlUtilsXMLException(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    try
+                    {
+                        reader.close();
+                    }
+                    catch (IOException ex)
+                    {
+                        _log.warn("Could not close reader for file " + file.getAbsolutePath());
+                    }
+                    reader = null;
+                }
+            }
+        }
+
         try
         {
-            if (_validateXml)
-            {
-                new ModelValidator().validate(new StreamSource(new FileReader(file)));
-            }
-            return read(new FileReader(file));
+            reader = new FileReader(file);
+            return read(getXMLInputFactory().createXMLStreamReader(reader));
+        }
+        catch (XMLStreamException ex)
+        {
+            throw new DdlUtilsXMLException(ex);
         }
         catch (IOException ex)
         {
             throw new DdlUtilsXMLException(ex);
         }
+        finally
+        {
+            if (reader != null)
+            {
+                try
+                {
+                    reader.close();
+                }
+                catch (IOException ex)
+                {
+                    _log.warn("Could not close reader for file " + file.getAbsolutePath());
+                }
+            }
+        }
     }
 
     /**
-     * Reads the database model given by the reader.
+     * Reads the database model given by the reader. Note that this method does not close the
+     * given reader.
      * 
      * @param reader The reader that returns the model XML
      * @return The database model
@@ -222,10 +264,6 @@ public class DatabaseIO
 
                 while ((len = reader.read(buf)) >= 0)
                 {
-                    if (tmpXml.length() > 0)
-                    {
-                        tmpXml.append("\n");
-                    }
                     tmpXml.append(buf, 0, len);
                 }
                 new ModelValidator().validate(new StreamSource(new StringReader(tmpXml.toString())));
@@ -355,7 +393,7 @@ public class DatabaseIO
 
         while (eventType != XMLStreamReader.END_ELEMENT)
         {
-            eventType = xmlReader.nextTag();
+            eventType = xmlReader.next();
             if (eventType == XMLStreamReader.START_ELEMENT)
             {
                 if (isSameAs(xmlReader.getName(), QNAME_ELEMENT_TABLE)) {
@@ -409,7 +447,7 @@ public class DatabaseIO
 
         while (eventType != XMLStreamReader.END_ELEMENT)
         {
-            eventType = xmlReader.nextTag();
+            eventType = xmlReader.next();
             if (eventType == XMLStreamReader.START_ELEMENT)
             {
                 QName elemQName = xmlReader.getName();
@@ -541,7 +579,7 @@ public class DatabaseIO
 
         while (eventType != XMLStreamReader.END_ELEMENT)
         {
-            eventType = xmlReader.nextTag();
+            eventType = xmlReader.next();
             if (eventType == XMLStreamReader.START_ELEMENT)
             {
                 QName elemQName = xmlReader.getName();
@@ -645,7 +683,7 @@ public class DatabaseIO
 
         while (eventType != XMLStreamReader.END_ELEMENT)
         {
-            eventType = xmlReader.nextTag();
+            eventType = xmlReader.next();
             if (eventType == XMLStreamReader.START_ELEMENT)
             {
                 QName elemQName = xmlReader.getName();
@@ -674,7 +712,7 @@ public class DatabaseIO
 
         while (eventType != XMLStreamReader.END_ELEMENT)
         {
-            eventType = xmlReader.nextTag();
+            eventType = xmlReader.next();
             if (eventType == XMLStreamReader.START_ELEMENT)
             {
                 QName elemQName = xmlReader.getName();
@@ -814,7 +852,7 @@ public class DatabaseIO
 
         while ((eventType != XMLStreamReader.END_ELEMENT) && (eventType != XMLStreamReader.END_DOCUMENT))
         {
-            eventType = reader.nextTag();
+            eventType = reader.next();
         }
     }
 
@@ -830,7 +868,7 @@ public class DatabaseIO
 
         while (depth > 0)
         {
-            int eventType = reader.nextTag();
+            int eventType = reader.next();
 
             if (eventType == XMLStreamReader.START_ELEMENT)
             {
