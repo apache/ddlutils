@@ -505,7 +505,7 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
             dataReader.setModel(_model);
             dataReader.setSink(new DataToDatabaseSink(getPlatform(), _model));
             dataReader.getSink().start();
-            dataReader.parse(new StringReader(dataXml));
+            dataReader.read(new StringReader(dataXml));
             dataReader.getSink().end();
             return _model;
         }

@@ -59,4 +59,30 @@ public abstract class TestTaskBase extends TestAgainstLiveDatabaseBase
         task.setUseDelimitedSqlIdentifiers(getPlatform().isDelimitedIdentifierModeOn());
         return task;
     }
+
+    /**
+     * Returns an instance of the {@link DdlToDatabaseTask}, already configured with
+     * a project and the tested database.
+     * 
+     * @return The task object
+     */
+    protected DdlToDatabaseTask getDdlToDatabaseTaskInstance()
+    {
+        DdlToDatabaseTask task       = new DdlToDatabaseTask();
+        Properties        props      = getTestProperties();
+        String            catalog    = props.getProperty(DDLUTILS_CATALOG_PROPERTY);
+        String            schema     = props.getProperty(DDLUTILS_SCHEMA_PROPERTY);
+        DataSource        dataSource = getDataSource();
+
+        if (!(dataSource instanceof BasicDataSource))
+        {
+            fail("Datasource needs to be of type " + BasicDataSource.class.getName());
+        }
+        task.setProject(new Project());
+        task.addConfiguredDatabase((BasicDataSource)getDataSource());
+        task.setCatalogPattern(catalog);
+        task.setSchemaPattern(schema);
+        task.setUseDelimitedSqlIdentifiers(getPlatform().isDelimitedIdentifierModeOn());
+        return task;
+    }
 }

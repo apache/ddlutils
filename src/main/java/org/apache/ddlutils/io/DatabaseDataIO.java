@@ -723,7 +723,7 @@ public class DatabaseDataIO
     {
         try
         {
-            dataReader.parse(path);
+            dataReader.read(path);
         }
         catch (Exception ex)
         {
@@ -744,7 +744,7 @@ public class DatabaseDataIO
     {
         try
         {
-            dataReader.parse(input);
+            dataReader.read(input);
         }
         catch (Exception ex)
         {
@@ -765,7 +765,7 @@ public class DatabaseDataIO
     {
         try
         {
-            dataReader.parse(input);
+            dataReader.read(input);
         }
         catch (Exception ex)
         {

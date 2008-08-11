@@ -19,8 +19,13 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 
 import junit.framework.TestCase;
@@ -37,48 +42,70 @@ import org.apache.ddlutils.model.Database;
  */
 public class TestDataReaderAndWriter extends TestCase
 {
+    // no need to call start/end as the don't do anything anyways
+    private static class TestDataSink implements DataSink
+    {
+        private final ArrayList readObjects;
+
+        private TestDataSink(ArrayList readObjects)
+        {
+            this.readObjects = readObjects;
+        }
+
+        public void start() throws DataSinkException
+        {}
+
+        public void addBean(DynaBean bean) throws DataSinkException
+        {
+            readObjects.add(bean);
+        }
+
+        public void end() throws DataSinkException
+        {}
+    }
+
     /**
      * Tests reading the data from XML.
      */
     public void testRead() throws Exception
     {
         final String testSchemaXml = 
-            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
-            "<database name=\"bookstore\">\n"+
-            "  <table name=\"author\">\n"+
-            "    <column name=\"author_id\" type=\"INTEGER\" primaryKey=\"true\" required=\"true\"/>\n"+
-            "    <column name=\"name\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
-            "    <column name=\"organisation\" type=\"VARCHAR\" size=\"50\" required=\"false\"/>\n"+
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='bookstore'>\n"+
+            "  <table name='author'>\n"+
+            "    <column name='author_id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='name' type='VARCHAR' size='50' required='true'/>\n"+
+            "    <column name='organisation' type='VARCHAR' size='50' required='false'/>\n"+
             "  </table>\n"+
-            "  <table name=\"book\">\n"+
-            "    <column name=\"book_id\" type=\"INTEGER\" required=\"true\" primaryKey=\"true\" autoIncrement=\"true\"/>\n"+
-            "    <column name=\"isbn\" type=\"VARCHAR\" size=\"15\" required=\"true\"/>\n"+
-            "    <column name=\"author_id\" type=\"INTEGER\" required=\"true\"/>\n"+
-            "    <column name=\"title\" type=\"VARCHAR\" size=\"255\" defaultValue=\"N/A\" required=\"true\"/>\n"+
-            "    <column name=\"issue_date\" type=\"DATE\" required=\"false\"/>\n"+
-            "    <foreign-key foreignTable=\"author\">\n"+
-            "      <reference local=\"author_id\" foreign=\"author_id\"/>\n"+
+            "  <table name='book'>\n"+
+            "    <column name='book_id' type='INTEGER' required='true' primaryKey='true' autoIncrement='true'/>\n"+
+            "    <column name='isbn' type='VARCHAR' size='15' required='true'/>\n"+
+            "    <column name='author_id' type='INTEGER' required='true'/>\n"+
+            "    <column name='title' type='VARCHAR' size='255' default='N/A' required='true'/>\n"+
+            "    <column name='issue_date' type='DATE' required='false'/>\n"+
+            "    <foreign-key foreignTable='author'>\n"+
+            "      <reference local='author_id' foreign='author_id'/>\n"+
             "    </foreign-key>\n"+
-            "    <index name=\"book_isbn\">\n"+
-            "      <index-column name=\"isbn\"/>\n"+
+            "    <index name='book_isbn'>\n"+
+            "      <index-column name='isbn'/>\n"+
             "    </index>\n"+
             "  </table>\n"+
             "</database>";
         final String testDataXml =
             "<data>\n"+
-            "  <author author_id=\"1\" name=\"Ernest Hemingway\"/>\n"+
-            "  <author author_id=\"2\" name=\"William Shakespeare\"/>\n"+
-            "  <book book_id=\"1\" author_id=\"1\">\n"+
+            "  <author author_id='1' name='Ernest Hemingway'/>\n"+
+            "  <author author_id='2' name='William Shakespeare'/>\n"+
+            "  <book book_id='1' author_id='1'>\n"+
             "    <isbn>0684830493</isbn>\n"+
             "    <title>Old Man And The Sea</title>\n"+
             "    <issue_date>1952</issue_date>\n"+
             "  </book>\n"+
-            "  <book book_id=\"2\" author_id=\"2\">\n"+
+            "  <book book_id='2' author_id='2'>\n"+
             "    <isbn>0198321465</isbn>\n"+
             "    <title>Macbeth</title>\n"+
             "    <issue_date>1606</issue_date>\n"+
             "  </book>\n"+
-            "  <book book_id=\"3\" author_id=\"2\">\n"+
+            "  <book book_id='3' author_id='2'>\n"+
             "    <isbn>0140707026</isbn>\n"+
             "    <title>A Midsummer Night's Dream</title>\n"+
             "    <issue_date>1595</issue_date>\n"+
@@ -87,28 +114,15 @@ public class TestDataReaderAndWriter extends TestCase
 
         DatabaseIO modelReader = new DatabaseIO();
 
-        modelReader.setUseInternalDtd(true);
-        modelReader.setValidateXml(false);
+        modelReader.setValidateXml(true);
         
         Database        model       = modelReader.read(new StringReader(testSchemaXml));
         final ArrayList readObjects = new ArrayList();
         DataReader      dataReader  = new DataReader();
 
         dataReader.setModel(model);
-        dataReader.setSink(new DataSink() {
-            public void start() throws DataSinkException
-            {}
-
-            public void addBean(DynaBean bean) throws DataSinkException
-            {
-                readObjects.add(bean);
-            }
-
-            public void end() throws DataSinkException
-            {}
-        });
-        // no need to call start/end as the don't do anything anyways
-        dataReader.parse(new StringReader(testDataXml));
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
 
         assertEquals(5, readObjects.size());
 
@@ -169,24 +183,543 @@ public class TestDataReaderAndWriter extends TestCase
     }
 
     /**
+     * Tests reading the data from a file via the {#link {@link DataReader#read(String)} method.
+     */
+    public void testReadFromFile1() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test id='1' value='foo'/>\n"+
+            "</data>";
+
+        File tmpFile = File.createTempFile("data", ".xml");
+
+        try
+        {
+            Writer writer = new BufferedWriter(new FileWriter(tmpFile));
+
+            writer.write(testDataXml);
+            writer.close();
+
+            DatabaseIO modelReader = new DatabaseIO();
+
+            modelReader.setValidateXml(true);
+            
+            Database        model       = modelReader.read(new StringReader(testSchemaXml));
+            final ArrayList readObjects = new ArrayList();
+            DataReader      dataReader  = new DataReader();
+    
+            dataReader.setModel(model);
+            dataReader.setSink(new TestDataSink(readObjects));
+            dataReader.read(tmpFile.getAbsolutePath());
+    
+            assertEquals(1, readObjects.size());
+    
+            DynaBean obj = (DynaBean)readObjects.get(0);
+    
+            assertEquals("test",
+                         obj.getDynaClass().getName());
+            assertEquals("1",
+                         obj.get("id").toString());
+            assertEquals("foo",
+                         obj.get("value").toString());
+        }
+        finally
+        {
+            tmpFile.delete();
+        }
+    }
+
+    /**
+     * Tests reading the data from a file via the {#link {@link DataReader#read(File)} method.
+     */
+    public void testReadFromFile2() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test id='1' value='foo'/>\n"+
+            "</data>";
+
+        File tmpFile = File.createTempFile("data", ".xml");
+
+        try
+        {
+            Writer writer = new BufferedWriter(new FileWriter(tmpFile));
+
+            writer.write(testDataXml);
+            writer.close();
+
+            DatabaseIO modelReader = new DatabaseIO();
+
+            modelReader.setValidateXml(true);
+            
+            Database        model       = modelReader.read(new StringReader(testSchemaXml));
+            final ArrayList readObjects = new ArrayList();
+            DataReader      dataReader  = new DataReader();
+    
+            dataReader.setModel(model);
+            dataReader.setSink(new TestDataSink(readObjects));
+            dataReader.read(tmpFile);
+    
+            assertEquals(1, readObjects.size());
+    
+            DynaBean obj = (DynaBean)readObjects.get(0);
+    
+            assertEquals("test",
+                         obj.getDynaClass().getName());
+            assertEquals("1",
+                         obj.get("id").toString());
+            assertEquals("foo",
+                         obj.get("value").toString());
+        }
+        finally
+        {
+            tmpFile.delete();
+        }
+    }
+
+    /**
+     * Tests reading the data from a file via the {#link {@link DataReader#read(java.io.InputStream)} method.
+     */
+    public void testReadFromFile3() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test id='1' value='foo'/>\n"+
+            "</data>";
+
+        File tmpFile = File.createTempFile("data", ".xml");
+
+        try
+        {
+            Writer writer = new BufferedWriter(new FileWriter(tmpFile));
+
+            writer.write(testDataXml);
+            writer.close();
+
+            DatabaseIO modelReader = new DatabaseIO();
+
+            modelReader.setValidateXml(true);
+            
+            Database        model       = modelReader.read(new StringReader(testSchemaXml));
+            final ArrayList readObjects = new ArrayList();
+            DataReader      dataReader  = new DataReader();
+    
+            dataReader.setModel(model);
+            dataReader.setSink(new TestDataSink(readObjects));
+            dataReader.read(new FileInputStream(tmpFile));
+    
+            assertEquals(1, readObjects.size());
+    
+            DynaBean obj = (DynaBean)readObjects.get(0);
+    
+            assertEquals("test",
+                         obj.getDynaClass().getName());
+            assertEquals("1",
+                         obj.get("id").toString());
+            assertEquals("foo",
+                         obj.get("value").toString());
+        }
+        finally
+        {
+            tmpFile.delete();
+        }
+    }
+
+    /**
+     * Tests sub elements for columns.
+     */
+    public void testSubElements() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test id='1'>\n"+
+            "    <value>foo</value>\n"+
+            "  </test>\n"+
+            "  <test id='2' value='foo'>\n"+
+            "    <value>bar</value>\n"+
+            "  </test>\n"+
+            "  <test id='3' value='baz'>\n"+
+            "  </test>\n"+
+            "</data>";
+
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setValidateXml(true);
+        
+        Database        model       = modelReader.read(new StringReader(testSchemaXml));
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
+
+        assertEquals(3, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertEquals("foo",
+                     obj.get("value").toString());
+
+        obj = (DynaBean)readObjects.get(1);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("2",
+                     obj.get("id").toString());
+        assertEquals("bar",
+                     obj.get("value").toString());
+
+        obj = (DynaBean)readObjects.get(2);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("3",
+                     obj.get("id").toString());
+        assertEquals("baz",
+                     obj.get("value").toString());
+    }
+
+    /**
+     * Tests that the name of the root element does not matter.
+     */
+    public void testRootElementNameDoesntMatter() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<someRandomName>\n"+
+            "  <test id='1' value='foo'/>\n"+
+            "</someRandomName>";
+
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setValidateXml(true);
+        
+        Database        model       = modelReader.read(new StringReader(testSchemaXml));
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
+
+        assertEquals(1, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertEquals("foo",
+                     obj.get("value").toString());
+    }
+
+    /**
+     * Tests that elements for undefined tables are ignored.
+     */
+    public void testElementForUndefinedTable() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test id='1' value='foo'/>\n"+
+            "  <other id='2' value='bar'/>\n"+
+            "  <test id='3' value='baz'/>\n"+
+            "</data>";
+
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setValidateXml(true);
+        
+        Database        model       = modelReader.read(new StringReader(testSchemaXml));
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
+
+        assertEquals(2, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertEquals("foo",
+                     obj.get("value").toString());
+
+        obj = (DynaBean)readObjects.get(1);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("3",
+                     obj.get("id").toString());
+        assertEquals("baz",
+                     obj.get("value").toString());
+    }
+
+    /**
+     * Tests that attributes for which no column is defined, are ignored.
+     */
+    public void testAttributeForUndefinedColumn() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test id='1' value1='foo'/>\n"+
+            "</data>";
+
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setValidateXml(true);
+        
+        Database        model       = modelReader.read(new StringReader(testSchemaXml));
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
+
+        assertEquals(1, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertNull(obj.get("value"));
+    }
+
+    /**
+     * Tests that sub elements for which no column is defined, are ignored.
+     */
+    public void testSubElementForUndefinedColumn() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test id='1'>\n"+
+            "    <value2>foo</value2>\n"+
+            "  </test>\n"+
+            "</data>";
+
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setValidateXml(true);
+        
+        Database        model       = modelReader.read(new StringReader(testSchemaXml));
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
+
+        assertEquals(1, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertNull(obj.get("value"));
+    }
+
+    /**
+     * Tests parsing when case sensitivity is turned on.
+     */
+    public void testCaseSensitivityTurnedOn() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='Test'>\n"+
+            "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='Value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test Id='1' Value='foo'/>\n"+
+            "  <Test Id='2' value='baz'/>\n"+
+            "</data>";
+
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setValidateXml(true);
+        
+        Database        model       = modelReader.read(new StringReader(testSchemaXml));
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setCaseSensitive(true);
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
+
+        assertEquals(1, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("Test",
+                     obj.getDynaClass().getName());
+        assertEquals("2",
+                     obj.get("Id").toString());
+        assertNull(obj.get("Value"));
+    }
+
+    /**
+     * Tests parsing when case sensitivity is turned off.
+     */
+    public void testCaseSensitivityTurnedOff() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='Test'>\n"+
+            "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='Value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testDataXml =
+            "<data>\n"+
+            "  <test Id='1' Value='foo'/>\n"+
+            "  <Test Id='2' value='bar'/>\n"+
+            "  <Test id='3' Value='baz'/>\n"+
+            "</data>";
+
+        DatabaseIO modelReader = new DatabaseIO();
+
+        modelReader.setValidateXml(true);
+        
+        Database        model       = modelReader.read(new StringReader(testSchemaXml));
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setCaseSensitive(false);
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(testDataXml));
+
+        assertEquals(3, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("Test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("Id").toString());
+        assertEquals("foo",
+                     obj.get("Value").toString());
+
+        obj = (DynaBean)readObjects.get(1);
+
+        assertEquals("Test",
+                     obj.getDynaClass().getName());
+        assertEquals("2",
+                     obj.get("Id").toString());
+        assertEquals("bar",
+                     obj.get("Value").toString());
+
+        obj = (DynaBean)readObjects.get(2);
+
+        assertEquals("Test",
+                     obj.getDynaClass().getName());
+        assertEquals("3",
+                     obj.get("Id").toString());
+        assertEquals("baz",
+                     obj.get("Value").toString());
+    }
+
+    /**
      * Tests special characters in the data XML (for DDLUTILS-63).
      */
     public void testSpecialCharacters() throws Exception
     {
         final String testSchemaXml = 
-            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
-            "<database name=\"test\">\n"+
-            "  <table name=\"test\">\n"+
-            "    <column name=\"id\" type=\"INTEGER\" primaryKey=\"true\" required=\"true\"/>\n"+
-            "    <column name=\"value\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
         final String testedValue = "Some Special Characters: \u0001\u0009\u0010";
 
         DatabaseIO modelIO = new DatabaseIO();
 
-        modelIO.setUseInternalDtd(true);
-        modelIO.setValidateXml(false);
+        modelIO.setValidateXml(true);
         
         Database     model      = modelIO.read(new StringReader(testSchemaXml));
         StringWriter output     = new StringWriter();
@@ -205,20 +738,8 @@ public class TestDataReaderAndWriter extends TestCase
         DataReader      dataReader  = new DataReader();
 
         dataReader.setModel(model);
-        dataReader.setSink(new DataSink() {
-            public void start() throws DataSinkException
-            {}
-
-            public void addBean(DynaBean bean) throws DataSinkException
-            {
-                readObjects.add(bean);
-            }
-
-            public void end() throws DataSinkException
-            {}
-        });
-        // no need to call start/end as they don't do anything anyways
-        dataReader.parse(new StringReader(dataXml));
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(dataXml));
 
         assertEquals(1, readObjects.size());
 
@@ -232,25 +753,24 @@ public class TestDataReaderAndWriter extends TestCase
                      obj.get("value").toString());
     }
 
-
     /**
      * Tests a cdata section (see DDLUTILS-174).
      */
     public void testCData() throws Exception
     {
         final String testSchemaXml = 
-            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"+
-            "<database name=\"test\">\n"+
-            "  <table name=\"test\">\n"+
-            "    <column name=\"id\" type=\"INTEGER\" primaryKey=\"true\" required=\"true\"/>\n"+
-            "    <column name=\"value1\" type=\"VARCHAR\" size=\"50\" required=\"true\"/>\n"+
-            "    <column name=\"value2\" type=\"VARCHAR\" size=\"4000\" required=\"true\"/>\n"+
-            "    <column name=\"value3\" type=\"LONGVARCHAR\" size=\"4000\" required=\"true\"/>\n"+
-            "    <column name=\"value4\" type=\"LONGVARCHAR\" size=\"4000\" required=\"true\"/>\n"+
-            "    <column name=\"value5\" type=\"LONGVARCHAR\" size=\"4000\" required=\"true\"/>\n"+
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value1' type='VARCHAR' size='50' required='true'/>\n"+
+            "    <column name='value2' type='VARCHAR' size='4000' required='true'/>\n"+
+            "    <column name='value3' type='LONGVARCHAR' size='4000' required='true'/>\n"+
+            "    <column name='value4' type='LONGVARCHAR' size='4000' required='true'/>\n"+
+            "    <column name='value5' type='LONGVARCHAR' size='4000' required='true'/>\n"+
             "  </table>\n"+
             "</database>";
-        final String testedValue1 = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><test><![CDATA[some text]]></test>";
+        final String testedValue1 = "<?xml version='1.0' encoding='ISO-8859-1'?><test><![CDATA[some text]]></test>";
         final String testedValue2 = StringUtils.repeat("a ", 1000) + testedValue1;
         final String testedValue3 = "<div>\n<h1><![CDATA[WfMOpen]]></h1>\n" + StringUtils.repeat("Make it longer\n", 99) +  "</div>";
         final String testedValue4 = "<![CDATA[" + StringUtils.repeat("b \n", 1000) +  "]]>";
@@ -258,8 +778,7 @@ public class TestDataReaderAndWriter extends TestCase
 
         DatabaseIO modelIO = new DatabaseIO();
 
-        modelIO.setUseInternalDtd(true);
-        modelIO.setValidateXml(false);
+        modelIO.setValidateXml(true);
 
         Database     model      = modelIO.read(new StringReader(testSchemaXml));
         StringWriter output     = new StringWriter();
@@ -282,20 +801,8 @@ public class TestDataReaderAndWriter extends TestCase
         DataReader      dataReader  = new DataReader();
 
         dataReader.setModel(model);
-        dataReader.setSink(new DataSink() {
-            public void start() throws DataSinkException
-            {}
-
-            public void addBean(DynaBean bean) throws DataSinkException
-            {
-                readObjects.add(bean);
-            }
-
-            public void end() throws DataSinkException
-            {}
-        });
-        // no need to call start/end as they don't do anything anyways
-        dataReader.parse(new StringReader(dataXml));
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(dataXml));
 
         assertEquals(1, readObjects.size());
 
@@ -316,4 +823,59 @@ public class TestDataReaderAndWriter extends TestCase
         assertEquals(testedValue5,
                      obj.get("value5").toString());
     }
+
+    /**
+     * Tests the reader & writer behavior when the table name is not a valid XML identifier.
+     */
+    public void testTableNameNotAValidXmlIdentifier() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testedValue = "Some Special Characters: \u0001\u0009\u0010";
+
+        DatabaseIO modelIO = new DatabaseIO();
+
+        modelIO.setValidateXml(true);
+        
+        Database     model      = modelIO.read(new StringReader(testSchemaXml));
+        StringWriter output     = new StringWriter();
+        DataWriter   dataWriter = new DataWriter(output, "UTF-8");
+        SqlDynaBean  bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+        dataWriter.writeDocumentStart();
+        dataWriter.write(bean);
+        dataWriter.writeDocumentEnd();
+
+        String dataXml = output.toString();
+
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new StringReader(dataXml));
+
+        assertEquals(1, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertEquals(testedValue,
+                     obj.get("value").toString());
+    }
+
+    // TODO: additional tests
+    // - table name with illegal-for-XML characters, e.g space, &, ... (write)
+    // - column name with illegal-for-XML characters, e.g space, &, ... (write)
 }
