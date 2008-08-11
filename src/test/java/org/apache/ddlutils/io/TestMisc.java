@@ -1058,11 +1058,11 @@ public class TestMisc extends TestAgainstLiveDatabaseBase
             "  <database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "    <table name='ad_sequence_no'>\n"+
             "      <column name='ad_sequence_id' required='true' type='NUMERIC' size='10'/>\n"+
-            "      <column name='year' required='true' type='VARCHAR' size='4' default='0000'/>\n"+
+            "      <column name='ad_year' required='true' type='VARCHAR' size='4' default='0000'/>\n"+
             "      <column name='ad_client_id' required='true' type='NUMERIC' size='10'/>\n"+
             "      <unique name='ad_sequence_no_key'>\n"+
             "        <unique-column name='ad_sequence_id'/>\n"+
-            "        <unique-column name='year'/>\n"+
+            "        <unique-column name='ad_year'/>\n"+
             "      </unique>\n"+
             "    </table>\n"+
             "</database>";
@@ -1156,5 +1156,63 @@ public class TestMisc extends TestAgainstLiveDatabaseBase
                 getLog().warn("Could not delete the temporary file " + tmpFile.getAbsolutePath());
             }
         }
+    }
+
+    /**
+     * Test for DDLUTILS-214.
+     */
+    public void testDdlUtils214() throws Exception
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+            "  <table name='roundtrip1'>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='roundtrip2'>\n"+
+            "    <column name='pk2' type='VARCHAR' primaryKey='true' required='true'/>\n"+
+            "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(modelXml);
+
+        Database readModel = readModelFromDatabase("roundtriptest");
+        
+        assertEquals(getAdjustedModel(),
+                     readModel);
+
+        insertRow("roundtrip1", new Object[] { new Integer(1), "foo" });
+        insertRow("roundtrip1", new Object[] { new Integer(2), "bar" });
+        insertRow("roundtrip2", new Object[] { "foo", new Integer(1) });
+        insertRow("roundtrip2", new Object[] { "bar", new Integer(2) });
+
+        List beans1 = getRows("roundtrip1", "pk1");
+        List beans2 = getRows("roundtrip2", "pk1");
+
+        assertEquals(2, beans1.size());
+        assertEquals(2, beans2.size());
+        assertEquals(new Integer(1), beans1.get(0), "pk1");
+        assertEquals((Object)"foo",  beans1.get(0), "pk2");
+        assertEquals(new Integer(2), beans1.get(1), "pk1");
+        assertEquals((Object)"bar",  beans1.get(1), "pk2");
+        assertEquals(new Integer(1), beans2.get(0), "pk1");
+        assertEquals((Object)"foo",  beans2.get(0), "pk2");
+        assertEquals(new Integer(2), beans2.get(1), "pk1");
+        assertEquals((Object)"bar",  beans2.get(1), "pk2");
+
+        deleteRow("roundtrip1", new Object[] { new Integer(1), "foo" });
+        deleteRow("roundtrip2", new Object[] { "foo", new Integer(1) });
+
+        beans1 = getRows("roundtrip1", "pk1");
+        beans2 = getRows("roundtrip2", "pk1");
+
+        assertEquals(1, beans1.size());
+        assertEquals(1, beans2.size());
+        assertEquals(new Integer(2), beans1.get(0), "pk1");
+        assertEquals((Object)"bar",  beans1.get(0), "pk2");
+        assertEquals(new Integer(2), beans2.get(0), "pk1");
+        assertEquals((Object)"bar",  beans2.get(0), "pk2");
     }
 }

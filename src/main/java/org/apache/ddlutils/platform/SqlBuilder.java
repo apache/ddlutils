@@ -1052,12 +1052,15 @@ public abstract class SqlBuilder
     }
 
     /**
-     * Creates the SQL for deleting an object from the specified table.
-     * If values are given then a concrete delete statement is created, otherwise an
-     * delete statement usable in a prepared statement is build.
+     * Creates the SQL for deleting an object from the specified table. Depending on
+     * the value of <code>genPlaceholders</code>, the generated SQL will contain
+     * prepared statement place holders or concrete values. Only those primary key
+     * columns wil be used that are present in the given map. If the map is null or
+     * completely empty, then the SQL will not have a WHERE clause. The SQL will contain
+     * the columns in the order defined in the table.
      * 
      * @param table           The table
-     * @param pkValues        The primary key values indexed by the column names, can be empty
+     * @param pkValues        The primary key columns to use, and optionally their values
      * @param genPlaceholders Whether to generate value placeholders for a
      *                        prepared statement
      * @return The delete sql
@@ -1071,26 +1074,30 @@ public abstract class SqlBuilder
         if ((pkValues != null) && !pkValues.isEmpty())
         {
             buffer.append(" WHERE ");
-            for (Iterator it = pkValues.entrySet().iterator(); it.hasNext();)
+
+            Column[] pkCols = table.getPrimaryKeyColumns();
+
+            for (int pkColIdx = 0; pkColIdx < pkCols.length; pkColIdx++)
             {
-                Map.Entry entry  = (Map.Entry)it.next();
-                Column    column = table.findColumn((String)entry.getKey());
-    
-                if (addSep)
-                {
-                    buffer.append(" AND ");
+                Column column = pkCols[pkColIdx];
+
+                if (pkValues.containsKey(column.getName())) {
+                    if (addSep)
+                    {
+                        buffer.append(" AND ");
+                    }
+                    buffer.append(getDelimitedIdentifier(column.getName()));
+                    buffer.append(" = ");
+                    if (genPlaceholders)
+                    {
+                        buffer.append("?");
+                    }
+                    else
+                    {
+                        buffer.append(getValueAsString(column, pkValues.get(column.getName())));
+                    }
+                    addSep = true;
                 }
-                buffer.append(getDelimitedIdentifier(entry.getKey().toString()));
-                buffer.append(" = ");
-                if (genPlaceholders)
-                {
-                    buffer.append("?");
-                }
-                else
-                {
-                    buffer.append(column == null ? entry.getValue() : getValueAsString(column, entry.getValue()));
-                }
-                addSep = true;
             }
         }
         return buffer.toString();
