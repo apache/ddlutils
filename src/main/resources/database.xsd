@@ -6,7 +6,7 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified"
-            version="1.0">
+            version="1.1">
   <xsd:annotation>
     <xsd:documentation>
     Licensed to the Apache Software Foundation (ASF) under one
