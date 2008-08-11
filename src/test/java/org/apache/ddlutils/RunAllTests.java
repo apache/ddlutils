@@ -59,6 +59,7 @@ import org.apache.ddlutils.platform.TestSapDbPlatform;
 import org.apache.ddlutils.platform.TestSqlBuilder;
 import org.apache.ddlutils.platform.TestSybasePlatform;
 import org.apache.ddlutils.task.TestDropTablesCommand;
+import org.apache.ddlutils.task.TestWriteDataToDatabaseCommand;
 import org.apache.ddlutils.task.TestWriteSchemaToFileCommand;
 
 import junit.framework.Test;
@@ -144,6 +145,7 @@ public class RunAllTests extends TestCase
         suite.addTest(TestMisc.suite());
         suite.addTest(TestDropTablesCommand.suite());
         suite.addTest(TestWriteSchemaToFileCommand.suite());
+        suite.addTest(TestWriteDataToDatabaseCommand.suite());
 
         return suite;
     }
