@@ -21,6 +21,8 @@ package org.apache.ddlutils.task;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -36,14 +38,10 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.ddlutils.io.PrettyPrintingXmlWriter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
-import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
 
 /**
  * A simple helper task that dumps information about a database using JDBC.
@@ -134,8 +132,7 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Specifies the table to be processed. For details see
-     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
+     * Specifies the table to be processed. For details see {@link DatabaseMetaData#getTables(String, String, String, String[])}.
      *
      * @param tablePattern The table pattern
      * @ant.not-required By default, all tables are read (value <code>%</code>).
@@ -146,8 +143,7 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Specifies the procedures to be processed. For details and typical table types see
-     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getProcedures(java.lang.String,%20java.lang.String,%20java.lang.String)">java.sql.DatabaseMetaData#getProcedures</a>.
+     * Specifies the procedures to be processed. For details and typical table types see {@link DatabaseMetaData#getProcedures(String, String, String)}.
      *
      * @param procedurePattern The procedure pattern
      * @ant.not-required By default, all procedures are read (value <code>%</code>).
@@ -158,8 +154,7 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Specifies the columns to be processed. For details and typical table types see
-     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getColumns(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getColumns</a>.
+     * Specifies the columns to be processed. For details and typical table types see {@link DatabaseMetaData#getColumns(String, String, String, String)}.
      *
      * @param columnPattern The column pattern
      * @ant.not-required By default, all columns are read (value <code>%</code>).
@@ -170,8 +165,7 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Specifies the table types to be processed. For details and typical table types see
-     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String[])">java.sql.DatabaseMetaData#getTables</a>.
+     * Specifies the table types to be processed. For details and typical table types see {@link DatabaseMetaData#getTables(String, String, String, String[])}.
      *
      * @param tableTypes The table types to read
      * @ant.not-required By default, all types of tables are read.
@@ -230,32 +224,31 @@ public class DumpMetadataTask extends Task
             return;
         }
 
-        Connection connection = null;
+        Connection   connection = null;
+        OutputStream output     = null;
+
         try
         {
-            Document document = DocumentFactory.getInstance().createDocument();
-            Element  root     = document.addElement("metadata");
-
-            root.addAttribute("driverClassName", _dataSource.getDriverClassName());
-            
             connection = _dataSource.getConnection();
-            
-            dumpMetaData(root, connection.getMetaData());
 
-            OutputFormat outputFormat = OutputFormat.createPrettyPrint();
-            XMLWriter    xmlWriter    = null;
-
-            outputFormat.setEncoding(_outputEncoding);
             if (_outputFile == null)
             {
-                xmlWriter = new XMLWriter(System.out, outputFormat);
+                output = System.out;
             }
             else
             {
-                xmlWriter = new XMLWriter(new FileOutputStream(_outputFile), outputFormat);
+                output = new FileOutputStream(_outputFile);
             }
-            xmlWriter.write(document);
-            xmlWriter.close();
+
+            PrettyPrintingXmlWriter xmlWriter = new PrettyPrintingXmlWriter(output, _outputEncoding);
+
+            xmlWriter.writeDocumentStart();
+            xmlWriter.writeElementStart(null, "metadata");
+            xmlWriter.writeAttribute(null, "driverClassName", _dataSource.getDriverClassName());
+            
+            dumpMetaData(xmlWriter, connection.getMetaData());
+
+            xmlWriter.writeDocumentEnd();
         }
         catch (Exception ex)
         {
@@ -272,6 +265,15 @@ public class DumpMetadataTask extends Task
                 catch (SQLException ex)
                 {}
             }
+            if ((_outputFile != null) && (output != null))
+            {
+                try
+                {
+                    output.close();
+                }
+                catch (IOException ex)
+                {}
+            }
         }
     }
 
@@ -281,7 +283,10 @@ public class DumpMetadataTask extends Task
      * @param element  The XML element
      * @param metaData The meta data
      */
-    private void dumpMetaData(Element element, DatabaseMetaData metaData) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, SQLException
+    private void dumpMetaData(PrettyPrintingXmlWriter xmlWriter, DatabaseMetaData metaData) throws NoSuchMethodException,
+                                                                                                   IllegalAccessException,
+                                                                                                   InvocationTargetException,
+                                                                                                   SQLException
     {
         // We rather iterate over the methods because most metadata properties
         // do not follow the bean naming standard
@@ -297,17 +302,17 @@ public class DumpMetadataTask extends Task
                 (Object.class != methods[idx].getDeclaringClass()) &&
                 !filtered.contains(methods[idx].getName()))
             {
-                dumpProperty(element, metaData, methods[idx]);
+                dumpProperty(xmlWriter, metaData, methods[idx]);
             }
         }
-        dumpCatalogsAndSchemas(element, metaData);
+        dumpCatalogsAndSchemas(xmlWriter, metaData);
         if (_dumpTables)
         {
-            dumpTables(element, metaData);
+            dumpTables(xmlWriter, metaData);
         }
         if (_dumpProcedures)
         {
-            dumpProcedures(element, metaData);
+            dumpProcedures(xmlWriter, metaData);
         }
     }
 
@@ -318,15 +323,15 @@ public class DumpMetadataTask extends Task
      * @param obj        The instance we're working on
      * @param propGetter The method for accessing the property
      */
-    private void dumpProperty(Element parent, Object obj, Method propGetter)
+    private void dumpProperty(PrettyPrintingXmlWriter xmlWriter, Object obj, Method propGetter)
     {
         try
         {
-            addProperty(parent, getPropertyName(propGetter.getName()), propGetter.invoke(obj, null));
+            addProperty(xmlWriter, getPropertyName(propGetter.getName()), propGetter.invoke(obj, null));
         }
         catch (Throwable ex)
         {
-            log("Could not dump property "+propGetter.getName()+" because of "+ex.getMessage(), Project.MSG_WARN);
+            log("Could not dump property "+propGetter.getName()+": "+ex.getStackTrace(), Project.MSG_ERR);
         }
     }
 
@@ -338,21 +343,21 @@ public class DumpMetadataTask extends Task
      * @param name    The name of the property
      * @param value   The value of the property
      */
-    private void addProperty(Element element, String name, Object value)
+    private void addProperty(PrettyPrintingXmlWriter xmlWriter, String name, Object value)
     {
         if (value != null)
         {
             if (value.getClass().isArray())
             {
-                addArrayProperty(element, name, (Object[])value);
+                addArrayProperty(xmlWriter, name, (Object[])value);
             }
             else if (value.getClass().isPrimitive() || (value instanceof String))
             {
-                element.addAttribute(name, value.toString());
+                xmlWriter.writeAttribute(null, name, value.toString());
             }
             else if (value instanceof ResultSet)
             {
-                addResultSetProperty(element, name, (ResultSet)value);
+                addResultSetProperty(xmlWriter, name, (ResultSet)value);
             }
         }
     }
@@ -364,7 +369,7 @@ public class DumpMetadataTask extends Task
      * @param name    The name of the property
      * @param values  The values of the property
      */
-    private void addArrayProperty(Element element, String name, Object[] values)
+    private void addArrayProperty(PrettyPrintingXmlWriter xmlWriter, String name, Object[] values)
     {
         String propName = name;
 
@@ -373,12 +378,12 @@ public class DumpMetadataTask extends Task
             propName = propName.substring(0, propName.length() - 1);
         }
 
-        Element arrayElem = element.addElement(propName + "s");
-
+        xmlWriter.writeElementStart(null, propName + "s");
         for (int idx = 0; idx < values.length; idx++)
         {
-            addProperty(arrayElem, "value", values[idx]);
+            addProperty(xmlWriter, "value", values[idx]);
         }
+        xmlWriter.writeElementEnd();
     }
     
     /**
@@ -388,35 +393,49 @@ public class DumpMetadataTask extends Task
      * @param name    The name of the property
      * @param result  The values of the property as a result set
      */
-    private void addResultSetProperty(Element element, String name, ResultSet result)
+    private void addResultSetProperty(PrettyPrintingXmlWriter xmlWriter, String name, ResultSet result)
     {
+        String propName = name;
+
+        if (propName.endsWith("s"))
+        {
+            propName = propName.substring(0, propName.length() - 1);
+        }
+
         try
         {
-            String propName = name;
-
-            if (propName.endsWith("s"))
+            ResultSetMetaData metaData = result.getMetaData();
+    
+            xmlWriter.writeElementStart(null, propName + "s");
+            try
             {
-                propName = propName.substring(0, propName.length() - 1);
-            }
-
-            Element           resultSetElem = element.addElement(propName + "s");
-            ResultSetMetaData metaData      = result.getMetaData();
-
-            while (result.next())
-            {
-                Element curRow = resultSetElem.addElement(propName);
-
-                for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
+                while (result.next())
                 {
-                    Object value = result.getObject(idx);
-
-                    addProperty(curRow, metaData.getColumnLabel(idx), value);
+                    xmlWriter.writeElementStart(null, propName);
+        
+                    try
+                    {
+                        for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
+                        {
+                            Object value = result.getObject(idx);
+            
+                            addProperty(xmlWriter, metaData.getColumnLabel(idx), value);
+                        }
+                    }
+                    finally
+                    {
+                        xmlWriter.writeElementEnd();
+                    }
                 }
+            }
+            finally
+            {
+                xmlWriter.writeElementEnd();
             }
         }
         catch (SQLException ex)
         {
-            ex.printStackTrace();
+            log("Could not read the result set metadata: "+ex.getStackTrace(), Project.MSG_ERR);
         }
     }
 
@@ -456,66 +475,116 @@ public class DumpMetadataTask extends Task
         }
     }
 
+    private static interface ResultSetXmlOperation
+    {
+        public ResultSet getResultSet() throws SQLException;
+        public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException;
+        public void handleError(SQLException ex);
+    }
+
+    private void performResultSetXmlOperation(PrettyPrintingXmlWriter xmlWriter, String name, ResultSetXmlOperation op)
+    {
+        ResultSet result = null;
+
+        try
+        {
+            result = op.getResultSet();
+
+            if (name != null)
+            {
+                xmlWriter.writeElementStart(null, name);
+            }
+            try
+            {
+                while (result.next())
+                {
+                    op.handleRow(xmlWriter, result);
+                }
+            }
+            finally
+            {
+                if (name != null)
+                {
+                    xmlWriter.writeElementEnd();
+                }
+            }
+        }
+        catch (SQLException ex)
+        {
+            op.handleError(ex);
+        }
+        finally
+        {
+            if (result != null)
+            {
+                try
+                {
+                    result.close();
+                }
+                catch (SQLException ex)
+                {
+                    log("Could not close a result set: " + ex.getStackTrace(), Project.MSG_ERR);
+                }
+            }
+        }
+    }
+
     /**
      * Dumps the catalogs and schemas of the database.
      * 
      * @param parent   The parent element
      * @param metaData The database meta data
      */
-    private void dumpCatalogsAndSchemas(Element parent, DatabaseMetaData metaData) throws SQLException
+    private void dumpCatalogsAndSchemas(PrettyPrintingXmlWriter xmlWriter, final DatabaseMetaData metaData)
     {
-        // Next we determine and dump the catalogs
-        Element   catalogsElem = parent.addElement("catalogs");
-        ResultSet result       = metaData.getCatalogs();
-
-        try
+        performResultSetXmlOperation(xmlWriter, "catalogs", new ResultSetXmlOperation()
         {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                String catalogName = getString(result, "TABLE_CAT");
-    
+                return metaData.getCatalogs();
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                String catalogName = result.getString("TABLE_CAT");
+                
                 if ((catalogName != null) && (catalogName.length() > 0))
                 {
-                    Element catalogElem = catalogsElem.addElement("catalog");
-    
-                    catalogElem.addAttribute("name", catalogName);
+                    xmlWriter.writeElementStart(null, "catalog");
+                    xmlWriter.writeAttribute(null, "name", catalogName);
+                    xmlWriter.writeElementEnd();
                 }
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleError(SQLException ex)
             {
-                result.close();
+                log("Could not read the catalogs from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
             }
-        }
-
-        Element schemasElem = parent.addElement("schemas");
-
-        // We also dump the schemas (some dbs only support one of the two)
-        result = metaData.getSchemas();
-
-        try
+        });
+        performResultSetXmlOperation(xmlWriter, "schemas", new ResultSetXmlOperation()
         {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                String schemaName = getString(result, "TABLE_SCHEM");
-    
+                return metaData.getSchemas();
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                String schemaName = result.getString("TABLE_SCHEM");
+                
                 if ((schemaName != null) && (schemaName.length() > 0))
                 {
-                    Element schemaElem = schemasElem.addElement("schema");
-    
-                    schemaElem.addAttribute("name", schemaName);
+                    xmlWriter.writeElementStart(null, "schema");
+                    xmlWriter.writeAttribute(null, "name", schemaName);
+                    xmlWriter.writeElementEnd();
                 }
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleError(SQLException ex)
             {
-                result.close();
+                log("Could not read the schemas from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
             }
-        }
+        });
     }
 
     /**
@@ -524,97 +593,97 @@ public class DumpMetadataTask extends Task
      * @param parent   The parent element
      * @param metaData The database metadata
      */
-    private void dumpTables(Element parent, DatabaseMetaData metaData) throws SQLException
+    private void dumpTables(PrettyPrintingXmlWriter xmlWriter, final DatabaseMetaData metaData)
     {
-        String[]  tableTypes = _tableTypes;
-        ResultSet result     = null;
+        // First we need the list of supported table types
+        final ArrayList tableTypeList = new ArrayList();
 
-        if ((tableTypes == null) || (tableTypes.length == 0))
+        performResultSetXmlOperation(xmlWriter, "tableTypes", new ResultSetXmlOperation()
         {
-            // First we need the list of supported table types
-            ArrayList tableTypeList = new ArrayList();
-
-            result = metaData.getTableTypes();
-
-            try
+            public ResultSet getResultSet() throws SQLException
             {
-                while (result.next())
+                return metaData.getTableTypes();
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                String tableType = result.getString("TABLE_TYPE");
+
+                tableTypeList.add(tableType);
+                xmlWriter.writeElementStart(null, "tableType");
+                xmlWriter.writeAttribute(null, "name", tableType);
+                xmlWriter.writeElementEnd();
+            }
+
+            public void handleError(SQLException ex)
+            {
+                log("Could not read the table types from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+            }
+        });
+
+        final String[] tableTypesToRead;
+
+        if ((_tableTypes == null) || (_tableTypes.length == 0))
+        {
+            tableTypesToRead = (String[])tableTypeList.toArray(new String[tableTypeList.size()]);
+        }
+        else
+        {
+            tableTypesToRead = _tableTypes;
+        }
+
+        performResultSetXmlOperation(xmlWriter, "tables", new ResultSetXmlOperation()
+        {
+            public ResultSet getResultSet() throws SQLException
+            {
+                return metaData.getTables(_catalogPattern, _schemaPattern, _tablePattern, tableTypesToRead);
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                Set    columns   = getColumnsInResultSet(result);
+                String tableName = result.getString("TABLE_NAME");
+
+                if ((tableName != null) && (tableName.length() > 0))
                 {
-                    tableTypeList.add(getString(result, "TABLE_TYPE"));
+                    String catalog = result.getString("TABLE_CAT");
+                    String schema  = result.getString("TABLE_SCHEM");
+
+                    log("Reading table " + ((schema != null) && (schema.length() > 0) ? schema + "." : "") + tableName, Project.MSG_INFO);
+
+                    xmlWriter.writeElementStart(null, "table");
+                    xmlWriter.writeAttribute(null, "name", tableName);
+                    if (catalog != null)
+                    {
+                        xmlWriter.writeAttribute(null, "catalog", catalog);
+                    }
+                    if (schema != null)
+                    {
+                        xmlWriter.writeAttribute(null, "schema", schema);
+                    }
+                    addStringAttribute(xmlWriter, "type", result, columns, "TABLE_TYPE");
+                    addStringAttribute(xmlWriter, "remarks", result, columns, "REMARKS");
+                    addStringAttribute(xmlWriter, "typeName", result, columns, "TYPE_NAME");
+                    addStringAttribute(xmlWriter, "typeCatalog", result, columns, "TYPE_CAT");
+                    addStringAttribute(xmlWriter, "typeSchema", result, columns, "TYPE_SCHEM");
+                    addStringAttribute(xmlWriter, "identifierColumn", result, columns, "SELF_REFERENCING_COL_NAME");
+                    addStringAttribute(xmlWriter, "identifierGeneration", result, columns, "REF_GENERATION");
+        
+                    dumpColumns(xmlWriter, metaData, catalog, schema, tableName);
+                    dumpPKs(xmlWriter, metaData, catalog, schema, tableName);
+                    dumpVersionColumns(xmlWriter, metaData, catalog, schema, tableName);
+                    dumpFKs(xmlWriter, metaData, catalog, schema, tableName);
+                    dumpIndexes(xmlWriter, metaData, catalog, schema, tableName);
+
+                    xmlWriter.writeElementEnd();
                 }
             }
-            finally
+
+            public void handleError(SQLException ex)
             {
-                if (result != null)
-                {
-                    result.close();
-                }
+                log("Could not read the tables from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
             }
-    
-            tableTypes = (String[])tableTypeList.toArray(new String[tableTypeList.size()]);
-        }
-
-        try
-        {
-            result = metaData.getTables(_catalogPattern, _schemaPattern, _tablePattern, tableTypes);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the tables: "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Element tablesElem = parent.addElement("tables");
-        Set     columns    = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
-            {
-                String tableName = getString(result, "TABLE_NAME");
-    
-                if ((tableName == null) || (tableName.length() == 0))
-                {
-                    continue;
-                }
-
-                Element tableElem = tablesElem.addElement("table");
-                String  catalog   = getString(result, "TABLE_CAT");
-                String  schema    = getString(result, "TABLE_SCHEM");
-    
-                log("Reading table " + ((schema != null) && (schema.length() > 0) ? schema + "." : "") + tableName, Project.MSG_INFO);
-
-                tableElem.addAttribute("name", tableName);
-                if (catalog != null)
-                {
-                    tableElem.addAttribute("catalog", catalog);
-                }
-                if (schema != null)
-                {
-                    tableElem.addAttribute("schema", schema);
-                }
-                addStringAttribute(result, columns, "TABLE_TYPE", tableElem, "type");
-                addStringAttribute(result, columns, "REMARKS", tableElem, "remarks");
-                addStringAttribute(result, columns, "TYPE_NAME", tableElem, "typeName");
-                addStringAttribute(result, columns, "TYPE_CAT", tableElem, "typeCatalog");
-                addStringAttribute(result, columns, "TYPE_SCHEM", tableElem, "typeSchema");
-                addStringAttribute(result, columns, "SELF_REFERENCING_COL_NAME", tableElem, "identifierColumn");
-                addStringAttribute(result, columns, "REF_GENERATION", tableElem, "identifierGeneration");
-    
-                dumpColumns(tableElem, metaData, catalog, schema, tableName);
-                dumpPKs(tableElem, metaData, catalog, schema, tableName);
-                dumpVersionColumns(tableElem, metaData, catalog, schema, tableName);
-                dumpFKs(tableElem, metaData, catalog, schema, tableName);
-                dumpIndices(tableElem, metaData, catalog, schema, tableName);
-            }
-        }
-        finally
-        {
-            if (result != null)
-            {
-                result.close();
-            }
-        }
+        });
     }
 
     /**
@@ -626,90 +695,98 @@ public class DumpMetadataTask extends Task
      * @param schemaName  The schema name
      * @param tableName   The table name
      */
-    private void dumpColumns(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
+    private void dumpColumns(PrettyPrintingXmlWriter xmlWriter,
+                             final DatabaseMetaData  metaData,
+                             final String            catalogName,
+                             final String            schemaName,
+                             final String            tableName) throws SQLException
     {
-        ResultSet result = null;
-
-        try
+        performResultSetXmlOperation(xmlWriter, null, new ResultSetXmlOperation()
         {
-            result = metaData.getColumns(catalogName, schemaName, tableName, _columnPattern);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the columns for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Set columns = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                String columnName = getString(result, "COLUMN_NAME");
-    
-                if ((columnName == null) || (columnName.length() == 0))
-                {
-                    continue;
-                }
-    
-                Element columnElem = tableElem.addElement("column");
-    
-                columnElem.addAttribute("name", columnName);
-                addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
-                addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
-                addIntAttribute(result, columns, "COLUMN_SIZE", columnElem, "size");
-                addIntAttribute(result, columns, "DECIMAL_DIGITS", columnElem, "digits");
-                addIntAttribute(result, columns, "NUM_PREC_RADIX", columnElem, "precision");
-                if (columns.contains("NULLABLE"))
-                {
-                    switch (result.getInt("NULLABLE"))
-                    {
-                        case DatabaseMetaData.columnNoNulls:
-                            columnElem.addAttribute("nullable", "false");
-                            break;
-                        case DatabaseMetaData.columnNullable:
-                            columnElem.addAttribute("nullable", "true");
-                            break;
-                        default:
-                            columnElem.addAttribute("nullable", "unknown");
-                            break;
-                    }
-                }
-                addStringAttribute(result, columns, "REMARKS", columnElem, "remarks");
-                addStringAttribute(result, columns, "COLUMN_DEF", columnElem, "defaultValue");
-                addIntAttribute(result, columns, "CHAR_OCTET_LENGTH", columnElem, "maxByteLength");
-                addIntAttribute(result, columns, "ORDINAL_POSITION", columnElem, "index");
-                if (columns.contains("IS_NULLABLE"))
-                {
-                    String value = getString(result, "IS_NULLABLE");
-    
-                    if ("no".equalsIgnoreCase(value))
-                    {
-                        columnElem.addAttribute("isNullable", "false");
-                    }
-                    else if ("yes".equalsIgnoreCase(value))
-                    {
-                        columnElem.addAttribute("isNullable", "true");
-                    }
-                    else
-                    {
-                        columnElem.addAttribute("isNullable", "unknown");
-                    }
-                }
-                addStringAttribute(result, columns, "SCOPE_CATLOG", columnElem, "refCatalog");
-                addStringAttribute(result, columns, "SCOPE_SCHEMA", columnElem, "refSchema");
-                addStringAttribute(result, columns, "SCOPE_TABLE", columnElem, "refTable");
-                addShortAttribute(result, columns, "SOURCE_DATA_TYPE", columnElem, "sourceTypeCode");
+                return metaData.getColumns(catalogName, schemaName, tableName, _columnPattern);
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
             {
-                result.close();
+                Set    columns    = getColumnsInResultSet(result);
+                String columnName = result.getString("COLUMN_NAME");
+                
+                if ((columnName != null) && (columnName.length() > 0))
+                {
+                    xmlWriter.writeElementStart(null, "column");
+                    xmlWriter.writeAttribute(null, "name", columnName);
+
+                    addIntAttribute(xmlWriter, "typeCode", result, columns, "DATA_TYPE");
+                    addStringAttribute(xmlWriter, "type", result, columns, "TYPE_NAME");
+                    addIntAttribute(xmlWriter, "size", result, columns, "COLUMN_SIZE");
+                    addIntAttribute(xmlWriter, "digits", result, columns, "DECIMAL_DIGITS");
+                    addIntAttribute(xmlWriter, "precision", result, columns, "NUM_PREC_RADIX");
+                    if (columns.contains("NULLABLE"))
+                    {
+                        try
+                        {
+                            switch (result.getInt("NULLABLE"))
+                            {
+                                case DatabaseMetaData.columnNoNulls:
+                                    xmlWriter.writeAttribute(null, "nullable", "false");
+                                    break;
+                                case DatabaseMetaData.columnNullable:
+                                    xmlWriter.writeAttribute(null, "nullable", "true");
+                                    break;
+                                default:
+                                    xmlWriter.writeAttribute(null, "nullable", "unknown");
+                                    break;
+                            }
+                        }
+                        catch (SQLException ex)
+                        {
+                            log("Could not read the NULLABLE value for colum '" + columnName + "' of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+                        }
+                    }
+                    addStringAttribute(xmlWriter, "remarks", result, columns, "REMARKS");
+                    addStringAttribute(xmlWriter, "defaultValue", result, columns, "COLUMN_DEF");
+                    addIntAttribute(xmlWriter, "maxByteLength", result, columns, "CHAR_OCTET_LENGTH");
+                    addIntAttribute(xmlWriter, "index", result, columns, "ORDINAL_POSITION");
+                    if (columns.contains("IS_NULLABLE"))
+                    {
+                        try
+                        {
+                            String value = result.getString("IS_NULLABLE");
+
+                            if ("no".equalsIgnoreCase(value))
+                            {
+                                xmlWriter.writeAttribute(null, "isNullable", "false");
+                            }
+                            else if ("yes".equalsIgnoreCase(value))
+                            {
+                                xmlWriter.writeAttribute(null, "isNullable", "true");
+                            }
+                            else
+                            {
+                                xmlWriter.writeAttribute(null, "isNullable", "unknown");
+                            }
+                        }
+                        catch (SQLException ex)
+                        {
+                            log("Could not read the IS_NULLABLE value for colum '" + columnName + "' of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+                        }
+                    }
+                    addStringAttribute(xmlWriter, "refCatalog", result, columns, "SCOPE_CATLOG");
+                    addStringAttribute(xmlWriter, "refSchema", result, columns, "SCOPE_SCHEMA");
+                    addStringAttribute(xmlWriter, "refTable", result, columns, "SCOPE_TABLE");
+                    addShortAttribute(xmlWriter, "sourceTypeCode", result, columns, "SOURCE_DATA_TYPE");
+
+                    xmlWriter.writeElementEnd();
+                }
             }
-        }
+
+            public void handleError(SQLException ex)
+            {
+                log("Could not read the colums for table '" + tableName + "' from the result set: "+ex.getStackTrace(), Project.MSG_ERR);
+            }
+        });
     }
 
     /**
@@ -721,47 +798,41 @@ public class DumpMetadataTask extends Task
      * @param schemaName  The schema name
      * @param tableName   The table name
      */
-    private void dumpPKs(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
+    private void dumpPKs(PrettyPrintingXmlWriter xmlWriter,
+                         final DatabaseMetaData  metaData,
+                         final String            catalogName,
+                         final String            schemaName,
+                         final String            tableName) throws SQLException
     {
-        ResultSet result = null;
-
-        try
+        performResultSetXmlOperation(xmlWriter, null, new ResultSetXmlOperation()
         {
-            result = metaData.getPrimaryKeys(catalogName, schemaName, tableName);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the primary key columns for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Set columns = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                String columnName = getString(result, "COLUMN_NAME");
-    
-                if ((columnName == null) || (columnName.length() == 0))
+                return metaData.getPrimaryKeys(catalogName, schemaName, tableName);
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                Set    columns    = getColumnsInResultSet(result);
+                String columnName = result.getString("COLUMN_NAME");
+                
+                if ((columnName != null) && (columnName.length() > 0))
                 {
-                    continue;
+                    xmlWriter.writeElementStart(null, "primaryKey");
+                    xmlWriter.writeAttribute(null, "column", columnName);
+
+                    addStringAttribute(xmlWriter, "name", result, columns, "PK_NAME");
+                    addShortAttribute(xmlWriter, "sequenceNumberInPK", result, columns, "KEY_SEQ");
+
+                    xmlWriter.writeElementEnd();
                 }
-    
-                Element pkElem = tableElem.addElement("primaryKey");
-    
-                pkElem.addAttribute("column", columnName);
-                addStringAttribute(result, columns, "PK_NAME", pkElem, "name");
-                addShortAttribute(result, columns, "KEY_SEQ", pkElem, "sequenceNumberInPK");
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleError(SQLException ex)
             {
-                result.close();
+                log("Could not read the primary keys for table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
             }
-        }
+        });
     }
 
     /**
@@ -773,65 +844,65 @@ public class DumpMetadataTask extends Task
      * @param schemaName  The schema name
      * @param tableName   The table name
      */
-    private void dumpVersionColumns(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
+    private void dumpVersionColumns(PrettyPrintingXmlWriter xmlWriter,
+                                    final DatabaseMetaData  metaData,
+                                    final String            catalogName,
+                                    final String            schemaName,
+                                    final String            tableName) throws SQLException
     {
-        ResultSet result = null;
-
-        try
+        performResultSetXmlOperation(xmlWriter, null, new ResultSetXmlOperation()
         {
-            result = metaData.getVersionColumns(catalogName, schemaName, tableName);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the versioned columns for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Set columns = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                String columnName = getString(result, "COLUMN_NAME");
-    
-                if ((columnName == null) || (columnName.length() == 0))
+                return metaData.getVersionColumns(catalogName, schemaName, tableName);
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                Set    columns    = getColumnsInResultSet(result);
+                String columnName = result.getString("COLUMN_NAME");
+                
+                if ((columnName != null) && (columnName.length() > 0))
                 {
-                    continue;
-                }
-    
-                Element columnElem = tableElem.addElement("versionedColumn");
-    
-                columnElem.addAttribute("column", columnName);
-                addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
-                addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
-                addIntAttribute(result, columns, "BUFFER_LENGTH", columnElem, "size");
-                addIntAttribute(result, columns, "COLUMN_SIZE", columnElem, "precision");
-                addShortAttribute(result, columns, "DECIMAL_DIGITS", columnElem, "scale");
-                if (columns.contains("PSEUDO_COLUMN"))
-                {
-                    switch (result.getShort("PSEUDO_COLUMN"))
+                    xmlWriter.writeElementStart(null, "versionedColumn");
+                    xmlWriter.writeAttribute(null, "column", columnName);
+
+                    addIntAttribute(xmlWriter, "typeCode", result, columns, "DATA_TYPE");
+                    addStringAttribute(xmlWriter, "type", result, columns, "TYPE_NAME");
+                    addIntAttribute(xmlWriter, "size", result, columns, "BUFFER_LENGTH");
+                    addIntAttribute(xmlWriter, "precision", result, columns, "COLUMN_SIZE");
+                    addShortAttribute(xmlWriter, "scale", result, columns, "DECIMAL_DIGITS");
+                    if (columns.contains("PSEUDO_COLUMN"))
                     {
-                        case DatabaseMetaData.versionColumnPseudo:
-                            columnElem.addAttribute("columnType", "pseudo column");
-                            break;
-                        case DatabaseMetaData.versionColumnNotPseudo:
-                            columnElem.addAttribute("columnType", "real column");
-                            break;
-                        default:
-                            columnElem.addAttribute("columnType", "unknown");
-                            break;
+                        try
+                        {
+                            switch (result.getShort("PSEUDO_COLUMN"))
+                            {
+                                case DatabaseMetaData.versionColumnPseudo:
+                                    xmlWriter.writeAttribute(null, "columnType", "pseudo column");
+                                    break;
+                                case DatabaseMetaData.versionColumnNotPseudo:
+                                    xmlWriter.writeAttribute(null, "columnType", "real column");
+                                    break;
+                                default:
+                                    xmlWriter.writeAttribute(null, "columnType", "unknown");
+                                    break;
+                            }
+                        }
+                        catch (SQLException ex)
+                        {
+                            log("Could not read the PSEUDO_COLUMN value for versioned colum '" + columnName + "' of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+                        }
                     }
+                    xmlWriter.writeElementEnd();
                 }
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleError(SQLException ex)
             {
-                result.close();
+                log("Could not read the versioned columns for table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
             }
-        }
+        });
     }
 
     /**
@@ -843,110 +914,127 @@ public class DumpMetadataTask extends Task
      * @param schemaName  The schema name
      * @param tableName   The table name
      */
-    private void dumpFKs(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
+    private void dumpFKs(PrettyPrintingXmlWriter xmlWriter,
+                         final DatabaseMetaData  metaData,
+                         final String            catalogName,
+                         final String            schemaName,
+                         final String            tableName) throws SQLException
     {
-        ResultSet result = null;
-
-        try
+        performResultSetXmlOperation(xmlWriter, null, new ResultSetXmlOperation()
         {
-            result = metaData.getImportedKeys(catalogName, schemaName, tableName);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the foreign keys for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Set columns = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                Element fkElem = tableElem.addElement("foreignKey");
-    
-                addStringAttribute(result, columns, "FK_NAME", fkElem, "name");
-                addStringAttribute(result, columns, "PK_NAME", fkElem, "primaryKeyName");
-                addStringAttribute(result, columns, "PKCOLUMN_NAME", fkElem, "column");
-                addStringAttribute(result, columns, "FKTABLE_CAT", fkElem, "foreignCatalog");
-                addStringAttribute(result, columns, "FKTABLE_SCHEM", fkElem, "foreignSchema");
-                addStringAttribute(result, columns, "FKTABLE_NAME", fkElem, "foreignTable");
-                addStringAttribute(result, columns, "FKCOLUMN_NAME", fkElem, "foreignColumn");
-                addShortAttribute(result, columns, "KEY_SEQ", fkElem, "sequenceNumberInFK");
+                return metaData.getImportedKeys(catalogName, schemaName, tableName);
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                Set columns = getColumnsInResultSet(result);
+
+                xmlWriter.writeElementStart(null, "foreignKey");
+
+                addStringAttribute(xmlWriter, "name", result, columns, "FK_NAME");
+                addStringAttribute(xmlWriter, "primaryKeyName", result, columns, "PK_NAME");
+                addStringAttribute(xmlWriter, "column", result, columns, "PKCOLUMN_NAME");
+                addStringAttribute(xmlWriter, "foreignCatalog", result, columns, "FKTABLE_CAT");
+                addStringAttribute(xmlWriter, "foreignSchema", result, columns, "FKTABLE_SCHEM");
+                addStringAttribute(xmlWriter, "foreignTable", result, columns, "FKTABLE_NAME");
+                addStringAttribute(xmlWriter, "foreignColumn", result, columns, "FKCOLUMN_NAME");
+                addShortAttribute(xmlWriter, "sequenceNumberInFK", result, columns, "KEY_SEQ");
                 if (columns.contains("UPDATE_RULE"))
                 {
-                    switch (result.getShort("UPDATE_RULE"))
+                    try
                     {
-                        case DatabaseMetaData.importedKeyNoAction:
-                            fkElem.addAttribute("updateRule", "no action");
-                            break;
-                        case DatabaseMetaData.importedKeyCascade:
-                            fkElem.addAttribute("updateRule", "cascade PK change");
-                            break;
-                        case DatabaseMetaData.importedKeySetNull:
-                            fkElem.addAttribute("updateRule", "set FK to NULL");
-                            break;
-                        case DatabaseMetaData.importedKeySetDefault:
-                            fkElem.addAttribute("updateRule", "set FK to default");
-                            break;
-                        default:
-                            fkElem.addAttribute("updateRule", "unknown");
-                            break;
+                        switch (result.getShort("UPDATE_RULE"))
+                        {
+                            case DatabaseMetaData.importedKeyNoAction:
+                                xmlWriter.writeAttribute(null, "updateRule", "no action");
+                                break;
+                            case DatabaseMetaData.importedKeyCascade:
+                                xmlWriter.writeAttribute(null, "updateRule", "cascade PK change");
+                                break;
+                            case DatabaseMetaData.importedKeySetNull:
+                                xmlWriter.writeAttribute(null, "updateRule", "set FK to NULL");
+                                break;
+                            case DatabaseMetaData.importedKeySetDefault:
+                                xmlWriter.writeAttribute(null, "updateRule", "set FK to default");
+                                break;
+                            default:
+                                xmlWriter.writeAttribute(null, "updateRule", "unknown");
+                                break;
+                        }
+                    }
+                    catch (SQLException ex)
+                    {
+                        log("Could not read the UPDATE_RULE value for a foreign key of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
                     }
                 }
                 if (columns.contains("DELETE_RULE"))
                 {
-                    switch (result.getShort("DELETE_RULE"))
+                    try
                     {
-                        case DatabaseMetaData.importedKeyNoAction:
-                        case DatabaseMetaData.importedKeyRestrict:
-                            fkElem.addAttribute("deleteRule", "no action");
-                            break;
-                        case DatabaseMetaData.importedKeyCascade:
-                            fkElem.addAttribute("deleteRule", "cascade PK change");
-                            break;
-                        case DatabaseMetaData.importedKeySetNull:
-                            fkElem.addAttribute("deleteRule", "set FK to NULL");
-                            break;
-                        case DatabaseMetaData.importedKeySetDefault:
-                            fkElem.addAttribute("deleteRule", "set FK to default");
-                            break;
-                        default:
-                            fkElem.addAttribute("deleteRule", "unknown");
-                            break;
+                        switch (result.getShort("DELETE_RULE"))
+                        {
+                            case DatabaseMetaData.importedKeyNoAction:
+                            case DatabaseMetaData.importedKeyRestrict:
+                                xmlWriter.writeAttribute(null, "deleteRule", "no action");
+                                break;
+                            case DatabaseMetaData.importedKeyCascade:
+                                xmlWriter.writeAttribute(null, "deleteRule", "cascade PK change");
+                                break;
+                            case DatabaseMetaData.importedKeySetNull:
+                                xmlWriter.writeAttribute(null, "deleteRule", "set FK to NULL");
+                                break;
+                            case DatabaseMetaData.importedKeySetDefault:
+                                xmlWriter.writeAttribute(null, "deleteRule", "set FK to default");
+                                break;
+                            default:
+                                xmlWriter.writeAttribute(null, "deleteRule", "unknown");
+                                break;
+                        }
+                    }
+                    catch (SQLException ex)
+                    {
+                        log("Could not read the DELETE_RULE value for a foreign key of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
                     }
                 }
                 if (columns.contains("DEFERRABILITY"))
                 {
-                    switch (result.getShort("DEFERRABILITY"))
+                    try
                     {
-                        case DatabaseMetaData.importedKeyInitiallyDeferred:
-                            fkElem.addAttribute("deferrability", "initially deferred");
-                            break;
-                        case DatabaseMetaData.importedKeyInitiallyImmediate:
-                            fkElem.addAttribute("deferrability", "immediately deferred");
-                            break;
-                        case DatabaseMetaData.importedKeyNotDeferrable:
-                            fkElem.addAttribute("deferrability", "not deferred");
-                            break;
-                        default:
-                            fkElem.addAttribute("deferrability", "unknown");
-                            break;
+                        switch (result.getShort("DEFERRABILITY"))
+                        {
+                            case DatabaseMetaData.importedKeyInitiallyDeferred:
+                                xmlWriter.writeAttribute(null, "deferrability", "initially deferred");
+                                break;
+                            case DatabaseMetaData.importedKeyInitiallyImmediate:
+                                xmlWriter.writeAttribute(null, "deferrability", "immediately deferred");
+                                break;
+                            case DatabaseMetaData.importedKeyNotDeferrable:
+                                xmlWriter.writeAttribute(null, "deferrability", "not deferred");
+                                break;
+                            default:
+                                xmlWriter.writeAttribute(null, "deferrability", "unknown");
+                                break;
+                        }
+                    }
+                    catch (SQLException ex)
+                    {
+                        log("Could not read the DEFERRABILITY value for a foreign key of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
                     }
                 }
+                xmlWriter.writeElementEnd();
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleError(SQLException ex)
             {
-                result.close();
+                log("Could not determine the foreign keys for table '" + tableName + "': " + ex.getStackTrace(), Project.MSG_ERR);
             }
-        }
+        });
     }
 
     /**
-     * Dumps the indices of the indicated table.
+     * Dumps the indexes of the indicated table.
      * 
      * @param tableElem   The XML element for the table
      * @param metaData    The database metadata
@@ -954,83 +1042,92 @@ public class DumpMetadataTask extends Task
      * @param schemaName  The schema name
      * @param tableName   The table name
      */
-    private void dumpIndices(Element tableElem, DatabaseMetaData metaData, String catalogName, String schemaName, String tableName) throws SQLException
+    private void dumpIndexes(PrettyPrintingXmlWriter xmlWriter,
+                             final DatabaseMetaData  metaData,
+                             final String            catalogName,
+                             final String            schemaName,
+                             final String            tableName) throws SQLException
     {
-        ResultSet result = null;
-
-        try
+        performResultSetXmlOperation(xmlWriter, null, new ResultSetXmlOperation()
         {
-            result = metaData.getIndexInfo(catalogName, schemaName, tableName, false, false);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the indices for table '"+tableName+"': "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Set columns = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                Element indexElem = tableElem.addElement("index");
-    
-                addStringAttribute(result, columns, "INDEX_NAME", indexElem, "name");
-                addBooleanAttribute(result, columns, "NON_UNIQUE", indexElem, "nonUnique");
-                addStringAttribute(result, columns, "INDEX_QUALIFIER", indexElem, "indexCatalog");
+                return metaData.getIndexInfo(catalogName, schemaName, tableName, false, false);
+            }
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                Set columns = getColumnsInResultSet(result);
+
+                xmlWriter.writeElementStart(null, "index");
+
+                addStringAttribute(xmlWriter, "name", result, columns, "INDEX_NAME");
+                addBooleanAttribute(xmlWriter, "nonUnique", result, columns, "NON_UNIQUE");
+                addStringAttribute(xmlWriter, "indexCatalog", result, columns, "INDEX_QUALIFIER");
                 if (columns.contains("TYPE"))
                 {
-                    switch (result.getShort("TYPE"))
+                    try
                     {
-                        case DatabaseMetaData.tableIndexStatistic:
-                            indexElem.addAttribute("type", "table statistics");
-                            break;
-                        case DatabaseMetaData.tableIndexClustered:
-                            indexElem.addAttribute("type", "clustered");
-                            break;
-                        case DatabaseMetaData.tableIndexHashed:
-                            indexElem.addAttribute("type", "hashed");
-                            break;
-                        case DatabaseMetaData.tableIndexOther:
-                            indexElem.addAttribute("type", "other");
-                            break;
-                        default:
-                            indexElem.addAttribute("type", "unknown");
-                            break;
+                        switch (result.getShort("TYPE"))
+                        {
+                            case DatabaseMetaData.tableIndexStatistic:
+                                xmlWriter.writeAttribute(null, "type", "table statistics");
+                                break;
+                            case DatabaseMetaData.tableIndexClustered:
+                                xmlWriter.writeAttribute(null, "type", "clustered");
+                                break;
+                            case DatabaseMetaData.tableIndexHashed:
+                                xmlWriter.writeAttribute(null, "type", "hashed");
+                                break;
+                            case DatabaseMetaData.tableIndexOther:
+                                xmlWriter.writeAttribute(null, "type", "other");
+                                break;
+                            default:
+                                xmlWriter.writeAttribute(null, "type", "unknown");
+                                break;
+                        }
+                    }
+                    catch (SQLException ex)
+                    {
+                        log("Could not read the TYPE value for an index of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
                     }
                 }
-                addStringAttribute(result, columns, "COLUMN_NAME", indexElem, "column");
-                addShortAttribute(result, columns, "ORDINAL_POSITION", indexElem, "sequenceNumberInIndex");
+                addStringAttribute(xmlWriter, "column", result, columns, "COLUMN_NAME");
+                addShortAttribute(xmlWriter, "sequenceNumberInIndex", result, columns, "ORDINAL_POSITION");
                 if (columns.contains("ASC_OR_DESC"))
                 {
-                    String value = getString(result, "ASC_OR_DESC");
-    
-                    if ("A".equalsIgnoreCase(value))
+                    try
                     {
-                        indexElem.addAttribute("sortOrder", "ascending");
+                        String value = result.getString("ASC_OR_DESC");
+                        
+                        if ("A".equalsIgnoreCase(value))
+                        {
+                            xmlWriter.writeAttribute(null, "sortOrder", "ascending");
+                        }
+                        else if ("D".equalsIgnoreCase(value))
+                        {
+                            xmlWriter.writeAttribute(null, "sortOrder", "descending");
+                        }
+                        else
+                        {
+                            xmlWriter.writeAttribute(null, "sortOrder", "unknown");
+                        }
                     }
-                    else if ("D".equalsIgnoreCase(value))
+                    catch (SQLException ex)
                     {
-                        indexElem.addAttribute("sortOrder", "descending");
-                    }
-                    else
-                    {
-                        indexElem.addAttribute("sortOrder", "unknown");
+                        log("Could not read the ASC_OR_DESC value for an index of table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
                     }
                 }
-                addIntAttribute(result, columns, "CARDINALITY", indexElem, "cardinality");
-                addIntAttribute(result, columns, "PAGES", indexElem, "pages");
-                addStringAttribute(result, columns, "FILTER_CONDITION", indexElem, "filter");
+                addIntAttribute(xmlWriter, "cardinality", result, columns, "CARDINALITY");
+                addIntAttribute(xmlWriter, "pages", result, columns, "PAGES");
+                addStringAttribute(xmlWriter, "filter", result, columns, "FILTER_CONDITION");
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleError(SQLException ex)
             {
-                result.close();
+                log("Could not read the indexes for table '" + tableName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
             }
-        }
+        });
     }
 
     /**
@@ -1039,79 +1136,74 @@ public class DumpMetadataTask extends Task
      * @param parent   The parent element
      * @param metaData The database metadata
      */
-    private void dumpProcedures(Element parent, DatabaseMetaData metaData) throws SQLException
+    private void dumpProcedures(PrettyPrintingXmlWriter xmlWriter, final DatabaseMetaData metaData) throws SQLException
     {
-        ResultSet result = null;
-
-        try
+        performResultSetXmlOperation(xmlWriter, "procedures", new ResultSetXmlOperation()
         {
-            result = metaData.getProcedures(_catalogPattern, _schemaPattern, _procedurePattern);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the procedures: "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Element proceduresElem = parent.addElement("procedures");
-        Set     columns        = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                String procedureName = getString(result, "PROCEDURE_NAME");
-    
-                if ((procedureName == null) || (procedureName.length() == 0))
-                {
-                    continue;
-                }
+                return metaData.getProcedures(_catalogPattern, _schemaPattern, _procedurePattern);
+            }
 
-                Element procedureElem = proceduresElem.addElement("procedure");
-                String  catalog       = getString(result, "PROCEDURE_CAT");
-                String  schema        = getString(result, "PROCEDURE_SCHEM");
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
+            {
+                Set    columns       = getColumnsInResultSet(result);
+                String procedureName = result.getString("PROCEDURE_NAME");
+                
+                if ((procedureName != null) && (procedureName.length() > 0))
+                {
+                    String catalog = result.getString("PROCEDURE_CAT");
+                    String schema  = result.getString("PROCEDURE_SCHEM");
+        
+                    log("Reading procedure " + ((schema != null) && (schema.length() > 0) ? schema + "." : "") + procedureName, Project.MSG_INFO);
     
-                log("Reading procedure " + ((schema != null) && (schema.length() > 0) ? schema + "." : "") + procedureName, Project.MSG_INFO);
-
-                procedureElem.addAttribute("name", procedureName);
-                if (catalog != null)
-                {
-                    procedureElem.addAttribute("catalog", catalog);
-                }
-                if (schema != null)
-                {
-                    procedureElem.addAttribute("schema", schema);
-                }
-                addStringAttribute(result, columns, "REMARKS", procedureElem, "remarks");
-                if (columns.contains("PROCEDURE_TYPE"))
-                {
-                    switch (result.getShort("PROCEDURE_TYPE"))
+                    xmlWriter.writeElementStart(null, "procedure");
+                    xmlWriter.writeAttribute(null, "name", procedureName);
+                    if (catalog != null)
                     {
-                        case DatabaseMetaData.procedureReturnsResult:
-                            procedureElem.addAttribute("type", "returns result");
-                            break;
-                        case DatabaseMetaData.procedureNoResult:
-                            procedureElem.addAttribute("type", "doesn't return result");
-                            break;
-                        case DatabaseMetaData.procedureResultUnknown:
-                            procedureElem.addAttribute("type", "may return result");
-                            break;
-                        default:
-                            procedureElem.addAttribute("type", "unknown");
-                            break;
+                        xmlWriter.writeAttribute(null, "catalog", catalog);
                     }
+                    if (schema != null)
+                    {
+                        xmlWriter.writeAttribute(null, "schema", schema);
+                    }
+                    addStringAttribute(xmlWriter, "remarks", result, columns, "REMARKS");
+                    if (columns.contains("PROCEDURE_TYPE"))
+                    {
+                        try
+                        {
+                            switch (result.getShort("PROCEDURE_TYPE"))
+                            {
+                                case DatabaseMetaData.procedureReturnsResult:
+                                    xmlWriter.writeAttribute(null, "type", "returns result");
+                                    break;
+                                case DatabaseMetaData.procedureNoResult:
+                                    xmlWriter.writeAttribute(null, "type", "doesn't return result");
+                                    break;
+                                case DatabaseMetaData.procedureResultUnknown:
+                                    xmlWriter.writeAttribute(null, "type", "may return result");
+                                    break;
+                                default:
+                                    xmlWriter.writeAttribute(null, "type", "unknown");
+                                    break;
+                            }
+                        }
+                        catch (SQLException ex)
+                        {
+                            log("Could not read the PROCEDURE_TYPE value for the procedure '" + procedureName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+                        }
+                    }
+        
+                    dumpProcedure(xmlWriter, metaData, "%", "%", procedureName);
+                    xmlWriter.writeElementEnd();
                 }
-    
-                dumpProcedure(procedureElem, metaData, "%", "%", procedureName);
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleError(SQLException ex)
             {
-                result.close();
+                log("Could not read the procedures from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
             }
-        }
+        });
     }
 
     /**
@@ -1123,92 +1215,97 @@ public class DumpMetadataTask extends Task
      * @param schemaName    The schema name
      * @param procedureName The procedure name
      */
-    private void dumpProcedure(Element procedureElem, DatabaseMetaData metaData, String catalogName, String schemaName, String procedureName) throws SQLException
+    private void dumpProcedure(PrettyPrintingXmlWriter xmlWriter,
+                               final DatabaseMetaData  metaData,
+                               final String            catalogName,
+                               final String            schemaName,
+                               final String            procedureName) throws SQLException
     {
-        ResultSet result = null;
-
-        try
+        performResultSetXmlOperation(xmlWriter, null, new ResultSetXmlOperation()
         {
-            result = metaData.getProcedureColumns(catalogName, schemaName, procedureName, _columnPattern);
-        }
-        catch (SQLException ex)
-        {
-            log("Could not determine the columns for procedure '"+procedureName+"': "+ex.getMessage(), Project.MSG_ERR);
-            return;
-        }
-
-        Set columns = getColumnsInResultSet(result);
-
-        try
-        {
-            while (result.next())
+            public ResultSet getResultSet() throws SQLException
             {
-                String columnName = getString(result, "COLUMN_NAME");
-    
-                if ((columnName == null) || (columnName.length() == 0))
-                {
-                    continue;
-                }
-    
-                Element columnElem = procedureElem.addElement("column");
-    
-                columnElem.addAttribute("name", columnName);
-                if (columns.contains("COLUMN_TYPE"))
-                {
-                    switch (result.getShort("COLUMN_TYPE"))
-                    {
-                        case DatabaseMetaData.procedureColumnIn:
-                            columnElem.addAttribute("type", "in parameter");
-                            break;
-                        case DatabaseMetaData.procedureColumnInOut:
-                            columnElem.addAttribute("type", "in/out parameter");
-                            break;
-                        case DatabaseMetaData.procedureColumnOut:
-                            columnElem.addAttribute("type", "out parameter");
-                            break;
-                        case DatabaseMetaData.procedureColumnReturn:
-                            columnElem.addAttribute("type", "return value");
-                            break;
-                        case DatabaseMetaData.procedureColumnResult:
-                            columnElem.addAttribute("type", "result column in ResultSet");
-                            break;
-                        default:
-                            columnElem.addAttribute("type", "unknown");
-                            break;
-                    }
-                }
-    
-                addIntAttribute(result, columns, "DATA_TYPE", columnElem, "typeCode");
-                addStringAttribute(result, columns, "TYPE_NAME", columnElem, "type");
-                addIntAttribute(result, columns, "LENGTH", columnElem, "length");
-                addIntAttribute(result, columns, "PRECISION", columnElem, "precision");
-                addShortAttribute(result, columns, "SCALE", columnElem, "short");
-                addShortAttribute(result, columns, "RADIX", columnElem, "radix");
-                if (columns.contains("NULLABLE"))
-                {
-                    switch (result.getInt("NULLABLE"))
-                    {
-                        case DatabaseMetaData.procedureNoNulls:
-                            columnElem.addAttribute("nullable", "false");
-                            break;
-                        case DatabaseMetaData.procedureNullable:
-                            columnElem.addAttribute("nullable", "true");
-                            break;
-                        default:
-                            columnElem.addAttribute("nullable", "unknown");
-                            break;
-                    }
-                }
-                addStringAttribute(result, columns, "REMARKS", columnElem, "remarks");
+                return metaData.getProcedureColumns(catalogName, schemaName, procedureName, _columnPattern);
             }
-        }
-        finally
-        {
-            if (result != null)
+
+            public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException
             {
-                result.close();
+                Set    columns    = getColumnsInResultSet(result);
+                String columnName = result.getString("COLUMN_NAME");
+                
+                if ((columnName != null) && (columnName.length() > 0))
+                {
+                    xmlWriter.writeElementStart(null, "column");
+                    xmlWriter.writeAttribute(null, "name", columnName);
+                    if (columns.contains("COLUMN_TYPE"))
+                    {
+                        try
+                        {
+                            switch (result.getShort("COLUMN_TYPE"))
+                            {
+                                case DatabaseMetaData.procedureColumnIn:
+                                    xmlWriter.writeAttribute(null, "type", "in parameter");
+                                    break;
+                                case DatabaseMetaData.procedureColumnInOut:
+                                    xmlWriter.writeAttribute(null, "type", "in/out parameter");
+                                    break;
+                                case DatabaseMetaData.procedureColumnOut:
+                                    xmlWriter.writeAttribute(null, "type", "out parameter");
+                                    break;
+                                case DatabaseMetaData.procedureColumnReturn:
+                                    xmlWriter.writeAttribute(null, "type", "return value");
+                                    break;
+                                case DatabaseMetaData.procedureColumnResult:
+                                    xmlWriter.writeAttribute(null, "type", "result column in ResultSet");
+                                    break;
+                                default:
+                                    xmlWriter.writeAttribute(null, "type", "unknown");
+                                    break;
+                            }
+                        }
+                        catch (SQLException ex)
+                        {
+                            log("Could not read the COLUMN_TYPE value for the column '" + columnName + "' of procedure '" + procedureName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+                        }
+                    }
+        
+                    addIntAttribute(xmlWriter, "typeCode", result, columns, "DATA_TYPE");
+                    addStringAttribute(xmlWriter, "type", result, columns, "TYPE_NAME");
+                    addIntAttribute(xmlWriter, "length", result, columns, "LENGTH");
+                    addIntAttribute(xmlWriter, "precision", result, columns, "PRECISION");
+                    addShortAttribute(xmlWriter, "short", result, columns, "SCALE");
+                    addShortAttribute(xmlWriter, "radix", result, columns, "RADIX");
+                    if (columns.contains("NULLABLE"))
+                    {
+                        try
+                        {
+                            switch (result.getInt("NULLABLE"))
+                            {
+                                case DatabaseMetaData.procedureNoNulls:
+                                    xmlWriter.writeAttribute(null, "nullable", "false");
+                                    break;
+                                case DatabaseMetaData.procedureNullable:
+                                    xmlWriter.writeAttribute(null, "nullable", "true");
+                                    break;
+                                default:
+                                    xmlWriter.writeAttribute(null, "nullable", "unknown");
+                                    break;
+                            }
+                        }
+                        catch (SQLException ex)
+                        {
+                            log("Could not read the NULLABLE value for the column '" + columnName + "' of procedure '" + procedureName + "' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+                        }
+                    }
+                    addStringAttribute(xmlWriter, "remarks", result, columns, "REMARKS");
+                }
             }
-        }
+
+            public void handleError(SQLException ex)
+            {
+                log("Could not read the columns for procedure '"+procedureName+"' from the result set: " + ex.getStackTrace(), Project.MSG_ERR);
+            }
+        });
     }
 
     /**
@@ -1219,18 +1316,20 @@ public class DumpMetadataTask extends Task
      * @param columnName The name of the column in the result set
      * @param element    The element to add the attribute
      * @param attrName   The name of the attribute to set
-     * @return The string value or <code>null</code>
      */
-    private String addStringAttribute(ResultSet result, Set columns, String columnName, Element element, String attrName) throws SQLException
+    private void addStringAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {
-        String value = null;
-
         if (columns.contains(columnName))
         {
-            value = getString(result, columnName);
-            element.addAttribute(attrName, value);
+            try
+            {
+                xmlWriter.writeAttribute(null, attrName, result.getString(columnName));
+            }
+            catch (SQLException ex)
+            {
+                log("Could not read the value from result set column " + columnName + ":" + ex.getStackTrace(), Project.MSG_ERR);
+            }
         }
-        return value;
     }
 
     /**
@@ -1241,40 +1340,34 @@ public class DumpMetadataTask extends Task
      * @param columnName The name of the column in the result set
      * @param element    The element to add the attribute
      * @param attrName   The name of the attribute to set
-     * @return The string value or <code>null</code>
      */
-    private String addIntAttribute(ResultSet result, Set columns, String columnName, Element element, String attrName) throws SQLException
+    private void addIntAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {
-        String value = null;
-
         if (columns.contains(columnName))
         {
         	try
         	{
-                value = String.valueOf(result.getInt(columnName));
+        	    xmlWriter.writeAttribute(null, attrName, String.valueOf(result.getInt(columnName)));
         	}
         	catch (SQLException ex)
         	{
         		// A few databases do not comply with the jdbc spec and return a string (or null),
         		// so lets try this just in case
-        		value = result.getString(columnName);
+        		String value = result.getString(columnName);
 
         		if (value != null)
         		{
 	        		try
 	        		{
-	        			Integer.parseInt(value);
+	                    xmlWriter.writeAttribute(null, attrName, new Integer(value).toString());
 	        		}
 	        		catch (NumberFormatException parseEx)
 	        		{
-	        			// its no int returned as a string, so lets re-throw the original exception
-	        			throw ex;
+	        			log("Could not parse the value from result set column " + columnName + ":" + ex.getStackTrace(), Project.MSG_ERR);
 	        		}
         		}
         	}
-            element.addAttribute(attrName, value);
         }
-        return value;
     }
 
     /**
@@ -1285,40 +1378,34 @@ public class DumpMetadataTask extends Task
      * @param columnName The name of the column in the result set
      * @param element    The element to add the attribute
      * @param attrName   The name of the attribute to set
-     * @return The string value or <code>null</code>
      */
-    private String addShortAttribute(ResultSet result, Set columns, String columnName, Element element, String attrName) throws SQLException
+    private void addShortAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {
-        String value = null;
-
         if (columns.contains(columnName))
         {
         	try
         	{
-                value = String.valueOf(result.getShort(columnName));
+                xmlWriter.writeAttribute(null, attrName, String.valueOf(result.getShort(columnName)));
         	}
         	catch (SQLException ex)
         	{
         		// A few databases do not comply with the jdbc spec and return a string (or null),
         		// so lets try strings this just in case
-        		value = result.getString(columnName);
+        		String value = result.getString(columnName);
 
         		if (value != null)
         		{
-	        		try
-	        		{
-	        			Short.parseShort(value);
-	        		}
-	        		catch (NumberFormatException parseEx)
-	        		{
-	        			// its no short returned as a string, so lets re-throw the original exception
-	        			throw ex;
-	        		}
+                    try
+                    {
+                        xmlWriter.writeAttribute(null, attrName, new Short(value).toString());
+                    }
+                    catch (NumberFormatException parseEx)
+                    {
+                        log("Could not parse the value from result set column " + columnName + ":" + ex.getStackTrace(), Project.MSG_ERR);
+                    }
         		}
         	}
-            element.addAttribute(attrName, value);
         }
-        return value;
     }
 
     /**
@@ -1329,30 +1416,34 @@ public class DumpMetadataTask extends Task
      * @param columnName The name of the column in the result set
      * @param element    The element to add the attribute
      * @param attrName   The name of the attribute to set
-     * @return The string value or <code>null</code>
      */
-    private String addBooleanAttribute(ResultSet result, Set columns, String columnName, Element element, String attrName) throws SQLException
+    private void addBooleanAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {
-        String value = null;
-
         if (columns.contains(columnName))
         {
-            value = String.valueOf(result.getBoolean(columnName));
-            element.addAttribute(attrName, value);
-        }
-        return value;
-    }
+            try
+            {
+                xmlWriter.writeAttribute(null, attrName, String.valueOf(result.getBoolean(columnName)));
+            }
+            catch (SQLException ex)
+            {
+                // A few databases do not comply with the jdbc spec and return a string (or null),
+                // so lets try strings this just in case
+                String value = result.getString(columnName);
 
-    /**
-     * Extracts a string from the result set.
-     * 
-     * @param result     The result set
-     * @param columnName The name of the column in the result set
-     * @return The string value
-     */
-    private String getString(ResultSet result, String columnName) throws SQLException
-    {
-        return result.getString(columnName);
+                if (value != null)
+                {
+                    try
+                    {
+                        xmlWriter.writeAttribute(null, attrName, new Boolean(value).toString());
+                    }
+                    catch (NumberFormatException parseEx)
+                    {
+                        log("Could not parse the value from result set column " + columnName + ":" + ex.getStackTrace(), Project.MSG_ERR);
+                    }
+                }
+            }
+        }
     }
     
     /**
