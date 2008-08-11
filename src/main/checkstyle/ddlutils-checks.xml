@@ -30,7 +30,7 @@
         <property name="tabWidth" value="4" />
 
         <module name="JavadocType">
-            <property name="versionFormat" value="${checkstyle.version.pattern}"/>
+            <property name="versionFormat" value="\$Revision.*\$"/>
         </module>
 
         <module name="JavadocMethod">
@@ -45,8 +45,7 @@
         </module>
 
         <module name="RegexpHeader">
-            <property name="headerFile"
-                      value='${checkstyle.license.file}'/>
+            <property name="headerFile" value="${checkstyle.header.file}"/>
         </module>
 <!-- 
 
