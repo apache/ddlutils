@@ -189,6 +189,8 @@ public class CloneHelper
         result.setName(source.getName());
         result.setForeignTable(foreignTable);
         result.setAutoIndexPresent(source.isAutoIndexPresent());
+        result.setOnDelete(source.getOnDelete());
+        result.setOnUpdate(source.getOnUpdate());
 
         for (int refIdx = 0; refIdx < source.getReferenceCount(); refIdx++)
         {
