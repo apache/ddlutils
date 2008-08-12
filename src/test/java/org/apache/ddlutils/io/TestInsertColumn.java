@@ -1876,7 +1876,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         List beans2 = getRows("roundtrip2");
 
         assertEquals(new Integer(1), beans1.get(0), "pk");
-        assertEquals(new Integer(1), beans2.get(0), "pk");
+        assertEquals(new Integer(2), beans2.get(0), "pk");
         assertEquals(new Integer(1), beans2.get(0), "avalue");
     }
 
