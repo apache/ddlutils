@@ -29,6 +29,9 @@ import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.platform.derby.DerbyPlatform;
+import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
+import org.apache.ddlutils.platform.mysql.MySql50Platform;
+import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
@@ -451,42 +454,45 @@ public class TestConstraints extends TestAgainstLiveDatabaseBase
      */
     public void testForeignKeyWithOnDeleteRestrict()
     {
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='roundtrip_1'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "  <table name='roundtrip_2'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
-            "    <foreign-key foreignTable='roundtrip_1' onDelete='restrict'>\n"+
-            "      <reference local='avalue' foreign='pk'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        performConstraintsTest(modelXml, true);
-
-        insertRow("roundtrip_1", new Object[] { new Integer(1) });
-        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
-
-        List beansTable1 = getRows("roundtrip_1");
-        List beansTable2 = getRows("roundtrip_2");
-
-        assertEquals(1, beansTable1.size());
-        assertEquals(1, beansTable2.size());
-        assertEquals(new Integer(1), beansTable1.get(0), "pk");
-        assertEquals(new Integer(5), beansTable2.get(0), "pk");
-        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
-
-        try
+        if (!FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            deleteRow("roundtrip_1", new Object[] { new Integer(1) });
-            fail();
+            final String modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip_1'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "  </table>\n"+
+                "  <table name='roundtrip_2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+                "    <foreign-key foreignTable='roundtrip_1' onDelete='restrict'>\n"+
+                "      <reference local='avalue' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+    
+            performConstraintsTest(modelXml, true);
+    
+            insertRow("roundtrip_1", new Object[] { new Integer(1) });
+            insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+    
+            List beansTable1 = getRows("roundtrip_1");
+            List beansTable2 = getRows("roundtrip_2");
+    
+            assertEquals(1, beansTable1.size());
+            assertEquals(1, beansTable2.size());
+            assertEquals(new Integer(1), beansTable1.get(0), "pk");
+            assertEquals(new Integer(5), beansTable2.get(0), "pk");
+            assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+    
+            try
+            {
+                deleteRow("roundtrip_1", new Object[] { new Integer(1) });
+                fail();
+            }
+            catch (DdlUtilsException ex)
+            {}
         }
-        catch (DdlUtilsException ex)
-        {}
     }
 
     /**
@@ -582,7 +588,9 @@ public class TestConstraints extends TestAgainstLiveDatabaseBase
      */
     public void testForeignKeyWithOnDeleteSetDefault()
     {
-        if (!DerbyPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (!DerbyPlatform.DATABASENAME.equals(getPlatform().getName()) &&
+            !MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) &&
+            !MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
         {
             final String modelXml = 
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
@@ -633,42 +641,45 @@ public class TestConstraints extends TestAgainstLiveDatabaseBase
      */
     public void testForeignKeyWithOnUpdateRestrict()
     {
-        final String modelXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
-            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='roundtrip_1'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "  </table>\n"+
-            "  <table name='roundtrip_2'>\n"+
-            "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='avalue' type='INTEGER' required='true'/>\n"+
-            "    <foreign-key foreignTable='roundtrip_1' onUpdate='restrict'>\n"+
-            "      <reference local='avalue' foreign='pk'/>\n"+
-            "    </foreign-key>\n"+
-            "  </table>\n"+
-            "</database>";
-
-        performConstraintsTest(modelXml, true);
-
-        insertRow("roundtrip_1", new Object[] { new Integer(1) });
-        insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
-
-        List beansTable1 = getRows("roundtrip_1");
-        List beansTable2 = getRows("roundtrip_2");
-
-        assertEquals(1, beansTable1.size());
-        assertEquals(1, beansTable2.size());
-        assertEquals(new Integer(1), beansTable1.get(0), "pk");
-        assertEquals(new Integer(5), beansTable2.get(0), "pk");
-        assertEquals(new Integer(1), beansTable2.get(0), "avalue");
-
-        try
+        if (!FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            updateRow("roundtrip_1", (DynaBean)beansTable1.get(0), new Object[] { new Integer(5) });
-            fail();
+            final String modelXml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip_1'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "  </table>\n"+
+                "  <table name='roundtrip_2'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='avalue' type='INTEGER' required='true'/>\n"+
+                "    <foreign-key foreignTable='roundtrip_1' onUpdate='restrict'>\n"+
+                "      <reference local='avalue' foreign='pk'/>\n"+
+                "    </foreign-key>\n"+
+                "  </table>\n"+
+                "</database>";
+    
+            performConstraintsTest(modelXml, true);
+    
+            insertRow("roundtrip_1", new Object[] { new Integer(1) });
+            insertRow("roundtrip_2", new Object[] { new Integer(5), new Integer(1) });
+    
+            List beansTable1 = getRows("roundtrip_1");
+            List beansTable2 = getRows("roundtrip_2");
+    
+            assertEquals(1, beansTable1.size());
+            assertEquals(1, beansTable2.size());
+            assertEquals(new Integer(1), beansTable1.get(0), "pk");
+            assertEquals(new Integer(5), beansTable2.get(0), "pk");
+            assertEquals(new Integer(1), beansTable2.get(0), "avalue");
+    
+            try
+            {
+                updateRow("roundtrip_1", (DynaBean)beansTable1.get(0), new Object[] { new Integer(5) });
+                fail();
+            }
+            catch (DdlUtilsException ex)
+            {}
         }
-        catch (DdlUtilsException ex)
-        {}
     }
 
     /**
@@ -774,7 +785,9 @@ public class TestConstraints extends TestAgainstLiveDatabaseBase
      */
     public void testForeignKeyWithOnUpdateSetDefault()
     {
-        if (!DerbyPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (!DerbyPlatform.DATABASENAME.equals(getPlatform().getName()) &&
+            !MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) &&
+            !MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
         {
             final String modelXml =
                 "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
@@ -809,13 +822,13 @@ public class TestConstraints extends TestAgainstLiveDatabaseBase
     
             updateRow("roundtrip_1", (DynaBean)beansTable1.get(1), new Object[] { new Integer(0) });
     
-            beansTable1 = getRows("roundtrip_1");
-            beansTable2 = getRows("roundtrip_2");
+            beansTable1 = getRows("roundtrip_1", "pk");
+            beansTable2 = getRows("roundtrip_2", "pk");
     
             assertEquals(2, beansTable1.size());
             assertEquals(1, beansTable2.size());
-            assertEquals(new Integer(1), beansTable1.get(0), "pk");
-            assertEquals(new Integer(0), beansTable1.get(1), "pk");
+            assertEquals(new Integer(0), beansTable1.get(0), "pk");
+            assertEquals(new Integer(1), beansTable1.get(1), "pk");
             assertEquals(new Integer(5), beansTable2.get(0), "pk");
             assertEquals(new Integer(1), beansTable2.get(0), "avalue");
         }
