@@ -284,6 +284,37 @@ public class TestConstraints extends TestAgainstLiveDatabaseBase
     }
 
     /**
+     * Test for DDLUTILS-199. 
+     */
+    public void testAutoIncrementPrimaryKeyWithUnderscoreInName()
+    {
+        // we need special catering for Sybase which does not support identity for INTEGER columns
+        final String modelXml; 
+
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                       "  <table name='roundtrip'>\n"+
+                       "    <column name='PK_Column' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+        else
+        {
+            modelXml = "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                       "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                       "  <table name='roundtrip'>\n"+
+                       "    <column name='PK_Column' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                       "  </table>\n"+
+                       "</database>";
+        }
+
+        performConstraintsTest(modelXml,
+                               getPlatformInfo().getIdentityStatusReadingSupported());
+    }
+
+    /**
      * Tests a simple index. 
      */
     public void testIndex()
