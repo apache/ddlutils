@@ -101,6 +101,163 @@ public class TestAlteration extends TestAgainstLiveDatabaseBase
     }
 
     /**
+     * Test for DDLUTILS-208.
+     */
+    public void testChangeColumnOrderWithAutoIncrementPK()
+    {
+        final String model1Xml; 
+        final String model2Xml; 
+
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            model1Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue2' type='INTEGER'/>\n"+
+                "  </table>\n"+
+                "</database>";
+            model2Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='NUMERIC' size='12,0' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue2' type='INTEGER'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            model1Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue2' type='INTEGER'/>\n"+
+                "  </table>\n"+
+                "</database>";
+            model2Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue2' type='INTEGER'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { null, "test", "value", null, null });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals((Object)"test", beans.get(0), "avalue1");
+        assertEquals((Object)null, beans.get(0), "avalue2");
+        assertEquals(new Double(1.0), beans.get(0), "avalue3");
+        assertEquals((Object)"value", beans.get(0), "avalue4");
+    }
+
+    /**
+     * Test for DDLUTILS-208.
+     */
+    public void testChangeColumnOrderWithAutoIncrementColumn()
+    {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
+        final String model1Xml; 
+        final String model2Xml; 
+
+        if (SybasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            model1Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue2' type='NUMERIC' size='12,0' required='true' autoIncrement='true'/>\n"+
+                "  </table>\n"+
+                "</database>";
+            model2Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue2' type='NUMERIC' size='12,0' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+        else
+        {
+            model1Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue2' type='INTEGER' required='true' autoIncrement='true'/>\n"+
+                "  </table>\n"+
+                "</database>";
+            model2Xml = 
+                "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+                "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+                "  <table name='roundtrip'>\n"+
+                "    <column name='pk' type='INTEGER' primaryKey='true' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue1' type='VARCHAR' size='32'/>\n"+
+                "    <column name='avalue2' type='INTEGER' required='true' autoIncrement='true'/>\n"+
+                "    <column name='avalue3' type='DOUBLE' default='1.0'/>\n"+
+                "    <column name='avalue4' type='VARCHAR' size='5'/>\n"+
+                "  </table>\n"+
+                "</database>";
+        }
+
+        createDatabase(model1Xml);
+
+        insertRow("roundtrip", new Object[] { new Integer(1), "test", "value", null, null });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans = getRows("roundtrip");
+
+        assertEquals((Object)"test",  beans.get(0), "avalue1");
+        assertEquals(new Integer(1),  beans.get(0), "avalue2");
+        assertEquals(new Double(1.0), beans.get(0), "avalue3");
+        assertEquals((Object)"value", beans.get(0), "avalue4");
+    }
+
+    /**
      * Tests the removal of a column.
      */
     public void testDropColumn()
