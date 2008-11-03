@@ -103,44 +103,61 @@ public class MetaDataColumnDescriptor
      */
     public Object readColumn(ResultSet resultSet) throws SQLException
     {
-        ResultSetMetaData metaData = resultSet.getMetaData();
-        int               foundIdx = -1;
+        Object result = null;
 
-        for (int idx = 1; (foundIdx < 0) && (idx <= metaData.getColumnCount()); idx++)
+        try
         {
-            if (_columnName.equals(metaData.getColumnName(idx).toUpperCase()))
-            {
-                foundIdx = idx;
-            }
-        }
-        if (foundIdx > 0)
-        {
-            Object result = null;
-
             switch (_jdbcType)
             {
                 case Types.BIT:
-                    result = new Boolean(resultSet.getBoolean(foundIdx));
+                    result = new Boolean(resultSet.getBoolean(_columnName));
                     break;
                 case Types.INTEGER:
-                    result = new Integer(resultSet.getInt(foundIdx));
+                    result = new Integer(resultSet.getInt(_columnName));
                     break;
                 case Types.TINYINT:
-                    result = new Short(resultSet.getShort(foundIdx));
+                    result = new Short(resultSet.getShort(_columnName));
                     break;
                 default:
-                    result = resultSet.getString(foundIdx);
+                    result = resultSet.getString(_columnName);
                 break;
             }
             if (resultSet.wasNull())
             {
                 result = null;
             }
-            return result;
         }
-        else
+        catch (SQLException ex)
         {
-            return _defaultValue;
+            if (isColumnInResultSet(resultSet))
+            {
+                throw ex;
+            }
+            else
+            {
+                result = _defaultValue;
+            }
         }
+        return result;
+    }
+
+    /**
+     * Determines whether a value for the specified column is present in the given result set.
+     * 
+     * @param resultSet The result set
+     * @return <code>true</code> if the column is present in the result set
+     */
+    private boolean isColumnInResultSet(ResultSet resultSet) throws SQLException
+    {
+        ResultSetMetaData metaData = resultSet.getMetaData();
+
+        for (int idx = 1; idx <= metaData.getColumnCount(); idx++)
+        {
+            if (_columnName.equals(metaData.getColumnName(idx).toUpperCase()))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
