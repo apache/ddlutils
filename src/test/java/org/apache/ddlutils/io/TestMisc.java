@@ -37,6 +37,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.derby.DerbyPlatform;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
+import org.apache.ddlutils.platform.mssql.MSSqlPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
@@ -1268,7 +1269,8 @@ public class TestMisc extends TestAgainstLiveDatabaseBase
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
             PostgreSqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            DerbyPlatform.DATABASENAME.equals(getPlatform().getName()))
+            DerbyPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MSSqlPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             query.append(" AS ");
             if (getPlatform().isDelimitedIdentifierModeOn())

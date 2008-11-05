@@ -351,9 +351,16 @@ public class MSSqlBuilder extends SqlBuilder
     {
         // Sql Server per default does not allow us to insert values explicitly into
         // identity columns. However, we can change this behavior
-        boolean hasIdentityColumns = targetTable.getAutoIncrementColumns().length > 0;
+        // We need to this only if
+        // - there is a column in both tables that is auto increment only in the target table, or
+        // - there is a column in both tables that is auto increment in both tables
+        Column[] targetIdentityColumns = targetTable.getAutoIncrementColumns();
 
-        if (hasIdentityColumns)
+        // Sql Server allows only one identity column, so let's take a shortcut here
+        boolean needToAllowIdentityInsert = (targetIdentityColumns.length > 0) &&
+                                            (sourceTable.findColumn(targetIdentityColumns[0].getName(), getPlatform().isDelimitedIdentifierModeOn()) != null);
+
+        if (needToAllowIdentityInsert)
         {
             print("SET IDENTITY_INSERT ");
             printIdentifier(getTableName(targetTable));
@@ -362,7 +369,7 @@ public class MSSqlBuilder extends SqlBuilder
         }
         super.copyData(sourceTable, targetTable);
         // We have to turn it off ASAP because it can be on only for one table per session
-        if (hasIdentityColumns)
+        if (needToAllowIdentityInsert)
         {
             print("SET IDENTITY_INSERT ");
             printIdentifier(getTableName(targetTable));
