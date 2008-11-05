@@ -47,6 +47,8 @@ public class PlatformConfiguration
     private String _catalogPattern;
     /** The schema pattern. */
     private String _schemaPattern;
+    /** The platform object. */
+    private Platform _platform;
 
     /**
      * Returns the database type.
@@ -197,40 +199,41 @@ public class PlatformConfiguration
      */
     public Platform getPlatform() throws BuildException
     {
-        Platform platform = null;
-
-        if (_databaseType == null)
+        if (_platform == null)
         {
-            if (_dataSource == null)
-            {
-                throw new BuildException("No database specified.");
-            }
             if (_databaseType == null)
             {
-                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource.getDriverClassName(),
-                                                                          _dataSource.getUrl());
+                if (_dataSource == null)
+                {
+                    throw new BuildException("No database specified.");
+                }
+                if (_databaseType == null)
+                {
+                    _databaseType = new PlatformUtils().determineDatabaseType(_dataSource.getDriverClassName(),
+                                                                              _dataSource.getUrl());
+                }
+                if (_databaseType == null)
+                {
+                    _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
+                }
             }
-            if (_databaseType == null)
+            try
             {
-                _databaseType = new PlatformUtils().determineDatabaseType(_dataSource);
+                _platform = PlatformFactory.createNewPlatformInstance(_databaseType);
             }
+            catch (Exception ex)
+            {
+                throw new BuildException("Database type "+_databaseType+" is not supported.", ex);
+            }
+            if (_platform == null)
+            {
+                throw new BuildException("Database type "+_databaseType+" is not supported.");
+            }
+            _platform.setDataSource(_dataSource);
+            _platform.setDelimitedIdentifierModeOn(isUseDelimitedSqlIdentifiers());
+            _platform.setForeignKeysSorted(isSortForeignKeys());
         }
-        try
-        {
-            platform = PlatformFactory.createNewPlatformInstance(_databaseType);
-        }
-        catch (Exception ex)
-        {
-            throw new BuildException("Database type "+_databaseType+" is not supported.", ex);
-        }
-        if (platform == null)
-        {
-            throw new BuildException("Database type "+_databaseType+" is not supported.");
-        }
-        platform.setDataSource(_dataSource);
-        platform.setDelimitedIdentifierModeOn(isUseDelimitedSqlIdentifiers());
-        platform.setForeignKeysSorted(isSortForeignKeys());
 
-        return platform;
+        return _platform;
     }
 }

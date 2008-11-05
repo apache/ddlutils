@@ -52,7 +52,6 @@ public class TestWriteDataToDatabaseCommand extends TestTaskBase
             subTask.setFailOnError(true);
             subTask.setUseBatchMode(useBatchMode);
             subTask.setEnsureForeignKeyOrder(ensureFkOrder);
-            task.setUseDelimitedSqlIdentifiers(getPlatform().isDelimitedIdentifierModeOn());
             task.addWriteDataToDatabase(subTask);
             task.setModelName("roundtriptest");
             task.execute();

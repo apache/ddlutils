@@ -56,7 +56,7 @@ public abstract class TestTaskBase extends TestAgainstLiveDatabaseBase
         task.addConfiguredDatabase((BasicDataSource)getDataSource());
         task.setCatalogPattern(catalog);
         task.setSchemaPattern(schema);
-        task.setUseDelimitedSqlIdentifiers(getPlatform().isDelimitedIdentifierModeOn());
+        task.setUseDelimitedSqlIdentifiers(isUseDelimitedIdentifiers());
         return task;
     }
 
@@ -82,7 +82,7 @@ public abstract class TestTaskBase extends TestAgainstLiveDatabaseBase
         task.addConfiguredDatabase((BasicDataSource)getDataSource());
         task.setCatalogPattern(catalog);
         task.setSchemaPattern(schema);
-        task.setUseDelimitedSqlIdentifiers(getPlatform().isDelimitedIdentifierModeOn());
+        task.setUseDelimitedSqlIdentifiers(isUseDelimitedIdentifiers());
         return task;
     }
 }

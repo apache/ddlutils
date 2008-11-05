@@ -29,11 +29,10 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
     /**
      * Adds the writeSchemaToFile sub task to the given task, executes it, and checks its output.
      *
-     * @param task                    The task
-     * @param useDelimitedIdentifiers Whether to run with delimited identifiers
-     * @param expectedModel           The expected model
+     * @param task          The task
+     * @param expectedModel The expected model
      */
-    private void runTask(DatabaseToDdlTask task, boolean useDelimitedIdentifiers, Database expectedModel) throws IOException
+    private void runTask(DatabaseToDdlTask task, Database expectedModel) throws IOException
     {
         WriteSchemaToFileCommand subTask = new WriteSchemaToFileCommand();
         File                     tmpFile = File.createTempFile("schema", ".xml");
@@ -41,14 +40,13 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         try
         {
             subTask.setOutputFile(tmpFile);
-            task.setUseDelimitedSqlIdentifiers(useDelimitedIdentifiers);
             task.addWriteSchemaToFile(subTask);
             task.setModelName("roundtriptest");
             task.execute();
 
             assertEquals(expectedModel,
                          new DatabaseIO().read(tmpFile),
-                         useDelimitedIdentifiers);
+                         isUseDelimitedIdentifiers());
         }
         finally
         {
@@ -64,7 +62,7 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
      */
     public void testEmptyDatabase() throws IOException
     {
-        runTask(getDatabaseToDdlTaskInstance(), false, new Database("roundtriptest"));
+        runTask(getDatabaseToDdlTaskInstance(), new Database("roundtriptest"));
     }
 
     /**
@@ -92,7 +90,7 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
             "</database>";
 
         createDatabase(modelXml);
-        runTask(getDatabaseToDdlTaskInstance(), false, readModelFromDatabase("roundtriptest"));
+        runTask(getDatabaseToDdlTaskInstance(), readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -100,6 +98,11 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
      */
     public void testSimpleModelWithDelimitedIdentifiers() throws IOException
     {
+        if (!isUseDelimitedIdentifiers())
+        {
+            return;
+        }
+
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -119,9 +122,8 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(modelXml);
-        runTask(getDatabaseToDdlTaskInstance(), true, readModelFromDatabase("roundtriptest"));
+        runTask(getDatabaseToDdlTaskInstance(), readModelFromDatabase("roundtriptest"));
     }
 
     /**
@@ -157,8 +159,15 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTables("roundtrip1");
-        runTask(task, false, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTables("roundtrip1");
+        }
+        else
+        {
+            task.setIncludeTables("ROUNDTRIP1");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -189,10 +198,17 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTables("roundtrip1");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTables("roundtrip1");
+        }
+        else
+        {
+            task.setIncludeTables("ROUNDTRIP1");
+        }
         try
         {
-            runTask(task, false, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -209,14 +225,14 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
@@ -224,19 +240,25 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(model1Xml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTableFilter("Round.*\\s1");
-        runTask(task, true, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTableFilter("Round.*1");
+        }
+        else
+        {
+            task.setIncludeTableFilter("ROUND.*1");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -247,31 +269,37 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(modelXml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTableFilter("Round.*\\s1");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTableFilter("Round.*1");
+        }
+        else
+        {
+            task.setIncludeTableFilter("ROUND.*1");
+        }
         try
         {
-            runTask(task, true, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -330,8 +358,15 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTables("roundtrip1,roundtrip3");
-        runTask(task, false, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTables("roundtrip1,roundtrip3");
+        }
+        else
+        {
+            task.setIncludeTables("ROUNDTRIP1,ROUNDTRIP3");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -369,10 +404,17 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTables("roundtrip1,roundtrip3");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTables("roundtrip1,roundtrip3");
+        }
+        else
+        {
+            task.setIncludeTables("ROUNDTRIP1,ROUNDTRIP3");
+        }
         try
         {
-            runTask(task, false, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -389,24 +431,24 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 3'>\n"+
+            "  <table name='Roundtrip_3'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
@@ -414,29 +456,35 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 3'>\n"+
+            "  <table name='Roundtrip_3'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(model1Xml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTableFilter(".*trip [1|3]");
-        runTask(task, true, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTableFilter(".*trip_[1|3]");
+        }
+        else
+        {
+            task.setIncludeTableFilter(".*TRIP_[1|3]");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -447,38 +495,44 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 3'>\n"+
+            "  <table name='Roundtrip_3'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(modelXml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTableFilter(".*trip\\s*[1|3]");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTableFilter(".*trip_*[1|3]");
+        }
+        else
+        {
+            task.setIncludeTableFilter(".*TRIP_*[1|3]");
+        }
         try
         {
-            runTask(task, true, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -520,8 +574,15 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTables("roundtrip2");
-        runTask(task, false, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTables("roundtrip2");
+        }
+        else
+        {
+            task.setExcludeTables("ROUNDTRIP2");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -552,10 +613,17 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTables("roundtrip1");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTables("roundtrip1");
+        }
+        else
+        {
+            task.setExcludeTables("ROUNDTRIP1");
+        }
         try
         {
-            runTask(task, false, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -572,14 +640,14 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
@@ -587,19 +655,25 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(model1Xml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTableFilter("Round.*\\s2");
-        runTask(task, true, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTableFilter("Round.*_2");
+        }
+        else
+        {
+            task.setExcludeTableFilter("ROUND.*_2");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -610,31 +684,37 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(modelXml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTableFilter("Round.*\\s2");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTableFilter("Round.*_2");
+        }
+        else
+        {
+            task.setExcludeTableFilter("ROUND.*_2");
+        }
         try
         {
-            runTask(task, true, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -683,8 +763,15 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTables("roundtrip1,roundtrip3");
-        runTask(task, false, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTables("roundtrip1,roundtrip3");
+        }
+        else
+        {
+            task.setExcludeTables("ROUNDTRIP1,ROUNDTRIP3");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -722,10 +809,17 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTables("roundtrip1,roundtrip3");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTables("roundtrip1,roundtrip3");
+        }
+        else
+        {
+            task.setExcludeTables("ROUNDTRIP1,ROUNDTRIP3");
+        }
         try
         {
-            runTask(task, false, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -742,24 +836,24 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 3'>\n"+
+            "  <table name='Roundtrip_3'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
@@ -767,22 +861,28 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(model1Xml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTableFilter(".*trip [1|3]");
-        runTask(task, true, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTableFilter(".*trip_[1|3]");
+        }
+        else
+        {
+            task.setExcludeTableFilter(".*TRIP_[1|3]");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -793,38 +893,44 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String modelXml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 3'>\n"+
+            "  <table name='Roundtrip_3'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(modelXml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setExcludeTableFilter(".*trip\\s*[1|3]");
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setExcludeTableFilter(".*trip_*[1|3]");
+        }
+        else
+        {
+            task.setExcludeTableFilter(".*TRIP_*[1|3]");
+        }
         try
         {
-            runTask(task, true, readModelFromDatabase("roundtriptest"));
+            runTask(task, readModelFromDatabase("roundtriptest"));
             fail();
         }
         catch (BuildException ex)
@@ -841,28 +947,28 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 1'>\n"+
+            "  <table name='Roundtrip_1'>\n"+
             "    <column name='pk' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 3'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_3'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 2'>\n"+
+            "  <table name='Roundtrip_2'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 2'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_2'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 3'>\n"+
+            "  <table name='Roundtrip_3'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='VARCHAR' size='32'/>\n"+
-            "    <foreign-key foreignTable='Roundtrip 1'>\n"+
+            "    <foreign-key foreignTable='Roundtrip_1'>\n"+
             "      <reference local='avalue' foreign='pk'/>\n"+
             "    </foreign-key>\n"+
             "  </table>\n"+
-            "  <table name='Roundtrip 4'>\n"+
+            "  <table name='Roundtrip_4'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
@@ -870,20 +976,27 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
         final String model2Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
-            "  <table name='Roundtrip 4'>\n"+
+            "  <table name='Roundtrip_4'>\n"+
             "    <column name='pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='avalue' type='INTEGER'/>\n"+
             "  </table>\n"+
             "</database>";
 
-        getPlatform().setDelimitedIdentifierModeOn(true);
         createDatabase(model1Xml);
 
         DatabaseToDdlTask task = getDatabaseToDdlTaskInstance();
 
-        task.setIncludeTables("Roundtrip 1,Roundtrip 3,Roundtrip 4");
-        task.setExcludeTables("Roundtrip 1,Roundtrip 3");
-        runTask(task, true, parseDatabaseFromString(model2Xml));
+        if (isUseDelimitedIdentifiers())
+        {
+            task.setIncludeTables("Roundtrip_1,Roundtrip_3,Roundtrip_4");
+            task.setExcludeTables("Roundtrip_1,Roundtrip_3");
+        }
+        else
+        {
+            task.setIncludeTables("ROUNDTRIP_1,ROUNDTRIP_3,ROUNDTRIP_4");
+            task.setExcludeTables("ROUNDTRIP_1,ROUNDTRIP_3");
+        }
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 
     /**
@@ -932,6 +1045,6 @@ public class TestWriteSchemaToFileCommand extends TestTaskBase
 
         task.setIncludeTableFilter(".*[1|2|3]");
         task.setExcludeTableFilter(".*[1|3]");
-        runTask(task, false, parseDatabaseFromString(model2Xml));
+        runTask(task, parseDatabaseFromString(model2Xml));
     }
 }

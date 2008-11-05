@@ -79,13 +79,20 @@ public class WriteDataToFileCommand extends ConvertingDatabaseCommand
     /**
      * {@inheritDoc}
      */
+    public boolean isRequiringModel()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void execute(DatabaseTaskBase task, Database model) throws BuildException
     {
         try
         {
             getDataIO().setDetermineSchema(_determineSchema);
-            getDataIO().setSchemaPattern(task.getPlatformConfiguration().getSchemaPattern());
-            getDataIO().writeDataToXML(getPlatform(),
+            getDataIO().writeDataToXML(getPlatform(), model,
                                        new FileOutputStream(_outputFile), _encoding);
             _log.info("Written data XML to file" + _outputFile.getAbsolutePath());
         }

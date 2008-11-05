@@ -342,6 +342,16 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
     }
 
     /**
+     * Determines whether the test shall use delimited identifiers.
+     * 
+     * @return Whether to use delimited identifiers
+     */
+    protected boolean isUseDelimitedIdentifiers()
+    {
+        return _useDelimitedIdentifiers;
+    }
+
+    /**
      * Returns the data source.
      * 
      * @return The data source
@@ -528,8 +538,9 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
      * 
      * @param tableName    The name of the table (case insensitive)
      * @param columnValues The values for the columns in order of definition
+     * @return The dyna bean for the row
      */
-    protected void insertRow(String tableName, Object[] columnValues)
+    protected DynaBean insertRow(String tableName, Object[] columnValues)
     {
         Table    table = getModel().findTable(tableName);
         DynaBean bean  = getModel().createDynaBeanFor(table);
@@ -541,6 +552,7 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
             bean.set(column.getName(), columnValues[idx]);
         }
         getPlatform().insert(getModel(), bean);
+        return bean;
     }
 
     /**
@@ -549,8 +561,9 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
      * @param tableName    The name of the table (case insensitive)
      * @param oldBean      The bean representing the current row
      * @param columnValues The values for the columns in order of definition
+     * @returne The dyna bean for the new row
      */
-    protected void updateRow(String tableName, DynaBean oldBean, Object[] columnValues)
+    protected DynaBean updateRow(String tableName, DynaBean oldBean, Object[] columnValues)
     {
         Table    table = getModel().findTable(tableName);
         DynaBean bean  = getModel().createDynaBeanFor(table);
@@ -562,6 +575,7 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
             bean.set(column.getName(), columnValues[idx]);
         }
         getPlatform().update(getModel(), oldBean, bean);
+        return bean;
     }
 
     /**
@@ -930,7 +944,9 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
      */
     protected Database getAdjustedModel()
     {
-        return adjustModel(getModel());
+        Database model = getModel();
+
+        return model == null ? null : adjustModel(model);
     }
 
     /**
