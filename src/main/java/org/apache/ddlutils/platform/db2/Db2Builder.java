@@ -149,7 +149,7 @@ public class Db2Builder extends SqlBuilder
                 {
                     sizeSpec = getPlatformInfo().getDefaultSize(targetColumn.getTypeCode());
                 }
-                type = "CHAR(" +sizeSpec.toString() + ")";
+                type = "CHAR(" + sizeSpec.toString() + ")";
             }
 
             print("CAST(");
