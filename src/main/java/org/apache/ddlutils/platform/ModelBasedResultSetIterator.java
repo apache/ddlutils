@@ -135,7 +135,7 @@ public class ModelBasedResultSetIterator implements Iterator
                 // the JDBC driver gave us enough meta data info
                 table = model.findTable(tableOfColumn, _caseSensitive);
             }
-            else
+            if (table == null)
             {
                 // not enough info in the meta data of the result set, lets try the
                 // user-supplied query hints

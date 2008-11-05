@@ -34,7 +34,12 @@ import junit.framework.Test;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.platform.derby.DerbyPlatform;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
+import org.apache.ddlutils.platform.mysql.MySql50Platform;
+import org.apache.ddlutils.platform.mysql.MySqlPlatform;
+import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -1214,5 +1219,73 @@ public class TestMisc extends TestAgainstLiveDatabaseBase
         assertEquals((Object)"bar",  beans1.get(0), "pk2");
         assertEquals(new Integer(2), beans2.get(0), "pk1");
         assertEquals((Object)"bar",  beans2.get(0), "pk2");
+    }
+
+    /**
+     * Test for DDLUTILS-227.
+     */
+    public void testDdlUtils227() throws Exception
+    {
+        final String modelXml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+            "  <table name='Roundtrip'>\n"+
+            "    <column name='Pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='Avalue' type='VARCHAR'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(modelXml);
+
+        Database readModel = readModelFromDatabase("roundtriptest");
+        
+        assertEquals(getAdjustedModel(),
+                     readModel);
+
+        insertRow("Roundtrip", new Object[] { new Integer(1), "foo" });
+
+        List beans = getRows("Roundtrip");
+
+        assertEquals(1, beans.size());
+        assertEquals(new Integer(1), beans.get(0), "Pk");
+        assertEquals((Object)"foo",  beans.get(0), "Avalue");
+
+        Table        table = getModel().findTable("Roundtrip", getPlatform().isDelimitedIdentifierModeOn());
+        StringBuffer query = new StringBuffer();
+
+        query.append("SELECT * FROM (SELECT * FROM ");
+        if (getPlatform().isDelimitedIdentifierModeOn())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        query.append(table.getName());
+        if (getPlatform().isDelimitedIdentifierModeOn())
+        {
+            query.append(getPlatformInfo().getDelimiterToken());
+        }
+        query.append(")");
+        // Some JDBC drivers do not allow us to perform the query without an explicit alias 
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            PostgreSqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            DerbyPlatform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            query.append(" AS ");
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+            query.append(table.getName());
+            if (getPlatform().isDelimitedIdentifierModeOn())
+            {
+                query.append(getPlatformInfo().getDelimiterToken());
+            }
+        }
+
+        beans = getPlatform().fetch(getModel(), query.toString(), new Table[] { table });
+
+        assertEquals(1, beans.size());
+        assertEquals(new Integer(1), beans.get(0), "Pk");
+        assertEquals((Object)"foo",  beans.get(0), "Avalue");
     }
 }
