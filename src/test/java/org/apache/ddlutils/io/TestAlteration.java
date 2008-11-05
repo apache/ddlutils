@@ -181,7 +181,8 @@ public class TestAlteration extends TestAgainstLiveDatabaseBase
      */
     public void testChangeColumnOrderWithAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isMultipleIdentityColumnsSupported())
         {
             return;
         }

@@ -26,6 +26,7 @@ import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.ModelException;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
 
 /**
@@ -155,11 +156,30 @@ public class HsqlDbBuilder extends SqlBuilder
         if (ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn) ||
             ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn))
         {
+            boolean needSubstr = TypeMap.isTextType(targetColumn.getTypeCode()) && (targetColumn.getSize() != null);
+
+            if (needSubstr)
+            {
+                print("SUBSTR(");
+            }
             print("CAST(");
             printIdentifier(getColumnName(sourceColumn));
             print(" AS ");
-            print(getSqlType(targetColumn));
+            if (needSubstr)
+            {
+                print(getNativeType(targetColumn));
+            }
+            else
+            {
+                print(getSqlType(targetColumn));
+            }
             print(")");
+            if (needSubstr)
+            {
+                print(",1,");
+                print(targetColumn.getSize());
+                print(")");
+            }
         }
         else {
             super.writeCastExpression(sourceColumn, targetColumn);

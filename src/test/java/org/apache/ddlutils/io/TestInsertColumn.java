@@ -26,6 +26,7 @@ import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
+import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
@@ -331,9 +332,10 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            // MySql ignores that the type is CHAR(8) and trims the value
+            // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue);
         }
         else
@@ -484,6 +486,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testAddAndInsertPKAndMultipleColumns()
     {
+        if (!getPlatformInfo().isMixingIdentityAndNormalPrimaryKeyColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -893,9 +900,10 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            // MySql ignores that the type is CHAR(8) and trims the value
+            // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue);
         }
         else
@@ -1178,9 +1186,10 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            // MySql ignores that the type is CHAR(8) and trims the value
+                // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue);
         }
         else
@@ -1503,9 +1512,10 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 
         assertEquals(new Integer(2),  beans.get(0), "avalue1");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            // MySql ignores that the type is CHAR(8) and trims the value
+            // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue2);
         }
         else
@@ -1834,9 +1844,10 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 
         assertEquals(new Integer(2), beans.get(0), "avalue1");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            // MySql ignores that the type is CHAR(8) and trims the value
+                // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue2);
         }
         else
@@ -2185,9 +2196,10 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 
         assertEquals(new Integer(1), beans2.get(0), "pk");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            // MySql ignores that the type is CHAR(8) and trims the value
+                // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", pk1);
             assertEquals("text", avalue);
         }
@@ -2759,9 +2771,10 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(new Integer(2), beans2.get(0), "pk");
         assertEquals(new Integer(1), beans2.get(0), "avalue1");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
-            // MySql ignores that the type is CHAR(8) and trims the value
+                // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", pk2);
             assertEquals("text", avalue2);
         }

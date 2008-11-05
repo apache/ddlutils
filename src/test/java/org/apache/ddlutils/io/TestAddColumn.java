@@ -27,7 +27,6 @@ import junit.framework.Test;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
-import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
@@ -507,10 +506,6 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
         if (isSybase)
         {
             assertEquals(new BigDecimal(1), beans.get(0), "pk");
-        }
-        else if (HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(0), beans.get(0), "pk");
         }
         else
         {
