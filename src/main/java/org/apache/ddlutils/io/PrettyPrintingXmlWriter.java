@@ -307,20 +307,23 @@ public class PrettyPrintingXmlWriter
      */
     public void writeAttribute(String namespaceUri, String localPart, String value) throws DdlUtilsXMLException
     {
-        try
+        if (value != null)
         {
-            if (namespaceUri == null)
+            try
             {
-                _writer.writeAttribute(localPart, value);
+                if (namespaceUri == null)
+                {
+                    _writer.writeAttribute(localPart, value);
+                }
+                else
+                {
+                    _writer.writeAttribute(namespaceUri, localPart, value);
+                }
             }
-            else
+            catch (XMLStreamException ex)
             {
-                _writer.writeAttribute(namespaceUri, localPart, value);
+                throwException(ex);
             }
-        }
-        catch (XMLStreamException ex)
-        {
-            throwException(ex);
         }
     }
 
@@ -331,13 +334,16 @@ public class PrettyPrintingXmlWriter
      */
     public void writeCData(String data) throws DdlUtilsXMLException
     {
-        try
+        if (data != null)
         {
-            _writer.writeCData(data);
-        }
-        catch (XMLStreamException ex)
-        {
-            throwException(ex);
+            try
+            {
+                _writer.writeCData(data);
+            }
+            catch (XMLStreamException ex)
+            {
+                throwException(ex);
+            }
         }
     }
 }
