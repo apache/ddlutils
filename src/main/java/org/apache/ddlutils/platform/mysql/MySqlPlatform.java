@@ -138,7 +138,8 @@ public class MySqlPlatform extends PlatformImplBase
                 {
                     AddColumnChange addColumnChange = (AddColumnChange)change;
 
-                    return !addColumnChange.getNewColumn().isAutoIncrement();
+                    return !addColumnChange.getNewColumn().isAutoIncrement() &&
+                           (!addColumnChange.getNewColumn().isRequired() || (addColumnChange.getNewColumn().getDefaultValue() != null));
                 }
                 else if (change instanceof ColumnDefinitionChange)
                 {

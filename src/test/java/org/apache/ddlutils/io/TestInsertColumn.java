@@ -26,6 +26,8 @@ import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
+import org.apache.ddlutils.platform.mysql.MySql50Platform;
+import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
 
 /**
@@ -328,7 +330,18 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         // it directly (in which case it might still be NULL)
         Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
-        assertTrue((avalue == null) || "text    ".equals(avalue));
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql ignores that the type is CHAR(8) and trims the value
+            assertEquals("text", avalue);
+        }
+        else
+        {
+            // TODO
+            //assertTrue((avalue == null) || "text    ".equals(avalue));
+            assertEquals("text    ", avalue);
+        }
     }
 
     /**
@@ -403,7 +416,9 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        assertTrue(getRows("roundtrip").isEmpty());
+        List beans = getRows("roundtrip");
+
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -540,6 +555,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertAutoIncrementColumnIntoPK()
     {
+        if (!getPlatformInfo().isMixingIdentityAndNormalPrimaryKeyColumnsSupported())
+        {
+            return;
+        }
+
         // we need special catering for Sybase which does not support identity for INTEGER columns
         boolean      isSybase  = SybasePlatform.DATABASENAME.equals(getPlatform().getName());
         final String model1Xml = 
@@ -602,6 +622,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertMultipleColumnsIntoPK()
     {
+        if (!getPlatformInfo().isMixingIdentityAndNormalPrimaryKeyColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -676,6 +701,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndAutoIncrementColumn()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -788,6 +818,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndrequiredAutoIncrementColumn()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -854,9 +889,19 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
+        List   beans  = getRows("roundtrip");
+        Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
-        assertEquals((Object)"text    ", beans.get(0), "avalue");
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql ignores that the type is CHAR(8) and trims the value
+            assertEquals("text", avalue);
+        }
+        else
+        {
+            assertEquals("text    ", avalue);
+        }
     }
 
     /**
@@ -941,6 +986,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertUniqueIndexAndAutoIncrementColumn()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1053,6 +1103,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertUniqueIndexAndRequiredAutoIncrementColumn()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1119,9 +1174,19 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
+        List   beans  = getRows("roundtrip");
+        Object avalue = ((DynaBean)beans.get(0)).get("avalue");
 
-        assertEquals((Object)"text    ", beans.get(0), "avalue");
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql ignores that the type is CHAR(8) and trims the value
+            assertEquals("text", avalue);
+        }
+        else
+        {
+            assertEquals("text    ", avalue);
+        }
     }
 
     /**
@@ -1212,6 +1277,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertAutoIncrementColumnIntoNonUniqueIndex()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1344,6 +1414,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredAutoIncrementColumnIntoNonUniqueIndex()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1423,10 +1498,20 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
+        List   beans   = getRows("roundtrip");
+        Object avalue2 = ((DynaBean)beans.get(0)).get("avalue2");
 
-        assertEquals(new Integer(2),     beans.get(0), "avalue1");
-        assertEquals((Object)"text    ", beans.get(0), "avalue2");
+        assertEquals(new Integer(2),  beans.get(0), "avalue1");
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql ignores that the type is CHAR(8) and trims the value
+            assertEquals("text", avalue2);
+        }
+        else
+        {
+            assertEquals("text    ", avalue2);
+        }
     }
 
     /**
@@ -1523,6 +1608,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertAutoIncrementColumnIntoUniqueIndex()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1655,6 +1745,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredAutoIncrementColumnIntoUniqueIndex()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1734,10 +1829,20 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans = getRows("roundtrip");
+        List   beans   = getRows("roundtrip");
+        Object avalue2 = ((DynaBean)beans.get(0)).get("avalue2");
 
-        assertEquals(new Integer(2),     beans.get(0), "avalue1");
-        assertEquals((Object)"text    ", beans.get(0), "avalue2");
+        assertEquals(new Integer(2), beans.get(0), "avalue1");
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql ignores that the type is CHAR(8) and trims the value
+            assertEquals("text", avalue2);
+        }
+        else
+        {
+            assertEquals("text    ", avalue2);
+        }
     }
 
     /**
@@ -1837,6 +1942,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertFKAndLocalAutoIncrementColumn()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1980,6 +2090,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertFKAndLocalRequiredAutoIncrementColumn()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -2063,12 +2178,26 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(getAdjustedModel(),
                      readModelFromDatabase("roundtriptest"));
 
-        List beans1 = getRows("roundtrip1");
-        List beans2 = getRows("roundtrip2");
+        List   beans1 = getRows("roundtrip1");
+        List   beans2 = getRows("roundtrip2");
+        Object pk1    = ((DynaBean)beans1.get(0)).get("pk");
+        Object avalue = ((DynaBean)beans2.get(0)).get("avalue");
 
-        assertEquals((Object)"text    ", beans1.get(0), "pk");
-        assertEquals(new Integer(1),    beans2.get(0), "pk");
-        assertEquals((Object)"text    ", beans2.get(0), "avalue");
+        assertEquals(new Integer(1), beans2.get(0), "pk");
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql ignores that the type is CHAR(8) and trims the value
+            assertEquals("text", pk1);
+            assertEquals("text", avalue);
+        }
+        else
+        {
+            // TODO
+            //assertTrue((avalue == null) || "text    ".equals(avalue));
+            assertEquals("text    ", pk1);
+            assertEquals("text    ", avalue);
+        }
     }
 
     /**
@@ -2359,6 +2488,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertAutoIncrementColumnIntoFK()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -2515,6 +2649,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredAutoIncrementColumnIntoFK()
     {
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -2611,14 +2750,26 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 
         alterDatabase(model2Xml);
 
-        List beans1 = getRows("roundtrip1");
-        List beans2 = getRows("roundtrip2");
+        List   beans1  = getRows("roundtrip1");
+        List   beans2  = getRows("roundtrip2");
+        Object pk2     = ((DynaBean)beans1.get(0)).get("pk2");
+        Object avalue2 = ((DynaBean)beans2.get(0)).get("avalue2");
 
-        assertEquals(new Integer(1),     beans1.get(0), "pk1");
-        assertEquals((Object)"text    ", beans1.get(0), "pk2");
-        assertEquals(new Integer(2),     beans2.get(0), "pk");
-        assertEquals(new Integer(1),     beans2.get(0), "avalue1");
-        assertEquals((Object)"text    ", beans2.get(0), "avalue2");
+        assertEquals(new Integer(1), beans1.get(0), "pk1");
+        assertEquals(new Integer(2), beans2.get(0), "pk");
+        assertEquals(new Integer(1), beans2.get(0), "avalue1");
+        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
+        {
+            // MySql ignores that the type is CHAR(8) and trims the value
+            assertEquals("text", pk2);
+            assertEquals("text", avalue2);
+        }
+        else
+        {
+            assertEquals("text    ", pk2);
+            assertEquals("text    ", avalue2);
+        }
     }
 
     /**

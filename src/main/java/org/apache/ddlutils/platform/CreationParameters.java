@@ -47,7 +47,7 @@ public class CreationParameters
     {
         ListOrderedMap result       = new ListOrderedMap();
         Map            globalParams = (Map)_parametersPerTable.get(null);
-        Map            tableParams  = (Map)_parametersPerTable.get(table);
+        Map            tableParams  = (Map)_parametersPerTable.get(table.getName());
 
         if (globalParams != null)
         {
@@ -69,13 +69,14 @@ public class CreationParameters
      */
     public void addParameter(Table table, String paramName, String paramValue)
     {
-        Map params = (Map)_parametersPerTable.get(table);
+        String key    = (table == null ? null : table.getName());
+        Map    params = (Map)_parametersPerTable.get(key);
 
         if (params == null)
         {
             // we're using a list orderered map to retain the order
             params = new ListOrderedMap();
-            _parametersPerTable.put(table, params);
+            _parametersPerTable.put(key, params);
         }
         params.put(paramName, paramValue);
     }

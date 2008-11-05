@@ -443,14 +443,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            // MySql uses an empty string to initialize the new pk column
-            assertEquals((Object)"",     beans.get(0), "pk");
-            assertEquals(new Integer(1), beans.get(0), "avalue");
-        }
-        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             // Mckoi uses null to initialize the new pk column
             assertEquals((Object)null,   beans.get(0), "pk");
@@ -564,15 +557,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(0),  beans.get(0), "pk1");
-            assertEquals((Object)"",      beans.get(0), "pk2");
-            assertEquals(new Double(2.0), beans.get(0), "pk3");
-            assertEquals(new Integer(1),  beans.get(0), "avalue");
-        }
-        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals((Object)null,    beans.get(0), "pk1");
             assertEquals((Object)null,    beans.get(0), "pk2");
@@ -619,15 +604,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(0),  beans.get(0), "pk1");
-            assertEquals((Object)"",      beans.get(0), "pk2");
-            assertEquals(new Double(2.0), beans.get(0), "pk3");
-            assertEquals(new Integer(1),  beans.get(0), "avalue");
-        }
-        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals((Object)null,    beans.get(0), "pk1");
             assertEquals((Object)null,    beans.get(0), "pk2");
@@ -726,14 +703,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),  beans.get(0), "pk1");
-            assertEquals(new Integer(0),  beans.get(0), "pk2");
-            assertEquals(new Integer(2),  beans.get(0), "avalue");
-        }
-        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk1");
             assertEquals((Object)null,   beans.get(0), "pk2");
@@ -848,15 +818,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),  beans.get(0), "pk1");
-            assertEquals((Object)"",      beans.get(0), "pk2");
-            assertEquals(new Double(0.0), beans.get(0), "pk3");
-            assertEquals((Object)null,    beans.get(0), "avalue");
-        }
-        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk1");
             assertEquals((Object)null,   beans.get(0), "pk2");
@@ -1103,14 +1065,8 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),    beans.get(0), "pk");
-            assertEquals(new BigDecimal(0), beans.get(0), "avalue");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals((Object)null,   beans.get(0), "avalue");
@@ -1304,15 +1260,8 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(1), beans.get(0), "avalue1");
-            assertEquals((Object)"",     beans.get(0), "avalue2");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals((Object)null,   beans.get(0), "avalue1");
@@ -1455,14 +1404,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        // TODO
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName())) 
-        {
-            assertEquals(new Integer(1),    beans.get(0), "pk");
-            assertEquals(new BigDecimal(0), beans.get(0), "avalue");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals((Object)null,   beans.get(0), "avalue");
@@ -1656,14 +1598,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(1), beans.get(0), "avalue1");
-            assertEquals((Object)"",     beans.get(0), "avalue2");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals((Object)null,   beans.get(0), "avalue1");
@@ -1717,14 +1652,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(1), beans.get(0), "avalue1");
-            assertEquals((Object)"",     beans.get(0), "avalue2");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(1), beans.get(0), "avalue1");
@@ -1884,15 +1812,8 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),    beans.get(0), "pk");
-            assertEquals(new Integer(2),    beans.get(0), "avalue1");
-            assertEquals(new BigDecimal(0), beans.get(0), "avalue2");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(2), beans.get(0), "avalue1");
@@ -2115,16 +2036,8 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),  beans.get(0), "pk");
-            assertEquals(new Integer(2),  beans.get(0), "avalue1");
-            assertEquals(new Integer(3),  beans.get(0), "avalue2");
-            assertEquals(new Double(0.0), beans.get(0), "avalue3");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-                 InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(2), beans.get(0), "avalue1");
@@ -2287,17 +2200,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        // TODO
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            // MySql uses the default value for the column's type to initialize
-            // the new column for existing rows
-            assertEquals(new Integer(1),    beans.get(0), "pk");
-            assertEquals(new Integer(2),    beans.get(0), "avalue1");
-            assertEquals(new BigDecimal(0), beans.get(0), "avalue2");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1), beans.get(0), "pk");
             assertEquals(new Integer(2), beans.get(0), "avalue1");
@@ -2519,15 +2422,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),  beans.get(0), "pk");
-            assertEquals(new Integer(2),  beans.get(0), "avalue1");
-            assertEquals(new Integer(3),  beans.get(0), "avalue2");
-            assertEquals(new Double(0.0), beans.get(0), "avalue3");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1),  beans.get(0), "pk");
             assertEquals(new Integer(2),  beans.get(0), "avalue1");
@@ -2588,15 +2483,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),  beans.get(0), "pk");
-            assertEquals(new Integer(2),  beans.get(0), "avalue1");
-            assertEquals(new Integer(3),  beans.get(0), "avalue2");
-            assertEquals(new Double(0.0), beans.get(0), "avalue3");
-        }
-        else if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
+        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             assertEquals(new Integer(1),  beans.get(0), "pk");
             assertEquals(new Integer(2),  beans.get(0), "avalue1");

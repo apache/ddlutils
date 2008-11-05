@@ -1713,13 +1713,6 @@ public class TestAlteration extends TestAgainstLiveDatabaseBase
             assertEquals((Object)null,   beans.get(0), "pk");
             assertEquals((Object)"test", beans.get(0), "avalue");
         }
-        else if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-                 MySql50Platform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            // Same with MySql except it uses the default value for the datatype
-            assertEquals(new Integer(0), beans.get(0), "pk");
-            assertEquals((Object)"test", beans.get(0), "avalue");
-        }
         else
         {
             assertTrue(beans.isEmpty());
