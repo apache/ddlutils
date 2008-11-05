@@ -880,6 +880,62 @@ public class TestAlteration extends TestAgainstLiveDatabaseBase
     }
 
     /**
+     * Tests the removal of a foreign key with camel case naming (DDLUTILS-195).
+     */
+    public void testDropCamelCaseFK()
+    {
+        final String model1Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+            "  <table name='Roundtrip1'>\n"+
+            "    <column name='Pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='Pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='Roundtrip2'>\n"+
+            "    <column name='Pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='Avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='Avalue2' type='INTEGER' required='true'/>\n"+
+            "    <foreign-key name='Rt1_To_Rt2' foreignTable='Roundtrip1'>\n"+
+            "      <reference local='Avalue2' foreign='Pk1'/>\n"+
+            "      <reference local='Avalue1' foreign='Pk2'/>\n"+
+            "    </foreign-key>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String model2Xml = 
+            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
+            "  <table name='Roundtrip1'>\n"+
+            "    <column name='Pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='Pk2' type='DOUBLE' primaryKey='true' required='true'/>\n"+
+            "  </table>\n"+
+            "  <table name='Roundtrip2'>\n"+
+            "    <column name='Pk' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='Avalue1' type='DOUBLE' required='true'/>\n"+
+            "    <column name='Avalue2' type='INTEGER' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+
+        createDatabase(model1Xml);
+
+        insertRow("Roundtrip1", new Object[] { new Integer(1), new Double(2.0) });
+        insertRow("Roundtrip2", new Object[] { new Integer(2), new Double(2.0), new Integer(1) });
+
+        alterDatabase(model2Xml);
+
+        assertEquals(getAdjustedModel(),
+                     readModelFromDatabase("roundtriptest"));
+
+        List beans1 = getRows("Roundtrip1");
+        List beans2 = getRows("Roundtrip2");
+
+        assertEquals(new Integer(1), beans1.get(0), "Pk1");
+        assertEquals(new Double(2.0), beans1.get(0), "Pk2");
+        assertEquals(new Integer(2), beans2.get(0), "Pk");
+        assertEquals(new Double(2.0), beans2.get(0), "Avalue1");
+        assertEquals(new Integer(1), beans2.get(0), "Avalue2");
+    }
+
+    /**
      * Tests removing a foreign key and an index that has the same name and same column.
      */
     public void testDropFKAndCorrespondingIndex()
