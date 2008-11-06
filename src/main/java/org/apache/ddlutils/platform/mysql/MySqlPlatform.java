@@ -32,6 +32,7 @@ import org.apache.ddlutils.alteration.RemoveColumnChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -75,6 +76,10 @@ public class MySqlPlatform extends PlatformImplBase
         info.setCommentPrefix("#");
         // Double quotes are only allowed for delimiting identifiers if the server SQL mode includes ANSI_QUOTES 
         info.setDelimiterToken("`");
+        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT,
+                                                                   CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL });
+        info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT,
+                                                                   CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL });
 
         info.addNativeTypeMapping(Types.ARRAY,         "LONGBLOB",   Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "TINYINT(1)");

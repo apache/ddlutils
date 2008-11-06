@@ -21,11 +21,13 @@ package org.apache.ddlutils;
 
 import java.lang.reflect.Field;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.model.CascadeActionEnum;
 
 /**
  * Conatains information about the database platform such as supported features and native type mappings.
@@ -166,6 +168,18 @@ public class PlatformInfo
     /** Contains those JDBC types whose corresponding native types are types that have precision and scale on this platform. */
     private HashSet _typesWithPrecisionAndScale = new HashSet();
 
+    /** The default ON UPDATE action. */
+    private CascadeActionEnum _defaultOnUpdateAction = CascadeActionEnum.NONE;
+
+    /** The default ON DELETE action. */
+    private CascadeActionEnum _defaultOnDeleteAction = CascadeActionEnum.NONE;
+
+    /** Contains the supported ON UPDATE actions. */
+    private HashSet _supportedOnUpdateActions = new HashSet();
+
+    /** Contains the supported ON DELETE actions. */
+    private HashSet _supportedOnDeleteActions = new HashSet();
+
     /**
      * Creates a new platform info object.
      */
@@ -187,6 +201,9 @@ public class PlatformInfo
 
         _typesWithPrecisionAndScale.add(new Integer(Types.DECIMAL));
         _typesWithPrecisionAndScale.add(new Integer(Types.NUMERIC));
+
+        _supportedOnUpdateActions.addAll(CascadeActionEnum.getEnumList());
+        _supportedOnDeleteActions.addAll(CascadeActionEnum.getEnumList());
     }
 
     // properties influencing the definition of columns
@@ -201,6 +218,7 @@ public class PlatformInfo
     {
         return _nullAsDefaultValueRequired;
     }
+
     /**
      * Specifies whether a NULL needs to be explicitly stated when the column
      * has no specified default value. Default is false.
@@ -1173,5 +1191,89 @@ public class PlatformInfo
         {
             _typesWithPrecisionAndScale.remove(new Integer(sqlTypeCode));
         }
+    }
+
+    /**
+     * Sets the actions that this platform supports for ON UPDATE.
+     * 
+     * @param actions The actions
+     */
+    public void setSupportedOnUpdateActions(CascadeActionEnum[] actions)
+    {
+        _supportedOnUpdateActions.clear();
+        _supportedOnUpdateActions.addAll(Arrays.asList(actions));
+    }
+    
+    /**
+     * Determines whether the given action is supported for ON UPDATE on this platform.
+     * 
+     * @param action The action
+     * @return <code>true</code> if the action is supported
+     */
+    public boolean isActionSupportedForOnUpdate(CascadeActionEnum action)
+    {
+        return _supportedOnUpdateActions.contains(action);
+    }
+
+    /**
+     * Sets the actions that this platform supports for ON DELETE.
+     * 
+     * @param actions The actions
+     */
+    public void setSupportedOnDeleteActions(CascadeActionEnum[] actions)
+    {
+        _supportedOnDeleteActions.clear();
+        _supportedOnDeleteActions.addAll(Arrays.asList(actions));
+    }
+
+    /**
+     * Determines whether the given action is supported for ON DELETE on this platform.
+     * 
+     * @param action The action
+     * @return <code>true</code> if the action is supported
+     */
+    public boolean isActionSupportedForOnDelete(CascadeActionEnum action)
+    {
+        return _supportedOnDeleteActions.contains(action);
+    }
+
+    /**
+     * Returns the default ON UPDATE action that is used if none is specified.
+     * 
+     * @return The default action
+     */
+    public CascadeActionEnum getDefaultOnUpdateAction()
+    {
+        return _defaultOnUpdateAction;
+    }
+
+    /**
+     * Sets the default ON UPDATE action that is used if none is specified.
+     * 
+     * @return The default action
+     */
+    public void setDefaultOnUpdateAction(CascadeActionEnum defaultOnUpdateAction)
+    {
+        _defaultOnUpdateAction = defaultOnUpdateAction;
+    }
+
+    /**
+     * Returns the default ON DELETE action that is used if none is specified.
+     * 
+     * @return The default action
+     */
+    public CascadeActionEnum getDefaultOnDeleteAction()
+    {
+        return _defaultOnDeleteAction;
+    }
+
+    /**
+     * Sets the default ON DELETE action that is used if none is specified.
+     * 
+     * @return The default action
+     */
+    public void setDefaultOnDeleteAction(CascadeActionEnum defaultOnDeleteAction)
+    {
+        _defaultOnDeleteAction = defaultOnDeleteAction;
     }
 }

@@ -199,6 +199,42 @@ public interface Platform
      */
     public void setForeignKeysSorted(boolean foreignKeysSorted);
 
+    /**
+     * Determines whether the default action for ON UPDATE is used if the specified one is not supported by the platform.
+     * If this is set to <code>false</code>, then an exception will be thrown if the action is not supported. By default, this
+     * is set to <code>true</code> meaning that the default action would be used.
+     * 
+     * @return <code>true</code> if the default action is used
+     */
+    public boolean isDefaultOnUpdateActionUsedIfUnsupported();
+
+    /**
+     * Specifies whether the default action for ON UPDATE shall be used if the specified one is not supported by the platform.
+     * If this is set to <code>false</code>, then an exception will be thrown if the action is not supported. By default, this
+     * is set to <code>true</code> meaning that the default action would be used.
+     * 
+     * @param useDefault If <code>true</code> then the default action will be used
+     */
+    public void setDefaultOnUpdateActionUsedIfUnsupported(boolean useDefault);
+
+    /**
+     * Determines whether the default action for ON DELETE is used if the specified one is not supported by the platform.
+     * If this is set to <code>false</code>, then an exception will be thrown if the action is not supported. By default, this
+     * is set to <code>true</code> meaning that the default action would be used.
+     * 
+     * @return <code>true</code> if the default action is used
+     */
+    public boolean isDefaultOnDeleteActionUsedIfUnsupported();
+
+    /**
+     * Specifies whether the default action for ON DELETE shall be used if the specified one is not supported by the platform.
+     * If this is set to <code>false</code>, then an exception will be thrown if the action is not supported. By default, this
+     * is set to <code>true</code> meaning that the default action would be used.
+     * 
+     * @param useDefault If <code>true</code> then the default action will be used
+     */
+    public void setDefaultOnDeleteActionUsedIfUnsupported(boolean useDefault);
+
     // functionality
     
     /**

@@ -27,9 +27,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.ddlutils.DatabaseOperationException;
+import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.alteration.AddColumnChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.DefaultTableDefinitionChangesPredicate;
 import org.apache.ddlutils.platform.cloudscape.CloudscapePlatform;
@@ -56,8 +58,15 @@ public class DerbyPlatform extends CloudscapePlatform
     public DerbyPlatform()
     {
         super();
-        getPlatformInfo().addNativeTypeMapping(Types.DOUBLE, "DOUBLE");
-        getPlatformInfo().addNativeTypeMapping(Types.FLOAT,  "DOUBLE", Types.DOUBLE);
+
+        PlatformInfo info = getPlatformInfo();
+
+        info.addNativeTypeMapping(Types.DOUBLE, "DOUBLE");
+        info.addNativeTypeMapping(Types.FLOAT,  "DOUBLE", Types.DOUBLE);
+        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT });
+        info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT,
+                                                                   CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL });
+
         setSqlBuilder(new DerbyBuilder(this));
         setModelReader(new DerbyModelReader(this));
     }

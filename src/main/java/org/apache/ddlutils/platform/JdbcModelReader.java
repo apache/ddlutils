@@ -929,8 +929,8 @@ public class JdbcModelReader
         {
             fk = new ForeignKey(fkName);
             fk.setForeignTableName((String)values.get("PKTABLE_NAME"));
-            fk.setOnUpdate(convertAction((Short)values.get("UPDATE_RULE")));
-            fk.setOnDelete(convertAction((Short)values.get("DELETE_RULE")));
+            fk.setOnUpdate(convertAction((Short)values.get("UPDATE_RULE"), getPlatformInfo().getDefaultOnUpdateAction()));
+            fk.setOnDelete(convertAction((Short)values.get("DELETE_RULE"), getPlatformInfo().getDefaultOnDeleteAction()));
             knownFks.put(fkName, fk);
         }
 
@@ -950,11 +950,12 @@ public class JdbcModelReader
      * {@link DatabaseMetaData} class) to a {@link CascadeActionEnum}.
      * 
      * @param jdbcActionValue The jdbc action value
+     * @param defaultAction   The default action
      * @return The enum value
      */
-    protected CascadeActionEnum convertAction(Short jdbcActionValue)
+    protected CascadeActionEnum convertAction(Short jdbcActionValue, CascadeActionEnum defaultAction)
     {
-        CascadeActionEnum action = CascadeActionEnum.NONE;
+        CascadeActionEnum action = defaultAction;
 
         if (jdbcActionValue != null)
         {

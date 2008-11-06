@@ -1957,10 +1957,25 @@ public abstract class SqlBuilder
      */
     private void writeForeignKeyOnDeleteAction(Table table, ForeignKey foreignKey) throws IOException
     {
-        if (foreignKey.getOnDelete() != CascadeActionEnum.NONE)
+        CascadeActionEnum action = foreignKey.getOnDelete();
+
+        if (!getPlatformInfo().isActionSupportedForOnDelete(action))
+        {
+            if (getPlatform().isDefaultOnDeleteActionUsedIfUnsupported())
+            {
+                _log.info("The platform does not support the " + action + " action for onDelete; using " + getPlatformInfo().getDefaultOnDeleteAction() + " instead");
+                action = getPlatformInfo().getDefaultOnDeleteAction();
+            }
+            else
+            {
+                throw new ModelException("The platform does not support the action '" + action +
+                                         "' for onDelete in foreign key in table " + table.getName());
+            }
+        }
+        if (action != getPlatformInfo().getDefaultOnDeleteAction())
         {
             print(" ON DELETE ");
-            switch (foreignKey.getOnDelete().getValue())
+            switch (action.getValue())
             {
                 case CascadeActionEnum.VALUE_CASCADE:
                     print("CASCADE");
@@ -1978,7 +1993,7 @@ public abstract class SqlBuilder
                     print("NO ACTION");
                     break;
                 default:
-                    throw new ModelException("Unsupported cascade value '" + foreignKey.getOnDelete().getValue() +
+                    throw new ModelException("Unsupported cascade value '" + action +
                                              "' for onDelete in foreign key in table " + table.getName());
             }
         }
@@ -1992,10 +2007,25 @@ public abstract class SqlBuilder
      */
     private void writeForeignKeyOnUpdateAction(Table table, ForeignKey foreignKey) throws IOException
     {
-        if (foreignKey.getOnUpdate() != CascadeActionEnum.NONE)
+        CascadeActionEnum action = foreignKey.getOnUpdate();
+
+        if (!getPlatformInfo().isActionSupportedForOnUpdate(action))
+        {
+            if (getPlatform().isDefaultOnUpdateActionUsedIfUnsupported())
+            {
+                _log.info("The platform does not support the " + action + " action for onUpdate; using " + getPlatformInfo().getDefaultOnUpdateAction() + " instead");
+                action = getPlatformInfo().getDefaultOnUpdateAction();
+            }
+            else
+            {
+                throw new ModelException("The platform does not support the action '" + action +
+                                         "' for onUpdate in foreign key in table " + table.getName());
+            }
+        }
+        if (action != getPlatformInfo().getDefaultOnUpdateAction())
         {
             print(" ON UPDATE ");
-            switch (foreignKey.getOnUpdate().getValue())
+            switch (action.getValue())
             {
                 case CascadeActionEnum.VALUE_CASCADE:
                     print("CASCADE");
@@ -2013,7 +2043,7 @@ public abstract class SqlBuilder
                     print("NO ACTION");
                     break;
                 default:
-                    throw new ModelException("Unsupported cascade value '" + foreignKey.getOnUpdate().getValue() +
+                    throw new ModelException("Unsupported cascade value '" + action +
                                              "' for onUpdate in foreign key in table " + table.getName());
             }
         }

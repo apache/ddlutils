@@ -116,6 +116,10 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     private boolean _identityOverrideOn;
     /** Whether read foreign keys shall be sorted alphabetically. */
     private boolean _foreignKeysSorted;
+    /** Whether to use the default ON UPDATE action if the specified one is unsupported. */
+    private boolean _useDefaultOnUpdateActionIfUnsupported = true;
+    /** Whether to use the default ON DELETE action if the specified one is unsupported. */
+    private boolean _useDefaultOnDeleteActionIfUnsupported = true;
 
     /**
      * {@inheritDoc}
@@ -251,6 +255,38 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     public void setForeignKeysSorted(boolean foreignKeysSorted)
     {
         _foreignKeysSorted = foreignKeysSorted;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isDefaultOnUpdateActionUsedIfUnsupported()
+    {
+        return _useDefaultOnUpdateActionIfUnsupported;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDefaultOnUpdateActionUsedIfUnsupported(boolean useDefault)
+    {
+        _useDefaultOnUpdateActionIfUnsupported = useDefault;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isDefaultOnDeleteActionUsedIfUnsupported()
+    {
+        return _useDefaultOnDeleteActionIfUnsupported;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDefaultOnDeleteActionUsedIfUnsupported(boolean useDefault)
+    {
+        _useDefaultOnDeleteActionIfUnsupported = useDefault;
     }
 
     /**

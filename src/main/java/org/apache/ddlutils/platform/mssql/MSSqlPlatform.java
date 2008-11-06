@@ -37,6 +37,7 @@ import org.apache.ddlutils.alteration.RemoveColumnChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -75,6 +76,8 @@ public class MSSqlPlatform extends PlatformImplBase
         info.setPrimaryKeyColumnAutomaticallyRequired(true);
         info.setIdentityColumnAutomaticallyRequired(true);
         info.setMultipleIdentityColumnsSupported(false);
+        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.NONE });
+        info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.NONE });
 
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE",         Types.LONGVARBINARY);
         // BIGINT will be mapped back to BIGINT by the model reader 

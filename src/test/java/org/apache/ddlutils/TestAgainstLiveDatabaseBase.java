@@ -1308,28 +1308,27 @@ public abstract class TestAgainstLiveDatabaseBase extends TestPlatformBase
                          getPlatform().getSqlBuilder().shortenName(expected.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()),
                          getPlatform().getSqlBuilder().shortenName(actual.getForeignTableName().toUpperCase(), getSqlBuilder().getMaxTableNameLength()));
         }
-        if ((expected.getOnUpdate() == CascadeActionEnum.NONE) || (expected.getOnUpdate() == CascadeActionEnum.RESTRICT))
+
+        CascadeActionEnum realExpectedOnUpdateAction = expected.getOnUpdate();
+
+        if (!getPlatformInfo().isActionSupportedForOnUpdate(realExpectedOnUpdateAction))
         {
-            assertTrue("Not the same onUpdate setting in foreign key "+actual.getName()+".",
-                       (actual.getOnUpdate() == CascadeActionEnum.NONE) || (actual.getOnUpdate() == CascadeActionEnum.RESTRICT));
+            realExpectedOnUpdateAction = getPlatformInfo().getDefaultOnUpdateAction();
         }
-        else
+        assertEquals("Not the same onUpdate setting in foreign key "+actual.getName()+".",
+                     realExpectedOnUpdateAction,
+                     actual.getOnUpdate());
+
+        CascadeActionEnum realExpectedOnDeleteAction = expected.getOnDelete();
+
+        if (!getPlatformInfo().isActionSupportedForOnDelete(realExpectedOnDeleteAction))
         {
-            assertEquals("Not the same onUpdate setting in foreign key "+actual.getName()+".",
-                         expected.getOnUpdate(),
-                         actual.getOnUpdate());
+            realExpectedOnDeleteAction = getPlatformInfo().getDefaultOnDeleteAction();
         }
-        if ((expected.getOnDelete() == CascadeActionEnum.NONE) || (expected.getOnDelete() == CascadeActionEnum.RESTRICT))
-        {
-            assertTrue("Not the same onDelete setting in foreign key "+actual.getName()+".",
-                       (actual.getOnDelete() == CascadeActionEnum.NONE) || (actual.getOnDelete() == CascadeActionEnum.RESTRICT));
-        }
-        else
-        {
-            assertEquals("Not the same onDelete setting in foreign key "+actual.getName()+".",
-                         expected.getOnDelete(),
-                         actual.getOnDelete());
-        }
+        assertEquals("Not the same onDelete setting in foreign key "+actual.getName()+".",
+                     realExpectedOnDeleteAction,
+                     actual.getOnDelete());
+
         assertEquals("Not the same number of references in foreign key "+actual.getName()+".",
                      expected.getReferenceCount(),
                      actual.getReferenceCount());
