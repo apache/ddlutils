@@ -929,8 +929,22 @@ public class JdbcModelReader
         {
             fk = new ForeignKey(fkName);
             fk.setForeignTableName((String)values.get("PKTABLE_NAME"));
-            fk.setOnUpdate(convertAction((Short)values.get("UPDATE_RULE"), getPlatformInfo().getDefaultOnUpdateAction()));
-            fk.setOnDelete(convertAction((Short)values.get("DELETE_RULE"), getPlatformInfo().getDefaultOnDeleteAction()));
+
+            CascadeActionEnum onUpdateAction = convertAction((Short)values.get("UPDATE_RULE"));
+            CascadeActionEnum onDeleteAction = convertAction((Short)values.get("DELETE_RULE"));
+
+            // Some JDBC drivers lie and return actions that the DB not actually supports
+            if ((onUpdateAction == null) || !getPlatformInfo().isActionSupportedForOnUpdate(onUpdateAction))
+            {
+                onUpdateAction = getPlatformInfo().getDefaultOnUpdateAction();
+            }
+            if ((onDeleteAction == null) || !getPlatformInfo().isActionSupportedForOnDelete(onDeleteAction))
+            {
+                onDeleteAction = getPlatformInfo().getDefaultOnDeleteAction();
+            }
+
+            fk.setOnUpdate(onUpdateAction);
+            fk.setOnDelete(onDeleteAction);
             knownFks.put(fkName, fk);
         }
 
@@ -950,12 +964,11 @@ public class JdbcModelReader
      * {@link DatabaseMetaData} class) to a {@link CascadeActionEnum}.
      * 
      * @param jdbcActionValue The jdbc action value
-     * @param defaultAction   The default action
      * @return The enum value
      */
-    protected CascadeActionEnum convertAction(Short jdbcActionValue, CascadeActionEnum defaultAction)
+    protected CascadeActionEnum convertAction(Short jdbcActionValue)
     {
-        CascadeActionEnum action = defaultAction;
+        CascadeActionEnum action = null;
 
         if (jdbcActionValue != null)
         {

@@ -19,7 +19,6 @@ package org.apache.ddlutils.platform.mssql;
  * under the License.
  */
 
-import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,7 +32,6 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.ddlutils.DdlUtilsException;
 import org.apache.ddlutils.Platform;
-import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
@@ -230,19 +228,4 @@ public class MSSqlModelReader extends JdbcModelReader
 
 		return column;
 	}
-
-    /**
-     * {@inheritDoc}
-     */
-    protected CascadeActionEnum convertAction(Short jdbcActionValue, CascadeActionEnum defaultAction)
-    {
-        CascadeActionEnum action = defaultAction;
-
-        // for whatever reason, the sql server jdbc driver returns restrict even though the DB does not support RESTRICT
-        if ((jdbcActionValue != null) && (jdbcActionValue.shortValue() == DatabaseMetaData.importedKeyCascade))
-        {
-            action = CascadeActionEnum.CASCADE;
-        }
-        return action;
-    }
 }

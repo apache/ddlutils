@@ -31,6 +31,7 @@ import org.apache.ddlutils.alteration.RemoveColumnChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -71,6 +72,8 @@ public class Oracle8Platform extends PlatformImplBase
         info.setMaxIdentifierLength(30);
         info.setIdentityStatusReadingSupported(false);
         info.setPrimaryKeyColumnAutomaticallyRequired(true);
+        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE });
+        info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL, CascadeActionEnum.NONE });
 
         // Note that the back-mappings are partially done by the model reader, not the driver
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",             Types.BLOB);
