@@ -1410,7 +1410,7 @@ public abstract class PlatformImplBase extends JdbcSupport implements Platform
     {
         Table changedTable = findChangedTable(currentModel, change);
 
-        getSqlBuilder().addColumn(changedTable, change.getNewColumn());
+        getSqlBuilder().addColumn(currentModel, changedTable, change.getNewColumn());
         change.apply(currentModel, isDelimitedIdentifierModeOn());
     }
 

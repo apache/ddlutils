@@ -529,8 +529,8 @@ public class MSSqlBuilder extends SqlBuilder
 
         if (sizeChanged || typeChanged)
         {
-            if (TypeMap.isTextType(targetColumn.getTypeCode()) &&
-                sizeChanged && (sourceColumn.getSizeAsInt() > targetColumn.getSizeAsInt()))
+            if (TypeMap.isTextType(targetColumn.getTypeCode()) && sizeChanged &&
+                (targetColumn.getSize() != null) && (sourceColumn.getSizeAsInt() > targetColumn.getSizeAsInt()))
             {
                 print("SUBSTRING(CAST(");
                 printIdentifier(getColumnName(sourceColumn));

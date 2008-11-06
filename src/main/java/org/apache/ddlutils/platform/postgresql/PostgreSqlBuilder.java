@@ -171,13 +171,13 @@ public class PostgreSqlBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void addColumn(Table table, Column newColumn) throws IOException
+    public void addColumn(Database model, Table table, Column newColumn) throws IOException
     {
         if (newColumn.isAutoIncrement())
         {
             createAutoIncrementSequence(table, newColumn);
         }
-        super.addColumn(table, newColumn);
+        super.addColumn(model, table, newColumn);
     }
 
     /**

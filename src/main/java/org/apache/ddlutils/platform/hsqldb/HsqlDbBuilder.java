@@ -153,10 +153,12 @@ public class HsqlDbBuilder extends SqlBuilder
      */
     protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
     {
-        if (ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn) ||
-            ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn))
+        boolean sizeChanged = ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+        boolean typeChanged = ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+
+        if (sizeChanged || typeChanged)
         {
-            boolean needSubstr = TypeMap.isTextType(targetColumn.getTypeCode()) && (targetColumn.getSize() != null);
+            boolean needSubstr = TypeMap.isTextType(targetColumn.getTypeCode()) && sizeChanged && (sourceColumn.getSizeAsInt() > targetColumn.getSizeAsInt());
 
             if (needSubstr)
             {
@@ -181,10 +183,9 @@ public class HsqlDbBuilder extends SqlBuilder
                 print(")");
             }
         }
-        else {
+        else
+        {
             super.writeCastExpression(sourceColumn, targetColumn);
         }
     }
-
-
 }

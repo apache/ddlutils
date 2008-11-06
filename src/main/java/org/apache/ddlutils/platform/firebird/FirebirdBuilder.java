@@ -24,10 +24,12 @@ import java.sql.Types;
 import java.util.Map;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
 
 /**
@@ -211,6 +213,23 @@ public class FirebirdBuilder extends SqlBuilder
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public void addColumn(Database model, Table table, Column newColumn) throws IOException
+    {
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(table));
+        printIndent();
+        print("ADD ");
+        writeColumn(table, newColumn);
+        printEndOfStatement();
+        if (newColumn.isAutoIncrement())
+        {
+            writeAutoIncrementCreateStmts(model, table, newColumn);
+        }
+    }
+
+    /**
      * Writes the SQL to add/insert a column.
      * 
      * @param model      The database model
@@ -221,30 +240,25 @@ public class FirebirdBuilder extends SqlBuilder
      */
     public void insertColumn(Database model, Table table, Column newColumn, Column prevColumn) throws IOException
     {
-        print("ALTER TABLE ");
-        printlnIdentifier(getTableName(table));
-        printIndent();
-        print("ADD ");
-        writeColumn(table, newColumn);
-        printEndOfStatement();
+        addColumn(model, table, newColumn);
+
+        // column positions start at 1 in Firebird
+        int pos = 1;
 
         if (prevColumn != null)
         {
-            // Even though Firebird can only add columns, we can move them later on
-            print("ALTER TABLE ");
-            printlnIdentifier(getTableName(table));
-            printIndent();
-            print("ALTER ");
-            printIdentifier(getColumnName(newColumn));
-            print(" POSITION ");
-            // column positions start at 1 in Firebird
-            print(String.valueOf(table.getColumnIndex(prevColumn) + 2));
-            printEndOfStatement();
+            pos = table.getColumnIndex(prevColumn) + 2;
         }
-        if (newColumn.isAutoIncrement())
-        {
-            writeAutoIncrementCreateStmts(model, table, newColumn);
-        }
+
+        // Even though Firebird can only add columns, we can move them later on
+        print("ALTER TABLE ");
+        printlnIdentifier(getTableName(table));
+        printIndent();
+        print("ALTER ");
+        printIdentifier(getColumnName(newColumn));
+        print(" POSITION ");
+        print(String.valueOf(pos));
+        printEndOfStatement();
     }
 
     /**
@@ -265,5 +279,43 @@ public class FirebirdBuilder extends SqlBuilder
         print("DROP ");
         printIdentifier(getColumnName(column));
         printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
+    {
+        boolean sizeChanged = ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+        boolean typeChanged = ColumnDefinitionChange.isTypeChanged(getPlatformInfo(), sourceColumn, targetColumn);
+
+        if (sizeChanged || typeChanged)
+        {
+            boolean needSubstr = TypeMap.isTextType(targetColumn.getTypeCode()) && sizeChanged &&
+                                 (targetColumn.getSize() != null) && (sourceColumn.getSizeAsInt() > targetColumn.getSizeAsInt());
+
+            if (needSubstr)
+            {
+                print("SUBSTRING(");
+            }
+            // we're not using CAST but instead string construction which does not require us to know the size
+            print("(");
+            printIdentifier(getColumnName(sourceColumn));
+            print(" || '' ");
+            if (needSubstr)
+            {
+                print(") FROM 1 FOR ");
+                print(targetColumn.getSize());
+                print(")");
+            }
+            else
+            {
+                print(")");
+            }
+        }
+        else
+        {
+            super.writeCastExpression(sourceColumn, targetColumn);
+        }
     }
 }

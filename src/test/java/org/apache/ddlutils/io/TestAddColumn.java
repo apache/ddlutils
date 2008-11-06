@@ -26,7 +26,6 @@ import junit.framework.Test;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
-import org.apache.ddlutils.platform.firebird.FirebirdPlatform;
 import org.apache.ddlutils.platform.interbase.InterbasePlatform;
 import org.apache.ddlutils.platform.mckoi.MckoiPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
@@ -1060,16 +1059,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals((Object)null,   beans.get(0), "avalue");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -1157,17 +1147,8 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals((Object)null,   beans.get(0), "avalue");
-        }
-        else
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(1), beans.get(0), "avalue");
-        }
+        assertEquals(new Integer(1), beans.get(0), "pk");
+        assertEquals(new Integer(1), beans.get(0), "avalue");
     }
 
     /**
@@ -1255,17 +1236,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals((Object)null,   beans.get(0), "avalue1");
-            assertEquals((Object)null,   beans.get(0), "avalue2");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
 
@@ -1399,15 +1370,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals((Object)null,   beans.get(0), "avalue");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -1496,14 +1459,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
         List beans = getRows("roundtrip");
 
         assertEquals(new Integer(1), beans.get(0), "pk");
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals((Object)null, beans.get(0), "avalue");
-        }
-        else
-        {
-            assertEquals(new Integer(1), beans.get(0), "avalue");
-        }
+        assertEquals(new Integer(1), beans.get(0), "avalue");
     }
 
     /**
@@ -1593,16 +1549,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals((Object)null,   beans.get(0), "avalue1");
-            assertEquals((Object)null,   beans.get(0), "avalue2");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -1647,16 +1594,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(1), beans.get(0), "avalue1");
-            assertEquals((Object)null,   beans.get(0), "avalue2");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -1807,17 +1745,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(2), beans.get(0), "avalue1");
-            assertEquals((Object)null,   beans.get(0), "avalue2");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -1918,19 +1846,9 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(2), beans.get(0), "avalue1");
-            assertEquals((Object)null,   beans.get(0), "avalue2");
-        }
-        else
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(2), beans.get(0), "avalue1");
-            assertEquals(new Integer(1), beans.get(0), "avalue2");
-        }
+        assertEquals(new Integer(1), beans.get(0), "pk");
+        assertEquals(new Integer(2), beans.get(0), "avalue1");
+        assertEquals(new Integer(1), beans.get(0), "avalue2");
     }
 
     /**
@@ -2031,18 +1949,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(2), beans.get(0), "avalue1");
-            assertEquals((Object)null,   beans.get(0), "avalue2");
-            assertEquals((Object)null,   beans.get(0), "avalue3");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -2195,16 +2102,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1), beans.get(0), "pk");
-            assertEquals(new Integer(2), beans.get(0), "avalue1");
-            assertEquals((Object)null,   beans.get(0), "avalue2");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -2307,14 +2205,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         assertEquals(new Integer(1), beans.get(0), "pk");
         assertEquals(new Integer(2), beans.get(0), "avalue1");
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals((Object)null, beans.get(0), "avalue2");
-        }
-        else
-        {
-            assertEquals(new Integer(1), beans.get(0), "avalue2");
-        }
+        assertEquals(new Integer(1), beans.get(0), "avalue2");
     }
 
     /**
@@ -2417,17 +2308,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),  beans.get(0), "pk");
-            assertEquals(new Integer(2),  beans.get(0), "avalue1");
-            assertEquals((Object)null,    beans.get(0), "avalue2");
-            assertEquals((Object)null,    beans.get(0), "avalue3");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -2478,17 +2359,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         List beans = getRows("roundtrip");
 
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(1),  beans.get(0), "pk");
-            assertEquals(new Integer(2),  beans.get(0), "avalue1");
-            assertEquals(new Integer(3),  beans.get(0), "avalue2");
-            assertEquals((Object)null,    beans.get(0), "avalue3");
-        }
-        else
-        {
-            assertTrue(beans.isEmpty());
-        }
+        assertTrue(beans.isEmpty());
     }
 
     /**
@@ -2645,17 +2516,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
         List beans2 = getRows("roundtrip2");
 
         assertEquals(new BigDecimal(1), beans1.get(0), "pk");
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(2), beans2.get(0), "pk");
-            assertEquals((Object)null,   beans2.get(0), "avalue");
-        }
-        else
-        {
-            assertTrue(beans2.isEmpty());
-        }
+        assertTrue(beans2.isEmpty());
     }
 
     /**
@@ -2757,15 +2618,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         assertEquals(new Integer(1), beans1.get(0), "pk");
         assertEquals(new Integer(2), beans2.get(0), "pk");
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals((Object)null, beans2.get(0), "avalue");
-        }
-        else
-        {
-            assertEquals(new Integer(1), beans2.get(0), "avalue");
-        }
+        assertEquals(new Integer(1), beans2.get(0), "avalue");
     }
 
     /**
@@ -2873,23 +2726,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
 
         assertEquals(new Integer(1), beans1.get(0), "pk1");
         assertEquals(new Double(2),  beans1.get(0), "pk2");
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(3), beans2.get(0), "pk");
-            assertEquals((Object)null,   beans2.get(0), "avalue1");
-            assertEquals((Object)null,   beans2.get(0), "avalue2");
-        }
-        else if (MckoiPlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals(new Integer(3), beans2.get(0), "pk");
-            assertEquals(new Integer(1), beans2.get(0), "avalue1");
-            assertEquals((Object)null,   beans2.get(0), "avalue2");
-        }
-        else
-        {
-            assertTrue(beans2.isEmpty());
-        }
+        assertTrue(beans2.isEmpty());
     }
 
     /**
@@ -3350,15 +3187,7 @@ public class TestAddColumn extends TestAgainstLiveDatabaseBase
         assertEquals(new Integer(1), beans1.get(0), "pk2");
         assertEquals(new Integer(2), beans2.get(0), "pk");
         assertEquals(new Integer(1), beans2.get(0), "avalue1");
-        if (FirebirdPlatform.DATABASENAME.equals(getPlatform().getName()) ||
-            InterbasePlatform.DATABASENAME.equals(getPlatform().getName()))
-        {
-            assertEquals((Object)null, beans2.get(0), "avalue2");
-        }
-        else
-        {
-            assertEquals(new Integer(1), beans2.get(0), "avalue2");
-        }
+        assertEquals(new Integer(1), beans2.get(0), "avalue2");
     }
 
     /**

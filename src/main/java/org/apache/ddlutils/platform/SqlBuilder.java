@@ -718,10 +718,11 @@ public abstract class SqlBuilder
     /**
      * Prints the SQL for adding a column to a table.
      * 
+     * @param model     The database model
      * @param table     The table
      * @param newColumn The new column
      */
-    public void addColumn(Table table, Column newColumn) throws IOException
+    public void addColumn(Database model, Table table, Column newColumn) throws IOException
     {
         print("ALTER TABLE ");
         printlnIdentifier(getTableName(table));
