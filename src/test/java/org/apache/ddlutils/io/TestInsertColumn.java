@@ -2473,7 +2473,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
             "  <table name='roundtrip1'>\n"+
-            "    <column name='pk2' type='VARCHAR' size='32' primaryKey='true'/>\n"+
+            "    <column name='pk2' type='VARCHAR' size='32' primaryKey='true' required='true'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "  </table>\n"+
             "  <table name='roundtrip2'>\n"+
@@ -2607,6 +2607,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertColumnsWithDefaultsIntoFK()
     {
+        if (getPlatformInfo().isPrimaryKeyColumnsHaveToBeRequired())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -2810,7 +2815,7 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
             "  <table name='roundtrip1'>\n"+
             "    <column name='pk3' type='DOUBLE' primaryKey='true' required='true'/>\n"+
             "    <column name='pk1' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='pk2' type='INTEGER' primaryKey='true' default='1'/>\n"+
+            "    <column name='pk2' type='INTEGER' primaryKey='true' default='1' required='true'/>\n"+
             "  </table>\n"+
             "  <table name='roundtrip2'>\n"+
             "    <column name='avalue3' type='DOUBLE' required='true'/>\n"+

@@ -30,6 +30,7 @@ import org.apache.ddlutils.alteration.RemoveColumnChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -75,6 +76,8 @@ public class Db2Platform extends PlatformImplBase
         info.setIdentityColumnAutomaticallyRequired(true);
         info.setPrimaryKeyColumnsHaveToBeRequired(true);
         info.setMultipleIdentityColumnsSupported(false);
+        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.RESTRICT, CascadeActionEnum.NONE });
+        info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.RESTRICT, CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL, CascadeActionEnum.NONE });
 
         // the BINARY types are also handled by Db2Builder.getSqlType(Column)
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",                      Types.BLOB);
@@ -141,7 +144,8 @@ public class Db2Platform extends PlatformImplBase
                     AddColumnChange addColumnChange = (AddColumnChange)change;
 
                     // DB2 cannot add IDENTITY columns, and required columns need a default value
-                    return !addColumnChange.getNewColumn().isAutoIncrement() &&
+                    return (addColumnChange.getNextColumn() == null) &&
+                           !addColumnChange.getNewColumn().isAutoIncrement() &&
                            (!addColumnChange.getNewColumn().isRequired() || !StringUtilsExt.isEmpty(addColumnChange.getNewColumn().getDefaultValue()));
                 }
                 else
