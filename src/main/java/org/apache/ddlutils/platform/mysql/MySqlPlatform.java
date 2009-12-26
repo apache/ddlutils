@@ -78,8 +78,10 @@ public class MySqlPlatform extends PlatformImplBase
         info.setDelimiterToken("`");
         info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT,
                                                                    CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL });
+        info.setDefaultOnUpdateAction(CascadeActionEnum.RESTRICT);
         info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT,
                                                                    CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL });
+        info.setDefaultOnDeleteAction(CascadeActionEnum.RESTRICT);
 
         info.addNativeTypeMapping(Types.ARRAY,         "LONGBLOB",   Types.LONGVARBINARY);
         info.addNativeTypeMapping(Types.BIT,           "TINYINT(1)");

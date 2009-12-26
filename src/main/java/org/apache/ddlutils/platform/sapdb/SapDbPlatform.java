@@ -32,6 +32,7 @@ import org.apache.ddlutils.alteration.RemoveColumnChange;
 import org.apache.ddlutils.alteration.RemovePrimaryKeyChange;
 import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.alteration.TableDefinitionChangesPredicate;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
@@ -66,6 +67,9 @@ public class SapDbPlatform extends PlatformImplBase
         info.setMultipleIdentityColumnsSupported(false);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
+        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE });
+        info.setDefaultOnDeleteAction(CascadeActionEnum.RESTRICT);
+        info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.RESTRICT, CascadeActionEnum.SET_DEFAULT, CascadeActionEnum.SET_NULL, CascadeActionEnum.NONE });
 
         // BIGINT is also handled by the model reader
         // Unfortunately there is no way to distinguish between REAL, and FLOAT/DOUBLE when
@@ -162,7 +166,7 @@ public class SapDbPlatform extends PlatformImplBase
 
                     // we can however handle the change if only the default value or the required status was changed
                     return ((curColumn.getTypeCode() == newColumn.getTypeCode()) &&
-                           (!getPlatformInfo().hasSize(curColumn.getTypeCode()) || StringUtilsExt.equals(curColumn.getSize(), newColumn.getSize())) &&
+                           !ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), curColumn, newColumn) &&
                            (curColumn.isAutoIncrement() == newColumn.isAutoIncrement()));
                 }
                 else

@@ -1250,7 +1250,7 @@ public class PlatformInfo
     /**
      * Sets the default ON UPDATE action that is used if none is specified.
      * 
-     * @return The default action
+     * @param defaultOnUpdateAction The default action
      */
     public void setDefaultOnUpdateAction(CascadeActionEnum defaultOnUpdateAction)
     {
@@ -1270,7 +1270,7 @@ public class PlatformInfo
     /**
      * Sets the default ON DELETE action that is used if none is specified.
      * 
-     * @return The default action
+     * @param defaultOnDeleteAction The default action
      */
     public void setDefaultOnDeleteAction(CascadeActionEnum defaultOnDeleteAction)
     {

@@ -110,8 +110,7 @@ public interface Index extends Serializable
     public void removeColumn(int idx);
 
     /**
-     * Returns a clone of this index object. This is essentially the same method as
-     * {@link #clone()}, except that it does not throw a checked exception.
+     * Returns a clone of this index object.
      * 
      * @return The clone
      */

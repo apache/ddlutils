@@ -1,38 +1,41 @@
 package org.apache.ddlutils.io;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 /**
-  * Contains basic utility methods for XML.</p>
-  * This class is borrowed from <a href='http://commons.apache.org/betwixt/'>Apache Commons Betwixt</a>
-  * whose class in turn is based on code in <a href='http://xerces.apache.org/xerces2-j/index.html'>Apache Xerces</a>.
-  * <p>The code for {@link #isWellFormedXMLName} is based on code in 
-  * <code>org.apache.xerces.util.XMLChar</code> 
-  * in <a href='http://xerces.apache.org/xerces2-j/index.html'>Apache Xerces</a>.
-  * The authors of the Xerces and Betwixt classes are credited below.</p>
-  *
-  * @author Glenn Marcy, IBM
-  * @author Andy Clark, IBM
-  * @author Eric Ye, IBM
-  * @author Arnaud  Le Hors, IBM
-  * @author Rahul Srivastava, Sun Microsystems Inc.  
-  * @author Robert Burrell Donkin
-  */
+ * <p>Contains basic utility methods for XML.</p>
+ * This class is borrowed from <a href='http://commons.apache.org/betwixt/'>Apache Commons Betwixt</a>
+ * whose class in turn is based on code in <a href='http://xerces.apache.org/xerces2-j/index.html'>Apache Xerces</a>.
+ * <p>The code for {@link #isWellFormedXMLName} is based on code in 
+ * <code>org.apache.xerces.util.XMLChar</code> 
+ * in <a href='http://xerces.apache.org/xerces2-j/index.html'>Apache Xerces</a>.
+ * The authors of the Xerces and Betwixt classes are credited below.</p>
+ *
+ * @author Glenn Marcy, IBM
+ * @author Andy Clark, IBM
+ * @author Eric Ye, IBM
+ * @author Arnaud  Le Hors, IBM
+ * @author Rahul Srivastava, Sun Microsystems Inc.  
+ * @author Robert Burrell Donkin
+ * @version $Revision: $
+ */
 public class XMLUtils
 {
     /** Name start character mask. */

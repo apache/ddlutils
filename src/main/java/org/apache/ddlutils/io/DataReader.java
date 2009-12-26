@@ -252,6 +252,11 @@ public class DataReader
 
     // TODO: add debug level logging (or trace ?)
 
+    /**
+     * Reads the xml document from the given xml stream reader.
+     * 
+     * @param xmlReader The reader
+     */
     private void readDocument(XMLStreamReader xmlReader) throws XMLStreamException, DdlUtilsXMLException
     {
         // we ignore the top-level tag since we don't know about its name
@@ -267,6 +272,11 @@ public class DataReader
         }
     }
 
+    /**
+     * Reads a bean from the given xml stream reader.
+     * 
+     * @param xmlReader The reader
+     */
     private void readBean(XMLStreamReader xmlReader) throws XMLStreamException, DdlUtilsXMLException
     {
         QName elemQName = xmlReader.getName();
@@ -303,6 +313,13 @@ public class DataReader
         }
     }
 
+    /**
+     * Reads all column sub elements that match the columns specified by the given table object from the xml reader into the given bean.
+     *  
+     * @param xmlReader The reader
+     * @param bean      The bean to fill
+     * @param table     The table definition
+     */
     private void readColumnSubElements(XMLStreamReader xmlReader, DynaBean bean, Table table) throws XMLStreamException, DdlUtilsXMLException
     {
         int eventType = XMLStreamReader.START_ELEMENT;
@@ -317,6 +334,13 @@ public class DataReader
         }
     }
 
+    /**
+     * Reads the next column sub element that matches a column specified by the given table object from the xml reader into the given bean.
+     *  
+     * @param xmlReader The reader
+     * @param bean      The bean to fill
+     * @param table     The table definition
+     */
     private void readColumnSubElement(XMLStreamReader xmlReader, DynaBean bean, Table table) throws XMLStreamException, DdlUtilsXMLException
     {
         QName   elemQName  = xmlReader.getName();
@@ -359,6 +383,14 @@ public class DataReader
         consumeRestOfElement(xmlReader);
     }
 
+    /**
+     * Converts the column value read from the XML stream to an object and sets it at the given bean.
+     * 
+     * @param bean   The bean
+     * @param table  The table definition
+     * @param column The column definition
+     * @param value  The value as a string
+     */
     private void setColumnValue(DynaBean bean, Table table, Column column, String value) throws DdlUtilsXMLException
     {
         SqlTypeConverter converter = _converterConf.getRegisteredConverter(table, column);

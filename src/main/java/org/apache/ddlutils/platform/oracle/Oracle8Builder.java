@@ -352,7 +352,7 @@ public class Oracle8Builder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void addColumn(Table table, Column newColumn) throws IOException
+    public void addColumn(Database model, Table table, Column newColumn) throws IOException
     {
         print("ALTER TABLE ");
         printlnIdentifier(getTableName(table));

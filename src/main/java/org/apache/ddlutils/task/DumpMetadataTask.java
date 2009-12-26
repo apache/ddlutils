@@ -278,10 +278,10 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Dumps the database meta data into XML elements under the given element.
+     * Dumps the database meta data into XML elements under the current element in the given writer.
      * 
-     * @param element  The XML element
-     * @param metaData The meta data
+     * @param xmlWriter The XML writer to write to
+     * @param metaData  The meta data to write
      */
     private void dumpMetaData(PrettyPrintingXmlWriter xmlWriter, DatabaseMetaData metaData) throws NoSuchMethodException,
                                                                                                    IllegalAccessException,
@@ -317,9 +317,9 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Dumps the property represented by the given method.
+     * Dumps the property represented by the given method in the current element in the given writer.
      * 
-     * @param parent     The parent XML element
+     * @param xmlWriter  The XML writer to write to
      * @param obj        The instance we're working on
      * @param propGetter The method for accessing the property
      */
@@ -336,12 +336,12 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Adds a property to the given element, either as an attribute (primitive value or
+     * Adds a property to the current element in the given xml writer, either as an attribute (primitive value or
      * string) or as a sub element.
      * 
-     * @param element The XML element
-     * @param name    The name of the property
-     * @param value   The value of the property
+     * @param xmlWriter The XML writer to write to
+     * @param name      The name of the property
+     * @param value     The value of the property
      */
     private void addProperty(PrettyPrintingXmlWriter xmlWriter, String name, Object value)
     {
@@ -363,11 +363,11 @@ public class DumpMetadataTask extends Task
     }
 
     /**
-     * Adds a property to the given XML element that is represented as an array.
+     * Adds a property that is represented as an array to the current element in the given xml writer.
      * 
-     * @param element The XML element
-     * @param name    The name of the property
-     * @param values  The values of the property
+     * @param xmlWriter The XML writer to write to
+     * @param name      The name of the property
+     * @param values    The values of the property
      */
     private void addArrayProperty(PrettyPrintingXmlWriter xmlWriter, String name, Object[] values)
     {
@@ -387,11 +387,11 @@ public class DumpMetadataTask extends Task
     }
     
     /**
-     * Adds a property to the given XML element that is represented as a result set.
+     * Adds a property that is represented as a result set to the current element in the given xml writer.
      * 
-     * @param element The XML element
-     * @param name    The name of the property
-     * @param result  The values of the property as a result set
+     * @param xmlWriter The XML writer to write to
+     * @param name      The name of the property
+     * @param result    The values of the property as a result set
      */
     private void addResultSetProperty(PrettyPrintingXmlWriter xmlWriter, String name, ResultSet result)
     {
@@ -475,13 +475,42 @@ public class DumpMetadataTask extends Task
         }
     }
 
+    /**
+     * Defines an interface for a callback that retrieves a specific result set from the metadata, and
+     * also writes rows to a given xml writer as well as handles errors.
+     */
     private static interface ResultSetXmlOperation
     {
+        /**
+         * Returns the result set to work on.
+         * 
+         * @return The result set
+         */
         public ResultSet getResultSet() throws SQLException;
+
+        /**
+         * Writes the row currently maintained by the given result set to the given xml writer.
+         * 
+         * @param xmlWriter The xml writer to write to
+         * @param result    The row to write
+         */
         public void handleRow(PrettyPrintingXmlWriter xmlWriter, ResultSet result) throws SQLException;
+
+        /**
+         * Handles the given exception.
+         * 
+         * @param ex The sql exception
+         */
         public void handleError(SQLException ex);
     }
 
+    /**
+     * Helper method that performs the given operation.
+     * 
+     * @param xmlWriter The xml writer that the operation shall write to
+     * @param name      The name of the xml element surrounding the operation's output
+     * @param op        The operation
+     */
     private void performResultSetXmlOperation(PrettyPrintingXmlWriter xmlWriter, String name, ResultSetXmlOperation op)
     {
         ResultSet result = null;
@@ -532,8 +561,8 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the catalogs and schemas of the database.
      * 
-     * @param parent   The parent element
-     * @param metaData The database meta data
+     * @param xmlWriter The xml writer to write to
+     * @param metaData  The database meta data
      */
     private void dumpCatalogsAndSchemas(PrettyPrintingXmlWriter xmlWriter, final DatabaseMetaData metaData)
     {
@@ -590,8 +619,8 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps all tables.
      * 
-     * @param parent   The parent element
-     * @param metaData The database metadata
+     * @param xmlWriter The xml writer to write to
+     * @param metaData  The database metadata
      */
     private void dumpTables(PrettyPrintingXmlWriter xmlWriter, final DatabaseMetaData metaData)
     {
@@ -689,7 +718,7 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the columns of the indicated table.
      * 
-     * @param tableElem   The XML element for the table
+     * @param xmlWriter   The xml writer to write to
      * @param metaData    The database metadata
      * @param catalogName The catalog name
      * @param schemaName  The schema name
@@ -792,7 +821,7 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the primary key columns of the indicated table.
      * 
-     * @param tableElem   The XML element for the table
+     * @param xmlWriter   The xml writer to write to
      * @param metaData    The database metadata
      * @param catalogName The catalog name
      * @param schemaName  The schema name
@@ -838,7 +867,7 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the versioned (auto-updating) columns of the indicated table.
      * 
-     * @param tableElem   The XML element for the table
+     * @param xmlWriter   The xml writer to write to
      * @param metaData    The database metadata
      * @param catalogName The catalog name
      * @param schemaName  The schema name
@@ -908,7 +937,7 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the foreign key columns of the indicated table to other tables.
      * 
-     * @param tableElem   The XML element for the table
+     * @param xmlWriter   The xml writer to write to
      * @param metaData    The database metadata
      * @param catalogName The catalog name
      * @param schemaName  The schema name
@@ -1036,7 +1065,7 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the indexes of the indicated table.
      * 
-     * @param tableElem   The XML element for the table
+     * @param xmlWriter   The xml writer to write to
      * @param metaData    The database metadata
      * @param catalogName The catalog name
      * @param schemaName  The schema name
@@ -1133,8 +1162,8 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps all procedures.
      * 
-     * @param parent   The parent element
-     * @param metaData The database metadata
+     * @param xmlWriter The xml writer to write to
+     * @param metaData  The database metadata
      */
     private void dumpProcedures(PrettyPrintingXmlWriter xmlWriter, final DatabaseMetaData metaData) throws SQLException
     {
@@ -1209,7 +1238,7 @@ public class DumpMetadataTask extends Task
     /**
      * Dumps the contents of the indicated procedure.
      * 
-     * @param procedureElem The XML element for the procedure
+     * @param xmlWriter     The xml writer to write to
      * @param metaData      The database metadata
      * @param catalogName   The catalog name
      * @param schemaName    The schema name
@@ -1311,11 +1340,11 @@ public class DumpMetadataTask extends Task
     /**
      * If the result set contains the indicated column, extracts its value and sets an attribute at the given element.
      * 
+     * @param xmlWriter  The xml writer to write to
+     * @param attrName   The name of the attribute to write
      * @param result     The result set
      * @param columns    The columns in the result set
      * @param columnName The name of the column in the result set
-     * @param element    The element to add the attribute
-     * @param attrName   The name of the attribute to set
      */
     private void addStringAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {
@@ -1335,11 +1364,11 @@ public class DumpMetadataTask extends Task
     /**
      * If the result set contains the indicated column, extracts its int value and sets an attribute at the given element.
      * 
+     * @param xmlWriter  The xml writer to write to
+     * @param attrName   The name of the attribute to write
      * @param result     The result set
      * @param columns    The columns in the result set
      * @param columnName The name of the column in the result set
-     * @param element    The element to add the attribute
-     * @param attrName   The name of the attribute to set
      */
     private void addIntAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {
@@ -1373,11 +1402,11 @@ public class DumpMetadataTask extends Task
     /**
      * If the result set contains the indicated column, extracts its short value and sets an attribute at the given element.
      * 
+     * @param xmlWriter  The xml writer to write to
+     * @param attrName   The name of the attribute to write
      * @param result     The result set
      * @param columns    The columns in the result set
      * @param columnName The name of the column in the result set
-     * @param element    The element to add the attribute
-     * @param attrName   The name of the attribute to set
      */
     private void addShortAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {
@@ -1411,11 +1440,11 @@ public class DumpMetadataTask extends Task
     /**
      * If the result set contains the indicated column, extracts its boolean value and sets an attribute at the given element.
      * 
+     * @param xmlWriter  The xml writer to write to
+     * @param attrName   The name of the attribute to write
      * @param result     The result set
      * @param columns    The columns in the result set
      * @param columnName The name of the column in the result set
-     * @param element    The element to add the attribute
-     * @param attrName   The name of the attribute to set
      */
     private void addBooleanAttribute(PrettyPrintingXmlWriter xmlWriter, String attrName, ResultSet result, Set columns, String columnName) throws SQLException
     {

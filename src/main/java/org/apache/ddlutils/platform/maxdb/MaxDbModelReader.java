@@ -68,12 +68,9 @@ public class MaxDbModelReader extends JdbcModelReader
         }
         if (column.getTypeCode() == Types.DECIMAL)
         {
-            // For some reason, the size will be reported with 2 byte more, e.g. 17 instead of 15
-            // So we have to adjust the size here
-            if (column.getSizeAsInt() > 2)
-            {
-                column.setSizeAndScale(column.getSizeAsInt() - 2, column.getScale());
-            }
+            // need to use COLUMN_SIZE for precision instead of NUM_PREC_RADIX
+            column.setPrecisionRadix(column.getSizeAsInt());
+
             // We also perform back-mapping to BIGINT
             if ((column.getSizeAsInt() == 38) && (column.getScale() == 0))
             {
