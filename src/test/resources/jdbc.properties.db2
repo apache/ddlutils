@@ -26,6 +26,6 @@ ddlutils.platform=Db2v8
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 
 datasource.driverClassName=com.ibm.db2.jcc.DB2Driver
-datasource.url=jdbc:db2://192.168.55.129:50000/ddlutils
+datasource.url=jdbc:db2://192.168.129.134:50000/ddlutils
 datasource.username=ddlutils
 datasource.password=ddlutils

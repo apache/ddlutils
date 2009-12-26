@@ -29,6 +29,6 @@
 
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=com.sap.dbtech.jdbc.DriverSapDB
-datasource.url=jdbc:sapdb://localhost/ddlutils
-datasource.username=dba
-datasource.password=dba
+datasource.url=jdbc:sapdb://192.168.129.129/MAXDB1
+datasource.username=ddlutils
+datasource.password=ddlutils

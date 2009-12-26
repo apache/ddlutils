@@ -29,7 +29,7 @@ ddlutils.platform=MySql5
 
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=com.mysql.jdbc.Driver
-datasource.url=jdbc:mysql://192.168.55.129/ddlutils
+datasource.url=jdbc:mysql://192.168.129.131/ddlutils
 datasource.username=ddlutils
 datasource.password=ddlutils
 
