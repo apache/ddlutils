@@ -448,8 +448,8 @@ public abstract class SqlBuilder
     /**
      * Writes a statement that copies the data from the source to the target table. Note
      * that this copies only those columns that are in both tables.
-     * Database-specific implementations might redefine this method though they usually
-     * it suffices to redefine the {@link #writeCastExpression(Column, Column)} method.
+     * Database-specific implementations might redefine this method though it usually
+     * suffices to redefine the {@link #writeCastExpression(Column, Column)} method.
      * 
      * @param sourceTable The source table
      * @param targetTable The target table
@@ -1956,7 +1956,7 @@ public abstract class SqlBuilder
      * @param table      The table
      * @param foreignKey The foreignkey
      */
-    private void writeForeignKeyOnDeleteAction(Table table, ForeignKey foreignKey) throws IOException
+    protected void writeForeignKeyOnDeleteAction(Table table, ForeignKey foreignKey) throws IOException
     {
         CascadeActionEnum action = foreignKey.getOnDelete();
 
@@ -2006,7 +2006,7 @@ public abstract class SqlBuilder
      * @param table      The table
      * @param foreignKey The foreignkey
      */
-    private void writeForeignKeyOnUpdateAction(Table table, ForeignKey foreignKey) throws IOException
+    protected void writeForeignKeyOnUpdateAction(Table table, ForeignKey foreignKey) throws IOException
     {
         CascadeActionEnum action = foreignKey.getOnUpdate();
 

@@ -22,11 +22,15 @@ package org.apache.ddlutils.platform.sapdb;
 import java.io.IOException;
 
 import org.apache.ddlutils.Platform;
+import org.apache.ddlutils.alteration.ColumnDefinitionChange;
+import org.apache.ddlutils.model.CascadeActionEnum;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.TypeMap;
 import org.apache.ddlutils.platform.SqlBuilder;
+import org.apache.ddlutils.util.StringUtilsExt;
 
 /**
  * The SQL Builder for SapDB.
@@ -85,26 +89,10 @@ public class SapDbBuilder extends SqlBuilder
     /**
      * {@inheritDoc}
      */
-    public void createForeignKey(Database database, Table table, ForeignKey foreignKey) throws IOException
+    protected void writeForeignKeyOnDeleteAction(Table table, ForeignKey foreignKey) throws IOException
     {
-        if (foreignKey.getForeignTableName() == null)
-        {
-            _log.warn("Foreign key table is null for key " + foreignKey);
-        }
-        else
-        {
-            writeTableAlterStmt(table);
-
-            print(" ADD FOREIGN KEY ");
-            printIdentifier(getForeignKeyName(table, foreignKey));
-            print(" (");
-            writeLocalReferences(foreignKey);
-            print(") REFERENCES ");
-            printIdentifier(getTableName(database.findTable(foreignKey.getForeignTableName())));
-            print(" (");
-            writeForeignReferences(foreignKey);
-            print(")");
-            printEndOfStatement();
+        if (foreignKey.getOnDelete() != CascadeActionEnum.NONE) {
+            super.writeForeignKeyOnDeleteAction(table, foreignKey);
         }
     }
 
@@ -235,5 +223,28 @@ public class SapDbBuilder extends SqlBuilder
             print(" DROP DEFAULT");
         }
         printEndOfStatement();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeCastExpression(Column sourceColumn, Column targetColumn) throws IOException
+    {
+        boolean charSizeChanged = TypeMap.isTextType(targetColumn.getTypeCode()) &&
+                                  TypeMap.isTextType(targetColumn.getTypeCode()) &&
+                                  ColumnDefinitionChange.isSizeChanged(getPlatformInfo(), sourceColumn, targetColumn) &&
+                                  !StringUtilsExt.isEmpty(targetColumn.getSize());
+
+        if (charSizeChanged)
+        {
+            print("SUBSTR(");
+        }
+        printIdentifier(getColumnName(sourceColumn));
+        if (charSizeChanged)
+        {
+            print(",1,");
+            print(targetColumn.getSize());
+            print(")");
+        }
     }
 }

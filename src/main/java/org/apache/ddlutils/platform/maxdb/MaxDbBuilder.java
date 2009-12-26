@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
-import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.sapdb.SapDbBuilder;
@@ -59,32 +58,6 @@ public class MaxDbBuilder extends SapDbBuilder
             printIdentifier(getConstraintName(null, table, "PK", null));
             print(" ");
             writePrimaryKeyStmt(table, primaryKeyColumns);
-            printEndOfStatement();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void createForeignKey(Database database, Table table, ForeignKey foreignKey) throws IOException
-    {
-        if (foreignKey.getForeignTableName() == null)
-        {
-            _log.warn("Foreign key table is null for key " + foreignKey);
-        }
-        else
-        {
-            writeTableAlterStmt(table);
-
-            print("ADD CONSTRAINT ");
-            printIdentifier(getForeignKeyName(table, foreignKey));
-            print(" FOREIGN KEY (");
-            writeLocalReferences(foreignKey);
-            print(") REFERENCES ");
-            printIdentifier(getTableName(database.findTable(foreignKey.getForeignTableName())));
-            print(" (");
-            writeForeignReferences(foreignKey);
-            print(")");
             printEndOfStatement();
         }
     }
