@@ -27,6 +27,7 @@ import junit.framework.Test;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.ddlutils.TestAgainstLiveDatabaseBase;
 import org.apache.ddlutils.platform.hsqldb.HsqlDbPlatform;
+import org.apache.ddlutils.platform.maxdb.MaxDbPlatform;
 import org.apache.ddlutils.platform.mysql.MySql50Platform;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.sybase.SybasePlatform;
@@ -333,7 +334,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue);
@@ -670,6 +672,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndColumn()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -708,7 +715,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -751,6 +759,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndRequiredColumn()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -787,6 +800,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndColumnWithDefault()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -825,7 +843,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndrequiredAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -868,6 +887,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertNonUniqueIndexAndRequiredColumnWithDefault()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -901,7 +925,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue);
@@ -917,6 +942,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testAddAndInsertNonUniqueIndexAndMultipleColumns()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -950,12 +980,16 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertTrue(getRows("roundtrip").isEmpty());
     }
 
-
     /**
      * Tests the insertion of an unique index and a column.
      */
     public void testInsertUniqueIndexAndColumn()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -994,7 +1028,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertUniqueIndexAndAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -1037,6 +1072,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertUniqueIndexAndRequiredColumn()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1073,6 +1113,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertUniqueIndexAndColumnWithDefault()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1111,7 +1156,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertUniqueIndexAndRequiredAutoIncrementColumn()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -1154,6 +1200,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertUniqueIndexAndRequiredColumnWithDefault()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1187,7 +1238,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
 
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
                 // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue);
@@ -1203,6 +1255,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testAddAndInsertUniqueIndexAndMultipleColumns()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1241,6 +1298,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertColumnIntoNonUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1286,7 +1348,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertAutoIncrementColumnIntoNonUniqueIndex()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -1336,6 +1399,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredColumnIntoNonUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1378,6 +1446,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertColumnWithDefaultIntoNonUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1423,7 +1496,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredAutoIncrementColumnIntoNonUniqueIndex()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -1473,6 +1547,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredColumnWithDefaultIntoNonUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1513,7 +1592,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(new Integer(2),  beans.get(0), "avalue1");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
             // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue2);
@@ -1529,6 +1609,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testAddAndInsertMultipleColumnsIntoNonUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1573,6 +1658,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertColumnIntoUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1618,7 +1708,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertAutoIncrementColumnIntoUniqueIndex()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -1668,6 +1759,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredColumnIntoUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1710,6 +1806,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertColumnWithDefaultIntoUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1755,7 +1856,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredAutoIncrementColumnIntoUniqueIndex()
     {
-        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported())
+        if (!getPlatformInfo().isNonPrimaryKeyIdentityColumnsSupported() ||
+            !getPlatformInfo().isIndicesSupported())
         {
             return;
         }
@@ -1805,6 +1907,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testInsertRequiredColumnWithDefaultIntoUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -1845,7 +1952,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(new Integer(2), beans.get(0), "avalue1");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
                 // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", avalue2);
@@ -1861,6 +1969,11 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
      */
     public void testAddAndInsertMultipleColumnsIntoUniqueIndex()
     {
+        if (!getPlatformInfo().isIndicesSupported())
+        {
+            return;
+        }
+
         final String model1Xml = 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='roundtriptest'>\n"+
@@ -2197,7 +2310,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(new Integer(1), beans2.get(0), "pk");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
                 // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", pk1);
@@ -2777,7 +2891,8 @@ public class TestInsertColumn extends TestAgainstLiveDatabaseBase
         assertEquals(new Integer(1), beans2.get(0), "avalue1");
         if (MySqlPlatform.DATABASENAME.equals(getPlatform().getName()) ||
             MySql50Platform.DATABASENAME.equals(getPlatform().getName()) ||
-            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()))
+            HsqlDbPlatform.DATABASENAME.equals(getPlatform().getName()) ||
+            MaxDbPlatform.DATABASENAME.equals(getPlatform().getName()))
         {
                 // Some DBs ignore that the type is CHAR(8) and trim the value
             assertEquals("text", pk2);

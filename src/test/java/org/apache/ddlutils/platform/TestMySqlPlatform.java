@@ -153,8 +153,8 @@ public class TestMySqlPlatform extends TestPlatformBase
             "    `COL_FK` INTEGER NOT NULL,\n"+
             "    PRIMARY KEY (`COL_PK`)\n"+
             ");\n"+
-            "ALTER TABLE `table2` ADD CONSTRAINT `table2_FK_COL_FK_1_COL_FK_2_table1` FOREIGN KEY (`COL_FK_1`, `COL_FK_2`) REFERENCES `table1` (`COL_PK_2`, `COL_PK_1`);\n"+
-            "ALTER TABLE `table3` ADD CONSTRAINT `testfk` FOREIGN KEY (`COL_FK`) REFERENCES `table2` (`COL_PK`);\n",
+            "ALTER TABLE `table2` ADD CONSTRAINT `table2_FK_COL_FK_1_COL_FK_2_table1` FOREIGN KEY (`COL_FK_1`, `COL_FK_2`) REFERENCES `table1` (`COL_PK_2`, `COL_PK_1`) ON DELETE NO ACTION ON UPDATE NO ACTION;\n"+
+            "ALTER TABLE `table3` ADD CONSTRAINT `testfk` FOREIGN KEY (`COL_FK`) REFERENCES `table2` (`COL_PK`) ON DELETE NO ACTION ON UPDATE NO ACTION;\n",
             getTableConstraintTestDatabaseCreationSql());
     }
 

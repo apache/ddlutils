@@ -3120,8 +3120,8 @@ public class TestChangeColumn extends TestAgainstLiveDatabaseBase
         List beans = getRows("roundtrip");
 
         assertEquals(new Integer(1), beans.get(0), "pk");
-        assertEquals(value,          beans.get(0), "avalue1");
         assertEquals(time,           beans.get(0), "avalue2");
+        assertEquals(value,          beans.get(0), "avalue1");
     }
 
     /**

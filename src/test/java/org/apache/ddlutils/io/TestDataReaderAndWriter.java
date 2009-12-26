@@ -42,24 +42,41 @@ import org.apache.ddlutils.model.Database;
  */
 public class TestDataReaderAndWriter extends TestCase
 {
-    // no need to call start/end as the don't do anything anyways
+    /**
+     * A test data sink. There is no need to call start/end as the don't do anything anyways in this class.
+     */
     private static class TestDataSink implements DataSink
     {
+        /** Stores the read objects. */
         private final ArrayList readObjects;
 
+        /**
+         * Creates a new test data sink using the given list as the backing store.
+         * 
+         * @param readObjects The list to store the read object
+         */
         private TestDataSink(ArrayList readObjects)
         {
             this.readObjects = readObjects;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public void start() throws DataSinkException
         {}
 
+        /**
+         * {@inheritDoc}
+         */
         public void addBean(DynaBean bean) throws DataSinkException
         {
             readObjects.add(bean);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public void end() throws DataSinkException
         {}
     }

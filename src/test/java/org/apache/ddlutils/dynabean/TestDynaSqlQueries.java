@@ -50,10 +50,10 @@ public class TestDynaSqlQueries extends TestAgainstLiveDatabaseBase
     }
 
     /**
-     * Returns the SQL to select all rows from the indicated table.
+     * Helper method to wrap the given identifier in delimiters if delimited identifier mode is turned on for the test.
      * 
-     * @param tableName The name of the table to query
-     * @return The SQL
+     * @param name The identifier
+     * @return The identifier, wrapped if delimited identifier mode is turned on, or as-is if not
      */
     private String asIdentifier(String name)
     {
