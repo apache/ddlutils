@@ -24,6 +24,7 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -179,6 +180,12 @@ public class PlatformInfo
 
     /** Contains the supported ON DELETE actions. */
     private HashSet _supportedOnDeleteActions = new HashSet();
+
+    /** Contains for each ON UPDATE action the list of equivalent actions. */
+    private HashMap _equivalentOnUpdateActions = new HashMap();
+
+    /** Contains for each ON DELETE action the list of equivalent actions. */
+    private HashMap _equivalentOnDeleteActions = new HashMap();
 
     /**
      * Creates a new platform info object.
@@ -1275,5 +1282,93 @@ public class PlatformInfo
     public void setDefaultOnDeleteAction(CascadeActionEnum defaultOnDeleteAction)
     {
         _defaultOnDeleteAction = defaultOnDeleteAction;
+    }
+
+    /**
+     * Registers the given pair of ON UPDATE actions to be equivalent. Equivalent actions will not
+     * cause a foreign key to be changed/recreated when altering a database.
+     * 
+     * @param actionA The first action
+     * @param actionB The second action
+     */
+    public void addEquivalentOnUpdateActions(CascadeActionEnum actionA, CascadeActionEnum actionB)
+    {
+        if (!actionA.equals(actionB))
+        {
+            Set actionsEquivalentToActionA = (Set)_equivalentOnUpdateActions.get(actionA);
+            Set actionsEquivalentToActionB = (Set)_equivalentOnUpdateActions.get(actionB);
+
+            if (actionsEquivalentToActionA == null)
+            {
+                actionsEquivalentToActionA = new HashSet();
+                _equivalentOnUpdateActions.put(actionA, actionsEquivalentToActionA);
+            }
+            if (actionsEquivalentToActionB == null)
+            {
+                actionsEquivalentToActionB = new HashSet();
+                _equivalentOnUpdateActions.put(actionB, actionsEquivalentToActionB);
+            }
+            actionsEquivalentToActionA.add(actionB);
+            actionsEquivalentToActionB.add(actionA);
+        }
+    }
+
+    /**
+     * Determiones whether the two ON UPDATE actions are equivalent. Equivalent actions will not
+     * cause a foreign key to be changed/recreated when altering a database.
+     * 
+     * @param actionA The first action
+     * @param actionB The second action
+     * @return <code>true</code> if the two actions are equivalent 
+     */
+    public boolean areEquivalentOnUpdateActions(CascadeActionEnum actionA, CascadeActionEnum actionB)
+    {
+        Set actionsEquivalentToActionA = (Set)_equivalentOnUpdateActions.get(actionA);
+
+        return actionsEquivalentToActionA == null ? false : actionsEquivalentToActionA.contains(actionB);
+    }
+
+    /**
+     * Registers the given pair of ON DELETE actions to be equivalent. Equivalent actions will not
+     * cause a foreign key to be changed/recreated when altering a database.
+     * 
+     * @param actionA The first action
+     * @param actionB The second action
+     */
+    public void addEquivalentOnDeleteActions(CascadeActionEnum actionA, CascadeActionEnum actionB)
+    {
+        if (!actionA.equals(actionB))
+        {
+            Set actionsEquivalentToActionA = (Set)_equivalentOnDeleteActions.get(actionA);
+            Set actionsEquivalentToActionB = (Set)_equivalentOnDeleteActions.get(actionB);
+
+            if (actionsEquivalentToActionA == null)
+            {
+                actionsEquivalentToActionA = new HashSet();
+                _equivalentOnDeleteActions.put(actionA, actionsEquivalentToActionA);
+            }
+            if (actionsEquivalentToActionB == null)
+            {
+                actionsEquivalentToActionB = new HashSet();
+                _equivalentOnDeleteActions.put(actionB, actionsEquivalentToActionB);
+            }
+            actionsEquivalentToActionA.add(actionB);
+            actionsEquivalentToActionB.add(actionA);
+        }
+    }
+
+    /**
+     * Determiones whether the two ON DELETE actions are equivalent. Equivalent actions will not
+     * cause a foreign key to be changed/recreated when altering a database.
+     * 
+     * @param actionA The first action
+     * @param actionB The second action
+     * @return <code>true</code> if the two actions are equivalent 
+     */
+    public boolean areEquivalentOnDeleteActions(CascadeActionEnum actionA, CascadeActionEnum actionB)
+    {
+        Set actionsEquivalentToActionA = (Set)_equivalentOnDeleteActions.get(actionA);
+
+        return actionsEquivalentToActionA == null ? false : actionsEquivalentToActionA.contains(actionB);
     }
 }

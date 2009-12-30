@@ -77,7 +77,9 @@ public class MSSqlPlatform extends PlatformImplBase
         info.setIdentityColumnAutomaticallyRequired(true);
         info.setMultipleIdentityColumnsSupported(false);
         info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.NONE });
+        info.addEquivalentOnUpdateActions(CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT);
         info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.NONE });
+        info.addEquivalentOnDeleteActions(CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT);
 
         info.addNativeTypeMapping(Types.ARRAY,         "IMAGE",         Types.LONGVARBINARY);
         // BIGINT will be mapped back to BIGINT by the model reader 

@@ -74,6 +74,7 @@ public class Oracle8Platform extends PlatformImplBase
         info.setPrimaryKeyColumnAutomaticallyRequired(true);
         info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE });
         info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.SET_NULL, CascadeActionEnum.NONE });
+        info.addEquivalentOnDeleteActions(CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT);
 
         // Note that the back-mappings are partially done by the model reader, not the driver
         info.addNativeTypeMapping(Types.ARRAY,         "BLOB",             Types.BLOB);

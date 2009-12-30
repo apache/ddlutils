@@ -29,7 +29,7 @@ ddlutils.platform=Oracle10
 
 datasource.class=org.apache.commons.dbcp.BasicDataSource
 datasource.driverClassName=oracle.jdbc.driver.OracleDriver
-datasource.url=jdbc:oracle:thin:@192.168.129.134:1521:XE
+datasource.url=jdbc:oracle:thin:@192.168.129.133:1521:XE
 datasource.username=ddlutils
 datasource.password=ddlutils
 

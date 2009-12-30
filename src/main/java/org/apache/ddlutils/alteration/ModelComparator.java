@@ -373,6 +373,7 @@ public class ModelComparator
         tableDefinitionChanges.addAll(checkForAddedColumns(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
         tableDefinitionChanges.addAll(checkForPrimaryKeyChanges(sourceModel, sourceTable, intermediateModel, intermediateTable, targetModel, targetTable));
 
+        // TOOD: check for foreign key changes (on delete/on update)
         if (!tableDefinitionChanges.isEmpty())
         {
             if ((_tableDefCangePredicate == null) || _tableDefCangePredicate.areSupported(tmpTable, tableDefinitionChanges))

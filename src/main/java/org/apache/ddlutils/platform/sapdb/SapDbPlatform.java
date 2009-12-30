@@ -67,9 +67,10 @@ public class SapDbPlatform extends PlatformImplBase
         info.setMultipleIdentityColumnsSupported(false);
         info.setCommentPrefix("/*");
         info.setCommentSuffix("*/");
-        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE });
-        info.setDefaultOnDeleteAction(CascadeActionEnum.RESTRICT);
         info.setSupportedOnDeleteActions(new CascadeActionEnum[] { CascadeActionEnum.CASCADE, CascadeActionEnum.RESTRICT, CascadeActionEnum.SET_DEFAULT, CascadeActionEnum.SET_NULL, CascadeActionEnum.NONE });
+        info.addEquivalentOnDeleteActions(CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT);
+        info.setSupportedOnUpdateActions(new CascadeActionEnum[] { CascadeActionEnum.NONE });
+        info.addEquivalentOnUpdateActions(CascadeActionEnum.NONE, CascadeActionEnum.RESTRICT);
 
         // BIGINT is also handled by the model reader
         // Unfortunately there is no way to distinguish between REAL, and FLOAT/DOUBLE when

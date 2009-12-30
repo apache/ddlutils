@@ -933,12 +933,11 @@ public class JdbcModelReader
             CascadeActionEnum onUpdateAction = convertAction((Short)values.get("UPDATE_RULE"));
             CascadeActionEnum onDeleteAction = convertAction((Short)values.get("DELETE_RULE"));
 
-            // Some JDBC drivers lie and return actions that the DB not actually supports
-            if ((onUpdateAction == null) || !getPlatformInfo().isActionSupportedForOnUpdate(onUpdateAction))
+            if (onUpdateAction == null)
             {
                 onUpdateAction = getPlatformInfo().getDefaultOnUpdateAction();
             }
-            if ((onDeleteAction == null) || !getPlatformInfo().isActionSupportedForOnDelete(onDeleteAction))
+            if (onDeleteAction == null)
             {
                 onDeleteAction = getPlatformInfo().getDefaultOnDeleteAction();
             }
