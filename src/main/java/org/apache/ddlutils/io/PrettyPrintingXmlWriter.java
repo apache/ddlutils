@@ -52,7 +52,7 @@ public class PrettyPrintingXmlWriter
      */
     public PrettyPrintingXmlWriter(OutputStream output) throws DdlUtilsXMLException
     {
-        this(output, null);
+        this(output, "UTF-8");
     }
 
     /**

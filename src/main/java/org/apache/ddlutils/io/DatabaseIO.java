@@ -923,7 +923,12 @@ public class DatabaseIO
      */
     public void write(Database model, OutputStream output) throws DdlUtilsXMLException
     {
-        write(model, new OutputStreamWriter(output));
+        PrettyPrintingXmlWriter xmlWriter = new PrettyPrintingXmlWriter(output, "UTF-8");
+
+        xmlWriter.setDefaultNamespace(DDLUTILS_NAMESPACE);
+        xmlWriter.writeDocumentStart();
+        writeDatabaseElement(model, xmlWriter);
+        xmlWriter.writeDocumentEnd();
     }
 
     /**

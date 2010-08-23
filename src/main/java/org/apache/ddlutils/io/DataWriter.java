@@ -66,7 +66,7 @@ public class DataWriter extends PrettyPrintingXmlWriter
      */
     public DataWriter(OutputStream output) throws DataWriterException
     {
-        this(output, null);
+        this(output, "UTF-8");
     }
 
     /**
