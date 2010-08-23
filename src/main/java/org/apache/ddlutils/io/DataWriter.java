@@ -20,6 +20,7 @@ package org.apache.ddlutils.io;
  */
 
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -202,7 +203,12 @@ public class DataWriter extends PrettyPrintingXmlWriter
                     if (writeBase64Encoded)
                     {
                         writeAttribute(null, DatabaseIO.BASE64_ATTR_NAME, "true");
-                        writeCData(new String(Base64.encodeBase64(content.getBytes())));
+                        try {
+                            writeCData(new String(Base64.encodeBase64(content.getBytes()), getEncoding()));
+                        }
+                        catch (UnsupportedEncodingException ex) {
+                            throw new DataWriterException(ex);
+                        }
                     }
                     else
                     {

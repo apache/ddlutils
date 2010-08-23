@@ -19,8 +19,9 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.Writer;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -37,8 +38,6 @@ public class PrettyPrintingXmlWriter
     /** The indentation string. */
     private static final String INDENT_STRING = "  ";
 
-    /** The output stream. */
-    private PrintWriter _output;
     /** The xml writer. */
     private XMLStreamWriter _writer;
     /** The output encoding. */
@@ -64,7 +63,16 @@ public class PrettyPrintingXmlWriter
      */
     public PrettyPrintingXmlWriter(OutputStream output, String encoding) throws DdlUtilsXMLException
     {
-        _output = new PrintWriter(output);
+        BufferedOutputStream bufferedOutput;
+
+        if (output instanceof BufferedOutputStream)
+        {
+            bufferedOutput = (BufferedOutputStream)output;
+        }
+        else
+        {
+            bufferedOutput = new BufferedOutputStream(output);
+        }
         if ((encoding == null) || (encoding.length() == 0))
         {
             _encoding = "UTF-8";
@@ -78,7 +86,7 @@ public class PrettyPrintingXmlWriter
         {
             XMLOutputFactory factory = XMLOutputFactory.newInstance();
 
-            _writer  = factory.createXMLStreamWriter(output, _encoding);
+            _writer  = factory.createXMLStreamWriter(bufferedOutput, _encoding);
         }
         catch (XMLStreamException ex)
         {
@@ -95,18 +103,37 @@ public class PrettyPrintingXmlWriter
      */
     public PrettyPrintingXmlWriter(Writer output, String encoding) throws DdlUtilsXMLException
     {
-        _output   = new PrintWriter(output);
+        BufferedWriter bufferedWriter;
+
+        if (output instanceof BufferedWriter)
+        {
+            bufferedWriter = (BufferedWriter)output;
+        }
+        else
+        {
+            bufferedWriter = new BufferedWriter(output);
+        }
         _encoding = encoding;
         try
         {
             XMLOutputFactory factory = XMLOutputFactory.newInstance();
 
-            _writer = factory.createXMLStreamWriter(_output);
+            _writer = factory.createXMLStreamWriter(bufferedWriter);
         }
         catch (XMLStreamException ex)
         {
             throwException(ex);
         }
+    }
+
+    /**
+     * Returnd the encoding used by this xml writer.
+     * 
+     * @return The encoding
+     */
+    public String getEncoding()
+    {
+        return _encoding;
     }
 
     /**

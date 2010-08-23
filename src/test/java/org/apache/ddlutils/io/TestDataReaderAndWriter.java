@@ -20,6 +20,8 @@ package org.apache.ddlutils.io;
  */
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.model.Database;
@@ -738,10 +741,10 @@ public class TestDataReaderAndWriter extends TestCase
 
         modelIO.setValidateXml(true);
         
-        Database     model      = modelIO.read(new StringReader(testSchemaXml));
-        StringWriter output     = new StringWriter();
-        DataWriter   dataWriter = new DataWriter(output, "UTF-8");
-        SqlDynaBean  bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        Database              model      = modelIO.read(new StringReader(testSchemaXml));
+        ByteArrayOutputStream output     = new ByteArrayOutputStream();
+        DataWriter            dataWriter = new DataWriter(output, "ISO-8859-1");
+        SqlDynaBean           bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
         bean.set("id", new Integer(1));
         bean.set("value", testedValue);
@@ -749,14 +752,81 @@ public class TestDataReaderAndWriter extends TestCase
         dataWriter.write(bean);
         dataWriter.writeDocumentEnd();
 
-        String dataXml = output.toString();
+        final ArrayList readObjects = new ArrayList();
+        DataReader      dataReader  = new DataReader();
+
+        String dataXml = new String(output.toByteArray(), "ISO-8859-1");
+
+        assertEquals("<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+                     "<data>\n" +
+                     "  <test id=\"1\">\n" +
+                     "    <value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\"><![CDATA[" + new String(Base64.encodeBase64(testedValue.getBytes()), "ISO-8859-1") + "]]></value>\n" +
+                     "  </test>\n" +
+                     "</data>\n",
+                     dataXml);
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.read(new ByteArrayInputStream(output.toByteArray()));
+
+        assertEquals(1, readObjects.size());
+
+        DynaBean obj = (DynaBean)readObjects.get(0);
+
+        assertEquals("test",
+                     obj.getDynaClass().getName());
+        assertEquals("1",
+                     obj.get("id").toString());
+        assertEquals(testedValue,
+                     obj.get("value").toString());
+    }
+
+    /**
+     * Tests special characters in the data XML (for DDLUTILS-233).
+     */
+    public void testSpecialCharactersUTF8() throws Exception
+    {
+        final String testSchemaXml = 
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>";
+        final String testedValue = "Some Special Characters: \u0001\u0009\u0010";
+
+        DatabaseIO modelIO = new DatabaseIO();
+
+        modelIO.setValidateXml(true);
+        
+        Database              model      = modelIO.read(new StringReader(testSchemaXml));
+        ByteArrayOutputStream output     = new ByteArrayOutputStream();
+        DataWriter            dataWriter = new DataWriter(output, "UTF-8");
+        SqlDynaBean           bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+        dataWriter.writeDocumentStart();
+        dataWriter.write(bean);
+        dataWriter.writeDocumentEnd();
+
+        String dataXml = new String(output.toByteArray(), "UTF-8");
+
+        assertEquals("<?xml version='1.0' encoding='UTF-8'?>\n" +
+                     "<data>\n" +
+                     "  <test id=\"1\">\n" +
+                     "    <value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\"><![CDATA[" + new String(Base64.encodeBase64(testedValue.getBytes()), "UTF-8") + "]]></value>\n" +
+                     "  </test>\n" +
+                     "</data>\n",
+                     dataXml);
 
         final ArrayList readObjects = new ArrayList();
         DataReader      dataReader  = new DataReader();
 
         dataReader.setModel(model);
         dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(dataXml));
+        dataReader.read(new ByteArrayInputStream(output.toByteArray()));
 
         assertEquals(1, readObjects.size());
 

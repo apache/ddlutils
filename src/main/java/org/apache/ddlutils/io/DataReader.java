@@ -19,8 +19,10 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -155,14 +157,7 @@ public class DataReader
      */
     public void read(String filename) throws DdlUtilsXMLException
     {
-        try
-        {
-            read(new FileReader(filename));
-        }
-        catch (IOException ex)
-        {
-            throw new DdlUtilsXMLException(ex);
-        }
+        read(new File(filename));
     }
 
     /**
@@ -172,13 +167,30 @@ public class DataReader
      */
     public void read(File file) throws DdlUtilsXMLException
     {
+        FileInputStream input = null;
+
         try
         {
-            read(new FileReader(file));
+            input = new FileInputStream(file);
+            read(input);
         }
         catch (IOException ex)
         {
             throw new DdlUtilsXMLException(ex);
+        }
+        finally
+        {
+            if (input != null)
+            {
+                try
+                {
+                    input.close();
+                }
+                catch (IOException ex)
+                {
+                    _log.warn("Error while trying to close the input stream for " + file, ex);
+                }
+            }
         }
     }
 
@@ -189,9 +201,19 @@ public class DataReader
      */
     public void read(Reader reader) throws DdlUtilsXMLException
     {
+        BufferedReader bufferedReader;
+
+        if (reader instanceof BufferedReader)
+        {
+            bufferedReader = (BufferedReader)reader;
+        }
+        else
+        {
+            bufferedReader = new BufferedReader(reader);
+        }
         try
         {
-            read(getXMLInputFactory().createXMLStreamReader(reader));
+            read(getXMLInputFactory().createXMLStreamReader(bufferedReader));
         }
         catch (XMLStreamException ex)
         {
@@ -206,9 +228,19 @@ public class DataReader
      */
     public void read(InputStream input) throws DdlUtilsXMLException
     {
+        BufferedInputStream bufferedInput;
+
+        if (input instanceof BufferedInputStream)
+        {
+            bufferedInput = (BufferedInputStream)input;
+        }
+        else
+        {
+            bufferedInput = new BufferedInputStream(input);
+        }
         try
         {
-            read(getXMLInputFactory().createXMLStreamReader(input));
+            read(getXMLInputFactory().createXMLStreamReader(bufferedInput));
         }
         catch (XMLStreamException ex)
         {
