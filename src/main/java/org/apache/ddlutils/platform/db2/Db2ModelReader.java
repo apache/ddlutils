@@ -233,7 +233,7 @@ public class Db2ModelReader extends JdbcModelReader
 
             try
             {
-                pkData = metaData.getPrimaryKeys(table.getName());
+                pkData = metaData.getPrimaryKeys(metaData.escapeForSearch(table.getName()));
                 while (pkData.next())
                 {
                     Map values = readColumns(pkData, getColumnsForPK());

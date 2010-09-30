@@ -147,7 +147,7 @@ public class MSSqlModelReader extends JdbcModelReader
 
         try
         {
-            pks = metaData.getPrimaryKeys(table.getName());
+            pks = metaData.getPrimaryKeys(metaData.escapeForSearch(table.getName()));
 
             while (pks.next())
             {

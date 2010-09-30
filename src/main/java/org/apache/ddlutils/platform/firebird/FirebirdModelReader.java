@@ -106,7 +106,7 @@ public class FirebirdModelReader extends JdbcModelReader
         	}
         	else
         	{
-        		columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
+        		columnData = metaData.getColumns(metaData.escapeForSearch(tableName), getDefaultColumnPattern());
 
         		while (columnData.next())
                 {
@@ -221,7 +221,7 @@ public class FirebirdModelReader extends JdbcModelReader
         	}
             else
             {
-	            pkData = metaData.getPrimaryKeys(tableName);
+	            pkData = metaData.getPrimaryKeys(metaData.escapeForSearch(tableName));
 	            while (pkData.next())
 	            {
 	                Map values = readColumns(pkData, getColumnsForPK());
@@ -265,7 +265,7 @@ public class FirebirdModelReader extends JdbcModelReader
         	}
             else
             {
-	            fkData = metaData.getForeignKeys(tableName);
+	            fkData = metaData.getForeignKeys(metaData.escapeForSearch(tableName));
 	            while (fkData.next())
 	            {
 	                Map values = readColumns(fkData, getColumnsForFK());
@@ -410,7 +410,7 @@ public class FirebirdModelReader extends JdbcModelReader
                 tablePattern = tablePattern.toUpperCase();
             }
 
-            tableData = metaData.getTables(tablePattern);
+            tableData = metaData.getTables(metaData.escapeForSearch(tablePattern));
 
             boolean found  = false;
             String  schema = null;
@@ -434,7 +434,7 @@ public class FirebirdModelReader extends JdbcModelReader
                     }
                     else
                     {
-                        columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
+                        columnData = metaData.getColumns(metaData.escapeForSearch(tableName), getDefaultColumnPattern());
                     }
 
                     while (found && columnData.next())

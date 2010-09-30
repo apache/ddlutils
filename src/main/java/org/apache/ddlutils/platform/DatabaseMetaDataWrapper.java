@@ -22,14 +22,15 @@ package org.apache.ddlutils.platform;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.regex.Pattern;
 
 /**
  * Wrapper class for database meta data that stores additional info.
- * 
- * @version $Revision: 329426 $
  */
 public class DatabaseMetaDataWrapper
 {
+    /** Matches the characters not allowed in search strings. */
+    private final Pattern searchStringPattern = Pattern.compile("[_%]");
     /** The database meta data. */
     private DatabaseMetaData _metaData;
     /** The catalog to acess in the database. */
@@ -135,6 +136,49 @@ public class DatabaseMetaDataWrapper
             _tableTypes = new String[types.length];
 
             System.arraycopy(types, 0, _tableTypes, 0, types.length);
+        }
+    }
+    
+    /**
+     * Escape a string literal so that it can be used as a search pattern.
+     * 
+     * @param literalString The string to escape.
+     * @return A string that can be properly used as a search string.
+     * @throws SQLException If an error occurred retrieving the meta data
+     */
+    public String escapeForSearch(String literalString) throws SQLException
+    {
+        String escape = getMetaData().getSearchStringEscape();
+
+        if (escape == "")
+        {
+            // No escape string, so nothing to do...
+            return literalString;
+        }
+        else
+        {
+            // with Java 5, we would just use Matcher.quoteReplacement
+            StringBuffer quotedEscape = new StringBuffer();
+
+            for (int idx = 0; idx < escape.length(); idx++)
+            {
+                char c = escape.charAt(idx);
+
+                switch (c)
+                {
+                    case '\\':
+                        quotedEscape.append("\\\\");
+                        break;
+                    case '$':
+                        quotedEscape.append("\\$");
+                        break;
+                    default:
+                        quotedEscape.append(c);
+                }
+            }
+            quotedEscape.append("$0");
+
+            return searchStringPattern.matcher(literalString).replaceAll(quotedEscape.toString());
         }
     }
 

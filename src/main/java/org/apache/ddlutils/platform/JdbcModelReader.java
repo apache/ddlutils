@@ -773,7 +773,7 @@ public class JdbcModelReader
 
         try
         {
-            columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
+            columnData = metaData.getColumns(metaData.escapeForSearch(tableName), getDefaultColumnPattern());
 
             List columns = new ArrayList();
 
@@ -856,7 +856,7 @@ public class JdbcModelReader
 
         try
         {
-            pkData = metaData.getPrimaryKeys(tableName);
+            pkData = metaData.getPrimaryKeys(metaData.escapeForSearch(tableName));
             while (pkData.next())
             {
                 Map values = readColumns(pkData, getColumnsForPK());
@@ -897,7 +897,7 @@ public class JdbcModelReader
 
         try
         {
-            fkData = metaData.getForeignKeys(tableName);
+            fkData = metaData.getForeignKeys(metaData.escapeForSearch(tableName));
 
             while (fkData.next())
             {
@@ -1004,7 +1004,7 @@ public class JdbcModelReader
 
         try 
         {
-            indexData = metaData.getIndices(tableName, false, false);
+            indexData = metaData.getIndices(metaData.escapeForSearch(tableName), false, false);
 
             while (indexData.next())
             {
@@ -1236,7 +1236,7 @@ public class JdbcModelReader
                 tablePattern = tablePattern.toUpperCase();
             }
 
-            tableData = metaData.getTables(tablePattern);
+            tableData = metaData.getTables(metaData.escapeForSearch(tablePattern));
 
             boolean found  = false;
             String  schema = null;
@@ -1249,7 +1249,7 @@ public class JdbcModelReader
                 if ((tableName != null) && (tableName.length() > 0))
                 {
                     schema     = (String)values.get("TABLE_SCHEM");
-                    columnData = metaData.getColumns(tableName, getDefaultColumnPattern());
+                    columnData = metaData.getColumns(metaData.escapeForSearch(tableName), getDefaultColumnPattern());
                     found      = true;
 
                     while (found && columnData.next())
