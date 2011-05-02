@@ -373,4 +373,24 @@ public class PrettyPrintingXmlWriter
             }
         }
     }
+
+    /**
+     * Writes a text segment.
+     * 
+     * @param data The data to write
+     */
+    public void writeCharacters(String data) throws DdlUtilsXMLException
+    {
+        if (data != null)
+        {
+            try
+            {
+                _writer.writeCharacters(data);
+            }
+            catch (XMLStreamException ex)
+            {
+                throwException(ex);
+            }
+        }
+    }
 }

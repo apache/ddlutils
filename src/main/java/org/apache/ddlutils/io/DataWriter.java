@@ -20,39 +20,25 @@ package org.apache.ddlutils.io;
  */
 
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
 import org.apache.ddlutils.dynabean.SqlDynaClass;
-import org.apache.ddlutils.io.converters.ConversionException;
 import org.apache.ddlutils.io.converters.SqlTypeConverter;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Table;
 
 /**
  * Writes dyna beans matching a specified database model into an XML file.
- * 
- * TODO: Make names (tables, columns) XML-compliant
- * 
- * @version $Revision: 289996 $
  */
 public class DataWriter extends PrettyPrintingXmlWriter
 {
-    /** String values with a size not bigger than this value will be written to attributes;
-        if their size is longer, then a sub element is generated instead. */ 
-    private static final int MAX_ATTRIBUTE_LENGTH = 255;
-
     /** Our log. */
     private final Log _log = LogFactory.getLog(DataWriter.class);
 
@@ -139,162 +125,36 @@ public class DataWriter extends PrettyPrintingXmlWriter
      */
     public void write(SqlDynaBean bean) throws DataWriterException
     {
-        SqlDynaClass dynaClass   = (SqlDynaClass)bean.getDynaClass();
-        Table        table       = dynaClass.getTable();
-        HashMap      subElements = new HashMap();
+        SqlDynaClass   dynaClass     = (SqlDynaClass)bean.getDynaClass();
+        Table          table         = dynaClass.getTable();
+        TableXmlWriter tableWriter   = new TableXmlWriter(table);
+        List           columnWriters = new ArrayList();
 
-        try
+        for (int idx = 0; idx < table.getColumnCount(); idx++)
         {
-            indentIfPrettyPrinting(1);
-            writeElementStart(null, table.getName());
-            for (int idx = 0; idx < table.getColumnCount(); idx++)
-            {
-                Column           column      = table.getColumn(idx);
-                Object           value       = bean.get(column.getName());
-                SqlTypeConverter converter   = _converterConf.getRegisteredConverter(table, column);
-                String           valueAsText = null;
+            Column           column      = table.getColumn(idx);
+            Object           value       = bean.get(column.getName());
+            SqlTypeConverter converter   = _converterConf.getRegisteredConverter(table, column);
+            String           valueAsText = null;
 
-                if (converter == null)
+            if (converter == null)
+            {
+                if (value != null)
                 {
-                    if (value != null)
-                    {
-                        valueAsText = value.toString();
-                    }
-                }
-                else
-                {
-                    valueAsText = converter.convertToString(value, column.getTypeCode());
-                }
-                if (valueAsText != null)
-                {
-                    // we create an attribute only if the text is not too long
-                    // and if it does not contain special characters
-                    if ((valueAsText.length() > MAX_ATTRIBUTE_LENGTH) || analyzeText(valueAsText, null))
-                    {
-                        // we defer writing the sub elements
-                        subElements.put(column.getName(), valueAsText);
-                    }
-                    else
-                    {
-                        writeAttribute(null, column.getName(), valueAsText);
-                    }
+                    valueAsText = value.toString();
                 }
             }
-            if (!subElements.isEmpty())
+            else
             {
-                List cutPoints = new ArrayList();
-
-                for (Iterator it = subElements.entrySet().iterator(); it.hasNext();)
-                {
-                    Map.Entry entry     = (Map.Entry)it.next();
-                    String    content   = entry.getValue().toString();
-
-                    printlnIfPrettyPrinting();
-                    indentIfPrettyPrinting(2);
-                    writeElementStart(null, entry.getKey().toString());
-
-                    // if the content contains special characters, we have to apply base64 encoding to it
-                    // if the content is too short, then it has to contain special characters (otherwise
-                    // it would have been written as an attribute already), otherwise we check
-                    cutPoints.clear();
-
-                    boolean writeBase64Encoded = analyzeText(content, cutPoints);
-
-                    if (writeBase64Encoded)
-                    {
-                        writeAttribute(null, DatabaseIO.BASE64_ATTR_NAME, "true");
-                        try {
-                            writeCData(new String(Base64.encodeBase64(content.getBytes()), getEncoding()));
-                        }
-                        catch (UnsupportedEncodingException ex) {
-                            throw new DataWriterException(ex);
-                        }
-                    }
-                    else
-                    {
-                        if (cutPoints.isEmpty())
-                        {
-                            writeCData(content);
-                        }
-                        else
-                        {
-                            int lastPos = 0;
-
-                            for (Iterator cutPointIt = cutPoints.iterator(); cutPointIt.hasNext();)
-                            {
-                                int curPos = ((Integer)cutPointIt.next()).intValue();
-
-                                writeCData(content.substring(lastPos, curPos));
-                                lastPos = curPos;
-                            }
-                            if (lastPos < content.length())
-                            {
-                                writeCData(content.substring(lastPos));
-                            }
-                        }
-                    }
-
-                    writeElementEnd();
-                }
-                printlnIfPrettyPrinting();
-                indentIfPrettyPrinting(1);
+                valueAsText = converter.convertToString(value, column.getTypeCode());
             }
-            writeElementEnd();
-            printlnIfPrettyPrinting();
-        }
-        catch (ConversionException ex)
-        {
-            throw new DataWriterException(ex);
-        }
-    }
-
-    /**
-     * Determines whether the given string contains special characters that cannot
-     * be used in XML, and if not, finds the cut points where to split the text
-     * when writing it in a CDATA section.
-     * 
-     * @param text      The text
-     * @param cutPoints Will be filled with cut points to split the text when writing it
-     *                  in a CDATA section (only if the method returns <code>false</code>)
-     * @return <code>true</code> if the text contains special characters
-     */
-    private boolean analyzeText(String text, List cutPoints)
-    {
-        List tmpCutPoints          = cutPoints == null ? null : new ArrayList();
-        int  numChars              = text.length();
-        int  numFoundCDataEndChars = 0;
-
-        for (int charPos = 0; charPos < numChars; charPos++)
-        {
-            char c = text.charAt(charPos);
-
-            if ((c < 0x0020) && (c != '\n') && (c != '\r') && (c != '\t'))
+            if (valueAsText != null)
             {
-                return true;
-            }
-            else if (cutPoints != null)
-            {
-                if ((c == ']') && ((numFoundCDataEndChars == 0) || (numFoundCDataEndChars == 1)))
-                {
-                    numFoundCDataEndChars++;
-                }
-                else if ((c == '>') && (numFoundCDataEndChars == 2))
-                {
-                    // we have to split the CDATA right here before the '>' (see DDLUTILS-174)
-                    tmpCutPoints.add(new Integer(charPos));
-                    numFoundCDataEndChars = 0;
-                }
-                else
-                {
-                    numFoundCDataEndChars = 0;
-                }
+                columnWriters.add(new ColumnXmlWriter(column, valueAsText));
             }
         }
-        if (cutPoints != null)
-        {
-            cutPoints.addAll(tmpCutPoints);
-        }
-        return false;
+
+        tableWriter.write(columnWriters, this);
     }
 
     /**

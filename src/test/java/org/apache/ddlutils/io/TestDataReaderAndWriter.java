@@ -26,17 +26,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
-
+import java.util.List;
 import junit.framework.TestCase;
-
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ddlutils.dynabean.SqlDynaBean;
+import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
+import org.apache.ddlutils.model.Table;
 
 /**
  * Tests the {@link org.apache.ddlutils.io.DataReader} and {@link org.apache.ddlutils.io.DataWriter} classes.
@@ -85,11 +86,102 @@ public class TestDataReaderAndWriter extends TestCase
     }
 
     /**
+     * Reads the given schema xml into a {@link Database} object.
+     * 
+     * @param schemaXml The schema xml
+     * @return The database model object
+     */
+    private Database readModel(String schemaXml)
+    {
+        DatabaseIO modelIO = new DatabaseIO();
+
+        modelIO.setValidateXml(true);
+        
+        return modelIO.read(new StringReader(schemaXml));
+    }
+
+    /**
+     * Writes the given dyna bean via a {@link DataWriter} and returns the raw xml output.
+     * 
+     * @param model    The database model to use
+     * @param bean     The bean to write
+     * @param encoding The encoding in which to write the xml
+     * @return The xml output as raw bytes
+     */
+    private byte[] writeBean(Database model, SqlDynaBean bean, String encoding)
+    {
+        ByteArrayOutputStream output     = new ByteArrayOutputStream();
+        DataWriter            dataWriter = new DataWriter(output, encoding);
+
+        dataWriter.writeDocumentStart();
+        dataWriter.write(bean);
+        dataWriter.writeDocumentEnd();
+
+        return output.toByteArray();
+    }
+
+    /**
+     * Uses a {@link DataReader} with default settings to read dyna beans from the given xml data.
+     * 
+     * @param model   The database model to use
+     * @param dataXml The raw xml data
+     * @return The read dyna beans
+     */
+    private List readBeans(Database model, byte[] dataXml)
+    {
+        ArrayList  beans      = new ArrayList();
+        DataReader dataReader = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(beans));
+        dataReader.read(new ByteArrayInputStream(dataXml));
+        return beans;
+    }
+
+    /**
+     * Uses a {@link DataReader} with default settings to read dyna beans from the given xml data.
+     * 
+     * @param model   The database model to use
+     * @param dataXml The xml data
+     * @return The read dyna beans
+     */
+    private List readBeans(Database model, String dataXml)
+    {
+        ArrayList  beans      = new ArrayList();
+        DataReader dataReader = new DataReader();
+
+        dataReader.setModel(model);
+        dataReader.setSink(new TestDataSink(beans));
+        dataReader.read(new StringReader(dataXml));
+        return beans;
+    }
+
+    /**
+     * Helper method to perform a test that writes a bean and then reads it back.
+     * 
+     * @param model           The database model to use
+     * @param bean            The bean to write and read back
+     * @param encoding        The encoding to use for the data xml
+     * @param expectedDataXml The expected xml generated for the bean
+     */
+    private void roundtripTest(Database model, SqlDynaBean bean, String encoding, String expectedDataXml) throws UnsupportedEncodingException
+    {
+        byte[] xmlData = writeBean(model, bean, encoding);
+
+        assertEquals(expectedDataXml, new String(xmlData, encoding));
+
+        List beans = readBeans(model, xmlData);
+
+        assertEquals(1, beans.size());
+        assertEquals(bean, beans.get(0));
+    }
+
+    /**
      * Tests reading the data from XML.
      */
     public void testRead() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel( 
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='bookstore'>\n"+
             "  <table name='author'>\n"+
@@ -110,8 +202,9 @@ public class TestDataReaderAndWriter extends TestCase
             "      <index-column name='isbn'/>\n"+
             "    </index>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        List beans = readBeans(
+            model,
             "<data>\n"+
             "  <author author_id='1' name='Ernest Hemingway'/>\n"+
             "  <author author_id='2' name='William Shakespeare'/>\n"+
@@ -130,27 +223,15 @@ public class TestDataReaderAndWriter extends TestCase
             "    <title>A Midsummer Night's Dream</title>\n"+
             "    <issue_date>1595</issue_date>\n"+
             "  </book>\n"+
-            "</data>";
+            "</data>");
 
-        DatabaseIO modelReader = new DatabaseIO();
+        assertEquals(5, beans.size());
 
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(testDataXml));
-
-        assertEquals(5, readObjects.size());
-
-        DynaBean obj1 = (DynaBean)readObjects.get(0);
-        DynaBean obj2 = (DynaBean)readObjects.get(1);
-        DynaBean obj3 = (DynaBean)readObjects.get(2);
-        DynaBean obj4 = (DynaBean)readObjects.get(3);
-        DynaBean obj5 = (DynaBean)readObjects.get(4);
+        DynaBean obj1 = (DynaBean)beans.get(0);
+        DynaBean obj2 = (DynaBean)beans.get(1);
+        DynaBean obj3 = (DynaBean)beans.get(2);
+        DynaBean obj4 = (DynaBean)beans.get(3);
+        DynaBean obj5 = (DynaBean)beans.get(4);
 
         assertEquals("author",
                      obj1.getDynaClass().getName());
@@ -207,15 +288,15 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testReadFromFile1() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        String testDataXml =
             "<data>\n"+
             "  <test id='1' value='foo'/>\n"+
             "</data>";
@@ -229,21 +310,16 @@ public class TestDataReaderAndWriter extends TestCase
             writer.write(testDataXml);
             writer.close();
 
-            DatabaseIO modelReader = new DatabaseIO();
-
-            modelReader.setValidateXml(true);
-            
-            Database        model       = modelReader.read(new StringReader(testSchemaXml));
-            final ArrayList readObjects = new ArrayList();
-            DataReader      dataReader  = new DataReader();
+            ArrayList  beans      = new ArrayList();
+            DataReader dataReader = new DataReader();
     
             dataReader.setModel(model);
-            dataReader.setSink(new TestDataSink(readObjects));
+            dataReader.setSink(new TestDataSink(beans));
             dataReader.read(tmpFile.getAbsolutePath());
     
-            assertEquals(1, readObjects.size());
+            assertEquals(1, beans.size());
     
-            DynaBean obj = (DynaBean)readObjects.get(0);
+            DynaBean obj = (DynaBean)beans.get(0);
     
             assertEquals("test",
                          obj.getDynaClass().getName());
@@ -263,15 +339,15 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testReadFromFile2() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        String testDataXml =
             "<data>\n"+
             "  <test id='1' value='foo'/>\n"+
             "</data>";
@@ -285,21 +361,16 @@ public class TestDataReaderAndWriter extends TestCase
             writer.write(testDataXml);
             writer.close();
 
-            DatabaseIO modelReader = new DatabaseIO();
-
-            modelReader.setValidateXml(true);
-            
-            Database        model       = modelReader.read(new StringReader(testSchemaXml));
-            final ArrayList readObjects = new ArrayList();
-            DataReader      dataReader  = new DataReader();
+            ArrayList  beans      = new ArrayList();
+            DataReader dataReader = new DataReader();
     
             dataReader.setModel(model);
-            dataReader.setSink(new TestDataSink(readObjects));
+            dataReader.setSink(new TestDataSink(beans));
             dataReader.read(tmpFile);
     
-            assertEquals(1, readObjects.size());
+            assertEquals(1, beans.size());
     
-            DynaBean obj = (DynaBean)readObjects.get(0);
+            DynaBean obj = (DynaBean)beans.get(0);
     
             assertEquals("test",
                          obj.getDynaClass().getName());
@@ -319,15 +390,15 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testReadFromFile3() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        String testDataXml =
             "<data>\n"+
             "  <test id='1' value='foo'/>\n"+
             "</data>";
@@ -341,21 +412,16 @@ public class TestDataReaderAndWriter extends TestCase
             writer.write(testDataXml);
             writer.close();
 
-            DatabaseIO modelReader = new DatabaseIO();
-
-            modelReader.setValidateXml(true);
-            
-            Database        model       = modelReader.read(new StringReader(testSchemaXml));
-            final ArrayList readObjects = new ArrayList();
-            DataReader      dataReader  = new DataReader();
+            ArrayList  beans      = new ArrayList();
+            DataReader dataReader = new DataReader();
     
             dataReader.setModel(model);
-            dataReader.setSink(new TestDataSink(readObjects));
+            dataReader.setSink(new TestDataSink(beans));
             dataReader.read(new FileInputStream(tmpFile));
     
-            assertEquals(1, readObjects.size());
+            assertEquals(1, beans.size());
     
-            DynaBean obj = (DynaBean)readObjects.get(0);
+            DynaBean obj = (DynaBean)beans.get(0);
     
             assertEquals("test",
                          obj.getDynaClass().getName());
@@ -375,15 +441,16 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testSubElements() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        List beans = readBeans(
+            model, 
             "<data>\n"+
             "  <test id='1'>\n"+
             "    <value>foo</value>\n"+
@@ -393,23 +460,11 @@ public class TestDataReaderAndWriter extends TestCase
             "  </test>\n"+
             "  <test id='3' value='baz'>\n"+
             "  </test>\n"+
-            "</data>";
+            "</data>");
 
-        DatabaseIO modelReader = new DatabaseIO();
+        assertEquals(3, beans.size());
 
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(testDataXml));
-
-        assertEquals(3, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        DynaBean obj = (DynaBean)beans.get(0);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -418,7 +473,7 @@ public class TestDataReaderAndWriter extends TestCase
         assertEquals("foo",
                      obj.get("value").toString());
 
-        obj = (DynaBean)readObjects.get(1);
+        obj = (DynaBean)beans.get(1);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -427,7 +482,7 @@ public class TestDataReaderAndWriter extends TestCase
         assertEquals("bar",
                      obj.get("value").toString());
 
-        obj = (DynaBean)readObjects.get(2);
+        obj = (DynaBean)beans.get(2);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -442,34 +497,23 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testRootElementNameDoesntMatter() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        List beans = readBeans(
+            model,
             "<someRandomName>\n"+
             "  <test id='1' value='foo'/>\n"+
-            "</someRandomName>";
+            "</someRandomName>");
 
-        DatabaseIO modelReader = new DatabaseIO();
+        assertEquals(1, beans.size());
 
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(testDataXml));
-
-        assertEquals(1, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        DynaBean obj = (DynaBean)beans.get(0);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -484,36 +528,25 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testElementForUndefinedTable() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        List beans = readBeans(
+            model,
             "<data>\n"+
             "  <test id='1' value='foo'/>\n"+
             "  <other id='2' value='bar'/>\n"+
             "  <test id='3' value='baz'/>\n"+
-            "</data>";
+            "</data>");
 
-        DatabaseIO modelReader = new DatabaseIO();
+        assertEquals(2, beans.size());
 
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(testDataXml));
-
-        assertEquals(2, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        DynaBean obj = (DynaBean)beans.get(0);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -522,7 +555,7 @@ public class TestDataReaderAndWriter extends TestCase
         assertEquals("foo",
                      obj.get("value").toString());
 
-        obj = (DynaBean)readObjects.get(1);
+        obj = (DynaBean)beans.get(1);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -537,34 +570,23 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testAttributeForUndefinedColumn() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        List beans = readBeans(
+            model,
             "<data>\n"+
             "  <test id='1' value1='foo'/>\n"+
-            "</data>";
+            "</data>");
 
-        DatabaseIO modelReader = new DatabaseIO();
+        assertEquals(1, beans.size());
 
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(testDataXml));
-
-        assertEquals(1, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        DynaBean obj = (DynaBean)beans.get(0);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -578,36 +600,25 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testSubElementForUndefinedColumn() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        List beans = readBeans(
+            model,
             "<data>\n"+
             "  <test id='1'>\n"+
             "    <value2>foo</value2>\n"+
             "  </test>\n"+
-            "</data>";
+            "</data>");
 
-        DatabaseIO modelReader = new DatabaseIO();
+        assertEquals(1, beans.size());
 
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(testDataXml));
-
-        assertEquals(1, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        DynaBean obj = (DynaBean)beans.get(0);
 
         assertEquals("test",
                      obj.getDynaClass().getName());
@@ -621,36 +632,31 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testCaseSensitivityTurnedOn() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='Test'>\n"+
             "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='Value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        String testDataXml =
             "<data>\n"+
             "  <test Id='1' Value='foo'/>\n"+
             "  <Test Id='2' value='baz'/>\n"+
             "</data>";
 
-        DatabaseIO modelReader = new DatabaseIO();
-
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
+        ArrayList  beans      = new ArrayList();
+        DataReader dataReader = new DataReader();
 
         dataReader.setCaseSensitive(true);
         dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.setSink(new TestDataSink(beans));
         dataReader.read(new StringReader(testDataXml));
 
-        assertEquals(1, readObjects.size());
+        assertEquals(1, beans.size());
 
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        DynaBean obj = (DynaBean)beans.get(0);
 
         assertEquals("Test",
                      obj.getDynaClass().getName());
@@ -664,37 +670,32 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testCaseSensitivityTurnedOff() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='Test'>\n"+
             "    <column name='Id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='Value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testDataXml =
+            "</database>");
+        String testDataXml =
             "<data>\n"+
             "  <test Id='1' Value='foo'/>\n"+
             "  <Test Id='2' value='bar'/>\n"+
             "  <Test id='3' Value='baz'/>\n"+
             "</data>";
 
-        DatabaseIO modelReader = new DatabaseIO();
-
-        modelReader.setValidateXml(true);
-        
-        Database        model       = modelReader.read(new StringReader(testSchemaXml));
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
+        ArrayList  beans      = new ArrayList();
+        DataReader dataReader = new DataReader();
 
         dataReader.setCaseSensitive(false);
         dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
+        dataReader.setSink(new TestDataSink(beans));
         dataReader.read(new StringReader(testDataXml));
 
-        assertEquals(3, readObjects.size());
+        assertEquals(3, beans.size());
 
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        DynaBean obj = (DynaBean)beans.get(0);
 
         assertEquals("Test",
                      obj.getDynaClass().getName());
@@ -703,7 +704,7 @@ public class TestDataReaderAndWriter extends TestCase
         assertEquals("foo",
                      obj.get("Value").toString());
 
-        obj = (DynaBean)readObjects.get(1);
+        obj = (DynaBean)beans.get(1);
 
         assertEquals("Test",
                      obj.getDynaClass().getName());
@@ -712,7 +713,7 @@ public class TestDataReaderAndWriter extends TestCase
         assertEquals("bar",
                      obj.get("Value").toString());
 
-        obj = (DynaBean)readObjects.get(2);
+        obj = (DynaBean)beans.get(2);
 
         assertEquals("Test",
                      obj.getDynaClass().getName());
@@ -727,58 +728,28 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testSpecialCharacters() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testedValue = "Some Special Characters: \u0001\u0009\u0010";
+            "</database>");
+        String testedValue = "Some Special Characters: \u0001\u0009\u0010";
 
-        DatabaseIO modelIO = new DatabaseIO();
-
-        modelIO.setValidateXml(true);
-        
-        Database              model      = modelIO.read(new StringReader(testSchemaXml));
-        ByteArrayOutputStream output     = new ByteArrayOutputStream();
-        DataWriter            dataWriter = new DataWriter(output, "ISO-8859-1");
-        SqlDynaBean           bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
         bean.set("id", new Integer(1));
         bean.set("value", testedValue);
-        dataWriter.writeDocumentStart();
-        dataWriter.write(bean);
-        dataWriter.writeDocumentEnd();
 
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        String dataXml = new String(output.toByteArray(), "ISO-8859-1");
-
-        assertEquals("<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
-                     "<data>\n" +
-                     "  <test id=\"1\">\n" +
-                     "    <value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\"><![CDATA[" + new String(Base64.encodeBase64(testedValue.getBytes()), "ISO-8859-1") + "]]></value>\n" +
-                     "  </test>\n" +
-                     "</data>\n",
-                     dataXml);
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new ByteArrayInputStream(output.toByteArray()));
-
-        assertEquals(1, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
-
-        assertEquals("test",
-                     obj.getDynaClass().getName());
-        assertEquals("1",
-                     obj.get("id").toString());
-        assertEquals(testedValue,
-                     obj.get("value").toString());
+        roundtripTest(model, bean, "ISO-8859-1",
+                      "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(testedValue.getBytes("UTF-8")), "ISO-8859-1") + "</value>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
     }
 
     /**
@@ -786,58 +757,28 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testSpecialCharactersUTF8() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='UTF-8'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testedValue = "Some Special Characters: \u0001\u0009\u0010";
+            "</database>");
+        String testedValue = "Some Special Characters: \u0001\u0009\u0010";
 
-        DatabaseIO modelIO = new DatabaseIO();
-
-        modelIO.setValidateXml(true);
-        
-        Database              model      = modelIO.read(new StringReader(testSchemaXml));
-        ByteArrayOutputStream output     = new ByteArrayOutputStream();
-        DataWriter            dataWriter = new DataWriter(output, "UTF-8");
-        SqlDynaBean           bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
         bean.set("id", new Integer(1));
         bean.set("value", testedValue);
-        dataWriter.writeDocumentStart();
-        dataWriter.write(bean);
-        dataWriter.writeDocumentEnd();
 
-        String dataXml = new String(output.toByteArray(), "UTF-8");
-
-        assertEquals("<?xml version='1.0' encoding='UTF-8'?>\n" +
-                     "<data>\n" +
-                     "  <test id=\"1\">\n" +
-                     "    <value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\"><![CDATA[" + new String(Base64.encodeBase64(testedValue.getBytes()), "UTF-8") + "]]></value>\n" +
-                     "  </test>\n" +
-                     "</data>\n",
-                     dataXml);
-
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new ByteArrayInputStream(output.toByteArray()));
-
-        assertEquals(1, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
-
-        assertEquals("test",
-                     obj.getDynaClass().getName());
-        assertEquals("1",
-                     obj.get("id").toString());
-        assertEquals(testedValue,
-                     obj.get("value").toString());
+        roundtripTest(model, bean, "ISO-8859-1",
+                      "<?xml version='1.0' encoding='ISO-8859-1'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(testedValue.getBytes("UTF-8")), "UTF-8") + "</value>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
     }
 
     /**
@@ -845,7 +786,7 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testCData() throws Exception
     {
-        final String testSchemaXml = 
+        Database model = readModel(
             "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
@@ -856,21 +797,14 @@ public class TestDataReaderAndWriter extends TestCase
             "    <column name='value4' type='LONGVARCHAR' size='4000' required='true'/>\n"+
             "    <column name='value5' type='LONGVARCHAR' size='4000' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testedValue1 = "<?xml version='1.0' encoding='ISO-8859-1'?><test><![CDATA[some text]]></test>";
-        final String testedValue2 = StringUtils.repeat("a ", 1000) + testedValue1;
-        final String testedValue3 = "<div>\n<h1><![CDATA[WfMOpen]]></h1>\n" + StringUtils.repeat("Make it longer\n", 99) +  "</div>";
-        final String testedValue4 = "<![CDATA[" + StringUtils.repeat("b \n", 1000) +  "]]>";
-        final String testedValue5 = "<<![CDATA[" + StringUtils.repeat("b \n", 500) +  "]]>><![CDATA[" + StringUtils.repeat("c \n", 500) +  "]]>";
+            "</database>");
+        String testedValue1 = "<?xml version='1.0' encoding='ISO-8859-1'?><test><![CDATA[some text]]></test>";
+        String testedValue2 = StringUtils.repeat("a ", 1000) + testedValue1;
+        String testedValue3 = "<div>\n<h1><![CDATA[WfMOpen]]></h1>\n" + StringUtils.repeat("Make it longer\n", 99) +  "</div>";
+        String testedValue4 = "<![CDATA[" + StringUtils.repeat("b \n", 1000) +  "]]>";
+        String testedValue5 = "<<![CDATA[" + StringUtils.repeat("b \n", 500) +  "]]>><![CDATA[" + StringUtils.repeat("c \n", 500) +  "]]>";
 
-        DatabaseIO modelIO = new DatabaseIO();
-
-        modelIO.setValidateXml(true);
-
-        Database     model      = modelIO.read(new StringReader(testSchemaXml));
-        StringWriter output     = new StringWriter();
-        DataWriter   dataWriter = new DataWriter(output, "UTF-8");
-        SqlDynaBean  bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        SqlDynaBean  bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
         bean.set("id", new Integer(1));
         bean.set("value1", testedValue1);
@@ -878,37 +812,42 @@ public class TestDataReaderAndWriter extends TestCase
         bean.set("value3", testedValue3);
         bean.set("value4", testedValue4);
         bean.set("value5", testedValue5);
-        dataWriter.writeDocumentStart();
-        dataWriter.write(bean);
-        dataWriter.writeDocumentEnd();
 
-        String dataXml = output.toString();
+        byte[] xmlData = writeBean(model, bean, "UTF-8");
+        List   beans   = readBeans(model, xmlData);
 
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
+        assertEquals(1, beans.size());
+        assertEquals(bean, beans.get(0));
+    }
 
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(dataXml));
+    /**
+     * Tests the reader & writer behavior when the table name is not a valid XML identifier.
+     */
+    public void testTableNameLong() throws Exception
+    {
+        String   tableName = StringUtils.repeat("test", 100);
+        Database model     = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='" + tableName + "'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
 
-        assertEquals(1, readObjects.size());
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
-        DynaBean obj = (DynaBean)readObjects.get(0);
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
 
-        assertEquals("test",
-                     obj.getDynaClass().getName());
-        assertEquals("1",
-                     obj.get("id").toString());
-        assertEquals(testedValue1,
-                     obj.get("value1").toString());
-        assertEquals(testedValue2,
-                     obj.get("value2").toString());
-        assertEquals(testedValue3,
-                     obj.get("value3").toString());
-        assertEquals(testedValue4,
-                     obj.get("value4").toString());
-        assertEquals(testedValue5,
-                     obj.get("value5").toString());
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table id=\"1\" value=\"" + testedValue + "\">\n" +
+                      "    <table-name>" + tableName + "</table-name>\n" +
+                      "  </table>\n" +
+                      "</data>\n");
     }
 
     /**
@@ -916,53 +855,864 @@ public class TestDataReaderAndWriter extends TestCase
      */
     public void testTableNameNotAValidXmlIdentifier() throws Exception
     {
-        final String testSchemaXml = 
-            "<?xml version='1.0' encoding='ISO-8859-1'?>\n"+
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test$'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table table-name=\"test$\" id=\"1\" value=\"" + testedValue + "\" />\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when the table name is not a valid XML identifier and too long.
+     */
+    public void testTableNameInvalidAndLong() throws Exception
+    {
+        String   tableName = StringUtils.repeat("table name", 50);
+        Database model     = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='" + tableName + "'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table id=\"1\" value=\"" + testedValue + "\">\n" +
+                      "    <table-name>" + tableName + "</table-name>\n" +
+                      "  </table>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when the table name contains a '&' character.
+     */
+    public void testTableNameContainsAmpersand() throws Exception
+    {
+        String   tableName   = "test&table";
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName("value");
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName(tableName);
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table table-name=\"test&amp;table\" id=\"1\" value=\"" + testedValue + "\" />\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when the table name contains a '<' character.
+     */
+    public void testTableNameContainsLessCharacter() throws Exception
+    {
+        String   tableName   = "test<table";
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName("value");
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName(tableName);
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table table-name=\"test&lt;table\" id=\"1\" value=\"" + testedValue + "\" />\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when the table name contains a '>' character.
+     */
+    public void testTableNameContainsMoreCharacter() throws Exception
+    {
+        String   tableName   = "test>table";
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName("value");
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName(tableName);
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table table-name=\"test>table\" id=\"1\" value=\"" + testedValue + "\" />\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when the table name contains characters not allowed in XML.
+     */
+    public void testTableNameContainsInvalidCharacters() throws Exception
+    {
+        String   tableName   = "test\u0000table";
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName("value");
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName(tableName);
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table id=\"1\" value=\"" + testedValue + "\">\n" +
+                      "    <table-name " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(tableName.getBytes("UTF-8")), "UTF-8") + "</table-name>\n" +
+                      "  </table>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when the table name is 'table'.
+     */
+    public void testTableNameIsTable() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='table'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        DatabaseIO modelIO = new DatabaseIO();
+
+        modelIO.setValidateXml(true);
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <table table-name=\"table\" id=\"1\" value=\"" + testedValue + "\" />\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is a normal valid tag,
+     * and both column name and value are shorter than 255 characters.
+     */
+    public void testColumnNameAndValueShort() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
             "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
-            "</database>";
-        final String testedValue = "Some Special Characters: \u0001\u0009\u0010";
+            "</database>");
+        String testedValue = "Some Text";
 
-        DatabaseIO modelIO = new DatabaseIO();
-
-        modelIO.setValidateXml(true);
-        
-        Database     model      = modelIO.read(new StringReader(testSchemaXml));
-        StringWriter output     = new StringWriter();
-        DataWriter   dataWriter = new DataWriter(output, "UTF-8");
-        SqlDynaBean  bean       = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
         bean.set("id", new Integer(1));
         bean.set("value", testedValue);
-        dataWriter.writeDocumentStart();
-        dataWriter.write(bean);
-        dataWriter.writeDocumentEnd();
 
-        String dataXml = output.toString();
-
-        final ArrayList readObjects = new ArrayList();
-        DataReader      dataReader  = new DataReader();
-
-        dataReader.setModel(model);
-        dataReader.setSink(new TestDataSink(readObjects));
-        dataReader.read(new StringReader(dataXml));
-
-        assertEquals(1, readObjects.size());
-
-        DynaBean obj = (DynaBean)readObjects.get(0);
-
-        assertEquals("test",
-                     obj.getDynaClass().getName());
-        assertEquals("1",
-                     obj.get("id").toString());
-        assertEquals(testedValue,
-                     obj.get("value").toString());
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\" value=\"" + testedValue + "\" />\n" +
+                      "</data>\n");
     }
 
-    // TODO: additional tests
-    // - table name with illegal-for-XML characters, e.g space, &, ... (write)
-    // - column name with illegal-for-XML characters, e.g space, &, ... (write)
+    /**
+     * Tests the reader & writer behavior when a column name is a normal valid tag,
+     * and the column name is shorter than 255 characters but the value is longer.
+     */
+    public void testColumnNameShortAndValueLong() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='400' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = StringUtils.repeat("Some Text", 40);
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <value>" + testedValue + "</value>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is not a valid XML identifier.
+     */
+    public void testColumnNameShortAndInvalidAndValueShort() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='the value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("the value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"the value\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is not a valid tag,
+     * and the column name is shorter than 255 characters and the value is longer.
+     */
+    public void testColumnNameShortAndInvalidAndValueLong() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='the value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = StringUtils.repeat("Some Text", 40);
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("the value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"the value\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is a valid tag,
+     * and the column name is longer than 255 characters and the value is shorter.
+     */
+    public void testColumnNameLongAndValueShort() throws Exception
+    {
+        String columnName = StringUtils.repeat("value", 100);
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='" + columnName + "' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column>\n" +
+                      "      <column-name>" + columnName + "</column-name>\n" +
+                      "      <column-value>" + testedValue + "</column-value>\n" +
+                      "    </column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is a valid tag,
+     * and both the column name and value are longer than 255 characters.
+     */
+    public void testColumnNameLongAndValueLong() throws Exception
+    {
+        String columnName = StringUtils.repeat("value", 100);
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='" + columnName + "' type='VARCHAR' size='500' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = StringUtils.repeat("Some Text", 40);
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column>\n" +
+                      "      <column-name>" + columnName + "</column-name>\n" +
+                      "      <column-value>" + testedValue + "</column-value>\n" +
+                      "    </column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is a valid tag,
+     * and the column name is longer than 255 characters and the value is shorter.
+     */
+    public void testColumnNameAndValueLong() throws Exception
+    {
+        String columnName = StringUtils.repeat("value", 100);
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='" + columnName + "' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column>\n" +
+                      "      <column-name>" + columnName + "</column-name>\n" +
+                      "      <column-value>" + testedValue + "</column-value>\n" +
+                      "    </column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is not a valid tag,
+     * and the value is invalid, and both are short.
+     */
+    public void testColumnNameAndValueShortAndInvalid() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='the value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "the\u0000value";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("the value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"the value\" " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(testedValue.getBytes("UTF-8")), "UTF-8") + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is a valid tag and longer,
+     * than 255 characters, and the value is invalid and shorter than 255 characters.
+     */
+    public void testColumnNameLongAndValueInvalidAndShort() throws Exception
+    {
+        String columnName = StringUtils.repeat("value", 100);
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='" + columnName + "' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "the\u0000value";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column>\n" +
+                      "      <column-name>" + columnName + "</column-name>\n" +
+                      "      <column-value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(testedValue.getBytes("UTF-8")), "UTF-8") + "</column-value>\n" +
+                      "    </column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is not a valid tag,
+     * and the value is invalid, and both are short.
+     */
+    public void testColumnNameAndValueLongAndInvalid() throws Exception
+    {
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+        String   columnName  = StringUtils.repeat("the\u0000name", 100);
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName(columnName);
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName("test");
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = StringUtils.repeat("the\u0000value", 40);
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column>\n" +
+                      "      <column-name " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(columnName.getBytes("UTF-8")), "UTF-8") + "</column-name>\n" +
+                      "      <column-value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(testedValue.getBytes("UTF-8")), "UTF-8") + "</column-value>\n" +
+                      "    </column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name contains an invalid character.
+     */
+    public void testColumnNameContainsInvalidCharacters() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String  testedValue = "the\u0000value";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <value " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(testedValue.getBytes("UTF-8")), "UTF-8") + "</value>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column value contains an invalid character.
+     */
+    public void testColumnValueContainsInvalidCharacters() throws Exception
+    {
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+        String   columnName  = "the\u0000value";
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName(columnName);
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName("test");
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column>\n" +
+                      "      <column-name " + DatabaseIO.BASE64_ATTR_NAME + "=\"true\">" + new String(Base64.encodeBase64(columnName.getBytes("UTF-8")), "UTF-8") + "</column-name>\n" +
+                      "      <column-value>" + testedValue + "</column-value>\n" +
+                      "    </column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column value contains the '&' character.
+     */
+    public void testColumnValueContainsAmpersand() throws Exception
+    {
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+        String   columnName  = "foo&bar";
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName(columnName);
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName("test");
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"foo&amp;bar\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column value contains the '<' character.
+     */
+    public void testColumnValueContainsLessCharacter() throws Exception
+    {
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+        String   columnName  = "foo<bar";
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName(columnName);
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName("test");
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"foo&lt;bar\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column value contains the '>' character.
+     */
+    public void testColumnValueContainsMoreCharacter() throws Exception
+    {
+        Database model       = new Database("test");
+        Table    table       = new Table();
+        Column   idColumn    = new Column();
+        Column   valueColumn = new Column();
+        String   columnName  = "foo>bar";
+
+        idColumn.setName("id");
+        idColumn.setType("INTEGER");
+        idColumn.setPrimaryKey(true);
+        idColumn.setRequired(true);
+        valueColumn.setName(columnName);
+        valueColumn.setType("VARCHAR");
+        valueColumn.setSize("50");
+        valueColumn.setRequired(true);
+        table.setName("test");
+        table.addColumn(idColumn);
+        table.addColumn(valueColumn);
+        model.addTable(table);
+
+        SqlDynaBean bean        = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+        String      testedValue = "Some Text";
+
+        bean.set("id", new Integer(1));
+        bean.set(columnName, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"foo>bar\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is 'column'.
+     */
+    public void testColumnNameIsColumn() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='column' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("column", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"column\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is 'column'.
+     */
+    public void testColumnNameIsColumnName() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='column-name' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("column-name", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\" column-name=\"" + testedValue + "\" />\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is 'column'.
+     */
+    public void testColumnNameIsTableName() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='the value' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set("the value", testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"the value\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
+
+    /**
+     * Tests the reader & writer behavior when a column name is 'base64'.
+     */
+    public void testColumnNameIsBase64() throws Exception
+    {
+        Database model = readModel(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"+
+            "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
+            "  <table name='test'>\n"+
+            "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
+            "    <column name='" + DatabaseIO.BASE64_ATTR_NAME + "' type='VARCHAR' size='50' required='true'/>\n"+
+            "  </table>\n"+
+            "</database>");
+        String testedValue = "Some Text";
+
+        SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
+
+        bean.set("id", new Integer(1));
+        bean.set(DatabaseIO.BASE64_ATTR_NAME, testedValue);
+
+        roundtripTest(model, bean, "UTF-8",
+                      "<?xml version='1.0' encoding='UTF-8'?>\n" +
+                      "<data>\n" +
+                      "  <test id=\"1\">\n" +
+                      "    <column column-name=\"" + DatabaseIO.BASE64_ATTR_NAME + "\">" + testedValue + "</column>\n" +
+                      "  </test>\n" +
+                      "</data>\n");
+    }
 }

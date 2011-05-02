@@ -19,9 +19,14 @@ package org.apache.ddlutils.io;
  * under the License.
  */
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.codec.binary.Base64;
+
 /**
  * <p>Contains basic utility methods for XML.</p>
- * This class is borrowed from <a href='http://commons.apache.org/betwixt/'>Apache Commons Betwixt</a>
+ * Parts of this class are borrowed from <a href='http://commons.apache.org/betwixt/'>Apache Commons Betwixt</a>
  * whose class in turn is based on code in <a href='http://xerces.apache.org/xerces2-j/index.html'>Apache Xerces</a>.
  * <p>The code for {@link #isWellFormedXMLName} is based on code in 
  * <code>org.apache.xerces.util.XMLChar</code> 
@@ -34,10 +39,14 @@ package org.apache.ddlutils.io;
  * @author Arnaud  Le Hors, IBM
  * @author Rahul Srivastava, Sun Microsystems Inc.  
  * @author Robert Burrell Donkin
- * @version $Revision: $
  */
 public class XMLUtils
 {
+    /** Maximum length of attribute values that we want to generate. */ 
+    public static final int MAX_ATTRIBUTE_LENGTH = 255;
+    /** Maximum length of a tag or attribute name that we want to generate. */ 
+    public static final int MAX_NAME_LENGTH = 255;
+
     /** Name start character mask. */
     private static final int MASK_NAME_START = 0x01;
     /** Name character mask. */
@@ -294,5 +303,89 @@ public class XMLUtils
     public static boolean isNameStartChar(int c)
     {
         return (c < 0x10000) && ((CHARS[c] & MASK_NAME_START) != 0);
+    }
+
+    /**
+     * Determines whether the given string contains special characters that cannot
+     * be used in XML.
+     * 
+     * @param text The text
+     * @return <code>true</code> if the text contains special characters
+     */
+    public static boolean hasIllegalXMLCharacters(String text)
+    {
+        int numChars = text.length();
+
+        for (int charPos = 0; charPos < numChars; charPos++)
+        {
+            char c = text.charAt(charPos);
+
+            if ((c != 0x9) && (c != 0xA) && (c != 0xD) && ((c < 0x20) || (c > 0xD7FF)) && ((c < 0xE000) || (c > 0xFFFD)) && ((c < 0x10000) || (c > 0x10FFFF)))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Encodes the given value with Base64.
+     * 
+     * @param value The value to encode
+     * @return The encoded value
+     */
+    public static String base64Encode(String value)
+    {
+        try
+        {
+            return value == null ? null : new String(Base64.encodeBase64(value.getBytes("UTF-8")), "UTF-8");
+        }
+        catch (UnsupportedEncodingException ex)
+        {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    /**
+     * Determines whether the given string contains special characters that cannot
+     * be used in XML, and if not, finds the cut points where to split the text
+     * when writing it in a CDATA section.
+     * 
+     * @param text The text
+     * @return <code>null</code> if the text contains special characters, or the list of cut points otherwise
+     */
+    public static List findCDataCutPoints(String text)
+    {
+        List cutPoints             = new ArrayList();
+        int  numChars              = text.length();
+        int  numFoundCDataEndChars = 0;
+
+        for (int charPos = 0; charPos < numChars; charPos++)
+        {
+            char c = text.charAt(charPos);
+
+            if ((c != 0x9) && (c != 0xA) && (c != 0xD) && ((c < 0x20) || (c > 0xD7FF)) && ((c < 0xE000) || (c > 0xFFFD)) && ((c < 0x10000) || (c > 0x10FFFF)))
+            {
+                return null;
+            }
+            else
+            {
+                if ((c == ']') && ((numFoundCDataEndChars == 0) || (numFoundCDataEndChars == 1)))
+                {
+                    numFoundCDataEndChars++;
+                }
+                else if ((c == '>') && (numFoundCDataEndChars == 2))
+                {
+                    // we have to split the CDATA right here before the '>' (see DDLUTILS-174)
+                    cutPoints.add(new Integer(charPos));
+                    numFoundCDataEndChars = 0;
+                }
+                else
+                {
+                    numFoundCDataEndChars = 0;
+                }
+            }
+        }
+        return cutPoints;
     }
 }

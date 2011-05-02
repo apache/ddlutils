@@ -67,4 +67,49 @@ public class SqlDynaBean extends BasicDynaBean
         }
         return result.toString();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode()
+    {
+        return toString().hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof SqlDynaBean)
+        {
+            SqlDynaBean other     = (SqlDynaBean)obj;
+            DynaClass   dynaClass = getDynaClass();
+
+            if (dynaClass.equals(other.getDynaClass()))
+            {
+                DynaProperty[] props = dynaClass.getDynaProperties();
+
+                for (int idx = 0; idx < props.length; idx++)
+                {
+                    Object value      = get(props[idx].getName());
+                    Object otherValue = other.get(props[idx].getName());
+
+                    if (value == null)
+                    {
+                        if (otherValue != null)
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return value.equals(otherValue);
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -27,8 +27,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -311,48 +314,62 @@ public class DataReader
      */
     private void readBean(XMLStreamReader xmlReader) throws XMLStreamException, DdlUtilsXMLException
     {
-        QName elemQName = xmlReader.getName();
-        Table table     = _model.findTable(elemQName.getLocalPart(), isCaseSensitive());
+        QName    elemQName  = xmlReader.getName();
+        Location location   = xmlReader.getLocation();
+        Map      attributes = new HashMap();
+        String   tableName  = null;
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName attrQName = xmlReader.getAttributeName(idx);
+
+            attributes.put(isCaseSensitive() ? attrQName.getLocalPart() : attrQName.getLocalPart().toLowerCase(),
+                           xmlReader.getAttributeValue(idx));
+        }
+        readColumnSubElements(xmlReader, attributes);
+
+        if ("table".equals(elemQName.getLocalPart()))
+        {
+            tableName = (String)attributes.get("table-name");
+        }
+        else
+        {
+            tableName  = elemQName.getLocalPart();
+        }
+
+        Table table = _model.findTable(tableName, isCaseSensitive());
 
         if (table == null)
         {
-            _log.warn("Data XML contains an element " + elemQName + " at location " + xmlReader.getLocation() +
+            _log.warn("Data XML contains an element " + elemQName + " at location " + location +
                       " but there is no table defined with this name. This element will be ignored.");
-            readOverElement(xmlReader);
         }
         else
         {
             DynaBean bean = _model.createDynaBeanFor(table);
-    
-            for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
-            {
-                QName  attrQName = xmlReader.getAttributeName(idx);
-                Column column    = table.findColumn(attrQName.getLocalPart(), isCaseSensitive());
 
-                if (column == null)
+            for (int idx = 0; idx < table.getColumnCount(); idx++)
+            {
+                Column column = table.getColumn(idx);
+                String value  = (String)attributes.get(isCaseSensitive() ? column.getName() : column.getName().toLowerCase());
+
+                if (value != null)
                 {
-                    _log.warn("Data XML contains an attribute " + attrQName + " at location " + xmlReader.getLocation() +
-                              " but there is no column defined in table " + table.getName() + " with this name. This attribute will be ignored.");
-                }
-                else
-                {
-                    setColumnValue(bean, table, column, xmlReader.getAttributeValue(idx));
+                    setColumnValue(bean, table, column, value);
                 }
             }
-            readColumnSubElements(xmlReader, bean, table);
             getSink().addBean(bean);
             consumeRestOfElement(xmlReader);
         }
     }
 
     /**
-     * Reads all column sub elements that match the columns specified by the given table object from the xml reader into the given bean.
+     * Reads all relevant sub elements that match the columns specified by the given table object from the xml reader into the given bean.
      *  
      * @param xmlReader The reader
-     * @param bean      The bean to fill
-     * @param table     The table definition
+     * @param data      Where to store the values
      */
-    private void readColumnSubElements(XMLStreamReader xmlReader, DynaBean bean, Table table) throws XMLStreamException, DdlUtilsXMLException
+    private void readColumnSubElements(XMLStreamReader xmlReader, Map data) throws XMLStreamException, DdlUtilsXMLException
     {
         int eventType = XMLStreamReader.START_ELEMENT;
 
@@ -361,7 +378,7 @@ public class DataReader
             eventType = xmlReader.next();
             if (eventType == XMLStreamReader.START_ELEMENT)
             {
-                readColumnSubElement(xmlReader, bean, table);
+                readColumnSubElement(xmlReader, data);
             }
         }
     }
@@ -370,47 +387,127 @@ public class DataReader
      * Reads the next column sub element that matches a column specified by the given table object from the xml reader into the given bean.
      *  
      * @param xmlReader The reader
-     * @param bean      The bean to fill
-     * @param table     The table definition
+     * @param data      Where to store the values
      */
-    private void readColumnSubElement(XMLStreamReader xmlReader, DynaBean bean, Table table) throws XMLStreamException, DdlUtilsXMLException
+    private void readColumnSubElement(XMLStreamReader xmlReader, Map data) throws XMLStreamException, DdlUtilsXMLException
+    {
+        QName   elemQName  = xmlReader.getName();
+        Map     attributes = new HashMap();
+        boolean usesBase64 = false;
+
+        for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
+        {
+            QName  attrQName = xmlReader.getAttributeName(idx);
+            String value     = xmlReader.getAttributeValue(idx);
+
+            if (DatabaseIO.BASE64_ATTR_NAME.equals(attrQName.getLocalPart()))
+            {
+                if ("true".equalsIgnoreCase(value))
+                {
+                    usesBase64 = true;
+                }
+            }
+            else
+            {
+                attributes.put(attrQName.getLocalPart(), value);
+            }
+        }
+
+        int          eventType = XMLStreamReader.START_ELEMENT;
+        StringBuffer content   = new StringBuffer();
+
+        while (eventType != XMLStreamReader.END_ELEMENT)
+        {
+            eventType = xmlReader.next();
+            if (eventType == XMLStreamReader.START_ELEMENT)
+            {
+                readColumnDataSubElement(xmlReader, attributes);
+            }
+            else if ((eventType == XMLStreamReader.CHARACTERS) ||
+                     (eventType == XMLStreamReader.CDATA) ||
+                     (eventType == XMLStreamReader.SPACE) ||
+                     (eventType == XMLStreamReader.ENTITY_REFERENCE))
+            {
+                content.append(xmlReader.getText());
+            }
+        }
+
+        String value = content.toString().trim();
+
+        if (usesBase64)
+        {
+            value = new String(Base64.decodeBase64(value.getBytes()));
+        }
+
+        String name = elemQName.getLocalPart();
+
+        if ("table-name".equals(name))
+        {
+            data.put("table-name", value);
+        }
+        else
+        {
+            if ("column".equals(name))
+            {
+                name = (String)attributes.get("column-name");
+            }
+            if (attributes.containsKey("column-value"))
+            {
+                value = (String)attributes.get("column-value");
+            }
+            data.put(name, value);
+        }
+        consumeRestOfElement(xmlReader);
+    }
+
+
+    /**
+     * Reads the next column-name or column-value sub element.
+     *  
+     * @param xmlReader The reader
+     * @param data      Where to store the values
+     */
+    private void readColumnDataSubElement(XMLStreamReader xmlReader, Map data) throws XMLStreamException, DdlUtilsXMLException
     {
         QName   elemQName  = xmlReader.getName();
         boolean usesBase64 = false;
 
         for (int idx = 0; idx < xmlReader.getAttributeCount(); idx++)
         {
-            QName attrQName = xmlReader.getAttributeName(idx);
+            QName  attrQName = xmlReader.getAttributeName(idx);
+            String value     = xmlReader.getAttributeValue(idx);
 
-            if (DatabaseIO.BASE64_ATTR_NAME.equals(attrQName.getLocalPart()) &&
-                "true".equalsIgnoreCase(xmlReader.getAttributeValue(idx)))
+            if (DatabaseIO.BASE64_ATTR_NAME.equals(attrQName.getLocalPart()))
             {
-                usesBase64 = true;
+                if ("true".equalsIgnoreCase(value))
+                {
+                    usesBase64 = true;
+                }
                 break;
             }
         }
 
-        Column column  = table.findColumn(elemQName.getLocalPart(), isCaseSensitive());
+        String value = xmlReader.getElementText();
 
-        if (column == null)
+        if (value != null)
         {
-            _log.warn("Data XML contains an element " + elemQName + " at location " + xmlReader.getLocation() +
-                      " but there is no column defined in table " + table.getName() + " with this name. This element will be ignored.");
-        }
-        else
-        {
-            String value = xmlReader.getElementText();
-
-            if (value != null)
+            value = value.toString().trim();
+    
+            if (usesBase64)
             {
-                value = value.trim();
-
-                if (usesBase64)
-                {
-                    value = new String(Base64.decodeBase64(value.getBytes()));
-                }
-                setColumnValue(bean, table, column, value);
+                value = new String(Base64.decodeBase64(value.getBytes()));
             }
+        }
+
+        String name = elemQName.getLocalPart();
+
+        if ("column-name".equals(name))
+        {
+            data.put("column-name", value);
+        }
+        else if ("column-value".equals(name))
+        {
+            data.put("column-value", value);
         }
         consumeRestOfElement(xmlReader);
     }
@@ -443,33 +540,6 @@ public class DataReader
         catch (InvocationTargetException ex)
         {
             throw new DdlUtilsXMLException("Could not set bean property for column " + column.getName(), ex);
-        }
-    }
-
-    // TODO: move these two into a helper class:
-    
-    /**
-     * Reads over the current element. This assumes that the current XML stream event type is
-     * START_ELEMENT.
-     *  
-     * @param reader The xml reader
-     */
-    private void readOverElement(XMLStreamReader reader) throws XMLStreamException
-    {
-        int depth = 1;
-
-        while (depth > 0)
-        {
-            int eventType = reader.next();
-
-            if (eventType == XMLStreamReader.START_ELEMENT)
-            {
-                depth++;
-            }
-            else if (eventType == XMLStreamReader.END_ELEMENT)
-            {
-                depth--;
-            }
         }
     }
     
