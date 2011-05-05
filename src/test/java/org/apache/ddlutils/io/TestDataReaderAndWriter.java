@@ -1630,7 +1630,7 @@ public class TestDataReaderAndWriter extends TestCase
     }
 
     /**
-     * Tests the reader & writer behavior when a column name is 'column'.
+     * Tests the reader & writer behavior when a column name is 'column-name'.
      */
     public void testColumnNameIsColumnName() throws Exception
     {
@@ -1657,7 +1657,7 @@ public class TestDataReaderAndWriter extends TestCase
     }
 
     /**
-     * Tests the reader & writer behavior when a column name is 'column'.
+     * Tests the reader & writer behavior when a column name is 'table-name'.
      */
     public void testColumnNameIsTableName() throws Exception
     {
@@ -1666,7 +1666,7 @@ public class TestDataReaderAndWriter extends TestCase
             "<database xmlns='" + DatabaseIO.DDLUTILS_NAMESPACE + "' name='test'>\n" +
             "  <table name='test'>\n"+
             "    <column name='id' type='INTEGER' primaryKey='true' required='true'/>\n"+
-            "    <column name='the value' type='VARCHAR' size='50' required='true'/>\n"+
+            "    <column name='table-name' type='VARCHAR' size='50' required='true'/>\n"+
             "  </table>\n"+
             "</database>");
         String testedValue = "Some Text";
@@ -1674,13 +1674,13 @@ public class TestDataReaderAndWriter extends TestCase
         SqlDynaBean bean = (SqlDynaBean)model.createDynaBeanFor(model.getTable(0));
 
         bean.set("id", new Integer(1));
-        bean.set("the value", testedValue);
+        bean.set("table-name", testedValue);
 
         roundtripTest(model, bean, "UTF-8",
                       "<?xml version='1.0' encoding='UTF-8'?>\n" +
                       "<data>\n" +
                       "  <test id=\"1\">\n" +
-                      "    <column column-name=\"the value\">" + testedValue + "</column>\n" +
+                      "    <column column-name=\"table-name\">" + testedValue + "</column>\n" +
                       "  </test>\n" +
                       "</data>\n");
     }
