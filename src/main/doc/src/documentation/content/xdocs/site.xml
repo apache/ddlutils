@@ -66,6 +66,7 @@ See http://forrest.apache.org/docs/linking.html for more info
       <sybase-support label="Sybase" href="databases/sybase.html" description="Support for the Sybase database"/>
     </database-support>
     <schema label="The XML schema format" href="ext:ddlutils/schemadoc/" description="The schema format"/>
+    <data-schema label="Using the API" href="schema.html" description="The data schema"/>
     <ant-tasks label="The Ant tasks" href="ext:ddlutils/antdoc/" description="How to use the Ant tasks"/>
     <api-usage label="Using the API" href="api-usage.html" description="How to use DdlUtils in your code"/>
     <javadoc label="Javadoc" href="ext:ddlutils/javadoc" description="The API documentation"/>

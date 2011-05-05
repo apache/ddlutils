@@ -20,13 +20,114 @@
 <!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
 <document> 
   <header> 
-    <title>The schema used by DdlUtils</title> 
+    <title>The data schema used by DdlUtils</title> 
   </header> 
   <body> 
     <section>
-      <title>The schema used by DdlUtils</title>
-      <p>Documenation of the </p>
-      <note>Coming soon</note>
+      <title>The data schema used by DdlUtils</title>
+      <p>
+        DdlUtils uses a dynamic XML schema for representing data that tries to use table and column names as much as possible.
+        It follows the following rules for choosing the tags and attributes to represent the table of a given row: 
+      </p>
+      <ul>
+        <li>
+          If the table name is a valid XML tag, then it will be used as the XML element for the row. E.g.
+          <source><![CDATA[
+<MyTable ...>...</MyTable>]]></source>
+        </li>
+        <li>
+          If the table name is not a valid XML tag, but it is shorter than 255 characters and does not contain characters that would be illegal
+          for an XML attribute, then the XML element will be <code>table</code> with an attribute <code>table-name</code> containing the name of the table.
+          E.g.
+          <source><![CDATA[
+<table table-name="My Table" ...>...</table>]]></source>
+          If the table name contains characters like the ampersand, then these will be escaped in the standard XML fashion (via entities):
+          <source><![CDATA[
+<table table-name="Bread&amp;Butter" ...>...</table>]]></source> 
+        </li>
+        <li>
+          If the table name is not a valid XML tag (not a valid tag or longer than 255 characters) and does not contain characters that would be illegal
+          for an XML attribute, then the XML element will be <code>table</code> with a sub element <code>table-name</code> containing the name of the table.
+           E.g.
+          <source><![CDATA[
+<table ...>
+  <table-name>My Really Long Table Name ...</table-name>
+  ...
+</table>]]></source>
+        </li>
+        <li>
+          If the table name contains characters that are illegal in XML, then the same format as above is used, but the value is also Base-64 encoded. An
+          additional attribute <code>base64</code> with the value <code>true</code> signifies that the value is Base-64 encoded. E.g.
+          <source><![CDATA[
+<table ...>
+  <table-name base64="true">TXlUYWJsZQ==</table-name>
+  ...
+</table>]]></source>
+        </li>
+      </ul>
+      <p>
+        The rules for the columns are similar:
+      </p>
+      <ul>
+        <li>
+          If the column name is a valid XML attribute name and not equal to <code>table-name</code> or <code>base64</code>, and the value is shorter than
+          255 characters and does not contain any characters invalid in XML, then an XML attribute will be used for the column. This is true regardless
+          of whether the table name is a valid tag:
+          <source><![CDATA[
+<MyTable myColumn="..." ...>...</MyTable>]]></source>
+          or not:
+          <source><![CDATA[
+<table table-name="My Table" myColumn="..." ...>...</table>]]></source>
+        </li>
+        <li>
+          If the column name is a valid XML attribute name and not equal to <code>table-name</code> or <code>base64</code>, but the value is not shorter
+          than 255 characters or it contains characters that are not allowed in XML documents, then instead a sub element will be used with the column
+          name as the tag name:
+          <source><![CDATA[
+<MyTable ...>
+  <myColumn>...</myColumn>
+  ...
+</MyTable>]]></source>
+          or
+          <source><![CDATA[
+<MyTable ...>
+  <myColumn base64="true">...</myColumn>
+  ...
+</MyTable>]]></source>
+          if the value needs to be Base-64 encoded because of illegal characters.
+        </li>
+        <li>
+          If the column name is not a valid XML attribute name and it is shorter than 255 characters and does not contain characters that would be illegal
+          for an XML attribute, or if the column name is equal to <code>column-name</code> or <code>base64</code>, then instead a sub element will be used
+          for the column name which will have an attribute <code>column-name</code> for the column name and the value as text content:
+          E.g.
+          <source><![CDATA[
+<MyTable ...>
+  <column column-name="the column">...</column>
+  ...
+</MyTable>]]></source>
+          or
+          <source><![CDATA[
+<MyTable ...>
+  <column column-name="the column" base64="true">...</column>
+  ...
+</MyTable>]]></source>
+          if the value needs to be Base-64 encoded.
+        </li>
+        <li>
+          If the column name is not a valid XML attribute name or it is longer than 255 characters or it contains illegal characters, then instead
+          a <column-name> sub element is used with the column name as the text content (base64 encoded if necessary). The value will be in a
+          corresponding <column-value> sub element:
+          <source><![CDATA[
+<MyTable ...>
+  <column>
+    <column-name>...</column-name>
+    <column-value>...</column-value>
+  </column>
+  ...
+</MyTable>]]></source>
+        </li>
+      </ul>
     </section>
   </body>
 </document>
