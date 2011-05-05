@@ -1625,9 +1625,7 @@ public class TestDataReaderAndWriter extends TestCase
         roundtripTest(model, bean, "UTF-8",
                       "<?xml version='1.0' encoding='UTF-8'?>\n" +
                       "<data>\n" +
-                      "  <test id=\"1\">\n" +
-                      "    <column column-name=\"column\">" + testedValue + "</column>\n" +
-                      "  </test>\n" +
+                      "  <test id=\"1\" column=\"" + testedValue + "\" />\n" +
                       "</data>\n");
     }
 

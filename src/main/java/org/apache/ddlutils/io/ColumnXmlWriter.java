@@ -85,7 +85,6 @@ public class ColumnXmlWriter extends ModelXmlWriter
                 columnFormattingMethod = AS_VALUE;
             }
             else if ("table-name".equals(columnName) ||
-                     "column".equals(columnName) ||
                      DatabaseIO.BASE64_ATTR_NAME.equals(columnName) ||
                      !XMLUtils.isWellFormedXMLName(columnName))
             {
