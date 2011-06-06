@@ -25,7 +25,7 @@
   <parent>
    <groupId>org.apache</groupId>
    <artifactId>apache</artifactId>
-   <version>8</version>
+   <version>9</version>
   </parent>
   <groupId>org.apache.ddlutils</groupId>
   <artifactId>ddlutils</artifactId>
@@ -278,4 +278,25 @@
 	  </build>
     </profile>
   </profiles>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.4</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.tomdz.maven</groupId>
+        <artifactId>sphinx-maven-plugin</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
