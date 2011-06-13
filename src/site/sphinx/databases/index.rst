@@ -15,16 +15,22 @@
    specific language governing permissions and limitations
    under the License.
 
-DdlUtils documentation
-======================
+Database details
+================
 
 .. toctree::
    :maxdepth: 2
 
-   welcome
-   download
-   api-usage
-   ant-tasks
-   database-support
-   databases/index
-   schema
+   axion
+   db2
+   derby
+   firebird
+   hsqldb
+   interbase
+   maxdb
+   mckoi
+   mysql
+   oracle
+   postgresql
+   sqlserver
+   sybase
