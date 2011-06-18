@@ -28,3 +28,4 @@ DdlUtils documentation
    database-support
    databases/index
    schema
+   javadoc </apidocs/index.html>

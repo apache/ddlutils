@@ -60,6 +60,6 @@ html_use_index = True
 htmlhelp_basename = 'ddlutilsdoc'
 
 html_sidebars = {
-    'index': ['globaltoc.html', 'relations.html', 'searchbox.html'],
-    '**': ['globaltoc.html', 'relations.html', 'searchbox.html']
+    'index': ['globaltoc.html', 'relations.html', 'sidebarintro.html', 'searchbox.html'],
+    '**': ['globaltoc.html', 'relations.html', 'sidebarintro.html', 'searchbox.html']
 }
