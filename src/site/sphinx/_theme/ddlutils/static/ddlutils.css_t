@@ -2,7 +2,7 @@
  * ddlutils.css_t
  * ~~~~~~~~~~~~
  *
- * Adapted from celery's CSS at https://github.com/ask/celery
+ * Adapted from the Sphinx themes used in Celery (https://github.com/ask/celery)
  * :copyright: Copyright 2010 by Armin Ronacher.
  * :license: BSD, see LICENSE for details.
  */
@@ -42,7 +42,7 @@ p.developmentversion {
 div.related {
     width: {{ page_width - 20 }}px;
     padding: 5px 10px;
-    background: #F2FCEE;
+    background: #FAFAFA;
     margin: 15px auto 15px auto;
 }
 
@@ -65,7 +65,7 @@ hr {
  
 div.body {
     background-color: #ffffff;
-    color: #3E4349;
+    color: #3E3E3E;
     padding: 0 30px 0 30px;
 }
 
@@ -90,7 +90,7 @@ div.footer a {
 div.sphinxsidebar a {
     color: #444;
     text-decoration: none;
-    border-bottom: 1px dashed #DCF0D5;
+    border-bottom: 1px dashed #DCDCDC;
 }
 
 div.sphinxsidebar a:hover {
@@ -156,12 +156,12 @@ div.sphinxsidebar input {
 /* -- body styles ----------------------------------------------------------- */
  
 a {
-    color: #348613;
+    color: #1F626F;
     text-decoration: underline;
 }
  
 a:hover {
-    color: #59B833;
+    color: #1F4E6F;
     text-decoration: underline;
 }
  
@@ -210,7 +210,6 @@ div.body p, div.body dd, div.body li {
 }
 
 div.admonition {
-    background: #fafafa;
     margin: 20px -30px;
     padding: 10px 30px;
     border-top: 1px solid #ccc;
@@ -235,26 +234,27 @@ div.highlight{
 }
 
 dt:target, .highlight {
-    background: #FAF3E8;
+    background: #FAFAFA;
 }
 
 div.note {
-    background-color: #eee;
-    border: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
 }
  
 div.seealso {
-    background-color: #ffc;
-    border: 1px solid #ff6;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
 }
  
 div.topic {
-    background-color: #eee;
+    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
 }
  
 div.warning {
-    background-color: #ffe4e4;
-    border: 1px solid #f66;
+    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
 }
  
 p.admonition-title {
@@ -356,10 +356,10 @@ ul {
 }
  
 pre {
-    background: #F0FFEB;
+    background: #FAFAFA;
     padding: 7px 10px;
     margin: 15px 0;
-    border: 1px solid #C7ECB8;
+    border: 1px solid #C7C7C7;
     border-radius: 2px;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
@@ -367,34 +367,34 @@ pre {
 }
  
 tt {
-    background: #F0FFEB;
+    background: #FAFAFA;
     color: #222;
     /* padding: 1px 2px; */
 }
 
 tt.xref, a tt {
-    background: #F0FFEB;
+    background: #FAFAFA;
     border-bottom: 1px solid white;
 }
 
 a.reference {
     text-decoration: none;
-    border-bottom: 1px dashed #DCF0D5;
+    border-bottom: 1px dashed #DCDCDC;
 }
 
 a.reference:hover {
-    border-bottom: 1px solid #6D4100;
+    border-bottom: 1px solid #6D6D6D;
 }
 
 a.footnote-reference {
     text-decoration: none;
     font-size: 0.7em;
     vertical-align: top;
-    border-bottom: 1px dashed #DCF0D5;
+    border-bottom: 1px dashed #DCDCDC;
 }
 
 a.footnote-reference:hover {
-    border-bottom: 1px solid #6D4100;
+    border-bottom: 1px solid #6D6D6D;
 }
 
 a:hover tt {
