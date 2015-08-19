@@ -40,6 +40,7 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ddlutils.DatabaseOperationException;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformInfo;
 import org.apache.ddlutils.model.CascadeActionEnum;
@@ -544,13 +545,21 @@ public class JdbcModelReader
 
             while (tableData.next())
             {
-                Map   values = readColumns(tableData, getColumnsForTable());
-                Table table  = readTable(metaData, values);
-
-                if (table != null)
-                {
-                    tables.add(table);
-                }
+            	try
+            	{
+	                Map   values = readColumns(tableData, getColumnsForTable());
+	                Table table  = readTable(metaData, values);
+	
+	                if (table != null)
+	                {
+	                    tables.add(table);
+	                }
+            	}
+            	catch(SQLException exception)
+            	{
+            		exception.printStackTrace();
+            		//continue
+            	}
             }
 
             final Collator collator = Collator.getInstance();
