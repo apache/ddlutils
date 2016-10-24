@@ -26,7 +26,15 @@ What is DdlUtils
 ================
 
 **DdlUtils** is a small, easy-to-use component for working with Database Definition
-(DDL) files. These are XML files that contain the definition of a database schema, e.g. tables
+(DDL) files. 
+
+As of Fall, 2016, the DdlUtils work is no longer active.
+
+The website, downloads, and issue tracker all remain open, though the
+issue tracker is read-only. The mailing lists have been closed down, but
+old mail can be browse in the mailing list archives.
+
+Database Definition (DDL) files are XML files that contain the definition of a database schema, e.g. tables
 and columns. These files can be fed into DdlUtils via its Ant task or programmatically in order to
 create the corresponding database or alter it so that it corresponds to the DDL. Likewise, DdlUtils
 can generate a DDL file for an existing database.
