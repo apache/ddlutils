@@ -93,7 +93,20 @@ public abstract class TypeMap
     public static final String VARBINARY     = "VARBINARY";
     /** The string representation of the {@link java.sql.Types#VARCHAR} constant. */
     public static final String VARCHAR       = "VARCHAR";
-
+    /** The string representation of the {@link java.sql.Types#NVARCHAR} constant. */
+    public static final String NVARCHAR       = "NVARCHAR";
+    /** The string representation of the {@link java.sql.Types#NCHAR} constant. */
+    public static final String NCHAR          = "NCHAR";
+    /** The string representation of the {@link java.sql.Types#NVARCHAR} constant. */
+    public static final String LONGNVARCHAR       = "NVARCHAR";
+    /** The string representation of the {@link java.sql.Types#NCLOB} constant. */
+    public static final String NCLOB	      = "NCLOB";
+    /** The string representation of the {@link java.sql.Types#ROWID} constant. */
+    public static final String ROWID = "ROWID";
+    /** The string representation of the {@link java.sql.Types#SQLXML} constant. */
+    public static final String SQLXML = "SQLXML";
+    /** The string representation of the {@link java.sql.Types#SQLXML} constant. */
+    
     /** Maps type names to the corresponding {@link java.sql.Types} constants. */
     private static HashMap _typeNameToTypeCode = new HashMap();
     /** Maps {@link java.sql.Types} type code constants to the corresponding type names. */
@@ -110,6 +123,7 @@ public abstract class TypeMap
         registerJdbcType(Types.BLOB,          BLOB,          JdbcTypeCategoryEnum.BINARY);
         registerJdbcType(Types.BOOLEAN,       BOOLEAN,       JdbcTypeCategoryEnum.NUMERIC);
         registerJdbcType(Types.CHAR,          CHAR,          JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.NCHAR,      	  NCHAR,       	 JdbcTypeCategoryEnum.TEXTUAL);
         registerJdbcType(Types.CLOB,          CLOB,          JdbcTypeCategoryEnum.TEXTUAL);
         registerJdbcType(Types.DATALINK,      DATALINK,      JdbcTypeCategoryEnum.SPECIAL);
         registerJdbcType(Types.DATE,          DATE,          JdbcTypeCategoryEnum.DATETIME);
@@ -133,6 +147,13 @@ public abstract class TypeMap
         registerJdbcType(Types.TINYINT,       TINYINT,       JdbcTypeCategoryEnum.NUMERIC);
         registerJdbcType(Types.VARBINARY,     VARBINARY,     JdbcTypeCategoryEnum.BINARY);
         registerJdbcType(Types.VARCHAR,       VARCHAR,       JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.NVARCHAR,      NVARCHAR,      JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.NCHAR,      	  NCHAR,       	 JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.LONGNVARCHAR,  LONGNVARCHAR,  JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.NCLOB,      NCLOB,       JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.ROWID,      ROWID,       JdbcTypeCategoryEnum.TEXTUAL);
+        registerJdbcType(Types.SQLXML,     SQLXML,       JdbcTypeCategoryEnum.TEXTUAL);
+        
 
         // Torque/Turbine extensions which we only support when reading from an XML schema
         _typeNameToTypeCode.put("BOOLEANINT",  new Integer(Types.TINYINT));
