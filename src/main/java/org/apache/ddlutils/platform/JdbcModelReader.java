@@ -856,7 +856,7 @@ public class JdbcModelReader
 
         try
         {
-            pkData = metaData.getPrimaryKeys(metaData.escapeForSearch(tableName));
+            pkData = metaData.getPrimaryKeys(tableName);
             while (pkData.next())
             {
                 Map values = readColumns(pkData, getColumnsForPK());
